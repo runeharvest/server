@@ -1,18 +1,21 @@
 {
     "files.associations": {
         "*.log": "ini",
-        "condition_variable": "cpp"
+        "condition_variable": "cpp",
+        "vector": "cpp"
     },
     "search.exclude": {
         "**/node_modules": true,
         "**/bower_components": true,
         "**/*.code-search": true,
-        "shared": true,
+        //        "shared": true,
     },
-    "files.exclude": {
-        "shared/*": true
-    },
+    // "files.exclude": {
+    //     "shared/*": true
+    // },
     "cmake.useCMakePresets": "always",
     "cmake.enableAutomaticKitScan": false,
-    "cmake.cmakePath": "/usr/local/bin/cmake"
+    "cmake.cmakePath": "/usr/local/bin/cmake",
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "xaver.clang-format",
 }

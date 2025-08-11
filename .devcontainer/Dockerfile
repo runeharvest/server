@@ -39,7 +39,8 @@ RUN apt update; \
         qt6-base-dev \
         qt6-l10n-tools \
         qt6-tools-dev \
-        qt6-tools-dev-tools
+        qt6-tools-dev-tools \
+        clang-format
 
 
 RUN apt install --yes \
