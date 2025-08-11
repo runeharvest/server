@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifdef NL_OS_WINDOWS
-#pragma warning (disable : 4355) // warning C4355: 'this' : used in base member initializer list
+#pragma warning(disable : 4355) // warning C4355: 'this' : used in base member initializer list
 #endif // NL_OS_WINDOWS
 
 #ifndef RYAI_BOT_PET_H
@@ -36,41 +36,40 @@ class CSpawnGroupPet;
 //////////////////////////////////////////////////////////////////////////////
 
 class CSpawnBotPet
-: public NLMISC::CDbgRefCount<CSpawnBotPet>
-, public CSpawnBot
+    : public NLMISC::CDbgRefCount<CSpawnBotPet>,
+      public CSpawnBot
 {
 public:
-	CSpawnBotPet(TDataSetRow const& row, CBot& owner, NLMISC::CEntityId const& id, float radius, uint32 level, RYAI_MAP_CRUNCH::TAStarFlag denyFlags);
-	
-	void processEvent(CCombatInterface::CEvent const& event) { }
-	
+	CSpawnBotPet(TDataSetRow const &row, CBot &owner, NLMISC::CEntityId const &id, float radius, uint32 level, RYAI_MAP_CRUNCH::TAStarFlag denyFlags);
+
+	void processEvent(CCombatInterface::CEvent const &event) { }
+
 	RYZOMID::TTypeId getRyzomType() const { return RYZOMID::pack_animal; }
-	
-	CBotPet& getPersistent	();
-	CBotPet const& getPersistent() const;
-	
-	CSpawnGroupPet& spawnGrp();
-	
+
+	CBotPet &getPersistent();
+	CBotPet const &getPersistent() const;
+
+	CSpawnGroupPet &spawnGrp();
+
 	void sendInfoToEGS() const { }
-	
+
 	// pets are always attackable by bots
-	virtual	bool isBotAttackable() const { return true; }
-	
+	virtual bool isBotAttackable() const { return true; }
+
 	// Take position from mirror
 	void updatePos();
-	
+
 	// Return true if the animal is mounted (thus controlled by the GPMS)
 	bool isMounted() const;
-	
-	CPathPosition& pathPos() { return _PathPos; }
-	
+
+	CPathPosition &pathPos() { return _PathPos; }
+
 	uint32 _DeathTime;
 
 	void setVisualPropertiesName();
-	
-private:
 
-	CPathPosition	_PathPos;
+private:
+	CPathPosition _PathPos;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -78,42 +77,42 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CBotPet
-: public CBot
+    : public CBot
 {
 public:
-	CBotPet(CGroup* owner, CAIAliasDescriptionNode* alias = NULL);
+	CBotPet(CGroup *owner, CAIAliasDescriptionNode *alias = NULL);
 	~CBotPet();
-	
-	void getSpawnPos(CAIVector& triedPos, RYAI_MAP_CRUNCH::CWorldPosition& spawnPos, RYAI_MAP_CRUNCH::CWorldMap const& worldMap, CAngle& spawnTheta);
-	void setSpawnPos(CAIPos const& spawnPos) { _SpawnPos = spawnPos; }
-	CGrpPet& getPetGroup();
-	
-	void update(uint32 ticks, CAIEntityPhysical const* petOwner);
-	
-	CSpawnBotPet* getSpawn() { return static_cast<CSpawnBotPet*>(getSpawnObj()); }
-	
-	CAIS::CCounter& getSpawnCounter();
-	
+
+	void getSpawnPos(CAIVector &triedPos, RYAI_MAP_CRUNCH::CWorldPosition &spawnPos, RYAI_MAP_CRUNCH::CWorldMap const &worldMap, CAngle &spawnTheta);
+	void setSpawnPos(CAIPos const &spawnPos) { _SpawnPos = spawnPos; }
+	CGrpPet &getPetGroup();
+
+	void update(uint32 ticks, CAIEntityPhysical const *petOwner);
+
+	CSpawnBotPet *getSpawn() { return static_cast<CSpawnBotPet *>(getSpawnObj()); }
+
+	CAIS::CCounter &getSpawnCounter();
+
 	void setDespawn() { _MustDespawn = true; }
 	bool haveToDespawn() const { return _MustDespawn; }
-	
-	void changeOwner(NLMISC::CEntityId const& newOwner);
-	
-	virtual std::string	getOneLineInfoString() const { return std::string("Pet bot '") + getName() + "'"; }
-	
-	virtual void triggerSetSheet(AISHEETS::ICreatureCPtr const& sheet);
-	
+
+	void changeOwner(NLMISC::CEntityId const &newOwner);
+
+	virtual std::string getOneLineInfoString() const { return std::string("Pet bot '") + getName() + "'"; }
+
+	virtual void triggerSetSheet(AISHEETS::ICreatureCPtr const &sheet);
+
 protected:
 	RYZOMID::TTypeId getRyzomType() const { return RYZOMID::pack_animal; }
-	
-	CSpawnBot* getSpawnBot(TDataSetRow const& row, NLMISC::CEntityId const& id, float radius)
+
+	CSpawnBot *getSpawnBot(TDataSetRow const &row, NLMISC::CEntityId const &id, float radius)
 	{
 		return new CSpawnBotPet(row, *this, id, radius, getSheet()->Level(), getGroup().getAStarFlag());
 	}
-	
+
 private:
-	CAIPos	_SpawnPos;
-	bool	_MustDespawn;
+	CAIPos _SpawnPos;
+	bool _MustDespawn;
 };
 
 /****************************************************************************/
@@ -124,47 +123,41 @@ private:
 // CSpawnBotPet                                                             //
 //////////////////////////////////////////////////////////////////////////////
 
-inline
-CSpawnBotPet::CSpawnBotPet(TDataSetRow const& row, CBot& owner, NLMISC::CEntityId const& id, float radius, uint32 level, RYAI_MAP_CRUNCH::TAStarFlag denyFlags)
-: CSpawnBot(row, owner, id, radius, level, denyFlags)
-, _DeathTime(0)
-, _PathPos(CAngle())
+inline CSpawnBotPet::CSpawnBotPet(TDataSetRow const &row, CBot &owner, NLMISC::CEntityId const &id, float radius, uint32 level, RYAI_MAP_CRUNCH::TAStarFlag denyFlags)
+    : CSpawnBot(row, owner, id, radius, level, denyFlags)
+    , _DeathTime(0)
+    , _PathPos(CAngle())
 {
 }
 
-inline
-CBotPet& CSpawnBotPet::getPersistent()
+inline CBotPet &CSpawnBotPet::getPersistent()
 {
-	return static_cast<CBotPet&>(CSpawnBot::getPersistent());
+	return static_cast<CBotPet &>(CSpawnBot::getPersistent());
 }
 
-inline
-CBotPet const& CSpawnBotPet::getPersistent() const
+inline CBotPet const &CSpawnBotPet::getPersistent() const
 {
-	return static_cast<const CBotPet&>(CSpawnBot::getPersistent());
+	return static_cast<const CBotPet &>(CSpawnBot::getPersistent());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // CBotPet                                                                  //
 //////////////////////////////////////////////////////////////////////////////
 
-inline
-CBotPet::CBotPet(CGroup* owner, CAIAliasDescriptionNode* alias)
-: CBot(owner, alias)
-, _MustDespawn(false)
+inline CBotPet::CBotPet(CGroup *owner, CAIAliasDescriptionNode *alias)
+    : CBot(owner, alias)
+    , _MustDespawn(false)
 {
 }
 
-inline
-CBotPet::~CBotPet()
+inline CBotPet::~CBotPet()
 {
 	if (!isSpawned())
 		return;
 	despawnBot();
 }
 
-inline
-CAIS::CCounter& CBotPet::getSpawnCounter()
+inline CAIS::CCounter &CBotPet::getSpawnCounter()
 {
 	return CAIS::instance()._PetBotCounter;
 }

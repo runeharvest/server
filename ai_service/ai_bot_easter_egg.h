@@ -26,16 +26,16 @@
 class CBotEasterEgg : public CBotNpc
 {
 public:
-	CBotEasterEgg(CGroup* owner, uint32 alias, std::string const& name, uint32 easterEggId);
+	CBotEasterEgg(CGroup *owner, uint32 alias, std::string const &name, uint32 easterEggId);
 	virtual ~CBotEasterEgg();
 
 	/// get the easter egg ID
-	uint32	getEasterEggId() const { return _EasterEggId; }
+	uint32 getEasterEggId() const { return _EasterEggId; }
 
-	virtual std::string	getOneLineInfoString() const;
+	virtual std::string getOneLineInfoString() const;
 
 private:
-	uint32	_EasterEggId;
+	uint32 _EasterEggId;
 };
 
 #endif

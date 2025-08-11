@@ -26,7 +26,7 @@
 class CAIEntity;
 class CAIInstance;
 
-extern void removeFromWatch(CAIEntity* entity);
+extern void removeFromWatch(CAIEntity *entity);
 
 class CAIEntity
 {
@@ -35,40 +35,37 @@ public:
 	//@{
 	virtual ~CAIEntity();
 	//@}
-	
+
 	/// @name Virtual interface
 	//@{
-	virtual CAIInstance* getAIInstance() const = 0;
-	// display verbose status information regarding the entity 
-//	virtual void display(CStringWriter& stringWriter) const;
-//	virtual std::string getIndexString() const = 0;
-	virtual std::string	getOneLineInfoString() const;
+	virtual CAIInstance *getAIInstance() const = 0;
+	// display verbose status information regarding the entity
+	//	virtual void display(CStringWriter& stringWriter) const;
+	//	virtual std::string getIndexString() const = 0;
+	virtual std::string getOneLineInfoString() const;
 	virtual std::vector<std::string> getMultiLineInfoString() const;
 	//@}
-	
+
 public:
 	/// @name Debug info display methods
 	//@{
 	// public interface for the 'buildDebugString' virtual
 	// method set - it is safe, returning cleanly if called on a NULL pointer
-//	std::string debugString(uint idx = 0) const;
+	//	std::string debugString(uint idx = 0) const;
 	//@}
 };
 
-inline
-CAIEntity::~CAIEntity()
+inline CAIEntity::~CAIEntity()
 {
 	removeFromWatch(this);
 }
 
-inline
-std::string	CAIEntity::getOneLineInfoString() const
+inline std::string CAIEntity::getOneLineInfoString() const
 {
 	return std::string("<no debug info available for this entity>");
 }
 
-inline
-std::vector<std::string> CAIEntity::getMultiLineInfoString() const
+inline std::vector<std::string> CAIEntity::getMultiLineInfoString() const
 {
 	std::vector<std::string> container;
 	MULTI_LINE_FORMATER::pushTitle(container, "CAIEntity");

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef AI_PROFILE_NPC_H
 #define AI_PROFILE_NPC_H
 
@@ -40,32 +38,32 @@ extern bool ai_profile_npc_VerboseLog;
 //////////////////////////////////////////////////////////////////////////////
 
 class CBotProfileMoveTo
-: public CAIBaseProfile
-, public NLMISC::IDbgPtrData
+    : public CAIBaseProfile,
+      public NLMISC::IDbgPtrData
 {
 public:
-	CBotProfileMoveTo(AITYPES::TVerticalPos verticalPos, RYAI_MAP_CRUNCH::CWorldPosition const& dest, CProfileOwner* owner);
+	CBotProfileMoveTo(AITYPES::TVerticalPos verticalPos, RYAI_MAP_CRUNCH::CWorldPosition const &dest, CProfileOwner *owner);
 
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void endProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::BOT_MOVE_TO; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_MOVE_TO; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
-	bool destinationReach()	const;
+	bool destinationReach() const;
 
-	CFollowPath::TFollowStatus		_Status;
-	AITYPES::TVerticalPos			_VerticalPos;
-	RYAI_MAP_CRUNCH::CWorldPosition	_Dest;
-	CPathCont		_PathCont;
-	CPathPosition	_PathPos;
-	CAIVector		_LastPos;
+	CFollowPath::TFollowStatus _Status;
+	AITYPES::TVerticalPos _VerticalPos;
+	RYAI_MAP_CRUNCH::CWorldPosition _Dest;
+	CPathCont _PathCont;
+	CPathPosition _PathPos;
+	CAIVector _LastPos;
 
 protected:
-	NLMISC::CDbgPtr<CSpawnBotNpc>	_Bot;
+	NLMISC::CDbgPtr<CSpawnBotNpc> _Bot;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -73,40 +71,40 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CBotProfileFollowPos
-: public CAIBaseProfile
-, public NLMISC::IDbgPtrData
+    : public CAIBaseProfile,
+      public NLMISC::IDbgPtrData
 {
 public:
-	CBotProfileFollowPos(CPathCont* pathCont, CProfileOwner* owner);
-	CBotProfileFollowPos(CBotProfileFollowPos	const& other);
+	CBotProfileFollowPos(CPathCont *pathCont, CProfileOwner *owner);
+	CBotProfileFollowPos(CBotProfileFollowPos const &other);
 
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void endProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_FOLLOW_POS; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_FOLLOW_POS; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
 	void setMaxSpeeds(float walkSpeed, float runSpeed);
 	void setStop(bool stop);
 
-	CFollowPath::TFollowStatus	_Status;
-	CPathPosition		_PathPos;
+	CFollowPath::TFollowStatus _Status;
+	CPathPosition _PathPos;
 
 protected:
-	NLMISC::CDbgPtr<CSpawnBotNpc>	_Bot;
+	NLMISC::CDbgPtr<CSpawnBotNpc> _Bot;
 
 private:
-	NLMISC::CDbgPtr<CPathCont>	_PathCont;
+	NLMISC::CDbgPtr<CPathCont> _PathCont;
 
 	// maximum speed to use (for group with different creatures)
-	float	_MaxWalkSpeed;
-	float	_MaxRunSpeed;
+	float _MaxWalkSpeed;
+	float _MaxRunSpeed;
 
 	// flag to stop temporary stop the movement
-	bool	_Stop;
+	bool _Stop;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -114,7 +112,7 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CBotProfileWanderBase
-: public CAIBaseProfile
+    : public CAIBaseProfile
 {
 public:
 	CBotProfileWanderBase();
@@ -131,23 +129,23 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CBotProfileStandAtPos
-: public CBotProfileWanderBase
-, public NLMISC::IDbgPtrData
+    : public CBotProfileWanderBase,
+      public NLMISC::IDbgPtrData
 {
 public:
-	CBotProfileStandAtPos(CProfileOwner* owner);
+	CBotProfileStandAtPos(CProfileOwner *owner);
 
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void endProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_STAND_AT_POS; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_STAND_AT_POS; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
 protected:
-	NLMISC::CDbgPtr<CSpawnBotNpc>	_Bot;
+	NLMISC::CDbgPtr<CSpawnBotNpc> _Bot;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -155,11 +153,11 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CBotProfileForage
-: public CBotProfileWanderBase
-, public NLMISC::IDbgPtrData
+    : public CBotProfileWanderBase,
+      public NLMISC::IDbgPtrData
 {
 public:
-	CBotProfileForage(CProfileOwner* owner);
+	CBotProfileForage(CProfileOwner *owner);
 	virtual ~CBotProfileForage();
 
 	/// @name IAIProfile implementation
@@ -167,7 +165,7 @@ public:
 	virtual void beginProfile();
 	virtual void endProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::BOT_FORAGE; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_FORAGE; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
@@ -186,7 +184,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CActivityProfile
-: public CAIBaseProfile
+    : public CAIBaseProfile
 {
 };
 
@@ -195,17 +193,17 @@ class CActivityProfile
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileNormal
-: public CActivityProfile
+    : public CActivityProfile
 {
 public:
-	CGrpProfileNormal(CProfileOwner* owner);
+	CGrpProfileNormal(CProfileOwner *owner);
 
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void endProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::ACTIVITY_NORMAL; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_NORMAL; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
@@ -213,7 +211,7 @@ public:
 	void setGroupFighting(bool groupFighting);
 
 protected:
-	NLMISC::CDbgPtr<CSpawnGroupNpc>	_Grp;
+	NLMISC::CDbgPtr<CSpawnGroupNpc> _Grp;
 	bool _GroupFighting;
 };
 
@@ -224,10 +222,10 @@ protected:
 // every bot add or remove must be done from a spawn/despawn/die event (and not this way!)
 
 class CSlaveProfile
-: public CAIBaseProfile
+    : public CAIBaseProfile
 {
 public:
-	CSlaveProfile(CProfileOwner* owner);
+	CSlaveProfile(CProfileOwner *owner);
 
 	/// @name IAIProfile partial implementation
 	//@{
@@ -235,8 +233,8 @@ public:
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	//@}
 
-	virtual	void addBot(CBot* bot) = 0;
-	virtual	void removeBot(CBot* bot) = 0;
+	virtual void addBot(CBot *bot) = 0;
+	virtual void removeBot(CBot *bot) = 0;
 
 protected:
 	NLMISC::CDbgPtr<CSpawnGroup> _Grp;
@@ -247,14 +245,14 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CMoveProfile
-: public CSlaveProfile
+    : public CSlaveProfile
 {
 public:
-	CMoveProfile(CProfileOwner* owner) ;
+	CMoveProfile(CProfileOwner *owner);
 
-	virtual	CPathCont* getPathCont(CBot const* bot) = 0;
+	virtual CPathCont *getPathCont(CBot const *bot) = 0;
 
-	virtual void resumeBot(CBot const* bot);
+	virtual void resumeBot(CBot const *bot);
 
 protected:
 	float _MaxRunSpeed;
@@ -266,12 +264,12 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CFightProfile
-: public CSlaveProfile
+    : public CSlaveProfile
 {
 public:
-	CFightProfile(CProfileOwner* owner);
+	CFightProfile(CProfileOwner *owner);
 
-	virtual std::vector<CBot*>& npcList() = 0;
+	virtual std::vector<CBot *> &npcList() = 0;
 	virtual bool stillHaveEnnemy() const = 0;
 };
 
@@ -280,12 +278,12 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileGoToPoint
-: public CMoveProfile
+    : public CMoveProfile
 {
 public:
 	/// @name Constructors, destructor
 	//@{
-	CGrpProfileGoToPoint(CProfileOwner* owner, RYAI_MAP_CRUNCH::CWorldPosition const& startPos, RYAI_MAP_CRUNCH::CWorldPosition const& endPos, bool dontSendEvent = false);
+	CGrpProfileGoToPoint(CProfileOwner *owner, RYAI_MAP_CRUNCH::CWorldPosition const &startPos, RYAI_MAP_CRUNCH::CWorldPosition const &endPos, bool dontSendEvent = false);
 	virtual ~CGrpProfileGoToPoint();
 	//@}
 
@@ -300,7 +298,7 @@ public:
 		CBotFollower();
 		virtual ~CBotFollower();
 		void setBotAtDest(bool atDest = true);
-		const bool& isBotAtDest() const;
+		const bool &isBotAtDest() const;
 
 	private:
 		bool _BotAtDest;
@@ -308,13 +306,13 @@ public:
 
 	/// @name CMoveProfile implementation
 	//@{
-	virtual CPathCont* getPathCont(CBot const* bot);
+	virtual CPathCont *getPathCont(CBot const *bot);
 	//@}
 
 	/// @name CSlaveProfile implementation
 	//@{
-	virtual void addBot(CBot* bot);
-	virtual void removeBot(CBot* bot);
+	virtual void addBot(CBot *bot);
+	virtual void removeBot(CBot *bot);
 	//@}
 
 	/// @name IAIProfile implementation
@@ -322,7 +320,7 @@ public:
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_GOTO_POINT; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_GOTO_POINT; }
 	virtual std::string getOneLineInfoString() const;
 	virtual void stateChangeProfile();
 	virtual void resumeProfile();
@@ -334,8 +332,7 @@ protected:
 	void setDirection(bool forward);
 	bool getDirection();
 
-
-	void setCurrentDestination(RYAI_MAP_CRUNCH::CWorldPosition const& dest);
+	void setCurrentDestination(RYAI_MAP_CRUNCH::CWorldPosition const &dest);
 
 	void calcRatios();
 
@@ -344,33 +341,33 @@ protected:
 private:
 	void assignGeometryFromState();
 
-	typedef	std::map<CBot*, CBotFollower>	TBotFollowerMap;
-	TBotFollowerMap	_NpcList;
+	typedef std::map<CBot *, CBotFollower> TBotFollowerMap;
+	TBotFollowerMap _NpcList;
 
-	bool		_ValidPosInit;
-	bool		_FollowForward;
-	bool		_ProfileTerminated;
-	bool		_MustCalcRatios;
-	TShapeType	_Shape;
+	bool _ValidPosInit;
+	bool _FollowForward;
+	bool _ProfileTerminated;
+	bool _MustCalcRatios;
+	TShapeType _Shape;
 	RYAI_MAP_CRUNCH::CWorldPosition _StartPos;
 	RYAI_MAP_CRUNCH::CWorldPosition _EndPos;
 
 	/// flag to temporary stop the bots
-	bool		_StopNpc;
+	bool _StopNpc;
 
 	// rectangle shape related vars.
-	float	_XSize;
-	float	_YSize;
-	float	_Ratio;
-	double	_Cx, _Cy;
-	uint32	_NbRange;
-	uint32	_NbLines;
-	uint32	_NbBotInNormalShape;
-	uint32	_Rest;
+	float _XSize;
+	float _YSize;
+	float _Ratio;
+	double _Cx, _Cy;
+	uint32 _NbRange;
+	uint32 _NbLines;
+	uint32 _NbBotInNormalShape;
+	uint32 _Rest;
 
-	uint32		_GeomIndex;
-	CPathCont	_PathCont;
-	CAIVector	_GlobalOrient;
+	uint32 _GeomIndex;
+	CPathCont _PathCont;
+	CAIVector _GlobalOrient;
 
 	AITYPES::TVerticalPos _VerticalPos;
 	bool _DontSendEvent;
@@ -381,18 +378,18 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileFollowRoute
-: public CMoveProfile
+    : public CMoveProfile
 {
 public:
-	CGrpProfileFollowRoute(CProfileOwner* owner, std::vector<CShape::TPosition> const& geometry, AITYPES::TVerticalPos const& verticalPos, bool dontSendEvent = false);
-	CGrpProfileFollowRoute(CProfileOwner* owner);
+	CGrpProfileFollowRoute(CProfileOwner *owner, std::vector<CShape::TPosition> const &geometry, AITYPES::TVerticalPos const &verticalPos, bool dontSendEvent = false);
+	CGrpProfileFollowRoute(CProfileOwner *owner);
 
 	virtual ~CGrpProfileFollowRoute();
 
 	enum TShapeType
 	{
 		SHAPE_NOTHING,
-			SHAPE_RECTANGLE,
+		SHAPE_RECTANGLE,
 	};
 
 	class CBotFollower
@@ -401,7 +398,7 @@ public:
 		CBotFollower();
 		virtual ~CBotFollower();
 		void setBotAtDest(bool atDest = true);
-		const bool& isBotAtDest() const;
+		const bool &isBotAtDest() const;
 
 	private:
 		bool _BotAtDest;
@@ -412,17 +409,17 @@ public:
 
 	void resumeProfile();
 
-	CPathCont* getPathCont(CBot const* bot);
+	CPathCont *getPathCont(CBot const *bot);
 
-	void addBot(CBot* bot);
-	void removeBot(CBot* bot);
+	void addBot(CBot *bot);
+	void removeBot(CBot *bot);
 
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_FOLLOW_ROUTE; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_FOLLOW_ROUTE; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
@@ -439,34 +436,34 @@ public:
 private:
 	void assignGeometryFromState();
 
-	typedef	std::map<CBot*, CBotFollower>	TBotFollowerMap;
-	TBotFollowerMap	_NpcList;
+	typedef std::map<CBot *, CBotFollower> TBotFollowerMap;
+	TBotFollowerMap _NpcList;
 
-	bool		_ValidPosInit;
-	bool		_FollowForward;
-	bool		_ProfileTerminated;
-	bool		_MustCalcRatios;
-	TShapeType	_Shape;
+	bool _ValidPosInit;
+	bool _FollowForward;
+	bool _ProfileTerminated;
+	bool _MustCalcRatios;
+	TShapeType _Shape;
 
 	/// flag to temporary stop the bots
-	bool		_StopNpc;
+	bool _StopNpc;
 
 	// rectangle shape related vars.
-	float	_XSize;
-	float	_YSize;
-	float	_Ratio;
-	double	_Cx, _Cy;
-	uint32	_NbRange;
-	uint32	_NbLines;
-	uint32	_NbBotInNormalShape;
-	uint32	_Rest;
+	float _XSize;
+	float _YSize;
+	float _Ratio;
+	double _Cx, _Cy;
+	uint32 _NbRange;
+	uint32 _NbLines;
+	uint32 _NbBotInNormalShape;
+	uint32 _Rest;
 
-	uint32		_GeomIndex;
-	CPathCont	_PathCont;
-	CAIVector	_GlobalOrient;
+	uint32 _GeomIndex;
+	CPathCont _PathCont;
+	CAIVector _GlobalOrient;
 
 	bool _GeometryComeFromState;
-	std::vector<CShape::TPosition> const* _Geometry;
+	std::vector<CShape::TPosition> const *_Geometry;
 	AITYPES::TVerticalPos _VerticalPos;
 	bool _DontSendEvent;
 };
@@ -476,49 +473,50 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileStandOnVertices
-: public CMoveProfile
+    : public CMoveProfile
 {
 public:
 	// utility class
 	class CBotPositionner : public NLMISC::CRefCount
 	{
 	public:
-		CBotPositionner(RYAI_MAP_CRUNCH::TAStarFlag	flags);
+		CBotPositionner(RYAI_MAP_CRUNCH::TAStarFlag flags);
 		CBotPositionner(uint32 geomIndex, RYAI_MAP_CRUNCH::TAStarFlag flags);
 		void setBotAtDest(bool atDest = true);
 		bool isBotAtDest() const;
 
 		CPathCont _PathCont;
 		uint32 _GeomIndex;
+
 	private:
 		bool _BotAtDest;
 	};
 
-	CGrpProfileStandOnVertices(CProfileOwner* owner);
+	CGrpProfileStandOnVertices(CProfileOwner *owner);
 	~CGrpProfileStandOnVertices();
 
-	CPathCont	*getPathCont	(const	CBot *bot);
+	CPathCont *getPathCont(const CBot *bot);
 
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_STAND_ON_VERTICES; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_STAND_ON_VERTICES; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 	void resumeProfile();
 
-	void setCurrentValidPos	(CAIStatePositional *grpState);
+	void setCurrentValidPos(CAIStatePositional *grpState);
 
-	void addBot(CBot* bot);
-	void removeBot(CBot* bot);
+	void addBot(CBot *bot);
+	void removeBot(CBot *bot);
 
 private:
-	typedef		std::map<const CBot*,NLMISC::CSmartPtr<CBotPositionner> >	TNpcBotPositionnerMap;
-	TNpcBotPositionnerMap			_NpcList;
-	bool							_Finished;
-	RYAI_MAP_CRUNCH::TAStarFlag		_DenyFlags;
+	typedef std::map<const CBot *, NLMISC::CSmartPtr<CBotPositionner>> TNpcBotPositionnerMap;
+	TNpcBotPositionnerMap _NpcList;
+	bool _Finished;
+	RYAI_MAP_CRUNCH::TAStarFlag _DenyFlags;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -526,50 +524,49 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileWander
-: public CMoveProfile
+    : public CMoveProfile
 {
 public:
-	CGrpProfileWander(CProfileOwner* owner);
-	CGrpProfileWander(CProfileOwner* owner, CNpcZone const* const npcZone);
+	CGrpProfileWander(CProfileOwner *owner);
+	CGrpProfileWander(CProfileOwner *owner, CNpcZone const *const npcZone);
 	virtual ~CGrpProfileWander();
 
-	void setBotStandProfile(AITYPES::TProfiles	botStandProfileType, IAIProfileFactory* botStandProfileFactory);
+	void setBotStandProfile(AITYPES::TProfiles botStandProfileType, IAIProfileFactory *botStandProfileFactory);
 
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_WANDER; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_WANDER; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
-	void		addBot			(CBot*	bot);
-	void		removeBot		(CBot*	bot);
-	CPathCont*	getPathCont		(CBot const*	bot);
+	void addBot(CBot *bot);
+	void removeBot(CBot *bot);
+	CPathCont *getPathCont(CBot const *bot);
 
-	void	stateChangeProfile();
+	void stateChangeProfile();
 
-	void	affectZoneFromStateMachine();
-	void	resetDestinationReachedData();
+	void affectZoneFromStateMachine();
+	void resetDestinationReachedData();
 
-	void	setTimer(uint32 ticks) { _Timer.set(ticks); }
-	bool	testTimer()	const { return _Timer.test(); }
+	void setTimer(uint32 ticks) { _Timer.set(ticks); }
+	bool testTimer() const { return _Timer.test(); }
 
-	CNpcZone const* currentZone() const { return _NpcZone; }
+	CNpcZone const *currentZone() const { return _NpcZone; }
 
 private:
-
 	/// the profile type to apply to bot standing between two deplacement
 	AITYPES::TProfiles _BotStandProfileType;
 	/// the profile factory to apply to bot standing between two deplacement
-	IAIProfileFactory*_BotStandProfileFactory;
+	IAIProfileFactory *_BotStandProfileFactory;
 	/// a flag to force social interaction for the bots
 	bool _Social;
 
 	NLMISC::CstCDbgPtr<CPlaceRandomPos> _RandomPos;
 	NLMISC::CSmartPtr<const CNpcZone> _NpcZone;
-	std::vector<bool>	_NpcDestinationReached;
+	std::vector<bool> _NpcDestinationReached;
 	bool _DestinationReachedAll;
 	bool _DestinationReachedFirst;
 
@@ -582,104 +579,100 @@ private:
 
 /// This profile shouldn't require data primitive for wander zone
 class CGrpProfileWanderNoPrim
-: public CMoveProfile
+    : public CMoveProfile
 {
 public:
-//	CGrpProfileWanderNoPrim(CProfileOwner* owner);
-	CGrpProfileWanderNoPrim(CProfileOwner* owner, NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> const& npcZone);
+	//	CGrpProfileWanderNoPrim(CProfileOwner* owner);
+	CGrpProfileWanderNoPrim(CProfileOwner *owner, NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> const &npcZone);
 	virtual ~CGrpProfileWanderNoPrim();
 
-	void setBotStandProfile(AITYPES::TProfiles	botStandProfileType, IAIProfileFactory* botStandProfileFactory);
+	void setBotStandProfile(AITYPES::TProfiles botStandProfileType, IAIProfileFactory *botStandProfileFactory);
 
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_WANDER; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_WANDER; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
-	void		addBot			(CBot*	bot);
-	void		removeBot		(CBot*	bot);
-	CPathCont*	getPathCont		(CBot const*	bot);
+	void addBot(CBot *bot);
+	void removeBot(CBot *bot);
+	CPathCont *getPathCont(CBot const *bot);
 
-	void	stateChangeProfile();
+	void stateChangeProfile();
 
-//	void	affectZoneFromStateMachine();
+	//	void	affectZoneFromStateMachine();
 
-	void	setTimer(uint32 ticks) { _Timer.set(ticks); }
-	bool	testTimer()	const { return _Timer.test(); }
+	void setTimer(uint32 ticks) { _Timer.set(ticks); }
+	bool testTimer() const { return _Timer.test(); }
 
-//	CNpcZone const* currentZone() const { return _NpcZone; }
+	//	CNpcZone const* currentZone() const { return _NpcZone; }
 
 private:
-
 	/// the profile type to apply to bot standing between two deplacement
 	AITYPES::TProfiles _BotStandProfileType;
 	/// the profile factory to apply to bot standing between two deplacement
-	IAIProfileFactory*_BotStandProfileFactory;
+	IAIProfileFactory *_BotStandProfileFactory;
 	/// a flag to force social interaction for the bots
 	bool _Social;
 
-//	NLMISC::CstCDbgPtr<CPlaceRandomPos> _RandomPos;
+	//	NLMISC::CstCDbgPtr<CPlaceRandomPos> _RandomPos;
 	NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> _NpcZone;
 
 	CAITimer _Timer;
 };
 
-class CGrpProfileFollowPlayer : 
-public CMoveProfile
+class CGrpProfileFollowPlayer : public CMoveProfile
 {
 public:
-	CGrpProfileFollowPlayer(CProfileOwner* owner, TDataSetRow const& playerRow, uint32 dispersionRadius);
-	virtual ~CGrpProfileFollowPlayer() {}
+	CGrpProfileFollowPlayer(CProfileOwner *owner, TDataSetRow const &playerRow, uint32 dispersionRadius);
+	virtual ~CGrpProfileFollowPlayer() { }
 
-	void setBotStandProfile(AITYPES::TProfiles	botStandProfileType, IAIProfileFactory* botStandProfileFactory);
+	void setBotStandProfile(AITYPES::TProfiles botStandProfileType, IAIProfileFactory *botStandProfileFactory);
 
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile() {}
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_FOLLOW_POS; }
+	virtual void endProfile() { }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_FOLLOW_POS; }
 	virtual std::string getOneLineInfoString() const { return std::string("follow_player group profile"); }
 	//@}
 
-	void	stateChangeProfile() {}
-	bool	destinationReach() const;
+	void stateChangeProfile() { }
+	bool destinationReach() const;
 
-	void		addBot			(CBot*	bot) {}
-	void		removeBot		(CBot*	bot) {}
-	CPathCont*	getPathCont		(CBot const*	bot) { return NULL; };
-
+	void addBot(CBot *bot) { }
+	void removeBot(CBot *bot) { }
+	CPathCont *getPathCont(CBot const *bot) { return NULL; };
 
 protected:
 private:
 	/// the profile type to apply to bot standing between two deplacement
 	AITYPES::TProfiles _BotStandProfileType;
 	/// the profile factory to apply to bot standing between two deplacement
-	IAIProfileFactory*_BotStandProfileFactory;
+	IAIProfileFactory *_BotStandProfileFactory;
 
-	CFollowPath::TFollowStatus	_Status;
-	CPathPosition	_PathPos;
-	CPathCont		_PathCont;
-	CAIVector		_LastPos;
+	CFollowPath::TFollowStatus _Status;
+	CPathPosition _PathPos;
+	CPathCont _PathCont;
+	CAIVector _LastPos;
 
-	TDataSetRow	_PlayerRow;
-	uint32      _DispersionRadius;
+	TDataSetRow _PlayerRow;
+	uint32 _DispersionRadius;
 };
-
 
 //////////////////////////////////////////////////////////////////////////////
 // CGrpProfileIdle                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileIdle
-: public CMoveProfile
+    : public CMoveProfile
 {
 public:
-	CGrpProfileIdle(CProfileOwner* owner);
+	CGrpProfileIdle(CProfileOwner *owner);
 	virtual ~CGrpProfileIdle();
 
 	class CBotPositionner
@@ -689,20 +682,20 @@ public:
 		virtual ~CBotPositionner();
 	};
 
-	CPathCont* getPathCont(CBot const* bot);
+	CPathCont *getPathCont(CBot const *bot);
 	virtual void beginProfile();
 	void resumeProfile();
 	virtual void endProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 
-	void addBot(CBot* bot);
-	void removeBot(CBot* bot);
+	void addBot(CBot *bot);
+	void removeBot(CBot *bot);
 
 	virtual std::string getOneLineInfoString() const;
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_IDLE; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_IDLE; }
 
 private:
-	typedef	std::map<CBot*,CBotPositionner>	TNpcBotPositionnerMap;
+	typedef std::map<CBot *, CBotPositionner> TNpcBotPositionnerMap;
 	TNpcBotPositionnerMap _NpcList;
 };
 
@@ -711,10 +704,10 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileBandit
-: public CGrpProfileNormal
+    : public CGrpProfileNormal
 {
 public:
-	CGrpProfileBandit(CProfileOwner* owner);
+	CGrpProfileBandit(CProfileOwner *owner);
 	virtual ~CGrpProfileBandit();
 
 	/// @name IAIProfile implementation
@@ -722,7 +715,7 @@ public:
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::ACTIVITY_BANDIT; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_BANDIT; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
@@ -735,10 +728,10 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileEscorted
-: public CGrpProfileNormal
+    : public CGrpProfileNormal
 {
 public:
-	CGrpProfileEscorted(CProfileOwner* owner);
+	CGrpProfileEscorted(CProfileOwner *owner);
 	virtual ~CGrpProfileEscorted();
 
 	/// @name IAIProfile implementation
@@ -746,7 +739,7 @@ public:
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::ACTIVITY_ESCORTED; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_ESCORTED; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
@@ -761,10 +754,10 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileGuard
-: public CGrpProfileNormal
+    : public CGrpProfileNormal
 {
 public:
-	CGrpProfileGuard(CProfileOwner* owner);
+	CGrpProfileGuard(CProfileOwner *owner);
 	virtual ~CGrpProfileGuard();
 
 	/// @name IAIProfile implementation
@@ -772,7 +765,7 @@ public:
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_GUARD; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_GUARD; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
@@ -786,10 +779,10 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileGuardEscorted
-: public CGrpProfileNormal
+    : public CGrpProfileNormal
 {
 public:
-	CGrpProfileGuardEscorted(CProfileOwner* owner);
+	CGrpProfileGuardEscorted(CProfileOwner *owner);
 	virtual ~CGrpProfileGuardEscorted();
 
 	/// @name IAIProfile implementation
@@ -797,14 +790,14 @@ public:
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_GUARD_ESCORTED; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_GUARD_ESCORTED; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
 	void stateChangeProfile();
 
 protected:
-	NLMISC::CSmartPtr<CGrpProfileGuard>    _GuardProfile;
+	NLMISC::CSmartPtr<CGrpProfileGuard> _GuardProfile;
 	NLMISC::CSmartPtr<CGrpProfileEscorted> _EscortedProfile;
 };
 
@@ -813,10 +806,10 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileFaction
-: public CGrpProfileNormal
+    : public CGrpProfileNormal
 {
 public:
-	CGrpProfileFaction(CProfileOwner* owner);
+	CGrpProfileFaction(CProfileOwner *owner);
 	virtual ~CGrpProfileFaction();
 
 	/// @name IAIProfile implementation
@@ -824,11 +817,11 @@ public:
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_FACTION; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_FACTION; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
-	virtual void aggroEntity(CAIEntityPhysical const* entity);
+	virtual void aggroEntity(CAIEntityPhysical const *entity);
 	void checkTargetsAround();
 	void noAssist() { bNoAssist = true; }
 
@@ -838,15 +831,14 @@ public:
 	static bool scriptFactionToFameFactionGreaterThan(std::string name);
 	static sint32 scriptFactionToFameFactionValue(std::string name);
 
-
 private:
-	CAITimer	_checkTargetTimer;
-	bool		bNoAssist;
+	CAITimer _checkTargetTimer;
+	bool bNoAssist;
 
 private:
 	static AITYPES::CPropertySet _FameFactions;
 	static void initFameFactions();
-	static bool entityHavePartOfFactions(CAIEntityPhysical const* entity, AITYPES::CPropertySetWithExtraList<TAllianceId> const& factions);
+	static bool entityHavePartOfFactions(CAIEntityPhysical const *entity, AITYPES::CPropertySetWithExtraList<TAllianceId> const &factions);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -855,27 +847,26 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileSquad
-: public CGrpProfileFaction
+    : public CGrpProfileFaction
 {
 public:
-	CGrpProfileSquad(CProfileOwner* owner);
+	CGrpProfileSquad(CProfileOwner *owner);
 	virtual ~CGrpProfileSquad();
 
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_SQUAD; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_SQUAD; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
-	virtual void aggroEntity(CAIEntityPhysical const* entity);
+	virtual void aggroEntity(CAIEntityPhysical const *entity);
 
-	NLMISC::CSmartPtr<CAIPlace const> buildFirstHitPlace(TDataSetRow const& aggroBot);
+	NLMISC::CSmartPtr<CAIPlace const> buildFirstHitPlace(TDataSetRow const &aggroBot);
 
 protected:
-
 	/// Return the outpost to which the squad belongs, or NULL if not found
-	COutpost* getDefendedOutpost() { return dynamic_cast<COutpost*>(_Grp->getPersistent().getOwner()->getOwner()); }
+	COutpost *getDefendedOutpost() { return dynamic_cast<COutpost *>(_Grp->getPersistent().getOwner()->getOwner()); }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -883,48 +874,49 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileFight
-: public CFightProfile
-, public CFightOrganizer
+    : public CFightProfile,
+      public CFightOrganizer
 {
 	// TODO : set this parameters thrue the group, no hardcode them
 	enum
 	{
 
 		CHECK_AROUND_PERIOD = 50, ///< Check every 5s
-			CHECK_AROUND_RADIUS = 60, ///< Check 60 meters around
+		CHECK_AROUND_RADIUS = 60, ///< Check 60 meters around
 	};
+
 public:
 	CGrpProfileFight(CProfileOwner *owner);
 	virtual ~CGrpProfileFight();
 
 	virtual void beginProfile();
-	void	endProfile();
+	void endProfile();
 
-	void	addBot	(CBot *bot);
-	void	removeBot	(CBot *bot);
+	void addBot(CBot *bot);
+	void removeBot(CBot *bot);
 
 	//////////////////////////////////////////////////////////////////////////
 	/// @name CFightOrganizer
 	//@{
-	virtual void setFight(CSpawnBot* bot, CAIEntityPhysical* ennemy);
-	virtual void setHeal(CSpawnBot* bot, CAIEntityPhysical* target);
-	virtual void setNoFight(CSpawnBot* bot);
-	virtual void setFlee(CSpawnBot* bot, CAIVector& fleeVect);
-	virtual void setReturnAfterFight(CSpawnBot* bot);
+	virtual void setFight(CSpawnBot *bot, CAIEntityPhysical *ennemy);
+	virtual void setHeal(CSpawnBot *bot, CAIEntityPhysical *target);
+	virtual void setNoFight(CSpawnBot *bot);
+	virtual void setFlee(CSpawnBot *bot, CAIVector &fleeVect);
+	virtual void setReturnAfterFight(CSpawnBot *bot);
 	//@}
 
-	bool stillHaveEnnemy	() const;
+	bool stillHaveEnnemy() const;
 
-	virtual	void	updateProfile(uint ticksSinceLastUpdate);
+	virtual void updateProfile(uint ticksSinceLastUpdate);
 
-	virtual	std::string	getOneLineInfoString() const;
+	virtual std::string getOneLineInfoString() const;
 
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::FIGHT_NORMAL; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::FIGHT_NORMAL; }
 
-	std::vector<CBot*>	&npcList();
+	std::vector<CBot *> &npcList();
 
 private:
-	std::vector<CBot*> _NpcList;
+	std::vector<CBot *> _NpcList;
 	/// A timer to check the friend groups around and set their aggro list if they are not fighting
 	CAITimer _CheckAround;
 	bool _WasRunning;
@@ -975,10 +967,10 @@ typedef CAIGenericProfileFactory<CGrpProfileStandOnVertices> CGrpProfileStandOnV
 
 /// No change special profile
 class CGrpProfileNoChangeFactory
-: public IAIProfileFactory
+    : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner *owner)
 	{
 		return NULL;
 	}
@@ -990,11 +982,12 @@ RYAI_DECLARE_PROFILE_FACTORY(CGrpProfileNoChangeFactory);
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpProfileBanditFactory
-: public IAIProfileFactory
+    : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner);
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner *owner);
 	static float getDefaultBanditAggroRange();
+
 private:
 	static float _DefaultAggroRange;
 };

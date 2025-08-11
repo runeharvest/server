@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #ifndef RYAI_KEYWORDS_H
 #define RYAI_KEYWORDS_H
 
@@ -29,13 +26,13 @@ public:
 	static void updateKeywordsFromCfg();
 	static void display();
 
-	static bool botMask(const std::string &word, CKeywordMask &result)		{ return _botKeywords.stringToMask(word, result); }
-	static bool groupMask(const std::string &word, CKeywordMask &result)	{ return _groupKeywords.stringToMask(word, result); }
-	static bool stateMask(const std::string &word, CKeywordMask &result)	{ return _stateKeywords.stringToMask(word, result); }
+	static bool botMask(const std::string &word, CKeywordMask &result) { return _botKeywords.stringToMask(word, result); }
+	static bool groupMask(const std::string &word, CKeywordMask &result) { return _groupKeywords.stringToMask(word, result); }
+	static bool stateMask(const std::string &word, CKeywordMask &result) { return _stateKeywords.stringToMask(word, result); }
 
-	static bool botFilter(const std::string &word, CKeywordFilter &result)	{ return _botKeywords.stringToFilter(word, result); }
-	static bool groupFilter(const std::string &word, CKeywordFilter &result)	{ return _groupKeywords.stringToFilter(word, result); }
-	static bool stateFilter(const std::string &word, CKeywordFilter &result)	{ return _stateKeywords.stringToFilter(word, result); }
+	static bool botFilter(const std::string &word, CKeywordFilter &result) { return _botKeywords.stringToFilter(word, result); }
+	static bool groupFilter(const std::string &word, CKeywordFilter &result) { return _groupKeywords.stringToFilter(word, result); }
+	static bool stateFilter(const std::string &word, CKeywordFilter &result) { return _stateKeywords.stringToFilter(word, result); }
 
 private:
 	static CKeywordSet _botKeywords;
@@ -45,6 +42,6 @@ private:
 private:
 	// this is a singleton so prohibit construction
 	CAIKeywords();
-};	
+};
 
 #endif

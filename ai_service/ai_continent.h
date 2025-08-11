@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 class CAIContinent;
 
 #ifndef RYAI_CONTINENT_H
@@ -25,18 +23,17 @@ class CAIContinent;
 #include "ai_route.h"
 
 /*
-	This class implements the data set and related methods for a continent.
-	Continent data includes collision maps and so on.
+    This class implements the data set and related methods for a continent.
+    Continent data includes collision maps and so on.
 */
 
-
-class CAIContinent  
+class CAIContinent
 {
 public:
 	// classic init(), update() and release()
-	static void init()		{}
-	static void update()	{}
-	static void release()	{}
+	static void init() { }
+	static void update() { }
+	static void release() { }
 
 	// the name of the continent
 	std::string Name;

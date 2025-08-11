@@ -20,19 +20,18 @@
 #include "ai_instance.h"
 #include "ais_actions.h"
 
-using namespace	AITYPES;
+using namespace AITYPES;
 using namespace std;
 using namespace CAISActionEnums;
 
-
-extern CAIInstance* currentInstance;
+extern CAIInstance *currentInstance;
 
 DEFINE_ACTION(ContextGlobal, SPIREMGR)
 {
 	nlassertex(currentInstance != NULL, ("No AIInstance created !"));
-	CAIInstance* aiInstance = currentInstance ;
-	CWorkPtr::aiInstance(aiInstance);	// set the current AIInstance.
-	
+	CAIInstance *aiInstance = currentInstance;
+	CWorkPtr::aiInstance(aiInstance); // set the current AIInstance.
+
 	// get hold of the manager's slot id - note that managers are identified by slot and not by alias!
 	uint32 alias;
 	string spireName;
@@ -40,45 +39,45 @@ DEFINE_ACTION(ContextGlobal, SPIREMGR)
 	string filename;
 	if (!getArgs(args, name(), alias, spireName, mapName, filename))
 		return;
-	
-	string mgrName = "spire_manager_"+spireName;
-	
+
+	string mgrName = "spire_manager_" + spireName;
+
 	// see whether the manager is already loaded
-	CManager* mgr = aiInstance->managers().getChildByName(mgrName);
-	
+	CManager *mgr = aiInstance->managers().getChildByName(mgrName);
+
 	// not found so look for a free slot
 	if (!mgr)
 		aiInstance->newMgr(MgrTypeNpc, 0, mgrName, mapName, filename);
 	else
-		mgr->registerForFile(filename);		
-	
+		mgr->registerForFile(filename);
+
 	mgr = aiInstance->managers().getChildByName(mgrName);
-	CMgrNpc* mgrNpc = dynamic_cast<CMgrNpc*>(mgr);
+	CMgrNpc *mgrNpc = dynamic_cast<CMgrNpc *>(mgr);
 	if (!mgrNpc)
 		return;
-	
+
 	// setup the working manager pointer and exit
 	CWorkPtr::mgr(mgrNpc);
 	CWorkPtr::eventReactionContainer(mgrNpc->getStateMachine());
-	
+
 	// set workptr state to this state
 	CContextStack::setContext(ContextNpcMgr);
 }
 
 DEFINE_ACTION(ContextEventContainer, SPIRSTAT) // spire state
 {
-	CStateMachine* container = CWorkPtr::eventReactionContainer();
+	CStateMachine *container = CWorkPtr::eventReactionContainer();
 	if (!container)
 		return;
-	
+
 	uint32 alias;
 	string spireName;
 	if (!getArgs(args, name(), alias, spireName))
 		return;
-	
-	string stateName = "spire_state_"+spireName;
-	
-	CAIStatePositional* state = new CAIStatePositional(container, alias, stateName);
+
+	string stateName = "spire_state_" + spireName;
+
+	CAIStatePositional *state = new CAIStatePositional(container, alias, stateName);
 	container->states().addAliasChild(state);
 	// set workptr::state to this state
 	CWorkPtr::stateState(container->states()[0]);
@@ -87,98 +86,94 @@ DEFINE_ACTION(ContextEventContainer, SPIRSTAT) // spire state
 		nlwarning("Failed to select state %s", LigoConfig.aliasToString(alias).c_str());
 		return;
 	}
-	
+
 	// set workptr state to this state
 	CContextStack::setContext(ContextPositionalState);
 }
 
 DEFINE_ACTION(ContextNpcMgr, SPIREGRP)
 {
-	CMgrNpc* mgr = CWorkPtr::mgrNpc();
+	CMgrNpc *mgr = CWorkPtr::mgrNpc();
 	if (!mgr)
 		return;
-	
+
 	uint32 alias;
 	string spireName;
 	if (!getArgs(args, name(), alias, spireName))
 		return;
-	
-	string grpName = "spire_group_"+spireName;
-	
-	CGroupNpc* grp = new CGroupNpc(mgr, alias, grpName, RYAI_MAP_CRUNCH::Nothing);
+
+	string grpName = "spire_group_" + spireName;
+
+	CGroupNpc *grp = new CGroupNpc(mgr, alias, grpName, RYAI_MAP_CRUNCH::Nothing);
 	grp->setAutoSpawn(false);
 	mgr->groups().addChild(grp);
 	CWorkPtr::grp(grp);
 	if (!CWorkPtr::grpNpc())
 	{
 		nlwarning("Failed to select spire group %s as not found in manager: %s",
-			grpName.c_str(),
-			CWorkPtr::mgrNpc()->getName().c_str());
+		    grpName.c_str(),
+		    CWorkPtr::mgrNpc()->getName().c_str());
 		return;
 	}
-	CStateMachine* stateMachine = CWorkPtr::eventReactionContainer();
+	CStateMachine *stateMachine = CWorkPtr::eventReactionContainer();
 	if (stateMachine)
 		grp->setStartState(stateMachine->cstStates()[0]);
-	
+
 	CContextStack::setContext(ContextNpcGrp);
 }
 
 DEFINE_ACTION(ContextNpcGrp, SPIREBOT)
 {
-	CGroupNpc* grp = CWorkPtr::grpNpc();
+	CGroupNpc *grp = CWorkPtr::grpNpc();
 	if (!grp)
 		return;
-	
+
 	uint32 alias;
 	string spireName;
 	if (!getArgs(args, name(), alias, spireName))
 		return;
-	
-	string botName = "spire_bot_"+spireName;
-	
-	CBotNpc* bot = new CBotNpc(grp, alias, botName);
+
+	string botName = "spire_bot_" + spireName;
+
+	CBotNpc *bot = new CBotNpc(grp, alias, botName);
 	grp->bots().addChild(bot);
 	CWorkPtr::bot(bot);
 	if (!CWorkPtr::botNpc())
 	{
 		nlwarning("Failed to select spire bot %s as not found in group: %s",
-			botName.c_str(),
-			CWorkPtr::grpNpc()->getName().c_str());
+		    botName.c_str(),
+		    CWorkPtr::grpNpc()->getName().c_str());
 		return;
 	}
-	
+
 	if (bot->getChat().isNull())
 		bot->newChat();
 	bot->getChat()->add(bot->getAIInstance(), "op:spire");
 
 	bot->setStuck(true);
-	
+
 	// set workptr state to this state
 	CContextStack::setContext(ContextNpcBot);
 }
 
 DEFINE_ACTION(ContextNpcBot, SPIRSHTS)
 {
-	CGroupNpc* grp = CWorkPtr::grpNpc();
+	CGroupNpc *grp = CWorkPtr::grpNpc();
 	if (!grp)
 		return;
-	
-	CBotNpc* bot = CWorkPtr::botNpc();
+
+	CBotNpc *bot = CWorkPtr::botNpc();
 	if (!bot)
 		return;
-	
+
 	FOREACHC(itArg, std::vector<CAIActions::CArg>, args)
 	{
 		string str, name, sheet;
 		itArg->get(str);
 		AI_SHARE::stringToKeywordAndTail(str, name, sheet);
-		grp->setStrLogicVar(NLMISC::CStringMapper::map("$sheet_spire_"+name), sheet);
+		grp->setStrLogicVar(NLMISC::CStringMapper::map("$sheet_spire_" + name), sheet);
 	}
 }
-
-
-
-
 
 #if 0
 #include "continent.h"
@@ -1606,11 +1601,11 @@ NLMISC_COMMAND(spireSetBuildingBotSheet, "Set the sheet of an spire building", "
 // The data you have access to after this macro:
 // - CSpire *spire
 // - msgStruct params;
-#define IF_GET_SPIRE_FOR_MSG( msgStruct ) \
-	msgStruct params; \
-	msgin.serial( params ); \
-	CSpire *spire = CSpire::getSpireByAlias( params.Spire ); \
-if ( spire )
+#define IF_GET_SPIRE_FOR_MSG(msgStruct)                    \
+	msgStruct params;                                      \
+	msgin.serial(params);                                  \
+	CSpire *spire = CSpire::getSpireByAlias(params.Spire); \
+	if (spire)
 
 
 void cbSpireCreateSquad( NLNET::CMessage& msgin, const std::string &serviceName, uint16 serviceId )

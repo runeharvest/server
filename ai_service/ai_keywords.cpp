@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 #include "ai_keywords.h"
 #include "nel/net/service.h"
@@ -35,33 +32,32 @@ void CAIKeywords::init()
 	updateKeywordsFromCfg();
 }
 
-static void loadKeywordsFromCfg(const char *varName,CKeywordSet &wordSet)
+static void loadKeywordsFromCfg(const char *varName, CKeywordSet &wordSet)
 {
 	// get hold of the config file variable
 	CConfigFile::CVar *varPtr;
-	varPtr=IService::getInstance()->ConfigFile.getVarPtr(std::string(varName));
-	if	(!varPtr)
+	varPtr = IService::getInstance()->ConfigFile.getVarPtr(std::string(varName));
+	if (!varPtr)
 	{
-		nlwarning("WARNING: Config file variable: %s not found",varName);
+		nlwarning("WARNING: Config file variable: %s not found", varName);
 		return;
 	}
 
 	// add config file variable contents to keyword set
-	for (uint32 i=0;i<varPtr->size();++i)
+	for (uint32 i = 0; i < varPtr->size(); ++i)
 		wordSet.addKeywords(varPtr->asString(i));
 }
 
 void CAIKeywords::updateKeywordsFromCfg()
 {
-	loadKeywordsFromCfg("KeywordsGroupNpc",_groupKeywords);
-	loadKeywordsFromCfg("KeywordsBotNpc",_botKeywords);
-	loadKeywordsFromCfg("KeywordsStateNpc",_stateKeywords);
+	loadKeywordsFromCfg("KeywordsGroupNpc", _groupKeywords);
+	loadKeywordsFromCfg("KeywordsBotNpc", _botKeywords);
+	loadKeywordsFromCfg("KeywordsStateNpc", _stateKeywords);
 }
 
 void CAIKeywords::display()
 {
-	nlinfo ("bot keywords: %s",_botKeywords.toString().c_str());
-	nlinfo ("group keywords: %s",_groupKeywords.toString().c_str());
-	nlinfo ("state keywords: %s",_stateKeywords.toString().c_str());
+	nlinfo("bot keywords: %s", _botKeywords.toString().c_str());
+	nlinfo("group keywords: %s", _groupKeywords.toString().c_str());
+	nlinfo("state keywords: %s", _stateKeywords.toString().c_str());
 }
-

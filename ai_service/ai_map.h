@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 class CAIMap;
 
 #ifndef RYAI_MAP_H
@@ -25,16 +23,15 @@ class CAIMap;
 #include "ai_route.h"
 
 /*
-	This class implements the data set and related methods for a map.
-	Map data includes collision maps and so on.
+    This class implements the data set and related methods for a map.
+    Map data includes collision maps and so on.
 */
 
-
-class CAIMap  
+class CAIMap
 {
 public:
 	// a method for releasing self cleanly before destruction
-	void release() {}
+	void release() { }
 
 	// the name of the map
 	std::string Name;

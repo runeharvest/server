@@ -21,9 +21,9 @@
 #include "ai_bot_pet.h"
 #include "server_share/pet_interface_msg.h"
 
-class	CPetOwner;
+class CPetOwner;
 
-typedef	std::map<NLMISC::CEntityId, uint32>	TEntityIdMapUint32;
+typedef std::map<NLMISC::CEntityId, uint32> TEntityIdMapUint32;
 
 //////////////////////////////////////////////////////////////////////////////
 // CMgrPet                                                                  //
@@ -31,30 +31,30 @@ typedef	std::map<NLMISC::CEntityId, uint32>	TEntityIdMapUint32;
 
 /// This is the manager class for pets, pack animals and steeds
 class CMgrPet
-: public CManager
+    : public CManager
 {
 public:
-	CMgrPet(IManagerParent* parent, uint32 alias, std::string const& name, std::string const& filename)	;
-	
+	CMgrPet(IManagerParent *parent, uint32 alias, std::string const &name, std::string const &filename);
+
 	void init() { }
 	void update();
 	void release() { }
-	
+
 	virtual void spawn() { CManager::spawn(); }
 	void despawnMgr() { CManager::despawnMgr(); }
-	
-	CStateMachine* getStateMachine() { return NULL; }
-	
-	void createPetGroup(NLMISC::CEntityId const& petOwnerId);
-	CGrpPet* getPetGroup(NLMISC::CEntityId const& petOwnerId);
-	void removePetGroup(NLMISC::CEntityId const& petOwnerId);
-	
+
+	CStateMachine *getStateMachine() { return NULL; }
+
+	void createPetGroup(NLMISC::CEntityId const &petOwnerId);
+	CGrpPet *getPetGroup(NLMISC::CEntityId const &petOwnerId);
+	void removePetGroup(NLMISC::CEntityId const &petOwnerId);
+
 	AITYPES::TMgrType type() const { return AITYPES::MgrTypePet; }
-	
-	void serviceEvent(CServiceEvent const& info);	
-	
-	virtual std::string	getOneLineInfoString() const { return std::string("Pet manager '") + getName() + "'"; }
-	
+
+	void serviceEvent(CServiceEvent const &info);
+
+	virtual std::string getOneLineInfoString() const { return std::string("Pet manager '") + getName() + "'"; }
+
 private:
 	TEntityIdMapUint32 _EntityIdToIndex;
 };
@@ -64,9 +64,9 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CPetSpawnMsgImp
-: public CPetSpawnMsg
+    : public CPetSpawnMsg
 {
-	virtual void callback(std::string const& name, NLNET::TServiceId id);
+	virtual void callback(std::string const &name, NLNET::TServiceId id);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -74,9 +74,9 @@ class CPetSpawnMsgImp
 //////////////////////////////////////////////////////////////////////////////
 
 class CPetSetOwnerImp
-: public CPetSetOwner
+    : public CPetSetOwner
 {
-	virtual void callback(std::string const& name, NLNET::TServiceId id);
+	virtual void callback(std::string const &name, NLNET::TServiceId id);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -84,9 +84,9 @@ class CPetSetOwnerImp
 //////////////////////////////////////////////////////////////////////////////
 
 class CPetCommandMsgImp
-: public CPetCommandMsg
+    : public CPetCommandMsg
 {
-	virtual void callback(std::string const& name, NLNET::TServiceId id);
+	virtual void callback(std::string const &name, NLNET::TServiceId id);
 };
 
 /****************************************************************************/
@@ -97,9 +97,8 @@ class CPetCommandMsgImp
 // CMgrPet                                                                  //
 //////////////////////////////////////////////////////////////////////////////
 
-inline
-CMgrPet::CMgrPet(IManagerParent* parent, uint32 alias, std::string const& name, std::string const& filename)	
-: CManager(parent, alias, name, filename)
+inline CMgrPet::CMgrPet(IManagerParent *parent, uint32 alias, std::string const &name, std::string const &filename)
+    : CManager(parent, alias, name, filename)
 {
 }
 

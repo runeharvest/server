@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYAI_MESSAGES_H
 #define RYAI_MESSAGES_H
 
@@ -29,27 +27,26 @@
 
 #include "nel/net/transport_class.h"
 
-
 //----------------------------------------------------------------
-// Message sent by AIS to AIDS in reaction to AIDS's service up 
+// Message sent by AIS to AIDS in reaction to AIDS's service up
 
 class CMsgAIServiceUp : public NLNET::CTransportClass
 {
 public:
-	CMsgAIServiceUp(float processorAllocation,float ramAllocation) 
+	CMsgAIServiceUp(float processorAllocation, float ramAllocation)
 	{
-		_processorAllocation=processorAllocation;
-		_ramAllocation=ramAllocation;
+		_processorAllocation = processorAllocation;
+		_ramAllocation = ramAllocation;
 	}
 
-	virtual void description ()
+	virtual void description()
 	{
-		className ("CMsgAIServiceUp");
-		property ("_processorAllocation", PropFloat, 0.0f, _processorAllocation);
-		property ("_ramAllocation", PropFloat, 0.0f, _ramAllocation);
+		className("CMsgAIServiceUp");
+		property("_processorAllocation", PropFloat, 0.0f, _processorAllocation);
+		property("_ramAllocation", PropFloat, 0.0f, _ramAllocation);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId  id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 
 protected:
 	float _processorAllocation;
@@ -62,32 +59,31 @@ protected:
 class CMsgAIOpenMgrs : public NLNET::CTransportClass
 {
 public:
-	CMsgAIOpenMgrs(uint16 idx,const std::string &name) 
+	CMsgAIOpenMgrs(uint16 idx, const std::string &name)
 	{
 		_idx.push_back(idx);
 		_name.push_back(name);
 	}
 
-	void push_back(uint16 idx,const std::string &name)
+	void push_back(uint16 idx, const std::string &name)
 	{
 		_idx.push_back(idx);
 		_name.push_back(name);
 	}
 
-	virtual void description ()
+	virtual void description()
 	{
-		className ("CMsgAIOpenMgrs");
-		propertyCont ("idx", PropUInt16, _idx);
-		propertyCont ("name", PropString, _name);
+		className("CMsgAIOpenMgrs");
+		propertyCont("idx", PropUInt16, _idx);
+		propertyCont("name", PropString, _name);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId  id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 
 protected:
-	std::vector <uint16> _idx;
-	std::vector <std::string> _name;
+	std::vector<uint16> _idx;
+	std::vector<std::string> _name;
 };
-
 
 //----------------------------------------------------------------
 // AIDS -> AIS: Reload Managers
@@ -95,7 +91,7 @@ protected:
 class CMsgAIReloadMgrs : public NLNET::CTransportClass
 {
 public:
-	CMsgAIReloadMgrs(uint16 idx) 
+	CMsgAIReloadMgrs(uint16 idx)
 	{
 		_idx.push_back(idx);
 	}
@@ -105,18 +101,17 @@ public:
 		_idx.push_back(idx);
 	}
 
-	virtual void description ()
+	virtual void description()
 	{
-		className ("CMsgAIReloadMgrs");
-		propertyCont ("idx", PropUInt16, _idx);
+		className("CMsgAIReloadMgrs");
+		propertyCont("idx", PropUInt16, _idx);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 
 protected:
-	std::vector <uint16> _idx;
+	std::vector<uint16> _idx;
 };
-
 
 //----------------------------------------------------------------
 // AIDS -> AIS: Save, stop and unload Managers
@@ -124,7 +119,7 @@ protected:
 class CMsgAICloseMgrs : public NLNET::CTransportClass
 {
 public:
-	CMsgAICloseMgrs(uint16 idx) 
+	CMsgAICloseMgrs(uint16 idx)
 	{
 		_idx.push_back(idx);
 	}
@@ -134,18 +129,17 @@ public:
 		_idx.push_back(idx);
 	}
 
-	virtual void description ()
+	virtual void description()
 	{
-		className ("CMsgAICloseMgrs");
-		propertyCont ("idx", PropUInt16, _idx);
+		className("CMsgAICloseMgrs");
+		propertyCont("idx", PropUInt16, _idx);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 
 protected:
-	std::vector <uint16> _idx;
+	std::vector<uint16> _idx;
 };
-
 
 //----------------------------------------------------------------
 // AIDS -> AIS: Save managers' backups
@@ -153,7 +147,7 @@ protected:
 class CMsgAIBackupMgrs : public NLNET::CTransportClass
 {
 public:
-	CMsgAIBackupMgrs(uint16 idx) 
+	CMsgAIBackupMgrs(uint16 idx)
 	{
 		_idx.push_back(idx);
 	}
@@ -163,18 +157,16 @@ public:
 		_idx.push_back(idx);
 	}
 
-	virtual void description ()
+	virtual void description()
 	{
-		className ("CMsgAIBackupMgrs");
-		propertyCont ("idx", PropUInt16, _idx);
+		className("CMsgAIBackupMgrs");
+		propertyCont("idx", PropUInt16, _idx);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 
 protected:
-	std::vector <uint16> _idx;
+	std::vector<uint16> _idx;
 };
 
-
 #endif
-

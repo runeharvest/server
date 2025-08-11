@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 //--------------------------------------------------------------------------
@@ -25,24 +23,22 @@ CAIWorldMap CAIWorldMap::_this;
 // the no-go surface neighbour
 CAIMapSurfaceNeighbour CAIMapSurfaceNeighbour::NoGo(true);
 
-
 //--------------------------------------------------------------------------
 // ctor - this is a singleton so prohibit public instantiation
-CAIWorldMap::CAIWorldMap() 
+CAIWorldMap::CAIWorldMap()
 {
-	memset(_map,0,sizeof(_map));
+	memset(_map, 0, sizeof(_map));
 }
-
 
 //--------------------------------------------------------------------------
 /*
-	The following routine uses a classic line draw algorithm to approximate the 
-	Movement path required to perform requested move. 
-	A better implementation would cater for overlap between entity collision radius
-	and neighbouring surfaces
+    The following routine uses a classic line draw algorithm to approximate the
+    Movement path required to perform requested move.
+    A better implementation would cater for overlap between entity collision radius
+    and neighbouring surfaces
 */
 bool CAIWorldMap::tryMoveStatic(CAIWorldMap::SMove &move)
-//bool CAIWorldMap::tryMoveStatic(CAIEntityPhysical *entity,sint dx,sint dy,double &result)
+// bool CAIWorldMap::tryMoveStatic(CAIEntityPhysical *entity,sint dx,sint dy,double &result)
 {
 #if 0
 	// ignore millimeter part of dx & dy and calculate magnitude of moves
@@ -160,69 +156,78 @@ bool CAIWorldMap::tryMoveDynamic(CAIWorldMap::SMove &move)
 	return true;
 }
 
-
 //--------------------------------------------------------------------------
 // linking cells into the map and unking them
 
-void CAIWorldMap::setMapCell(CAICoord cx, CAICoord cy,CAIMapCell *cell)
+void CAIWorldMap::setMapCell(CAICoord cx, CAICoord cy, CAIMapCell *cell)
 {
-	uint x=(uint)cx.asInt();
-	uint y=(uint)-cy.asInt();
-	uint x0=x&((1<<10)-1);	x>>=10;	uint y0=y&((1<<10)-1);	y>>=10;	// millimeter
-	uint x1=x&((1<<4)-1);	x>>=4;	uint y1=y&((1<<4)-1);	y>>=4;	// 16x16 meter cells
-	uint x2=x&((1<<4)-1);	x>>=4;	uint y2=y&((1<<4)-1);	y>>=4;	// 16x16 cell map segments
-	uint x3=x&0xff;					uint y3=y&0xff;					// 256x256 grid of map segments (64km x 64km) 
+	uint x = (uint)cx.asInt();
+	uint y = (uint)-cy.asInt();
+	uint x0 = x & ((1 << 10) - 1);
+	x >>= 10;
+	uint y0 = y & ((1 << 10) - 1);
+	y >>= 10; // millimeter
+	uint x1 = x & ((1 << 4) - 1);
+	x >>= 4;
+	uint y1 = y & ((1 << 4) - 1);
+	y >>= 4; // 16x16 meter cells
+	uint x2 = x & ((1 << 4) - 1);
+	x >>= 4;
+	uint y2 = y & ((1 << 4) - 1);
+	y >>= 4; // 16x16 cell map segments
+	uint x3 = x & 0xff;
+	uint y3 = y & 0xff; // 256x256 grid of map segments (64km x 64km)
 
 	// if this is a 'dropMapCell' and the related map segment doesn't exist then nothing to do so return
-	if (_this._map[y3][x3]==NULL && cell==NULL)
+	if (_this._map[y3][x3] == NULL && cell == NULL)
 		return;
 
 	// make sure the map segment for the cell exists (create it if it doesn't)
-	if (_this._map[y3][x3]==NULL)
+	if (_this._map[y3][x3] == NULL)
 	{
-		_this._map[y3][x3]=(TMapSegment *)malloc(sizeof(TMapSegment));
-		memset(_this._map[y3][x3],0,sizeof(*_this._map[y3][x3]));
+		_this._map[y3][x3] = (TMapSegment *)malloc(sizeof(TMapSegment));
+		memset(_this._map[y3][x3], 0, sizeof(*_this._map[y3][x3]));
 	}
 
 	// the following assert is an assert 'cos it means there's a big bad memory leak!
-	nlassert(_this._map[y3][x3][y2][x2]==NULL);
-	
-	_this._map[y3][x3][y2][x2]=cell;
+	nlassert(_this._map[y3][x3][y2][x2] == NULL);
+
+	_this._map[y3][x3][y2][x2] = cell;
 }
 
 void CAIWorldMap::dropMapCell(CAICoord x, CAICoord y)
 {
-	setMapCell(x,y,NULL);
+	setMapCell(x, y, NULL);
 }
-
 
 //--------------------------------------------------------------------------
 // The CAIMapCell ctor & dtor
 //--------------------------------------------------------------------------
 
-CAIMapCell::CAIMapCell(CAICoord x0,CAICoord y0): _x0(x0), _y0(y0) 
+CAIMapCell::CAIMapCell(CAICoord x0, CAICoord y0)
+    : _x0(x0)
+    , _y0(y0)
 {
-	CAIWorldMap::setMapCell(_x0,_y0,this);
+	CAIWorldMap::setMapCell(_x0, _y0, this);
 }
 
-CAIMapCell::~CAIMapCell() 
+CAIMapCell::~CAIMapCell()
 {
-	CAIWorldMap::dropMapCell(_x0,_y0);
+	CAIWorldMap::dropMapCell(_x0, _y0);
 }
 
-	
 //--------------------------------------------------------------------------
 
-NLMISC_COMMAND(dummyWorldMap,"","")
+NLMISC_COMMAND(dummyWorldMap, "", "")
 {
 	NL_ALLOC_CONTEXT(AIDWM);
-	if(args.size()!=1)
+	if (args.size() != 1)
 		return false;
 
-	for (CAICoord j=4096.0;j>(4096.0+512.0);j+=16.0)
-		for (CAICoord i=4096.0;i<(4096.0+512.0);i+=16.0)
+	for (CAICoord j = 4096.0; j > (4096.0 + 512.0); j += 16.0)
+		for (CAICoord i = 4096.0; i < (4096.0 + 512.0); i += 16.0)
 		{
-			new CAIMapCellSimple(i,j);
+			new CAIMapCellSimple(i, j);
 		}
 
 	return true;

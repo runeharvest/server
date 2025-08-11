@@ -25,11 +25,13 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 using namespace RYAI_MAP_CRUNCH;
-using namespace	AITYPES;
+using namespace AITYPES;
 
 // Stuff used for management of log messages
-static bool VerboseLog=false;
-#define LOG if (!VerboseLog) {} else nlinfo
+static bool VerboseLog = false;
+#define LOG              \
+	if (!VerboseLog) { } \
+	else nlinfo
 
 //////////////////////////////////////////////////////////////////////////////
 // CMgrNpc                                                                  //
@@ -38,9 +40,9 @@ static bool VerboseLog=false;
 // instantiate the bot population
 void CMgrNpc::spawn()
 {
-	nlinfo("---------------  spawn Npc manager: %s ----------------",	getName().c_str()	);
+	nlinfo("---------------  spawn Npc manager: %s ----------------", getName().c_str());
 	CManager::spawn();
-	
+
 	// inform the EGS of our existence - simulate connection of EGS
 	if (EGSHasMirrorReady)
 		serviceEvent(CServiceEvent(TServiceId(0), std::string("EGS"), CServiceEvent::SERVICE_UP));
@@ -49,11 +51,11 @@ void CMgrNpc::spawn()
 // clear the bot population
 void CMgrNpc::despawnMgr()
 {
-	nlinfo("--------------  despawn manager: %s --------------- ",	getName().c_str());
+	nlinfo("--------------  despawn manager: %s --------------- ", getName().c_str());
 	CManager::despawnMgr();
 }
 
-IAliasCont* CMgrNpc::getAliasCont(TAIType type)
+IAliasCont *CMgrNpc::getAliasCont(TAIType type)
 {
 	switch (type)
 	{
@@ -69,17 +71,17 @@ IAliasCont* CMgrNpc::getAliasCont(TAIType type)
 	case AITypeState:
 		return &getStateMachine()->states();
 	case AITypeEvent:
-		return	&getStateMachine()->eventReactions();
+		return &getStateMachine()->eventReactions();
 	case AITypeFolder:
 	default:
-		return	NULL;
+		return NULL;
 	}
 }
 
-CAliasTreeOwner* CMgrNpc::createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree)
+CAliasTreeOwner *CMgrNpc::createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree)
 {
-	CAliasTreeOwner* child = NULL;
-	
+	CAliasTreeOwner *child = NULL;
+
 	switch (aliasTree->getType())
 	{
 	case AITypeGrp:
@@ -97,23 +99,23 @@ CAliasTreeOwner* CMgrNpc::createChild(IAliasCont* cont, CAIAliasDescriptionNode*
 		break;
 	case AITypeEvent:
 		child = new CAIEventReaction(getStateMachine(), aliasTree);
-		break;		
+		break;
 	case AITypeNoGo:
 	case AITypeFolder:
 		break;
 	}
 	if (child)
-		cont->addAliasChild(child);	
+		cont->addAliasChild(child);
 	return child;
 }
 
-std::string	CMgrNpc::getOneLineInfoString() const
+std::string CMgrNpc::getOneLineInfoString() const
 {
 	return std::string("NPC manager '") + getName() + "'";
 }
 
-CMgrNpc::CMgrNpc(IManagerParent* parent, uint32 alias, std::string const& name, std::string const& filename)
-: CManager(parent, alias, name, filename)
+CMgrNpc::CMgrNpc(IManagerParent *parent, uint32 alias, std::string const &name, std::string const &filename)
+    : CManager(parent, alias, name, filename)
 {
 	registerEvents();
 }
@@ -134,13 +136,13 @@ void CMgrNpc::update()
 void CMgrNpc::registerEvents()
 {
 	_StateMachine.registerEvents();
-	
-	_StateMachine.addEvent(	"destination_reached",			EventDestinationReachedFirst	);
-	_StateMachine.addEvent(	"destination_reached_first",	EventDestinationReachedFirst	);
-	_StateMachine.addEvent(	"destination_reached_all",		EventDestinationReachedAll	);
-	_StateMachine.addEvent(	"bot_killed",					EventBotKilled				);
-	_StateMachine.addEvent(	"squad_leader_killed",			EventSquadLeaderKilled		);
-	_StateMachine.addEvent(	"group_eliminated",				EventGrpEliminated			);
+
+	_StateMachine.addEvent("destination_reached", EventDestinationReachedFirst);
+	_StateMachine.addEvent("destination_reached_first", EventDestinationReachedFirst);
+	_StateMachine.addEvent("destination_reached_all", EventDestinationReachedAll);
+	_StateMachine.addEvent("bot_killed", EventBotKilled);
+	_StateMachine.addEvent("squad_leader_killed", EventSquadLeaderKilled);
+	_StateMachine.addEvent("group_eliminated", EventGrpEliminated);
 }
 
 std::vector<std::string> CMgrNpc::getMultiLineInfoString() const
@@ -148,19 +150,17 @@ std::vector<std::string> CMgrNpc::getMultiLineInfoString() const
 	using namespace MULTI_LINE_FORMATER;
 	std::vector<std::string> container;
 	std::vector<std::string> strings;
-	
-	
+
 	pushTitle(container, "CMgrNpc");
 	strings = CManager::getMultiLineInfoString();
 	FOREACHC(itString, std::vector<std::string>, strings)
-		pushEntry(container, *itString);
-//	pushEntry(container, "state machine:");
+	pushEntry(container, *itString);
+	//	pushEntry(container, "state machine:");
 	strings = _StateMachine.getMultiLineInfoString();
 	FOREACHC(itString, std::vector<std::string>, strings)
-		pushEntry(container, *itString);
+	pushEntry(container, *itString);
 	pushFooter(container);
-	
-	
+
 	return container;
 }
 
@@ -169,14 +169,12 @@ std::vector<std::string> CStateMachine::getMultiLineInfoString() const
 {
 	using namespace MULTI_LINE_FORMATER;
 	std::vector<std::string> container;
-	
-	
+
 	pushTitle(container, "CStateMachine");
 	pushEntry(container, "States:");
 	FOREACHC(itState, CCont<CAIState>, _states)
-		pushEntry(container, " - "+itState->getName());
+	pushEntry(container, " - " + itState->getName());
 	pushFooter(container);
-	
-	
+
 	return container;
 }

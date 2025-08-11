@@ -22,91 +22,77 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
-
-
 /*
-	Persistent variables structures
+    Persistent variables structures
 */
-
 
 #define PERSISTENT_TOKEN_FAMILY AiTokenFamily
 
 #define PERSISTENT_MACROS_AUTO_UNDEF
 
-
 /*
-	Persistent variables structures
+    Persistent variables structures
 */
-
 
 #define PERSISTENT_CLASS CPersistentVariables
 
 #define PERSISTENT_PRE_APPLY nlinfo("Staring Persistent var apply.");
 
-#define PERSISTENT_DATA\
-    STRUCT_MAP( string, SPersistentVariableSet, _VariableSets ) \
+#define PERSISTENT_DATA \
+	STRUCT_MAP(string, SPersistentVariableSet, _VariableSets)
 
-#define PERSISTENT_POST_APPLY	\
-	TVariableSets::iterator first(_VariableSets.begin()), last(_VariableSets.end());	\
-	for (; first != last; ++first)	\
-	{	\
-		nldebug("End of variable set '%s'", first->first.c_str());	\
-		TVariables::iterator first2(first->second.Variables.begin()), last2(first->second.Variables.end());	\
-		for (; first2 != last2; ++first2)	\
-		{	\
-			nldebug("Var '%s' = '%s'", first2->first.c_str(), first2->second.c_str());	\
-		}	\
-	}	\
+#define PERSISTENT_POST_APPLY                                                                               \
+	TVariableSets::iterator first(_VariableSets.begin()), last(_VariableSets.end());                        \
+	for (; first != last; ++first)                                                                          \
+	{                                                                                                       \
+		nldebug("End of variable set '%s'", first->first.c_str());                                          \
+		TVariables::iterator first2(first->second.Variables.begin()), last2(first->second.Variables.end()); \
+		for (; first2 != last2; ++first2)                                                                   \
+		{                                                                                                   \
+			nldebug("Var '%s' = '%s'", first2->first.c_str(), first2->second.c_str());                      \
+		}                                                                                                   \
+	}
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
-
 /*
-	Persistent variables structures
+    Persistent variables structures
 */
 
 #define PERSISTENT_CLASS SPersistentVariableSet
 
 #define PERSISTENT_PRE_APPLY nlinfo("Staring Persistent variable set apply.");
 
-#define PERSISTENT_DATA\
-    PROP_MAP( string, string, Variables ) \
-	
-#define PERSISTENT_POST_APPLY	\
-	nldebug("End of variable set, read %u var from PDR", Variables.size());	\
-	TVariables::iterator first(Variables.begin()), last(Variables.end());	\
-	for (; first != last; ++first)	\
-	{	\
-		nldebug("Var '%s' = '%s'", first->first.c_str(), first->second.c_str());	\
-	}	\
+#define PERSISTENT_DATA \
+	PROP_MAP(string, string, Variables)
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#define PERSISTENT_POST_APPLY                                                    \
+	nldebug("End of variable set, read %u var from PDR", Variables.size());      \
+	TVariables::iterator first(Variables.begin()), last(Variables.end());        \
+	for (; first != last; ++first)                                               \
+	{                                                                            \
+		nldebug("Var '%s' = '%s'", first->first.c_str(), first->second.c_str()); \
+	}
+
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
-
-
-
-
-
 // Automatic SaveShardRootGameShare path standardization
-void cbOnSaveShardRootModified( NLMISC::IVariable& var )
+void cbOnSaveShardRootModified(NLMISC::IVariable &var)
 {
-	var.fromString( CPath::standardizePath( var.toString() ) );
+	var.fromString(CPath::standardizePath(var.toString()));
 }
-
 
 // (SaveShardRootGameShare from game_share/backup_service_interface.cpp is not instanciated because nothing is used from that file)
 extern NLMISC::CVariable<std::string> SaveShardRootGameShare;
-CVariable<string>	PdrFilename("ai", "PdrFilename", "Pdr file containing AIScript variables", string("ai_persistent_var.pdr"), 0, true);
+CVariable<string> PdrFilename("ai", "PdrFilename", "Pdr file containing AIScript variables", string("ai_persistent_var.pdr"), 0, true);
 
+CAIScriptDataManager *CAIScriptDataManager::_instance = 0;
 
-CAIScriptDataManager* CAIScriptDataManager::_instance = 0;
-
-CAIScriptDataManager* CAIScriptDataManager::getInstance()
+CAIScriptDataManager *CAIScriptDataManager::getInstance()
 {
-	if (_instance==0)
+	if (_instance == 0)
 	{
 		_instance = new CAIScriptDataManager();
 		_instance->init();
@@ -128,16 +114,15 @@ string CAIScriptDataManager::makePdrFileName()
 {
 	string aisName;
 	// get the AIS local path
-	//CConfigFile::CVar *var = IService::getInstance()->ConfigFile.getVarPtr("AESAliasName");
+	// CConfigFile::CVar *var = IService::getInstance()->ConfigFile.getVarPtr("AESAliasName");
 	// aisName must be get from getServiceAliasName to manage "-N AIS_NAME" command line arg
-	
+
 	aisName = IService::getInstance()->getServiceAliasName();
-	
+
 	if (aisName.empty())
 		aisName = "unamed_ais";
 
-
-	return string("ai_script_data/")+aisName+"_pdr.bin";
+	return string("ai_script_data/") + aisName + "_pdr.bin";
 }
 
 void CAIScriptDataManager::init()
@@ -146,24 +131,23 @@ void CAIScriptDataManager::init()
 
 	CAIVarUpdateCallback *cb = new CAIVarUpdateCallback();
 
-	//Bsi.requestFile(PdrFilename, cb);
+	// Bsi.requestFile(PdrFilename, cb);
 	Bsi.syncLoadFile(makePdrFileName(), cb);
-
 }
 
 CAIScriptDataManager::~CAIScriptDataManager()
 {
-//	save();
-//	FOREACH(itFile, TFileContainer, _Files)
-//	{
-//		NLMISC::CConfigFile* file = itFile->second;
-//		if (file)
-//			delete file;
-//	}
-//	_Files.clear();
+	//	save();
+	//	FOREACH(itFile, TFileContainer, _Files)
+	//	{
+	//		NLMISC::CConfigFile* file = itFile->second;
+	//		if (file)
+	//			delete file;
+	//	}
+	//	_Files.clear();
 }
 
-//void CAIScriptDataManager::save()
+// void CAIScriptDataManager::save()
 //{
 //	FOREACH(itFile, TFileContainer, _Files)
 //	{
@@ -173,14 +157,14 @@ CAIScriptDataManager::~CAIScriptDataManager()
 //	}
 //	// :TODO: It may be wise to close all the files (ie delete CConfigFile)
 //	// when we save, to save memory and 'save time' if we open several files
-//}
+// }
 
 std::string CAIScriptDataManager::dirname()
 {
-	return SaveShardRootGameShare.get()+"/"+IService::getInstance()->SaveFilesDirectory.toString()+"/ai_script_data";
+	return SaveShardRootGameShare.get() + "/" + IService::getInstance()->SaveFilesDirectory.toString() + "/ai_script_data";
 }
 
-//CConfigFile* CAIScriptDataManager::createFile(string name)
+// CConfigFile* CAIScriptDataManager::createFile(string name)
 //{
 //	CConfigFile* file = new CConfigFile;
 //	string fullfilename = dirname() + "/" + name + ".ai_script_data";
@@ -207,34 +191,34 @@ std::string CAIScriptDataManager::dirname()
 //		nlwarning("Error while loading AI script data file %s", fullfilename.c_str());
 //	}
 //	_Files.insert(make_pair(name, file));
-//	
+//
 //	return file;
-//}
+// }
 
-//CConfigFile* CAIScriptDataManager::getFile(string name)
+// CConfigFile* CAIScriptDataManager::getFile(string name)
 //{
 //	TFileContainer::iterator itFile = _Files.find(name);
 //	if (itFile!=_Files.end())
 //		return itFile->second;
 //	else
 //		return createFile(name);
-//}
+// }
 
 string CAIScriptDataManager::getVar_s(const string &name) const
 {
 	// Split name in filename and varname
 	string::size_type pos = name.find(':');
-	if (pos!=string::npos && pos!=(name.length()-1))
+	if (pos != string::npos && pos != (name.length() - 1))
 	{
 		string filename = name.substr(0, pos);
-		string varname = name.substr(pos+1);
-		
+		string varname = name.substr(pos + 1);
+
 		// Get a file ptr
 		/*CConfigFile* file = getFile(filename);
 		if (!file)
 		{
-			nlwarning("Unable to access ai script data file '%s'", filename.c_str());
-			return "";
+		    nlwarning("Unable to access ai script data file '%s'", filename.c_str());
+		    return "";
 		}
 		// Create var
 		CConfigFile::CVar* var = file->getVarPtr(varname);
@@ -242,7 +226,7 @@ string CAIScriptDataManager::getVar_s(const string &name) const
 		TVariableValue var = _PersistentVariables.get(filename, varname);
 		return var;
 		/*if (var)
-			return var->asString();*/
+		    return var->asString();*/
 		// :NOTE: If var don't exists we simply return default value
 	}
 	else
@@ -255,56 +239,56 @@ string CAIScriptDataManager::getVar_s(const string &name) const
 float CAIScriptDataManager::getVar_f(const string &name) const
 {
 	return (float)atof(getVar_s(name).c_str());
-//	// Split name in filename and varname
-//	string::size_type pos = name.find(':');
-//	if (pos!=string::npos && pos!=(name.length()-1))
-//	{
-//		string filename = name.substr(0, pos);
-//		string varname = name.substr(pos+1);
-//		// Get a file ptr
-//		/*CConfigFile* file = getFile(filename);
-//		if (!file)
-//		{
-//			nlwarning("Unable to access ai script data file '%s'", filename.c_str());
-//			return 0.f;
-//		}
-//		// Create var
-//		CConfigFile::CVar* var = file->getVarPtr(varname);
-//		if (var)
-//			return var->asFloat();*/
-//		TVariableValue varValue = _PersistentVariables.get(filename, varname);
-//		return (float)atof(varValue.c_str());
-//		// :NOTE: If var don't exists we simply return default value
-//	}
-//	else
-//	{
-//		nlwarning("AI script data variable name is misformed. Should be filename:varname");
-//	}
-//	return 0.f;
+	//	// Split name in filename and varname
+	//	string::size_type pos = name.find(':');
+	//	if (pos!=string::npos && pos!=(name.length()-1))
+	//	{
+	//		string filename = name.substr(0, pos);
+	//		string varname = name.substr(pos+1);
+	//		// Get a file ptr
+	//		/*CConfigFile* file = getFile(filename);
+	//		if (!file)
+	//		{
+	//			nlwarning("Unable to access ai script data file '%s'", filename.c_str());
+	//			return 0.f;
+	//		}
+	//		// Create var
+	//		CConfigFile::CVar* var = file->getVarPtr(varname);
+	//		if (var)
+	//			return var->asFloat();*/
+	//		TVariableValue varValue = _PersistentVariables.get(filename, varname);
+	//		return (float)atof(varValue.c_str());
+	//		// :NOTE: If var don't exists we simply return default value
+	//	}
+	//	else
+	//	{
+	//		nlwarning("AI script data variable name is misformed. Should be filename:varname");
+	//	}
+	//	return 0.f;
 }
 
 void CAIScriptDataManager::setVar(const string &name, const string &value)
 {
 	// Split name in filename and varname
 	string::size_type pos = name.find(':');
-	if (pos!=string::npos && pos!=(name.length()-1))
+	if (pos != string::npos && pos != (name.length() - 1))
 	{
 		string filename = name.substr(0, pos);
-		string varname = name.substr(pos+1);
+		string varname = name.substr(pos + 1);
 		// Get a file ptr
 		/*CConfigFile* file = getFile(filename);
 		if (!file)
 		{
-			nlwarning("Unable to access ai script data file '%s'", filename.c_str());
-			return;
+		    nlwarning("Unable to access ai script data file '%s'", filename.c_str());
+		    return;
 		}
 		// Create var
 		CConfigFile::CVar* var = file->getVarPtr(varname);
 		if (!var)
-			createVar(file, varname, value);
+		    createVar(file, varname, value);
 		else
 		//	var->setAsString(value);
-			var->forceAsString(value);*/
+		    var->forceAsString(value);*/
 		_PersistentVariables.set(filename, varname, value);
 	}
 	else
@@ -317,24 +301,24 @@ void CAIScriptDataManager::setVar(const string &name, float value)
 {
 	// Split name in filename and varname
 	string::size_type pos = name.find(':');
-	if (pos!=string::npos && pos!=(name.length()-1))
+	if (pos != string::npos && pos != (name.length() - 1))
 	{
 		string filename = name.substr(0, pos);
-		string varname = name.substr(pos+1);
+		string varname = name.substr(pos + 1);
 		// Get a file ptr
 		/*CConfigFile* file = getFile(filename);
 		if (!file)
 		{
-			nlwarning("Unable to access ai script data file '%s'", filename.c_str());
-			return;
+		    nlwarning("Unable to access ai script data file '%s'", filename.c_str());
+		    return;
 		}
 		// Create var
 		CConfigFile::CVar* var = file->getVarPtr(varname);
 		if (!var)
-			createVar(file, varname, value);
+		    createVar(file, varname, value);
 		else
 		//	var->setAsFloat(value);
-			var->forceAsDouble((double)value);*/
+		    var->forceAsDouble((double)value);*/
 		_PersistentVariables.set(filename, varname, toString(value));
 	}
 	else
@@ -346,19 +330,17 @@ void CAIScriptDataManager::setVar(const string &name, float value)
 void CAIScriptDataManager::deleteVar(const std::string &name)
 {
 	string::size_type pos = name.find(':');
-	if (pos!=string::npos && pos!=(name.length()-1))
+	if (pos != string::npos && pos != (name.length() - 1))
 	{
 		string filename = name.substr(0, pos);
-		string varname = name.substr(pos+1);
+		string varname = name.substr(pos + 1);
 		_PersistentVariables.deleteVar(filename, varname);
 	}
 	else
 	{
 		nlwarning("AI script data variable name is misformed. Should be filename:varname");
 	}
-	
 }
-
 
 bool CAIScriptDataManager::needsPersistentVarUpdate()
 {
@@ -375,7 +357,7 @@ const CPersistentVariables &CAIScriptDataManager::getPersistentVariables() const
 	return _PersistentVariables;
 }
 
-TVariableValue CPersistentVariables::get(const TVariableSetName& setName, const TVariableName& variableName) const
+TVariableValue CPersistentVariables::get(const TVariableSetName &setName, const TVariableName &variableName) const
 {
 	TVariableSets::const_iterator it(_VariableSets.find(setName));
 	if (it != _VariableSets.end())
@@ -388,18 +370,17 @@ TVariableValue CPersistentVariables::get(const TVariableSetName& setName, const 
 	return string();
 }
 
-void CPersistentVariables::set(const TVariableSetName& setName, const TVariableName& variableName, const TVariableValue& value)
+void CPersistentVariables::set(const TVariableSetName &setName, const TVariableName &variableName, const TVariableValue &value)
 {
-	TVariableValue& theValue= _VariableSets[setName].Variables[variableName];
+	TVariableValue &theValue = _VariableSets[setName].Variables[variableName];
 	if (value != theValue)
 	{
 		theValue = value;
-		_Dirty = true; 
+		_Dirty = true;
 	}
-
 }
 
-void CPersistentVariables::deleteVar(const TVariableSetName& setName, const TVariableName& variableName)
+void CPersistentVariables::deleteVar(const TVariableSetName &setName, const TVariableName &variableName)
 {
 	_VariableSets[setName].Variables.erase(variableName);
 	if (_VariableSets[setName].Variables.size() == 0)
@@ -407,14 +388,12 @@ void CPersistentVariables::deleteVar(const TVariableSetName& setName, const TVar
 		_VariableSets.erase(setName);
 	}
 	_Dirty = true;
-	
 }
 
 bool CPersistentVariables::isDirty() const
 {
 	return _Dirty;
 }
-    
 
 void CPersistentVariables::clearDirtyFlag()
 {
@@ -422,13 +401,13 @@ void CPersistentVariables::clearDirtyFlag()
 }
 
 //
-//called once at AIScriptDataManager singleton instanciation
+// called once at AIScriptDataManager singleton instanciation
 //
-void CAIVarUpdateCallback::callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+void CAIVarUpdateCallback::callback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream)
 {
 	nldebug("CAIVarUpdateCallback::callback : loading persistent var from pdr file");
 	// on receive file from backup
-	CPersistentDataRecord    pdr;
+	CPersistentDataRecord pdr;
 
 	if (pdr.fromBuffer(dataStream))
 	{
@@ -438,8 +417,7 @@ void CAIVarUpdateCallback::callback(const CFileDescription& fileDescription, NLM
 	}
 }
 
-
-NLMISC_CATEGORISED_COMMAND (ais, convertPersistentVarFiles, "Convert all old persistent var to the new system", "<no arg>")
+NLMISC_CATEGORISED_COMMAND(ais, convertPersistentVarFiles, "Convert all old persistent var to the new system", "<no arg>")
 {
 	// load all the legacy cfg files containing the persistent var and
 	// fill the new persistent var structure, then save the new persistent
@@ -447,11 +425,11 @@ NLMISC_CATEGORISED_COMMAND (ais, convertPersistentVarFiles, "Convert all old per
 
 	log.displayNL("Converting all local script data file from '%s'...", CAIScriptDataManager::getInstance()->dirname().c_str());
 	// get all the ai data files
-	vector<string>	files;
+	vector<string> files;
 	CPath::getPathContent(CAIScriptDataManager::getInstance()->dirname(), false, false, true, files);
 
 	log.displayNL("Found %u files", files.size());
-	for (uint i=0; i<files.size(); ++i)
+	for (uint i = 0; i < files.size(); ++i)
 	{
 		if (files[i].find(".ai_script_data") != string::npos)
 		{
@@ -463,13 +441,13 @@ NLMISC_CATEGORISED_COMMAND (ais, convertPersistentVarFiles, "Convert all old per
 			CConfigFile cfg;
 			cfg.load(files[i], false);
 
-			// parse all the 
-			for (uint j=0; j<cfg.getNumVar(); ++j)
+			// parse all the
+			for (uint j = 0; j < cfg.getNumVar(); ++j)
 			{
 				CConfigFile::CVar *var = cfg.getVar(j);
 
-				log.displayNL("  Adding var '%s' = '%s'", (filename+":"+var->Name).c_str(), var->asString(0).c_str());
-				CAIScriptDataManager::getInstance()->setVar(filename+":"+var->Name, var->asString(0));
+				log.displayNL("  Adding var '%s' = '%s'", (filename + ":" + var->Name).c_str(), var->asString(0).c_str());
+				CAIScriptDataManager::getInstance()->setVar(filename + ":" + var->Name, var->asString(0));
 			}
 		}
 		else
@@ -479,6 +457,6 @@ NLMISC_CATEGORISED_COMMAND (ais, convertPersistentVarFiles, "Convert all old per
 	}
 
 	// at next tick update, the AIS will write the changed var file
-	
+
 	return true;
 }

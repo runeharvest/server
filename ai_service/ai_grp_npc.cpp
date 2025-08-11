@@ -36,16 +36,18 @@ using namespace MULTI_LINE_FORMATER;
 
 using namespace NLMISC;
 using namespace std;
-using namespace	AITYPES;
+using namespace AITYPES;
 
 extern CVariable<uint32> DefaultNpcAggroDist;
 extern CVariable<float> DefaultEscortRange;
 
-static bool VerboseLog=false;
-#define LOG if (!VerboseLog) {} else nlinfo
+static bool VerboseLog = false;
+#define LOG              \
+	if (!VerboseLog) { } \
+	else nlinfo
 
 // 5 minute in ticks (10 Hz)
-uint32 DEFAULT_RESPAWN_DELAY = 5*60*10;
+uint32 DEFAULT_RESPAWN_DELAY = 5 * 60 * 10;
 
 //////////////////////////////////////////////////////////////////////////////
 // CSpawnGroupNpc                                                           //
@@ -54,15 +56,15 @@ uint32 DEFAULT_RESPAWN_DELAY = 5*60*10;
 uint32 CSpawnGroupNpc::_SlowUpdatePeriod = 10;
 vector<uint32> CSpawnGroupNpc::_SlowUpdateBuckets(_SlowUpdatePeriod);
 
-CSpawnGroupNpc::CSpawnGroupNpc(CPersistent<CSpawnGroup>& owner)
-: CSpawnGroup(owner)
-, _GroupInVision(false)
+CSpawnGroupNpc::CSpawnGroupNpc(CPersistent<CSpawnGroup> &owner)
+    : CSpawnGroup(owner)
+    , _GroupInVision(false)
 {
-	sint32 const randomVal = (sint32)CTimeInterface::gameCycle()-CAIS::rand32(20);
-	_LastUpdate = (randomVal>=0)?randomVal:CTimeInterface::gameCycle();
+	sint32 const randomVal = (sint32)CTimeInterface::gameCycle() - CAIS::rand32(20);
+	_LastUpdate = (randomVal >= 0) ? randomVal : CTimeInterface::gameCycle();
 	_LastBotUpdate = CTimeInterface::gameCycle();
 	activityProfile().setAIProfile(new CGrpProfileNormal(this));
-	_BotUpdateTimer.set((CAIS::rand32(40)+((intptr_t)this>>2))%20); // start with a random value.
+	_BotUpdateTimer.set((CAIS::rand32(40) + ((intptr_t)this >> 2)) % 20); // start with a random value.
 	resetSlowUpdateCycle();
 	_DespawnBotsWhenNoMoreHandleTimerActive = false;
 }
@@ -70,25 +72,25 @@ CSpawnGroupNpc::CSpawnGroupNpc(CPersistent<CSpawnGroup>& owner)
 void CSpawnGroupNpc::setSlowUpdatePeriod(uint32 ticks)
 {
 	// Check args
-	nlassert(ticks>0);
-	if (ticks==0) return;
+	nlassert(ticks > 0);
+	if (ticks == 0) return;
 	// Save ticks number
 	_SlowUpdatePeriod = ticks;
 	// Reset cycles buckets
 	_SlowUpdateBuckets.clear();
 	_SlowUpdateBuckets.resize(_SlowUpdatePeriod);
 	// For each group
-	FOREACH (itInstance, CCont<CAIInstance>, CAIS::instance().AIList())
+	FOREACH(itInstance, CCont<CAIInstance>, CAIS::instance().AIList())
 	{
-		FOREACH (itManager, CCont<CManager>, itInstance->managers())
+		FOREACH(itManager, CCont<CManager>, itInstance->managers())
 		{
-			FOREACH (itGroup, CCont<CGroup>, itManager->groups())
+			FOREACH(itGroup, CCont<CGroup>, itManager->groups())
 			{
 				// Find the spawn
-				CGroup* group = *itGroup;
-				CSpawnGroup* spawnGroup = group->getSpawnObj();
-				CSpawnGroupNpc* spawnGroupNpc = dynamic_cast<CSpawnGroupNpc*>(spawnGroup);
-				if (spawnGroupNpc!=NULL)
+				CGroup *group = *itGroup;
+				CSpawnGroup *spawnGroup = group->getSpawnObj();
+				CSpawnGroupNpc *spawnGroupNpc = dynamic_cast<CSpawnGroupNpc *>(spawnGroup);
+				if (spawnGroupNpc != NULL)
 					spawnGroupNpc->resetSlowUpdateCycle();
 			}
 		}
@@ -113,10 +115,10 @@ void CSpawnGroupNpc::resetSlowUpdateCycle()
 
 void CSpawnGroupNpc::displaySlowUpdateBuckets()
 {
-	std::vector<uint32>::iterator it, end=_SlowUpdateBuckets.end();
-	for (it = _SlowUpdateBuckets.begin(); it!=end; ++it)
+	std::vector<uint32>::iterator it, end = _SlowUpdateBuckets.end();
+	for (it = _SlowUpdateBuckets.begin(); it != end; ++it)
 	{
-		nlinfo("Bucket %d: %d", it-_SlowUpdateBuckets.begin(), *it);
+		nlinfo("Bucket %d: %d", it - _SlowUpdateBuckets.begin(), *it);
 	}
 }
 
@@ -135,11 +137,11 @@ void CSpawnGroupNpc::sendInfoToEGS() const
 {
 	FOREACHC(itBot, CCont<CBot>, bots())
 	{
-		CBot const* bot = *itBot;
+		CBot const *bot = *itBot;
 		if (!bot->isSpawned())
 			continue;
 		// :NOTE: As it can be called during CSpawnBotNpc dtor rely on dynamic cast to verify object is valid
-		CSpawnBotNpc const* spawn = dynamic_cast<CSpawnBotNpc const*>(bot->getSpawnObj());
+		CSpawnBotNpc const *spawn = dynamic_cast<CSpawnBotNpc const *>(bot->getSpawnObj());
 		if (spawn)
 			spawn->sendInfoToEGS();
 	}
@@ -148,12 +150,12 @@ void CSpawnGroupNpc::sendInfoToEGS() const
 void CSpawnGroupNpc::update()
 {
 	H_AUTO(GrpNpcUpdate);
-	
+
 	++AISStat::GrpTotalUpdCtr;
 	++AISStat::GrpNpcUpdCtr;
-	
-	uint32 const Dt = CTimeInterface::gameCycle()-_LastUpdate;
-	bool const inFight = activityProfile().getAIProfileType()==FIGHT_NORMAL;
+
+	uint32 const Dt = CTimeInterface::gameCycle() - _LastUpdate;
+	bool const inFight = activityProfile().getAIProfileType() == FIGHT_NORMAL;
 
 	uint32 updateTrigger; // in tick
 
@@ -162,7 +164,7 @@ void CSpawnGroupNpc::update()
 	{
 		updateTrigger = 0;
 	}
-	else if ( getPersistent().isRingGrp() )
+	else if (getPersistent().isRingGrp())
 	{
 		updateTrigger = 4;
 	}
@@ -174,30 +176,30 @@ void CSpawnGroupNpc::update()
 	{
 		updateTrigger = 30;
 	}
-	
-	bool const haveToUpdateGroupBehaviour = (Dt>=updateTrigger); // every second.
-	
+
+	bool const haveToUpdateGroupBehaviour = (Dt >= updateTrigger); // every second.
+
 	if (haveToUpdateGroupBehaviour)
 	{
 		H_AUTO(GrpNpcUpdateBehaviour);
 		// record the tick at which we ran this update (for future refference)
 		_LastUpdate = CTimeInterface::gameCycle();
-		
+
 		checkDespawn();
 		checkRespawn();
 		getPersistent().updateStateInstance();
 	}
-	
+
 	// bot update()s --------------------------------------------------
 	{
 		if (haveToUpdateGroupBehaviour)
 		{
 			H_AUTO(GrpNpcUpdateBots);
 			_GroupInVision = false;
-			
-			FOREACH(first,CCont<CBot>, bots())
+
+			FOREACH(first, CCont<CBot>, bots())
 			{
-				CSpawnBotNpc const* const bot = static_cast<CBotNpc*>(*first)->getSpawn();
+				CSpawnBotNpc const *const bot = static_cast<CBotNpc *>(*first)->getSpawn();
 				if (!bot)
 					continue;
 				if (simulateBug(3))
@@ -212,24 +214,24 @@ void CSpawnGroupNpc::update()
 				}
 				if (!bot->havePlayersAround())
 					continue;
-				
+
 				_GroupInVision = true;
 				break;
 			}
 		}
-		
+
 		// TODO : hack : remove this when the "can't reach and turn arround" debility is corrected
 		bool fastUpdate = _GroupInVision || inFight;
-		bool slowUpdate = (CTimeInterface::gameCycle()%_SlowUpdatePeriod)==_SlowUpdateCycle;
-		
+		bool slowUpdate = (CTimeInterface::gameCycle() % _SlowUpdatePeriod) == _SlowUpdateCycle;
+
 		if (fastUpdate || slowUpdate)
 		{
-			uint32 const botDt = CTimeInterface::gameCycle()-_LastBotUpdate;
+			uint32 const botDt = CTimeInterface::gameCycle() - _LastBotUpdate;
 			_LastBotUpdate = CTimeInterface::gameCycle();
-			
+
 			FOREACH(first, CCont<CBot>, bots())
 			{
-				CSpawnBotNpc* const bot = static_cast<CBotNpc*>(*first)->getSpawn();
+				CSpawnBotNpc *const bot = static_cast<CBotNpc *>(*first)->getSpawn();
 				if (bot && bot->isAlive())
 				{
 					H_AUTO(GrpNpcUpdateBotsUpdate);
@@ -239,13 +241,13 @@ void CSpawnGroupNpc::update()
 			_BotUpdateTimer.set(10);
 		}
 	}
-	
+
 	if (haveToUpdateGroupBehaviour)
-	{			
+	{
 		H_AUTO(GrpNpcUpdateGrpBehaviour);
 		if (!activityProfile().getAISpawnProfile().isNull()) // Check if we have a behaviour.
 			activityProfile().updateProfile(Dt); // If so, then update it !
-//		this->CBotAggroOwner::update(Dt);
+		//		this->CBotAggroOwner::update(Dt);
 	}
 
 	if (_DespawnBotsWhenNoMoreHandleTimerActive)
@@ -258,32 +260,32 @@ void CSpawnGroupNpc::update()
 	}
 }
 
-void CSpawnGroupNpc::stateChange(CAIState const* oldState, CAIState const* newState)
+void CSpawnGroupNpc::stateChange(CAIState const *oldState, CAIState const *newState)
 {
 	// Find changing group profiles.
 	{
 		setProfileParameters(getPersistent().profileParameters());
-		
-		IAIProfileFactory* moveProfile = newState->moveProfile();
-		IAIProfileFactory* actProfile = newState->activityProfile();
-		
+
+		IAIProfileFactory *moveProfile = newState->moveProfile();
+		IAIProfileFactory *actProfile = newState->activityProfile();
+
 		mergeProfileParameters(newState->profileParameters());
-		
+
 		FOREACHC(it, CCont<CAIStateProfile>, newState->profiles())
 		{
 			if (!it->testCompatibility(getPersistent()))
 				continue;
-			
-			if (it->moveProfile()!= RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
+
+			if (it->moveProfile() != RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
 				moveProfile = it->moveProfile();
-			
-			if (it->activityProfile()!=RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
+
+			if (it->activityProfile() != RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
 				actProfile = it->activityProfile();
-			
+
 			mergeProfileParameters(it->profileParameters());
 			break;
 		}
-		
+
 		breakable
 		{
 			if (oldState)
@@ -294,44 +296,44 @@ void CSpawnGroupNpc::stateChange(CAIState const* oldState, CAIState const* newSt
 					// need to backup the current profiles
 					_PunctualHoldActivityProfile = activityProfile();
 					_PunctualHoldMovingProfile = movingProfile();
-					
+
 					activityProfile() = CProfilePtr();
 					movingProfile() = CProfilePtr();
 					break;
 				}
-				
+
 				if (newState->isPositional() && !oldState->isPositional())
 				{
 					// end of punctual state
 					// need to restore the backuped profile
 					activityProfile() = _PunctualHoldActivityProfile;
 					movingProfile() = _PunctualHoldMovingProfile;
-					
+
 					_PunctualHoldActivityProfile = CProfilePtr();
 					_PunctualHoldMovingProfile = CProfilePtr();
-					
+
 					// resume the profiles
 					activityProfile().getAISpawnProfile()->resumeProfile();
 					movingProfile().getAISpawnProfile()->resumeProfile();
 					break;
 				}
 			}
-			
+
 			// normal behavior, transition from positionnal to positionnal state
-			if	(moveProfile!=RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
+			if (moveProfile != RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
 				setMoveProfileFromStateMachine(moveProfile);
-			
-			if	(actProfile!=RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
+
+			if (actProfile != RYAI_GET_FACTORY(CGrpProfileNoChangeFactory))
 				setActivityProfileFromStateMachine(actProfile);
-			
+
 			break;
 		}
 	}
 
 	// iterate through bots	changing their chat.
-	for (CCont<CBot>::iterator it=bots().begin(), itEnd=bots().end();it!=itEnd;++it)
+	for (CCont<CBot>::iterator it = bots().begin(), itEnd = bots().end(); it != itEnd; ++it)
 	{
-		CBotNpc	*const	botNpc=static_cast<CBotNpc *>(*it);
+		CBotNpc *const botNpc = static_cast<CBotNpc *>(*it);
 		if (!botNpc->isSpawned())
 			continue;
 		botNpc->getSpawn()->updateChat(newState);
@@ -342,7 +344,7 @@ void CSpawnGroupNpc::spawnBots()
 {
 	FOREACH(itBot, CCont<CBot>, bots())
 	{
-		CBot* bot = *itBot;
+		CBot *bot = *itBot;
 		if (!bot->isSpawned())
 			bot->spawn();
 	}
@@ -352,11 +354,11 @@ void CSpawnGroupNpc::despawnBots(bool immediately)
 {
 	FOREACH(itBot, CCont<CBot>, bots())
 	{
-		CBot* const bot = *itBot;
+		CBot *const bot = *itBot;
 		if (!bot->isSpawned())
 			continue;
-		
-		if (TheDataset.getOnlineTimestamp( bot->getSpawnObj()->dataSetRow()) >= CTickEventHandler::getGameCycle())
+
+		if (TheDataset.getOnlineTimestamp(bot->getSpawnObj()->dataSetRow()) >= CTickEventHandler::getGameCycle())
 			nlwarning("Bots %s:%s spawn/despawn in the same tick ! despawn ignored", getPersistent().getName().c_str(), bot->getName().c_str());
 		else
 			bot->despawnBot();
@@ -365,53 +367,53 @@ void CSpawnGroupNpc::despawnBots(bool immediately)
 		getPersistent().getOwner()->groups().removeChildByIndex(getPersistent().getChildIndex());
 }
 
-CGroupNpc& CSpawnGroupNpc::getPersistent() const
+CGroupNpc &CSpawnGroupNpc::getPersistent() const
 {
-	return static_cast<CGroupNpc&>(CSpawnGroup::getPersistent());
+	return static_cast<CGroupNpc &>(CSpawnGroup::getPersistent());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // CGroupNpc                                                                //
 //////////////////////////////////////////////////////////////////////////////
 
-CGroupNpc::CGroupNpc(CMgrNpc* mgr, CAIAliasDescriptionNode* aliasTree, RYAI_MAP_CRUNCH::TAStarFlag denyFlags)
-: CGroup(mgr, denyFlags, aliasTree)
-, CDynGrpBase()
-, CPersistentStateInstance(*mgr->getStateMachine())
+CGroupNpc::CGroupNpc(CMgrNpc *mgr, CAIAliasDescriptionNode *aliasTree, RYAI_MAP_CRUNCH::TAStarFlag denyFlags)
+    : CGroup(mgr, denyFlags, aliasTree)
+    , CDynGrpBase()
+    , CPersistentStateInstance(*mgr->getStateMachine())
 {
 	_BotsAreNamed = true;
-	
+
 	_PlayerAttackable = false;
 	_BotAttackable = false;
 	_AggroDist = 0;
 	_RingGrp = false;
 }
 
-CGroupNpc::CGroupNpc(CMgrNpc* mgr, uint32 alias, std::string const& name, RYAI_MAP_CRUNCH::TAStarFlag denyFlags)
-: CGroup(mgr, denyFlags, alias, name)
-, CDynGrpBase()
-, CPersistentStateInstance(*mgr->getStateMachine())
+CGroupNpc::CGroupNpc(CMgrNpc *mgr, uint32 alias, std::string const &name, RYAI_MAP_CRUNCH::TAStarFlag denyFlags)
+    : CGroup(mgr, denyFlags, alias, name)
+    , CDynGrpBase()
+    , CPersistentStateInstance(*mgr->getStateMachine())
 {
 	_BotsAreNamed = true;
-	
+
 	_PlayerAttackable = false;
 	_BotAttackable = false;
 	_AggroDist = 0;
 }
 
-CGroupNpc::~CGroupNpc() 
+CGroupNpc::~CGroupNpc()
 {
 	// avoid re-deletion by despawn
 	_AutoDestroy = false;
 	if (isSpawned()) // to avoid bad CDbgPtr link interpretation
 		despawnGrp();
-	
+
 	// clear all persistent state instance
 	while (!_PSIChilds.empty())
 	{
 		_PSIChilds.back()->setParentStateInstance(NULL);
 	}
-	
+
 	_PSIChilds.clear();
 }
 
@@ -424,73 +426,72 @@ std::vector<std::string> CGroupNpc::getMultiLineInfoString() const
 {
 	std::vector<std::string> container;
 	std::vector<std::string> strings;
-	
+
 	pushTitle(container, "CGroupNpc");
 	strings = CGroup::getMultiLineInfoString();
 	FOREACHC(itString, std::vector<std::string>, strings)
-		pushEntry(container, *itString);
-	pushEntry(container, "faction=" + (faction().empty()?string("<none>"):faction().toString()));
-	pushEntry(container, "friends=" + (friendFaction().empty()?string("<none>"):friendFaction().toString()));
-	pushEntry(container, "ennemies=" + (ennemyFaction().empty()?string("<none>"):ennemyFaction().toString()));
-	pushEntry(container, NLMISC::toString("attackable: player=%s bot=%s", _PlayerAttackable?"yes":"no", _BotAttackable?"yes":"no"));
-	pushEntry(container, "state=" + (getState()?getState()->getName():string("<null>")));
+	pushEntry(container, *itString);
+	pushEntry(container, "faction=" + (faction().empty() ? string("<none>") : faction().toString()));
+	pushEntry(container, "friends=" + (friendFaction().empty() ? string("<none>") : friendFaction().toString()));
+	pushEntry(container, "ennemies=" + (ennemyFaction().empty() ? string("<none>") : ennemyFaction().toString()));
+	pushEntry(container, NLMISC::toString("attackable: player=%s bot=%s", _PlayerAttackable ? "yes" : "no", _BotAttackable ? "yes" : "no"));
+	pushEntry(container, "state=" + (getState() ? getState()->getName() : string("<null>")));
 	pushFooter(container);
-	
+
 	return container;
 }
 
-CMgrNpc& CGroupNpc::mgr() const
+CMgrNpc &CGroupNpc::mgr() const
 {
-	return *static_cast<CMgrNpc*>(getOwner());
+	return *static_cast<CMgrNpc *>(getOwner());
 }
 
-void CGroupNpc::updateDependencies(CAIAliasDescriptionNode const& aliasTree, CAliasTreeOwner* aliasTreeOwner)
-{	
-	switch(aliasTree.getType())
-	{		
-		case AITypeEvent:
-		{
-			CAIEventReaction* const eventPtr = NLMISC::safe_cast<CAIEventReaction*>(mgr().getStateMachine()->eventReactions().getChildByAlias(aliasTree.getAlias()));
-			nlassert(eventPtr);
-			if (!eventPtr)
-				break;
-			eventPtr->setType(CAIEventReaction::FixedGroup);
-			eventPtr->setGroup(getAlias());
+void CGroupNpc::updateDependencies(CAIAliasDescriptionNode const &aliasTree, CAliasTreeOwner *aliasTreeOwner)
+{
+	switch (aliasTree.getType())
+	{
+	case AITypeEvent: {
+		CAIEventReaction *const eventPtr = NLMISC::safe_cast<CAIEventReaction *>(mgr().getStateMachine()->eventReactions().getChildByAlias(aliasTree.getAlias()));
+		nlassert(eventPtr);
+		if (!eventPtr)
 			break;
-		}
+		eventPtr->setType(CAIEventReaction::FixedGroup);
+		eventPtr->setGroup(getAlias());
+		break;
+	}
 	}
 }
 
-IAliasCont* CGroupNpc::getAliasCont(TAIType type)
+IAliasCont *CGroupNpc::getAliasCont(TAIType type)
 {
-	switch(type)
+	switch (type)
 	{
 	case AITypeBot:
 		return &_Bots;
 
-	case AITypeFolder:		//	Nothing ..
+	case AITypeFolder: //	Nothing ..
 	default:
 		return NULL;
 	}
 }
 
-CAliasTreeOwner* CGroupNpc::createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree)
+CAliasTreeOwner *CGroupNpc::createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree)
 {
-	CAliasTreeOwner* child = NULL;
-	
+	CAliasTreeOwner *child = NULL;
+
 	switch (aliasTree->getType())
 	{
 	case AITypeOutpostBuilding:
 	case AITypeBot:
 		child = new CBotNpc(this, aliasTree);
 		break;
-		
+
 	case AITypeFolder:
 	default:
 		break;
 	}
-	
-	if (child!=NULL)
+
+	if (child != NULL)
 		cont->addAliasChild(child);
 	return (child);
 }
@@ -500,12 +501,12 @@ CSmartPtr<CSpawnGroup> CGroupNpc::createSpawnGroup()
 	return new CSpawnGroupNpc(*this);
 }
 
-void CGroupNpc::serviceEvent (const CServiceEvent &info)
+void CGroupNpc::serviceEvent(const CServiceEvent &info)
 {
 	CGroup::serviceEvent(info);
-	
+
 	// If the EGS crash
-	if ( (info.getServiceName() == "EGS") && (info.getEventType() == CServiceEvent::SERVICE_DOWN) )
+	if ((info.getServiceName() == "EGS") && (info.getEventType() == CServiceEvent::SERVICE_DOWN))
 	{
 		// If the Group of NPC has handles on itself
 		if (!_Handles.empty())
@@ -527,32 +528,30 @@ void CGroupNpc::serviceEvent (const CServiceEvent &info)
 	{
 		processStateEvent(getEventContainer().EventEGSUp);
 	}
-	
 }
 
-
-bool	CGroupNpc::spawn	()
-{		
+bool CGroupNpc::spawn()
+{
 	if (CGroup::spawn())
 	{
-		setStartState(getStartState());	//	stateInstance.
-		
+		setStartState(getStartState()); //	stateInstance.
+
 		// inform the EGS of our existence - simulate connection of EGS
-		serviceEvent	(CServiceEvent(NLNET::TServiceId(0),std::string("EGS"),CServiceEvent::SERVICE_UP));
-		
+		serviceEvent(CServiceEvent(NLNET::TServiceId(0), std::string("EGS"), CServiceEvent::SERVICE_UP));
+
 		if (isAutoSpawn())
 		{
-			CCont<CBot >::iterator first(bots().begin()), last(bots().end());
+			CCont<CBot>::iterator first(bots().begin()), last(bots().end());
 			for (; first != last; ++first)
 			{
-				CBotNpc *bot = static_cast<CBotNpc*>(*first);
+				CBotNpc *bot = static_cast<CBotNpc *>(*first);
 				// ok, we can spawn this bot
 				bot->spawn();
 			}
 		}
-		return	true; 		
+		return true;
 	}
-	return	false;
+	return false;
 }
 
 void CGroupNpc::despawnGrp()
@@ -568,12 +567,12 @@ void CGroupNpc::clearParameters()
 	_AggroDist = DefaultNpcAggroDist;
 	setEscortTeamId(CTEAM::InvalidTeamId);
 	setEscortRange(DefaultEscortRange);
-	respawnTime() = (uint32) DEFAULT_RESPAWN_DELAY;
-	despawnTime() = (uint32) DEFAULT_RESPAWN_DELAY / 4;
+	respawnTime() = (uint32)DEFAULT_RESPAWN_DELAY;
+	despawnTime() = (uint32)DEFAULT_RESPAWN_DELAY / 4;
 }
 
 // Parse a paremeter for this group.
-void CGroupNpc::addParameter(std::string const& parameter)
+void CGroupNpc::addParameter(std::string const &parameter)
 {
 	static std::string ATTACKABLE("attackable");
 	static std::string PLAYER_ATTACKABLE("player_attackable");
@@ -585,13 +584,13 @@ void CGroupNpc::addParameter(std::string const& parameter)
 	static std::string DESPAWN_TIME("despawn time");
 	static std::string RING("ring");
 	static std::string DENIED_ASTAR_FLAGS("denied_astar_flags");
-	
+
 	std::string key, tail;
-	
+
 	// force lowercase
 	std::string p = NLMISC::toLowerAscii(parameter);
 	AI_SHARE::stringToKeywordAndTail(p, key, tail);
-	
+
 	breakable
 	{
 		if (key == RING)
@@ -604,19 +603,19 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			_BotAttackable = true;
 			break;
 		}
-		
+
 		if (key == ATTACKABLE || key == PLAYER_ATTACKABLE)
 		{
-			// the bots are attackable ! 
+			// the bots are attackable !
 			_PlayerAttackable = true;
-			if (!IsRingShard) // In Ring shard, BotAttackable means attackable by bot not vulnerable 
-			{			
+			if (!IsRingShard) // In Ring shard, BotAttackable means attackable by bot not vulnerable
+			{
 				// attackable implie vulnerable!
 				_BotAttackable = true;
 			}
 			break;
 		}
-		
+
 		if (key == BADGUY)
 		{
 			// the bots are bad guys! they will attack players in their aggro range.
@@ -640,7 +639,6 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			if (!tail.empty())
 			{
 				NLMISC::fromString(tail, _AggroDist);
-
 			}
 			else
 			{
@@ -648,7 +646,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			}
 			break;
 		}
-		
+
 		if (key == ESCORT_RANGE)
 		{
 			if (!tail.empty())
@@ -663,17 +661,17 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			}
 			break;
 		}
-		
+
 		if (key == RESPAWN_TIME)
 		{
 			if (!tail.empty())
 			{
-				uint32	respawntime = NLMISC::atoui(tail.c_str());
+				uint32 respawntime = NLMISC::atoui(tail.c_str());
 				// TODO:kxu: fix CAITimer!
 				if (respawntime > 0x7fffffff)
 					respawntime = 0x7fffffff; // AI timers do not treat properly delta times greater than the max signed int
 				LOG("Setting respawn time to %u", respawntime);
-				respawnTime()=respawntime;
+				respawnTime() = respawntime;
 			}
 			else
 			{
@@ -681,7 +679,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			}
 			break;
 		}
-		
+
 		if (key == DESPAWN_TIME)
 		{
 			if (!tail.empty())
@@ -691,7 +689,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 				if (despawntime > 0x7fffffff)
 					despawntime = 0x7fffffff; // AI timers do not treat properly delta times greater than the max signed int
 				LOG("Setting despawn time to %u", despawntime);
-				despawnTime()=despawntime;
+				despawnTime() = despawntime;
 			}
 			else
 			{
@@ -699,7 +697,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			}
 			break;
 		}
-		
+
 		if (key == DENIED_ASTAR_FLAGS)
 		{
 			if (!tail.empty())
@@ -709,7 +707,7 @@ void CGroupNpc::addParameter(std::string const& parameter)
 				NLMISC::splitString(tail, "|", sFlags);
 				FOREACHC(it, vector<string>, sFlags)
 				{
-					flags = RYAI_MAP_CRUNCH::TAStarFlag( flags | RYAI_MAP_CRUNCH::toAStarFlag(*it) );
+					flags = RYAI_MAP_CRUNCH::TAStarFlag(flags | RYAI_MAP_CRUNCH::toAStarFlag(*it));
 				}
 
 				LOG("Setting denied AStar flags to (%s) = %u", tail.c_str(), flags);
@@ -722,9 +720,9 @@ void CGroupNpc::addParameter(std::string const& parameter)
 			break;
 		}
 
-		if	(parameter.empty())
+		if (parameter.empty())
 			break;
-		
+
 		nlwarning("CAIBotNpc::addParameter unknown parameter '%s'", parameter.c_str());
 	}
 }
@@ -736,17 +734,17 @@ void CGroupNpc::addHpUpTrigger(float threshold, int eventId)
 
 void CGroupNpc::delHpUpTrigger(float threshold, int eventId)
 {
-	CGroupNpc::THpTriggerList& hpTriggers = _hpUpTriggers;
+	CGroupNpc::THpTriggerList &hpTriggers = _hpUpTriggers;
 	CGroupNpc::THpTriggerList::iterator first, last, trigger;
 	first = hpTriggers.lower_bound(threshold);
 	last = hpTriggers.upper_bound(threshold);
-	
-	for (; first!=last; ++first)
+
+	for (; first != last; ++first)
 	{
-		if (first->second==eventId)
+		if (first->second == eventId)
 			break;
 	}
-	if (first!=last)
+	if (first != last)
 		hpTriggers.erase(first);
 }
 
@@ -757,17 +755,17 @@ void CGroupNpc::addHpDownTrigger(float threshold, int eventId)
 
 void CGroupNpc::delHpDownTrigger(float threshold, int eventId)
 {
-	CGroupNpc::THpTriggerList& hpTriggers = _hpDownTriggers;
+	CGroupNpc::THpTriggerList &hpTriggers = _hpDownTriggers;
 	CGroupNpc::THpTriggerList::iterator first, last, trigger;
 	first = hpTriggers.lower_bound(threshold);
 	last = hpTriggers.upper_bound(threshold);
-	
-	for (; first!=last; ++first)
+
+	for (; first != last; ++first)
 	{
-		if (first->second==eventId)
+		if (first->second == eventId)
 			break;
 	}
-	if (first!=last)
+	if (first != last)
 		hpTriggers.erase(first);
 }
 
@@ -778,17 +776,17 @@ void CGroupNpc::addHpUpTrigger(float threshold, std::string cbFunc)
 
 void CGroupNpc::delHpUpTrigger(float threshold, std::string cbFunc)
 {
-	CGroupNpc::THpTriggerList2& hpTriggers = _hpUpTriggers2;
+	CGroupNpc::THpTriggerList2 &hpTriggers = _hpUpTriggers2;
 	CGroupNpc::THpTriggerList2::iterator first, last, trigger;
 	first = hpTriggers.lower_bound(threshold);
 	last = hpTriggers.upper_bound(threshold);
-	
-	for (; first!=last; ++first)
+
+	for (; first != last; ++first)
 	{
-		if (first->second==cbFunc)
+		if (first->second == cbFunc)
 			break;
 	}
-	if (first!=last)
+	if (first != last)
 		hpTriggers.erase(first);
 }
 
@@ -799,33 +797,33 @@ void CGroupNpc::addHpDownTrigger(float threshold, std::string cbFunc)
 
 void CGroupNpc::delHpDownTrigger(float threshold, std::string cbFunc)
 {
-	CGroupNpc::THpTriggerList2& hpTriggers = _hpDownTriggers2;
+	CGroupNpc::THpTriggerList2 &hpTriggers = _hpDownTriggers2;
 	CGroupNpc::THpTriggerList2::iterator first, last, trigger;
 	first = hpTriggers.lower_bound(threshold);
 	last = hpTriggers.upper_bound(threshold);
-	
-	for (; first!=last; ++first)
+
+	for (; first != last; ++first)
 	{
-		if (first->second==cbFunc)
+		if (first->second == cbFunc)
 			break;
 	}
-	if (first!=last)
+	if (first != last)
 		hpTriggers.erase(first);
 }
 
 bool CGroupNpc::haveHpTriggers()
 {
-	return (_hpUpTriggers.size()+_hpDownTriggers.size()+_hpUpTriggers2.size()+_hpDownTriggers2.size())>0;
+	return (_hpUpTriggers.size() + _hpDownTriggers.size() + _hpUpTriggers2.size() + _hpDownTriggers2.size()) > 0;
 }
 
 void CGroupNpc::hpTriggerCb(float oldVal, float newVal)
 {
-	if (newVal>oldVal)
+	if (newVal > oldVal)
 	{
 		CGroupNpc::THpTriggerList::const_iterator first, last, trigger, triggerProcessed;
 		first = _hpUpTriggers.upper_bound(oldVal);
 		last = _hpUpTriggers.upper_bound(newVal);
-		for (trigger=first; trigger!=last;)
+		for (trigger = first; trigger != last;)
 		{
 			triggerProcessed = trigger;
 			++trigger;
@@ -834,19 +832,19 @@ void CGroupNpc::hpTriggerCb(float oldVal, float newVal)
 		CGroupNpc::THpTriggerList2::const_iterator first2, last2, trigger2, triggerProcessed2;
 		first2 = _hpUpTriggers2.upper_bound(oldVal);
 		last2 = _hpUpTriggers2.upper_bound(newVal);
-		for (trigger2=first2; trigger2!=last2;)
+		for (trigger2 = first2; trigger2 != last2;)
 		{
 			triggerProcessed2 = trigger2;
 			++trigger2;
 			callScriptCallBack(this, NLMISC::CStringMapper::map(triggerProcessed2->second));
 		}
 	}
-	if (newVal<oldVal)
+	if (newVal < oldVal)
 	{
 		CGroupNpc::THpTriggerList::const_iterator first, last, trigger, triggerProcessed;
 		first = _hpDownTriggers.lower_bound(newVal);
 		last = _hpDownTriggers.lower_bound(oldVal);
-		for (trigger=first; trigger!=last;)
+		for (trigger = first; trigger != last;)
 		{
 			triggerProcessed = trigger;
 			++trigger;
@@ -855,7 +853,7 @@ void CGroupNpc::hpTriggerCb(float oldVal, float newVal)
 		CGroupNpc::THpTriggerList2::const_iterator first2, last2, trigger2, triggerProcessed2;
 		first2 = _hpDownTriggers2.lower_bound(newVal);
 		last2 = _hpDownTriggers2.lower_bound(oldVal);
-		for (trigger2=first2; trigger2!=last2;)
+		for (trigger2 = first2; trigger2 != last2;)
 		{
 			triggerProcessed2 = trigger2;
 			++trigger2;
@@ -864,20 +862,20 @@ void CGroupNpc::hpTriggerCb(float oldVal, float newVal)
 	}
 }
 
-void CGroupNpc::addNamedEntityListener(std::string const& name, std::string const& prop, int event)
+void CGroupNpc::addNamedEntityListener(std::string const &name, std::string const &prop, int event)
 {
 	_namedEntityListeners.insert(std::make_pair(std::make_pair(name, prop), event));
 	CNamedEntityManager::getInstance()->get(name).addListenerGroup(prop, this);
 }
 
-void CGroupNpc::delNamedEntityListener(std::string const& name, std::string const& prop, int event)
+void CGroupNpc::delNamedEntityListener(std::string const &name, std::string const &prop, int event)
 {
 	TNamedEntityListenerList::iterator first, last, listener;
 	listener = _namedEntityListeners.lower_bound(std::make_pair(name, prop));
 	last = _namedEntityListeners.upper_bound(std::make_pair(name, prop));
-	while (listener!=last)
+	while (listener != last)
 	{
-		if (listener->second==event)
+		if (listener->second == event)
 		{
 			_namedEntityListeners.erase(listener);
 			CNamedEntityManager::getInstance()->get(name).delListenerGroup(prop, this);
@@ -887,20 +885,20 @@ void CGroupNpc::delNamedEntityListener(std::string const& name, std::string cons
 	}
 }
 
-void CGroupNpc::addNamedEntityListener(std::string const& name, std::string const& prop, std::string functionName)
+void CGroupNpc::addNamedEntityListener(std::string const &name, std::string const &prop, std::string functionName)
 {
 	_namedEntityListeners2.insert(std::make_pair(std::make_pair(name, prop), functionName));
 	CNamedEntityManager::getInstance()->get(name).addListenerGroup(prop, this);
 }
 
-void CGroupNpc::delNamedEntityListener(std::string const& name, std::string const& prop, std::string functionName)
+void CGroupNpc::delNamedEntityListener(std::string const &name, std::string const &prop, std::string functionName)
 {
 	TNamedEntityListenerList2::iterator first, last, listener;
 	listener = _namedEntityListeners2.lower_bound(std::make_pair(name, prop));
 	last = _namedEntityListeners2.upper_bound(std::make_pair(name, prop));
-	while (listener!=last)
+	while (listener != last)
 	{
-		if (listener->second==functionName)
+		if (listener->second == functionName)
 		{
 			_namedEntityListeners2.erase(listener);
 			CNamedEntityManager::getInstance()->get(name).delListenerGroup(prop, this);
@@ -910,12 +908,12 @@ void CGroupNpc::delNamedEntityListener(std::string const& name, std::string cons
 	}
 }
 
-void CGroupNpc::namedEntityListenerCb(std::string const& name, std::string const& prop)
+void CGroupNpc::namedEntityListenerCb(std::string const &name, std::string const &prop)
 {
 	TNamedEntityListenerList::iterator first, last, listener;
 	first = _namedEntityListeners.lower_bound(std::make_pair(name, prop));
 	last = _namedEntityListeners.upper_bound(std::make_pair(name, prop));
-	for (listener=first; listener!=last; ++listener)
+	for (listener = first; listener != last; ++listener)
 	{
 		processStateEvent(getEventContainer().EventUserEvent[listener->second]);
 	}
@@ -923,9 +921,9 @@ void CGroupNpc::namedEntityListenerCb(std::string const& name, std::string const
 	first2 = _namedEntityListeners2.lower_bound(std::make_pair(name, prop));
 	last2 = _namedEntityListeners2.upper_bound(std::make_pair(name, prop));
 	std::queue<NLMISC::TStringId> listeners;
-	for (listener2=first2; listener2!=last2; ++listener2)
+	for (listener2 = first2; listener2 != last2; ++listener2)
 		listeners.push(NLMISC::CStringMapper::map(listener2->second));
-	while(!listeners.empty())
+	while (!listeners.empty())
 	{
 		callScriptCallBack(this, listeners.front());
 		listeners.pop();
@@ -944,12 +942,12 @@ void CGroupNpc::addHandle(TDataSetRow playerRowId, uint32 missionAlias, uint32 D
 	{
 		_AutoSpawnWhenNoMoreHandle = isAutoSpawn();
 	}
-	
+
 	setAutoSpawn(true);
 	// There is always a spawned object for group
 	if (getSpawnObj() != NULL)
 	{
-		if (! getSpawnObj()->isGroupAlive() ) // if no bots spawned
+		if (!getSpawnObj()->isGroupAlive()) // if no bots spawned
 		{
 			getSpawnObj()->spawnBots();
 		}
@@ -959,7 +957,7 @@ void CGroupNpc::addHandle(TDataSetRow playerRowId, uint32 missionAlias, uint32 D
 	SHandle h;
 	h.MissionAlias = missionAlias;
 	h.PlayerRowId = playerRowId;
-	
+
 	set<SHandle>::const_iterator it = _Handles.find(h);
 
 	if (it != _Handles.end())
@@ -1024,17 +1022,17 @@ void CGroupNpc::delHandle(TDataSetRow playerRowId, uint32 missionAlias)
 //--------------------------------------------------------------------
 // the default display()
 //--------------------------------------------------------------------
-std::string	CSpawnGroupNpc::buildDebugString(uint idx) const
+std::string CSpawnGroupNpc::buildDebugString(uint idx) const
 {
 	if (idx == 0)
 		return "No debug info";
 	return std::string();
 }
 
-std::string	CGroupNpc::buildDebugString(uint idx) const
+std::string CGroupNpc::buildDebugString(uint idx) const
 {
-	
-	switch(idx)
+
+	switch (idx)
 	{
 	case 0: return "-- CGroupNpc -----------------------------";
 	case 1: {
@@ -1049,38 +1047,38 @@ std::string	CGroupNpc::buildDebugString(uint idx) const
 		else
 		{
 			s += "id=" + getIndexString();
-			s += " alias="+getAliasString();
+			s += " alias=" + getAliasString();
 			s += " info='" + getSpawnObj()->buildDebugString(0) + "'";
-			s += " name="+getName();
+			s += " name=" + getName();
 		}
 		return s;
 	}
 	case 2:
 		return NLMISC::toString(": %s :", getAliasNode()->getName().c_str()) + buidStateInstanceDebugString();
 	case 3:
-		return	NLMISC::toString(" User Timers: %s %s %s %s",
-			userTimer(0).toString().c_str(),
-			userTimer(1).toString().c_str(),
-			userTimer(2).toString().c_str(),
-			userTimer(3).toString().c_str());
+		return NLMISC::toString(" User Timers: %s %s %s %s",
+		    userTimer(0).toString().c_str(),
+		    userTimer(1).toString().c_str(),
+		    userTimer(2).toString().c_str(),
+		    userTimer(3).toString().c_str());
 	case 4:
 		if (getEscortTeamId() != CTEAM::InvalidTeamId)
-			return	NLMISC::toString(" Escorted by team %u", getEscortTeamId());
+			return NLMISC::toString(" Escorted by team %u", getEscortTeamId());
 		else
-			return	std::string(" Not escorted");
+			return std::string(" Not escorted");
 	case 5: return "----------------------------------------";
 	}
-	return	std::string();
+	return std::string();
 }
 
-void CGroupNpc::display(CStringWriter	&stringWriter) const
+void CGroupNpc::display(CStringWriter &stringWriter) const
 {
 #ifdef NL_DEBUG
 	nlstopex(("not implemented"));
 #endif
 }
 
-CAIS::CCounter& CGroupNpc::getSpawnCounter()
+CAIS::CCounter &CGroupNpc::getSpawnCounter()
 {
 	return CAIS::instance()._NpcBotCounter;
 }
@@ -1100,7 +1098,7 @@ void CGroupNpc::setColour(uint8 colour)
 {
 	FOREACH(itBot, CCont<CBot>, bots())
 	{
-		CBotNpc* bot = static_cast<CBotNpc*>(*itBot);
+		CBotNpc *bot = static_cast<CBotNpc *>(*itBot);
 		if (bot)
 			bot->setColour(colour);
 	}
@@ -1110,7 +1108,7 @@ void CGroupNpc::setOutpostSide(OUTPOSTENUMS::TPVPSide side)
 {
 	FOREACH(itBot, CCont<CBot>, bots())
 	{
-		CBotNpc* bot = static_cast<CBotNpc*>(*itBot);
+		CBotNpc *bot = static_cast<CBotNpc *>(*itBot);
 		if (bot)
 			bot->setOutpostSide(side);
 	}
@@ -1122,7 +1120,7 @@ void CGroupNpc::setOutpostFactions(OUTPOSTENUMS::TPVPSide side)
 	if (side == OUTPOSTENUMS::OutpostOwner)
 	{
 		// Bots factions
-		faction      ().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
+		faction().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
 		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
 		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
 		// Players faction
@@ -1131,7 +1129,7 @@ void CGroupNpc::setOutpostFactions(OUTPOSTENUMS::TPVPSide side)
 	if (side == OUTPOSTENUMS::OutpostAttacker)
 	{
 		// Bots factions
-		faction      ().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
+		faction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
 		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
 		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
 		// Players faction
@@ -1158,16 +1156,16 @@ void CGroupNpc::setFactionAttackableBelow(std::string faction, sint32 threshold,
 bool CGroupNpc::isFactionAttackable(std::string faction, sint32 fame)
 {
 	TFactionAttackableSet::const_iterator it, itEnd;
-	for (it=_FactionAttackableAbove.begin(), itEnd=_FactionAttackableAbove.end(); it!=itEnd; ++it)
-		if (faction==it->first && fame>it->second)
+	for (it = _FactionAttackableAbove.begin(), itEnd = _FactionAttackableAbove.end(); it != itEnd; ++it)
+		if (faction == it->first && fame > it->second)
 			return true;
-	for (it=_FactionAttackableBelow.begin(), itEnd=_FactionAttackableBelow.end(); it!=itEnd; ++it)
-		if (faction==it->first && fame<it->second)
+	for (it = _FactionAttackableBelow.begin(), itEnd = _FactionAttackableBelow.end(); it != itEnd; ++it)
+		if (faction == it->first && fame < it->second)
 			return true;
 	return false;
 }
 
-void CGroupNpc::stateChange(CAIState const* oldState, CAIState const* newState)
+void CGroupNpc::stateChange(CAIState const *oldState, CAIState const *newState)
 {
 	if (isSpawned())
 		getSpawnObj()->stateChange(oldState, newState);
@@ -1175,7 +1173,7 @@ void CGroupNpc::stateChange(CAIState const* oldState, CAIState const* newState)
 
 void CGroupNpc::setEvent(uint eventId)
 {
-	nlassert(eventId<10);
+	nlassert(eventId < 10);
 	if (eventId >= 10) return;
 	processStateEvent(getEventContainer().EventUserEvent[eventId]);
 }
@@ -1188,27 +1186,27 @@ void CGroupNpc::setEvent(uint eventId)
 // Control over verbose nature of logging
 //---------------------------------------------------------------------------------------
 
-NLMISC_COMMAND(verboseNPCGrp,"Turn on or off or check the state of verbose npc group logging","")
+NLMISC_COMMAND(verboseNPCGrp, "Turn on or off or check the state of verbose npc group logging", "")
 {
-	if(args.size()>1)
+	if (args.size() > 1)
 		return false;
-	
-	if(args.size()==1)
-		StrToBool	(VerboseLog, args[0]);
-	
-	nlinfo("VerboseLogging is %s",VerboseLog?"ON":"OFF");
+
+	if (args.size() == 1)
+		StrToBool(VerboseLog, args[0]);
+
+	nlinfo("VerboseLogging is %s", VerboseLog ? "ON" : "OFF");
 	return true;
 }
 
-NLMISC_COMMAND(NpcGroupSlowUpdatePeriod, "Slow update period of the NPC groups","[<period_ticks>]")
+NLMISC_COMMAND(NpcGroupSlowUpdatePeriod, "Slow update period of the NPC groups", "[<period_ticks>]")
 {
-	if (args.size()==0 || args.size()==1)
+	if (args.size() == 0 || args.size() == 1)
 	{
-		if (args.size()==1)
+		if (args.size() == 1)
 		{
 			uint32 ticks;
 			NLMISC::fromString(args[0], ticks);
-			if (ticks>0)
+			if (ticks > 0)
 				CSpawnGroupNpc::setSlowUpdatePeriod(ticks);
 			else
 				return false;

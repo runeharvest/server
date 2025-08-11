@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #ifndef AI_SPIRE_H
 #define AI_SPIRE_H
 /*
@@ -80,7 +77,7 @@ extern NLMISC::CLog SpireDbgLog, SpireInfLog, SpireWrnLog, SpireErrLog;
 
 class CSpire
 : public NLMISC::CDbgRefCount<CSpire>
-, public CAliasChild<CContinent> 
+, public CAliasChild<CContinent>
 , public NLMISC::CRefCount
 , public CAliasTreeRoot
 , public CPlaceOwner
@@ -88,160 +85,160 @@ class CSpire
 {
 public:
 
-	typedef std::map< TAIAlias, NLMISC::CSmartPtr<CGroupDesc<CSpireSquadFamily> > > CSquadLinks;
+    typedef std::map< TAIAlias, NLMISC::CSmartPtr<CGroupDesc<CSpireSquadFamily> > > CSquadLinks;
 
-	/// Return the spire corresponding to the alias, or NULL if not found (with a nlwarning)
-	static CSpire* getSpireByAlias(TAIAlias spireAlias);
+    /// Return the spire corresponding to the alias, or NULL if not found (with a nlwarning)
+    static CSpire* getSpireByAlias(TAIAlias spireAlias);
 
-	CSpire(CContinent* owner, uint32 alias, std::string const& name, std::string const& filename);
-	virtual ~CSpire();
-	
-	/// @name CChild implementation
-	//@{
-	virtual std::string getIndexString() const;
-	virtual std::string	getOneLineInfoString() const;
+    CSpire(CContinent* owner, uint32 alias, std::string const& name, std::string const& filename);
+    virtual ~CSpire();
+
+    /// @name CChild implementation
+    //@{
+    virtual std::string getIndexString() const;
+    virtual std::string	getOneLineInfoString() const;
 //	virtual std::vector<std::string> getMultiLineInfoString() const;
-	virtual std::string getFullName() const;
-	//	virtual std::string getName() const;
-	//@}
-	
-	/// @name IManagerParent implementation
-	//@{
-	virtual CAIInstance* getAIInstance() const;
-	virtual CCellZone* getCellZone() { return NULL; }
+    virtual std::string getFullName() const;
+    //	virtual std::string getName() const;
+    //@}
+
+    /// @name IManagerParent implementation
+    //@{
+    virtual CAIInstance* getAIInstance() const;
+    virtual CCellZone* getCellZone() { return NULL; }
 //	virtual std::string getIndexString() const = 0;
-	virtual std::string getManagerIndexString(CManager const* manager) const;
-	virtual void groupDead(CGroup* grp) { }
-	//@}
-	
-	/// @name Children containers accessors
-	//@{
-	CAliasCont<CSpireSpawnZone>& spawnZones() { return _SpawnZones; }
-	CAliasCont<CSpireSpawnZone> const& spawnZones() const { return _SpawnZones; }
-	CAliasCont<CSpireManager>& managers() { return _Managers; }
-	CAliasCont<CSpireManager> const& managers() const { return _Managers; }
-	//@}
-	
-	/// @name Spire zone
-	//@{
-	NLMISC::CSmartPtr<CAIPlaceSpire> const& getShape() const { return _Shape; }
-	void setShape(NLMISC::CSmartPtr<CAIPlaceSpire> const& shape) { _Shape = shape; }
-	//@}
-	
-	/// Returns the group containing building bots
-	CGroup* getBuildingGroup();
-	/// Returns the building bot with the specified alias
-	CBot* getBuildingBotByAlias(TAIAlias alias);
-	
-	/// Set the tribe that can own the spire when no guild owns it
-	void setTribe(std::string const& tribeName);
+    virtual std::string getManagerIndexString(CManager const* manager) const;
+    virtual void groupDead(CGroup* grp) { }
+    //@}
 
-	std::string const& getTribe() const { return _Tribe; }
+    /// @name Children containers accessors
+    //@{
+    CAliasCont<CSpireSpawnZone>& spawnZones() { return _SpawnZones; }
+    CAliasCont<CSpireSpawnZone> const& spawnZones() const { return _SpawnZones; }
+    CAliasCont<CSpireManager>& managers() { return _Managers; }
+    CAliasCont<CSpireManager> const& managers() const { return _Managers; }
+    //@}
 
-	/// Return the guild defending the spire, or InvalidGuildId
-	TAllianceId getOwnerAlliance() const { return _OwnerAllianceId; }
+    /// @name Spire zone
+    //@{
+    NLMISC::CSmartPtr<CAIPlaceSpire> const& getShape() const { return _Shape; }
+    void setShape(NLMISC::CSmartPtr<CAIPlaceSpire> const& shape) { _Shape = shape; }
+    //@}
 
-	/// Assign the spire to a guild (defender) or to a tribe with InvalidAllianceId.
-	void setOwnerAlliance( TAllianceId ownerAllianceId );
+    /// Returns the group containing building bots
+    CGroup* getBuildingGroup();
+    /// Returns the building bot with the specified alias
+    CBot* getBuildingBotByAlias(TAIAlias alias);
 
-	/// Set the attacker guilds (opponent and its allies) of the spire
-	void setAttackerAlliance( TAllianceId attackerAllianceId );
-	
-	/// Set the EGS state of the spire
-	void setState( SPIREENUMS::TSpireState state );
-	
-	/// Manages service event (typically service ups and downs)
-	void serviceEvent(CServiceEvent	const& info);
-	
-	std::string const& getSpireName() const { return _SpireName; }
-	
-	/// Called regularly at low frequency by continent update
-	void update();
-	
-	void addZone(CSpireSpawnZone* zone);
-	void removeZone(CSpireSpawnZone* zone);
-	CSpireSpawnZone* getZone(NLMISC::TStringId zoneName);
-	
-	void createSquad(CGroupDesc<CSpireSquadFamily> const* groupDesc, CSpireSquadManager* manager, std::string const& initialStateName, CSpireSpawnZone const* spawnZone, uint32 spawnOrder, uint32 respawTimeGC, SPIREENUMS::TPVPSide side);
-	void createSquad(std::string const& dynGroupName, std::string const& stateMachineName, std::string const& initialStateName, std::string const& zoneName, uint32 spawnOrder, uint32 respawTimeGC, SPIREENUMS::TPVPSide side);
-	void createSquad(uint32 dynGroupAlias, uint32 zoneAlias, uint32 spawnOrder, uint32 respawTimeGC, SPIREENUMS::TPVPSide side);
-	void spawnSquad(uint32 groupId);
-	void despawnSquad(uint32 groupId);
-	void deleteSquad(uint32 groupId);
-	void despawnAllSquads();
-	void sendSpireSquadStatus(CGroupNpc* group);
-	void squadLeaderDied(CGroupNpc* group);
-	void squadDied(CGroupNpc* group);
-	
-	void triggerSpecialEvent(SPIREENUMS::TSpecialSpireEvent eventId);
-	
-	void setBuildingBotSheet(uint32 buildingAlias, NLMISC::CSheetId sheetId, bool autoSpawnDespawn, const std::string & customName);
+    /// Set the tribe that can own the spire when no guild owns it
+    void setTribe(std::string const& tribeName);
 
-	bool spawn();
-	bool despawn();
-	
-	/// returns the state of the spire
-	std::string getStateName() const;
-	
-	/// return true if the spire is owned by a guild, not by a tribe
-	bool isBelongingToAGuild() const { return (_OwnerAllianceId!=InvalidAllianceId); }
-	
-	// add a link to a squad that can be created/spawned in the spire
-	void addSquadLink( TAIAlias alias, CGroupDesc<CSpireSquadFamily> *squad )
-	{
-		_SquadLinks.insert( std::make_pair( alias, squad ) );
-	}
+    std::string const& getTribe() const { return _Tribe; }
 
-	/// get a squad that can be created/spawned in the spire
-	CGroupDesc<CSpireSquadFamily> *getSquad( TAIAlias alias )
-	{
-		CSquadLinks::iterator it=_SquadLinks.find( alias );
-		if ( it != _SquadLinks.end() )
-			return (*it).second;
-		else
-			return NULL;
-	}
+    /// Return the guild defending the spire, or InvalidGuildId
+    TAllianceId getOwnerAlliance() const { return _OwnerAllianceId; }
 
-	const CSquadLinks& squadLinks() const { return _SquadLinks; }
-	
+    /// Assign the spire to a guild (defender) or to a tribe with InvalidAllianceId.
+    void setOwnerAlliance( TAllianceId ownerAllianceId );
+
+    /// Set the attacker guilds (opponent and its allies) of the spire
+    void setAttackerAlliance( TAllianceId attackerAllianceId );
+
+    /// Set the EGS state of the spire
+    void setState( SPIREENUMS::TSpireState state );
+
+    /// Manages service event (typically service ups and downs)
+    void serviceEvent(CServiceEvent	const& info);
+
+    std::string const& getSpireName() const { return _SpireName; }
+
+    /// Called regularly at low frequency by continent update
+    void update();
+
+    void addZone(CSpireSpawnZone* zone);
+    void removeZone(CSpireSpawnZone* zone);
+    CSpireSpawnZone* getZone(NLMISC::TStringId zoneName);
+
+    void createSquad(CGroupDesc<CSpireSquadFamily> const* groupDesc, CSpireSquadManager* manager, std::string const& initialStateName, CSpireSpawnZone const* spawnZone, uint32 spawnOrder, uint32 respawTimeGC, SPIREENUMS::TPVPSide side);
+    void createSquad(std::string const& dynGroupName, std::string const& stateMachineName, std::string const& initialStateName, std::string const& zoneName, uint32 spawnOrder, uint32 respawTimeGC, SPIREENUMS::TPVPSide side);
+    void createSquad(uint32 dynGroupAlias, uint32 zoneAlias, uint32 spawnOrder, uint32 respawTimeGC, SPIREENUMS::TPVPSide side);
+    void spawnSquad(uint32 groupId);
+    void despawnSquad(uint32 groupId);
+    void deleteSquad(uint32 groupId);
+    void despawnAllSquads();
+    void sendSpireSquadStatus(CGroupNpc* group);
+    void squadLeaderDied(CGroupNpc* group);
+    void squadDied(CGroupNpc* group);
+
+    void triggerSpecialEvent(SPIREENUMS::TSpecialSpireEvent eventId);
+
+    void setBuildingBotSheet(uint32 buildingAlias, NLMISC::CSheetId sheetId, bool autoSpawnDespawn, const std::string & customName);
+
+    bool spawn();
+    bool despawn();
+
+    /// returns the state of the spire
+    std::string getStateName() const;
+
+    /// return true if the spire is owned by a guild, not by a tribe
+    bool isBelongingToAGuild() const { return (_OwnerAllianceId!=InvalidAllianceId); }
+
+    // add a link to a squad that can be created/spawned in the spire
+    void addSquadLink( TAIAlias alias, CGroupDesc<CSpireSquadFamily> *squad )
+    {
+        _SquadLinks.insert( std::make_pair( alias, squad ) );
+    }
+
+    /// get a squad that can be created/spawned in the spire
+    CGroupDesc<CSpireSquadFamily> *getSquad( TAIAlias alias )
+    {
+        CSquadLinks::iterator it=_SquadLinks.find( alias );
+        if ( it != _SquadLinks.end() )
+            return (*it).second;
+        else
+            return NULL;
+    }
+
+    const CSquadLinks& squadLinks() const { return _SquadLinks; }
+
 private:
-	IAliasCont		*getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner	*createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree);	
-	template <class T>
-	void sendSpireMessage(std::string const& msgName, T& paramStruct);
-		
+    IAliasCont		*getAliasCont(AITYPES::TAIType type);
+    CAliasTreeOwner	*createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree);
+    template <class T>
+    void sendSpireMessage(std::string const& msgName, T& paramStruct);
+
 private:
-	/// @name AI service hierarchy
-	//@{
-	CAliasCont<CSpireSpawnZone> _SpawnZones;
-	CAliasCont<CSpireManager> _Managers;
-	//@}
+    /// @name AI service hierarchy
+    //@{
+    CAliasCont<CSpireSpawnZone> _SpawnZones;
+    CAliasCont<CSpireManager> _Managers;
+    //@}
 
-	/// Links to the squad group descs
-	CSquadLinks					_SquadLinks;
+    /// Links to the squad group descs
+    CSquadLinks					_SquadLinks;
 
-	/// The guild or the tribe that control the spire. Can be InvalidAllianceId if tribe alliance id not known yet.
-	TAllianceId					_OwnerAllianceId;
-	
-	/// The guild that wants to control the spire (if any). Can be InvalidAllianceId (peace time).
-	TAllianceId					_AttackerAllianceId;
-	
-	/// current state of the spire
-	SPIREENUMS::TSpireState	_State;
-	
-	/// The tribe that controls this spire when no guild owns it
-	std::string					_Tribe;
-	
-	/// Name of the spire
-	std::string					_SpireName;
-	
-	// Zone map to retrieve a spawn zone based on its name
-	typedef	std::map<NLMISC::TStringId, NLMISC::CDbgPtr<CSpireSpawnZone> > TZoneList;
-	TZoneList	_ZoneList;
-	
-	/// The polygon surounding the spire
+    /// The guild or the tribe that control the spire. Can be InvalidAllianceId if tribe alliance id not known yet.
+    TAllianceId					_OwnerAllianceId;
+
+    /// The guild that wants to control the spire (if any). Can be InvalidAllianceId (peace time).
+    TAllianceId					_AttackerAllianceId;
+
+    /// current state of the spire
+    SPIREENUMS::TSpireState	_State;
+
+    /// The tribe that controls this spire when no guild owns it
+    std::string					_Tribe;
+
+    /// Name of the spire
+    std::string					_SpireName;
+
+    // Zone map to retrieve a spawn zone based on its name
+    typedef	std::map<NLMISC::TStringId, NLMISC::CDbgPtr<CSpireSpawnZone> > TZoneList;
+    TZoneList	_ZoneList;
+
+    /// The polygon surounding the spire
 //	CShape	_Shape;
-	NLMISC::CSmartPtr<CAIPlaceSpire>	_Shape;
+    NLMISC::CSmartPtr<CAIPlaceSpire>	_Shape;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -254,28 +251,28 @@ class CSpireSquadFamily
 , public CAliasChild<CAIInstance>
 {
 public:
-	CSpireSquadFamily(CAIInstance* owner, uint32 alias, std::string const& name)
-	: CAliasChild<CAIInstance>(owner, alias, name)
-	{
-	}
-	virtual	~CSpireSquadFamily()
-	{
-		_GroupDescs.clear();	
-	}
-	
-	CAliasCont<CGroupDesc<CSpireSquadFamily> >& groupDescs() { return _GroupDescs; }
-	CAliasCont<CGroupDesc<CSpireSquadFamily> > const& groupDescs() const { return _GroupDescs; }
-	
-	virtual std::string getFullName() const;
-	virtual std::string getIndexString() const;
-	
+    CSpireSquadFamily(CAIInstance* owner, uint32 alias, std::string const& name)
+    : CAliasChild<CAIInstance>(owner, alias, name)
+    {
+    }
+    virtual	~CSpireSquadFamily()
+    {
+        _GroupDescs.clear();
+    }
+
+    CAliasCont<CGroupDesc<CSpireSquadFamily> >& groupDescs() { return _GroupDescs; }
+    CAliasCont<CGroupDesc<CSpireSquadFamily> > const& groupDescs() const { return _GroupDescs; }
+
+    virtual std::string getFullName() const;
+    virtual std::string getIndexString() const;
+
 //private:
-	IAliasCont		*getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner	*createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree);	
-	
+    IAliasCont		*getAliasCont(AITYPES::TAIType type);
+    CAliasTreeOwner	*createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree);
+
 private:
-	/// These are only references to the group descs that are created when reading the squad template primitive
-	CAliasCont< CGroupDesc<CSpireSquadFamily> > _GroupDescs;
+    /// These are only references to the group descs that are created when reading the squad template primitive
+    CAliasCont< CGroupDesc<CSpireSquadFamily> > _GroupDescs;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -288,11 +285,11 @@ class CSpireSpawnZone
 , public CAIPlaceXYR
 {
 public:
-	CSpireSpawnZone(CSpire* owner, CAIAliasDescriptionNode* adn);
-	~CSpireSpawnZone();
-	
-	virtual std::string getFullName() const;
-	virtual std::string getIndexString() const;
+    CSpireSpawnZone(CSpire* owner, CAIAliasDescriptionNode* adn);
+    ~CSpireSpawnZone();
+
+    virtual std::string getFullName() const;
+    virtual std::string getIndexString() const;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -305,37 +302,37 @@ class CSpireManager
 : public CMgrNpc
 {
 public:
-	CSpireManager(CSpire* parent, uint32 alias, std::string const& name, std::string const& filename = std::string());
-	virtual ~CSpireManager();
-	
-	void update();
-	
-	IAliasCont* getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
-	virtual std::string	getOneLineInfoString() const;
-	
-	/// Change the list of enemies of the squad (attackers of the spire)
-	void setEnemies( TAllianceId attackerAllianceId );
-	
-	CAIEvent EventSpirePeaceStateEnd;
-	CAIEvent EventSpirePeaceStateBegin;
-	CAIEvent EventSpireTribeOwnershipBegin;
-	CAIEvent EventSpireTribeOwnershipEnd;
-	CAIEvent EventSpireGuildOwnershipBegin;
-	CAIEvent EventSpireGuildOwnershipEnd;
-	CAIEvent EventSpireOwnerChanged;
-	CAIEvent EventSpireAttackerChanged;
-	CAIEvent EventSpireStateChanged;
-	
-	virtual void registerEvents();
-	virtual void unregisterEvents();
-	
-	void setAutoSpawn(bool autoSpawn) { _AutoSpawn = autoSpawn; }
-	void autoSpawnBegin();
-	void autoSpawnEnd();
-	
+    CSpireManager(CSpire* parent, uint32 alias, std::string const& name, std::string const& filename = std::string());
+    virtual ~CSpireManager();
+
+    void update();
+
+    IAliasCont* getAliasCont(AITYPES::TAIType type);
+    CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
+    virtual std::string	getOneLineInfoString() const;
+
+    /// Change the list of enemies of the squad (attackers of the spire)
+    void setEnemies( TAllianceId attackerAllianceId );
+
+    CAIEvent EventSpirePeaceStateEnd;
+    CAIEvent EventSpirePeaceStateBegin;
+    CAIEvent EventSpireTribeOwnershipBegin;
+    CAIEvent EventSpireTribeOwnershipEnd;
+    CAIEvent EventSpireGuildOwnershipBegin;
+    CAIEvent EventSpireGuildOwnershipEnd;
+    CAIEvent EventSpireOwnerChanged;
+    CAIEvent EventSpireAttackerChanged;
+    CAIEvent EventSpireStateChanged;
+
+    virtual void registerEvents();
+    virtual void unregisterEvents();
+
+    void setAutoSpawn(bool autoSpawn) { _AutoSpawn = autoSpawn; }
+    void autoSpawnBegin();
+    void autoSpawnEnd();
+
 private:
-	bool _AutoSpawn;
+    bool _AutoSpawn;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -347,7 +344,7 @@ class CSpireSquadManager
 : public CSpireManager
 {
 public:
-	CSpireSquadManager(CSpire* parent, uint32 alias, std::string const& name, std::string const& filename = std::string());
+    CSpireSquadManager(CSpire* parent, uint32 alias, std::string const& name, std::string const& filename = std::string());
 };
 */
 #endif

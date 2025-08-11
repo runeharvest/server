@@ -37,13 +37,13 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace MULTI_LINE_FORMATER;
 
-CAIInstance::CAIInstance(CAIS* owner)
-: CChild<CAIS>(owner)
+CAIInstance::CAIInstance(CAIS *owner)
+    : CChild<CAIS>(owner)
 {
 	_PlayerManager = new CManagerPlayer(this);
-	_PetManager = static_cast<CMgrPet*>(newMgr(AITYPES::MgrTypePet, 0, "Pet Manager", "MapName: Pet Manager", ""));
-	_EventNpcManager = static_cast<CMgrNpc*>(newMgr(AITYPES::MgrTypeNpc, 0, "Event NPCs Manager", "MapName: Event NPCs Manager", ""));
-	_EasterEggManager = static_cast<CMgrNpc*>(newMgr(AITYPES::MgrTypeNpc, 0, "Easter Eggs Manager", "MapName: Easter Eggs Manager", ""));
+	_PetManager = static_cast<CMgrPet *>(newMgr(AITYPES::MgrTypePet, 0, "Pet Manager", "MapName: Pet Manager", ""));
+	_EventNpcManager = static_cast<CMgrNpc *>(newMgr(AITYPES::MgrTypeNpc, 0, "Event NPCs Manager", "MapName: Event NPCs Manager", ""));
+	_EasterEggManager = static_cast<CMgrNpc *>(newMgr(AITYPES::MgrTypeNpc, 0, "Easter Eggs Manager", "MapName: Easter Eggs Manager", ""));
 	_SquadFamily = new COutpostSquadFamily(this, 0, "Squads");
 }
 
@@ -73,13 +73,13 @@ CAIInstance::~CAIInstance()
 static bool zoneHaveError = false;
 
 /// map of lastCreatedNpcGroup by player id
-static	std::map<CEntityId, string> _PlayersLastCreatedNpcGroup;
+static std::map<CEntityId, string> _PlayersLastCreatedNpcGroup;
 
-void CAIInstance::addZone(string const& zoneName, CNpcZone* zone)
+void CAIInstance::addZone(string const &zoneName, CNpcZone *zone)
 {
 #if !FINAL_VERSION
-	TZoneList::iterator	it = zoneList.find(CStringMapper::map(zoneName));
-	if (it!=zoneList.end())
+	TZoneList::iterator it = zoneList.find(CStringMapper::map(zoneName));
+	if (it != zoneList.end())
 	{
 		nlwarning("this NpcZone have the same name than another: %s", zoneName.c_str());
 		zoneHaveError = true;
@@ -88,31 +88,31 @@ void CAIInstance::addZone(string const& zoneName, CNpcZone* zone)
 	zoneList[CStringMapper::map(zoneName)] = zone;
 }
 
-void CAIInstance::removeZone(string const& zoneName, CNpcZone* zone)
+void CAIInstance::removeZone(string const &zoneName, CNpcZone *zone)
 {
-	TZoneList::iterator	it = zoneList.find(CStringMapper::map(zoneName));
+	TZoneList::iterator it = zoneList.find(CStringMapper::map(zoneName));
 	zoneList.erase(it);
 }
 
-void CAIInstance::updateZoneTrigger(CBotPlayer* player)
+void CAIInstance::updateZoneTrigger(CBotPlayer *player)
 {
-	std::list<CMgrNpc*> zoneTriggerManager;
+	std::list<CMgrNpc *> zoneTriggerManager;
 
 	FOREACH(it, CCont<CManager>, _Managers)
 	{
 		std::string name = it->getName();
 		uint32 size = (uint32)name.size();
-		const uint32 extensionSize   = 13; // strlen(".zone_trigger");
-		if (size >= 13 && name.substr(size - extensionSize, extensionSize) == ".zone_trigger" )
+		const uint32 extensionSize = 13; // strlen(".zone_trigger");
+		if (size >= 13 && name.substr(size - extensionSize, extensionSize) == ".zone_trigger")
 		{
-			CMgrNpc* npcManager = dynamic_cast<CMgrNpc*>(*it);
+			CMgrNpc *npcManager = dynamic_cast<CMgrNpc *>(*it);
 			if (npcManager && npcManager->getStateMachine())
 			{
 				zoneTriggerManager.push_back(npcManager);
 			}
 		}
 	}
-	if ( zoneTriggerManager.empty() )
+	if (zoneTriggerManager.empty())
 	{
 		return;
 	}
@@ -128,21 +128,21 @@ void CAIInstance::updateZoneTrigger(CBotPlayer* player)
 	std::vector<uint32> enterZone;
 	std::vector<uint32> leaveZone;
 
-	FOREACH(it, std::list<CMgrNpc*>, zoneTriggerManager)
+	FOREACH(it, std::list<CMgrNpc *>, zoneTriggerManager)
 	{
-		CMgrNpc* npcManager = *it;
-		CAliasCont<CGroup>& groups = npcManager->groups();
+		CMgrNpc *npcManager = *it;
+		CAliasCont<CGroup> &groups = npcManager->groups();
 
 		CAliasCont<CGroup>::iterator first2(groups.begin()), last2(groups.end());
-		for ( ; first2 != last2 ; ++first2)
+		for (; first2 != last2; ++first2)
 		{
-			CAIState*  startState = first2->getPersistentStateInstance()->getStartState();
+			CAIState *startState = first2->getPersistentStateInstance()->getStartState();
 			if (startState->isPositional())
 			{
-				const CAIStatePositional* posit = dynamic_cast<const CAIStatePositional*>(startState);
+				const CAIStatePositional *posit = dynamic_cast<const CAIStatePositional *>(startState);
 				if (posit)
 				{
-					CAIVector pos( player->pos() );
+					CAIVector pos(player->pos());
 					bool inside = posit->contains(pos);
 					if (inside)
 					{
@@ -155,19 +155,18 @@ void CAIInstance::updateZoneTrigger(CBotPlayer* player)
 
 	player->updateInsideTriggerZones(insideZone, enterZone, leaveZone);
 
-
-	static NLMISC::TStringId  nbPlayer = CStringMapper::map("NbPlayer");
+	static NLMISC::TStringId nbPlayer = CStringMapper::map("NbPlayer");
 
 	FOREACH(zoneIt, std::vector<uint32>, enterZone)
 	{
-		FOREACH(it, std::list<CMgrNpc*>, zoneTriggerManager)
+		FOREACH(it, std::list<CMgrNpc *>, zoneTriggerManager)
 		{
-			CGroup* grp = (*it)->groups().getChildByAlias(*zoneIt);
+			CGroup *grp = (*it)->groups().getChildByAlias(*zoneIt);
 			if (grp)
 			{
 
-				CGroupNpc* grpNpc = dynamic_cast<CGroupNpc*>(grp);
-				CPersistentStateInstance* sa = grpNpc->getPersistentStateInstance();
+				CGroupNpc *grpNpc = dynamic_cast<CGroupNpc *>(grp);
+				CPersistentStateInstance *sa = grpNpc->getPersistentStateInstance();
 				if (sa)
 				{
 					sa->setLogicVar(nbPlayer, sa->getLogicVar(nbPlayer) + 1);
@@ -179,13 +178,13 @@ void CAIInstance::updateZoneTrigger(CBotPlayer* player)
 
 	FOREACH(zoneIt, std::vector<uint32>, leaveZone)
 	{
-		FOREACH(it, std::list<CMgrNpc*>, zoneTriggerManager)
+		FOREACH(it, std::list<CMgrNpc *>, zoneTriggerManager)
 		{
-			CGroup* grp = (*it)->groups().getChildByAlias(*zoneIt);
+			CGroup *grp = (*it)->groups().getChildByAlias(*zoneIt);
 			if (grp)
 			{
-				CGroupNpc* grpNpc = dynamic_cast<CGroupNpc*>(grp);
-				CPersistentStateInstance* sa = grpNpc->getPersistentStateInstance();
+				CGroupNpc *grpNpc = dynamic_cast<CGroupNpc *>(grp);
+				CPersistentStateInstance *sa = grpNpc->getPersistentStateInstance();
 				if (sa)
 				{
 					sa->setLogicVar(nbPlayer, sa->getLogicVar(nbPlayer) - 1);
@@ -194,34 +193,33 @@ void CAIInstance::updateZoneTrigger(CBotPlayer* player)
 			}
 		}
 	}
-
 }
 
-CNpcZone* CAIInstance::getZone(TStringId zoneName)
+CNpcZone *CAIInstance::getZone(TStringId zoneName)
 {
 	return zoneList[zoneName];
 }
 
-std::string CAIInstance::getManagerIndexString(CManager const* manager) const
+std::string CAIInstance::getManagerIndexString(CManager const *manager) const
 {
-	return getIndexString()+NLMISC::toString(":m%u", manager->getChildIndex());
+	return getIndexString() + NLMISC::toString(":m%u", manager->getChildIndex());
 }
 
-void CAIInstance::initInstance(string const& continentName, uint32 instanceNumber)
+void CAIInstance::initInstance(string const &continentName, uint32 instanceNumber)
 {
 	_ContinentName = continentName;
 	_InstanceNumber = instanceNumber;
 
 	sendInstanceInfoToEGS();
 
-	if	(!EGSHasMirrorReady)
+	if (!EGSHasMirrorReady)
 		return;
 
 	// check all player in mirror to insert them in this instance.
 	TEntityIdToEntityIndexMap::const_iterator it, itEnd(TheDataset.entityEnd());
-	for	(it = TheDataset.entityBegin(); it!=itEnd; ++it)
+	for (it = TheDataset.entityBegin(); it != itEnd; ++it)
 	{
-		if (it->first.getType()!=RYZOMID::player)
+		if (it->first.getType() != RYZOMID::player)
 			continue;
 
 		TDataSetRow const row = TheDataset.getCurrentDataSetRow(it->second);
@@ -238,22 +236,22 @@ void CAIInstance::initInstance(string const& continentName, uint32 instanceNumbe
 	}
 }
 
-void CAIInstance::serviceEvent(CServiceEvent const& info)
+void CAIInstance::serviceEvent(CServiceEvent const &info)
 {
 	if (info.getServiceName() == "EGS")
 		sendInstanceInfoToEGS();
 
 	FOREACH(it, CCont<CManager>, managers())
-		it->serviceEvent(info);
+	it->serviceEvent(info);
 
-	if (CMgrPet* petManager = getPetMgr())
+	if (CMgrPet *petManager = getPetMgr())
 		petManager->serviceEvent(info);
 
 	if (_EventNpcManager)
 		_EventNpcManager->serviceEvent(info);
 
 	FOREACH(first, CCont<CContinent>, continents())
-		(*first)->serviceEvent(info);
+	(*first)->serviceEvent(info);
 }
 
 void CAIInstance::sendInstanceInfoToEGS()
@@ -274,19 +272,19 @@ bool CAIInstance::advanceUserTimer(uint32 nbTicks)
 	// for each manager, look for a timer event
 	FOREACH(it, CCont<CManager>, _Managers)
 	{
-		CGroup* grp = (*it)->getNextValidGroupChild();
+		CGroup *grp = (*it)->getNextValidGroupChild();
 		while (grp)
 		{
 			grp->getPersistentStateInstance()->advanceUserTimer(nbTicks);
-			grp=(*it)->getNextValidGroupChild(grp);	// next group
+			grp = (*it)->getNextValidGroupChild(grp); // next group
 		}
 	}
 	return true;
 }
 
-void CAIInstance::addGroupInfo(CGroup* grp)
+void CAIInstance::addGroupInfo(CGroup *grp)
 {
-	string const& name = grp->aliasTreeOwner()->getName();
+	string const &name = grp->aliasTreeOwner()->getName();
 	uint32 alias = grp->aliasTreeOwner()->getAlias();
 
 	if (!name.empty())
@@ -295,20 +293,20 @@ void CAIInstance::addGroupInfo(CGroup* grp)
 		_GroupFromAlias[alias] = grp;
 }
 
-void CAIInstance::removeGroupInfo(CGroup* grp, CAliasTreeOwner* grpAliasTreeOwner)
+void CAIInstance::removeGroupInfo(CGroup *grp, CAliasTreeOwner *grpAliasTreeOwner)
 {
-	string const& name = grpAliasTreeOwner->getName();
+	string const &name = grpAliasTreeOwner->getName();
 	uint32 alias = grpAliasTreeOwner->getAlias();
 
 	if (!name.empty())
 	{
-		std::map< std::string, std::vector<NLMISC::CDbgPtr<CGroup> > >::iterator it=_GroupFromNames.find(name);
+		std::map<std::string, std::vector<NLMISC::CDbgPtr<CGroup>>>::iterator it = _GroupFromNames.find(name);
 
 		// remove from name
-		if (it!=_GroupFromNames.end())
+		if (it != _GroupFromNames.end())
 		{
-			std::vector<NLMISC::CDbgPtr<CGroup> > &v = it->second;	//	_GroupFromNames[name];
-			std::vector<NLMISC::CDbgPtr<CGroup> >::iterator itGrp(find(v.begin(), v.end(), NLMISC::CDbgPtr<CGroup>(grp) ));
+			std::vector<NLMISC::CDbgPtr<CGroup>> &v = it->second; //	_GroupFromNames[name];
+			std::vector<NLMISC::CDbgPtr<CGroup>>::iterator itGrp(find(v.begin(), v.end(), NLMISC::CDbgPtr<CGroup>(grp)));
 			if (itGrp != v.end())
 				v.erase(itGrp);
 		}
@@ -318,24 +316,24 @@ void CAIInstance::removeGroupInfo(CGroup* grp, CAliasTreeOwner* grpAliasTreeOwne
 		_GroupFromAlias.erase(alias);
 }
 
-CGroup* CAIInstance::findGroup(uint32 alias)
+CGroup *CAIInstance::findGroup(uint32 alias)
 {
-	std::map<uint32, NLMISC::CDbgPtr<CGroup> >::iterator it(_GroupFromAlias.find(alias));
+	std::map<uint32, NLMISC::CDbgPtr<CGroup>>::iterator it(_GroupFromAlias.find(alias));
 	if (it != _GroupFromAlias.end())
 		return it->second;
 	return NULL;
 }
 
-void CAIInstance::findGroup(std::vector<CGroup*>& result, std::string const& name)
+void CAIInstance::findGroup(std::vector<CGroup *> &result, std::string const &name)
 {
-	std::map<std::string, std::vector<NLMISC::CDbgPtr<CGroup> > >::iterator it(_GroupFromNames.find(name));
+	std::map<std::string, std::vector<NLMISC::CDbgPtr<CGroup>>>::iterator it(_GroupFromNames.find(name));
 	if (it != _GroupFromNames.end())
 		result.insert(result.end(), it->second.begin(), it->second.end());
 }
 
-void CAIInstance::addMissionInfo(std::string const& missionName, uint32 alias)
+void CAIInstance::addMissionInfo(std::string const &missionName, uint32 alias)
 {
-	std::string const* otherName;
+	std::string const *otherName;
 
 	while (true)
 	{
@@ -347,18 +345,18 @@ void CAIInstance::addMissionInfo(std::string const& missionName, uint32 alias)
 		aliases.erase(find(aliases.begin(), aliases.end(), alias));
 	}
 
-	vector<uint32>& aliases = _MissionToAlias[missionName];
+	vector<uint32> &aliases = _MissionToAlias[missionName];
 	if (std::find(aliases.begin(), aliases.end(), alias) == aliases.end())
 		aliases.push_back(alias);
 }
 
-std::string const& CAIInstance::findMissionName(uint32 alias)
+std::string const &CAIInstance::findMissionName(uint32 alias)
 {
-	map<string, vector<uint32> >::iterator it, itEnd(_MissionToAlias.end());
-	for (it=_MissionToAlias.begin(); it!=itEnd; ++it)
+	map<string, vector<uint32>>::iterator it, itEnd(_MissionToAlias.end());
+	for (it = _MissionToAlias.begin(); it != itEnd; ++it)
 	{
 		vector<uint32>::iterator it2, itEnd2(it->second.end());
-		for (it2=it->second.begin(); it2!=itEnd2; ++it2)
+		for (it2 = it->second.begin(); it2 != itEnd2; ++it2)
 		{
 			if (*it2 == alias)
 				return it->first;
@@ -380,125 +378,125 @@ void CAIInstance::update()
 	{
 		H_AUTO(ManagersUpdate)
 		FOREACH(it, CCont<CManager>, _Managers)
-			it->CManager::update();
+		it->CManager::update();
 	}
 
 	// call continent's update
 	{
 		H_AUTO(ContinentsUpdate)
 		FOREACH(it, CCont<CContinent>, _Continents)
-			it->CContinent::update();
+		it->CContinent::update();
 	}
 }
 
-CManager* CAIInstance::tryToGetManager(char const* str)
+CManager *CAIInstance::tryToGetManager(char const *str)
 {
-	return dynamic_cast<CManager*>(tryToGetEntity(str, CAIS::AI_MANAGER));
+	return dynamic_cast<CManager *>(tryToGetEntity(str, CAIS::AI_MANAGER));
 }
 
-CGroup* CAIInstance::tryToGetGroup(char const* str)
+CGroup *CAIInstance::tryToGetGroup(char const *str)
 {
-	return dynamic_cast<CGroup*>(tryToGetEntity(str, CAIS::AI_GROUP));
+	return dynamic_cast<CGroup *>(tryToGetEntity(str, CAIS::AI_GROUP));
 }
 
 // :TODO: Document that function
-CAIEntity* CAIInstance::tryToGetEntity(char const* str, CAIS::TSearchType searchType)
+CAIEntity *CAIInstance::tryToGetEntity(char const *str, CAIS::TSearchType searchType)
 {
-	char	ident[512];
-	char*	id	=	ident;
+	char ident[512];
+	char *id = ident;
 
-	strcpy(ident,str);
+	strcpy(ident, str);
 
-	char		*mgr=NULL;
-	char		*grp=NULL;
-	char		*bot=NULL;
-	char		lastChar;
-	CManager	*mgrPtr=NULL;
-	CGroup		*grpPtr=NULL;
-	CBot		*botPtr=NULL;
-	uint32		localIndex = std::numeric_limits<uint32>::max();
+	char *mgr = NULL;
+	char *grp = NULL;
+	char *bot = NULL;
+	char lastChar;
+	CManager *mgrPtr = NULL;
+	CGroup *grpPtr = NULL;
+	CBot *botPtr = NULL;
+	uint32 localIndex = std::numeric_limits<uint32>::max();
 
-	mgr	=	id;
-	while((*id!=':')&&(*id!=0))		id++;
-	lastChar =	*id;
-	*id=0;
+	mgr = id;
+	while ((*id != ':') && (*id != 0)) id++;
+	lastChar = *id;
+	*id = 0;
 	id++;
 
-	localIndex=getInt64FromStr(mgr);
-	if (localIndex<managers().size())
-		mgrPtr	=	managers()[localIndex];
-	if	(!mgrPtr)
+	localIndex = getInt64FromStr(mgr);
+	if (localIndex < managers().size())
+		mgrPtr = managers()[localIndex];
+	if (!mgrPtr)
 		goto tryWithEntityId;
-	if	(	lastChar==0
-		||	searchType==CAIS::AI_MANAGER)
-		return	dynamic_cast<CAIEntity*>	(mgrPtr);
+	if (lastChar == 0
+	    || searchType == CAIS::AI_MANAGER)
+		return dynamic_cast<CAIEntity *>(mgrPtr);
 
-	grp	=	id;
-	while((*id!=':')&&(*id!=0))		id++;
-	lastChar =	*id;
-	*id=0;
+	grp = id;
+	while ((*id != ':') && (*id != 0)) id++;
+	lastChar = *id;
+	*id = 0;
 	id++;
 
-	grpPtr	=	mgrPtr->getGroup(getInt64FromStr(grp));
-	if	(!grpPtr)
+	grpPtr = mgrPtr->getGroup(getInt64FromStr(grp));
+	if (!grpPtr)
 		goto tryWithEntityId;
-	if	(	lastChar==0
-		||	searchType==CAIS::AI_GROUP)
-		return	dynamic_cast<CAIEntity*>	(grpPtr);
+	if (lastChar == 0
+	    || searchType == CAIS::AI_GROUP)
+		return dynamic_cast<CAIEntity *>(grpPtr);
 
-	bot	=	id;
-	while((*id!=':')&&(*id!=0))		id++;
-	lastChar =	*id;
-	*id=0;
+	bot = id;
+	while ((*id != ':') && (*id != 0)) id++;
+	lastChar = *id;
+	*id = 0;
 
-	botPtr	=	grpPtr->getBot(getInt64FromStr(bot));
-	if	(!botPtr)
+	botPtr = grpPtr->getBot(getInt64FromStr(bot));
+	if (!botPtr)
 		goto tryWithEntityId;
-	if	(	lastChar==0
-		||	searchType==CAIS::AI_BOT)
-		return	dynamic_cast<CAIEntity*>	(botPtr);
+	if (lastChar == 0
+	    || searchType == CAIS::AI_BOT)
+		return dynamic_cast<CAIEntity *>(botPtr);
 
-	return	NULL;
+	return NULL;
 
 tryWithEntityId:
 
-	CEntityId	entityId;
+	CEntityId entityId;
 	entityId.fromString(str);
 
 	if (entityId.isUnknownId())
-		return	NULL;
+		return NULL;
 
-	CCont<CAIInstance>::iterator instanceIt=CAIS::instance().AIList().begin(), instanceItEnd=CAIS::instance().AIList().end();
+	CCont<CAIInstance>::iterator instanceIt = CAIS::instance().AIList().begin(), instanceItEnd = CAIS::instance().AIList().end();
 
-	while (instanceIt!=instanceItEnd)
+	while (instanceIt != instanceItEnd)
 	{
-		CAIInstance	*instancePtr=*instanceIt;
+		CAIInstance *instancePtr = *instanceIt;
 
-		CCont<CManager>::iterator it=instancePtr->managers().begin(), itEnd=instancePtr->managers().end();
+		CCont<CManager>::iterator it = instancePtr->managers().begin(), itEnd = instancePtr->managers().end();
 
-		while (it!=itEnd)
+		while (it != itEnd)
 		{
-			mgrPtr	=	*it;
+			mgrPtr = *it;
 
-			grpPtr	=	mgrPtr->getNextValidGroupChild	();
+			grpPtr = mgrPtr->getNextValidGroupChild();
 			while (grpPtr)
 			{
-				botPtr	=	grpPtr->getNextValidBotChild();
+				botPtr = grpPtr->getNextValidBotChild();
 				while (botPtr)
 				{
 					if (botPtr->isSpawned() && botPtr->getSpawnObj()->getEntityId() == entityId)
-//					if	(botPtr->createEntityId()==entityId)
-						return	dynamic_cast<CAIEntity*>	(botPtr);
-					botPtr	=	grpPtr->getNextValidBotChild	(botPtr);
+						//					if	(botPtr->createEntityId()==entityId)
+						return dynamic_cast<CAIEntity *>(botPtr);
+					botPtr = grpPtr->getNextValidBotChild(botPtr);
 				}
-				grpPtr=mgrPtr->getNextValidGroupChild	(grpPtr);
+				grpPtr = mgrPtr->getNextValidGroupChild(grpPtr);
 			}
 			++it;
 		}
 		++instanceIt;
 	}
 
-	return	NULL;
+	return NULL;
 }
 
 //--------------------------------------------------------------------------
@@ -508,15 +506,15 @@ tryWithEntityId:
 // factory for creating new managers and for adding them to the _Managers map
 // asserts if the id is invalid (<0 or >1023)
 // asserts if the id is already in use
-CManager* CAIInstance::newMgr(AITYPES::TMgrType type, uint32 alias, std::string const& name, std::string const& mapName, std::string const& filename)
+CManager *CAIInstance::newMgr(AITYPES::TMgrType type, uint32 alias, std::string const &name, std::string const &mapName, std::string const &filename)
 {
 
-	CManager* mgr = CManager::createManager(type, this, alias, name, "", filename);
+	CManager *mgr = CManager::createManager(type, this, alias, name, "", filename);
 	// add the manager into the singleton's managers vector
 	if (mgr)
 	{
 		_Managers.addChild(mgr);
-		mgr->init	();
+		mgr->init();
 	}
 	return mgr;
 }
@@ -525,16 +523,16 @@ bool CAIInstance::spawn()
 {
 	// Spawn instance managers
 	CCont<CManager>::iterator itManager, itManagerEnd(_Managers.end());
-	for (itManager=_Managers.begin(); itManager!=itManagerEnd; ++itManager)
+	for (itManager = _Managers.begin(); itManager != itManagerEnd; ++itManager)
 	{
-		CManager* manager = *itManager;
+		CManager *manager = *itManager;
 		manager->spawn();
 	}
 	// Spawn continents
 	CCont<CContinent>::iterator itContinent, itContinentEnd(continents().end());
-	for (itContinent=continents().begin(); itContinent!=itContinentEnd; ++itContinent)
+	for (itContinent = continents().begin(); itContinent != itContinentEnd; ++itContinent)
 	{
-		CContinent* continent = *itContinent;
+		CContinent *continent = *itContinent;
 		continent->spawn();
 	}
 	// We should check individual errors, but fake success here :)
@@ -545,16 +543,16 @@ bool CAIInstance::despawn()
 {
 	// Despawn instance managers
 	CCont<CManager>::iterator itManager, itManagerEnd(_Managers.end());
-	for (itManager=_Managers.begin(); itManager!=itManagerEnd; ++itManager)
+	for (itManager = _Managers.begin(); itManager != itManagerEnd; ++itManager)
 	{
-		CManager* manager = *itManager;
+		CManager *manager = *itManager;
 		manager->despawnMgr();
 	}
 	// Despawn continents
 	CCont<CContinent>::iterator itContinent, itContinentEnd(_Continents.end());
-	for (itContinent=_Continents.begin(); itContinent!=itContinentEnd; ++itContinent)
+	for (itContinent = _Continents.begin(); itContinent != itContinentEnd; ++itContinent)
 	{
-		CContinent* continent = *itContinent;
+		CContinent *continent = *itContinent;
 		continent->despawn();
 	}
 	// We should check individual errors, but fake success here :)
@@ -577,37 +575,36 @@ void CAIInstance::deleteMgr(sint mgrId)
 // Interface to kami management
 //----------------------------------------------------------------------------
 
-void CAIInstance::registerKamiDeposit(uint32 alias, CGroupNpc* grp)
+void CAIInstance::registerKamiDeposit(uint32 alias, CGroupNpc *grp)
 {
-	if (_KamiDeposits.find(alias) !=_KamiDeposits.end() && _KamiDeposits[alias]!=grp)
+	if (_KamiDeposits.find(alias) != _KamiDeposits.end() && _KamiDeposits[alias] != grp)
 	{
 		nlwarning("Failed to register Kami deposit '%s' with alias '%u' because alias already assigned to deposit '%s'",
-			(grp==NULL || grp->getAliasNode()==NULL) ? "NULL" : grp->getAliasNode()->fullName().c_str(),
-			alias,
-			(_KamiDeposits[alias]==NULL || _KamiDeposits[alias]->getAliasNode()==NULL)? "NULL": _KamiDeposits[alias]->getAliasNode()->fullName().c_str()
-			);
+		    (grp == NULL || grp->getAliasNode() == NULL) ? "NULL" : grp->getAliasNode()->fullName().c_str(),
+		    alias,
+		    (_KamiDeposits[alias] == NULL || _KamiDeposits[alias]->getAliasNode() == NULL) ? "NULL" : _KamiDeposits[alias]->getAliasNode()->fullName().c_str());
 		return;
 	}
-	if (grp!=NULL)
+	if (grp != NULL)
 		_KamiDeposits[alias] = grp;
 	else
-		nlwarning("Attempt to assign Kami deposit alias '%u' to an inexistant group",alias);
+		nlwarning("Attempt to assign Kami deposit alias '%u' to an inexistant group", alias);
 }
 
 void CAIInstance::unregisterKamiDeposit(uint32 alias)
 {
-	if (_KamiDeposits.find(alias) !=_KamiDeposits.end())
+	if (_KamiDeposits.find(alias) != _KamiDeposits.end())
 		_KamiDeposits.erase(_KamiDeposits.find(alias));
 }
 
 //----------------------------------------------------------------------------
 
-std::string	CAIInstance::getIndexString() const
+std::string CAIInstance::getIndexString() const
 {
-	return getOwner()->getIndexString()+NLMISC::toString(":i%u", getChildIndex());
+	return getOwner()->getIndexString() + NLMISC::toString(":i%u", getChildIndex());
 }
 
-std::string	CAIInstance::getOneLineInfoString() const
+std::string CAIInstance::getOneLineInfoString() const
 {
 	return "AI instance number " + NLMISC::toString("%u", getInstanceNumber()) + ", continent '" + getContinentName() + "'";
 }
@@ -616,13 +613,11 @@ std::vector<std::string> CAIInstance::getMultiLineInfoString() const
 {
 	std::vector<std::string> container;
 
-
 	pushTitle(container, "CAIInstance");
 	pushEntry(container, "id=" + getIndexString());
 	container.back() += " num=" + NLMISC::toString("%u", getInstanceNumber());
 	container.back() += " continent=" + getContinentName();
 	pushFooter(container);
-
 
 	return container;
 }
@@ -632,32 +627,30 @@ std::vector<std::string> CAIInstance::getMultiLineInfoString() const
 #include "ai_bot_npc.h"
 #include "ai_profile_npc.h"
 
-inline
-static CAIVector randomPos(double dispersionRadius)
+inline static CAIVector randomPos(double dispersionRadius)
 {
-	if (dispersionRadius<=0.)
+	if (dispersionRadius <= 0.)
 	{
 		return CAIVector(0., 0.);
 	}
 	static const uint32 maxLimit = std::numeric_limits<uint32>::max() >> 1;
-	double rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
-	double r = dispersionRadius*sqrt(rval);
-	rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
-	double t = 2.0*NLMISC::Pi*rval;
-	double dx = cos(t)*r;
-	double dy = sin(t)*r;
+	double rval = (double)CAIS::rand32(maxLimit) / (double)maxLimit; // [0-1[
+	double r = dispersionRadius * sqrt(rval);
+	rval = (double)CAIS::rand32(maxLimit) / (double)maxLimit; // [0-1[
+	double t = 2.0 * NLMISC::Pi * rval;
+	double dx = cos(t) * r;
+	double dy = sin(t) * r;
 	return CAIVector(dx, dy);
 }
 
-inline
-static float randomAngle()
+inline static float randomAngle()
 {
-	uint32 const maxLimit = CAngle::PI*2;
+	uint32 const maxLimit = CAngle::PI * 2;
 	float val = (float)CAIS::rand32(maxLimit);
 	return val;
 }
 
-CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &botsName, const std::string &look)
+CGroupNpc *CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const &sheetId, CAIVector const &pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &botsName, const std::string &look)
 {
 	if (!_EventNpcManager)
 		return NULL;
@@ -670,7 +663,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	}
 
 	// Create a group
-	CGroupNpc* grp = new CGroupNpc(_EventNpcManager, NULL, RYAI_MAP_CRUNCH::Nothing);
+	CGroupNpc *grp = new CGroupNpc(_EventNpcManager, NULL, RYAI_MAP_CRUNCH::Nothing);
 	// Register it in the manager
 	_EventNpcManager->groups().addAliasChild(grp);
 	// Set the group parameters
@@ -686,17 +679,17 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 
 	{
 		// build unnamed bot
-		for	(uint i=0; i<nbBots; ++i)
+		for (uint i = 0; i < nbBots; ++i)
 		{
-			grp->bots().addChild(new CBotNpc(grp, 0, botsName.empty() ? grp->getName():botsName), i); // Doub: 0 instead of getAlias()+i otherwise aliases are wrong
+			grp->bots().addChild(new CBotNpc(grp, 0, botsName.empty() ? grp->getName() : botsName), i); // Doub: 0 instead of getAlias()+i otherwise aliases are wrong
 
-			CBotNpc* const bot = NLMISC::safe_cast<CBotNpc*>(grp->bots()[i]);
+			CBotNpc *const bot = NLMISC::safe_cast<CBotNpc *>(grp->bots()[i]);
 
 			bot->setSheet(sheet);
 			if (!look.empty())
 				bot->setClientSheet(look);
 			bot->equipmentInit();
-			bot->initEnergy(/*groupEnergyCoef()*/0);
+			bot->initEnergy(/*groupEnergyCoef()*/ 0);
 			CAIVector rpos(pos);
 			if (dispersionRadius == 0)
 			{
@@ -706,17 +699,16 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 			// Spawn all randomly except if only 1 bot
 			if (nbBots > 1)
 			{
-				RYAI_MAP_CRUNCH::CWorldMap const& worldMap = CWorldContainer::getWorldMap();
-				RYAI_MAP_CRUNCH::CWorldPosition	wp;
+				RYAI_MAP_CRUNCH::CWorldMap const &worldMap = CWorldContainer::getWorldMap();
+				RYAI_MAP_CRUNCH::CWorldPosition wp;
 				uint32 maxTries = 100;
 				do
 				{
 					rpos = pos;
 					rpos += randomPos(dispersionRadius);
 					--maxTries;
-				}
-				while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries>0);
-				if (maxTries<=0)
+				} while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries > 0);
+				if (maxTries <= 0)
 					rpos = pos;
 			}
 
@@ -726,13 +718,13 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 			else
 				angle = randomAngle();
 
-			bot->setStartPos(rpos.x().asDouble(),rpos.y().asDouble(), angle, AITYPES::vp_auto);
+			bot->setStartPos(rpos.x().asDouble(), rpos.y().asDouble(), angle, AITYPES::vp_auto);
 		}
 	}
 
 	grp->spawn();
-	CSpawnGroupNpc* spawnGroup = grp->getSpawnObj();
-	if	(!spawnGroup)
+	CSpawnGroupNpc *spawnGroup = grp->getSpawnObj();
+	if (!spawnGroup)
 	{
 		// the spawning has failed, delete the useless object
 		nlwarning("Failed to spawn the event group");
@@ -741,7 +733,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	}
 
 	NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> destZone = NLMISC::CSmartPtr<CNpcZonePlaceNoPrim>(new CNpcZonePlaceNoPrim());
-	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(pos, 0, 0), (uint32)(dispersionRadius*1000.));
+	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(pos, 0, 0), (uint32)(dispersionRadius * 1000.));
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
 
 	if (spawnBots)
@@ -750,7 +742,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	return grp;
 }
 
-CBotEasterEgg* CAIInstance::createEasterEgg(uint32 easterEggId, NLMISC::CSheetId const& sheetId, std::string const& botName, double x, double y, double z, double heading, const std::string& look)
+CBotEasterEgg *CAIInstance::createEasterEgg(uint32 easterEggId, NLMISC::CSheetId const &sheetId, std::string const &botName, double x, double y, double z, double heading, const std::string &look)
 {
 	if (_EasterEggManager == NULL)
 		return NULL;
@@ -758,7 +750,7 @@ CBotEasterEgg* CAIInstance::createEasterEgg(uint32 easterEggId, NLMISC::CSheetId
 	if (_EasterEggGroup == NULL)
 	{
 		// create the easter egg group
-		CGroupNpc* grp = new CGroupNpc(_EasterEggManager, NULL, RYAI_MAP_CRUNCH::Nothing);
+		CGroupNpc *grp = new CGroupNpc(_EasterEggManager, NULL, RYAI_MAP_CRUNCH::Nothing);
 		_EasterEggManager->groups().addAliasChild(grp);
 
 		// set the group parameters
@@ -772,7 +764,7 @@ CBotEasterEgg* CAIInstance::createEasterEgg(uint32 easterEggId, NLMISC::CSheetId
 		// spawn the group
 		grp->spawn();
 
-		CSpawnGroupNpc* spawnGroup = grp->getSpawnObj();
+		CSpawnGroupNpc *spawnGroup = grp->getSpawnObj();
 		if (spawnGroup == NULL)
 		{
 			// the spawning has failed, delete the useless object
@@ -803,7 +795,7 @@ CBotEasterEgg* CAIInstance::createEasterEgg(uint32 easterEggId, NLMISC::CSheetId
 	}
 
 	// build the easter egg bot
-	CBotEasterEgg* bot = new CBotEasterEgg(_EasterEggGroup, 0, botName, easterEggId);
+	CBotEasterEgg *bot = new CBotEasterEgg(_EasterEggGroup, 0, botName, easterEggId);
 	_EasterEggGroup->bots().addChild(bot);
 
 	bot->setSheet(sheet);
@@ -826,7 +818,7 @@ CBotEasterEgg* CAIInstance::createEasterEgg(uint32 easterEggId, NLMISC::CSheetId
 
 void CAIInstance::destroyEasterEgg(uint32 easterEggId)
 {
-	CBotEasterEgg* bot = getEasterEgg(easterEggId);
+	CBotEasterEgg *bot = getEasterEgg(easterEggId);
 	if (bot != NULL)
 	{
 		bot->despawnBot();
@@ -838,14 +830,14 @@ void CAIInstance::destroyEasterEgg(uint32 easterEggId)
 	}
 }
 
-CBotEasterEgg* CAIInstance::getEasterEgg(uint32 easterEggId)
+CBotEasterEgg *CAIInstance::getEasterEgg(uint32 easterEggId)
 {
 	if (_EasterEggGroup == NULL)
 		return NULL;
 
 	FOREACH(itBot, CCont<CBot>, _EasterEggGroup->bots())
 	{
-		CBotEasterEgg* bot = dynamic_cast<CBotEasterEgg*>(*itBot);
+		CBotEasterEgg *bot = dynamic_cast<CBotEasterEgg *>(*itBot);
 #if !FINAL_VERSION
 		nlassert(bot != NULL);
 #endif
@@ -856,7 +848,7 @@ CBotEasterEgg* CAIInstance::getEasterEgg(uint32 easterEggId)
 	return NULL;
 }
 
-void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbEventCreateNpcGroup(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 messageVersion;
 	uint32 instanceNumber;
@@ -873,7 +865,7 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	std::string look;
 	sint32 cell;
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1);
+	nlassert(messageVersion == 1);
 	msgin.serial(instanceNumber);
 	msgin.serial(playerId);
 	msgin.serial(x);
@@ -887,18 +879,18 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	msgin.serial(botsName);
 	msgin.serial(look);
 	msgin.serial(cell);
-	CAIInstance* instance = CAIS::instance().getAIInstance(instanceNumber);
+	CAIInstance *instance = CAIS::instance().getAIInstance(instanceNumber);
 	if (instance)
 	{
-		CGroupNpc* npcGroup = instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(((double)x)/1000.0, ((double)y)/1000.0), dispersionRadius, spawnBots, ((double)orientation)/1000.0, botsName, look);
+		CGroupNpc *npcGroup = instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(((double)x) / 1000.0, ((double)y) / 1000.0), dispersionRadius, spawnBots, ((double)orientation) / 1000.0, botsName, look);
 		if (npcGroup != NULL)
 		{
 			_PlayersLastCreatedNpcGroup[playerId] = npcGroup->getName();
 
-			FOREACH(botIt, CCont<CBot>,	npcGroup->bots())
+			FOREACH(botIt, CCont<CBot>, npcGroup->bots())
 			{
-				CSpawnBot* pbot = botIt->getSpawnObj();
-				if (pbot!=NULL)
+				CSpawnBot *pbot = botIt->getSpawnObj();
+				if (pbot != NULL)
 				{
 					CEntityId id = pbot->getEntityId();
 					float t = 0;
@@ -906,15 +898,15 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 					uint8 one = 1;
 					NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle() + 1;
 					CMessage msgout2("ENTITY_TELEPORTATION");
-					msgout2.serial( id   );
-					msgout2.serial( x );
-					msgout2.serial( y );
-					msgout2.serial( z );
-					msgout2.serial( t );
-					msgout2.serial( tick );
-					msgout2.serial( cont );
-					msgout2.serial( cell );
-					msgout2.serial( one  );
+					msgout2.serial(id);
+					msgout2.serial(x);
+					msgout2.serial(y);
+					msgout2.serial(z);
+					msgout2.serial(t);
+					msgout2.serial(tick);
+					msgout2.serial(cont);
+					msgout2.serial(cell);
+					msgout2.serial(one);
 
 					sendMessageViaMirror("GPMS", msgout2);
 				}
@@ -923,16 +915,16 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	}
 }
 
-extern vector<vector<string> > scriptCommands2;
+extern vector<vector<string>> scriptCommands2;
 
-void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbEventNpcGroupScript(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 messageVersion;
 	string botId;
 	uint32 nbString;
 	vector<string> strings;
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1);
+	nlassert(messageVersion == 1);
 	msgin.serial(nbString);
 
 	string eid;
@@ -948,7 +940,7 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 		nlinfo("  %d '%s'", 0, strings[0].c_str());
 		strings[1] = firstCommand;
 		nlinfo("  %d '%s'", 1, strings[1].c_str());
-		for (uint32 i=2; i<nbString-2; ++i)
+		for (uint32 i = 2; i < nbString - 2; ++i)
 		{
 			msgin.serial(strings[i]);
 			nlinfo("  %d '%s'", i, strings[i].c_str());
@@ -956,17 +948,17 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 	}
 	else
 	{
-		nlinfo("Event group script with %d strings :", nbString-1);
+		nlinfo("Event group script with %d strings :", nbString - 1);
 		CEntityId playerId(eid);
-		strings.resize(nbString-1);
+		strings.resize(nbString - 1);
 		NLMISC::CSString groupname = CSString(firstCommand);
 		if (firstCommand[0] == '#' && firstCommand[1] == '(')
 		{
 			NLMISC::CEntityId botEId = NLMISC::CEntityId(firstCommand.substr(1));
-			if (botEId==NLMISC::CEntityId::Unknown)
+			if (botEId == NLMISC::CEntityId::Unknown)
 				return;
-			CAIEntityPhysical* entity = CAIEntityPhysicalLocator::getInstance()->getEntity(botEId);
-			CSpawnBotNpc* bot = dynamic_cast<CSpawnBotNpc*>(entity);
+			CAIEntityPhysical *entity = CAIEntityPhysicalLocator::getInstance()->getEntity(botEId);
+			CSpawnBotNpc *bot = dynamic_cast<CSpawnBotNpc *>(entity);
 			if (!bot)
 				return;
 			if (!bot->getPersistent().getOwner())
@@ -976,10 +968,10 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 		}
 		else
 		{
-			strings[0] =  (string)groupname.replace("#last", _PlayersLastCreatedNpcGroup[playerId].c_str());
+			strings[0] = (string)groupname.replace("#last", _PlayersLastCreatedNpcGroup[playerId].c_str());
 		}
 		nlinfo("  %d '%s'", 0, strings[0].c_str());
-		for (uint32 i=1; i<nbString-1; ++i)
+		for (uint32 i = 1; i < nbString - 1; ++i)
 		{
 			msgin.serial(strings[i]);
 			nlinfo("  %d '%s'", i, strings[i].c_str());
@@ -988,7 +980,7 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 	scriptCommands2.push_back(strings);
 }
 
-void cbEventFaunaBotSetRadii( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbEventFaunaBotSetRadii(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 messageVersion;
 	string botName;
@@ -997,13 +989,13 @@ void cbEventFaunaBotSetRadii( NLNET::CMessage& msgin, const std::string &service
 	float huntingRadius;
 
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1);
+	nlassert(messageVersion == 1);
 	msgin.serial(botName);
 	msgin.serial(notHungryRadius);
 	msgin.serial(hungryRadius);
 	msgin.serial(huntingRadius);
 
-	vector<CBot*> bots;
+	vector<CBot *> bots;
 	/// try to find the bot name
 	buildFilteredBotList(bots, botName);
 	if (bots.empty())
@@ -1013,33 +1005,33 @@ void cbEventFaunaBotSetRadii( NLNET::CMessage& msgin, const std::string &service
 	}
 	else
 	{
-		FOREACH(itBot, vector<CBot*>, bots)
+		FOREACH(itBot, vector<CBot *>, bots)
 		{
-			CBot* bot = *itBot;
-			CBotFauna* botFauna = dynamic_cast<CBotFauna*>(bot);
+			CBot *bot = *itBot;
+			CBotFauna *botFauna = dynamic_cast<CBotFauna *>(bot);
 			if (botFauna)
 			{
-				if (notHungryRadius>=0.f)
+				if (notHungryRadius >= 0.f)
 					botFauna->setAggroRadiusNotHungry(notHungryRadius);
-				if (hungryRadius>=0.f)
+				if (hungryRadius >= 0.f)
 					botFauna->setAggroRadiusHungry(hungryRadius);
-				if (huntingRadius>=0.f)
+				if (huntingRadius >= 0.f)
 					botFauna->setAggroRadiusHunting(huntingRadius);
 			}
 		}
 	}
 }
 
-void cbEventFaunaBotResetRadii( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbEventFaunaBotResetRadii(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 messageVersion;
 	string botName;
 
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1);
+	nlassert(messageVersion == 1);
 	msgin.serial(botName);
 
-	vector<CBot*> bots;
+	vector<CBot *> bots;
 	/// try to find the bot name
 	buildFilteredBotList(bots, botName);
 	if (bots.empty())
@@ -1049,28 +1041,28 @@ void cbEventFaunaBotResetRadii( NLNET::CMessage& msgin, const std::string &servi
 	}
 	else
 	{
-		FOREACH(itBot, vector<CBot*>, bots)
+		FOREACH(itBot, vector<CBot *>, bots)
 		{
-			CBot* bot = *itBot;
-			CBotFauna* botFauna = dynamic_cast<CBotFauna*>(bot);
+			CBot *bot = *itBot;
+			CBotFauna *botFauna = dynamic_cast<CBotFauna *>(bot);
 			if (botFauna)
 				botFauna->resetAggroRadius();
 		}
 	}
 }
 
-void cbEventBotCanAggro( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbEventBotCanAggro(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 messageVersion;
 	string botName;
 	bool canAggro;
 
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1);
+	nlassert(messageVersion == 1);
 	msgin.serial(botName);
 	msgin.serial(canAggro);
 
-	vector<CBot*> bots;
+	vector<CBot *> bots;
 	/// try to find the bot name
 	buildFilteredBotList(bots, botName);
 	if (bots.empty())
@@ -1080,12 +1072,12 @@ void cbEventBotCanAggro( NLNET::CMessage& msgin, const std::string &serviceName,
 	}
 	else
 	{
-		FOREACH(itBot, vector<CBot*>, bots)
+		FOREACH(itBot, vector<CBot *>, bots)
 		{
-			CBot* bot = *itBot;
+			CBot *bot = *itBot;
 			if (bot)
 			{
-				CSpawnBot* spBot = bot->getSpawnObj();
+				CSpawnBot *spBot = bot->getSpawnObj();
 				if (spBot)
 					spBot->setCanAggro(canAggro);
 			}
@@ -1093,7 +1085,7 @@ void cbEventBotCanAggro( NLNET::CMessage& msgin, const std::string &serviceName,
 	}
 }
 
-void cbEventBotSheet( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbEventBotSheet(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 messageVersion;
 	string botName;
@@ -1102,13 +1094,13 @@ void cbEventBotSheet( NLNET::CMessage& msgin, const std::string &serviceName, NL
 	string customName;
 
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==3);
+	nlassert(messageVersion == 3);
 	msgin.serial(botName);
 	msgin.serial(sheetId);
 	msgin.serial(autoSpawnDespawn);
 	msgin.serial(customName);
 
-	vector<CBot*> bots;
+	vector<CBot *> bots;
 	/// try to find the bot name
 	buildFilteredBotList(bots, botName);
 	if (bots.empty())
@@ -1119,11 +1111,11 @@ void cbEventBotSheet( NLNET::CMessage& msgin, const std::string &serviceName, NL
 	else
 	{
 		AISHEETS::ICreatureCPtr const sheet = AISHEETS::CSheets::getInstance()->lookup(sheetId);
-		if (sheetId!=NLMISC::CSheetId::Unknown && !sheet.isNull())
+		if (sheetId != NLMISC::CSheetId::Unknown && !sheet.isNull())
 		{
-			FOREACH(itBot, vector<CBot*>, bots)
+			FOREACH(itBot, vector<CBot *>, bots)
 			{
-				CBot* bot = *itBot;
+				CBot *bot = *itBot;
 				if (bot)
 				{
 					bot->setCustomName(customName);
@@ -1135,9 +1127,9 @@ void cbEventBotSheet( NLNET::CMessage& msgin, const std::string &serviceName, NL
 		}
 		else if (autoSpawnDespawn)
 		{
-			FOREACH(itBot, vector<CBot*>, bots)
+			FOREACH(itBot, vector<CBot *>, bots)
 			{
-				CBot* bot = *itBot;
+				CBot *bot = *itBot;
 				if (bot && bot->isSpawned())
 					bot->despawnBot();
 			}
@@ -1145,36 +1137,36 @@ void cbEventBotSheet( NLNET::CMessage& msgin, const std::string &serviceName, NL
 	}
 }
 
-extern vector<vector<string> > scriptCommandsBotById;
+extern vector<vector<string>> scriptCommandsBotById;
 
-void cbR2NpcBotScriptById(NLNET::CMessage& msgin, const std::string& serviceName, NLNET::TServiceId serviceId)
+void cbR2NpcBotScriptById(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 messageVersion;
 	string botId;
 	uint32 nbString;
 	vector<string> strings;
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1);
+	nlassert(messageVersion == 1);
 	msgin.serial(nbString);
 	strings.resize(nbString);
-	for (uint32 i=0; i<nbString; ++i)
+	for (uint32 i = 0; i < nbString; ++i)
 		msgin.serial(strings[i]);
 	scriptCommandsBotById.push_back(strings);
 }
 
-extern vector<vector<string> > scriptCommandsGroupByName;
+extern vector<vector<string>> scriptCommandsGroupByName;
 
-void cbR2NpcGroupScriptByName(NLNET::CMessage& msgin, const std::string& serviceName, NLNET::TServiceId serviceId)
+void cbR2NpcGroupScriptByName(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 messageVersion;
 	string botId;
 	uint32 nbString;
 	vector<string> strings;
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1);
+	nlassert(messageVersion == 1);
 	msgin.serial(nbString);
 	strings.resize(nbString);
-	for (uint32 i=0; i<nbString; ++i)
+	for (uint32 i = 0; i < nbString; ++i)
 		msgin.serial(strings[i]);
 	scriptCommandsGroupByName.push_back(strings);
 }
@@ -1187,72 +1179,72 @@ class CBotDespawnNotification : private CBot::IObserver
 {
 public:
 	/// get the singleton instance
-	static CBotDespawnNotification* getInstance();
+	static CBotDespawnNotification *getInstance();
 
 	/// register a service to be notified when a bot will despawn
-	void registerService(NLNET::TServiceId serviceId, CBot* bot, const NLMISC::CEntityId& botId);
+	void registerService(NLNET::TServiceId serviceId, CBot *bot, const NLMISC::CEntityId &botId);
 
 	/// dump in a log
-	void dump(CLog& log) const;
+	void dump(CLog &log) const;
 
 private:
 	/// private ctor
 	CBotDespawnNotification();
 
 	/// callback of the observer
-	void notifyBotDespawn(CBot* bot);
-	void notifyBotDeath(CBot* bot);
-	void notifyStopNpcControl(CBot* bot);
+	void notifyBotDespawn(CBot *bot);
+	void notifyBotDeath(CBot *bot);
+	void notifyStopNpcControl(CBot *bot);
 
 	/// the singleton instance
-	static CBotDespawnNotification*	_Instance;
+	static CBotDespawnNotification *_Instance;
 
 	class CRegisteredService
 	{
 	public:
-		CRegisteredService(NLNET::TServiceId serviceId, const CEntityId& botId)
-			: _ServiceId(serviceId)
-			, _BotId(botId)
+		CRegisteredService(NLNET::TServiceId serviceId, const CEntityId &botId)
+		    : _ServiceId(serviceId)
+		    , _BotId(botId)
 		{
 		}
 
 		NLNET::TServiceId getServiceId() const { return _ServiceId; }
-		const CEntityId& getBotId() const { return _BotId; }
+		const CEntityId &getBotId() const { return _BotId; }
 
-		bool operator==(const CRegisteredService& other) const
+		bool operator==(const CRegisteredService &other) const
 		{
 			return (_ServiceId == other._ServiceId && _BotId == other._BotId);
 		}
 
 	private:
-		NLNET::TServiceId		_ServiceId;
-		CEntityId	_BotId;
+		NLNET::TServiceId _ServiceId;
+		CEntityId _BotId;
 	};
 
 	/// registered services by bot alias
 	typedef std::multimap<uint32, CRegisteredService> TRegisteredServiceMap;
-	TRegisteredServiceMap	_RegisteredServices;
+	TRegisteredServiceMap _RegisteredServices;
 };
 
-CBotDespawnNotification* CBotDespawnNotification::_Instance = NULL;
+CBotDespawnNotification *CBotDespawnNotification::_Instance = NULL;
 
 CBotDespawnNotification::CBotDespawnNotification()
 {
 }
 
-CBotDespawnNotification* CBotDespawnNotification::getInstance()
+CBotDespawnNotification *CBotDespawnNotification::getInstance()
 {
 	if (_Instance == NULL)
 		_Instance = new CBotDespawnNotification;
 	return _Instance;
 }
 
-void CBotDespawnNotification::registerService(NLNET::TServiceId serviceId, CBot* bot, const NLMISC::CEntityId& botId)
+void CBotDespawnNotification::registerService(NLNET::TServiceId serviceId, CBot *bot, const NLMISC::CEntityId &botId)
 {
 	nlassert(bot != NULL);
 
-	TRegisteredServiceMap::const_iterator first	= _RegisteredServices.lower_bound(bot->getAlias());
-	TRegisteredServiceMap::const_iterator last	= _RegisteredServices.upper_bound(bot->getAlias());
+	TRegisteredServiceMap::const_iterator first = _RegisteredServices.lower_bound(bot->getAlias());
+	TRegisteredServiceMap::const_iterator last = _RegisteredServices.upper_bound(bot->getAlias());
 
 	if (first == last)
 		bot->attachObserver(this);
@@ -1265,36 +1257,34 @@ void CBotDespawnNotification::registerService(NLNET::TServiceId serviceId, CBot*
 			break;
 	}
 	if (first == last)
-		_RegisteredServices.insert( make_pair(bot->getAlias(), rs) );
+		_RegisteredServices.insert(make_pair(bot->getAlias(), rs));
 }
 
-void CBotDespawnNotification::dump(CLog& log) const
+void CBotDespawnNotification::dump(CLog &log) const
 {
 	FOREACHC(it, TRegisteredServiceMap, _RegisteredServices)
 	{
-		const CRegisteredService& rs = (*it).second;
+		const CRegisteredService &rs = (*it).second;
 		log.displayNL("BotAlias %s => ServiceId %hu, BotId %s",
-			LigoConfig.aliasToString((*it).first).c_str(),
-			rs.getServiceId().get(),
-			rs.getBotId().toString().c_str()
-			);
+		    LigoConfig.aliasToString((*it).first).c_str(),
+		    rs.getServiceId().get(),
+		    rs.getBotId().toString().c_str());
 	}
 }
 
-void CBotDespawnNotification::notifyBotDespawn(CBot* bot)
+void CBotDespawnNotification::notifyBotDespawn(CBot *bot)
 {
 	nlassert(bot != NULL);
 
 	// catch this event only once for current services registered for this bot
 	bot->detachObserver(this);
 
-	TRegisteredServiceMap::iterator first	= _RegisteredServices.lower_bound(bot->getAlias());
-	TRegisteredServiceMap::iterator last	= _RegisteredServices.upper_bound(bot->getAlias());
+	TRegisteredServiceMap::iterator first = _RegisteredServices.lower_bound(bot->getAlias());
+	TRegisteredServiceMap::iterator last = _RegisteredServices.upper_bound(bot->getAlias());
 	if (first == last)
 	{
 		nlwarning("No service requested despawn notification for bot %s",
-			LigoConfig.aliasToString(bot->getAlias()).c_str()
-			);
+		    LigoConfig.aliasToString(bot->getAlias()).c_str());
 		DEBUG_STOP;
 		return;
 	}
@@ -1302,7 +1292,7 @@ void CBotDespawnNotification::notifyBotDespawn(CBot* bot)
 	// notify all services registered for this bot
 	while (first != last)
 	{
-		const CRegisteredService& rs = (*first).second;
+		const CRegisteredService &rs = (*first).second;
 		CMessages::notifyBotDespawn(rs.getServiceId(), bot->getAlias(), rs.getBotId());
 
 		TRegisteredServiceMap::iterator tmp = first;
@@ -1311,42 +1301,40 @@ void CBotDespawnNotification::notifyBotDespawn(CBot* bot)
 	}
 }
 
-void CBotDespawnNotification::notifyStopNpcControl(CBot* bot)
+void CBotDespawnNotification::notifyStopNpcControl(CBot *bot)
 {
 	nlassert(bot != NULL);
 
 	// catch this event only once for current services registered for this bot
-	//bot->detachObserver(this);
+	// bot->detachObserver(this);
 
-	TRegisteredServiceMap::iterator first	= _RegisteredServices.lower_bound(bot->getAlias());
-	TRegisteredServiceMap::iterator last	= _RegisteredServices.upper_bound(bot->getAlias());
-
+	TRegisteredServiceMap::iterator first = _RegisteredServices.lower_bound(bot->getAlias());
+	TRegisteredServiceMap::iterator last = _RegisteredServices.upper_bound(bot->getAlias());
 
 	// notify all services registered for this bot
 	while (first != last)
 	{
-		const CRegisteredService& rs = (*first).second;
+		const CRegisteredService &rs = (*first).second;
 		CMessages::notifyBotStopNpcControl(rs.getServiceId(), bot->getAlias(), rs.getBotId());
 
 		TRegisteredServiceMap::iterator tmp = first;
 		++first;
-	//	_RegisteredServices.erase(tmp);
+		//	_RegisteredServices.erase(tmp);
 	}
 }
-void CBotDespawnNotification::notifyBotDeath(CBot* bot)
+void CBotDespawnNotification::notifyBotDeath(CBot *bot)
 {
-		nlassert(bot != NULL);
+	nlassert(bot != NULL);
 
 	// catch this event only once for current services registered for this bot
 	bot->detachObserver(this);
 
-	TRegisteredServiceMap::iterator first	= _RegisteredServices.lower_bound(bot->getAlias());
-	TRegisteredServiceMap::iterator last	= _RegisteredServices.upper_bound(bot->getAlias());
+	TRegisteredServiceMap::iterator first = _RegisteredServices.lower_bound(bot->getAlias());
+	TRegisteredServiceMap::iterator last = _RegisteredServices.upper_bound(bot->getAlias());
 	if (first == last)
 	{
 		nlwarning("No service requested death notification for bot %s",
-			LigoConfig.aliasToString(bot->getAlias()).c_str()
-			);
+		    LigoConfig.aliasToString(bot->getAlias()).c_str());
 		DEBUG_STOP;
 		return;
 	}
@@ -1354,7 +1342,7 @@ void CBotDespawnNotification::notifyBotDeath(CBot* bot)
 	// notify all services registered for this bot
 	while (first != last)
 	{
-		const CRegisteredService& rs = (*first).second;
+		const CRegisteredService &rs = (*first).second;
 		CMessages::notifyBotDeath(rs.getServiceId(), bot->getAlias(), rs.getBotId());
 
 		TRegisteredServiceMap::iterator tmp = first;
@@ -1363,8 +1351,7 @@ void CBotDespawnNotification::notifyBotDeath(CBot* bot)
 	}
 }
 
-
-void cbAskBotDespawnNotification(NLNET::CMessage& msgin, const std::string& serviceName, NLNET::TServiceId serviceId)
+void cbAskBotDespawnNotification(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 messageVersion;
 	uint32 botAlias;
@@ -1382,8 +1369,8 @@ void cbAskBotDespawnNotification(NLNET::CMessage& msgin, const std::string& serv
 		return;
 	}
 
-	CAIEntityPhysical* entity = CAIS::instance().getEntityPhysical(botRowId);
-	if	(entity == NULL)
+	CAIEntityPhysical *entity = CAIS::instance().getEntityPhysical(botRowId);
+	if (entity == NULL)
 	{
 		CMessages::notifyBotDespawn(serviceId, botAlias, botId);
 		return;
@@ -1393,12 +1380,12 @@ void cbAskBotDespawnNotification(NLNET::CMessage& msgin, const std::string& serv
 	nlassert(entity->getEntityId() == botId);
 #endif
 
-	CSpawnBot* bot = NULL;
+	CSpawnBot *bot = NULL;
 	switch (entity->getRyzomType())
 	{
 	case RYZOMID::creature:
 	case RYZOMID::npc:
-		bot = NLMISC::safe_cast<CSpawnBot*>(entity);
+		bot = NLMISC::safe_cast<CSpawnBot *>(entity);
 		break;
 	default:
 		break;
@@ -1415,7 +1402,7 @@ void cbAskBotDespawnNotification(NLNET::CMessage& msgin, const std::string& serv
 	CBotDespawnNotification::getInstance()->registerService(serviceId, &bot->getPersistent(), botId);
 }
 
-void cbSpawnEasterEgg(NLNET::CMessage& msgin, const std::string& serviceName, NLNET::TServiceId serviceId)
+void cbSpawnEasterEgg(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 messageVersion;
 	uint32 instanceNumber;
@@ -1428,7 +1415,7 @@ void cbSpawnEasterEgg(NLNET::CMessage& msgin, const std::string& serviceName, NL
 	float heading;
 
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1);
+	nlassert(messageVersion == 1);
 	msgin.serial(instanceNumber);
 	msgin.serial(easterEggId);
 	msgin.serial(sheetId);
@@ -1436,10 +1423,10 @@ void cbSpawnEasterEgg(NLNET::CMessage& msgin, const std::string& serviceName, NL
 	msgin.serial(look);
 	msgin.serial(x, y, z, heading);
 
-	CAIInstance* instance = CAIS::instance().getAIInstance(instanceNumber);
+	CAIInstance *instance = CAIS::instance().getAIInstance(instanceNumber);
 	if (instance != NULL)
 	{
-		CBotEasterEgg* bot = instance->createEasterEgg(easterEggId, sheetId, botName, float(x)/1000., float(y)/1000., float(z)/1000., heading, look );
+		CBotEasterEgg *bot = instance->createEasterEgg(easterEggId, sheetId, botName, float(x) / 1000., float(y) / 1000., float(z) / 1000., heading, look);
 		if (bot != NULL)
 		{
 			nlassert(bot->getSpawn() != NULL);
@@ -1461,18 +1448,18 @@ void cbSpawnEasterEgg(NLNET::CMessage& msgin, const std::string& serviceName, NL
 	}
 }
 
-void cbDespawnEasterEgg(NLNET::CMessage& msgin, const std::string& serviceName, NLNET::TServiceId serviceId)
+void cbDespawnEasterEgg(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 messageVersion;
 	uint32 instanceNumber;
 	uint32 easterEggId;
 
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1);
+	nlassert(messageVersion == 1);
 	msgin.serial(instanceNumber);
 	msgin.serial(easterEggId);
 
-	CAIInstance* instance = CAIS::instance().getAIInstance(instanceNumber);
+	CAIInstance *instance = CAIS::instance().getAIInstance(instanceNumber);
 	if (instance != NULL)
 	{
 		instance->destroyEasterEgg(easterEggId);

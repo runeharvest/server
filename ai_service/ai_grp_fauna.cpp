@@ -25,23 +25,22 @@ using namespace MULTI_LINE_FORMATER;
 
 using namespace NLMISC;
 using namespace RYAI_MAP_CRUNCH;
-using namespace	AITYPES;
+using namespace AITYPES;
 
-static char const* stateName(CSpawnGroupFauna::TState s)
+static char const *stateName(CSpawnGroupFauna::TState s)
 {
 	switch (s)
 	{
-	case CSpawnGroupFauna::StateDespawned:	return "DESPAWNED";
-	case CSpawnGroupFauna::StateSpawning:	return "SPAWNING";
-	case CSpawnGroupFauna::StateGrazing:	return "GRAZING";
-	case CSpawnGroupFauna::StateWandering:	return "WANDERING";
-	case CSpawnGroupFauna::StateResting:	return "RESTING";
+	case CSpawnGroupFauna::StateDespawned: return "DESPAWNED";
+	case CSpawnGroupFauna::StateSpawning: return "SPAWNING";
+	case CSpawnGroupFauna::StateGrazing: return "GRAZING";
+	case CSpawnGroupFauna::StateWandering: return "WANDERING";
+	case CSpawnGroupFauna::StateResting: return "RESTING";
 	default:
 		break;
 	}
 	return "UNKNOWN STATE";
 }
-
 
 // helper : get a fauna xyr zone from a base zone or a zone reference
 static inline const CFaunaGenericPlace *getFaunaGenericPlace(const CAIPlace *place)
@@ -55,11 +54,10 @@ static inline const CFaunaGenericPlace *getFaunaGenericPlace(const CAIPlace *pla
 // CGrpFauna static data                                                    //
 //////////////////////////////////////////////////////////////////////////////
 
-CGrpFauna::CCycleDef const CGrpFauna::cycles[] =
-{
+CGrpFauna::CCycleDef const CGrpFauna::cycles[] = {
 	{ CSpawnGroupFauna::StateSpawning, CGrpFauna::SPAWN_TIME, CGrpFauna::SPAWN_PLACE },
-	{ CSpawnGroupFauna::StateGrazing,  CGrpFauna::EAT_TIME,   CGrpFauna::EAT_PLACE },
-	{ CSpawnGroupFauna::StateResting,  CGrpFauna::REST_TIME,  CGrpFauna::REST_PLACE }
+	{ CSpawnGroupFauna::StateGrazing, CGrpFauna::EAT_TIME, CGrpFauna::EAT_PLACE },
+	{ CSpawnGroupFauna::StateResting, CGrpFauna::REST_TIME, CGrpFauna::REST_PLACE }
 };
 
 uint32 const CGrpFauna::nbCycle = sizeof(CGrpFauna::CCycleDef) / sizeof(CGrpFauna::cycles);
@@ -68,15 +66,15 @@ uint32 const CGrpFauna::nbCycle = sizeof(CGrpFauna::CCycleDef) / sizeof(CGrpFaun
 // CSpawnGroupFauna                                                         //
 //////////////////////////////////////////////////////////////////////////////
 
-CSpawnGroupFauna::CSpawnGroupFauna(CPersistent<CSpawnGroup>& owner, RYAI_MAP_CRUNCH::TAStarFlag denyFlag)
-: CSpawnGroup(owner)
-, _DespawnImmediately(false)
-, _PathCont(denyFlag)
+CSpawnGroupFauna::CSpawnGroupFauna(CPersistent<CSpawnGroup> &owner, RYAI_MAP_CRUNCH::TAStarFlag denyFlag)
+    : CSpawnGroup(owner)
+    , _DespawnImmediately(false)
+    , _PathCont(denyFlag)
 {
 	// variables for CAIMgrFauna's update prioritisation system
-	_UpdatePriority = 0;	// 0..15 - priority class (distance based - 0 is highest priority)
+	_UpdatePriority = 0; // 0..15 - priority class (distance based - 0 is highest priority)
 
-	_Leader = (CBotFauna*)NULL;
+	_Leader = (CBotFauna *)NULL;
 
 	_Timer.set(0);
 
@@ -87,30 +85,30 @@ CSpawnGroupFauna::CSpawnGroupFauna(CPersistent<CSpawnGroup>& owner, RYAI_MAP_CRU
 		std::vector<uint> candidates;
 		// seek place with the smallest index
 		sint minIndex = INT_MAX;
-		for (uint k  = 0; k < getPersistent().places().size(); ++k)
+		for (uint k = 0; k < getPersistent().places().size(); ++k)
 		{
 			const CFaunaGenericPlace *place = getFaunaGenericPlace(getPersistent().places()[k]);
-			minIndex = std::min((sint) place->getIndex(), minIndex);
+			minIndex = std::min((sint)place->getIndex(), minIndex);
 		}
-		for (uint k  = 0; k < getPersistent().places().size(); ++k)
+		for (uint k = 0; k < getPersistent().places().size(); ++k)
 		{
 			const CFaunaGenericPlace *place = getFaunaGenericPlace(getPersistent().places()[k]);
-			if ((sint) place->getIndex() == minIndex)
+			if ((sint)place->getIndex() == minIndex)
 			{
 				candidates.push_back(k);
 			}
 		}
-		spawnPlace = (sint) candidates[rand() % candidates.size()];
-		//nlwarning("No spawn place found for group %s, using place with smallest index", getPersistent().getName().c_str());
+		spawnPlace = (sint)candidates[rand() % candidates.size()];
+		// nlwarning("No spawn place found for group %s, using place with smallest index", getPersistent().getName().c_str());
 	}
 	setPlace(spawnPlace);
 	_CenterPos = _TargetPlace->midPos();
 
 	// make sure memory's been allocated for the bots
-	if (bots().size()==0)
+	if (bots().size() == 0)
 		getPersistent().allocateBots();
 
-	if (bots().size()!=0)
+	if (bots().size() != 0)
 	{
 		uint32 const spawnTimer = getPersistent().timer(CGrpFauna::SPAWN_TIME);
 		_Timer.set(spawnTimer);
@@ -125,14 +123,14 @@ CSpawnGroupFauna::CSpawnGroupFauna(CPersistent<CSpawnGroup>& owner, RYAI_MAP_CRU
 	setMustDespawnBots(false);
 }
 
-CSpawnGroupFauna& CSpawnBotFauna::spawnGrp()
+CSpawnGroupFauna &CSpawnBotFauna::spawnGrp()
 {
-	return static_cast<CSpawnGroupFauna&>(CSpawnBot::spawnGrp());
+	return static_cast<CSpawnGroupFauna &>(CSpawnBot::spawnGrp());
 }
 
-void CSpawnGroupFauna::despawnGrp()				//	critical code (despawn 'this' object).
+void CSpawnGroupFauna::despawnGrp() //	critical code (despawn 'this' object).
 {
-	CGrpFauna* faunaGrpPtr = &getPersistent();
+	CGrpFauna *faunaGrpPtr = &getPersistent();
 	faunaGrpPtr->mgr().addToSpawn(faunaGrpPtr);
 	faunaGrpPtr->despawnGrp();
 }
@@ -148,31 +146,29 @@ void CSpawnGroupFauna::recalcUpdatePriorityDeltaAndGroupPos()
 
 	FOREACH(it, CCont<CBot>, bots())
 	{
-		CBotFauna	*bot=NLMISC::safe_cast<CBotFauna*>(*it);
-		CSpawnBotFauna	*botFauna=bot->getSpawn();
+		CBotFauna *bot = NLMISC::safe_cast<CBotFauna *>(*it);
+		CSpawnBotFauna *botFauna = bot->getSpawn();
 		if (botFauna)
 		{
 			if (botFauna->isAlive())
 			{
-				const	CAIPosMirror	&pos=botFauna->pos();
-				grpPosx+=(sint32)(pos.x().asInt()*(1.0/1000.0));
-				grpPosy+=(sint32)(pos.y().asInt()*(1.0/1000.0));
+				const CAIPosMirror &pos = botFauna->pos();
+				grpPosx += (sint32)(pos.x().asInt() * (1.0 / 1000.0));
+				grpPosy += (sint32)(pos.y().asInt() * (1.0 / 1000.0));
 				nbBots++;
 			}
 
 			if (botFauna->havePlayersAround())
 			{
-				speedUpdate=true;
+				speedUpdate = true;
 				break;
 			}
-
 		}
-
 	}
 
-	if (nbBots>0)
+	if (nbBots > 0)
 	{
-		_CenterPos = CAIVector(grpPosx/nbBots,grpPosy/nbBots);
+		_CenterPos = CAIVector(grpPosx / nbBots, grpPosy / nbBots);
 	}
 
 	if (speedUpdate)
@@ -181,29 +177,29 @@ void CSpawnGroupFauna::recalcUpdatePriorityDeltaAndGroupPos()
 		_UpdatePriority = 31;
 
 	// if players are approaching then crop our move time
-	uint32	curTime	= CTimeInterface::gameCycle	();
-	if (((sint32)(curTime-_LastUpdate))>(_UpdatePriority+1))
-		_LastUpdate	=	curTime-(_UpdatePriority+1);
+	uint32 curTime = CTimeInterface::gameCycle();
+	if (((sint32)(curTime - _LastUpdate)) > (_UpdatePriority + 1))
+		_LastUpdate = curTime - (_UpdatePriority + 1);
 
-	_DeltaTime = curTime-_LastUpdate;
+	_DeltaTime = curTime - _LastUpdate;
 }
 
-CBotFauna* CSpawnGroupFauna::findLeader()
+CBotFauna *CSpawnGroupFauna::findLeader()
 {
-	CBotFauna* possibleLeader = NULL;
+	CBotFauna *possibleLeader = NULL;
 
-	CCont<CBot >::iterator it = bots().begin();
-	CCont<CBot >::iterator itEnd = bots().end();
-	while (it!=itEnd)
+	CCont<CBot>::iterator it = bots().begin();
+	CCont<CBot>::iterator itEnd = bots().end();
+	while (it != itEnd)
 	{
-		CBotFauna* botPtr = static_cast<CBotFauna*>(*it);
-		if	(botPtr->isSpawned())	//	if bot is spawned
+		CBotFauna *botPtr = static_cast<CBotFauna *>(*it);
+		if (botPtr->isSpawned()) //	if bot is spawned
 		{
-			if (botPtr->getSpawnObj()->isAlive())	// is alive
+			if (botPtr->getSpawnObj()->isAlive()) // is alive
 			{
-				possibleLeader=botPtr;
-				if (_TargetPlace->atPlace(possibleLeader->getSpawn()->pos()))	//	and eventually in place
-					return	possibleLeader;
+				possibleLeader = botPtr;
+				if (_TargetPlace->atPlace(possibleLeader->getSpawn()->pos())) //	and eventually in place
+					return possibleLeader;
 			}
 		}
 		++it;
@@ -220,20 +216,20 @@ void CSpawnGroupFauna::update()
 
 	getPersistent().updateStateInstance();
 
-	if (_CurrentCycle==std::numeric_limits<uint32>::max())
+	if (_CurrentCycle == std::numeric_limits<uint32>::max())
 		return;
 
 	// Respawn
-//	breakable
+	//	breakable
 	{
 		H_AUTO(GrpFaunaUpdateDealWithDead);
-		checkDespawn ();
+		checkDespawn();
 
-		if	(nbBotToRespawn()>0)
+		if (nbBotToRespawn() > 0)
 		{
-			if	(nbSpawnedBot()>0)	//	(getPersistent().bots().size()/2))
+			if (nbSpawnedBot() > 0) //	(getPersistent().bots().size()/2))
 			{
-				if	(getPersistent().timeAllowSpawn	())
+				if (getPersistent().timeAllowSpawn())
 				{
 					checkRespawn();
 				}
@@ -242,7 +238,7 @@ void CSpawnGroupFauna::update()
 			{
 				//	critical code (despawn 'this' object).
 				despawnGrp();
-				return;	//	forced becoz the group is despawn and respawned (will be updated next time).
+				return; //	forced becoz the group is despawn and respawned (will be updated next time).
 			}
 		}
 	}
@@ -270,60 +266,58 @@ void CSpawnGroupFauna::update()
 	_LastUpdate = CTimeInterface::gameCycle();
 }
 
-void CSpawnGroupFauna::generalUpdate(TState	state)
+void CSpawnGroupFauna::generalUpdate(TState state)
 {
 	H_TIME(GrpFaunaReorganize, reorganize(bots().begin(), bots().end()););
 
 	{
 		H_AUTO(GrpFaunaUpdDespawnTest);
 
-		if (	!mustDespawnBots()
-			&&	getUpdatePriority	()>(2<<3)
-			&&	!getPersistent().timeAllowSpawn()	)	//	40*3 -> more than 120 meters far from players
+		if (!mustDespawnBots()
+		    && getUpdatePriority() > (2 << 3)
+		    && !getPersistent().timeAllowSpawn()) //	40*3 -> more than 120 meters far from players
 		{
-			setMustDespawnBots	(true);
+			setMustDespawnBots(true);
 		}
 	}
 
-	if (state==StateUndefined)
-		state=CGrpFauna::cycles[_CurrentCycle]._Activity;
+	if (state == StateUndefined)
+		state = CGrpFauna::cycles[_CurrentCycle]._Activity;
 
 	// call a type-dependent update
-	switch	(getPersistent().getType())
+	switch (getPersistent().getType())
 	{
 	case FaunaTypeHerbivore:
-	case FaunaTypePredator:
+	case FaunaTypePredator: {
+		H_AUTO(GrpFaunaUpdNonPlant);
+		switch (state) //	updateAnimals.
 		{
-			H_AUTO(GrpFaunaUpdNonPlant);
-			switch (state)	//	updateAnimals.
-			{
-			case StateDespawned:	break;
-			case StateSpawning:		updateSpawning();	break;
-			case StateGrazing:		updateActivity(ACTIVITY_GRAZING);	break;
-			case StateWandering:	updateActivity(ACTIVITY_WANDERING);	break;
-			case StateResting:		updateActivity(ACTIVITY_RESTING);		break;
-			default:	nlwarning("CSpawnGroupFauna::updateAnimals FAILED because state not valid: %d",state);
-			}
+		case StateDespawned: break;
+		case StateSpawning: updateSpawning(); break;
+		case StateGrazing: updateActivity(ACTIVITY_GRAZING); break;
+		case StateWandering: updateActivity(ACTIVITY_WANDERING); break;
+		case StateResting: updateActivity(ACTIVITY_RESTING); break;
+		default: nlwarning("CSpawnGroupFauna::updateAnimals FAILED because state not valid: %d", state);
 		}
-		break;
+	}
+	break;
 
-	case FaunaTypePlant:
+	case FaunaTypePlant: {
+		H_AUTO(GrpFaunaUpdPlant);
+		// run the state behaviour code
+		switch (state) //	updatePlants.
 		{
-			H_AUTO(GrpFaunaUpdPlant);
-			// run the state behaviour code
-			switch (state)	//	updatePlants.
-			{
-			case StateDespawned:	break;
-			case StateSpawning:		updateSpawning();	break;
-			case StateGrazing:		updateActivity(ACTIVITY_PLANTIDLE);	break;
-			case StateWandering:	updateActivity(ACTIVITY_PLANTIDLE);	break;
-			case StateResting:		updateActivity(ACTIVITY_PLANTIDLE);	break;
-			default:	nlwarning("CSpawnGroupFauna::updatePlants FAILED because state not valid: %d",state);
-			}
+		case StateDespawned: break;
+		case StateSpawning: updateSpawning(); break;
+		case StateGrazing: updateActivity(ACTIVITY_PLANTIDLE); break;
+		case StateWandering: updateActivity(ACTIVITY_PLANTIDLE); break;
+		case StateResting: updateActivity(ACTIVITY_PLANTIDLE); break;
+		default: nlwarning("CSpawnGroupFauna::updatePlants FAILED because state not valid: %d", state);
 		}
-		break;
+	}
+	break;
 
-	default:	nlwarning("CSpawnGroupFauna::update() FAILED because group type not valid: %d",getPersistent().getType());
+	default: nlwarning("CSpawnGroupFauna::update() FAILED because group type not valid: %d", getPersistent().getType());
 	}
 }
 
@@ -335,25 +329,24 @@ bool CSpawnGroupFauna::isSpawning()
 void CSpawnGroupFauna::updateSpawning()
 {
 	//	check if we have some bots to spawn to reach timer (proportionnaly).
-	if	(	(!mustDespawnBots())
-			&&	(	(	_Timer.timeRemaining()==0
-					&&	nbSpawnedBot()<bots().size())
-				||	(	_Timer.totalTime()!=0
-					&&	nbSpawnedBot()<((bots().size()*_Timer.timeSinceStart())/_Timer.totalTime()))
-					)	)
+	if ((!mustDespawnBots())
+	    && ((_Timer.timeRemaining() == 0
+	            && nbSpawnedBot() < bots().size())
+	        || (_Timer.totalTime() != 0
+	            && nbSpawnedBot() < ((bots().size() * _Timer.timeSinceStart()) / _Timer.totalTime()))))
 	{
-		uint	i,j;
-		uint	targetCount=0;
+		uint i, j;
+		uint targetCount = 0;
 #ifdef NL_DEBUG
 		nlassert(getPersistent().populations()[getPersistent()._CurPopulation]);
 #endif
-		CPopulation&	curPop=*getPersistent().populations()[getPersistent()._CurPopulation];
+		CPopulation &curPop = *getPersistent().populations()[getPersistent()._CurPopulation];
 
-		for (i=0;i<curPop.size();++i)
-			targetCount+=curPop[i].getBotCount(getPersistent().getCountMultiplierFlag());
+		for (i = 0; i < curPop.size(); ++i)
+			targetCount += curPop[i].getBotCount(getPersistent().getCountMultiplierFlag());
 
 		// if no more bots to spawn then change state...
-		if	(bots()[targetCount-1]->isSpawned())
+		if (bots()[targetCount - 1]->isSpawned())
 		{
 			incCurrentCycle();
 			generalUpdate();
@@ -361,43 +354,39 @@ void CSpawnGroupFauna::updateSpawning()
 		}
 
 		// identify the bot to spawn
-		uint	count=0;
+		uint count = 0;
 		{
-			CBot*	faunaPt=NULL;
-			for (i=0;i<curPop.size();++i)
+			CBot *faunaPt = NULL;
+			for (i = 0; i < curPop.size(); ++i)
 			{
-				CPopulationRecord	&popRecord=curPop[i];
-				for (j=0;j<popRecord.getBotCount(getPersistent().getCountMultiplierFlag());++j,++count)
+				CPopulationRecord &popRecord = curPop[i];
+				for (j = 0; j < popRecord.getBotCount(getPersistent().getCountMultiplierFlag()); ++j, ++count)
 				{
-					if	(!bots()[count]->isSpawned())
+					if (!bots()[count]->isSpawned())
 						break;
 				}
-				if (j<popRecord.getBotCount(getPersistent().getCountMultiplierFlag()))
+				if (j < popRecord.getBotCount(getPersistent().getCountMultiplierFlag()))
 					break;
 			}
-
 		}
 
-
-
 		// by definition there must be a bot type
-		nlassert(i<curPop.size());
+		nlassert(i < curPop.size());
 
 		// spawn the bot
 		{
-			CBotFauna	*faunaPt=NLMISC::safe_cast<CBotFauna*>(bots()[count]);
+			CBotFauna *faunaPt = NLMISC::safe_cast<CBotFauna *>(bots()[count]);
 
-			faunaPt->setSheet	(/*const_cast<AISHEETS::ICreature *>(*/curPop[i].getCreatureSheet()/*)*/);
-			faunaPt->reSpawn	();
+			faunaPt->setSheet(/*const_cast<AISHEETS::ICreature *>(*/ curPop[i].getCreatureSheet() /*)*/);
+			faunaPt->reSpawn();
 		}
 
 		// if this is the first bot to be spawned in the group then st up the leader pointer to point to it
 		// and set the group type
-		if (count==0)
+		if (count == 0)
 		{
 			_Leader = findLeader();
 		}
-
 	}
 	// to all intent and purpose consider that our bots are wandering
 	generalUpdate(StateWandering);
@@ -416,8 +405,8 @@ void CSpawnGroupFauna::setCurrentCycle(uint32 cycle)
 		return;
 	}
 	//	did we start a new cycle ?
-	if (cycle>=(sizeof(CGrpFauna::cycles)/sizeof(CGrpFauna::CCycleDef)))
-		cycle=1;
+	if (cycle >= (sizeof(CGrpFauna::cycles) / sizeof(CGrpFauna::CCycleDef)))
+		cycle = 1;
 
 	const CFaunaGenericPlace *targetPlacePtr = getFaunaGenericPlace(targetPlace());
 
@@ -425,64 +414,64 @@ void CSpawnGroupFauna::setCurrentCycle(uint32 cycle)
 	// search a place that match current cycle
 	// First we search a neighbour place that has wanted activity
 	// otherwise we change activity to the one we found
-	switch(CGrpFauna::cycles[cycle]._Place)
+	switch (CGrpFauna::cycles[cycle]._Place)
 	{
-		case CGrpFauna::EAT_PLACE:
-			nextPlace = getPersistent().getNextPlace(targetPlacePtr, CAIPlaceXYRFauna::FLAG_EAT);
-			if (nextPlace == CGrpFauna::INVALID_PLACE)
+	case CGrpFauna::EAT_PLACE:
+		nextPlace = getPersistent().getNextPlace(targetPlacePtr, CAIPlaceXYRFauna::FLAG_EAT);
+		if (nextPlace == CGrpFauna::INVALID_PLACE)
+		{
+			nextPlace = getPersistent().getNextPlace(targetPlacePtr, CAIPlaceXYRFauna::FLAG_REST);
+			if (nextPlace != CGrpFauna::INVALID_PLACE)
 			{
-				nextPlace = getPersistent().getNextPlace(targetPlacePtr, CAIPlaceXYRFauna::FLAG_REST);
-				if (nextPlace != CGrpFauna::INVALID_PLACE)
+				cycle = CGrpFauna::REST_PLACE; // force to rest
+			}
+			else
+			{
+				nextPlace = targetPlace()->getChildIndex();
+				// remains in the same place
+				if (!targetPlacePtr->getFlag(CAIPlaceXYRFauna::FLAG_EAT))
 				{
+					// can't eat there, so force to rest
 					cycle = CGrpFauna::REST_PLACE; // force to rest
 				}
-				else
-				{
-					nextPlace = targetPlace()->getChildIndex();
-					// remains in the same place
-					if (!targetPlacePtr->getFlag(CAIPlaceXYRFauna::FLAG_EAT))
-					{
-						// can't eat there, so force to rest
-						cycle = CGrpFauna::REST_PLACE; // force to rest
-					}
-				}
 			}
+		}
 		break;
-		case CGrpFauna::REST_PLACE:
-			nextPlace = getPersistent().getNextPlace(targetPlacePtr, CAIPlaceXYRFauna::FLAG_REST);
-			if (nextPlace == CGrpFauna::INVALID_PLACE)
+	case CGrpFauna::REST_PLACE:
+		nextPlace = getPersistent().getNextPlace(targetPlacePtr, CAIPlaceXYRFauna::FLAG_REST);
+		if (nextPlace == CGrpFauna::INVALID_PLACE)
+		{
+			nextPlace = getPersistent().getNextPlace(targetPlacePtr, CAIPlaceXYRFauna::FLAG_EAT);
+			if (nextPlace != CGrpFauna::INVALID_PLACE)
 			{
-				nextPlace = getPersistent().getNextPlace(targetPlacePtr, CAIPlaceXYRFauna::FLAG_EAT);
-				if (nextPlace != CGrpFauna::INVALID_PLACE)
+				cycle = CGrpFauna::EAT_PLACE; // force to eat
+			}
+			else
+			{
+				nextPlace = targetPlace()->getChildIndex();
+				// remains in the same place
+				if (!targetPlacePtr->getFlag(CAIPlaceXYRFauna::FLAG_REST))
 				{
-					cycle = CGrpFauna::EAT_PLACE; // force to eat
-				}
-				else
-				{
-					nextPlace = targetPlace()->getChildIndex();
-					// remains in the same place
-					if (!targetPlacePtr->getFlag(CAIPlaceXYRFauna::FLAG_REST))
-					{
-						// can't rest there, so force to eat
-						cycle = CGrpFauna::EAT_PLACE; // force to rest
-					}
+					// can't rest there, so force to eat
+					cycle = CGrpFauna::EAT_PLACE; // force to rest
 				}
 			}
+		}
 		break;
 	}
 	_CurrentCycle = cycle;
 	setPlace(nextPlace);
 
-	if (_CurrentCycle==CGrpFauna::EAT_PLACE)
+	if (_CurrentCycle == CGrpFauna::EAT_PLACE)
 	{
-		for (CCont<CBot >::iterator it=bots().begin(), itEnd=bots().end();it!=itEnd;++it)
+		for (CCont<CBot>::iterator it = bots().begin(), itEnd = bots().end(); it != itEnd; ++it)
 		{
-			CBotFauna		*const	faunaBot=NLMISC::safe_cast<CBotFauna*>(*it);
-			CSpawnBotFauna	*const	faunaSpawnBot=	faunaBot->getSpawn();
-			if	(!faunaSpawnBot)
+			CBotFauna *const faunaBot = NLMISC::safe_cast<CBotFauna *>(*it);
+			CSpawnBotFauna *const faunaSpawnBot = faunaBot->getSpawn();
+			if (!faunaSpawnBot)
 				continue;
 
-			faunaSpawnBot->hungry()=faunaSpawnBot->radius();
+			faunaSpawnBot->hungry() = faunaSpawnBot->radius();
 		}
 	}
 }
@@ -491,49 +480,46 @@ void CSpawnGroupFauna::updateActivity(TProfiles activity)
 {
 	FOREACH(it, CCont<CBot>, bots())
 	{
-		CBotFauna*	bot=NLMISC::safe_cast<CBotFauna*>(*it);
+		CBotFauna *bot = NLMISC::safe_cast<CBotFauna *>(*it);
 		if (bot->isSpawned())
-			bot->getSpawn()->update(activity,getDt());
+			bot->getSpawn()->update(activity, getDt());
 	}
 }
 
 void CSpawnGroupFauna::checkTimers()
 {
-	if (CGrpFauna::cycles[_CurrentCycle]._Activity==StateSpawning)
+	if (CGrpFauna::cycles[_CurrentCycle]._Activity == StateSpawning)
 		return;
 
-	if (!_ArrivedInZone)	//	 if we are changing the current activity zone.
+	if (!_ArrivedInZone) //	 if we are changing the current activity zone.
 	{
-		if	(	!_Leader.isNULL()
-			&&	_Leader->isSpawned())
+		if (!_Leader.isNULL()
+		    && _Leader->isSpawned())
 		{
-			const	CAIPos	leaderPos(_Leader->getSpawn()->pos());
-			const	CAIPos	midPos=_TargetPlace->midPos();	//	better is very possible.
+			const CAIPos leaderPos(_Leader->getSpawn()->pos());
+			const CAIPos midPos = _TargetPlace->midPos(); //	better is very possible.
 
-			if	(leaderPos.distTo(midPos)<_TargetPlace->getRadius())	//	si leader dans la zone.
+			if (leaderPos.distTo(midPos) < _TargetPlace->getRadius()) //	si leader dans la zone.
 			{
-				_ArrivedInZone=true;	//	we desactivate the boolean.
+				_ArrivedInZone = true; //	we desactivate the boolean.
 				const CFaunaGenericPlace *faunaPlace = getFaunaGenericPlace(targetPlace());
 				NLMISC::CRandom rnd;
-				uint32 stayTime = faunaPlace->getMinStayTime() + (sint32) (rnd.frand() * ((sint32) faunaPlace->getMaxStayTime() - (sint32) faunaPlace->getMinStayTime()));
+				uint32 stayTime = faunaPlace->getMinStayTime() + (sint32)(rnd.frand() * ((sint32)faunaPlace->getMaxStayTime() - (sint32)faunaPlace->getMinStayTime()));
 				_Timer.set(stayTime);
 				/*
 				nlwarning("Group %s : Setting stay time to %d in place %s with index %d",
-					      getPersistent().getName().c_str(),
-						  (int) stayTime,
-						  faunaPlace->getName().c_str(),
-						  (int) faunaPlace->getIndex());
-						  */
-
+				          getPersistent().getName().c_str(),
+				          (int) stayTime,
+				          faunaPlace->getName().c_str(),
+				          (int) faunaPlace->getIndex());
+				          */
 			}
-
 		}
-
 	}
 	else
 	{
 		// nlwarning("Group %s : Timer = %d", getPersistent().getName().c_str(), (int) (100 * _Timer.timeRemaining() / _Timer.totalTime()));
-		if	(_Timer.test())	//	si fin de timer.
+		if (_Timer.test()) //	si fin de timer.
 			incCurrentCycle();
 	}
 }
@@ -542,7 +528,7 @@ void CSpawnGroupFauna::spawnBots()
 {
 	setMustDespawnBots(false);
 	_CurrentCycle = 0; // first activity == spawning.
-	nlassert(bots().size()>0);
+	nlassert(bots().size() > 0);
 	_Timer.set(getPersistent().timer(CGrpFauna::SPAWN_TIME));
 }
 
@@ -552,24 +538,24 @@ void CSpawnGroupFauna::despawnBots(bool immediately)
 	setMustDespawnBots();
 }
 
-CAIPos const& CSpawnGroupFauna::magnetPos() const
+CAIPos const &CSpawnGroupFauna::magnetPos() const
 {
 	return targetPlace()->midPos();
 }
 
 float CSpawnGroupFauna::magnetRadiusNear() const
 {
-	return targetPlace()->getRadius()*(7.0f/8.0f);
+	return targetPlace()->getRadius() * (7.0f / 8.0f);
 }
 
 float CSpawnGroupFauna::magnetRadiusFar() const
 {
-	return targetPlace()->getRadius()*(9.0f/8.0f);
+	return targetPlace()->getRadius() * (9.0f / 8.0f);
 }
 
-CGrpFauna& CSpawnGroupFauna::getPersistent()
+CGrpFauna &CSpawnGroupFauna::getPersistent()
 {
-	return static_cast<CGrpFauna&>(CSpawnGroup::getPersistent());
+	return static_cast<CGrpFauna &>(CSpawnGroup::getPersistent());
 }
 
 uint32 CSpawnGroupFauna::getCurrentCycleTime()
@@ -581,27 +567,26 @@ uint32 CSpawnGroupFauna::getCurrentCycleTime()
 // CGrpFauna                                                                //
 //////////////////////////////////////////////////////////////////////////////
 
-
 uint32 CGrpFauna::refTimer(TTime time)
 {
-	switch(time)
+	switch (time)
 	{
-		case EAT_TIME:    return  250;
-		case REST_TIME:   return  250;
-		case SPAWN_TIME:  return  30;
-		case CORPSE_TIME: return  120;
-		case RESPAWN_TIME: return  45;	// "Backward" compatibility: 45 seconds after the corpse is despawned (after corpse time, or when looted)
-		default:
-			nlassert(0);
+	case EAT_TIME: return 250;
+	case REST_TIME: return 250;
+	case SPAWN_TIME: return 30;
+	case CORPSE_TIME: return 120;
+	case RESPAWN_TIME: return 45; // "Backward" compatibility: 45 seconds after the corpse is despawned (after corpse time, or when looted)
+	default:
+		nlassert(0);
 		break;
 	}
 	return 0;
 }
 
-CGrpFauna::CGrpFauna(CMgrFauna* mgr, CAIAliasDescriptionNode* aliasTree, RYAI_MAP_CRUNCH::TAStarFlag denyFlags)
-: CGroup(mgr, denyFlags, aliasTree)
-, CDynGrpBase()
-, CPersistentStateInstance(*mgr->getStateMachine())
+CGrpFauna::CGrpFauna(CMgrFauna *mgr, CAIAliasDescriptionNode *aliasTree, RYAI_MAP_CRUNCH::TAStarFlag denyFlags)
+    : CGroup(mgr, denyFlags, aliasTree)
+    , CDynGrpBase()
+    , CPersistentStateInstance(*mgr->getStateMachine())
 {
 
 	// state
@@ -618,11 +603,11 @@ CGrpFauna::CGrpFauna(CMgrFauna* mgr, CAIAliasDescriptionNode* aliasTree, RYAI_MA
 	setTimer(RESPAWN_TIME, refTimer(RESPAWN_TIME));
 }
 
-void CGrpFauna::stateChange(CAIState const* oldState, CAIState const* newState)
+void CGrpFauna::stateChange(CAIState const *oldState, CAIState const *newState)
 {
 }
 
-std::string	CGrpFauna::getOneLineInfoString() const
+std::string CGrpFauna::getOneLineInfoString() const
 {
 	return std::string("Fauna group '") + getName() + "'";
 }
@@ -631,7 +616,6 @@ std::vector<std::string> CGrpFauna::getMultiLineInfoString() const
 {
 	std::vector<std::string> container;
 
-
 	pushTitle(container, "CGrpFauna");
 	pushEntry(container, "id=" + CGroup::getIndexString());
 	container.back() += " alias=" + getAliasString();
@@ -639,36 +623,35 @@ std::vector<std::string> CGrpFauna::getMultiLineInfoString() const
 	pushEntry(container, "fullname=" + CGroup::getFullName());
 	FOREACHC(it, CCont<CPopulation>, _Populations)
 	{
-		CPopulation const* pop = *it;
+		CPopulation const *pop = *it;
 		uint32 index = pop->getChildIndex();
-		pushEntry(container, "- population["+toString(index)+"]: "+((_CurPopulation==index)? "* ACTIVE *": ""));
+		pushEntry(container, "- population[" + toString(index) + "]: " + ((_CurPopulation == index) ? "* ACTIVE *" : ""));
 
-		for (uint j=0; j<pop->size(); ++j)
+		for (uint j = 0; j < pop->size(); ++j)
 		{
-			CPopulationRecord& popRecord = (*pop)[j];
+			CPopulationRecord &popRecord = (*pop)[j];
 			pushEntry(container, "bots:");
-			container.back() += " count="+toString(popRecord.getBotCount(getCountMultiplierFlag()));
-			if (popRecord.getCreatureSheet()==NULL)
+			container.back() += " count=" + toString(popRecord.getBotCount(getCountMultiplierFlag()));
+			if (popRecord.getCreatureSheet() == NULL)
 				container.back() += " <no sheet>";
 			else
-				container.back() += " sheet='"+popRecord.getCreatureSheet()->SheetId().toString()+"'";
+				container.back() += " sheet='" + popRecord.getCreatureSheet()->SheetId().toString() + "'";
 		}
 	}
 	FOREACHC(it, CCont<CBot>, bots())
 	{
 		std::vector<std::string> strings = it->getMultiLineInfoString();
 		FOREACHC(itString, std::vector<std::string>, strings)
-			container.push_back("  " + *itString);
+		container.push_back("  " + *itString);
 	}
 	pushFooter(container);
-
 
 	return container;
 }
 
-IAliasCont* CGrpFauna::getAliasCont(TAIType type)
+IAliasCont *CGrpFauna::getAliasCont(TAIType type)
 {
-	switch(type)
+	switch (type)
 	{
 	case AITypePlaceFauna:
 	case AITypePlace:
@@ -680,44 +663,43 @@ IAliasCont* CGrpFauna::getAliasCont(TAIType type)
 	}
 }
 
-CAliasTreeOwner* CGrpFauna::createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree)
+CAliasTreeOwner *CGrpFauna::createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree)
 {
 	if (!cont)
-		return	NULL;
+		return NULL;
 
-	CAliasTreeOwner* child = NULL;
+	CAliasTreeOwner *child = NULL;
 
 	switch (aliasTree->getType())
 	{
-		//	create the child and adds it to the corresponding position.
-		case AITypePlaceFauna:
-			child = new CAIPlaceXYRFauna(this, aliasTree);
+	//	create the child and adds it to the corresponding position.
+	case AITypePlaceFauna:
+		child = new CAIPlaceXYRFauna(this, aliasTree);
 		break;
-		case AITypePlace:
-			{
-				std::string const& name = aliasTree->getName();
-				CAIPlaceXYRFauna *faunaPlace = new CAIPlaceXYRFauna(this, aliasTree);
-				child = faunaPlace;
-				uint placeIndex = faunaPlace->setupFromOldName(name);
-				nlassert(placeIndex!=std::numeric_limits<uint>::max());
+	case AITypePlace: {
+		std::string const &name = aliasTree->getName();
+		CAIPlaceXYRFauna *faunaPlace = new CAIPlaceXYRFauna(this, aliasTree);
+		child = faunaPlace;
+		uint placeIndex = faunaPlace->setupFromOldName(name);
+		nlassert(placeIndex != std::numeric_limits<uint>::max());
 
-				if (placeIndex!=std::numeric_limits<uint>::max())
-					cont->addAliasChild(child, placeIndex);
+		if (placeIndex != std::numeric_limits<uint>::max())
+			cont->addAliasChild(child, placeIndex);
 
-				return child;
-			}
+		return child;
+	}
+	break;
+	case AITypeGrpFaunaPop:
+		child = new CPopulation(this, aliasTree);
 		break;
-		case AITypeGrpFaunaPop:
-			child = new CPopulation(this, aliasTree);
-			break;
 	}
 
 	if (child)
 		cont->addAliasChild(child);
-	return	child;
+	return child;
 }
 
-void CGrpFauna::displayPlaces(CStringWriter& stringWriter) const
+void CGrpFauna::displayPlaces(CStringWriter &stringWriter) const
 {
 	FOREACHC(it, CCont<CAIPlace>, _Places)
 	{
@@ -725,10 +707,9 @@ void CGrpFauna::displayPlaces(CStringWriter& stringWriter) const
 	}
 }
 
-
 CGrpFauna::~CGrpFauna()
 {
-	if (isSpawned())	// to avoid bad CDbgPtr link interpretation
+	if (isSpawned()) // to avoid bad CDbgPtr link interpretation
 	{
 		despawnGrp();
 	}
@@ -743,11 +724,11 @@ CGrpFauna::~CGrpFauna()
 
 void CGrpFauna::setEvent(uint eventId)
 {
-	nlassert(eventId<10);
+	nlassert(eventId < 10);
 	processStateEvent(getEventContainer().EventUserEvent[eventId]);
 }
 
-void CGrpFauna::serviceEvent (const CServiceEvent &info)
+void CGrpFauna::serviceEvent(const CServiceEvent &info)
 {
 	CGroup::serviceEvent(info);
 
@@ -755,7 +736,6 @@ void CGrpFauna::serviceEvent (const CServiceEvent &info)
 	{
 		processStateEvent(getEventContainer().EventEGSUp);
 	}
-
 }
 
 NLMISC::CSmartPtr<CSpawnGroup> CGrpFauna::createSpawnGroup()
@@ -768,18 +748,18 @@ bool CGrpFauna::spawn()
 	if (!getSpawnCounter().remainToMax())
 		return false;
 
-	setStartState(getStartState());	//	stateInstance.
+	setStartState(getStartState()); //	stateInstance.
 	return spawnPop(std::numeric_limits<uint>::max());
 }
 
 bool CGrpFauna::timeAllowSpawn(uint32 popVersion) const
 {
-	if (popVersion==12345)
+	if (popVersion == 12345)
 	{
 		popVersion = _CurPopulation;
 	}
 
-	CPopulation* popPtr = _Populations[popVersion];
+	CPopulation *popPtr = _Populations[popVersion];
 #ifdef NL_DEBUG
 	nlassert(popPtr);
 #endif
@@ -789,9 +769,9 @@ bool CGrpFauna::timeAllowSpawn(uint32 popVersion) const
 	}
 	TSpawnType st = popPtr->getSpawnType();
 
-	bool const& isDay = CTimeInterface::isDay();
+	bool const &isDay = CTimeInterface::isDay();
 
-	return (st==SpawnTypeAlways) || (isDay&&st==SpawnTypeDay) || (!isDay&&st==SpawnTypeNight);
+	return (st == SpawnTypeAlways) || (isDay && st == SpawnTypeDay) || (!isDay && st == SpawnTypeNight);
 }
 
 bool CGrpFauna::spawnPop(uint popVersion)
@@ -803,23 +783,23 @@ bool CGrpFauna::spawnPop(uint popVersion)
 	}
 	/*
 	if (	!places()[SPAWN_PLACE]->worldValidPos().isValid()
-		||	!places()[EAT_PLACE]->worldValidPos().isValid()
-		||	!places()[REST_PLACE]->worldValidPos().isValid())	// coz time is not initialized yet ..
-		return	false;*/
+	    ||	!places()[EAT_PLACE]->worldValidPos().isValid()
+	    ||	!places()[REST_PLACE]->worldValidPos().isValid())	// coz time is not initialized yet ..
+	    return	false;*/
 
 	//	check compatibility.
 	/*
 	{
-		RYAI_MAP_CRUNCH::CCompatibleResult res;
-		areCompatiblesWithoutStartRestriction(places()[SPAWN_PLACE]->worldValidPos(), places()[EAT_PLACE]->worldValidPos(), getAStarFlag(), res);
-		if	(!res.isValid())
-			return	false;
-		areCompatiblesWithoutStartRestriction(places()[SPAWN_PLACE]->worldValidPos(), places()[REST_PLACE]->worldValidPos(), getAStarFlag(), res);
-		if	(!res.isValid())
-			return	false;
-		areCompatiblesWithoutStartRestriction(places()[EAT_PLACE]->worldValidPos(), places()[REST_PLACE]->worldValidPos(), getAStarFlag(), res);
-		if	(!res.isValid())
-			return	false;
+	    RYAI_MAP_CRUNCH::CCompatibleResult res;
+	    areCompatiblesWithoutStartRestriction(places()[SPAWN_PLACE]->worldValidPos(), places()[EAT_PLACE]->worldValidPos(), getAStarFlag(), res);
+	    if	(!res.isValid())
+	        return	false;
+	    areCompatiblesWithoutStartRestriction(places()[SPAWN_PLACE]->worldValidPos(), places()[REST_PLACE]->worldValidPos(), getAStarFlag(), res);
+	    if	(!res.isValid())
+	        return	false;
+	    areCompatiblesWithoutStartRestriction(places()[EAT_PLACE]->worldValidPos(), places()[REST_PLACE]->worldValidPos(), getAStarFlag(), res);
+	    if	(!res.isValid())
+	        return	false;
 	}
 	*/
 	// check each arc of the graph
@@ -829,22 +809,21 @@ bool CGrpFauna::spawnPop(uint popVersion)
 		checkArcs(*_Places[k]);
 	}
 
-
 	//	check flags ..
-	for (uint32 i=0;i<places().size();i++)
+	for (uint32 i = 0; i < places().size(); i++)
 	{
 		if (!places()[i]->worldValidPos().isValid())
-			return	false;
-		const	RYAI_MAP_CRUNCH::TAStarFlag	flags=places()[i]->worldValidPos().getTopologyRef().getCstTopologyNode().getFlags();
-		if	((flags&getAStarFlag())!=0)
-			return	false;
+			return false;
+		const RYAI_MAP_CRUNCH::TAStarFlag flags = places()[i]->worldValidPos().getTopologyRef().getCstTopologyNode().getFlags();
+		if ((flags & getAStarFlag()) != 0)
+			return false;
 	}
 
 	// check the validity of the input parameter
-	if (popVersion!=std::numeric_limits<uint>::max() && popVersion>=_Populations.size())
+	if (popVersion != std::numeric_limits<uint>::max() && popVersion >= _Populations.size())
 	{
-		nlwarning("CGrpFauna::spawn(idx) FAILED for group %s because idx (%d) >= _Populations.size() (%d)",this->CGroup::getFullName().c_str(),popVersion,_Populations.size());
-		return	false;
+		nlwarning("CGrpFauna::spawn(idx) FAILED for group %s because idx (%d) >= _Populations.size() (%d)", this->CGroup::getFullName().c_str(), popVersion, _Populations.size());
+		return false;
 	}
 
 	popVersion = std::numeric_limits<uint>::max();
@@ -852,19 +831,18 @@ bool CGrpFauna::spawnPop(uint popVersion)
 	//	if we are in a cycle.
 	if (_CurrentCycle != std::numeric_limits<uint32>::max())
 	{
-		Cycle const& cycle = _Cycles[_CurrentCycle];
+		Cycle const &cycle = _Cycles[_CurrentCycle];
 
 		// this to avoid bug dues to bad data initialization.
 		do
 		{
 			++_CurrentCycleIndex;
-		}
-		while	(	_CurrentCycleIndex<(sint32)cycle._PopList.size()
-				&&	!_Populations[cycle._PopList[_CurrentCycleIndex]]);
+		} while (_CurrentCycleIndex < (sint32)cycle._PopList.size()
+		    && !_Populations[cycle._PopList[_CurrentCycleIndex]]);
 
-		if (_CurrentCycleIndex<(sint32)cycle._PopList.size())
+		if (_CurrentCycleIndex < (sint32)cycle._PopList.size())
 		{
-			popVersion=cycle._PopList[_CurrentCycleIndex];
+			popVersion = cycle._PopList[_CurrentCycleIndex];
 
 			if (!timeAllowSpawn(popVersion))
 			{
@@ -886,28 +864,28 @@ bool CGrpFauna::spawnPop(uint popVersion)
 		//	we can precalculate this, but it won't appears so much to be called.
 		FOREACH(it, CCont<CPopulation>, _Populations)
 		{
-			CPopulation const& pop = *(*it);
+			CPopulation const &pop = *(*it);
 			if (!timeAllowSpawn(pop.getChildIndex()))
 				continue;
 			totalWeight += pop.getWeight();
 		}
 
-		if (totalWeight==0)
+		if (totalWeight == 0)
 			return false;
 
 		{
 			sint32 rnd = CAIS::rand32(totalWeight);
 			FOREACH(it, CCont<CPopulation>, _Populations)
 			{
-				CPopulation	const& pop = *(*it);
+				CPopulation const &pop = *(*it);
 				if (!timeAllowSpawn(pop.getChildIndex()))
 					continue;
 
 				rnd -= pop.getWeight();
-				if (rnd>0)	// we found the population to spawn. :)
+				if (rnd > 0) // we found the population to spawn. :)
 					continue;
 
-				popVersion=pop.getChildIndex();
+				popVersion = pop.getChildIndex();
 				break;
 			}
 		}
@@ -915,14 +893,14 @@ bool CGrpFauna::spawnPop(uint popVersion)
 #if !FINAL_VERSION
 		nlassert(popVersion != std::numeric_limits<uint>::max());
 #endif
-		if	(popVersion == std::numeric_limits<uint>::max())
-			return	false;
+		if (popVersion == std::numeric_limits<uint>::max())
+			return false;
 
 		//	find if we are starting a new cycle ..
-		for	(uint32 i=0;i<_Cycles.size();i++)
+		for (uint32 i = 0; i < _Cycles.size(); i++)
 		{
-			nlassert(_Cycles[i]._PopList.size()>0);
-			if (_Cycles[i]._PopList[0]!=popVersion)
+			nlassert(_Cycles[i]._PopList.size() > 0);
+			if (_Cycles[i]._PopList[0] != popVersion)
 				continue;
 
 			_CurrentCycle = i;
@@ -930,10 +908,10 @@ bool CGrpFauna::spawnPop(uint popVersion)
 		}
 	}
 
-	if	(popVersion >= _Populations.size())
+	if (popVersion >= _Populations.size())
 	{
-		nlwarning("Problem with pop size for group id %s, NAME = %s", this->CGroup::getFullName().c_str(), getName().c_str() );
-		return	false;
+		nlwarning("Problem with pop size for group id %s, NAME = %s", this->CGroup::getFullName().c_str(), getName().c_str());
+		return false;
 	}
 
 	// setup the pointer to the current population
@@ -942,7 +920,7 @@ bool CGrpFauna::spawnPop(uint popVersion)
 	// check that we have a defined spawn location
 	if (!_Places[SPAWN_PLACE])
 	{
-		nlwarning("CGrpFauna::spawn(idx) FAILED for group %s because _spawnPlace==NULL",this->CGroup::getFullName().c_str());
+		nlwarning("CGrpFauna::spawn(idx) FAILED for group %s because _spawnPlace==NULL", this->CGroup::getFullName().c_str());
 		return false;
 	}
 
@@ -956,17 +934,17 @@ bool CGrpFauna::spawnPop(uint popVersion)
 
 	//////////////////////////////////////////////////////////////////////////
 	// Init the group type.
-	setType	((*_Populations[_CurPopulation])[0].getCreatureSheet()->FaunaType()); //	gets the first population record of the population to spawn.
+	setType((*_Populations[_CurPopulation])[0].getCreatureSheet()->FaunaType()); //	gets the first population record of the population to spawn.
 
 	{
-		uint32 botCount=0;
+		uint32 botCount = 0;
 		uint32 i;
-		CPopulation& curPop = *populations()[_CurPopulation];
-		for (i=0; i<curPop.size(); ++i)
+		CPopulation &curPop = *populations()[_CurPopulation];
+		for (i = 0; i < curPop.size(); ++i)
 		{
 			botCount += curPop[i].getBotCount(getCountMultiplierFlag());
-			if (	curPop[i].getBotCount(getCountMultiplierFlag()) == 0
-				||	curPop[i].getCreatureSheet()->FaunaType() == getType())
+			if (curPop[i].getBotCount(getCountMultiplierFlag()) == 0
+			    || curPop[i].getCreatureSheet()->FaunaType() == getType())
 				continue;
 
 			if (getGroupDesc()) // Dyn system.
@@ -980,7 +958,7 @@ bool CGrpFauna::spawnPop(uint popVersion)
 		}
 		bots().setChildSize(botCount); // set the good size for bots vector.
 
-		for (i=0;i<botCount;i++)
+		for (i = 0; i < botCount; i++)
 			_Bots.addChild(new CBotFauna(getType(), this), i);
 	}
 
@@ -994,27 +972,27 @@ void CGrpFauna::despawnGrp()
 }
 
 //	reads cycle from primitive (string representation).
-void CGrpFauna::setCyles(std::string const& cycles)
+void CGrpFauna::setCyles(std::string const &cycles)
 {
 	uint32 strIndex = 0;
 	uint32 curCycle = std::numeric_limits<uint32>::max();
 
-	while (strIndex<cycles.size())
+	while (strIndex < cycles.size())
 	{
 		char carac = cycles[++strIndex];
 
-		if (carac>='A' && carac<='Z')
-			carac += 'a'-'A';
+		if (carac >= 'A' && carac <= 'Z')
+			carac += 'a' - 'A';
 
-		if (carac>='a' && carac<='z')
+		if (carac >= 'a' && carac <= 'z')
 		{
 			if (curCycle == std::numeric_limits<uint32>::max())
 			{
 				curCycle = (uint32)_Cycles.size();
 				_Cycles.push_back(Cycle());
 			}
-			Cycle& CycleRef = _Cycles[curCycle];
-			CycleRef._PopList.push_back((uint16)(carac-'a'));
+			Cycle &CycleRef = _Cycles[curCycle];
+			CycleRef._PopList.push_back((uint16)(carac - 'a'));
 		}
 		else
 		{
@@ -1023,31 +1001,31 @@ void CGrpFauna::setCyles(std::string const& cycles)
 	}
 }
 
-void CGrpFauna::setPopulation(CPopulation* pop)
+void CGrpFauna::setPopulation(CPopulation *pop)
 {
-	CPopulation* sameAliasPop = NULL;
+	CPopulation *sameAliasPop = NULL;
 	uint32 index = std::numeric_limits<uint32>::max();
 
 	if (pop)
 		sameAliasPop = _Populations.getChildByAlias(pop->getAlias());
 
-	if (pop && pop->size()==0)	// no population record :(
-		pop=NULL;
+	if (pop && pop->size() == 0) // no population record :(
+		pop = NULL;
 
-	if (sameAliasPop)	//	Alias already present ?
+	if (sameAliasPop) //	Alias already present ?
 	{
 		index = sameAliasPop->getChildIndex();
-		_Populations.addChild(pop, index);	//	automatic deletion with smart pointers
+		_Populations.addChild(pop, index); //	automatic deletion with smart pointers
 	}
 	else
 	{
-		_Populations.addChild(pop);	//	else simply add it to the populations container
+		_Populations.addChild(pop); //	else simply add it to the populations container
 	}
 
 	//	if it was the current population, respawn it. (to check with designers?)
-	if (index==_CurPopulation)
+	if (index == _CurPopulation)
 	{
-		if (isSpawned())	// if spawned, despawn.
+		if (isSpawned()) // if spawned, despawn.
 			getSpawnObj()->despawnGrp();
 	}
 }
@@ -1064,41 +1042,41 @@ void CGrpFauna::allocateBots()
 	CCont<CPopulation>::iterator it = populations().begin();
 	CCont<CPopulation>::iterator itEnd = populations().end();
 
-	while (it!=itEnd)
+	while (it != itEnd)
 	{
-		CPopulation* pop = *(it);
-		uint count=0;
+		CPopulation *pop = *(it);
+		uint count = 0;
 
-		for (sint j=(sint)pop->size()-1;j>=0;j--)
-			count+=(*pop)[j].getBotCount(getCountMultiplierFlag());
+		for (sint j = (sint)pop->size() - 1; j >= 0; j--)
+			count += (*pop)[j].getBotCount(getCountMultiplierFlag());
 
-		if (count>maxPopulation)
-			maxPopulation=count;
+		if (count > maxPopulation)
+			maxPopulation = count;
 		++it;
 	}
 
 	_Bots.setChildSize(maxPopulation);
-	for	(uint32 i=0;i<maxPopulation;i++)
-		_Bots.addChild(new	CBotFauna(getType(),this),i);
+	for (uint32 i = 0; i < maxPopulation; i++)
+		_Bots.addChild(new CBotFauna(getType(), this), i);
 }
 
 // Methods for setting up static data ----------------------------------------
 void CGrpFauna::setType(TFaunaType type)
 {
 	faction().removeProperties();
-	if (type==AITYPES::FaunaTypePredator)
+	if (type == AITYPES::FaunaTypePredator)
 		faction().addProperty(AITYPES::CPropertyId("Predator"));
 	_Type = type;
 }
 
-CMgrFauna& CGrpFauna::mgr() const
+CMgrFauna &CGrpFauna::mgr() const
 {
-	return *static_cast<CMgrFauna*>(getOwner());
+	return *static_cast<CMgrFauna *>(getOwner());
 }
 
-CAIS::CCounter& CGrpFauna::getSpawnCounter()
+CAIS::CCounter &CGrpFauna::getSpawnCounter()
 {
-	return	CAIS::instance()._FaunaBotCounter;
+	return CAIS::instance()._FaunaBotCounter;
 }
 
 void CGrpFauna::lastBotDespawned()
@@ -1141,20 +1119,20 @@ sint CGrpFauna::getNextPlace(const CFaunaGenericPlace *startPlace, CAIPlaceXYRFa
 		sint firstIndex = INT_MAX;
 		if (startPlace->getReachNext())
 		{
-			for (uint k  = 0; k < _Places.size(); ++k)
+			for (uint k = 0; k < _Places.size(); ++k)
 			{
 				const CFaunaGenericPlace *place = getFaunaGenericPlace(_Places[k]);
-				firstIndex = std::min(firstIndex, (sint) place->getIndex());
+				firstIndex = std::min(firstIndex, (sint)place->getIndex());
 				if (place->getIndex() < minIndex && place->getIndex() > startPlace->getIndex())
 				{
 					minIndex = place->getIndex();
 				}
 			}
 			minIndex = std::max(minIndex, firstIndex);
-			for (uint k  = 0; k < _Places.size(); ++k)
+			for (uint k = 0; k < _Places.size(); ++k)
 			{
 				const CFaunaGenericPlace *place = getFaunaGenericPlace(_Places[k]);
-				if ((sint) place->getIndex() == minIndex)
+				if ((sint)place->getIndex() == minIndex)
 				{
 					if (place->getActive())
 					{
@@ -1168,7 +1146,7 @@ sint CGrpFauna::getNextPlace(const CFaunaGenericPlace *startPlace, CAIPlaceXYRFa
 			}
 		}
 		// includes all places reachable from the arcs list
-		for (uint k  = 0; k < _Places.size(); ++k)
+		for (uint k = 0; k < _Places.size(); ++k)
 		{
 			const CFaunaGenericPlace *place = getFaunaGenericPlace(_Places[k]);
 			if (place != startPlace && place->getFlag(wantedFlag))
@@ -1193,13 +1171,13 @@ sint CGrpFauna::getNextPlace(const CFaunaGenericPlace *startPlace, CAIPlaceXYRFa
 	// nlwarning("%d active place, %d unactive places", (int) activeCandidates.size(), (int) candidates.size());
 	if (!activeCandidates.empty())
 	{
-		return (sint) activeCandidates[rand() % activeCandidates.size()];
+		return (sint)activeCandidates[rand() % activeCandidates.size()];
 	}
 	// if current place is valid then don't move
 	if (startPlace && startPlace->getActive()) return CAIPlaceXYRFauna::INVALID_PLACE;
 	// otherwise select a place in unactive places
 	if (candidates.empty()) return CAIPlaceXYRFauna::INVALID_PLACE;
-	return (sint) candidates[rand() % candidates.size()];
+	return (sint)candidates[rand() % candidates.size()];
 }
 
 bool CGrpFauna::checkArcs(const CAIPlace &startPlace) const
@@ -1211,20 +1189,20 @@ bool CGrpFauna::checkArcs(const CAIPlace &startPlace) const
 	sint firstIndex = INT_MAX;
 	if (startPlaceGeneric->getReachNext())
 	{
-		for (uint k  = 0; k < _Places.size(); ++k)
+		for (uint k = 0; k < _Places.size(); ++k)
 		{
 			const CFaunaGenericPlace *place = getFaunaGenericPlace(_Places[k]);
-			firstIndex = std::min(firstIndex, (sint) place->getIndex());
+			firstIndex = std::min(firstIndex, (sint)place->getIndex());
 			if (place->getIndex() < minIndex && place->getIndex() > startPlaceGeneric->getIndex())
 			{
 				minIndex = place->getIndex();
 			}
 		}
 		minIndex = std::max(minIndex, firstIndex);
-		for (uint k  = 0; k < _Places.size(); ++k)
+		for (uint k = 0; k < _Places.size(); ++k)
 		{
 			const CFaunaGenericPlace *place = getFaunaGenericPlace(_Places[k]);
-			if ((sint) place->getIndex() == minIndex)
+			if ((sint)place->getIndex() == minIndex)
 			{
 				RYAI_MAP_CRUNCH::CCompatibleResult res;
 				areCompatiblesWithoutStartRestriction(startPlace.worldValidPos(), _Places[k]->worldValidPos(), getAStarFlag(), res);
@@ -1233,7 +1211,7 @@ bool CGrpFauna::checkArcs(const CAIPlace &startPlace) const
 		}
 	}
 	// includes all places reachable from the arcs list
-	for (uint k  = 0; k < _Places.size(); ++k)
+	for (uint k = 0; k < _Places.size(); ++k)
 	{
 		const CFaunaGenericPlace *place = getFaunaGenericPlace(_Places[k]);
 		if (place != startPlaceGeneric)
@@ -1253,9 +1231,9 @@ bool CGrpFauna::checkArcs(const CAIPlace &startPlace) const
 void CSpawnGroupFauna::setPlace(int placeIndex)
 {
 	const CFaunaGenericPlace *place = getFaunaGenericPlace(getPersistent().places()[placeIndex]);
-	//nlwarning("Going to place %s with index %d", getPersistent().places()[placeIndex]->getName().c_str(), place->getIndex());
+	// nlwarning("Going to place %s with index %d", getPersistent().places()[placeIndex]->getName().c_str(), place->getIndex());
 
-	if ((int) getPersistent().places().size() <= placeIndex)
+	if ((int)getPersistent().places().size() <= placeIndex)
 	{
 		nlwarning("Bad place index for fauna group %s", getPersistent().getName().c_str());
 	}
@@ -1265,8 +1243,8 @@ void CSpawnGroupFauna::setPlace(int placeIndex)
 
 	_TargetPlace = getPersistent().places()[placeIndex];
 #if !FINAL_VERSION
-	const	RYAI_MAP_CRUNCH::TAStarFlag	flags=targetPlace()->worldValidPos().getTopologyRef().getCstTopologyNode().getFlags();
-	nlassert((flags&getPersistent().getAStarFlag())==0);
+	const RYAI_MAP_CRUNCH::TAStarFlag flags = targetPlace()->worldValidPos().getTopologyRef().getCstTopologyNode().getFlags();
+	nlassert((flags & getPersistent().getAStarFlag()) == 0);
 #endif
 	_PathCont.setDestination(targetPlace()->getVerticalPos(), targetPlace()->worldValidPos());
 	_ArrivedInZone = false;

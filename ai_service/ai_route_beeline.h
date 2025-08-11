@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 class CAIRouteBeeline;
 
 #ifndef RYAI_ROUTE_BEELINE_H
@@ -25,30 +23,28 @@ class CAIRouteBeeline;
 #include "ai_route.h"
 
 /*
-	This class implements beeline routes towards points - it is the most
-	basic form of pathfinding imaginable
+    This class implements beeline routes towards points - it is the most
+    basic form of pathfinding imaginable
 */
 
-
-class CAIRouteBeeline: public CAIRoute
+class CAIRouteBeeline : public CAIRoute
 {
 public:
 	// ctors and dtors -------------------------------------------------
 	CAIRouteBeeline(CAIPos destination)
 	{
-		_destination=destination;
+		_destination = destination;
 	}
 
 public:
 	// respecting the inheritted interface -----------------------------
 
 	virtual double getDirection(CAIPos currentCoord);
-	virtual bool haveArrived(CAIPos currentCoord,uint dist);
+	virtual bool haveArrived(CAIPos currentCoord, uint dist);
 
 private:
 	CAIPos _destination;
 };
-
 
 //----------------------------------------------------------------------
 // methods
@@ -58,9 +54,9 @@ double CAIRouteBeeline::getDirection(CAIPos currentCoord)
 	return currentCoord.directionTo(_destination);
 }
 
-double CAIRouteBeeline::haveArrived(CAIPos currentCoord,uint dist)
+double CAIRouteBeeline::haveArrived(CAIPos currentCoord, uint dist)
 {
-	return currentCoord.distTo(_destination)<=dist;
+	return currentCoord.distTo(_destination) <= dist;
 }
 
 #endif

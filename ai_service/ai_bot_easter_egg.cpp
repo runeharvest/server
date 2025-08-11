@@ -23,9 +23,9 @@ using namespace std;
 // CBotEasterEgg                                                            //
 //////////////////////////////////////////////////////////////////////////////
 
-CBotEasterEgg::CBotEasterEgg(CGroup* owner, uint32 alias, std::string const& name, uint32 easterEggId)
-: CBotNpc(owner, alias, name)
-, _EasterEggId(easterEggId)
+CBotEasterEgg::CBotEasterEgg(CGroup *owner, uint32 alias, std::string const &name, uint32 easterEggId)
+    : CBotNpc(owner, alias, name)
+    , _EasterEggId(easterEggId)
 {
 }
 
@@ -33,7 +33,7 @@ CBotEasterEgg::~CBotEasterEgg()
 {
 }
 
-std::string	CBotEasterEgg::getOneLineInfoString() const
+std::string CBotEasterEgg::getOneLineInfoString() const
 {
 	string desc = NLMISC::toString("Easter Egg bot %u '%s'", getEasterEggId(), getName().c_str());
 	return desc;

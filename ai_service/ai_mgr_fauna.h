@@ -30,53 +30,53 @@ class CFauna;
 
 /// This is the manager class for fauna (and fauna groups)
 class CMgrFauna
-: public CManager
+    : public CManager
 {
-public:	
-	CMgrFauna(IManagerParent* parent, uint32 alias, std::string const& name, std::string const& filename);
+public:
+	CMgrFauna(IManagerParent *parent, uint32 alias, std::string const &name, std::string const &filename);
 	virtual ~CMgrFauna();
-	
-	CStateMachine* getStateMachine() { return &_StateMachine; }
-	
+
+	CStateMachine *getStateMachine() { return &_StateMachine; }
+
 	virtual std::string getOneLineInfoString() const;
-	
+
 	//////////////////////////////////////////////////////////////////////////
 	//	CStateMachine
-	
+
 	uint32 getAlias() const { return CManager::getAlias(); }
-	
-	CAIAliasDescriptionNode* getAliasNode() const { return CManager::getAliasNode(); }
-	
+
+	CAIAliasDescriptionNode *getAliasNode() const { return CManager::getAliasNode(); }
+
 	//////////////////////////////////////////////////////////////////////////
-	
-	//////////////////////////////////////////////////////////////////////////	
+
+	//////////////////////////////////////////////////////////////////////////
 	//	Methods inherited from IManager.
 	void init();
 	void update();
 	void release() { CManager::release(); }
-	
+
 	AITYPES::TMgrType type() const { return AITYPES::MgrTypeFauna; }
 	// event managers --------------------------------------------------
 	CAIEvent EventDestinationReachedFirst;
 	CAIEvent EventDestinationReachedAll;
 	CAIEvent EventBotKilled;
 	CAIEvent EventGrpEliminated;
-	
+
 	CStateMachine _StateMachine;
-	
+
 	void registerEvents();
-	
-	//////////////////////////////////////////////////////////////////////////	
+
+	//////////////////////////////////////////////////////////////////////////
 	//	Alias Tree related Methods.
-	
-	IAliasCont*			getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner*	createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
-	
+
+	IAliasCont *getAliasCont(AITYPES::TAIType type);
+	CAliasTreeOwner *createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree);
+
 	/// @name CAIEntity public implementation
 	//@{
-	virtual void display(CStringWriter& stringWriter);
+	virtual void display(CStringWriter &stringWriter);
 	//@}
-	
+
 protected:
 	/// @name CAIEntity protected implementation
 	//@{

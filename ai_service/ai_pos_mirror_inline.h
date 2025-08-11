@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 class CAIPosMirror;
 
 #ifndef RYAI_POS_MIRROR_INLINE_H
@@ -44,172 +42,175 @@ class CAIPos;
 #include "ai_pos.h"
 
 // ctor
-inline CAIPosMirror::CAIPosMirror(const TDataSetRow& entityIndex):
-	CAIVectorMirror(entityIndex), 
-	_h( *CMirrors::DataSet, entityIndex, DSPropertyPOSZ ),
-	_theta( *CMirrors::DataSet, entityIndex, DSPropertyORIENTATION )
-	{}
+inline CAIPosMirror::CAIPosMirror(const TDataSetRow &entityIndex)
+    : CAIVectorMirror(entityIndex)
+    , _h(*CMirrors::DataSet, entityIndex, DSPropertyPOSZ)
+    , _theta(*CMirrors::DataSet, entityIndex, DSPropertyORIENTATION)
+{
+}
 
 // toString for debugging...
-inline std::string CAIPosMirror::toString() const 
+inline std::string CAIPosMirror::toString() const
 {
-	return NLMISC::toString("(%9s,%9s,%d) %3d\"",x().toString().c_str(),(y()).toString().c_str(),h(),theta().asDegrees());
+	return NLMISC::toString("(%9s,%9s,%d) %3d\"", x().toString().c_str(), (y()).toString().c_str(), h(), theta().asDegrees());
 }
-
 
 // == and != operators
-inline bool CAIPosMirror::operator==(const CAIPos &other) const	
+inline bool CAIPosMirror::operator==(const CAIPos &other) const
 {
-	return other.x()==x() && other.y()==y() && other.h()==h(); 
+	return other.x() == x() && other.y() == y() && other.h() == h();
 }
 
-inline bool CAIPosMirror::operator!=(const CAIPos &other) const	
-{
-	return !(*this == other); 
-}
-
-
-inline bool CAIPosMirror::operator==(const CAIPosMirror &other) const	
-{
-	return other.x()==x() && other.y()==y() && other.h()==h(); 
-}
-
-inline bool CAIPosMirror::operator!=(const CAIPosMirror &other) const	
+inline bool CAIPosMirror::operator!=(const CAIPos &other) const
 {
 	return !(*this == other);
 }
 
+inline bool CAIPosMirror::operator==(const CAIPosMirror &other) const
+{
+	return other.x() == x() && other.y() == y() && other.h() == h();
+}
+
+inline bool CAIPosMirror::operator!=(const CAIPosMirror &other) const
+{
+	return !(*this == other);
+}
 
 // = operator
-inline const CAIPosMirror &CAIPosMirror::operator= (const CAIPos &other)	
+inline const CAIPosMirror &CAIPosMirror::operator=(const CAIPos &other)
 {
-	setX(other.x()); setY(other.y()); setH(other.h()); setTheta(other.theta()); return *this; 
+	setX(other.x());
+	setY(other.y());
+	setH(other.h());
+	setTheta(other.theta());
+	return *this;
 }
 
 // += and -= operators
-template <class C> 
-inline const CAIPosMirror &CAIPosMirror::operator+=(const C &v)		
+template <class C>
+inline const CAIPosMirror &CAIPosMirror::operator+=(const C &v)
 {
-	setX(x()+v.x()); setY(y()+v.y()); return *this;
-}
-
-template <class C> 
-inline const CAIPosMirror &CAIPosMirror::operator-=(const C &v)		
-{
-	setX(x()-v.x()); setY(y()-v.y()); return *this; 
-}
-
-
-// * and / operators
-inline const CAIPos  CAIPosMirror::operator* (double d) const
-{
-	return CAIPos(CAIVectorMirror::operator*(d),h(),theta()); 
-}
-
-inline const CAIPos  CAIPosMirror::operator/ (double d) const	
-{
-	return CAIPos(CAIVectorMirror::operator/(d),h(),theta()); 
-}
-
-
-// + and - operators
-template <class C> 
-inline CAIPos  CAIPosMirror::operator+ (const C &v) const	
-{
-	return CAIPos(*this)+v; 
+	setX(x() + v.x());
+	setY(y() + v.y());
+	return *this;
 }
 
 template <class C>
-inline CAIPos  CAIPosMirror::operator- (const C &v) const	
+inline const CAIPosMirror &CAIPosMirror::operator-=(const C &v)
 {
-	return CAIPos(*this)-v; 
+	setX(x() - v.x());
+	setY(y() - v.y());
+	return *this;
 }
 
-inline const sint32	&CAIPosMirror::h() const	
+// * and / operators
+inline const CAIPos CAIPosMirror::operator*(double d) const
 {
-	return _h(); 
+	return CAIPos(CAIVectorMirror::operator*(d), h(), theta());
 }
 
-inline CAngle CAIPosMirror::theta() const	
+inline const CAIPos CAIPosMirror::operator/(double d) const
 {
-	return (CAngle)_theta(); 
+	return CAIPos(CAIVectorMirror::operator/(d), h(), theta());
 }
 
-
-template <class C> inline void CAIPosMirror::setH(C h)					
+// + and - operators
+template <class C>
+inline CAIPos CAIPosMirror::operator+(const C &v) const
 {
-	_h=(TYPE_POSZ)h; 
+	return CAIPos(*this) + v;
 }
 
-template <class C> inline void CAIPosMirror::setTheta(C theta)			
+template <class C>
+inline CAIPos CAIPosMirror::operator-(const C &v) const
 {
-	_theta=((CAngle)theta).asRadians(); 
+	return CAIPos(*this) - v;
 }
 
+inline const sint32 &CAIPosMirror::h() const
+{
+	return _h();
+}
+
+inline CAngle CAIPosMirror::theta() const
+{
+	return (CAngle)_theta();
+}
+
+template <class C>
+inline void CAIPosMirror::setH(C h)
+{
+	_h = (TYPE_POSZ)h;
+}
+
+template <class C>
+inline void CAIPosMirror::setTheta(C theta)
+{
+	_theta = ((CAngle)theta).asRadians();
+}
 
 // a few handy utility methods SLOW!!!!!!!!!
-inline CAngle	CAIVectorMirror::angleTo(const CAIPos &dest) const	
+inline CAngle CAIVectorMirror::angleTo(const CAIPos &dest) const
 {
-	return (dest-CAIVector(*this)).asAngle();
+	return (dest - CAIVector(*this)).asAngle();
 }
 
-inline double	CAIVectorMirror::distTo(const CAIPos &dest) const	
+inline double CAIVectorMirror::distTo(const CAIPos &dest) const
 {
-	return (dest-CAIVector(*this)).norm(); 
+	return (dest - CAIVector(*this)).norm();
 }
 
-inline double	CAIVectorMirror::distSqTo(const CAIPos &dest) const	
+inline double CAIVectorMirror::distSqTo(const CAIPos &dest) const
 {
-	return (dest-CAIVector(*this)).sqrnorm(); 
+	return (dest - CAIVector(*this)).sqrnorm();
 }
 
-inline double	CAIVectorMirror::quickDistTo(const CAIPos &dest) const	
+inline double CAIVectorMirror::quickDistTo(const CAIPos &dest) const
 {
-	double dx=fabs((dest.x()-x()).asDouble()), dy=fabs((dest.y()-y()).asDouble());
-	return (dx>dy)? (dx+dy/2): (dy+dx/2); 
+	double dx = fabs((dest.x() - x()).asDouble()), dy = fabs((dest.y() - y()).asDouble());
+	return (dx > dy) ? (dx + dy / 2) : (dy + dx / 2);
 }
 
-
-inline CAngle	CAIVectorMirror::angleTo(const CAIVector &dest) const	
+inline CAngle CAIVectorMirror::angleTo(const CAIVector &dest) const
 {
-	return (dest-CAIVector(*this)).asAngle();
+	return (dest - CAIVector(*this)).asAngle();
 }
 
-inline double	CAIVectorMirror::distTo(const CAIVector &dest) const	
+inline double CAIVectorMirror::distTo(const CAIVector &dest) const
 {
-	return (dest-CAIVector(*this)).norm(); 
+	return (dest - CAIVector(*this)).norm();
 }
 
-inline double	CAIVectorMirror::distSqTo(const CAIVector &dest) const	
+inline double CAIVectorMirror::distSqTo(const CAIVector &dest) const
 {
-	return (dest-CAIVector(*this)).sqrnorm(); 
+	return (dest - CAIVector(*this)).sqrnorm();
 }
 
-inline double	CAIVectorMirror::quickDistTo(const CAIVector &dest) const	
+inline double CAIVectorMirror::quickDistTo(const CAIVector &dest) const
 {
-	double dx=fabs((dest.x()-x()).asDouble()), dy=fabs((dest.y()-y()).asDouble());
-	return (dx>dy)? (dx+dy/2): (dy+dx/2); 
+	double dx = fabs((dest.x() - x()).asDouble()), dy = fabs((dest.y() - y()).asDouble());
+	return (dx > dy) ? (dx + dy / 2) : (dy + dx / 2);
 }
 
-
-inline CAngle	CAIVectorMirror::angleTo(const CAIVectorMirror &dest) const	
+inline CAngle CAIVectorMirror::angleTo(const CAIVectorMirror &dest) const
 {
-	return CAngle(atan2((dest.y()-y()).asDouble(),(dest.x()-x()).asDouble())); 
+	return CAngle(atan2((dest.y() - y()).asDouble(), (dest.x() - x()).asDouble()));
 }
 
-inline double	CAIVectorMirror::distTo(const CAIVectorMirror &dest)  const	
+inline double CAIVectorMirror::distTo(const CAIVectorMirror &dest) const
 {
-	return (dest-*this).norm(); 
+	return (dest - *this).norm();
 }
 
-inline double	CAIVectorMirror::distSqTo(const CAIVectorMirror &dest)  const	
+inline double CAIVectorMirror::distSqTo(const CAIVectorMirror &dest) const
 {
-	return (dest-*this).sqrnorm(); 
+	return (dest - *this).sqrnorm();
 }
 
-inline double	CAIVectorMirror::quickDistTo(const CAIVectorMirror &dest) const 
+inline double CAIVectorMirror::quickDistTo(const CAIVectorMirror &dest) const
 {
-	double dx=fabs((dest.x()-x()).asDouble()), dy=fabs((dest.y()-y()).asDouble()); return (dx>dy)? (dx+dy/2): (dy+dx/2); 
+	double dx = fabs((dest.x() - x()).asDouble()), dy = fabs((dest.y() - y()).asDouble());
+	return (dx > dy) ? (dx + dy / 2) : (dy + dx / 2);
 }
 
 inline CAIVectorMirror::operator CAIVector() const
@@ -218,4 +219,3 @@ inline CAIVectorMirror::operator CAIVector() const
 }
 
 #endif
-

@@ -17,14 +17,14 @@
 #include "stdpch.h"
 #include "ai_profile_pet.h"
 
-#include "ai_bot_pet.h"			// for CSpawnBotPet
-#include "ai_grp_pet.h"			// for CSpawnGroupPet
-#include "server_share/animal_hunger.h"	// for CSpeedLimit
+#include "ai_bot_pet.h" // for CSpawnBotPet
+#include "ai_grp_pet.h" // for CSpawnGroupPet
+#include "server_share/animal_hunger.h" // for CSpeedLimit
 
 using namespace NLMISC;
 using namespace NLNET;
 using namespace RYAI_MAP_CRUNCH;
-using namespace	AITYPES;
+using namespace AITYPES;
 
 /****************************************************************************/
 /* Local classes                                                            */
@@ -35,15 +35,15 @@ using namespace	AITYPES;
 //////////////////////////////////////////////////////////////////////////////
 
 class CTopoPosValidator
-: public CWorldContainer::CPosValidator
+    : public CWorldContainer::CPosValidator
 {
 public:
-	CTopoPosValidator(CWorldPosition const& startPos, TAStarFlag denyFlags);
-	bool check(CWorldPosition const& wpos) const;
-	
+	CTopoPosValidator(CWorldPosition const &startPos, TAStarFlag denyFlags);
+	bool check(CWorldPosition const &wpos) const;
+
 private:
 	CWorldPosition _StartPos;
-	TAStarFlag     _DenyFlags;
+	TAStarFlag _DenyFlags;
 };
 
 /****************************************************************************/
@@ -54,9 +54,9 @@ private:
 // CAIPetProfileStand                                                       //
 //////////////////////////////////////////////////////////////////////////////
 
-CAIPetProfileStand::CAIPetProfileStand(CSpawnBotPet* bot)
-: CAIBaseProfile()
-, _Bot(bot)
+CAIPetProfileStand::CAIPetProfileStand(CSpawnBotPet *bot)
+    : CAIBaseProfile()
+    , _Bot(bot)
 {
 #ifndef NL_DEBUG
 	nlassert(bot);
@@ -67,43 +67,43 @@ CAIPetProfileStand::CAIPetProfileStand(CSpawnBotPet* bot)
 // CAIPetProfileFollowPlayer                                                //
 //////////////////////////////////////////////////////////////////////////////
 
-CAIPetProfileFollowPlayer::CAIPetProfileFollowPlayer(CSpawnBotPet* bot, TDataSetRow const& playerRow)
-: CAIBaseProfile()
-, _Bot(bot)
-, _PlayerRow(playerRow)
+CAIPetProfileFollowPlayer::CAIPetProfileFollowPlayer(CSpawnBotPet *bot, TDataSetRow const &playerRow)
+    : CAIBaseProfile()
+    , _Bot(bot)
+    , _PlayerRow(playerRow)
 {
 }
 
 void CAIPetProfileFollowPlayer::updateProfile(uint ticksSinceLastUpdate)
 {
 	H_AUTO(PetFollowPlayer);
-	
+
 	// Is the pet stucked by something?
 	if (!_Bot->canMove())
 		return;
-	
+
 	// Need to wait for a correct position before moving?
-	CAIVector const& dest = _Bot->spawnGrp().getPathCont().getDestination();
-	if (dest.x()==0 || dest.y()==0)
+	CAIVector const &dest = _Bot->spawnGrp().getPathCont().getDestination();
+	if (dest.x() == 0 || dest.y() == 0)
 		return;
-	
-	CPathCont& pathCont = _Bot->spawnGrp().getPathCont();
-	if ((pathCont.getDestination()-_Bot->wpos().toAIVector()).quickNorm()>6.f) // follow only if > 6 meters.
+
+	CPathCont &pathCont = _Bot->spawnGrp().getPathCont();
+	if ((pathCont.getDestination() - _Bot->wpos().toAIVector()).quickNorm() > 6.f) // follow only if > 6 meters.
 	{
 		// Handle the hunger of the animal
-		CSpeedLimit speedLimit( TheDataset, _Bot->dataSetRow() );
-		float speedToUse = speedLimit.getSpeedLimit( _Bot->walkSpeed(), _Bot->runSpeed() );
-		
+		CSpeedLimit speedLimit(TheDataset, _Bot->dataSetRow());
+		float speedToUse = speedLimit.getSpeedLimit(_Bot->walkSpeed(), _Bot->runSpeed());
+
 		// Move
 		float const dist = speedToUse * ticksSinceLastUpdate;
 		CFollowPath::TFollowStatus const status = CFollowPath::getInstance()->followPath(
-			_Bot,
-			_Bot->pathPos(),
-			pathCont,
-			dist,
-			0,
-			.5f);
-		if (status==CFollowPath::FOLLOW_NO_PATH)
+		    _Bot,
+		    _Bot->pathPos(),
+		    pathCont,
+		    dist,
+		    0,
+		    .5f);
+		if (status == CFollowPath::FOLLOW_NO_PATH)
 		{
 			nlwarning("problem with pet following behavior and ground properties like (Water, Nogo)");
 		}
@@ -114,19 +114,19 @@ void CAIPetProfileFollowPlayer::updateProfile(uint ticksSinceLastUpdate)
 // CAIPetProfileGotoPoint                                                   //
 //////////////////////////////////////////////////////////////////////////////
 
-CAIPetProfileGotoPoint::CAIPetProfileGotoPoint(CSpawnBotPet* bot, CAIPos const& position, TAStarFlag denyFlags, bool despawn)
-: CAIBaseProfile()
-, _Bot(bot)
-, _Pos(position)
-, _Despawn(despawn)
-, _Valid(false)
-, _PathCont(denyFlags)
+CAIPetProfileGotoPoint::CAIPetProfileGotoPoint(CSpawnBotPet *bot, CAIPos const &position, TAStarFlag denyFlags, bool despawn)
+    : CAIBaseProfile()
+    , _Bot(bot)
+    , _Pos(position)
+    , _Despawn(despawn)
+    , _Valid(false)
+    , _PathCont(denyFlags)
 {
 #ifndef NL_DEBUG
 	nlassert(bot);
 #endif
 	CTopoPosValidator const posValidator(bot->wpos(), denyFlags);
-	
+
 	CWorldPosition gotoPos;
 	if (!CWorldContainer::calcNearestWPosFromPosAnRadius(vp_auto, gotoPos, _Pos, 16, 300, posValidator))
 	{
@@ -145,27 +145,27 @@ void CAIPetProfileGotoPoint::updateProfile(uint ticksSinceLastUpdate)
 	H_AUTO(PetGotoPoint);
 	if (!_Bot->canMove())
 		return;
-	
+
 	CAIVector botPos = _Bot->wpos().toAIVector();
 	float dist = _Bot->runSpeed() * ticksSinceLastUpdate;
-	
-	if ((_PathCont.getDestination()-botPos).quickNorm()>3.f) // follow only if > 6 meters.
+
+	if ((_PathCont.getDestination() - botPos).quickNorm() > 3.f) // follow only if > 6 meters.
 	{
 		CFollowPath::TFollowStatus const status = CFollowPath::getInstance()->followPath(
-			_Bot,
-			_Bot->pathPos(),
-			_PathCont,
-			dist,
-			0.f,
-			.5f);
-		if (status==CFollowPath::FOLLOW_NO_PATH)
+		    _Bot,
+		    _Bot->pathPos(),
+		    _PathCont,
+		    dist,
+		    0.f,
+		    .5f);
+		if (status == CFollowPath::FOLLOW_NO_PATH)
 		{
 			nlwarning("PetGotoPoint problem with destination properties (Water, Nogo)");
 		}
 	}
 	botPos -= _Bot->wpos().toAIVector();
-	
-	if (botPos.quickNorm()<(dist*0.1))
+
+	if (botPos.quickNorm() < (dist * 0.1))
 	{
 		if (_Despawn)
 		{
@@ -189,13 +189,13 @@ TProfiles CAIPetProfileGotoPoint::getAIProfileType() const
 // CTopoPosValidator                                                        //
 //////////////////////////////////////////////////////////////////////////////
 
-CTopoPosValidator::CTopoPosValidator(CWorldPosition const& startPos, TAStarFlag denyFlags)
-: _StartPos(startPos)
-, _DenyFlags(denyFlags)
+CTopoPosValidator::CTopoPosValidator(CWorldPosition const &startPos, TAStarFlag denyFlags)
+    : _StartPos(startPos)
+    , _DenyFlags(denyFlags)
 {
 }
 
-bool CTopoPosValidator::check(CWorldPosition const& wpos) const
+bool CTopoPosValidator::check(CWorldPosition const &wpos) const
 {
 	CCompatibleResult res;
 	areCompatiblesWithoutStartRestriction(_StartPos, wpos, _DenyFlags, res, true);

@@ -19,8 +19,7 @@
 
 #include "nel/misc/variable.h"
 
-namespace AISStat
-{
+namespace AISStat {
 
 // Managers
 extern NLMISC::CVariable<uint32> StatMgrTotalUpdCtr;
@@ -84,80 +83,78 @@ extern uint32 GrpFastUpdCtr;
 extern uint32 GrpSlowUpdCtr;
 extern uint32 VisionCtr[256];
 
-inline
-void countersBegin()
+inline void countersBegin()
 {
 	// Managers
-	MgrTotalUpdCtr  = 0;
-	MgrFaunaUpdCtr  = 0;
-	MgrNpcUpdCtr    = 0;
-	MgrPetUpdCtr    = 0;
+	MgrTotalUpdCtr = 0;
+	MgrFaunaUpdCtr = 0;
+	MgrNpcUpdCtr = 0;
+	MgrPetUpdCtr = 0;
 	MgrPlayerUpdCtr = 0;
 	// Groups
-	GrpTotalUpdCtr  = 0;
-	GrpFaunaUpdCtr  = 0;
-	GrpNpcUpdCtr    = 0;
-	GrpPetUpdCtr    = 0;
+	GrpTotalUpdCtr = 0;
+	GrpFaunaUpdCtr = 0;
+	GrpNpcUpdCtr = 0;
+	GrpPetUpdCtr = 0;
 	// Bots
-	BotTotalUpdCtr  = 0;
-	BotFaunaUpdCtr  = 0;
-	BotNpcUpdCtr    = 0;
+	BotTotalUpdCtr = 0;
+	BotFaunaUpdCtr = 0;
+	BotNpcUpdCtr = 0;
 	// Pathfinding
-	PathFindingCalls      = 0;
+	PathFindingCalls = 0;
 	PathFindingIterations = 0;
-	PathFindingHeapSize   = 0;
-	PathFindingCallsInside      = 0;
+	PathFindingHeapSize = 0;
+	PathFindingCallsInside = 0;
 	PathFindingIterationsInside = 0;
-	PathFindingHeapSizeInside   = 0;
+	PathFindingHeapSizeInside = 0;
 	// Player visibility
-	AISStat::GrpFastUpdCtr   = 0;
-	AISStat::GrpSlowUpdCtr   = 0;
-	for (size_t i=0; i<256; ++i)
+	AISStat::GrpFastUpdCtr = 0;
+	AISStat::GrpSlowUpdCtr = 0;
+	for (size_t i = 0; i < 256; ++i)
 		VisionCtr[i] = 0;
 }
 
-inline
-void countersEnd()
+inline void countersEnd()
 {
 	// Managers
-	StatMgrTotalUpdCtr  = MgrTotalUpdCtr;
-	StatMgrFaunaUpdCtr  = MgrFaunaUpdCtr;
-	StatMgrNpcUpdCtr    = MgrNpcUpdCtr;
-	StatMgrPetUpdCtr    = MgrPetUpdCtr;
+	StatMgrTotalUpdCtr = MgrTotalUpdCtr;
+	StatMgrFaunaUpdCtr = MgrFaunaUpdCtr;
+	StatMgrNpcUpdCtr = MgrNpcUpdCtr;
+	StatMgrPetUpdCtr = MgrPetUpdCtr;
 	StatMgrPlayerUpdCtr = MgrPlayerUpdCtr;
 	// Groups
-	StatGrpTotalUpdCtr  = GrpTotalUpdCtr;
-	StatGrpFaunaUpdCtr  = GrpFaunaUpdCtr;
-	StatGrpNpcUpdCtr    = GrpNpcUpdCtr;
-	StatGrpPetUpdCtr    = GrpPetUpdCtr;
+	StatGrpTotalUpdCtr = GrpTotalUpdCtr;
+	StatGrpFaunaUpdCtr = GrpFaunaUpdCtr;
+	StatGrpNpcUpdCtr = GrpNpcUpdCtr;
+	StatGrpPetUpdCtr = GrpPetUpdCtr;
 	// Bots
-	StatBotTotalUpdCtr  = BotTotalUpdCtr;
-	StatBotFaunaUpdCtr  = BotFaunaUpdCtr;
-	StatBotNpcUpdCtr    = BotNpcUpdCtr;
+	StatBotTotalUpdCtr = BotTotalUpdCtr;
+	StatBotFaunaUpdCtr = BotFaunaUpdCtr;
+	StatBotNpcUpdCtr = BotNpcUpdCtr;
 	// Pathfinding
-	StatPathFindingCalls      = PathFindingCalls;
-	StatPathFindingIterations = PathFindingCalls!=0?(float)PathFindingIterations/(float)PathFindingCalls:0.f;
-	StatPathFindingHeapSize   = PathFindingCalls!=0?(float)PathFindingHeapSize  /(float)PathFindingCalls:0.f;
-	StatPathFindingCallsInside      = PathFindingCallsInside;
-	StatPathFindingIterationsInside = PathFindingCallsInside!=0?(float)PathFindingIterationsInside/(float)PathFindingCallsInside:0.f;
-	StatPathFindingHeapSizeInside   = PathFindingCallsInside!=0?(float)PathFindingHeapSizeInside  /(float)PathFindingCallsInside:0.f;
+	StatPathFindingCalls = PathFindingCalls;
+	StatPathFindingIterations = PathFindingCalls != 0 ? (float)PathFindingIterations / (float)PathFindingCalls : 0.f;
+	StatPathFindingHeapSize = PathFindingCalls != 0 ? (float)PathFindingHeapSize / (float)PathFindingCalls : 0.f;
+	StatPathFindingCallsInside = PathFindingCallsInside;
+	StatPathFindingIterationsInside = PathFindingCallsInside != 0 ? (float)PathFindingIterationsInside / (float)PathFindingCallsInside : 0.f;
+	StatPathFindingHeapSizeInside = PathFindingCallsInside != 0 ? (float)PathFindingHeapSizeInside / (float)PathFindingCallsInside : 0.f;
 	// Player visibility
-	StatGrpFastUpdCtr   = GrpFastUpdCtr;
-	StatGrpSlowUpdCtr   = GrpSlowUpdCtr;
-	StatVision0Ctr      = VisionCtr[0];
+	StatGrpFastUpdCtr = GrpFastUpdCtr;
+	StatGrpSlowUpdCtr = GrpSlowUpdCtr;
+	StatVision0Ctr = VisionCtr[0];
 	uint32 total = 0;
-	for (size_t i=1; i<=64; ++i)
+	for (size_t i = 1; i <= 64; ++i)
 		total += VisionCtr[i];
-	StatVision1To64Ctr  = total;
+	StatVision1To64Ctr = total;
 	total = 0;
-	for (size_t i=65; i<=127; ++i)
+	for (size_t i = 65; i <= 127; ++i)
 		total += VisionCtr[i];
 	StatVision65To127Ctr = total;
 	total = 0;
-	for (size_t i=128; i<=254; ++i)
+	for (size_t i = 128; i <= 254; ++i)
 		total += VisionCtr[i];
 	StatVision128To254Ctr = total;
-	StatVision255Ctr    = VisionCtr[255];
+	StatVision255Ctr = VisionCtr[255];
 }
 
 }

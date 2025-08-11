@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "ai_place.h"
 #include "ai_place_xyr.h"
@@ -28,14 +27,14 @@
 
 std::string CAIPlace::getIndexString() const
 {
-	return	getOwner()->getIndexString()+NLMISC::toString(":%u", getChildIndex());
+	return getOwner()->getIndexString() + NLMISC::toString(":%u", getChildIndex());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // CAIPlaceXYR                                                              //
 //////////////////////////////////////////////////////////////////////////////
 
-bool CAIPlaceXYR::atPlace(CAIEntityPhysical const* entity) const
+bool CAIPlaceXYR::atPlace(CAIEntityPhysical const *entity) const
 {
 	return atPlace(entity->pos());
 }
@@ -45,33 +44,33 @@ bool CAIPlaceXYR::atPlace(CAIEntityPhysical const* entity) const
 //////////////////////////////////////////////////////////////////////////////
 std::string CAIPlaceXYRFauna::getOneLineInfoString() const
 {
-	std::string result = NLMISC::toString("Name = %s; Active : %s, index = %d ", getFullName().c_str(), getActive() ? "on" : "off", (int) getIndex());
-	if (getFlag(FLAG_SPAWN)) result +="spawn ";
-	if (getFlag(FLAG_EAT)) result +="food ";
-	if (getFlag(FLAG_REST)) result +="rest ";
+	std::string result = NLMISC::toString("Name = %s; Active : %s, index = %d ", getFullName().c_str(), getActive() ? "on" : "off", (int)getIndex());
+	if (getFlag(FLAG_SPAWN)) result += "spawn ";
+	if (getFlag(FLAG_EAT)) result += "food ";
+	if (getFlag(FLAG_REST)) result += "rest ";
 	if (getTimeDriven()) result += NLMISC::toString(" TIME_DRIVEN : days=%s; time=%s", getDayInterval().c_str(), getTimeInterval().c_str());
-	return result;	
+	return result;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // CAIPlaceFastXYR                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
-bool CAIPlaceFastXYR::atPlace(CAIEntityPhysical const* entity) const
+bool CAIPlaceFastXYR::atPlace(CAIEntityPhysical const *entity) const
 {
 	return atPlace(entity->pos());
 }
 
-void CAIPlaceFastXYR::display(CStringWriter& stringWriter) const
+void CAIPlaceFastXYR::display(CStringWriter &stringWriter) const
 {
-	stringWriter.append("XYR: ("+_Pos.x().toString()
-		+" "
-		+_Pos.y().toString()
-		+" "+NLMISC::toString(_Pos.h())
-		+") Radius "
-		+NLMISC::toString(_Radius)
-		+" "
-		+getName());
+	stringWriter.append("XYR: (" + _Pos.x().toString()
+	    + " "
+	    + _Pos.y().toString()
+	    + " " + NLMISC::toString(_Pos.h())
+	    + ") Radius "
+	    + NLMISC::toString(_Radius)
+	    + " "
+	    + getName());
 }
 
 uint CFaunaGenericPlace::setupFromOldName(const std::string &name)
@@ -79,7 +78,7 @@ uint CFaunaGenericPlace::setupFromOldName(const std::string &name)
 	uint32 stayTime;
 	uint placeIndex = std::numeric_limits<uint>::max();
 	// depending on place name setup eat/ rest/ sleep pointers
-	if (NLMISC::nlstricmp(name,"spawn")==0)
+	if (NLMISC::nlstricmp(name, "spawn") == 0)
 	{
 		placeIndex = CGrpFauna::SPAWN_PLACE;
 		setIndex(0);
@@ -87,8 +86,7 @@ uint CFaunaGenericPlace::setupFromOldName(const std::string &name)
 		setFlag(FLAG_SPAWN, true);
 		stayTime = CGrpFauna::refTimer(CGrpFauna::CORPSE_TIME);
 	}
-	else
-	if (NLMISC::nlstricmp(name,"food")==0)
+	else if (NLMISC::nlstricmp(name, "food") == 0)
 	{
 		placeIndex = CGrpFauna::EAT_PLACE;
 		setIndex(1);
@@ -96,8 +94,7 @@ uint CFaunaGenericPlace::setupFromOldName(const std::string &name)
 		setFlag(FLAG_EAT, true);
 		stayTime = CGrpFauna::refTimer(CGrpFauna::EAT_TIME);
 	}
-	else
-	if (NLMISC::nlstricmp(name,"rest")==0)
+	else if (NLMISC::nlstricmp(name, "rest") == 0)
 	{
 		placeIndex = CGrpFauna::REST_PLACE;
 		setIndex(2);
@@ -112,13 +109,13 @@ uint CFaunaGenericPlace::setupFromOldName(const std::string &name)
 		nlwarning("Unknown fauna place type");
 		nlassert(0);
 	}
-	stayTime *= FAUNA_BEHAVIOR_GLOBAL_SCALE;	
+	stayTime *= FAUNA_BEHAVIOR_GLOBAL_SCALE;
 	setMinStayTime(stayTime);
 	setMaxStayTime(stayTime);
 	return placeIndex;
 }
 
-bool  CFaunaGenericPlace::getActive() const
+bool CFaunaGenericPlace::getActive() const
 {
 	if (!_TimeDriven) return _Active;
 	// NB : INDICES FOR DAYS are expected to start at 1!!
@@ -127,11 +124,11 @@ bool  CFaunaGenericPlace::getActive() const
 	std::vector<std::string> dayIntervals;
 	NLMISC::explode(_DayInterval, std::string(","), dayIntervals, true);
 	std::string season = EGSPD::CSeason::toString(rt.getRyzomSeason());
-	std::string month = MONTH::toString((MONTH::EMonth) rt.getRyzomMonth());
-	std::string weekday = WEEKDAY::toString((WEEKDAY::EWeekDay) rt.getRyzomDay());	
+	std::string month = MONTH::toString((MONTH::EMonth)rt.getRyzomMonth());
+	std::string weekday = WEEKDAY::toString((WEEKDAY::EWeekDay)rt.getRyzomDay());
 	bool found = false;
 	for (uint k = 0; k < dayIntervals.size(); ++k)
-	{		
+	{
 		bool goodToken = false;
 		if (NLMISC::nlstricmp(dayIntervals[k], "always") == 0)
 		{
@@ -142,7 +139,7 @@ bool  CFaunaGenericPlace::getActive() const
 		{
 			found = true;
 			break;
-		}		
+		}
 		if (EGSPD::CSeason::fromString(season) != EGSPD::CSeason::Unknown)
 		{
 			goodToken = true;
@@ -168,9 +165,9 @@ bool  CFaunaGenericPlace::getActive() const
 		// see if this is a n interval
 		int startDay, endDay;
 		if (sscanf(dayIntervals[k].c_str(), "%d-%d", &startDay, &endDay) == 2)
-		{			
+		{
 			goodToken = true;
-			if ((int) (rt.getRyzomDay() + 1) >= startDay && (int) (rt.getRyzomDay() + 1) <= endDay)
+			if ((int)(rt.getRyzomDay() + 1) >= startDay && (int)(rt.getRyzomDay() + 1) <= endDay)
 			{
 				found = true;
 				break;
@@ -181,7 +178,7 @@ bool  CFaunaGenericPlace::getActive() const
 		if (sscanf(dayIntervals[k].c_str(), "%d", &day) == 1)
 		{
 			goodToken = true;
-			if ((int) (rt.getRyzomDay() + 1) == day)
+			if ((int)(rt.getRyzomDay() + 1) == day)
 			{
 				found = true;
 				break;
@@ -199,10 +196,10 @@ bool  CFaunaGenericPlace::getActive() const
 	std::vector<std::string> timeIntervals;
 	NLMISC::explode(_TimeInterval, std::string(","), timeIntervals, true);
 	for (uint k = 0; k < dayIntervals.size(); ++k)
-	{				
+	{
 		uint startHour, endHour;
 		if (sscanf(timeIntervals[k].c_str(), "%d-%d", &startHour, &endHour) == 2)
-		{			
+		{
 			if (startHour > endHour)
 			{
 				// reversed interval
@@ -212,12 +209,12 @@ bool  CFaunaGenericPlace::getActive() const
 				}
 			}
 			else
-			{				
+			{
 				if (rt.getRyzomTime() >= startHour && rt.getRyzomTime() <= endHour)
 				{
 					return true;
 				}
-			}			
+			}
 		}
 		else
 		{
@@ -231,15 +228,16 @@ bool  CFaunaGenericPlace::getActive() const
 // CAIPlaceShape                                                            //
 //////////////////////////////////////////////////////////////////////////////
 
-CAIPlaceShape::CAIPlaceShape(CPlaceOwner* owner, CAIAliasDescriptionNode* aliasDescription, bool warnOnInvalidPosition)
-: CAIPlace(owner, aliasDescription), _Shape(!warnOnInvalidPosition)
+CAIPlaceShape::CAIPlaceShape(CPlaceOwner *owner, CAIAliasDescriptionNode *aliasDescription, bool warnOnInvalidPosition)
+    : CAIPlace(owner, aliasDescription)
+    , _Shape(!warnOnInvalidPosition)
 {
 	_Shape.calcRandomPos(_MidPos);
 	CWorldContainer::getWorldMap().setWorldPosition(AITYPES::vp_auto, _WorldValidPos, _MidPos);
 	_Shape.calcRandomPos(_MidPos);
 }
 
-bool CAIPlaceShape::atPlace(CAIVector const& pos) const
+bool CAIPlaceShape::atPlace(CAIVector const &pos) const
 {
 	return _Shape.contains(pos);
 }
@@ -249,17 +247,17 @@ bool CAIPlaceShape::atPlace(const CAIVectorMirror &pos) const
 	return _Shape.contains(pos);
 }
 
-bool CAIPlaceShape::atPlace(CAIEntityPhysical const* entity) const
+bool CAIPlaceShape::atPlace(CAIEntityPhysical const *entity) const
 {
 	return atPlace(entity->pos());
 }
 
-CAIPos const& CAIPlaceShape::midPos() const
+CAIPos const &CAIPlaceShape::midPos() const
 {
 	return _MidPos;
 }
 
-RYAI_MAP_CRUNCH::CWorldPosition const& CAIPlaceShape::worldValidPos() const
+RYAI_MAP_CRUNCH::CWorldPosition const &CAIPlaceShape::worldValidPos() const
 {
 	return _WorldValidPos;
 }
@@ -275,19 +273,19 @@ AITYPES::TVerticalPos CAIPlaceShape::getVerticalPos() const
 	return _Shape.getVerticalPos();
 }
 
-void CAIPlaceShape::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const
+void CAIPlaceShape::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition &pos) const
 {
-	CAIPos	aiPos;
+	CAIPos aiPos;
 	_Shape.calcRandomPos(aiPos);
 	CWorldContainer::getWorldMap().setWorldPosition(AITYPES::vp_auto, pos, aiPos);
 }
 
-bool CAIPlaceShape::calcRandomPos(CAIPos& pos) const
+bool CAIPlaceShape::calcRandomPos(CAIPos &pos) const
 {
 	return _Shape.calcRandomPos(pos);
 }
 
-bool CAIPlaceShape::setPatat(AITYPES::TVerticalPos verticalPos, std::vector<CAIVector> const& points)
+bool CAIPlaceShape::setPatat(AITYPES::TVerticalPos verticalPos, std::vector<CAIVector> const &points)
 {
 	return _Shape.setPatat(verticalPos, points);
 }
@@ -296,12 +294,12 @@ bool CAIPlaceShape::setPatat(AITYPES::TVerticalPos verticalPos, std::vector<CAIV
 // CAIPlaceIntersect                                                        //
 //////////////////////////////////////////////////////////////////////////////
 
-CAIPlaceIntersect::CAIPlaceIntersect(CPlaceOwner* owner, CAIAliasDescriptionNode* aliasDescription)
-: CAIPlace(owner, aliasDescription)
+CAIPlaceIntersect::CAIPlaceIntersect(CPlaceOwner *owner, CAIAliasDescriptionNode *aliasDescription)
+    : CAIPlace(owner, aliasDescription)
 {
 }
 
-bool CAIPlaceIntersect::atPlace(CAIVector const& pos) const
+bool CAIPlaceIntersect::atPlace(CAIVector const &pos) const
 {
 	if (_Place1 && _Place2)
 		return _Place1->atPlace(pos) && _Place2->atPlace(pos);
@@ -323,7 +321,7 @@ bool CAIPlaceIntersect::atPlace(const CAIVectorMirror &pos) const
 	return true;
 }
 
-bool CAIPlaceIntersect::atPlace(CAIEntityPhysical const* pos) const
+bool CAIPlaceIntersect::atPlace(CAIEntityPhysical const *pos) const
 {
 	if (_Place1 && _Place2)
 		return _Place1->atPlace(pos) && _Place2->atPlace(pos);
@@ -334,7 +332,7 @@ bool CAIPlaceIntersect::atPlace(CAIEntityPhysical const* pos) const
 	return true;
 }
 
-CAIPos const& CAIPlaceIntersect::midPos() const
+CAIPos const &CAIPlaceIntersect::midPos() const
 {
 	nlassert(_Place1 || _Place2);
 	if (_Place1)
@@ -344,7 +342,7 @@ CAIPos const& CAIPlaceIntersect::midPos() const
 	return _DummyMidPos;
 }
 
-RYAI_MAP_CRUNCH::CWorldPosition const& CAIPlaceIntersect::worldValidPos() const
+RYAI_MAP_CRUNCH::CWorldPosition const &CAIPlaceIntersect::worldValidPos() const
 {
 	nlassert(_Place1 || _Place2);
 	if (_Place1)
@@ -374,7 +372,7 @@ AITYPES::TVerticalPos CAIPlaceIntersect::getVerticalPos() const
 	return AITYPES::vp_auto;
 }
 
-void CAIPlaceIntersect::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const
+void CAIPlaceIntersect::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition &pos) const
 {
 	nlassert(_Place1 || _Place2);
 	if (_Place1)
@@ -383,21 +381,21 @@ void CAIPlaceIntersect::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const
 		_Place2->getRandomPos(pos);
 }
 
-bool CAIPlaceIntersect::calcRandomPos(CAIPos& pos) const
+bool CAIPlaceIntersect::calcRandomPos(CAIPos &pos) const
 {
-//	if (_Place1 && _Place1->calcRandomPos(pos))
-//		return true;
-//	if (_Place2 && _Place2->calcRandomPos(pos))
-//		return true;
+	//	if (_Place1 && _Place1->calcRandomPos(pos))
+	//		return true;
+	//	if (_Place2 && _Place2->calcRandomPos(pos))
+	//		return true;
 	return false;
 }
 
-void CAIPlaceIntersect::setPlace1(NLMISC::CSmartPtr<CAIPlace const> const& place)
+void CAIPlaceIntersect::setPlace1(NLMISC::CSmartPtr<CAIPlace const> const &place)
 {
 	_Place1 = place;
 }
 
-void CAIPlaceIntersect::setPlace2(NLMISC::CSmartPtr<CAIPlace const> const& place)
+void CAIPlaceIntersect::setPlace2(NLMISC::CSmartPtr<CAIPlace const> const &place)
 {
 	_Place2 = place;
 }
@@ -406,15 +404,15 @@ void CAIPlaceIntersect::setPlace2(NLMISC::CSmartPtr<CAIPlace const> const& place
 // CAIPlaceOutpost                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
-CAIPlaceOutpost::CAIPlaceOutpost(CPlaceOwner* owner, CAIAliasDescriptionNode* aliasDescription)
-: CAIPlaceShape(owner, aliasDescription,false)
-, _OutpostAlias(0)
+CAIPlaceOutpost::CAIPlaceOutpost(CPlaceOwner *owner, CAIAliasDescriptionNode *aliasDescription)
+    : CAIPlaceShape(owner, aliasDescription, false)
+    , _OutpostAlias(0)
 {
 }
 
-bool CAIPlaceOutpost::atPlace(CAIEntityPhysical const* entity) const
+bool CAIPlaceOutpost::atPlace(CAIEntityPhysical const *entity) const
 {
-	if (_OutpostAlias!=0)
+	if (_OutpostAlias != 0)
 	{
 		CMirrorPropValueRO<TYPE_IN_OUTPOST_ZONE_ALIAS> entityInOutpostAlias(TheDataset, entity->dataSetRow(), DSPropertyIN_OUTPOST_ZONE_ALIAS);
 		return (entityInOutpostAlias == _OutpostAlias);
@@ -426,4 +424,3 @@ void CAIPlaceOutpost::setOutpostAlias(uint32 outpostAlias)
 {
 	_OutpostAlias = outpostAlias;
 }
-

@@ -14,31 +14,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef AI_FACTORY_H
 #define AI_FACTORY_H
 
 #include <nel/misc/types_nl.h>
 #include <map>
 
-
 template <class BaseClass>
 class IAiFactory
-	:public	NLMISC::CDbgRefCount<IAiFactory<BaseClass> >
+    : public NLMISC::CDbgRefCount<IAiFactory<BaseClass>>
 {
 public:
-	virtual BaseClass *createObject(const	typename BaseClass::CtorParam&	ctorParam) = 0;
+	virtual BaseClass *createObject(const typename BaseClass::CtorParam &ctorParam) = 0;
 };
-
 
 template <class BaseClass, class KeyType = std::string>
 class CAiFactoryContainer
 {
-	typedef std::map<KeyType, NLMISC::CDbgPtr<IAiFactory<BaseClass> > > TRegisterCont;
+	typedef std::map<KeyType, NLMISC::CDbgPtr<IAiFactory<BaseClass>>> TRegisterCont;
 
 public:
-		
 	static CAiFactoryContainer &instance()
 	{
 		if (!_Instance)
@@ -48,7 +43,7 @@ public:
 		return *_Instance;
 	}
 
-	virtual ~CAiFactoryContainer() 
+	virtual ~CAiFactoryContainer()
 	{
 	}
 
@@ -58,37 +53,36 @@ public:
 		_Instance = NULL;
 	}
 
-	void	registerFactory(const KeyType &key, IAiFactory<BaseClass> *factoryRegister)
+	void registerFactory(const KeyType &key, IAiFactory<BaseClass> *factoryRegister)
 	{
 		nlassert(_FactoryRegisters.find(key) == _FactoryRegisters.end());
 		_FactoryRegisters.insert(std::make_pair(key, factoryRegister));
 	}
 
-
-	IAiFactory<BaseClass>*	getFactory	(const KeyType &key)
+	IAiFactory<BaseClass> *getFactory(const KeyType &key)
 	{
-		typename TRegisterCont::iterator it (_FactoryRegisters.find(key));
-		if	(it!=_FactoryRegisters.end())
-			return	it->second;
-		return	NULL;
+		typename TRegisterCont::iterator it(_FactoryRegisters.find(key));
+		if (it != _FactoryRegisters.end())
+			return it->second;
+		return NULL;
 	}
 
 protected:
-	static CAiFactoryContainer	*_Instance;
-private:
-	TRegisterCont	_FactoryRegisters;
-};
+	static CAiFactoryContainer *_Instance;
 
+private:
+	TRegisterCont _FactoryRegisters;
+};
 
 template <class BaseClass, class SpecializedClass>
 class CAiFactory : public IAiFactory<BaseClass>
 {
 public:
-	CAiFactory	()
+	CAiFactory()
 	{
 	}
 
-	BaseClass *createObject(const	typename BaseClass::CtorParam&	ctorParam)
+	BaseClass *createObject(const typename BaseClass::CtorParam &ctorParam)
 	{
 		return new SpecializedClass(ctorParam);
 	}
@@ -104,12 +98,10 @@ public:
 	virtual BaseFactoryClass *getFactory() = 0;
 };
 
-
-
 template <class BaseFactoryClass, class KeyType = std::string>
 class CAiFactoryIndirect
 {
-	typedef std::map<KeyType, IAiFactoryIndirectRegister<BaseFactoryClass>*> TRegisterCont;
+	typedef std::map<KeyType, IAiFactoryIndirectRegister<BaseFactoryClass> *> TRegisterCont;
 
 public:
 	static CAiFactoryIndirect &instance()
@@ -129,23 +121,24 @@ public:
 
 	BaseFactoryClass *getFactory(const KeyType &key)
 	{
-		typename TRegisterCont::const_iterator it (_FactoryRegisters.find(key));
+		typename TRegisterCont::const_iterator it(_FactoryRegisters.find(key));
 		if (it == _FactoryRegisters.end())
 			return NULL;
 		else
 			return it->second->getFactory();
 	}
+
 private:
-	static CAiFactoryIndirect	*_Instance;
+	static CAiFactoryIndirect *_Instance;
 
-	TRegisterCont	_FactoryRegisters;
+	TRegisterCont _FactoryRegisters;
 };
-
 
 template <class IndirectFactoryClass, class BaseFactoryClass, class SpecializedFactoryClass, class KeyType>
 class CAiFactoryIndirectRegister : public IAiFactoryIndirectRegister<BaseFactoryClass>
 {
-	SpecializedFactoryClass	_FactoryClass;
+	SpecializedFactoryClass _FactoryClass;
+
 public:
 	CAiFactoryIndirectRegister(const KeyType &key)
 	{
@@ -158,10 +151,11 @@ public:
 	}
 };
 
-#define RYAI_IMPLEMENT_FACTORY_INDIRECT(baseFactoryClass, keyType)	template <> CAiFactoryIndirect<baseFactoryClass, keyType>	*CAiFactoryIndirect<baseFactoryClass, keyType>::_Instance = NULL
+#define RYAI_IMPLEMENT_FACTORY_INDIRECT(baseFactoryClass, keyType) template <> \
+	                                                               CAiFactoryIndirect<baseFactoryClass, keyType> *CAiFactoryIndirect<baseFactoryClass, keyType>::_Instance = NULL
 
-#define RYAI_REGISTER_FACTORY(baseFactoryClass, specializedFactoryClass, keyType, keyValue)	CAiFactoryIndirectRegister<CAiFactoryIndirect<baseFactoryClass, keyType>, baseFactoryClass, specializedFactoryClass, keyType>	RegisterIndirect##specializedFactoryClass(keyValue)
-#define RYAI_DECLARE_FACTORY(baseFactoryClass, specializedFactoryClass, keyType)	extern CAiFactoryIndirectRegister<CAiFactoryIndirect<baseFactoryClass, keyType>, baseFactoryClass, specializedFactoryClass, keyType>	RegisterIndirect##specializedFactoryClass
+#define RYAI_REGISTER_FACTORY(baseFactoryClass, specializedFactoryClass, keyType, keyValue) CAiFactoryIndirectRegister<CAiFactoryIndirect<baseFactoryClass, keyType>, baseFactoryClass, specializedFactoryClass, keyType> RegisterIndirect##specializedFactoryClass(keyValue)
+#define RYAI_DECLARE_FACTORY(baseFactoryClass, specializedFactoryClass, keyType) extern CAiFactoryIndirectRegister<CAiFactoryIndirect<baseFactoryClass, keyType>, baseFactoryClass, specializedFactoryClass, keyType> RegisterIndirect##specializedFactoryClass
 
 #define RYAI_GET_FACTORY(specializedFactoryClass) RegisterIndirect##specializedFactoryClass.getFactory()
 

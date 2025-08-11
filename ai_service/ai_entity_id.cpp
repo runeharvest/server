@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 /*
 #include "stdpch.h"
 
@@ -25,153 +23,153 @@
 //--------------------------------------------------------------------------
 
 CAIEntityId	CAIEntityId::entityId(const std::string &name)
-{	
-	CAIEntityId	eid;
-	
-	eid	=	CAIEntityId::mgrId(name);
-	if (!eid.isInvalid())
-		return	(eid);
-		
-	eid	=	CAIEntityId::grpId(name);
-	if (!eid.isInvalid())
-		return	(eid);
-	
-	eid	=	CAIEntityId::botId(name);
-	if (!eid.isInvalid())
-		return	(eid);
+{
+    CAIEntityId	eid;
 
-	return CAIEntityId();
+    eid	=	CAIEntityId::mgrId(name);
+    if (!eid.isInvalid())
+        return	(eid);
+
+    eid	=	CAIEntityId::grpId(name);
+    if (!eid.isInvalid())
+        return	(eid);
+
+    eid	=	CAIEntityId::botId(name);
+    if (!eid.isInvalid())
+        return	(eid);
+
+    return CAIEntityId();
 }
 
 CAIEntityId CAIEntityId::botId(const std::string &name)
 {
-	CAIEntityId id;
-	
-	// see if we have a CAIEntityId.toString()
-	id=CAIEntityId(name);
-	if (id.isBot() && id.exists())
-		return id;
-	
-	// see if we have a NLMISC::CEntityId.toStirng()
-	if (name[0]=='(')
-	{
-		id=CAIEntityId(NLMISC::CEntityId(name.c_str()));
-		if (id.isBot() && id.exists())
-			return id;
-	}
-	
-	// see if we have a bot number, group number and manager number
-	uint mgridx, grpidx, botidx;
-	char s[30];
-	
-	sscanf(name.c_str(),"%i:%i:%i",&mgridx,&grpidx,&botidx);
-	sprintf(s,"%i:%i:%i",mgridx,grpidx,botidx);
-	if (name==std::string(s))
-		return CAIEntityId::botId(mgridx,grpidx,botidx);
-	
-	sscanf(name.c_str(),"%i,%i,%i",&mgridx,&grpidx,&botidx);
-	sprintf(s,"%i,%i,%i",mgridx,grpidx,botidx);
-	if (name==std::string(s))
-		return CAIEntityId::botId(mgridx,grpidx,botidx);
-	
-	sscanf(name.c_str(),"%i.%i.%i",&mgridx,&grpidx,&botidx);
-	sprintf(s,"%i.%i.%i",mgridx,grpidx,botidx);
-	if (name==std::string(s))
-		return CAIEntityId::botId(mgridx,grpidx,botidx);
-	
-	// we're out of options so give up
-	return	CAIEntityId();
+    CAIEntityId id;
+
+    // see if we have a CAIEntityId.toString()
+    id=CAIEntityId(name);
+    if (id.isBot() && id.exists())
+        return id;
+
+    // see if we have a NLMISC::CEntityId.toStirng()
+    if (name[0]=='(')
+    {
+        id=CAIEntityId(NLMISC::CEntityId(name.c_str()));
+        if (id.isBot() && id.exists())
+            return id;
+    }
+
+    // see if we have a bot number, group number and manager number
+    uint mgridx, grpidx, botidx;
+    char s[30];
+
+    sscanf(name.c_str(),"%i:%i:%i",&mgridx,&grpidx,&botidx);
+    sprintf(s,"%i:%i:%i",mgridx,grpidx,botidx);
+    if (name==std::string(s))
+        return CAIEntityId::botId(mgridx,grpidx,botidx);
+
+    sscanf(name.c_str(),"%i,%i,%i",&mgridx,&grpidx,&botidx);
+    sprintf(s,"%i,%i,%i",mgridx,grpidx,botidx);
+    if (name==std::string(s))
+        return CAIEntityId::botId(mgridx,grpidx,botidx);
+
+    sscanf(name.c_str(),"%i.%i.%i",&mgridx,&grpidx,&botidx);
+    sprintf(s,"%i.%i.%i",mgridx,grpidx,botidx);
+    if (name==std::string(s))
+        return CAIEntityId::botId(mgridx,grpidx,botidx);
+
+    // we're out of options so give up
+    return	CAIEntityId();
 }
 
 
 
 CAIEntityId CAIEntityId::grpId(const std::string &name)
 {
-	CAIEntityId id;
-	
-	// see if we have a CAIEntityId.toStirng()
-	id=CAIEntityId(name);
-	if (id.isGrp() && id.exists())
-		return id;
-	
-	// see if we have a NLMISC::CEntityId.toStirng()
-	if (name[0]=='(')
-	{
-		id=CAIEntityId(NLMISC::CEntityId(name.c_str()));
-		if (id.isGrp() && id.exists())
-			return id;
-	}
-	
-	// see if name corresponds to the name of one of the groups
-	for (id=CAIEntityId::firstMgr().firstGrp();!id.isInvalid();id=id.nextGrp())
-		if (id.exists())
-			if (id.grpPtr()->getName()==name || 
-				id.grpPtr()->getName()+"."+id.grpPtr()->getName()==name ||
-				id.grpPtr()->getName()+":"+id.grpPtr()->getName()==name	)
-				return id;
-			
-	// see if we have a group number and manager number
-	uint mgridx, grpidx;
-	char s[30];
-	
-	sscanf(name.c_str(),"%i:%i",&mgridx,&grpidx);
-	sprintf(s,"%i:%i",mgridx,grpidx);
-	if (name==std::string(s))
-		return CAIEntityId::grpId(mgridx,grpidx);
-	
-	sscanf(name.c_str(),"%i,%i",&mgridx,&grpidx);
-	sprintf(s,"%i,%i",mgridx,grpidx);
-	if (name==std::string(s))
-		return CAIEntityId::grpId(mgridx,grpidx);
-	
-	sscanf(name.c_str(),"%i.%i",&mgridx,&grpidx);
-	sprintf(s,"%i.%i",mgridx,grpidx);
-	if (name==std::string(s))
-		return CAIEntityId::grpId(mgridx,grpidx);
-	
-	// we're out of options so give up
-	return	CAIEntityId();
+    CAIEntityId id;
+
+    // see if we have a CAIEntityId.toStirng()
+    id=CAIEntityId(name);
+    if (id.isGrp() && id.exists())
+        return id;
+
+    // see if we have a NLMISC::CEntityId.toStirng()
+    if (name[0]=='(')
+    {
+        id=CAIEntityId(NLMISC::CEntityId(name.c_str()));
+        if (id.isGrp() && id.exists())
+            return id;
+    }
+
+    // see if name corresponds to the name of one of the groups
+    for (id=CAIEntityId::firstMgr().firstGrp();!id.isInvalid();id=id.nextGrp())
+        if (id.exists())
+            if (id.grpPtr()->getName()==name ||
+                id.grpPtr()->getName()+"."+id.grpPtr()->getName()==name ||
+                id.grpPtr()->getName()+":"+id.grpPtr()->getName()==name	)
+                return id;
+
+    // see if we have a group number and manager number
+    uint mgridx, grpidx;
+    char s[30];
+
+    sscanf(name.c_str(),"%i:%i",&mgridx,&grpidx);
+    sprintf(s,"%i:%i",mgridx,grpidx);
+    if (name==std::string(s))
+        return CAIEntityId::grpId(mgridx,grpidx);
+
+    sscanf(name.c_str(),"%i,%i",&mgridx,&grpidx);
+    sprintf(s,"%i,%i",mgridx,grpidx);
+    if (name==std::string(s))
+        return CAIEntityId::grpId(mgridx,grpidx);
+
+    sscanf(name.c_str(),"%i.%i",&mgridx,&grpidx);
+    sprintf(s,"%i.%i",mgridx,grpidx);
+    if (name==std::string(s))
+        return CAIEntityId::grpId(mgridx,grpidx);
+
+    // we're out of options so give up
+    return	CAIEntityId();
 }
 
 
 
 CAIEntityId CAIEntityId::mgrId(const std::string &name)
 {
-	CAIEntityId id;
-	
-	// see if we have a CAIEntityId.toString()
-	id=CAIEntityId(name);
-	if (id.isMgr() && id.exists())
-		return id;
-	
-	// see if we have a NLMISC::CEntityId.toString()
-	if (name[0]=='(')
-	{
-		id=CAIEntityId(NLMISC::CEntityId(name.c_str()));
-		if (id.isMgr() && id.exists())
-			return id;
-	}
-	
-	// see if name corresponds to the name of one of the manager
-	for (id=CAIEntityId::firstMgr();!id.isInvalid();id=id.nextMgr())
-		if (id.exists())
-			if (id.mgrPtr()->getName()==name)
-				return id;
-			
-	// see if we have a manager number
-	uint	idx;
-	char	s[256];
-	sscanf(name.c_str(),"%i",&idx);
-	sprintf(s,"%i",idx);
-	if (name==std::string(s))
-		return CAIS::getMgr(idx)->id();
-	
-	//	toString no more accepts to compile and not have the time to look at, so its remplaced by the upper piece of code ..
-	//	uint idx=atoi(name.c_str());
-	//	if (toString(idx)==name)
-	//		return CAIS::getMgr(idx)->id();
-			
-	// we're out of options so give up
-	return CAIEntityId();
+    CAIEntityId id;
+
+    // see if we have a CAIEntityId.toString()
+    id=CAIEntityId(name);
+    if (id.isMgr() && id.exists())
+        return id;
+
+    // see if we have a NLMISC::CEntityId.toString()
+    if (name[0]=='(')
+    {
+        id=CAIEntityId(NLMISC::CEntityId(name.c_str()));
+        if (id.isMgr() && id.exists())
+            return id;
+    }
+
+    // see if name corresponds to the name of one of the manager
+    for (id=CAIEntityId::firstMgr();!id.isInvalid();id=id.nextMgr())
+        if (id.exists())
+            if (id.mgrPtr()->getName()==name)
+                return id;
+
+    // see if we have a manager number
+    uint	idx;
+    char	s[256];
+    sscanf(name.c_str(),"%i",&idx);
+    sprintf(s,"%i",idx);
+    if (name==std::string(s))
+        return CAIS::getMgr(idx)->id();
+
+    //	toString no more accepts to compile and not have the time to look at, so its remplaced by the upper piece of code ..
+    //	uint idx=atoi(name.c_str());
+    //	if (toString(idx)==name)
+    //		return CAIS::getMgr(idx)->id();
+
+    // we're out of options so give up
+    return CAIEntityId();
 }
 */

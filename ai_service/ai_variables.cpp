@@ -14,31 +14,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "nel/misc/variable.h"
 #include "ai_variables.h"
 
 using namespace NLMISC;
 
-CVariable<TGameCycle>	DynamicMaxUpdatePeriod("ai", "DynamicMaxUpdatePeriod", "The maximum update frequency (in ticks) for the dynamic system", 900, 0, true);
+CVariable<TGameCycle> DynamicMaxUpdatePeriod("ai", "DynamicMaxUpdatePeriod", "The maximum update frequency (in ticks) for the dynamic system", 900, 0, true);
 
-CVariable<bool>	LogAcceptablePos("ai", "LogAcceptablePos", "Log the corrected and invalid world position.", false, 0, true);
+CVariable<bool> LogAcceptablePos("ai", "LogAcceptablePos", "Log the corrected and invalid world position.", false, 0, true);
 
-CVariable<bool>	LogGroupCreationFailure("ai", "LogGroupCreationFailure", "Log the dynamic group creation failure details.", false, 0, true);
+CVariable<bool> LogGroupCreationFailure("ai", "LogGroupCreationFailure", "Log the dynamic group creation failure details.", false, 0, true);
 
-CVariable<bool>	LogAliasTreeOwner("ai", "LogAliasTreeOwner", "Log the alias tree owner creation.", false, 0, true);
+CVariable<bool> LogAliasTreeOwner("ai", "LogAliasTreeOwner", "Log the alias tree owner creation.", false, 0, true);
 
-CVariable<bool>	LogOutpostDebug("ai", "LogOutpostDebug", "Log the outpost debug log.", false, 0, true);
+CVariable<bool> LogOutpostDebug("ai", "LogOutpostDebug", "Log the outpost debug log.", false, 0, true);
 
-CVariable<uint32>	RandomPosMaxRetry("ai", "RandomPosMaxRetry", "The total number of try to find the random position around place.", 32*200, 0, true);
+CVariable<uint32> RandomPosMaxRetry("ai", "RandomPosMaxRetry", "The total number of try to find the random position around place.", 32 * 200, 0, true);
 
-CVariable<float>	SpeedFactor("ai", "SpeedFactor", "Speed factor to scall up/down all bot speed .", 1, 0, true);
+CVariable<float> SpeedFactor("ai", "SpeedFactor", "Speed factor to scall up/down all bot speed .", 1, 0, true);
 
 void validateTimerSpeedUp(IVariable &var)
 {
-	CVariable<int> &speedUp = static_cast<CVariable<int>&>(var);
+	CVariable<int> &speedUp = static_cast<CVariable<int> &>(var);
 	if (speedUp < 1)
 		speedUp = 1;
 }
@@ -54,9 +52,7 @@ CVariable<sint32> FameForGuardHelp("ai", "FameForGuardHelp", "The fame value tha
 CVariable<uint32> DefaultNpcAggroDist("ai", "DefaultNpcAggroDist", "The default aggro distance for NPC", 15, 0, true);
 CVariable<float> DefaultEscortRange("ai", "DefaultEscortRange", "The default escort range", 10, 0, true);
 
-
-namespace AISStat
-{
+namespace AISStat {
 
 // managers
 CVariable<uint32> StatMgrTotalUpdCtr("ai_stat", "StatMgrTotalUpdCtr", "MgrTotalUpdCtr", 0, 100, false);
@@ -74,20 +70,20 @@ CVariable<uint32> StatBotTotalUpdCtr("ai_stat", "StatBotTotalUpdCtr", "BotTotalU
 CVariable<uint32> StatBotFaunaUpdCtr("ai_stat", "StatBotFaunaUpdCtr", "BotFaunaUpdCtr", 0, 100, false);
 CVariable<uint32> StatBotNpcUpdCtr("ai_stat", "StatBotNpcUpdCtr", "BotNpcUpdCtr", 0, 100, false);
 // Pathfinding
-CVariable<uint32> StatPathFindingCalls     ("ai_stat", "StatPathFindingCalls",      "PathFindingCalls",      0,   100, false);
-CVariable<float>  StatPathFindingIterations("ai_stat", "StatPathFindingIterations", "PathFindingIterations", 0.f, 100, false);
-CVariable<float>  StatPathFindingHeapSize  ("ai_stat", "StatPathFindingHeapSize",   "PathFindingHeapSize",   0.f, 100, false);
-CVariable<uint32> StatPathFindingCallsInside     ("ai_stat", "StatPathFindingCallsInside",      "PathFindingCallsInside",      0,   100, false);
-CVariable<float>  StatPathFindingIterationsInside("ai_stat", "StatPathFindingIterationsInside", "PathFindingIterationsInside", 0.f, 100, false);
-CVariable<float>  StatPathFindingHeapSizeInside  ("ai_stat", "StatPathFindingHeapSizeInside",   "PathFindingHeapSizeInside",   0.f, 100, false);
+CVariable<uint32> StatPathFindingCalls("ai_stat", "StatPathFindingCalls", "PathFindingCalls", 0, 100, false);
+CVariable<float> StatPathFindingIterations("ai_stat", "StatPathFindingIterations", "PathFindingIterations", 0.f, 100, false);
+CVariable<float> StatPathFindingHeapSize("ai_stat", "StatPathFindingHeapSize", "PathFindingHeapSize", 0.f, 100, false);
+CVariable<uint32> StatPathFindingCallsInside("ai_stat", "StatPathFindingCallsInside", "PathFindingCallsInside", 0, 100, false);
+CVariable<float> StatPathFindingIterationsInside("ai_stat", "StatPathFindingIterationsInside", "PathFindingIterationsInside", 0.f, 100, false);
+CVariable<float> StatPathFindingHeapSizeInside("ai_stat", "StatPathFindingHeapSizeInside", "PathFindingHeapSizeInside", 0.f, 100, false);
 // player visibility
 CVariable<uint32> StatGrpFastUpdCtr("ai_stat", "StatGrpFastUpdCtr", "GrpFastUpdCtr", 0, 100, false);
 CVariable<uint32> StatGrpSlowUpdCtr("ai_stat", "StatGrpSlowUpdCtr", "GrpSlowUpdCtr", 0, 100, false);
-CVariable<uint32> StatVision0Ctr       ("ai_stat", "StatVision0Ctr",        "Player in vision at 0m",             0, 100, false);
-CVariable<uint32> StatVision1To64Ctr   ("ai_stat", "StatVision1To64Ctr",    "Player in vision from 1m to 64m",    0, 100, false);
-CVariable<uint32> StatVision65To127Ctr ("ai_stat", "StatVision65To127Ctr",  "Player in vision from 65m to 127m",  0, 100, false);
+CVariable<uint32> StatVision0Ctr("ai_stat", "StatVision0Ctr", "Player in vision at 0m", 0, 100, false);
+CVariable<uint32> StatVision1To64Ctr("ai_stat", "StatVision1To64Ctr", "Player in vision from 1m to 64m", 0, 100, false);
+CVariable<uint32> StatVision65To127Ctr("ai_stat", "StatVision65To127Ctr", "Player in vision from 65m to 127m", 0, 100, false);
 CVariable<uint32> StatVision128To254Ctr("ai_stat", "StatVision128To254Ctr", "Player in vision from 128m to 254m", 0, 100, false);
-CVariable<uint32> StatVision255Ctr     ("ai_stat", "StatVision255Ctr",      "Player in vision at 255m",           0, 100, false);
+CVariable<uint32> StatVision255Ctr("ai_stat", "StatVision255Ctr", "Player in vision at 255m", 0, 100, false);
 
 // managers
 uint32 MgrTotalUpdCtr;
@@ -133,8 +129,5 @@ CVariable<float> AggroPropagationRadius("ai_aggro", "AggroPropagationRadius", "e
 CVariable<uint32> HealSpecificDowntime("ai_heal", "HealSpecificDowntime", "", 100, 0, true);
 CVariable<uint32> HealSpecificDowntimeSelf("ai_heal", "HealSpecificDowntimeSelf", "", 100, 0, true);
 
-
-
-//max dist for npc selection (ring only)
-CVariable<double>	RingMaxSelectDist("ai", "RingMaxSelectDist", "Max dist used to allow far selection or not.", 20, 0, true);
-
+// max dist for npc selection (ring only)
+CVariable<double> RingMaxSelectDist("ai", "RingMaxSelectDist", "Max dist used to allow far selection or not.", 20, 0, true);

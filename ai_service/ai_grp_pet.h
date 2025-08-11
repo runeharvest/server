@@ -31,32 +31,32 @@ class CPetOwner;
 
 /// This is the base class for PET groups
 class CSpawnGroupPet
-: public CSpawnGroup
+    : public CSpawnGroup
 {
-public:	
-	CSpawnGroupPet(CPersistent<CSpawnGroup>& owner)
-	: CSpawnGroup(owner)
-	, _PathCont(NLMISC::safe_cast<CGroup*>(&owner)->getAStarFlag())
+public:
+	CSpawnGroupPet(CPersistent<CSpawnGroup> &owner)
+	    : CSpawnGroup(owner)
+	    , _PathCont(NLMISC::safe_cast<CGroup *>(&owner)->getAStarFlag())
 	{
 		_LastUpdate = CTimeInterface::gameCycle();
 		_IsPlayerSpawned = true;
 	}
-	
-	CGrpPet& getPersistent() const;
-	
+
+	CGrpPet &getPersistent() const;
+
 	void spawnBots() { }
-	void despawnBots (bool immediately) { }
-	
+	void despawnBots(bool immediately) { }
+
 	void update();
-		
-	CPathCont& getPathCont() { return _PathCont; }
-	
-	CAIVector const& getPos() const { return _PathCont.getDestination(); }
-	
+
+	CPathCont &getPathCont() { return _PathCont; }
+
+	CAIVector const &getPos() const { return _PathCont.getDestination(); }
+
 private:
-	CPathCont	_PathCont;		// this path container is share by all player pets .. (thats accelerate our computing).
-	uint32		_LastUpdate;
-	bool		_IsPlayerSpawned;
+	CPathCont _PathCont; // this path container is share by all player pets .. (thats accelerate our computing).
+	uint32 _LastUpdate;
+	bool _IsPlayerSpawned;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -64,41 +64,41 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrpPet
-: public CGroup
+    : public CGroup
 {
 public:
-	CGrpPet(CMgrPet* mgr, NLMISC::CEntityId const& owner, CAIAliasDescriptionNode* aliasTree = NULL);
-	
-	CDynGrpBase* getGrpDynBase() { return NULL; }
-	
+	CGrpPet(CMgrPet *mgr, NLMISC::CEntityId const &owner, CAIAliasDescriptionNode *aliasTree = NULL);
+
+	CDynGrpBase *getGrpDynBase() { return NULL; }
+
 	RYZOMID::TTypeId getRyzomType() { return RYZOMID::pack_animal; }
-	
-	CAIS::CCounter& getSpawnCounter();
-	
+
+	CAIS::CCounter &getSpawnCounter();
+
 	/// @name Service events
 	//@{
-	void serviceUp(uint32 serviceId, std::string const& serviceName);
-	void serviceDown(uint32 serviceId, std::string const& serviceName);
+	void serviceUp(uint32 serviceId, std::string const &serviceName);
+	void serviceDown(uint32 serviceId, std::string const &serviceName);
 	//@}
-	
+
 	void init() { }
-	
+
 	void release() { }
-	
+
 	void setEvent(uint eventId);
-	
+
 	NLMISC::CSmartPtr<CSpawnGroup> createSpawnGroup();
-	
-	CPersistentStateInstance* getPersistentStateInstance();
-	
-	NLMISC::CEntityId const& getPetOwner() const { return _PetOwner; }
-	
-	CMgrPet& getPetManager() { return *(NLMISC::safe_cast<CMgrPet*>(getOwner())); }
-	
-	CCont<CBot>& bots() { return _Bots; }
-	
-	virtual std::string	getOneLineInfoString() const { return std::string("Pet group '") + getName() + "'"; }
-	
+
+	CPersistentStateInstance *getPersistentStateInstance();
+
+	NLMISC::CEntityId const &getPetOwner() const { return _PetOwner; }
+
+	CMgrPet &getPetManager() { return *(NLMISC::safe_cast<CMgrPet *>(getOwner())); }
+
+	CCont<CBot> &bots() { return _Bots; }
+
+	virtual std::string getOneLineInfoString() const { return std::string("Pet group '") + getName() + "'"; }
+
 private:
 	NLMISC::CEntityId const _PetOwner;
 };
@@ -111,42 +111,37 @@ private:
 // CSpawnGroupPet                                                           //
 //////////////////////////////////////////////////////////////////////////////
 
-inline
-CGrpPet& CSpawnGroupPet::getPersistent() const
+inline CGrpPet &CSpawnGroupPet::getPersistent() const
 {
-	return static_cast<CGrpPet&>(CSpawnGroup::getPersistent());
+	return static_cast<CGrpPet &>(CSpawnGroup::getPersistent());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // CGrpPet                                                                  //
 //////////////////////////////////////////////////////////////////////////////
 
-inline
-CGrpPet::CGrpPet(CMgrPet* mgr, NLMISC::CEntityId const& owner, CAIAliasDescriptionNode* aliasTree)
-: CGroup(mgr, RYAI_MAP_CRUNCH::Nothing, aliasTree)
-, _PetOwner(owner)
+inline CGrpPet::CGrpPet(CMgrPet *mgr, NLMISC::CEntityId const &owner, CAIAliasDescriptionNode *aliasTree)
+    : CGroup(mgr, RYAI_MAP_CRUNCH::Nothing, aliasTree)
+    , _PetOwner(owner)
 {
 	_Bots.setChildSize(4);
 }
 
-inline
-void CGrpPet::setEvent(uint eventId)
+inline void CGrpPet::setEvent(uint eventId)
 {
 	nlwarning("Can't set event on a CGrpPet object !");
 }
 
-inline
-NLMISC::CSmartPtr<CSpawnGroup> CGrpPet::createSpawnGroup()
+inline NLMISC::CSmartPtr<CSpawnGroup> CGrpPet::createSpawnGroup()
 {
 	return new CSpawnGroupPet(*this);
 }
 
-inline
-CPersistentStateInstance* CGrpPet::getPersistentStateInstance()
+inline CPersistentStateInstance *CGrpPet::getPersistentStateInstance()
 {
 	// WE NEVER HAVE TO GO HERE AS PET ARE NOT DERIVED FROM STATE_INSTANCE STUFF !
 	nldebug("State instance stuff called on a pet group");
-	return (CPersistentStateInstance*)NULL;
+	return (CPersistentStateInstance *)NULL;
 }
 
 #endif

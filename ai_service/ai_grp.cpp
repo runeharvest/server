@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "ai_grp.h"
 #include "visual_properties_interface.h"
@@ -31,53 +29,52 @@ using namespace MULTI_LINE_FORMATER;
 // METHODS for debugging stuff
 //--------------------------------------------------------------------------
 
-bool	GrpHistoryRecordLog	=	true;
-CAIVector	lastTriedPos;
+bool GrpHistoryRecordLog = true;
+CAIVector lastTriedPos;
 
-CGroup::CGroup	(CManager *owner, RYAI_MAP_CRUNCH::TAStarFlag	denyFlags, CAIAliasDescriptionNode *aliasTree) :
-		CAliasChild<CManager>(owner,aliasTree),
-		CPersistent<CSpawnGroup>(),
-		_EscortTeamId(CTEAM::InvalidTeamId),
-		_EscortRange(30),
-		_AutoSpawn(true),
-		_DenyFlags(denyFlags),
-		_AutoDestroy(false),
-		_AggroRange(0),
-		_UpdateNbTicks(30)
+CGroup::CGroup(CManager *owner, RYAI_MAP_CRUNCH::TAStarFlag denyFlags, CAIAliasDescriptionNode *aliasTree)
+    : CAliasChild<CManager>(owner, aliasTree)
+    , CPersistent<CSpawnGroup>()
+    , _EscortTeamId(CTEAM::InvalidTeamId)
+    , _EscortRange(30)
+    , _AutoSpawn(true)
+    , _DenyFlags(denyFlags)
+    , _AutoDestroy(false)
+    , _AggroRange(0)
+    , _UpdateNbTicks(30)
 {
 	owner->getAIInstance()->addGroupInfo(this);
 }
 
-CGroup::CGroup	(CManager *owner, RYAI_MAP_CRUNCH::TAStarFlag	denyFlags, uint32 alias, std::string const& name) :
-		CAliasChild<CManager>(owner, alias, name),
-		CPersistent<CSpawnGroup>(),
-		_EscortTeamId(CTEAM::InvalidTeamId),
-		_EscortRange(30),
-		_AutoSpawn(true),
-		_DenyFlags(denyFlags),
-		_AutoDestroy(false),
-		_AggroRange(0),
-		_UpdateNbTicks(30)
+CGroup::CGroup(CManager *owner, RYAI_MAP_CRUNCH::TAStarFlag denyFlags, uint32 alias, std::string const &name)
+    : CAliasChild<CManager>(owner, alias, name)
+    , CPersistent<CSpawnGroup>()
+    , _EscortTeamId(CTEAM::InvalidTeamId)
+    , _EscortRange(30)
+    , _AutoSpawn(true)
+    , _DenyFlags(denyFlags)
+    , _AutoDestroy(false)
+    , _AggroRange(0)
+    , _UpdateNbTicks(30)
 {
 	owner->getAIInstance()->addGroupInfo(this);
 }
 
-CGroup::~CGroup	()
+CGroup::~CGroup()
 {
 	getAIInstance()->removeGroupInfo(this, this);
-	getOwner()->removeFromSpawnList	(this);
+	getOwner()->removeFromSpawnList(this);
 	if (isSpawned())
 	{
-		despawnGrp	();
+		despawnGrp();
 	}
-
 }
 
-CBot* CGroup::getLeader()
+CBot *CGroup::getLeader()
 {
 	FOREACH(itBot, CCont<CBot>, bots())
 	{
-		CSpawnBot* const bot = itBot->getSpawnObj();
+		CSpawnBot *const bot = itBot->getSpawnObj();
 		if (bot && bot->isAlive())
 			return *itBot;
 	}
@@ -85,12 +82,12 @@ CBot* CGroup::getLeader()
 	return NULL;
 }
 
-CBot* CGroup::getSquadLeader(bool checkAliveStatus)
+CBot *CGroup::getSquadLeader(bool checkAliveStatus)
 {
 	CCont<CBot>::iterator itBot = bots().begin();
-	if (itBot!=bots().end())
+	if (itBot != bots().end())
 	{
-		CSpawnBot* const bot = itBot->getSpawnObj();
+		CSpawnBot *const bot = itBot->getSpawnObj();
 		if (bot && (!checkAliveStatus || bot->isAlive()))
 			return *itBot;
 	}
@@ -98,30 +95,28 @@ CBot* CGroup::getSquadLeader(bool checkAliveStatus)
 	return NULL;
 }
 
-void	CGroup::serviceEvent	(const	CServiceEvent	&info)
+void CGroup::serviceEvent(const CServiceEvent &info)
 {
-	CCont<CBot>::iterator	it=bots().begin(), itEnd=bots().end();
-	while (it!=itEnd)
+	CCont<CBot>::iterator it = bots().begin(), itEnd = bots().end();
+	while (it != itEnd)
 	{
-		it->serviceEvent	(info);
+		it->serviceEvent(info);
 		++it;
 	}
-
 }
 
-void	CGroup::despawnBots	()
+void CGroup::despawnBots()
 {
-	for	(CCont<CBot>::iterator	it=_Bots.begin(), itEnd=_Bots.end(); it!=itEnd;++it)
+	for (CCont<CBot>::iterator it = _Bots.begin(), itEnd = _Bots.end(); it != itEnd; ++it)
 	{
 		if (it->isSpawned())
 			it->despawnBot();
 	}
-
 }
 
 std::string CGroup::getIndexString() const
 {
-	return getOwner()->getIndexString()+NLMISC::toString(":g%u", getChildIndex());
+	return getOwner()->getIndexString() + NLMISC::toString(":g%u", getChildIndex());
 }
 
 std::string CGroup::getOneLineInfoString() const
@@ -132,7 +127,7 @@ std::string CGroup::getOneLineInfoString() const
 std::vector<std::string> CGroup::getMultiLineInfoString() const
 {
 	std::vector<std::string> container;
-	
+
 	pushTitle(container, "CGroup");
 	pushEntry(container, "id=" + getIndexString());
 	container.back() += " alias=" + getAliasString();
@@ -145,18 +140,18 @@ std::vector<std::string> CGroup::getMultiLineInfoString() const
 	{
 		std::vector<std::string> strings = getSpawnObj()->getMultiLineInfoString();
 		FOREACHC(it, std::vector<std::string>, strings)
-			pushEntry(container, *it);
+		pushEntry(container, *it);
 	}
 	else
 		pushEntry(container, "<not spawned>");
 	pushFooter(container);
-	
+
 	return container;
 }
 
 std::string CGroup::getFullName() const
 {
-	return std::string(getOwner()->getFullName()+":"+getName());
+	return std::string(getOwner()->getFullName() + ":" + getName());
 }
 
 void CGroup::lastBotDespawned()
@@ -175,14 +170,14 @@ void CGroup::firstBotSpawned()
 
 CSpawnGroup::~CSpawnGroup()
 {
-	FOREACH(it, CCont<CBot>,bots())
+	FOREACH(it, CCont<CBot>, bots())
 	{
 		if ((*it)->isSpawned())
 			(*it)->despawnBot();
 	}
-	
+
 	getPersistent().despawnBots();
-	
+
 	// clear profiles
 	_MovingProfile = CProfilePtr();
 	_FightProfile = CProfilePtr();
@@ -191,62 +186,62 @@ CSpawnGroup::~CSpawnGroup()
 	_PunctualHoldMovingProfile = CProfilePtr();
 }
 
-bool CSpawnGroup::calcCenterPos(CAIVector& grp_pos, bool allowDeadBot)
+bool CSpawnGroup::calcCenterPos(CAIVector &grp_pos, bool allowDeadBot)
 {
-	if (bots().size()<=0)
-		return	false;
-	
+	if (bots().size() <= 0)
+		return false;
+
 	double x(0), y(0);
 	uint count(0);
-	
+
 	FOREACH(it, CCont<CBot>, bots())
 	{
-		CSpawnBot const* const spawnBot = it->getSpawnObj();
+		CSpawnBot const *const spawnBot = it->getSpawnObj();
 		if (!spawnBot || (!allowDeadBot && !spawnBot->isAlive()))
 			continue;
-		
+
 		x += spawnBot->pos().x().asDouble();
 		y += spawnBot->pos().y().asDouble();
 		++count;
 	}
-	if (count==0)
+	if (count == 0)
 		return false;
-	
-	grp_pos.setX(x/count);
-	grp_pos.setY(y/count);
-	return	true;
+
+	grp_pos.setX(x / count);
+	grp_pos.setY(y / count);
+	return true;
 }
 
 void CSpawnGroup::spawnBotOfGroup()
 {
 	CCont<CBot>::iterator it = bots().begin();
 	CCont<CBot>::iterator itEnd = bots().end();
-	while (it!=itEnd)
+	while (it != itEnd)
 	{
-		CBot* bot = *it;
+		CBot *bot = *it;
 		if (!bot->isSpawned())
 		{
-			bool ok= bot->spawn();
-// code removed by Sadge because it didn't fix the problem it was added for
-//			if (ok)
-//			{
-//				// the spawn succeeded
-//				// make sure the bot isn't in the despawn list
-//				for (uint32 i= _BotsToDespawn.size(); i--;)
-//				{
-//					if (_BotsToDespawn[i].getBotIndex()== bot->getChildIndex())
-//					{
-//						nldebug("Removing bot from the despawn list because they just respawned: %s",bot->getFullName().c_str());
-//						_BotsToDespawn[i]= _BotsToDespawn.back();
-//						_BotsToDespawn.pop_back();
-//					}
-//				}
-//			}
+			bool ok = bot->spawn();
+			// code removed by Sadge because it didn't fix the problem it was added for
+			//			if (ok)
+			//			{
+			//				// the spawn succeeded
+			//				// make sure the bot isn't in the despawn list
+			//				for (uint32 i= _BotsToDespawn.size(); i--;)
+			//				{
+			//					if (_BotsToDespawn[i].getBotIndex()== bot->getChildIndex())
+			//					{
+			//						nldebug("Removing bot from the despawn list because they just respawned: %s",bot->getFullName().c_str());
+			//						_BotsToDespawn[i]= _BotsToDespawn.back();
+			//						_BotsToDespawn.pop_back();
+			//					}
+			//				}
+			//			}
 			if (!ok)
 			{
 				// the spawn failed
-				std::string	name;
-				
+				std::string name;
+
 				if (!bot->getFullName().empty())
 					name = bot->getFullName();
 				else
@@ -256,9 +251,9 @@ void CSpawnGroup::spawnBotOfGroup()
 					else
 						name = std::string("Unknown");
 				}
-				
-				if (bot->getSheet()->SheetId()==NLMISC::CSheetId::Unknown)
-					nlwarning("***> Spawn failed position(%s), UNKNOWN SHEET! Bot %s ",	lastTriedPos.toString().c_str(), name.c_str());
+
+				if (bot->getSheet()->SheetId() == NLMISC::CSheetId::Unknown)
+					nlwarning("***> Spawn failed position(%s), UNKNOWN SHEET! Bot %s ", lastTriedPos.toString().c_str(), name.c_str());
 				else
 					nlwarning("***> Spawn failed position(%s), sheetId(%s) Bot %s ", lastTriedPos.toString().c_str(), bot->getSheet()->SheetId().toString().c_str(), name.c_str());
 			}
@@ -267,16 +262,16 @@ void CSpawnGroup::spawnBotOfGroup()
 	}
 }
 
-void CSpawnGroup::addBotToDespawnAndRespawnTime(CBot* bot, uint32 despawnTime, uint32 respawnTime)
+void CSpawnGroup::addBotToDespawnAndRespawnTime(CBot *bot, uint32 despawnTime, uint32 respawnTime)
 {
 	nlassert(bot->isSpawned());
-	nlassert(bot->getOwner()==&getPersistent());
-	
+	nlassert(bot->getOwner() == &getPersistent());
+
 	uint32 const botIndex = bot->getChildIndex();
-	
+
 	FOREACH(it, std::vector<CBotToSpawn>, _BotsToDespawn)
 	{
-		if (it->getBotIndex()==botIndex)
+		if (it->getBotIndex() == botIndex)
 		{
 			*it = CBotToSpawn(botIndex, despawnTime, respawnTime);
 			return;
@@ -289,25 +284,25 @@ void CSpawnGroup::checkDespawn()
 {
 	if (_BotsToDespawn.empty())
 		return;
-	
-	//FOREACH_NOINC(it, std::vector<CBotToSpawn>, _BotsToDespawn)
-	for(uint32 i = 0; i < _BotsToDespawn.size();)
+
+	// FOREACH_NOINC(it, std::vector<CBotToSpawn>, _BotsToDespawn)
+	for (uint32 i = 0; i < _BotsToDespawn.size();)
 	{
-		CBotToSpawn& botToDespawn = _BotsToDespawn[i];
+		CBotToSpawn &botToDespawn = _BotsToDespawn[i];
 		if (botToDespawn.waitingDespawnTimeOver())
 		{
-			if (botToDespawn.getBotIndex()>=getPersistent().bots().size())
+			if (botToDespawn.getBotIndex() >= getPersistent().bots().size())
 			{
 				STOP("Array overflow in despawn code!");
 			}
-			else if (getPersistent().bots()[botToDespawn.getBotIndex()]==NULL)
+			else if (getPersistent().bots()[botToDespawn.getBotIndex()] == NULL)
 			{
 				STOP("Trying to despawn a bot who doesn't exist!!");
 			}
 			else
 			{
 				getPersistent().bots()[botToDespawn.getBotIndex()]->despawnBot();
-				if	(getPersistent().isAutoSpawn())
+				if (getPersistent().isAutoSpawn())
 					_BotsToRespawn.push_back(botToDespawn);
 			}
 
@@ -320,42 +315,41 @@ void CSpawnGroup::checkDespawn()
 		i++;
 	}
 
-	if (_NbSpawnedBot==0 && _BotsToRespawn.size()==0)
+	if (_NbSpawnedBot == 0 && _BotsToRespawn.size() == 0)
 	{
 		// Warn the parent manager that this group is now dead.
 		getPersistent().getOwner()->getOwner()->groupDead(&getPersistent());
-		if	(getPersistent()._AutoDestroy)
+		if (getPersistent()._AutoDestroy)
 			getPersistent().getOwner()->groups().removeChildByIndex(getPersistent().getChildIndex());
 	}
 }
 
-
-void CSpawnGroup::incSpawnedBot(CBot& spawnBot)
+void CSpawnGroup::incSpawnedBot(CBot &spawnBot)
 {
 #if !FINAL_VERSION
-	uint32	 botIndex = spawnBot.getChildIndex();
-	for	(uint32 i=(uint32)_BotsToRespawn.size(); i--; )
+	uint32 botIndex = spawnBot.getChildIndex();
+	for (uint32 i = (uint32)_BotsToRespawn.size(); i--;)
 	{
-		if (_BotsToRespawn[i].getBotIndex()==botIndex)
+		if (_BotsToRespawn[i].getBotIndex() == botIndex)
 		{
-			nldebug("Removing bot from _BotsToRespawn because they just respawned: %s",spawnBot.getFullName().c_str());
-//			nlwarning("WARNING!!! Old assert \"_BotsToRespawn[i].getBotIndex()!=botIndex\" would have failed");
-			_BotsToRespawn[i]=_BotsToRespawn.back();
+			nldebug("Removing bot from _BotsToRespawn because they just respawned: %s", spawnBot.getFullName().c_str());
+			//			nlwarning("WARNING!!! Old assert \"_BotsToRespawn[i].getBotIndex()!=botIndex\" would have failed");
+			_BotsToRespawn[i] = _BotsToRespawn.back();
 			_BotsToRespawn.pop_back();
 		}
 	}
-	for	(uint32 i=(uint32)_BotsToDespawn.size(); i--; )
+	for (uint32 i = (uint32)_BotsToDespawn.size(); i--;)
 	{
-		if (_BotsToDespawn[i].getBotIndex()==botIndex)
+		if (_BotsToDespawn[i].getBotIndex() == botIndex)
 		{
-			nldebug("Removing bot from _BotsToDespawn because they just respawned: %s",spawnBot.getFullName().c_str());
-//			nlwarning("WARNING!!! Old assert \"_BotsToDespawn[i].getBotIndex()!=botIndex\" would have failed");
-			_BotsToDespawn[i]=_BotsToDespawn.back();
+			nldebug("Removing bot from _BotsToDespawn because they just respawned: %s", spawnBot.getFullName().c_str());
+			//			nlwarning("WARNING!!! Old assert \"_BotsToDespawn[i].getBotIndex()!=botIndex\" would have failed");
+			_BotsToDespawn[i] = _BotsToDespawn.back();
 			_BotsToDespawn.pop_back();
 		}
 	}
 #endif
-	if (_NbSpawnedBot==0)
+	if (_NbSpawnedBot == 0)
 	{
 		getPersistent().firstBotSpawned();
 	}
@@ -365,7 +359,7 @@ void CSpawnGroup::incSpawnedBot(CBot& spawnBot)
 void CSpawnGroup::decSpawnedBot()
 {
 	--_NbSpawnedBot;
-	if (_NbSpawnedBot==0)
+	if (_NbSpawnedBot == 0)
 	{
 		getPersistent().lastBotDespawned();
 	}
@@ -374,16 +368,16 @@ void CSpawnGroup::decSpawnedBot()
 void CSpawnGroup::checkRespawn()
 {
 	// respawn if there is not too much dead .. (no more than one at each tick).
-	if (_BotsToRespawn.size()<=0)
+	if (_BotsToRespawn.size() <= 0)
 		return;
-	
-	//FOREACH_NOINC(it, std::vector<CBotToSpawn>, _BotsToRespawn)
-	for(uint32 i = 0; i < _BotsToRespawn.size();)
+
+	// FOREACH_NOINC(it, std::vector<CBotToSpawn>, _BotsToRespawn)
+	for (uint32 i = 0; i < _BotsToRespawn.size();)
 	{
-		CBotToSpawn const& botToSpawn = _BotsToRespawn[i];
+		CBotToSpawn const &botToSpawn = _BotsToRespawn[i];
 		if (botToSpawn.waitingRespawnTimeOver())
 		{
-			CBot* botPt = getPersistent().bots()[botToSpawn.getBotIndex()];
+			CBot *botPt = getPersistent().bots()[botToSpawn.getBotIndex()];
 
 			CBotToSpawn const botToSpawn = _BotsToRespawn.back();
 
@@ -397,23 +391,22 @@ void CSpawnGroup::checkRespawn()
 			}
 			if (botPt->isSpawned() || botPt->reSpawn(false))
 			{
-				continue;					//	directly test the same it (the next in fact).
+				continue; //	directly test the same it (the next in fact).
 			}
 			else
 			{
-				_BotsToRespawn.insert(_BotsToRespawn.begin(), botToSpawn);	//	push_front so the end doesn't change.
+				_BotsToRespawn.insert(_BotsToRespawn.begin(), botToSpawn); //	push_front so the end doesn't change.
 			}
 		}
 		++i;
 	}
-	
 }
 
-CBot* CSpawnGroup::findLeader()
+CBot *CSpawnGroup::findLeader()
 {
 	FOREACH(itBot, CCont<CBot>, bots())
 	{
-		CBot* bot = *itBot;
+		CBot *bot = *itBot;
 		if (bot->isSpawned())
 		{
 			if (bot->getSpawnObj()->isAlive())
@@ -426,32 +419,32 @@ CBot* CSpawnGroup::findLeader()
 std::vector<std::string> CSpawnGroup::getMultiLineInfoString() const
 {
 	std::vector<std::string> container;
-	
+
 	pushTitle(container, "CSpawnGroup");
 	pushEntry(container, "move profile:     " + _MovingProfile.getOneLineInfoString());
 	pushEntry(container, "activity profile: " + _ActivityProfile.getOneLineInfoString());
 	pushEntry(container, "fight profile:    " + _FightProfile.getOneLineInfoString());
 	pushFooter(container);
-	
+
 	return container;
 }
 
-NLMISC::CSmartPtr<CAIPlace const> CSpawnGroup::buildFirstHitPlace(TDataSetRow const& aggroBot) const
+NLMISC::CSmartPtr<CAIPlace const> CSpawnGroup::buildFirstHitPlace(TDataSetRow const &aggroBot) const
 {
-	if (_ActivityProfile.getAIProfileType()==AITYPES::ACTIVITY_SQUAD)
-		return static_cast<CGrpProfileSquad*>(_ActivityProfile.getAIProfile())->buildFirstHitPlace(aggroBot);
+	if (_ActivityProfile.getAIProfileType() == AITYPES::ACTIVITY_SQUAD)
+		return static_cast<CGrpProfileSquad *>(_ActivityProfile.getAIProfile())->buildFirstHitPlace(aggroBot);
 	return NULL;
 }
 
-void CSpawnGroup::addAggroFor(TDataSetRow const& bot, float aggro, bool forceReturnAggro, NLMISC::CSmartPtr<CAIPlace const> place)
+void CSpawnGroup::addAggroFor(TDataSetRow const &bot, float aggro, bool forceReturnAggro, NLMISC::CSmartPtr<CAIPlace const> place)
 {
-	CGroup& grp = getPersistent();
+	CGroup &grp = getPersistent();
 	FOREACH(itBot, CCont<CBot>, grp.bots())
 	{
-		CBot* pBot = *itBot;
+		CBot *pBot = *itBot;
 		if (pBot)
 		{
-			CSpawnBot* spBot = pBot->getSpawnObj();
+			CSpawnBot *spBot = pBot->getSpawnObj();
 			if (spBot)
 			{
 				spBot->addAggroFor(bot, aggro, forceReturnAggro, place, false);
@@ -459,15 +452,15 @@ void CSpawnGroup::addAggroFor(TDataSetRow const& bot, float aggro, bool forceRet
 		}
 	}
 }
-void CSpawnGroup::setAggroMinimumFor(TDataSetRow const& bot, float aggro, bool forceReturnAggro, NLMISC::CSmartPtr<CAIPlace const> place)
+void CSpawnGroup::setAggroMinimumFor(TDataSetRow const &bot, float aggro, bool forceReturnAggro, NLMISC::CSmartPtr<CAIPlace const> place)
 {
-	CGroup& grp = getPersistent();
+	CGroup &grp = getPersistent();
 	FOREACH(itBot, CCont<CBot>, grp.bots())
 	{
-		CBot* pBot = *itBot;
+		CBot *pBot = *itBot;
 		if (pBot)
 		{
-			CSpawnBot* spBot = pBot->getSpawnObj();
+			CSpawnBot *spBot = pBot->getSpawnObj();
 			if (spBot)
 			{
 				spBot->setAggroMinimumFor(bot, aggro, forceReturnAggro, place, false);
@@ -478,13 +471,13 @@ void CSpawnGroup::setAggroMinimumFor(TDataSetRow const& bot, float aggro, bool f
 
 bool CSpawnGroup::haveAggro() const
 {
-	CGroup const& group = getPersistent();
+	CGroup const &group = getPersistent();
 	FOREACHC(itBot, CCont<CBot>, group.bots())
 	{
-		CBot const* pBot = *itBot;
+		CBot const *pBot = *itBot;
 		if (pBot)
 		{
-			CSpawnBot const* spBot = pBot->getSpawnObj();
+			CSpawnBot const *spBot = pBot->getSpawnObj();
 			if (spBot && spBot->haveAggro())
 				return true;
 		}
@@ -494,13 +487,13 @@ bool CSpawnGroup::haveAggro() const
 
 bool CSpawnGroup::haveAggroOrReturnPlace() const
 {
-	CGroup const& group = getPersistent();
+	CGroup const &group = getPersistent();
 	FOREACHC(itBot, CCont<CBot>, group.bots())
 	{
-		CBot const* pBot = *itBot;
+		CBot const *pBot = *itBot;
 		if (pBot)
 		{
-			CSpawnBot const* spBot = pBot->getSpawnObj();
+			CSpawnBot const *spBot = pBot->getSpawnObj();
 			if (spBot && spBot->haveAggroOrReturnPlace())
 				return true;
 		}

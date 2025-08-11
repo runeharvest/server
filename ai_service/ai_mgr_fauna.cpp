@@ -24,26 +24,27 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 using namespace RYAI_MAP_CRUNCH;
-using namespace	AITYPES;
+using namespace AITYPES;
 
 // Stuff used for management of log messages
-static bool VerboseLog=false;
-#define LOG if (!VerboseLog) {} else nlinfo
+static bool VerboseLog = false;
+#define LOG              \
+	if (!VerboseLog) { } \
+	else nlinfo
 
 //////////////////////////////////////////////////////////////////////////////
 // Local globals                                                            //
 //////////////////////////////////////////////////////////////////////////////
 
-static CAITimer VerboseMgrFaunaUpdateTimer;	// for activating verbose debug info for short periods
-static uint32 PlayersPerRegion = 0;			// dummy variable for setting fake number of players per region
-
+static CAITimer VerboseMgrFaunaUpdateTimer; // for activating verbose debug info for short periods
+static uint32 PlayersPerRegion = 0; // dummy variable for setting fake number of players per region
 
 //////////////////////////////////////////////////////////////////////////////
 // CMgrFauna                                                                //
 //////////////////////////////////////////////////////////////////////////////
 
-CMgrFauna::CMgrFauna(IManagerParent* parent, uint32 alias, std::string const& name, std::string const& filename)
-: CManager(parent, alias, name, filename)
+CMgrFauna::CMgrFauna(IManagerParent *parent, uint32 alias, std::string const &name, std::string const &filename)
+    : CManager(parent, alias, name, filename)
 {
 	registerEvents();
 }
@@ -56,13 +57,13 @@ CMgrFauna::~CMgrFauna()
 
 void CMgrFauna::registerEvents()
 {
-	_StateMachine.registerEvents	();
-	
-	_StateMachine.addEvent(	"destination_reached",			EventDestinationReachedFirst	);
-	_StateMachine.addEvent(	"destination_reached_first",	EventDestinationReachedFirst	);
-	_StateMachine.addEvent(	"destination_reached_all",		EventDestinationReachedAll	);
-	_StateMachine.addEvent(	"bot_killed",					EventBotKilled				);
-	_StateMachine.addEvent(	"group_eliminated",				EventGrpEliminated			);
+	_StateMachine.registerEvents();
+
+	_StateMachine.addEvent("destination_reached", EventDestinationReachedFirst);
+	_StateMachine.addEvent("destination_reached_first", EventDestinationReachedFirst);
+	_StateMachine.addEvent("destination_reached_all", EventDestinationReachedAll);
+	_StateMachine.addEvent("bot_killed", EventBotKilled);
+	_StateMachine.addEvent("group_eliminated", EventGrpEliminated);
 }
 
 void CMgrFauna::init()
@@ -73,16 +74,16 @@ void CMgrFauna::init()
 void CMgrFauna::update()
 {
 	H_AUTO(MgrFaunaUpdate);
-	
+
 	++AISStat::MgrTotalUpdCtr;
 	++AISStat::MgrFaunaUpdCtr;
-	
+
 	CManager::update(); // general update call ..
 }
 
-IAliasCont* CMgrFauna::getAliasCont(TAIType type)
+IAliasCont *CMgrFauna::getAliasCont(TAIType type)
 {
-	switch(type)
+	switch (type)
 	{
 	case AITypeGrp:
 		return &_Groups;
@@ -95,10 +96,10 @@ IAliasCont* CMgrFauna::getAliasCont(TAIType type)
 	}
 }
 
-CAliasTreeOwner* CMgrFauna::createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree)
+CAliasTreeOwner *CMgrFauna::createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree)
 {
-	CAliasTreeOwner* child = NULL;
-	
+	CAliasTreeOwner *child = NULL;
+
 	switch (aliasTree->getType())
 	{
 	case AITypeGrp:
@@ -111,8 +112,8 @@ CAliasTreeOwner* CMgrFauna::createChild(IAliasCont* cont, CAIAliasDescriptionNod
 		child = new CAIStatePositional(getStateMachine(), aliasTree);
 		break;
 	}
-	
-	cont->addAliasChild(child);	
+
+	cont->addAliasChild(child);
 	return child;
 }
 
@@ -121,14 +122,14 @@ std::string CMgrFauna::buildDebugString(uint idx)
 	switch (idx)
 	{
 	case 0:
-		return CManager::getIndexString() + " " + getFullName() + NLMISC::toString(": %-25s ",getName().c_str());
+		return CManager::getIndexString() + " " + getFullName() + NLMISC::toString(": %-25s ", getName().c_str());
 	default:
 		break;
 	}
 	return std::string();
 }
 
-void CMgrFauna::display(CStringWriter& stringWriter)
+void CMgrFauna::display(CStringWriter &stringWriter)
 {
 	stringWriter.append(getFullName());
 }
@@ -158,14 +159,14 @@ NLMISC_DYNVARIABLE(uint32, SimPlayersPerRegion, "Dump update priority heaps and 
 
 //----------------------------------------------------------------------------
 // Control over verbose nature of logging
-NLMISC_COMMAND(verboseFaunaMgrLog,"Turn on or off or check the state of verbose manager activity logging","")
+NLMISC_COMMAND(verboseFaunaMgrLog, "Turn on or off or check the state of verbose manager activity logging", "")
 {
-	if(args.size()>1)
+	if (args.size() > 1)
 		return false;
 
-	if(args.size()==1)
-		StrToBool	(VerboseLog, args[0]);
+	if (args.size() == 1)
+		StrToBool(VerboseLog, args[0]);
 
-	nlinfo("verboseLogging is %s",VerboseLog?"ON":"OFF");
+	nlinfo("verboseLogging is %s", VerboseLog ? "ON" : "OFF");
 	return true;
 }

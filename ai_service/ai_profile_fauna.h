@@ -39,9 +39,9 @@
 #ifndef AI_PROFILE_FAUNA_H
 #define AI_PROFILE_FAUNA_H
 
-#include "profile.h"		// for CAIBaseProfile
-#include "path_behaviors.h"	// for CPathPosition
-#include "ai_bot_fauna.h"	// for CCorpseFaunaProfile
+#include "profile.h" // for CAIBaseProfile
+#include "path_behaviors.h" // for CPathPosition
+#include "ai_bot_fauna.h" // for CCorpseFaunaProfile
 #include "ai_grp_fauna.h"
 #include "ai_mgr_fauna.h"
 
@@ -62,14 +62,14 @@ class CFaunaProfileFloodLogger
 {
 public:
 	typedef std::map<std::string, int> TLogPositions;
-	
+
 public:
 	CFaunaProfileFloodLogger(int period)
-	: logLastTick(0)
-	, logPeriod(period)
+	    : logLastTick(0)
+	    , logPeriod(period)
 	{
 	}
-	
+
 public:
 	TLogPositions logPositions;
 	int logLastTick;
@@ -81,22 +81,22 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 class CPlanteIdleFaunaProfile
-: public CAIBaseProfile
+    : public CAIBaseProfile
 {
 public:
-	CPlanteIdleFaunaProfile(CProfileOwner* owner);
-	
+	CPlanteIdleFaunaProfile(CProfileOwner *owner);
+
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_PLANTIDLE; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_PLANTIDLE; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
-	
+
 protected:
-	CSpawnBotFauna* _Bot;
+	CSpawnBotFauna *_Bot;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -104,14 +104,14 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CAIFaunaActivityBaseSpawnProfile
-: public CAIBaseProfile
-, public IMouvementMagnetOwner
+    : public CAIBaseProfile,
+      public IMouvementMagnetOwner
 {
 public:
-	CAIFaunaActivityBaseSpawnProfile(CProfileOwner* owner);
-	
-	virtual NLMISC::CSmartPtr<CMovementMagnet> const& getMovementMagnet() const;
-	
+	CAIFaunaActivityBaseSpawnProfile(CProfileOwner *owner);
+
+	virtual NLMISC::CSmartPtr<CMovementMagnet> const &getMovementMagnet() const;
+
 protected:
 	NLMISC::CSmartPtr<CMovementMagnet> _MovementMagnet;
 	CPathPosition _PathPos;
@@ -123,23 +123,23 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CWanderFaunaProfile
-: public CAIFaunaActivityBaseSpawnProfile
+    : public CAIFaunaActivityBaseSpawnProfile
 {
 public:
-	CWanderFaunaProfile(CProfileOwner* owner);
-	
+	CWanderFaunaProfile(CProfileOwner *owner);
+
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_WANDERING; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_WANDERING; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
-	
+
 protected:
 	RYAI_MAP_CRUNCH::TAStarFlag _DenyFlags;
-	CSpawnBotFauna* _Bot;
+	CSpawnBotFauna *_Bot;
 	double _magnetDistSq; ///< square distance from bot to his magnet at last move
 	static CFaunaProfileFloodLogger _FloodLogger;
 };
@@ -149,28 +149,29 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGrazeFaunaProfile
-: public CAIFaunaActivityBaseSpawnProfile
+    : public CAIFaunaActivityBaseSpawnProfile
 {
 public:
-	CGrazeFaunaProfile(CProfileOwner* owner);
-	
+	CGrazeFaunaProfile(CProfileOwner *owner);
+
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_GRAZING; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_GRAZING; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
-	
+
 protected:
-	CSpawnBotFauna*	_Bot;
+	CSpawnBotFauna *_Bot;
+
 private:
-	CAITimer			_CycleTimer;
-	uint			_CycleTimerBaseTime;
-	bool			_ArrivedInZone;	
-	double			_magnetDistSq; ///< square distance from bot to his magnet at last move
-	RYAI_MAP_CRUNCH::TAStarFlag	_DenyFlags;
+	CAITimer _CycleTimer;
+	uint _CycleTimerBaseTime;
+	bool _ArrivedInZone;
+	double _magnetDistSq; ///< square distance from bot to his magnet at last move
+	RYAI_MAP_CRUNCH::TAStarFlag _DenyFlags;
 	static CFaunaProfileFloodLogger _FloodLogger;
 };
 
@@ -179,28 +180,29 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CRestFaunaProfile
-: public CAIFaunaActivityBaseSpawnProfile
+    : public CAIFaunaActivityBaseSpawnProfile
 {
 public:
-	CRestFaunaProfile(CProfileOwner* owner);
-	
+	CRestFaunaProfile(CProfileOwner *owner);
+
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_RESTING; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_RESTING; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
-	
+
 protected:
-	CSpawnBotFauna*	_Bot;
+	CSpawnBotFauna *_Bot;
+
 private:
-	CAITimer			_CycleTimer;
-	uint			_CycleTimerBaseTime;
-	bool			_ArrivedInZone;
-	double			_magnetDistSq;	// square distance from bot to his magnet at last move
-	RYAI_MAP_CRUNCH::TAStarFlag	_DenyFlags;
+	CAITimer _CycleTimer;
+	uint _CycleTimerBaseTime;
+	bool _ArrivedInZone;
+	double _magnetDistSq; // square distance from bot to his magnet at last move
+	RYAI_MAP_CRUNCH::TAStarFlag _DenyFlags;
 	static CFaunaProfileFloodLogger _FloodLogger;
 };
 
@@ -209,28 +211,30 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CEatCorpseFaunaProfile
-: public CAIBaseProfile
+    : public CAIBaseProfile
 {
-public:	
-	CEatCorpseFaunaProfile(CProfileOwner* owner, TDataSetRow const& corpse, RYAI_MAP_CRUNCH::TAStarFlag flag);
-	
+public:
+	CEatCorpseFaunaProfile(CProfileOwner *owner, TDataSetRow const &corpse, RYAI_MAP_CRUNCH::TAStarFlag flag);
+
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_EAT_CORPSE; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_EAT_CORPSE; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
-	
-	TDataSetRow		_eated;
+
+	TDataSetRow _eated;
+
 protected:
-	CSpawnBotFauna*	_Bot;
+	CSpawnBotFauna *_Bot;
+
 private:
-	bool			_atGoodDist;
-	CAITimer			_eatTimer;
-	CPathPosition	_PathPos;
-	CPathCont		_PathCont;
+	bool _atGoodDist;
+	CAITimer _eatTimer;
+	CPathPosition _PathPos;
+	CPathCont _PathCont;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -238,31 +242,33 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CCuriosityFaunaProfile
-: public CAIBaseProfile
+    : public CAIBaseProfile
 {
 public:
-	CCuriosityFaunaProfile(CProfileOwner* owner, TDataSetRow const& player, RYAI_MAP_CRUNCH::TAStarFlag flag);
-	
+	CCuriosityFaunaProfile(CProfileOwner *owner, TDataSetRow const &player, RYAI_MAP_CRUNCH::TAStarFlag flag);
+
 	/// @name IAIProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_CURIOSITY; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_CURIOSITY; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
 
-	TDataSetRow		_player;
+	TDataSetRow _player;
+
 protected:
-	CSpawnBotFauna*	_Bot;
+	CSpawnBotFauna *_Bot;
+
 private:
-	bool			_atGoodDist;
-	CAITimer			_curiosityTimer;
-	CPathPosition	_PathPos;
-	CPathCont		_PathCont;
-	uint32			_addCuriosityTime;
-	bool			_TooFar;
-	RYAI_MAP_CRUNCH::TAStarFlag	_Flag;
+	bool _atGoodDist;
+	CAITimer _curiosityTimer;
+	CPathPosition _PathPos;
+	CPathCont _PathCont;
+	uint32 _addCuriosityTime;
+	bool _TooFar;
+	RYAI_MAP_CRUNCH::TAStarFlag _Flag;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -270,30 +276,30 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CCorpseFaunaProfile
-: public CAIBaseProfile
+    : public CAIBaseProfile
 {
 public:
-	CCorpseFaunaProfile(CProfileOwner* owner);
-	
+	CCorpseFaunaProfile(CProfileOwner *owner);
+
 	virtual void beginProfile();
-	
+
 	virtual void endProfile() { }
-	
+
 	virtual void updateProfile(uint ticksSinceLastUpdate) { }
-	
+
 	virtual std::string getOneLineInfoString() const { return NLMISC::toString("corpse fauna profile"); }
-	
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_CORPSE; }
-	
+
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_CORPSE; }
+
 	bool eated() const { return _Eated; }
 	void setEated(bool eated) { _Eated = eated; }
-	
+
 	void setEater(bool eater) { _HaveEater = eater; }
 	bool haveEater() const { return _HaveEater; }
-	
+
 protected:
-	CSpawnBotFauna* _Bot;
-	
+	CSpawnBotFauna *_Bot;
+
 private:
 	bool _HaveEater;
 	bool _Eated;
@@ -324,10 +330,10 @@ typedef CAIGenericProfileFactory<CCorpseFaunaProfile> CCorpseFaunaProfileFactory
 
 // CStaticFightFaunaProfile
 class CFightFaunaProfileFactory
-: public IAIProfileFactory
+    : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner *owner)
 	{
 		return NULL;
 	}
@@ -335,29 +341,29 @@ public:
 
 // CStaticEatCorpseFaunaProfile
 class CEatCorpseFaunaProfileFactory
-: public IAIProfileFactory
+    : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner *owner)
 	{
-	#ifdef NL_DEBUG
+#ifdef NL_DEBUG
 		nlassert(false);
-	#endif
-		return	NULL;
+#endif
+		return NULL;
 	}
 };
 
 // CStaticCuriosityFaunaProfile
 class CCuriosityFaunaProfileFactory
-: public IAIProfileFactory
+    : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner *owner)
 	{
 #ifdef NL_DEBUG
 		nlassert(false);
 #endif
-		return	NULL;
+		return NULL;
 	}
 };
 

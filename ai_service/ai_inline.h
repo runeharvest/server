@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYAI_AI_INLINE_H
 #define RYAI_AI_INLINE_H
-
 
 //-------------------------------------------------------------------
 // Important boolean showing true when the singleton has been initialised
@@ -26,40 +23,37 @@
 
 /*inline bool CAIS::initialised()
 {
-	return _initialised;
+    return _initialised;
 }
 */
 //-------------------------------------------------------------------
 // Interface to the random number generator
-inline sint32 CAIS::randPlusMinus(uint16 mod)	{ return _random.randPlusMinus(mod); }
-inline float CAIS::frand(double mod)			{ return _random.frand(mod); }
-inline float CAIS::frandPlusMinus(double mod)	{ return _random.frandPlusMinus(mod); }
+inline sint32 CAIS::randPlusMinus(uint16 mod) { return _random.randPlusMinus(mod); }
+inline float CAIS::frand(double mod) { return _random.frand(mod); }
+inline float CAIS::frandPlusMinus(double mod) { return _random.frandPlusMinus(mod); }
 
 inline uint32 CAIS::rand32()
-{ 
-	return ((uint32(_random.rand()))<<16)+uint32(_random.rand()); // FIXME: this is broken. _random.rand() is just 15 bits
+{
+	return ((uint32(_random.rand())) << 16) + uint32(_random.rand()); // FIXME: this is broken. _random.rand() is just 15 bits
 }
 inline uint32 CAIS::rand32(uint32 mod)
-{ 
-	if (mod==0)
-		return	0;
-	return rand32()%mod;
+{
+	if (mod == 0)
+		return 0;
+	return rand32() % mod;
 }
 inline uint32 CAIS::rand16(uint32 mod)
-{ 
-	if (mod==0)
-		return	0;
-	return _random.rand()%mod; // FIXME: this is broken. _random.rand() is just 15 bits
+{
+	if (mod == 0)
+		return 0;
+	return _random.rand() % mod; // FIXME: this is broken. _random.rand() is just 15 bits
 }
 
 //-------------------------------------------------------------------
 // Interface to the vision management matrices
 
 // read accessors for getting hold of the vision matrices
-inline const CAIEntityMatrixIteratorTblRandom	*CAIS::matrixIterator2x2()	{ return &_matrixIterator2x2; }
-inline const CAIEntityMatrixIteratorTblRandom	*CAIS::matrixIterator3x3()	{ return &_matrixIterator3x3; }
-
+inline const CAIEntityMatrixIteratorTblRandom *CAIS::matrixIterator2x2() { return &_matrixIterator2x2; }
+inline const CAIEntityMatrixIteratorTblRandom *CAIS::matrixIterator3x3() { return &_matrixIterator3x3; }
 
 #endif
-
-

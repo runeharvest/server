@@ -14,34 +14,31 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-//class CAIRoute;
+// class CAIRoute;
 
 #ifndef RYAI_ROUTE_H
 #define RYAI_ROUTE_H
 
-//#include "nel/misc/types_nl.h"
+// #include "nel/misc/types_nl.h"
 #include "ai_share/ai_coord.h"
 #include "ai_pos.h"
 
 /*
-	This is the virtual base class for abstracting pathfinding algorithms
-	Routes are generaly spawned by CAIPlace classes (the 'place' is the destination)
+    This is the virtual base class for abstracting pathfinding algorithms
+    Routes are generaly spawned by CAIPlace classes (the 'place' is the destination)
 */
-
 
 class CAIRoute
 {
 public:
-	virtual ~CAIRoute() {}
+	virtual ~CAIRoute() { }
 	// get direction vector from current coordinate
-	virtual double getDirection(CAIPos currentCoord)=0;
+	virtual double getDirection(CAIPos currentCoord) = 0;
 
 	// have we arrived at the destination
 	// - dist defines the distance that the entity moves/ tick
 	// returns true if distance from currentCoord to dest <= dist
-	virtual bool haveArrived(CAIPos currentCoord,uint dist)=0;
+	virtual bool haveArrived(CAIPos currentCoord, uint dist) = 0;
 };
 
 #endif
