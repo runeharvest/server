@@ -39,7 +39,7 @@
 #include "nel/net/unified_network.h"
 #include "nel/net/login_cookie.h"
 
-#include "ryzom_welcome_service.h"
+#include "welcome_service.h"
 
 #include "game_share/welcome_service_itf.h"
 #include "game_share/mirror.h"

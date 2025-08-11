@@ -62,7 +62,7 @@ public:
 static const char *getCompleteServiceName(const IService *theService)
 {
 	static std::string s;
-	s = "ryzom_admin_service";
+	s = "admin_service";
 
 	if (theService->haveLongArg("adminname"))
 	{
