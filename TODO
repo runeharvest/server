@@ -1,0 +1,5 @@
+- Removed admin_modules
+- Removed ags_test
+- removed ai_data_service
+- Moved nel, ai_share, server_share to shared repo
+- removed RYZOM_LIVE flags
