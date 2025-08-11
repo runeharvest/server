@@ -6,7 +6,12 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-vscode.cpptools-extension-pack"
+        "ms-vscode.cpptools-extension-pack",
+        "xaver.clang-format",
+        "bibhasdn.unique-lines",
+        "Gruntfuggly.todo-tree",
+        "eriklynd.json-tools",
+        "maattdd.gitless"
       ],
       "settings": {
         "cmake.configureArgs": [

@@ -127,8 +127,6 @@ aes_state.txt
 # intellij project folder
 .idea/
 
-# VSCode project folder
-.vscode/
 
 # Python cache
 *.pyd

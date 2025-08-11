@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "*.log": "ini",
+        "condition_variable": "cpp"
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "shared": true,
+    },
+    "files.exclude": {
+        "shared/*": true
+    },
+    "cmake.useCMakePresets": "always",
+    "cmake.enableAutomaticKitScan": false,
+    "cmake.cmakePath": "/usr/local/bin/cmake"
+}

@@ -8,7 +8,6 @@ RUN apt update; \
         bison \
         build-essential \
         ccache \
-        clang-15 \
         freeglut3-dev \
         libavcodec-dev \
         libavdevice-dev \
@@ -32,8 +31,6 @@ RUN apt update; \
         libswscale-dev \
         libvorbis-dev \
         libxml2-dev \
-        mingw-w64 \
-        mingw-w64-tools \
         ninja-build \
         qtbase5-dev \
         qttools5-dev \
