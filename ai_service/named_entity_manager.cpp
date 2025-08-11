@@ -19,11 +19,11 @@
 #include <queue>
 #include "named_entity_manager.h"
 
-CNamedEntityManager* CNamedEntityManager::_instance = 0;
+CNamedEntityManager *CNamedEntityManager::_instance = 0;
 
-CNamedEntityManager* CNamedEntityManager::getInstance()
+CNamedEntityManager *CNamedEntityManager::getInstance()
 {
-	if (_instance==0)
+	if (_instance == 0)
 		_instance = new CNamedEntityManager();
 	return _instance;
 }
@@ -34,19 +34,19 @@ void CNamedEntityManager::destroyInstance()
 	_instance = 0;
 }
 
-CNamedEntity& CNamedEntityManager::create(std::string const& name)
+CNamedEntity &CNamedEntityManager::create(std::string const &name)
 {
 	return get(name);
 }
 
-CNamedEntity& CNamedEntityManager::get(std::string const& name)
+CNamedEntity &CNamedEntityManager::get(std::string const &name)
 {
 	entity_name_container_t::iterator it = _nameIndex.find(name);
-	if (it!=_nameIndex.end())
+	if (it != _nameIndex.end())
 		return *it->second;
 	else
 	{
-		CNamedEntity* ptr = new CNamedEntity(name);
+		CNamedEntity *ptr = new CNamedEntity(name);
 		_entities.insert(ptr);
 		_nameIndex.insert(std::make_pair(ptr->name(), ptr));
 		_idIndex.insert(std::make_pair(ptr->id(), ptr));
@@ -54,26 +54,26 @@ CNamedEntity& CNamedEntityManager::get(std::string const& name)
 	}
 }
 
-CNamedEntity* CNamedEntityManager::get(NLMISC::CEntityId const& id)
+CNamedEntity *CNamedEntityManager::get(NLMISC::CEntityId const &id)
 {
 	entity_id_container_t::iterator it = _idIndex.find(id);
-	if (it!=_idIndex.end())
+	if (it != _idIndex.end())
 		return it->second;
 	else
 		return 0;
 }
 
-void CNamedEntityManager::destroy(CNamedEntity const& entity)
+void CNamedEntityManager::destroy(CNamedEntity const &entity)
 {
 	destroy(entity.name());
 }
 
-void CNamedEntityManager::destroy(std::string const& name)
+void CNamedEntityManager::destroy(std::string const &name)
 {
 	entity_name_container_t::iterator it = _nameIndex.find(name);
-	if (it!=_nameIndex.end())
+	if (it != _nameIndex.end())
 	{
-		CNamedEntity* ptr = it->second;
+		CNamedEntity *ptr = it->second;
 		_nameIndex.erase(ptr->name());
 		_idIndex.erase(ptr->id());
 		_entities.erase(ptr);
@@ -81,12 +81,12 @@ void CNamedEntityManager::destroy(std::string const& name)
 	}
 }
 
-void CNamedEntityManager::destroy(NLMISC::CEntityId const& id)
+void CNamedEntityManager::destroy(NLMISC::CEntityId const &id)
 {
 	entity_id_container_t::iterator it = _idIndex.find(id);
-	if (it!=_idIndex.end())
+	if (it != _idIndex.end())
 	{
-		CNamedEntity* ptr = it->second;
+		CNamedEntity *ptr = it->second;
 		_nameIndex.erase(ptr->name());
 		_idIndex.erase(ptr->id());
 		_entities.erase(ptr);
@@ -94,26 +94,26 @@ void CNamedEntityManager::destroy(NLMISC::CEntityId const& id)
 	}
 }
 
-bool CNamedEntityManager::exists(std::string const& name)
+bool CNamedEntityManager::exists(std::string const &name)
 {
 	return _nameIndex.find(name) != _nameIndex.end();
 }
 
-bool CNamedEntityManager::exists(NLMISC::CEntityId const& id)
+bool CNamedEntityManager::exists(NLMISC::CEntityId const &id)
 {
 	return _idIndex.find(id) != _idIndex.end();
 }
 
 /**	Valid format for request string is:
-	- *				Select all entities
-	- <entity id>	Select the specified entity using his eid (format is "(id:type:crea:dyn)")
-	- <name>		Select an entity with its name (any name allowed for a named entity)
+    - *				Select all entities
+    - <entity id>	Select the specified entity using his eid (format is "(id:type:crea:dyn)")
+    - <name>		Select an entity with its name (any name allowed for a named entity)
 */
-void CNamedEntityManager::select(std::string const& request, std::vector<NLMISC::CEntityId>& entities)
+void CNamedEntityManager::select(std::string const &request, std::vector<NLMISC::CEntityId> &entities)
 {
 	if (request.empty())
 		return;
-	
+
 	if (request == "*")
 	{
 		// we want all entities
@@ -137,52 +137,59 @@ void CNamedEntityManager::select(std::string const& request, std::vector<NLMISC:
 	}
 }
 
-#define ENTITY_VARIABLE(__name,__help) \
-struct __name##Class : public NLMISC::ICommand \
-{ \
-__name##Class () : NLMISC::ICommand("variables",#__name, __help, "<entity> [<value>]") { Type = Variable; } \
-	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) \
-	{ \
-		if (args.size() != 1 && args.size() != 2) \
-			return false; \
- \
-		std::vector<NLMISC::CEntityId> entities; \
-		CNamedEntityManager::getInstance()->select(args[0], entities); \
- \
-		for (uint i = 0; i < entities.size(); i++) \
-		{ \
-			std::string value; \
-			if (args.size()==2) \
-				value = args[1]; \
-			else \
-				value = "???"; \
-			pointer(entities[i], (args.size()==1), value); \
-			if (quiet) \
-				log.displayNL("%s %s", entities[i].toString().c_str(), value.c_str()); \
-			else \
-				log.displayNL("Entity %s Variable %s = %s", entities[i].toString().c_str(), _CommandName.c_str(), value.c_str()); \
-		} \
-		return true; \
-	} \
-	void pointer(NLMISC::CEntityId entity, bool get, std::string &value); \
-}; \
-__name##Class __name##Instance; \
-void __name##Class::pointer(NLMISC::CEntityId entity, bool get, std::string &value)
+#define ENTITY_VARIABLE(__name, __help)                                                                                                            \
+	struct __name##Class : public NLMISC::ICommand                                                                                                 \
+	{                                                                                                                                              \
+		__name##Class()                                                                                                                            \
+		    : NLMISC::ICommand("variables", #__name, __help, "<entity> [<value>]")                                                                 \
+		{                                                                                                                                          \
+			Type = Variable;                                                                                                                       \
+		}                                                                                                                                          \
+		virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) \
+		{                                                                                                                                          \
+			if (args.size() != 1 && args.size() != 2)                                                                                              \
+				return false;                                                                                                                      \
+                                                                                                                                                   \
+			std::vector<NLMISC::CEntityId> entities;                                                                                               \
+			CNamedEntityManager::getInstance()->select(args[0], entities);                                                                         \
+                                                                                                                                                   \
+			for (uint i = 0; i < entities.size(); i++)                                                                                             \
+			{                                                                                                                                      \
+				std::string value;                                                                                                                 \
+				if (args.size() == 2)                                                                                                              \
+					value = args[1];                                                                                                               \
+				else                                                                                                                               \
+					value = "???";                                                                                                                 \
+				pointer(entities[i], (args.size() == 1), value);                                                                                   \
+				if (quiet)                                                                                                                         \
+					log.displayNL("%s %s", entities[i].toString().c_str(), value.c_str());                                                         \
+				else                                                                                                                               \
+					log.displayNL("Entity %s Variable %s = %s", entities[i].toString().c_str(), _CommandName.c_str(), value.c_str());              \
+			}                                                                                                                                      \
+			return true;                                                                                                                           \
+		}                                                                                                                                          \
+		void pointer(NLMISC::CEntityId entity, bool get, std::string &value);                                                                      \
+	};                                                                                                                                             \
+	__name##Class __name##Instance;                                                                                                                \
+	void __name##Class::pointer(NLMISC::CEntityId entity, bool get, std::string &value)
 
-#define ENTITY_GET_NAMEDENTITY \
-	CNamedEntity* namedEntity = CNamedEntityManager::getInstance()->get(entity); \
-	if(namedEntity == 0) \
-	{ \
-		nlwarning("Unknown entity '%s'", entity.toString().c_str()); \
-		if (get) value = "UnknownEntity"; \
-		return; \
-	} \
-
+#define ENTITY_GET_NAMEDENTITY                                                   \
+	CNamedEntity *namedEntity = CNamedEntityManager::getInstance()->get(entity); \
+	if (namedEntity == 0)                                                        \
+	{                                                                            \
+		nlwarning("Unknown entity '%s'", entity.toString().c_str());             \
+		if (get) value = "UnknownEntity";                                        \
+		return;                                                                  \
+	}
 
 struct NamedEntityChange
 {
 	NamedEntityChange(NLMISC::CEntityId _id, std::string _prop, std::string _value)
-		: id(_id), prop(_prop), value(_value) { }
+	    : id(_id)
+	    , prop(_prop)
+	    , value(_value)
+	{
+	}
 	NLMISC::CEntityId id;
 	std::string prop;
 	std::string value;
@@ -191,12 +198,12 @@ std::queue<NamedEntityChange> namedEntityChangeQueue;
 
 void execNamedEntityChanges()
 {
-	CNamedEntityManager* manager = CNamedEntityManager::getInstance();
+	CNamedEntityManager *manager = CNamedEntityManager::getInstance();
 	while (!namedEntityChangeQueue.empty())
 	{
-		NamedEntityChange& namedEntityChange = namedEntityChangeQueue.front();
-		CNamedEntity* namedEntity = manager->get(namedEntityChange.id);
-		if(namedEntity != 0)
+		NamedEntityChange &namedEntityChange = namedEntityChangeQueue.front();
+		CNamedEntity *namedEntity = manager->get(namedEntityChange.id);
+		if (namedEntity != 0)
 		{
 			namedEntity->set(namedEntityChange.prop, namedEntityChange.value, true);
 		}
@@ -204,12 +211,10 @@ void execNamedEntityChanges()
 	}
 }
 
-
-
 ENTITY_VARIABLE(NamedEntityName, "Name of a named entity")
 {
 	ENTITY_GET_NAMEDENTITY
-	
+
 	if (get)
 		value = namedEntity->name();
 	else
@@ -219,32 +224,32 @@ ENTITY_VARIABLE(NamedEntityName, "Name of a named entity")
 ENTITY_VARIABLE(NamedEntityState, "State of a named entity")
 {
 	ENTITY_GET_NAMEDENTITY
-	
+
 	if (get)
 		value = namedEntity->getState();
 	else
-	//	namedEntity->set("state", value, true);
+		//	namedEntity->set("state", value, true);
 		namedEntityChangeQueue.push(NamedEntityChange(entity, "state", value));
 }
 
 ENTITY_VARIABLE(NamedEntityParam1, "Param1 of a named entity")
 {
 	ENTITY_GET_NAMEDENTITY
-	
+
 	if (get)
 		value = namedEntity->getParam1();
 	else
-	//	namedEntity->set("param1", value, true);
+		//	namedEntity->set("param1", value, true);
 		namedEntityChangeQueue.push(NamedEntityChange(entity, "param1", value));
 }
 
 ENTITY_VARIABLE(NamedEntityParam2, "Param1 of a named entity")
 {
 	ENTITY_GET_NAMEDENTITY
-	
+
 	if (get)
 		value = namedEntity->getParam2();
 	else
-	//	namedEntity->set("param2", value, true);
+		//	namedEntity->set("param2", value, true);
 		namedEntityChangeQueue.push(NamedEntityChange(entity, "param2", value));
 }

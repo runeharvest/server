@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -37,13 +35,13 @@ extern CPlayerManager PlayerManager;
 //--------------------------------------------------------------
 //		CBleedEffect::update()
 //--------------------------------------------------------------
-bool CBleedEffect::update(CTimerEvent * event, bool applyEffect)
+bool CBleedEffect::update(CTimerEvent *event, bool applyEffect)
 {
 
 	const TGameCycle date = CTickEventHandler::getGameCycle();
 	float totalDamage = 0.0f;
 	std::list<CSlaveBleedEffect>::iterator it;
-	for ( it = _Effects.begin() ; it != _Effects.end() ; )
+	for (it = _Effects.begin(); it != _Effects.end();)
 	{
 		totalDamage += (*it).CycleDamage;
 		if ((*it).EndDate <= date)
@@ -55,17 +53,17 @@ bool CBleedEffect::update(CTimerEvent * event, bool applyEffect)
 	sint32 damage = sint32(totalDamage);
 	_RemainingDamage += (float)fabs(totalDamage - float(damage));
 
-//	sint32 damage = sint32(_CycleDamage);
-//	_RemainingDamage += (float)fabs(_CycleDamage - float(damage));
-	
+	//	sint32 damage = sint32(_CycleDamage);
+	//	_RemainingDamage += (float)fabs(_CycleDamage - float(damage));
+
 	if (_RemainingDamage >= 1.0f)
 	{
 		_RemainingDamage -= 1.0f;
 		++damage;
 	}
-	
+
 	// remove hp
-	if ( damage > 0 && _BleedingEntity != NULL)
+	if (damage > 0 && _BleedingEntity != NULL)
 	{
 		// send messages
 		// to target
@@ -73,26 +71,26 @@ bool CBleedEffect::update(CTimerEvent * event, bool applyEffect)
 		{
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
 			params[0].Int = damage;
-			PHRASE_UTILITIES::sendDynamicSystemMessage( _BleedingEntity->getEntityRowId(), "EFFECT_BLEED_LOSE_HP", params);
+			PHRASE_UTILITIES::sendDynamicSystemMessage(_BleedingEntity->getEntityRowId(), "EFFECT_BLEED_LOSE_HP", params);
 		}
 		// to actor
-		if ( _CreatorRowId != _TargetRowId && _CreatorRowId.isValid() && TheDataset.isDataSetRowStillValid(_CreatorRowId))
+		if (_CreatorRowId != _TargetRowId && _CreatorRowId.isValid() && TheDataset.isDataSetRowStillValid(_CreatorRowId))
 		{
 			CCharacter *actor = PlayerManager.getChar(_CreatorRowId);
 			if (actor != NULL)
 			{
 				SM_STATIC_PARAMS_2(params, STRING_MANAGER::entity, STRING_MANAGER::integer);
-				params[0].setEIdAIAlias( _BleedingEntity->getId(), CAIAliasTranslator::getInstance()->getAIAlias(_BleedingEntity->getId()) );
+				params[0].setEIdAIAlias(_BleedingEntity->getId(), CAIAliasTranslator::getInstance()->getAIAlias(_BleedingEntity->getId()));
 				params[1].Int = damage;
-				PHRASE_UTILITIES::sendDynamicSystemMessage( actor->getEntityRowId(), "EFFECT_BLEED_LOSE_HP_ACTOR", params);
+				PHRASE_UTILITIES::sendDynamicSystemMessage(actor->getEntityRowId(), "EFFECT_BLEED_LOSE_HP_ACTOR", params);
 			}
 		}
 
 		// remove HP
-		if (_BleedingEntity->changeCurrentHp( (-1) * damage, _CreatorRowId))
+		if (_BleedingEntity->changeCurrentHp((-1) * damage, _CreatorRowId))
 		{
 			// killed entity, so this effect and all other effects have been cleared send kill message and return true
-			PHRASE_UTILITIES::sendDeathMessages( _CreatorRowId, _TargetRowId);
+			PHRASE_UTILITIES::sendDeathMessages(_CreatorRowId, _TargetRowId);
 			_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 			return true;
 		}
@@ -116,12 +114,12 @@ void CBleedEffect::removed()
 		return;
 
 	DEBUGLOG("COMBAT EFFECT: Bleed effect ends on entity %s", _BleedingEntity->getId().toString().c_str());
-	
+
 	// check entity isn't bleeding anymore
-	const std::vector<CSEffectPtr>& effects = _BleedingEntity->getSEffects();
-	for (uint i = 0 ; i < effects.size() ; ++i)
+	const std::vector<CSEffectPtr> &effects = _BleedingEntity->getSEffects();
+	for (uint i = 0; i < effects.size(); ++i)
 	{
-		if (effects[i] && effects[i] != this && (effects[i]->getFamily() == EFFECT_FAMILIES::CombatBleed) )
+		if (effects[i] && effects[i] != this && (effects[i]->getFamily() == EFFECT_FAMILIES::CombatBleed))
 		{
 			DEBUGLOG("EFFECT : entity is still bleeding (has another bleed effect)");
 			return;
@@ -130,19 +128,18 @@ void CBleedEffect::removed()
 
 	// send messages to target
 	if (_BleedingEntity->getId().getType() == RYZOMID::player)
-		PHRASE_UTILITIES::sendDynamicSystemMessage( _BleedingEntity->getEntityRowId(), "EFFECT_BLEED_ENDED");
+		PHRASE_UTILITIES::sendDynamicSystemMessage(_BleedingEntity->getEntityRowId(), "EFFECT_BLEED_ENDED");
 
 	// try to inform actor
-	if ( _CreatorRowId != _TargetRowId && TheDataset.isAccessible(_CreatorRowId))
+	if (_CreatorRowId != _TargetRowId && TheDataset.isAccessible(_CreatorRowId))
 	{
 		CCharacter *actor = PlayerManager.getChar(_CreatorRowId);
 		if (actor != NULL)
 		{
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::entity);
-			params[0].setEIdAIAlias( _BleedingEntity->getId(), CAIAliasTranslator::getInstance()->getAIAlias(_BleedingEntity->getId()) );
-			PHRASE_UTILITIES::sendDynamicSystemMessage( actor->getEntityRowId(), "EFFECT_BLEED_ENDED_ACTOR", params);
+			params[0].setEIdAIAlias(_BleedingEntity->getId(), CAIAliasTranslator::getInstance()->getAIAlias(_BleedingEntity->getId()));
+			PHRASE_UTILITIES::sendDynamicSystemMessage(actor->getEntityRowId(), "EFFECT_BLEED_ENDED_ACTOR", params);
 		}
 	}
 
 } // removed //
-

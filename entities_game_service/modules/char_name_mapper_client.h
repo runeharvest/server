@@ -19,12 +19,10 @@
 
 #include "nel/misc/singleton.h"
 
-
 /** Interface to the char name mapper client singleton */
 class ICharNameMapperClient : public NLMISC::CManualSingleton<ICharNameMapperClient>
 {
 public:
-
 	virtual void mapCharacterName(const NLMISC::CEntityId &charEid, const ucstring &charName) = 0;
 };
 

@@ -17,13 +17,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_SPECIAL_POWER_MOD_DEFENSE_H
 #define RYZOM_SPECIAL_POWER_MOD_DEFENSE_H
 
 #include "special_power.h"
-
 
 /**
  * Specialized class for power "ModDefense"
@@ -35,14 +32,16 @@ class CSpecialPowerModDefense : public CSpecialPower
 {
 public:
 	/// Default Constructor
-	CSpecialPowerModDefense() : CSpecialPower()
-	{}
+	CSpecialPowerModDefense()
+	    : CSpecialPower()
+	{
+	}
 
 	/// Constructor
-	CSpecialPowerModDefense(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds,  
-		const std::string& defenseMode, float modifier1, float modifier2 )
+	CSpecialPowerModDefense(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds,
+	    const std::string &defenseMode, float modifier1, float modifier2)
 	{
-		if(TheDataset.isAccessible(actorRowId))
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -50,18 +49,17 @@ public:
 		}
 
 		_Phrase = phrase;
-		
+
 		_DisablePowerTime = 0;
-		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());		
+		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());
 
 		_DefenseMode = defenseMode;
 		_Modifier1 = modifier1;
 		_Modifier2 = modifier2;
 
-		if( NLMISC::toLowerAscii(_DefenseMode) == "dodge" )
+		if (NLMISC::toLowerAscii(_DefenseMode) == "dodge")
 			_PowerType = POWERS::ModDodgeSkill;
-		else
-		if( NLMISC::toLowerAscii(_DefenseMode) == "parry" )
+		else if (NLMISC::toLowerAscii(_DefenseMode) == "parry")
 			_PowerType = POWERS::ModParrySkill;
 		else
 			_PowerType = POWERS::ModDefenseSkill;
@@ -70,17 +68,16 @@ public:
 	/// apply effects
 	virtual void apply();
 
-
 protected:
 	/// Dodge or Parry ?
-	std::string	_DefenseMode;
+	std::string _DefenseMode;
 
-	// score modifier 
+	// score modifier
 	float _Modifier1;
 	float _Modifier2;
 
 	/// Duration in ticks
-	NLMISC::TGameCycle	_Duration;
+	NLMISC::TGameCycle _Duration;
 };
 
 #endif // RYZOM_SPECIAL_POWER_MOD_DEFENSE_H

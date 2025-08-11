@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 //----------------------------------------------------------------------------
 
 #include "stdpch.h"
@@ -27,7 +24,7 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 using namespace CAISActionEnums;
-using namespace	AITYPES;
+using namespace AITYPES;
 
 extern CAIInstance *currentInstance;
 
@@ -35,105 +32,103 @@ extern CAIInstance *currentInstance;
 // Handy local variables and sub routines for GLOBAL context
 //----------------------------------------------------------------------------
 
-static	void	DoMgrAction(const std::vector <CAIActions::CArg> &args,
-							enum TMgrType type,
-							TContext context, 
-							uint32 aIInstanceNumber=0)
+static void DoMgrAction(const std::vector<CAIActions::CArg> &args,
+    enum TMgrType type,
+    TContext context,
+    uint32 aIInstanceNumber = 0)
 {
-//	if (!CAIS::initialised())
-//		CAIS::initAI();
+	//	if (!CAIS::initialised())
+	//		CAIS::initAI();
 
-/*	CAIInstance	*aiInstance=NULL;
-	
-	if (aIInstanceNumber<CAIS::instance().AIList().size())
-	{
-		aiInstance=CAIS::instance().AIList()[aIInstanceNumber];
-	}
-	
-	if	(!aiInstance)
-	{
-		aiInstance=CAIS::instance().AIList().addChild(new CAIInstance(*((CAIS*)NULL)),	aIInstanceNumber);	//	Arggghhh !!!
-		if (!aiInstance)
-		{
-			return;
-		}
+	/*	CAIInstance	*aiInstance=NULL;
 
-	}
-*/
+	    if (aIInstanceNumber<CAIS::instance().AIList().size())
+	    {
+	        aiInstance=CAIS::instance().AIList()[aIInstanceNumber];
+	    }
+
+	    if	(!aiInstance)
+	    {
+	        aiInstance=CAIS::instance().AIList().addChild(new CAIInstance(*((CAIS*)NULL)),	aIInstanceNumber);	//	Arggghhh !!!
+	        if (!aiInstance)
+	        {
+	            return;
+	        }
+
+	    }
+	*/
 	nlassertex(currentInstance != NULL, ("No AIInstance created !"));
-	CAIInstance	*aiInstance=currentInstance ;
-	CWorkPtr::aiInstance(aiInstance);	// set the current AIInstance.
+	CAIInstance *aiInstance = currentInstance;
+	CWorkPtr::aiInstance(aiInstance); // set the current AIInstance.
 
 	// get hold of the manager's slot id - note that managers are identified by slot and not by alias!
-	uint32 alias;	//,firstSlot,lastSlot;
-	std::string name,mapName, filename;
-	if	(!getArgs(args,"MANAGER",alias,name,mapName, filename))
+	uint32 alias; //,firstSlot,lastSlot;
+	std::string name, mapName, filename;
+	if (!getArgs(args, "MANAGER", alias, name, mapName, filename))
 		return;
 
 	// see whether the manager is already loaded
-	CManager*	mgr	=	aiInstance->managers().getChildByAlias(alias);
-	
+	CManager *mgr = aiInstance->managers().getChildByAlias(alias);
+
 	// not found so look for a free slot
-	if	(!mgr)
+	if (!mgr)
 		aiInstance->newMgr(type, alias, name, mapName, filename);
 	else
-		mgr->registerForFile(filename);		
+		mgr->registerForFile(filename);
 
-	mgr=aiInstance->managers().getChildByAlias(alias);
+	mgr = aiInstance->managers().getChildByAlias(alias);
 
 	// clear the delete flag (if present)
-//	mgr->clearDeleteFlag();
-
+	//	mgr->clearDeleteFlag();
 
 	// setup the working manager pointer and exit
 	CWorkPtr::mgr(mgr);
-	if	(mgr)
+	if (mgr)
 		CWorkPtr::eventReactionContainer(mgr->getStateMachine());
 	else
-		CWorkPtr::eventReactionContainer(NULL);	
-	
+		CWorkPtr::eventReactionContainer(NULL);
+
 	// push the manager context onto the context stack
 	CContextStack::setContext(context);
 }
-
 
 //----------------------------------------------------------------------------
 // The GLOBAL context
 //----------------------------------------------------------------------------
 
-DEFINE_ACTION(ContextGlobal,MGRFAUNA)
+DEFINE_ACTION(ContextGlobal, MGRFAUNA)
 {
-	DoMgrAction(args,MgrTypeFauna,ContextFaunaMgr);
+	DoMgrAction(args, MgrTypeFauna, ContextFaunaMgr);
 }
 
-DEFINE_ACTION(ContextGlobal,MGRNPC)
+DEFINE_ACTION(ContextGlobal, MGRNPC)
 {
-	DoMgrAction(args,MgrTypeNpc,ContextNpcMgr);
+	DoMgrAction(args, MgrTypeNpc, ContextNpcMgr);
 }
 
-//DEFINE_ACTION(ContextGlobal,MGRKAMI)
+// DEFINE_ACTION(ContextGlobal,MGRKAMI)
 //{
 //	DoMgrAction(args,MgrTypeKami,ContextNpcMgrKami);
-//}
+// }
 
-//DEFINE_ACTION(ContextGlobal,MGRTRIBE)
+// DEFINE_ACTION(ContextGlobal,MGRTRIBE)
 //{
 //	DoMgrAction(args,MgrTypeTribe,ContextNpcMgrTribe);
-//}
+// }
 
-DEFINE_ACTION(ContextGlobal,MGRKARAV)
+DEFINE_ACTION(ContextGlobal, MGRKARAV)
 {
-	DoMgrAction(args,MgrTypeKaravan,ContextNpcMgrKaravan);
+	DoMgrAction(args, MgrTypeKaravan, ContextNpcMgrKaravan);
 }
 
-DEFINE_ACTION(ContextGlobal,SCRIPT)
+DEFINE_ACTION(ContextGlobal, SCRIPT)
 {
 	// get hold of the parameters and check their validity
 	string name;
 	std::string code;
-	if (!getArgs(args,"",name,code))
+	if (!getArgs(args, "", name, code))
 		return;
-	
+
 	AIVM::CLibrary::getInstance().addLib(name, code);
 }
 
@@ -141,7 +136,7 @@ DEFINE_ACTION(ContextGlobal,SCRIPT)
 // The base context for MGR contexts
 //----------------------------------------------------------------------------
 
-DEFINE_ACTION(BaseContextMgr,IDTREE)
+DEFINE_ACTION(BaseContextMgr, IDTREE)
 {
 	// set the id tree for the manager (results in creation or update of manager's object tree)
 	// args: aliasTree
@@ -151,28 +146,28 @@ DEFINE_ACTION(BaseContextMgr,IDTREE)
 
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode *aliasTree;
-	if (!getArgs(args,name(),aliasTree))
+	if (!getArgs(args, name(), aliasTree))
 		return;
 
 	// have the manager update it's structure from the id tree
 	nlinfo("ACTION IDTREE: Applying new tree to manager[%u]: '%s'%s",
-		CWorkPtr::mgr()->getChildIndex(),
-		CWorkPtr::mgr()->getAliasTreeOwner()->getName().c_str(),
-		CWorkPtr::mgr()->getAliasTreeOwner()->getAliasString().c_str());
-	
+	    CWorkPtr::mgr()->getChildIndex(),
+	    CWorkPtr::mgr()->getAliasTreeOwner()->getName().c_str(),
+	    CWorkPtr::mgr()->getAliasTreeOwner()->getAliasString().c_str());
+
 	if (aliasTree)
 		CWorkPtr::mgr()->updateAliasTree(*aliasTree);
 }
 
-DEFINE_ACTION(BaseContextMgr,BOUNDS)
+DEFINE_ACTION(BaseContextMgr, BOUNDS)
 {
 	// set the bounding patat  for a manager
 	// args: [x0, y0 [, x1, y1 [, x2,y2 [,...]]]]
 
-	if (CWorkPtr::mgr()==NULL) return;
+	if (CWorkPtr::mgr() == NULL) return;
 
 	// make sure argument count is even
-	if (args.size()&1)
+	if (args.size() & 1)
 	{
 		nlwarning("BOUNDS failed due to invalid arguments");
 		return;
@@ -180,22 +175,22 @@ DEFINE_ACTION(BaseContextMgr,BOUNDS)
 
 	// build a vector of CAIVectot to hold points
 	std::vector<CAIVector> points;
-	for (uint i=0;i<args.size();i+=2)
+	for (uint i = 0; i < args.size(); i += 2)
 	{
-		double x,y;
-		if (!(args[i].get(x)&&args[i+1].get(y)))
+		double x, y;
+		if (!(args[i].get(x) && args[i + 1].get(y)))
 		{
 			nlwarning("BOUNDS failed due to invalid arguments");
 			return;
 		}
-		points.push_back(CAIVector(x,y));
+		points.push_back(CAIVector(x, y));
 	}
 
 	// pass vector of points to the currently active manger
-//	CWorkPtr::mgr()->setBounds(points);
+	//	CWorkPtr::mgr()->setBounds(points);
 }
 
-//DEFINE_ACTION(BaseContextMgr,NOGO)
+// DEFINE_ACTION(BaseContextMgr,NOGO)
 //{
 //	// add a no-go zone to the manager's bounding patat
 //	// args: [x0, y0 [, x1, y1 [, x2,y2 [,...]]]]
@@ -225,5 +220,4 @@ DEFINE_ACTION(BaseContextMgr,BOUNDS)
 //
 //	// pass vector of points to the currently active manger
 //	//	CWorkPtr::mgr()->addNogo(alias,points);
-//}
-
+// }

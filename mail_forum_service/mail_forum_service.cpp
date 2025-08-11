@@ -28,23 +28,18 @@
 #include "hof_generator.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
 
 using namespace NLNET;
 using namespace NLMISC;
 using namespace std;
 
-
-
-
-
-CVariable<std::string>	WebRootDirectory("web", "WebRootDirectory", "Set Web directory access", "www/", 0, true);
-CVariable<std::string>	IncomingMailDirectory("web", "IncomingMailDirectory", "Directory to check for new mail files (in WebRootDirectory)", "incoming", 0, true);
-
+CVariable<std::string> WebRootDirectory("web", "WebRootDirectory", "Set Web directory access", "www/", 0, true);
+CVariable<std::string> IncomingMailDirectory("web", "IncomingMailDirectory", "Directory to check for new mail files (in WebRootDirectory)", "incoming", 0, true);
 
 /**
  * CMailForumService
@@ -56,7 +51,6 @@ CVariable<std::string>	IncomingMailDirectory("web", "IncomingMailDirectory", "Di
 class CMailForumService : public NLNET::IService
 {
 public:
-
 	/**
 	 * init the service
 	 */
@@ -85,93 +79,84 @@ public:
 	{
 	}
 
-	TTime		LastCheckMail;
-	FILE*		MailFile;
+	TTime LastCheckMail;
+	FILE *MailFile;
 
 	// Open/close session
-	static void	openSession( uint32 shardid, string username, string cookie );
-	static void	closeSession( uint32 shardid, string username );
-	static void	cbOpenSession( CMessage& msgin, const std::string &serviceName, TServiceId serviceId );
-	static void	cbCloseSession( CMessage& msgin, const std::string &serviceName, TServiceId serviceId );
+	static void openSession(uint32 shardid, string username, string cookie);
+	static void closeSession(uint32 shardid, string username);
+	static void cbOpenSession(CMessage &msgin, const std::string &serviceName, TServiceId serviceId);
+	static void cbCloseSession(CMessage &msgin, const std::string &serviceName, TServiceId serviceId);
 
 	// Remove user/guild
-	static void	removeUser( uint32 shardid, string username);
-	static void	removeGuild( uint32 shardid, string username );
-	static void	cbRemoveUser( CMessage& msgin, const std::string &serviceName, TServiceId serviceId );
-	static void	cbRemoveGuild( CMessage& msgin, const std::string &serviceName, TServiceId serviceId );
+	static void removeUser(uint32 shardid, string username);
+	static void removeGuild(uint32 shardid, string username);
+	static void cbRemoveUser(CMessage &msgin, const std::string &serviceName, TServiceId serviceId);
+	static void cbRemoveGuild(CMessage &msgin, const std::string &serviceName, TServiceId serviceId);
 
 	//
-	static void	changeUserName(uint32 shardid, const string& oldName, const string& newName);
-	static void	cbChangeUserName( CMessage& msgin, const std::string &serviceName, TServiceId serviceId );
+	static void changeUserName(uint32 shardid, const string &oldName, const string &newName);
+	static void cbChangeUserName(CMessage &msgin, const std::string &serviceName, TServiceId serviceId);
 
 	//
-	void		checkMail();
-	void		checkFile(const std::string& file);
+	void checkMail();
+	void checkFile(const std::string &file);
 };
 
+TUnifiedCallbackItem CbArray[] = {
+	{ "OPEN_SESSION", CMailForumService::cbOpenSession },
+	{ "CLOSE_SESSION", CMailForumService::cbCloseSession },
 
+	{ "REMOVE_USER", CMailForumService::cbRemoveUser },
+	{ "REMOVE_GUILD", CMailForumService::cbRemoveGuild },
 
-
-
-TUnifiedCallbackItem CbArray[]=
-{
-	{ "OPEN_SESSION",		CMailForumService::cbOpenSession },
-	{ "CLOSE_SESSION",		CMailForumService::cbCloseSession },
-
-	{ "REMOVE_USER",		CMailForumService::cbRemoveUser },
-	{ "REMOVE_GUILD",		CMailForumService::cbRemoveGuild },
-
-	{ "CHANGE_UNAME",		CMailForumService::cbChangeUserName },
+	{ "CHANGE_UNAME", CMailForumService::cbChangeUserName },
 };
 
-NLNET_SERVICE_MAIN( CMailForumService, "MFS", "mail_forum_service", 43980, CbArray, "", "" )
+NLNET_SERVICE_MAIN(CMailForumService, "MFS", "mail_forum_service", 43980, CbArray, "", "")
 
-
-
-
-
-void	CMailForumService::checkMail()
+void CMailForumService::checkMail()
 {
-	TTime	now = CTime::getLocalTime();
-	if (now - LastCheckMail < 10*1000)
+	TTime now = CTime::getLocalTime();
+	if (now - LastCheckMail < 10 * 1000)
 		return;
 
 	LastCheckMail = now;
-	string	dir = CPath::standardizePath(WebRootDirectory)+IncomingMailDirectory.get();
+	string dir = CPath::standardizePath(WebRootDirectory) + IncomingMailDirectory.get();
 
 	// no path, no mails
 	if (!CFile::isExists(dir))
 		return;
 
-	std::vector<std::string>	files;
+	std::vector<std::string> files;
 	CPath::getPathContent(dir, false, false, true, files);
 
 	if (files.empty())
 		return;
 
-	uint	i;
-	for (i=0; i<files.size(); ++i)
+	uint i;
+	for (i = 0; i < files.size(); ++i)
 		checkFile(files[i]);
 }
 
-void	CMailForumService::checkFile(const std::string& file)
+void CMailForumService::checkFile(const std::string &file)
 {
-	uint	fsz = CFile::getFileSize(file);
+	uint fsz = CFile::getFileSize(file);
 
 	if (fsz == 0)
 		return;
 
-	vector<uint8>	buffer(fsz);
+	vector<uint8> buffer(fsz);
 
-	CIFile	fi;
+	CIFile fi;
 	if (!fi.open(file))
 		return;
 
 	fi.serialBuffer(&(buffer[0]), fsz);
 	fi.close();
 
-	char*	pb = (char*)(&(buffer[0]));
-	char*	pt = pb;
+	char *pb = (char *)(&(buffer[0]));
+	char *pt = pb;
 
 	while (*pt != '\0' && strncmp(pt, "$$$$", 4))
 		++pt;
@@ -181,17 +166,17 @@ void	CMailForumService::checkFile(const std::string& file)
 	{
 		CFile::deleteFile(file);
 
-		int		shard_id;
-		char	to_username[256];
-		char	from_username[256];
+		int shard_id;
+		char to_username[256];
+		char from_username[256];
 
-		int		scanned = sscanf(pb, "shard=%d to=%s from=%s", &shard_id, to_username, from_username);
+		int scanned = sscanf(pb, "shard=%d to=%s from=%s", &shard_id, to_username, from_username);
 
-		CMessage	msgout("MAIL_NOTIF");
+		CMessage msgout("MAIL_NOTIF");
 
-		uint32	shardId = (uint32)shard_id;
-		string	toUserName = to_username;
-		string	fromUserName = from_username;
+		uint32 shardId = (uint32)shard_id;
+		string toUserName = to_username;
+		string fromUserName = from_username;
 
 		nldebug("MAIL: sent notification for user '%s' on shard '%d'", toUserName.c_str(), shardId);
 
@@ -201,13 +186,11 @@ void	CMailForumService::checkFile(const std::string& file)
 	}
 }
 
-
-
-string	getUserDirectory(uint32 shardid, const string& userName)
+string getUserDirectory(uint32 shardid, const string &userName)
 {
-	string	un = toCaseInsensitive(CMailForumValidator::nameToFile(userName));
+	string un = toCaseInsensitive(CMailForumValidator::nameToFile(userName));
 
-	string	dir = CPath::standardizePath(WebRootDirectory)+toString(shardid)+"/"+un.substr(0, 2)+"/"+un+"/";
+	string dir = CPath::standardizePath(WebRootDirectory) + toString(shardid) + "/" + un.substr(0, 2) + "/" + un + "/";
 
 	if (!CFile::isExists(dir))
 	{
@@ -220,9 +203,9 @@ string	getUserDirectory(uint32 shardid, const string& userName)
 
 string getGuildDirectory(uint32 shardid, const string &guildName)
 {
-	string	un = toCaseInsensitive(CMailForumValidator::nameToFile(guildName));
+	string un = toCaseInsensitive(CMailForumValidator::nameToFile(guildName));
 
-	string	dir = CPath::standardizePath(WebRootDirectory)+toString(shardid)+"/"+un.substr(0, 2)+"/"+un+"/";
+	string dir = CPath::standardizePath(WebRootDirectory) + toString(shardid) + "/" + un.substr(0, 2) + "/" + un + "/";
 
 	if (!CFile::isExists(dir))
 	{
@@ -233,59 +216,55 @@ string getGuildDirectory(uint32 shardid, const string &guildName)
 	return dir;
 }
 
-void	CMailForumService::openSession( uint32 shardid, string username, string cookie )
+void CMailForumService::openSession(uint32 shardid, string username, string cookie)
 {
-	string	sessionfile = getUserDirectory(shardid, username) + "session";
-	string	checkmailfile = getUserDirectory(shardid, username) + "new_mails";
+	string sessionfile = getUserDirectory(shardid, username) + "session";
+	string checkmailfile = getUserDirectory(shardid, username) + "new_mails";
 
-	COFile	ofile;
+	COFile ofile;
 	if (ofile.open(sessionfile))
 	{
 		cookie += "\n";
-		ofile.serialBuffer((uint8*)(&cookie[0]), (uint)cookie.size());
+		ofile.serialBuffer((uint8 *)(&cookie[0]), (uint)cookie.size());
 	}
 
 	if (CFile::fileExists(checkmailfile))
 	{
 		CFile::deleteFile(checkmailfile);
-		CMessage	msgout("MAIL_NOTIF");
+		CMessage msgout("MAIL_NOTIF");
 		msgout.serial(shardid, username);
 		CUnifiedNetwork::getInstance()->send("EGS", msgout);
 	}
 }
 
-void	CMailForumService::closeSession( uint32 shardid, string username )
+void CMailForumService::closeSession(uint32 shardid, string username)
 {
-	string	sessionfile = getUserDirectory(shardid, username) + "session";
+	string sessionfile = getUserDirectory(shardid, username) + "session";
 	CFile::deleteFile(sessionfile);
 }
 
-
-
-void	CMailForumService::changeUserName(uint32 shardid, const string& oldName, const string& newName)
+void CMailForumService::changeUserName(uint32 shardid, const string &oldName, const string &newName)
 {
-	string	olddir = getUserDirectory(shardid, oldName);
-	string	newdir = getUserDirectory(shardid, newName);
+	string olddir = getUserDirectory(shardid, oldName);
+	string newdir = getUserDirectory(shardid, newName);
 
-	std::vector<std::string>	files;
+	std::vector<std::string> files;
 	CPath::getPathContent(olddir, false, false, true, files);
 
-	uint	i;
-	for (i=0; i<files.size(); ++i)
-		CFile::moveFile(newdir+CFile::getFilename(files[i]), files[i]);
+	uint i;
+	for (i = 0; i < files.size(); ++i)
+		CFile::moveFile(newdir + CFile::getFilename(files[i]), files[i]);
 }
-
-
 
 //
 
-void	CMailForumService::cbOpenSession( CMessage& msgin, const std::string &serviceName, TServiceId serviceId )
+void CMailForumService::cbOpenSession(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	try
 	{
-		uint32	shardId;
-		string	userName;
-		string	cookie;
+		uint32 shardId;
+		string userName;
+		string cookie;
 
 		msgin.serial(shardId);
 		msgin.serial(userName);
@@ -293,114 +272,111 @@ void	CMailForumService::cbOpenSession( CMessage& msgin, const std::string &servi
 
 		openSession(shardId, userName, cookie);
 	}
-	catch(const Exception& e)
+	catch (const Exception &e)
 	{
 		nlwarning("Failed to open session: %s", e.what());
 	}
 }
 
-void	CMailForumService::cbCloseSession( CMessage& msgin, const std::string &serviceName, TServiceId serviceId )
+void CMailForumService::cbCloseSession(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	try
 	{
-		uint32	shardId;
-		string	userName;
+		uint32 shardId;
+		string userName;
 
 		msgin.serial(shardId);
 		msgin.serial(userName);
 
 		closeSession(shardId, userName);
 	}
-	catch(const Exception& e)
+	catch (const Exception &e)
 	{
 		nlwarning("Failed to close session: %s", e.what());
 	}
 }
 
 // ****************************************************************************
-void CMailForumService::cbRemoveUser( CMessage& msgin, const std::string &serviceName, TServiceId serviceId )
+void CMailForumService::cbRemoveUser(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	try
 	{
-		uint32	shardId;
-		string	userName;
+		uint32 shardId;
+		string userName;
 
 		msgin.serial(shardId);
 		msgin.serial(userName);
 
 		removeUser(shardId, userName);
 	}
-	catch(const Exception& e)
+	catch (const Exception &e)
 	{
 		nlwarning("Failed to remove user: %s", e.what());
 	}
 }
 
 // ****************************************************************************
-void CMailForumService::cbRemoveGuild( CMessage& msgin, const std::string &serviceName, TServiceId serviceId )
+void CMailForumService::cbRemoveGuild(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	try
 	{
-		uint32	shardId;
-		string	guildName;
+		uint32 shardId;
+		string guildName;
 
 		msgin.serial(shardId);
 		msgin.serial(guildName);
 
 		removeGuild(shardId, guildName);
 	}
-	catch(const Exception& e)
+	catch (const Exception &e)
 	{
 		nlwarning("Failed to remove guild: %s", e.what());
 	}
 }
 
 // ****************************************************************************
-void CMailForumService::removeUser( uint32 shardid, string username )
+void CMailForumService::removeUser(uint32 shardid, string username)
 {
-	string	userDir = getUserDirectory(shardid, username);
-	if (userDir[userDir.size()-1] == '/')
-		userDir = userDir.substr(0, userDir.size()-1);
+	string userDir = getUserDirectory(shardid, username);
+	if (userDir[userDir.size() - 1] == '/')
+		userDir = userDir.substr(0, userDir.size() - 1);
 
 	uint32 i = 0;
 	string userDelDir;
 	do
 	{
-		userDelDir = userDir + ".deleted." +toString("%05d", i);
+		userDelDir = userDir + ".deleted." + toString("%05d", i);
 		++i;
-	}
-	while (CFile::isExists(userDelDir));
+	} while (CFile::isExists(userDelDir));
 
 	CFile::moveFile(userDelDir, userDir);
 }
 
 // ****************************************************************************
-void CMailForumService::removeGuild( uint32 shardid, string guildname )
+void CMailForumService::removeGuild(uint32 shardid, string guildname)
 {
-	string	guildDir = getGuildDirectory(shardid, guildname);
-	if (guildDir[guildDir.size()-1] == '/')
-		guildDir = guildDir.substr(0, guildDir.size()-1);
+	string guildDir = getGuildDirectory(shardid, guildname);
+	if (guildDir[guildDir.size() - 1] == '/')
+		guildDir = guildDir.substr(0, guildDir.size() - 1);
 
 	uint32 i = 0;
 	string guildDelDir;
 	do
 	{
-		guildDelDir = guildDir + ".deleted." +toString("%05d", i);
+		guildDelDir = guildDir + ".deleted." + toString("%05d", i);
 		++i;
-	}
-	while (CFile::isExists(guildDelDir));
+	} while (CFile::isExists(guildDelDir));
 
 	CFile::moveFile(guildDelDir, guildDir);
 }
 
-
-void	CMailForumService::cbChangeUserName( CMessage& msgin, const std::string &serviceName, TServiceId serviceId )
+void CMailForumService::cbChangeUserName(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	try
 	{
-		uint32	shardId;
-		string	oldName;
-		string	newName;
+		uint32 shardId;
+		string oldName;
+		string newName;
 
 		msgin.serial(shardId);
 		msgin.serial(oldName);
@@ -408,7 +384,7 @@ void	CMailForumService::cbChangeUserName( CMessage& msgin, const std::string &se
 
 		changeUserName(shardId, oldName, newName);
 	}
-	catch(const Exception& e)
+	catch (const Exception &e)
 	{
 		nlwarning("Failed to close session: %s", e.what());
 	}
@@ -416,7 +392,7 @@ void	CMailForumService::cbChangeUserName( CMessage& msgin, const std::string &se
 
 //
 
-NLMISC_COMMAND(openSession,"open a mail/forum session for a player", "shardid username cookie")
+NLMISC_COMMAND(openSession, "open a mail/forum session for a player", "shardid username cookie")
 {
 	if (args.size() != 3)
 		return false;
@@ -450,8 +426,7 @@ NLMISC_COMMAND(changeUserName, "change a user's name (guild or player)", "shardi
 	uint32 shardId;
 	NLMISC::fromString(args[0], shardId);
 
-	CMailForumService::changeUserName( shardId, args[1], args[2] );
+	CMailForumService::changeUserName(shardId, args[1], args[2]);
 
 	return true;
 }
-

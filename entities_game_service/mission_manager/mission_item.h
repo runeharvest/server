@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_MISSION_ITEM_H
 #define RY_MISSION_ITEM_H
 
@@ -33,34 +31,33 @@ class CMissionItem
 {
 public:
 	/// build this class from a script. Return true on success, and add the item chat param to the parameter list
-	bool buildFromScript( const std::vector<std::string> & script, std::vector< std::pair< std::string, STRING_MANAGER::TParamType > > & chatParams, std::string & varName );
+	bool buildFromScript(const std::vector<std::string> &script, std::vector<std::pair<std::string, STRING_MANAGER::TParamType>> &chatParams, std::string &varName);
 	/// create an ingame item from this class and put it in user temp inventory
-	CGameItemPtr createItemInTempInv(CCharacter * user, uint16 quantity);
+	CGameItemPtr createItemInTempInv(CCharacter *user, uint16 quantity);
 	/// create an item from the mission item data
 	CGameItemPtr createItem(uint16 quantity);
 	/// return the quality
 	uint16 getQuality() { return _Quality; }
 	/// return the quality
-	const NLMISC::CSheetId & getSheetId() { return _SheetId; }
+	const NLMISC::CSheetId &getSheetId() { return _SheetId; }
+
 private:
 	// set a created item parameter
 	void setItemParam(CGameItemPtr item);
 
-	
 	/// sheet describing the item type
-	NLMISC::CSheetId		_SheetId;
+	NLMISC::CSheetId _SheetId;
 	/// parameters of the item
-	CCraftParameters		_Params;
+	CCraftParameters _Params;
 	/// quality of the item
-	uint16					_Quality;
+	uint16 _Quality;
 	/// phrase id of the item ( its name in most cases )
-	std::string				_PhraseId;
+	std::string _PhraseId;
 	/// true if the item cant be dropped
-	bool					_NoDrop;
+	bool _NoDrop;
 	/// sheet of the phrase
-	NLMISC::CSheetId		_SPhraseId;
+	NLMISC::CSheetId _SPhraseId;
 };
-
 
 #endif // RY_MISSION_ITEM_H
 

@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef RYAI_COMBAT_INTERFACE_H
 #define RYAI_COMBAT_INTERFACE_H
 
@@ -26,8 +25,8 @@
 #include "game_share/action_nature.h"
 #include "nel/misc/sheet_id.h"
 
-class	CAIEntityPhysical;
-class	CModEntityPhysical;
+class CAIEntityPhysical;
+class CModEntityPhysical;
 
 // the class
 class CCombatInterface
@@ -39,12 +38,12 @@ public:
 	class CEvent
 	{
 	public:
-		TDataSetRow					_originatorRow;
-		TDataSetRow					_targetRow;
-		float						_weight;
-		ACTNATURE::TActionNature	_nature;
+		TDataSetRow _originatorRow;
+		TDataSetRow _targetRow;
+		float _weight;
+		ACTNATURE::TActionNature _nature;
 	};
-	static std::list <CEvent> _events;
+	static std::list<CEvent> _events;
 };
 
 #endif

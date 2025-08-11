@@ -42,15 +42,14 @@ extern NLLIGO::CLigoConfig LigoConfig;
 //////////////////////////////////////////////////////////////////////////////
 
 class CStateInstance
-: public AIVM::IScriptContext
+    : public AIVM::IScriptContext
 {
 public:
-	inline
-	CStateInstance(CAIState* startState);
+	inline CStateInstance(CAIState *startState);
 
-	void init(CAIState* startState);
+	void init(CAIState *startState);
 
-	virtual CPersistentStateInstance* getPersistentStateInstance();
+	virtual CPersistentStateInstance *getPersistentStateInstance();
 
 	//////////////////////////////////////////////////////////////////////////
 	//	State Persistent.
@@ -58,9 +57,9 @@ public:
 	struct CStatePersistentObjEntry
 	{
 		CStatePersistentObjEntry();
-		CStatePersistentObjEntry(CAIState const* state, NLMISC::CSmartPtr<NLMISC::CVirtualRefCount> obj);
+		CStatePersistentObjEntry(CAIState const *state, NLMISC::CSmartPtr<NLMISC::CVirtualRefCount> obj);
 		virtual ~CStatePersistentObjEntry();
-		CAIState const* _State;
+		CAIState const *_State;
 		NLMISC::CSmartPtr<NLMISC::CVirtualRefCount> _Obj;
 	};
 	typedef std::vector<CStatePersistentObjEntry> TStatePersistentObjList;
@@ -68,88 +67,88 @@ public:
 	TStatePersistentObjList _StatePersistentObjList;
 
 	// Made to allow obj with life time less or equal to state affectation life time.
-	void addStatePersistentObj(CAIState const* keyState, NLMISC::CSmartPtr<NLMISC::CVirtualRefCount> anyObj);
-	void removeExceptForState(CAIState const* keyState);
+	void addStatePersistentObj(CAIState const *keyState, NLMISC::CSmartPtr<NLMISC::CVirtualRefCount> anyObj);
+	void removeExceptForState(CAIState const *keyState);
 
 	/** Try to obtain a group interface from the CStateInstance. Can return NULL if the
 	 *	CStateInstance if not implemeted by a group related objet.
 	 */
 	// Bad, Bad, Bad ..
-	virtual CGroup* getGroup() = 0;
+	virtual CGroup *getGroup() = 0;
 
 	//////////////////////////////////////////////////////////////////////////
 
-	CAITimerExtended& timerStateTimeout() { return _StateTimeout; }
-	CAITimerExtended& timerPunctTimeout() { return _PunctualStateTimeout; }
-	CAITimerExtended& timerUser(uint idx);
+	CAITimerExtended &timerStateTimeout() { return _StateTimeout; }
+	CAITimerExtended &timerPunctTimeout() { return _PunctualStateTimeout; }
+	CAITimerExtended &timerUser(uint idx);
 
-	CAIState* getCAIState();
+	CAIState *getCAIState();
 
-	virtual	CAliasTreeOwner* aliasTreeOwner() = 0;
+	virtual CAliasTreeOwner *aliasTreeOwner() = 0;
 
-	virtual void stateChange(CAIState const* oldState, CAIState const* newState) = 0;
+	virtual void stateChange(CAIState const *oldState, CAIState const *newState) = 0;
 
-	CAIState* getState() const { return _state; }
-	void setNextState(CAIState*);
+	CAIState *getState() const { return _state; }
+	void setNextState(CAIState *);
 
-	CAIState* getPunctualState() const { return _PunctualState; }
-	CAIState* getNextPunctualState() const { return _NextPunctualState; }
-	void setNextPunctualState(CAIState* state);
+	CAIState *getPunctualState() const { return _PunctualState; }
+	CAIState *getNextPunctualState() const { return _NextPunctualState; }
+	void setNextPunctualState(CAIState *state);
 	void cancelPunctualState() { _CancelPunctualState = true; }
 
 	std::string buidStateInstanceDebugString() const;
 
-	void dumpVarsAndFunctions(CStringWriter& sw) const;
+	void dumpVarsAndFunctions(CStringWriter &sw) const;
 
-	virtual CDebugHistory* getDebugHistory () = 0;
+	virtual CDebugHistory *getDebugHistory() = 0;
 
-	CAIState const* getActiveState() const;
+	CAIState const *getActiveState() const;
 
 	sint32 getUserTimer(uint timerId);
 	void setUserTimer(uint timerId, sint32 time);
 
-	void logicVarsToString(std::string& str) const;
+	void logicVarsToString(std::string &str) const;
 
-	float getNelVar(std::string const& varId);
-	void setNelVar(std::string const& varId, float value);
-	void delNelVar(std::string const& varId);
+	float getNelVar(std::string const &varId);
+	void setNelVar(std::string const &varId, float value);
+	void delNelVar(std::string const &varId);
 
-	std::string getStrNelVar(std::string const& varId);
-	void setStrNelVar(std::string const& varId, std::string const& value);
-	void delStrNelVar(std::string const& varId);
+	std::string getStrNelVar(std::string const &varId);
+	void setStrNelVar(std::string const &varId, std::string const &value);
+	void delStrNelVar(std::string const &varId);
 
-	static void setGlobalNelVar(std::string const& varId, float value);
-	static void setGlobalNelVar(std::string const& varId, std::string value);
+	static void setGlobalNelVar(std::string const &varId, float value);
+	static void setGlobalNelVar(std::string const &varId, std::string value);
 
-	CAITimerExtended const& userTimer (uint32 index) const;
+	CAITimerExtended const &userTimer(uint32 index) const;
 
 	bool advanceUserTimer(uint32 nbTicks);
 
-	void processStateEvent(CAIEvent const& stateEvent, CAIState const* state = NULL);
+	void processStateEvent(CAIEvent const &stateEvent, CAIState const *state = NULL);
 
 	//	callerStateInstance could be NULL;
-	void interpretCode(AIVM::IScriptContext* callerStateInstance, AIVM::CByteCodeEntry const& codeScriptEntry);
-	void interpretCode(AIVM::IScriptContext* callerStateInstance, NLMISC::CSmartPtr<AIVM::CByteCode const> const& codeScript);
+	void interpretCode(AIVM::IScriptContext *callerStateInstance, AIVM::CByteCodeEntry const &codeScriptEntry);
+	void interpretCode(AIVM::IScriptContext *callerStateInstance, NLMISC::CSmartPtr<AIVM::CByteCode const> const &codeScript);
 
 	/// @name IScriptContext implementation
 	//@{
 	virtual std::string getContextName();
-	virtual void interpretCodeOnChildren(AIVM::CByteCodeEntry const& codeScriptEntry);
+	virtual void interpretCodeOnChildren(AIVM::CByteCodeEntry const &codeScriptEntry);
 
-	float getLogicVar(NLMISC::TStringId	varId);
+	float getLogicVar(NLMISC::TStringId varId);
 	void setLogicVar(NLMISC::TStringId varId, float value);
 	std::string getStrLogicVar(NLMISC::TStringId varId);
-	void setStrLogicVar(NLMISC::TStringId varId, std::string const& value);
-	AIVM::IScriptContext* getCtxLogicVar(NLMISC::TStringId varId);
-	void setCtxLogicVar(NLMISC::TStringId varId, AIVM::IScriptContext* value);
+	void setStrLogicVar(NLMISC::TStringId varId, std::string const &value);
+	AIVM::IScriptContext *getCtxLogicVar(NLMISC::TStringId varId);
+	void setCtxLogicVar(NLMISC::TStringId varId, AIVM::IScriptContext *value);
 	void setFirstBotSpawned();
 
-	virtual AIVM::IScriptContext* findContext(NLMISC::TStringId const strId);
+	virtual AIVM::IScriptContext *findContext(NLMISC::TStringId const strId);
 
-	virtual void setScriptCallBack(NLMISC::TStringId const& eventName, AIVM::CByteCodeEntry const& codeScriptEntry);
-	virtual AIVM::CByteCodeEntry const* getScriptCallBackPtr(NLMISC::TStringId const& eventName) const;
-	virtual void callScriptCallBack(AIVM::IScriptContext* caller, NLMISC::TStringId const& funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", AIVM::CScriptStack* stack = NULL);
-	virtual void callNativeCallBack(AIVM::IScriptContext* caller, std::string const&       funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", AIVM::CScriptStack* stack = NULL);
+	virtual void setScriptCallBack(NLMISC::TStringId const &eventName, AIVM::CByteCodeEntry const &codeScriptEntry);
+	virtual AIVM::CByteCodeEntry const *getScriptCallBackPtr(NLMISC::TStringId const &eventName) const;
+	virtual void callScriptCallBack(AIVM::IScriptContext *caller, NLMISC::TStringId const &funcName, int mode = 0, std::string const &inParamsSig = "", std::string const &outParamsSig = "", AIVM::CScriptStack *stack = NULL);
+	virtual void callNativeCallBack(AIVM::IScriptContext *caller, std::string const &funcName, int mode = 0, std::string const &inParamsSig = "", std::string const &outParamsSig = "", AIVM::CScriptStack *stack = NULL);
 
 	void blockUserEvent(uint32 eventId);
 	void unblockUserEvent(uint32 eventId);
@@ -158,44 +157,44 @@ public:
 
 protected:
 	/// Logic variables
-	typedef	std::map<NLMISC::TStringId, float>           TLogicVarList;
-	typedef	std::map<NLMISC::TStringId, std::string>     TStrLogicVarList;
-	typedef std::map<NLMISC::TStringId, uint32>		 TLogicVarIndex;
-	typedef	std::map<NLMISC::TStringId, AIVM::IScriptContext*> TCtxLogicVarList;
-	TLogicVarList    _LogicVar;
+	typedef std::map<NLMISC::TStringId, float> TLogicVarList;
+	typedef std::map<NLMISC::TStringId, std::string> TStrLogicVarList;
+	typedef std::map<NLMISC::TStringId, uint32> TLogicVarIndex;
+	typedef std::map<NLMISC::TStringId, AIVM::IScriptContext *> TCtxLogicVarList;
+	TLogicVarList _LogicVar;
 	TStrLogicVarList _StrLogicVar;
 	TCtxLogicVarList _CtxLogicVar;
 
 	// Nel variables
-	typedef	std::map<std::string, NLMISC::CVariable<float>*>       TNelVarList;
-	typedef	std::map<std::string, NLMISC::CVariable<std::string>*> TStrNelVarList;
-	TNelVarList    _NelVar;
+	typedef std::map<std::string, NLMISC::CVariable<float> *> TNelVarList;
+	typedef std::map<std::string, NLMISC::CVariable<std::string> *> TStrNelVarList;
+	TNelVarList _NelVar;
 	TStrNelVarList _StrNelVar;
 
 	// Callbacks (?)
-	typedef	std::map<NLMISC::TStringId, AIVM::CByteCodeEntry> TCallBackList;
+	typedef std::map<NLMISC::TStringId, AIVM::CByteCodeEntry> TCallBackList;
 	TCallBackList _CallBacks;
 
 	/// Flag for variable modification
 	bool _LogicVarChanged;
 	bool _LogicVarChangedList[4];
-	//TLogicVarIndex _VarIndex;
-	// update logic	timers ---------------------------------------------
+	// TLogicVarIndex _VarIndex;
+	//  update logic	timers ---------------------------------------------
 	/// 4 timers available for user logic
 	CAITimerExtended _UserTimer[4];
 
 	/// timer for timing positional states
 	CAITimerExtended _StateTimeout;
 	/// current state (index into manager's state vector)
-	CAIState* _state;
+	CAIState *_state;
 	/// variable set to request a state change (std::numeric_limits<uint32>::max() otherwise)
-	CAIState* _NextState;
+	CAIState *_NextState;
 
 	/// timer for timing	punctual states
-	CAITimerExtended	_PunctualStateTimeout;
+	CAITimerExtended _PunctualStateTimeout;
 
-	CAIState* _PunctualState;
-	CAIState* _NextPunctualState;
+	CAIState *_PunctualState;
+	CAIState *_NextPunctualState;
 
 	/// Flag for leaving the punctual state, returning to normal behavior
 	bool _CancelPunctualState;
@@ -209,46 +208,46 @@ protected:
 //////////////////////////////////////////////////////////////////////////////
 
 class CPersistentStateInstance
-: public NLMISC::CDbgRefCount<CPersistentStateInstance>
-, public CKeyWordOwner
-, public CStateInstance
+    : public NLMISC::CDbgRefCount<CPersistentStateInstance>,
+      public CKeyWordOwner,
+      public CStateInstance
 {
 public:
-	CPersistentStateInstance(CStateMachine& reactionContainer);
-	virtual	~CPersistentStateInstance();
+	CPersistentStateInstance(CStateMachine &reactionContainer);
+	virtual ~CPersistentStateInstance();
 
-	typedef	std::vector<NLMISC::CDbgPtr<CPersistentStateInstance> >	TChildList;
+	typedef std::vector<NLMISC::CDbgPtr<CPersistentStateInstance>> TChildList;
 
-	void setParentStateInstance(CPersistentStateInstance* parentStateInstance);
+	void setParentStateInstance(CPersistentStateInstance *parentStateInstance);
 
-	CPersistentStateInstance* getParentStateInstance() const { return _ParentStateInstance; }
+	CPersistentStateInstance *getParentStateInstance() const { return _ParentStateInstance; }
 
-	void addChildStateInstance(CPersistentStateInstance* parentStateInstance);
+	void addChildStateInstance(CPersistentStateInstance *parentStateInstance);
 
-	void removeChildStateInstance(CPersistentStateInstance* parentStateInstance);
+	void removeChildStateInstance(CPersistentStateInstance *parentStateInstance);
 
-	TChildList& childs() { return _PSIChilds; }
+	TChildList &childs() { return _PSIChilds; }
 
 	TChildList _PSIChilds;
 
 	// Interface to state status variables -----------------------------
-	CAIState* getStartState() { return _StartState; }
-	void setStartState(CAIState* state);
+	CAIState *getStartState() { return _StartState; }
+	void setStartState(CAIState *state);
 
-	CStateMachine& getEventContainer() { return _Container; }
+	CStateMachine &getEventContainer() { return _Container; }
 
 	void updateStateInstance();
 
 	//////////////////////////////////////////////////////////////////////////
 	//	CStateInstance
-	CPersistentStateInstance* getPersistentStateInstance() { return this; }
+	CPersistentStateInstance *getPersistentStateInstance() { return this; }
 
 	//////////////////////////////////////////////////////////////////////////
 
 private:
 	/// id of the state to use at startup
 	NLMISC::CDbgPtr<CAIState> _StartState;
-	CStateMachine& _Container;
+	CStateMachine &_Container;
 	NLMISC::CDbgPtr<CPersistentStateInstance> _ParentStateInstance;
 };
 
@@ -260,67 +259,59 @@ private:
 // CStateInstance                                                           //
 //////////////////////////////////////////////////////////////////////////////
 
-inline
-CStateInstance::CStateInstance(CAIState* startState)
+inline CStateInstance::CStateInstance(CAIState *startState)
 {
 	_UserEventBlocked = 0;
 	_CtxLogicVar[NLMISC::CStringMapper::map("@this")] = this;
 	init(startState);
 }
 
-inline
-CPersistentStateInstance* CStateInstance::getPersistentStateInstance()
+inline CPersistentStateInstance *CStateInstance::getPersistentStateInstance()
 {
-//	nlassert(false);
-	return (CPersistentStateInstance*)NULL;
+	//	nlassert(false);
+	return (CPersistentStateInstance *)NULL;
 }
 
-inline
-CStateInstance::CStatePersistentObjEntry::CStatePersistentObjEntry()
+inline CStateInstance::CStatePersistentObjEntry::CStatePersistentObjEntry()
 {
 }
 
-inline
-CStateInstance::CStatePersistentObjEntry::CStatePersistentObjEntry(CAIState const* state, NLMISC::CSmartPtr<NLMISC::CVirtualRefCount> obj)
-: _State(state)
-, _Obj(obj)
+inline CStateInstance::CStatePersistentObjEntry::CStatePersistentObjEntry(CAIState const *state, NLMISC::CSmartPtr<NLMISC::CVirtualRefCount> obj)
+    : _State(state)
+    , _Obj(obj)
 {
 }
 
-inline
-CStateInstance::CStatePersistentObjEntry::~CStatePersistentObjEntry()
+inline CStateInstance::CStatePersistentObjEntry::~CStatePersistentObjEntry()
 {
 	_Obj = NULL;
 	_State = NULL;
 }
 
-inline
-CAITimerExtended& CStateInstance::timerUser(uint idx)
+inline CAITimerExtended &CStateInstance::timerUser(uint idx)
 {
-	nlassert(idx<4); return _UserTimer[idx];
+	nlassert(idx < 4);
+	return _UserTimer[idx];
 }
 
-inline
-void CStateInstance::logicVarsToString(std::string& str) const
+inline void CStateInstance::logicVarsToString(std::string &str) const
 {
-	for	(TLogicVarList::const_iterator it=_LogicVar.begin(), itEnd=_LogicVar.end();it!=itEnd;++it)
-		str+=*(it->first)+"="+NLMISC::toString(it->second)+" ";
+	for (TLogicVarList::const_iterator it = _LogicVar.begin(), itEnd = _LogicVar.end(); it != itEnd; ++it)
+		str += *(it->first) + "=" + NLMISC::toString(it->second) + " ";
 }
 
-inline
-float CStateInstance::getLogicVar(NLMISC::TStringId	varId)
+inline float CStateInstance::getLogicVar(NLMISC::TStringId varId)
 {
-	TLogicVarList::iterator		it=_LogicVar.find(varId);
-	if (it==_LogicVar.end())
+	TLogicVarList::iterator it = _LogicVar.find(varId);
+	if (it == _LogicVar.end())
 	{
-		_LogicVar[varId]=0.f;
-		return	0.f;
+		_LogicVar[varId] = 0.f;
+		return 0.f;
 	}
-	return	it->second;	//_LogicVar[varId];
+	return it->second; //_LogicVar[varId];
 }
 
-inline
-void CStateInstance::setLogicVar(NLMISC::TStringId varId, float value)
+inline void CStateInstance::setLogicVar(NLMISC::TStringId varId, float value)
 {
 	_LogicVar[varId] = value;
 	_LogicVarChanged = true;
@@ -333,19 +324,15 @@ void CStateInstance::setLogicVar(NLMISC::TStringId varId, float value)
 			//_VarIndex[varId]
 			_LogicVarChangedList[static_cast<uint32>(index)] = true;
 		}
-
 	}
-
 }
 
-inline
-std::string CStateInstance::getStrLogicVar(NLMISC::TStringId varId)
+inline std::string CStateInstance::getStrLogicVar(NLMISC::TStringId varId)
 {
 	return _StrLogicVar[varId];
 }
 
-inline
-void CStateInstance::setStrLogicVar(NLMISC::TStringId varId, std::string const& value)
+inline void CStateInstance::setStrLogicVar(NLMISC::TStringId varId, std::string const &value)
 {
 	_StrLogicVar[varId] = value;
 	_LogicVarChanged = true;
@@ -357,26 +344,22 @@ void CStateInstance::setStrLogicVar(NLMISC::TStringId varId, std::string const& 
 			//_VarIndex[varId]
 			_LogicVarChangedList[static_cast<uint32>(index)] = true;
 		}
-
 	}
 	//_LogicVarChangedList[_VarIndex[varId]] = true;
 }
 
-inline
-AIVM::IScriptContext* CStateInstance::getCtxLogicVar(NLMISC::TStringId varId)
+inline AIVM::IScriptContext *CStateInstance::getCtxLogicVar(NLMISC::TStringId varId)
 {
 	return _CtxLogicVar[varId];
 }
 
-inline
-void CStateInstance::setCtxLogicVar(NLMISC::TStringId varId, AIVM::IScriptContext* value)
+inline void CStateInstance::setCtxLogicVar(NLMISC::TStringId varId, AIVM::IScriptContext *value)
 {
 	_CtxLogicVar[varId] = value;
 	_LogicVarChanged = true;
 }
 
-inline
-float CStateInstance::getNelVar(std::string const& varId)
+inline float CStateInstance::getNelVar(std::string const &varId)
 {
 	TNelVarList::iterator it = _NelVar.find(varId);
 	if (it != _NelVar.end()) return it->second->get();
@@ -391,11 +374,10 @@ float CStateInstance::getNelVar(std::string const& varId)
 	return _NelVar[varId]->get();
 }
 
-inline
-void CStateInstance::setNelVar(std::string const& varId, float value)
+inline void CStateInstance::setNelVar(std::string const &varId, float value)
 {
 	TNelVarList::iterator it = _NelVar.find(varId);
-	if (it==_NelVar.end())
+	if (it == _NelVar.end())
 	{
 		if (NLMISC::CVariable<float>::exists(varId))
 		{
@@ -407,11 +389,10 @@ void CStateInstance::setNelVar(std::string const& varId, float value)
 	_NelVar[varId]->set(value);
 }
 
-inline
-void CStateInstance::delNelVar(std::string const& varId)
+inline void CStateInstance::delNelVar(std::string const &varId)
 {
 	TNelVarList::iterator it = _NelVar.find(varId);
-	if (it!=_NelVar.end())
+	if (it != _NelVar.end())
 	{
 		delete it->second;
 		_NelVar.erase(it);
@@ -422,8 +403,7 @@ void CStateInstance::delNelVar(std::string const& varId)
 	}
 }
 
-inline
-std::string CStateInstance::getStrNelVar(std::string const& varId)
+inline std::string CStateInstance::getStrNelVar(std::string const &varId)
 {
 	TStrNelVarList::iterator it = _StrNelVar.find(varId);
 	if (it != _StrNelVar.end()) return it->second->get();
@@ -438,11 +418,10 @@ std::string CStateInstance::getStrNelVar(std::string const& varId)
 	return _StrNelVar[varId]->get();
 }
 
-inline
-void CStateInstance::setStrNelVar(std::string const& varId, std::string const& value)
+inline void CStateInstance::setStrNelVar(std::string const &varId, std::string const &value)
 {
 	TStrNelVarList::iterator it = _StrNelVar.find(varId);
-	if (it==_StrNelVar.end())
+	if (it == _StrNelVar.end())
 	{
 		if (NLMISC::CVariable<float>::exists(varId))
 		{
@@ -454,11 +433,10 @@ void CStateInstance::setStrNelVar(std::string const& varId, std::string const& v
 	_StrNelVar[varId]->set(value);
 }
 
-inline
-void CStateInstance::delStrNelVar(std::string const& varId)
+inline void CStateInstance::delStrNelVar(std::string const &varId)
 {
 	TStrNelVarList::iterator it = _StrNelVar.find(varId);
-	if (it!=_StrNelVar.end())
+	if (it != _StrNelVar.end())
 	{
 		delete it->second;
 		_StrNelVar.erase(it);
@@ -469,68 +447,64 @@ void CStateInstance::delStrNelVar(std::string const& varId)
 	}
 }
 
-inline
-CAITimerExtended const& CStateInstance::userTimer (uint32 index) const
+inline CAITimerExtended const &CStateInstance::userTimer(uint32 index) const
 {
-	return	_UserTimer[index];
+	return _UserTimer[index];
 }
 
-inline
-bool CStateInstance::advanceUserTimer(uint32 nbTicks)
+inline bool CStateInstance::advanceUserTimer(uint32 nbTicks)
 {
-	for (uint k=0; k<4; ++k)
+	for (uint k = 0; k < 4; ++k)
 	{
-		const	uint32 t = getUserTimer(k);
-		setUserTimer(k, (t>nbTicks)?(t-nbTicks):0);
+		const uint32 t = getUserTimer(k);
+		setUserTimer(k, (t > nbTicks) ? (t - nbTicks) : 0);
 	}
-	return	true;
+	return true;
 }
 
-inline
-void CStateInstance::processStateEvent(CAIEvent const& stateEvent, CAIState const* state)
+inline void CStateInstance::processStateEvent(CAIEvent const &stateEvent, CAIState const *state)
 {
 	//	NOTE: This is a quick and inefficient implementation of event treatment - needs to be re-worked
 	//	note that it is OK for state to be 'NULL'
-	if	(!state)
+	if (!state)
 	{
-		state=getActiveState();
-		if	(!state)
+		state = getActiveState();
+		if (!state)
 			return;
 	}
 
-	bool foundReaction=false;
+	bool foundReaction = false;
 	//	nlassert(_mgr);
-	for (uint i=0;i<stateEvent.reactionList().size();++i)
+	for (uint i = 0; i < stateEvent.reactionList().size(); ++i)
 	{
-		const CAIEventReaction	&reaction=*stateEvent.reactionList()[i];
-		if	(!reaction.testCompatibility(this,state))
+		const CAIEventReaction &reaction = *stateEvent.reactionList()[i];
+		if (!reaction.testCompatibility(this, state))
 			continue;
 
 		if (getDebugHistory()->isRecording())
 		{
 			nldebug("Reaction for event"); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
 			nldebug("STATE: '%s' EVENT: '%s' REACTION: '%s'", state->getAliasNode()->fullName().c_str(),
-				stateEvent.getName().c_str(), reaction.getAliasNode()->fullName().c_str()); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
+			    stateEvent.getName().c_str(), reaction.getAliasNode()->fullName().c_str()); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
 			getDebugHistory()->addHistory("STATE: '%s' EVENT: '%s' REACTION: '%s'", state->getAliasNode()->fullName().c_str(),
-				stateEvent.getName().c_str(), reaction.getAliasNode()->fullName().c_str());
+			    stateEvent.getName().c_str(), reaction.getAliasNode()->fullName().c_str());
 		}
 
-		foundReaction=true;
+		foundReaction = true;
 
 		if (!reaction.getAction())
 		{
 			nldebug("Failed to find action for event"); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
-			nlwarning("Failed to find action for event: %s",reaction.getAliasNode()->fullName().c_str());
+			nlwarning("Failed to find action for event: %s", reaction.getAliasNode()->fullName().c_str());
 			continue;
 		}
 		if (!reaction.getAction()->executeAction(this, NULL))
 		{
 			nldebug("Failed to execute action for event"); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
-			nlwarning("Failed to execute action for event '%s': for stateInstance:'%s' in state:'%s'",	stateEvent.getName().c_str(),
-				aliasTreeOwner()->getAliasNode()->fullName().c_str(),	state->getAliasNode()->fullName().c_str());
+			nlwarning("Failed to execute action for event '%s': for stateInstance:'%s' in state:'%s'", stateEvent.getName().c_str(),
+			    aliasTreeOwner()->getAliasNode()->fullName().c_str(), state->getAliasNode()->fullName().c_str());
 			continue;
 		}
-
 	}
 	if (!foundReaction)
 	{
@@ -538,16 +512,14 @@ void CStateInstance::processStateEvent(CAIEvent const& stateEvent, CAIState cons
 		{
 			nldebug("No reaction for event"); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
 			nldebug("STATE: '%s' EVENT: '%s' NO REACTION", state->getAliasNode()->fullName().c_str(),
-				stateEvent.getName().c_str()); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
+			    stateEvent.getName().c_str()); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
 			getDebugHistory()->addHistory("STATE: '%s' EVENT: '%s' NO REACTION", state->getAliasNode()->fullName().c_str(),
-				stateEvent.getName().c_str());
+			    stateEvent.getName().c_str());
 		}
 	}
-
 }
 
-inline
-void CStateInstance::setNextState(CAIState* state)
+inline void CStateInstance::setNextState(CAIState *state)
 {
 	// we're allowed to set state to 'no state'
 	if (!state)
@@ -560,8 +532,8 @@ void CStateInstance::setNextState(CAIState* state)
 	if (!state->isPositional())
 	{
 		nlwarning("setNextState(): State should not be punctual '%s'%s - setting state to std::numeric_limits<uint32>::max()",
-			state->getAliasNode()->fullName().c_str(),
-			state->getAliasString().c_str());
+		    state->getAliasNode()->fullName().c_str(),
+		    state->getAliasString().c_str());
 		_NextState = NULL;
 		return;
 	}
@@ -570,8 +542,7 @@ void CStateInstance::setNextState(CAIState* state)
 	_NextState = state;
 }
 
-inline
-void CStateInstance::setNextPunctualState(CAIState* state)
+inline void CStateInstance::setNextPunctualState(CAIState *state)
 {
 	// we're allowed to set state to 'no state'
 	if (!state)
@@ -581,8 +552,8 @@ void CStateInstance::setNextPunctualState(CAIState* state)
 	if (state->isPositional())
 	{
 		nlwarning("CStateInstance::setNextPunctualState(): State should be punctual '%s'%s - setting state to std::numeric_limits<uint32>::max()",
-			state->getAliasNode()->fullName().c_str(),
-			state->getAliasString().c_str());
+		    state->getAliasNode()->fullName().c_str(),
+		    state->getAliasString().c_str());
 		state = NULL; // this does nothing wtf
 		return;
 	}
@@ -595,59 +566,53 @@ void CStateInstance::setNextPunctualState(CAIState* state)
 // CPersistentStateInstance                                                 //
 //////////////////////////////////////////////////////////////////////////////
 
-inline
-CPersistentStateInstance::CPersistentStateInstance(CStateMachine& reactionContainer)
-: CKeyWordOwner()
-, CStateInstance(NULL)
-, _StartState()
-, _Container(reactionContainer)
+inline CPersistentStateInstance::CPersistentStateInstance(CStateMachine &reactionContainer)
+    : CKeyWordOwner()
+    , CStateInstance(NULL)
+    , _StartState()
+    , _Container(reactionContainer)
 {
 }
 
-inline
-CPersistentStateInstance::~CPersistentStateInstance()
+inline CPersistentStateInstance::~CPersistentStateInstance()
 {
 #if !FINAL_VERSION
-	if (_PSIChilds.size()!=0)
+	if (_PSIChilds.size() != 0)
 		nlwarning("a Npc group is dying and still have childs, which is not possible !!");
-	nlassert(_PSIChilds.size()==0);
+	nlassert(_PSIChilds.size() == 0);
 #endif
 	if (!_ParentStateInstance.isNULL())
 		_ParentStateInstance->removeChildStateInstance(this);
 }
 
-inline
-void CPersistentStateInstance::setParentStateInstance(CPersistentStateInstance* parentStateInstance)
+inline void CPersistentStateInstance::setParentStateInstance(CPersistentStateInstance *parentStateInstance)
 {
 	if (!_ParentStateInstance.isNULL())
 		_ParentStateInstance->removeChildStateInstance(this);
-	_ParentStateInstance=parentStateInstance;
-	if (parentStateInstance!=NULL)
+	_ParentStateInstance = parentStateInstance;
+	if (parentStateInstance != NULL)
 		parentStateInstance->addChildStateInstance(this);
 }
 
-inline
-void CPersistentStateInstance::addChildStateInstance(CPersistentStateInstance* parentStateInstance)
+inline void CPersistentStateInstance::addChildStateInstance(CPersistentStateInstance *parentStateInstance)
 {
 #if !FINAL_VERSION
-	nlassert(std::find(_PSIChilds.begin(), _PSIChilds.end(), NLMISC::CDbgPtr<CPersistentStateInstance>(parentStateInstance))==_PSIChilds.end());
+	nlassert(std::find(_PSIChilds.begin(), _PSIChilds.end(), NLMISC::CDbgPtr<CPersistentStateInstance>(parentStateInstance)) == _PSIChilds.end());
 #endif
 	_PSIChilds.push_back(parentStateInstance);
 }
 
-inline
-void CPersistentStateInstance::removeChildStateInstance(CPersistentStateInstance* parentStateInstance)
+inline void CPersistentStateInstance::removeChildStateInstance(CPersistentStateInstance *parentStateInstance)
 {
 	TChildList::iterator it = std::find(_PSIChilds.begin(), _PSIChilds.end(), NLMISC::CDbgPtr<CPersistentStateInstance>(parentStateInstance));
 #if !FINAL_VERSION
-	nlassert(it!=_PSIChilds.end());
+	nlassert(it != _PSIChilds.end());
 #endif
-	if (it!=_PSIChilds.end())
+	if (it != _PSIChilds.end())
 		_PSIChilds.erase(it);
 }
 
-inline
-void CPersistentStateInstance::setStartState(CAIState* state)
+inline void CPersistentStateInstance::setStartState(CAIState *state)
 {
 	_StartState = state;
 	CStateInstance::init(_StartState);

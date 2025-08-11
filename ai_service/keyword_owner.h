@@ -14,42 +14,39 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYAI_KEYWORD_OWNER_H
 #define RYAI_KEYWORD_OWNER_H
 
 #include "ai_keywords.h"
 
-class	CKeyWordOwner
+class CKeyWordOwner
 {
 public:
 	CKeyWordOwner()
 	{
 	}
-	
+
 	virtual ~CKeyWordOwner()
 	{
 	}
 	// Keyword management ----------------------------------------------
-	inline	void keywordsClear()
+	inline void keywordsClear()
 	{
 		_keywords.clear();
 	}
 
-	inline	void keywordsAdd(CKeywordMask	mask)	//const std::string &keyword)
+	inline void keywordsAdd(CKeywordMask mask) // const std::string &keyword)
 	{
-		_keywords|=mask;
+		_keywords |= mask;
 	}
 
-	inline	const CKeywordMask &getKeywords() const
+	inline const CKeywordMask &getKeywords() const
 	{
 		return _keywords;
 	}
-	
-protected:
-	CKeywordMask	_keywords;	// set of keywords that characterise the owner.
-};
 
+protected:
+	CKeywordMask _keywords; // set of keywords that characterise the owner.
+};
 
 #endif

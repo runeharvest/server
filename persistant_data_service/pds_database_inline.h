@@ -21,14 +21,9 @@
 #ifndef RY_PDS_DATABASE_INLINE_H
 #define RY_PDS_DATABASE_INLINE_H
 
-
 //
 // Inlines
 //
-
-
-
-
 
 //
 // Get methods
@@ -37,11 +32,11 @@
 /*
  * Get Type
  */
-inline const CType*	CDatabase::getType(TTypeId typeId) const
+inline const CType *CDatabase::getType(TTypeId typeId) const
 {
 	if (typeId >= _Types.size())
 	{
-		//warning("getType(): type '"+NLMISC::toString(typeId)+"' is not initialised");
+		// warning("getType(): type '"+NLMISC::toString(typeId)+"' is not initialised");
 		return NULL;
 	}
 
@@ -51,23 +46,21 @@ inline const CType*	CDatabase::getType(TTypeId typeId) const
 /*
  * Get Table
  */
-inline const CTable*	CDatabase::getTable(TTypeId tableId) const
+inline const CTable *CDatabase::getTable(TTypeId tableId) const
 {
 	if (tableId >= _Tables.size())
 	{
-		//warning("getTable(): table '"+NLMISC::toString(tableId)+"' is not initialised");
+		// warning("getTable(): table '"+NLMISC::toString(tableId)+"' is not initialised");
 		return NULL;
 	}
 
 	return _Tables[tableId];
 }
 
-
-
 /*
  * Private Get Table (non const)
  */
-inline CTable*	CDatabase::getNonConstTable(RY_PDS::TTableIndex tableId)
+inline CTable *CDatabase::getNonConstTable(RY_PDS::TTableIndex tableId)
 {
 	if (tableId >= _Tables.size())
 		return NULL;
@@ -75,5 +68,4 @@ inline CTable*	CDatabase::getNonConstTable(RY_PDS::TTableIndex tableId)
 	return _Tables[tableId];
 }
 
-#endif //RY_PDS_DATABASE_INLINE_H
-
+#endif // RY_PDS_DATABASE_INLINE_H

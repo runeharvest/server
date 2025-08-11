@@ -14,29 +14,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "chat_stats.h"
 #include "nel/misc/debug.h"
 
 using namespace std;
 
-
 //-----------------------------------------------
 //	addOccurence :
 //
 //-----------------------------------------------
-void CChatStats::addOccurence( const string& str )
+void CChatStats::addOccurence(const string &str)
 {
-	map<string,uint32>::iterator itOcc = _Occurences.find( str );
-	if( itOcc != _Occurences.end() )
+	map<string, uint32>::iterator itOcc = _Occurences.find(str);
+	if (itOcc != _Occurences.end())
 	{
 		(*itOcc).second++;
 	}
 	else
 	{
-		nlwarning("<CChatStats::addOccurence> The string %s is unknown",str.c_str());
+		nlwarning("<CChatStats::addOccurence> The string %s is unknown", str.c_str());
 	}
 
 } // addOccurence //
-

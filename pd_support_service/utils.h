@@ -14,17 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef PDSS_UTILS_H
 #define PDSS_UTILS_H
-
 
 //-------------------------------------------------------------------------------------------------
 // includes
 //-------------------------------------------------------------------------------------------------
 
 #include "nel/misc/sstring.h"
-
 
 //-------------------------------------------------------------------------------------------------
 // Handy utilities
@@ -35,7 +32,6 @@ NLMISC::CSString buildDowTimeString(uint32 timeValue);
 NLMISC::CSString buildDurationString(uint32 timeValue);
 
 NLMISC::CSString lookupSessionName(uint32 shardId);
-uint32 lookupSessionId(const NLMISC::CSString& sessionName);
-
+uint32 lookupSessionId(const NLMISC::CSString &sessionName);
 
 #endif // PDSS_UTILS_H

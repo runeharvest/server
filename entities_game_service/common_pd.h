@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef COMMON_PD_H
 #define COMMON_PD_H
 
@@ -26,14 +25,11 @@
 
 // User #includes
 
-namespace EGSPD
-{
-	
+namespace EGSPD {
+
 //
 // Forward declarations
 //
-
-
 
 //
 // Typedefs & Enums
@@ -44,16 +40,12 @@ namespace EGSPD
  */
 typedef NLMISC::CEntityId TCharacterId;
 
-
 /** TGuildId
  * defined at entities_game_service\pd_scripts\egs_pd.pds:10
  */
 typedef uint32 TGuildId;
 
-
-	
 } // End of EGSPD
-
 
 //
 // Inline implementations

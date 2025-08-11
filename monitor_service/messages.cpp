@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 // include files
 #include "stdpch.h"
 
@@ -28,11 +26,13 @@ using namespace NLNET;
 // the callback table
 // ***************************************************************************
 
-static void cbAddEntities( NLNET::CMessage& msgin, const std::string &serviceName, TServiceId serviceId );
+static void cbAddEntities(NLNET::CMessage &msgin, const std::string &serviceName, TServiceId serviceId);
 
-TUnifiedCallbackItem CbArray[] = 
-{
-	{	"ADDED_ENTITIES",		cbAddEntities,			},
+TUnifiedCallbackItem CbArray[] = {
+	{
+	    "ADDED_ENTITIES",
+	    cbAddEntities,
+	},
 };
 
 // ***************************************************************************
@@ -40,9 +40,7 @@ TUnifiedCallbackItem CbArray[] =
 // ***************************************************************************
 
 //
-static void cbAddEntities( NLNET::CMessage& msgin, const std::string &serviceName, TServiceId serviceId )
+static void cbAddEntities(NLNET::CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
-//	This is where we should deal with player record creation
+	//	This is where we should deal with player record creation
 }
-
-

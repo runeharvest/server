@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_EGS_PROGRESS_CALLBACK_H
 #define RY_EGS_PROGRESS_CALLBACK_H
 
@@ -30,14 +28,14 @@
 class CEGSProgressCallback : public NLMISC::IProgressCallback
 {
 public:
-	CEGSProgressCallback():IProgressCallback() {}
-	virtual void progress (float progressValue) {}
-	virtual ~CEGSProgressCallback() {}
-
+	CEGSProgressCallback()
+	    : IProgressCallback()
+	{
+	}
+	virtual void progress(float progressValue) { }
+	virtual ~CEGSProgressCallback() { }
 };
-
 
 #endif // RY_EGS_PROGRESS_CALLBACK_H
 
 /* End of egs_progress_callback.h */
-

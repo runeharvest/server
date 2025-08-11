@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 // Include
 #include "nel/net/unified_network.h"
 #include "game_share/tick_event_handler.h"
@@ -24,7 +22,6 @@
 using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
-
 
 // classic init(), update() and release()
 void CIOSInterface::init()
@@ -42,25 +39,22 @@ void CIOSInterface::release()
 void CIOSInterface::addEntity(CAIEntityId id, NLMISC::CSheetId sheet)
 {
 	nlstop;
-	
-	NLMISC::CEntityId eid=id.toEntityId();
+
+	NLMISC::CEntityId eid = id.toEntityId();
 
 	// send creature to IOS
 	CMessage msgOPS("ADD_CREATURE");
-	msgOPS.serial( eid );
-	msgOPS.serial( sheet );
+	msgOPS.serial(eid);
+	msgOPS.serial(sheet);
 	sendMessageViaMirror("IOS", msgOPS);
-
 }
-
 
 void CIOSInterface::removeEntity(CAIEntityId id)
 {
-	NLMISC::CEntityId eid=id.toEntityId();
+	NLMISC::CEntityId eid = id.toEntityId();
 
 	// remove the actor from the IOS
 	CMessage msgOPS("REMOVE_CREATURE");
-	msgOPS.serial( eid );
-	sendMessageViaMirror( "IOS", msgOPS );
+	msgOPS.serial(eid);
+	sendMessageViaMirror("IOS", msgOPS);
 }
-

@@ -19,32 +19,31 @@
 
 #error "Deprecated"
 
-//#include <nel/misc/types_nl.h>
-//#include <nel/misc/entity_id.h>
-//#include <nel/misc/ucstring.h>
-//#include <nel/misc/stream.h>
-//#include <nel/misc/debug.h>
-//#include <nel/misc/path.h>
-//#include "nel/misc/hierarchical_timer.h"
+// #include <nel/misc/types_nl.h>
+// #include <nel/misc/entity_id.h>
+// #include <nel/misc/ucstring.h>
+// #include <nel/misc/stream.h>
+// #include <nel/misc/debug.h>
+// #include <nel/misc/path.h>
+// #include "nel/misc/hierarchical_timer.h"
 
-
-//class CTimestamp;
+// class CTimestamp;
 //
-//namespace NLNET
+// namespace NLNET
 //{
 //	class CMessage;
-//}
+// }
 //
-//namespace RY_PDS 
+// namespace RY_PDS
 //{
 //
 //// must a a power of 2!!
-//const uint32	PD_STRING_HASHTABLE_SIZE = 65536;
+// const uint32	PD_STRING_HASHTABLE_SIZE = 65536;
 //
 //// invalid string id
-//const uint32	PD_INVALID_STRING_ID = 0xffffffff;
-//const uint32	PD_INVALID_STRING_PID = 0xffffffff;
-//class CPDSLib;
+// const uint32	PD_INVALID_STRING_ID = 0xffffffff;
+// const uint32	PD_INVALID_STRING_PID = 0xffffffff;
+// class CPDSLib;
 //
 ///**
 // * Persistant Data String Manager
@@ -52,9 +51,9 @@
 // * \author Nevrax France
 // * \date 2003
 // */
-//class CPDStringManager
+// class CPDStringManager
 //{
-//public:
+// public:
 //
 //	/// Constructor
 //	CPDStringManager();
@@ -163,7 +162,7 @@
 //
 //	enum
 //	{
-//		InvalidStringId = 0xffffffff, 
+//		InvalidStringId = 0xffffffff,
 //		InvalidEntryId = 0xffffffff
 //	};
 //
@@ -208,7 +207,7 @@
 //	/// Returns true if IOS has not processed all store string requests
 //	static bool				isWaitingIOSStoreStringResult();
 //
-//private:
+// private:
 //
 //	friend void	cbStoreStringResult(NLNET::CMessage& msgin, const std::string &serviceName, uint16 serviceId);
 //
@@ -434,7 +433,7 @@
 ///*
 // * Get string entry only if exists
 // */
-//inline CPDStringManager::TEntryId	CPDStringManager::getEntryId(const ucstring& str) const
+// inline CPDStringManager::TEntryId	CPDStringManager::getEntryId(const ucstring& str) const
 //{
 //	THash		hash = getHash(str);
 //	TEntryId	entryId = InvalidEntryId;
@@ -454,7 +453,7 @@
 ///*
 // * Get String Hash
 // */
-//inline CPDStringManager::THash	CPDStringManager::getHash(const ucstring& str)
+// inline CPDStringManager::THash	CPDStringManager::getHash(const ucstring& str)
 //{
 //	return getHash(str.c_str());
 //	//return str.empty() ? (THash)0 : getHash(str.c_str());
@@ -463,7 +462,7 @@
 ///*
 // * Get String Hash
 // */
-//inline CPDStringManager::THash	CPDStringManager::getHash(const ucchar* str)
+// inline CPDStringManager::THash	CPDStringManager::getHash(const ucchar* str)
 //{
 //	// classic hash formula sum(i=0..n, str[i]*31^(n-i))
 //	uint32		hash;
@@ -477,7 +476,7 @@
 ///*
 // * Get String
 // */
-//inline const ucstring&	CPDStringManager::getString(const NLMISC::CEntityId &eid) const
+// inline const ucstring&	CPDStringManager::getString(const NLMISC::CEntityId &eid) const
 //{
 //	TEIdMap::const_iterator	it = _EIdMap.find(eid);
 //
@@ -487,7 +486,7 @@
 ///*
 // * Get String
 // */
-//inline const ucstring&	CPDStringManager::getString(TStringId id) const
+// inline const ucstring&	CPDStringManager::getString(TStringId id) const
 //{
 //	TStringIdMap::const_iterator	it = _StringIdMap.find(id);
 //
@@ -497,7 +496,7 @@
 ///*
 // * Get Session String Id (from the ucstring itself)
 // */
-//inline CPDStringManager::TStringId	CPDStringManager::getStringId(const ucstring& str) const
+// inline CPDStringManager::TStringId	CPDStringManager::getStringId(const ucstring& str) const
 //{
 //	TEntryId	entry = getEntryId(str);
 //
@@ -507,7 +506,7 @@
 ///*
 // * Get Session String Id (from the string entity id)
 // */
-//inline CPDStringManager::TStringId	CPDStringManager::getStringId(const NLMISC::CEntityId& eid) const
+// inline CPDStringManager::TStringId	CPDStringManager::getStringId(const NLMISC::CEntityId& eid) const
 //{
 //	TEIdMap::const_iterator	it = _EIdMap.find(eid);
 //
@@ -518,7 +517,7 @@
 ///*
 // * Does string exists with given type
 // */
-//inline bool	CPDStringManager::stringExists(const ucstring& str, uint8 type, NLMISC::CEntityId* foundEid) const
+// inline bool	CPDStringManager::stringExists(const ucstring& str, uint8 type, NLMISC::CEntityId* foundEid) const
 //{
 //	TEntryId	entry = getEntryId(str);
 //
@@ -544,7 +543,7 @@
 ///*
 // * Get Mapped Ids
 // */
-//inline bool	CPDStringManager::getMappedIds(const ucstring& str, std::vector<NLMISC::CEntityId>& ids) const
+// inline bool	CPDStringManager::getMappedIds(const ucstring& str, std::vector<NLMISC::CEntityId>& ids) const
 //{
 //	TEntryId	entry = getEntryId(str);
 //
@@ -558,7 +557,7 @@
 ///*
 // * Map eid to string entry
 // */
-//inline void	CPDStringManager::mapEid(const NLMISC::CEntityId& eid, TEntryId id)
+// inline void	CPDStringManager::mapEid(const NLMISC::CEntityId& eid, TEntryId id)
 //{
 //	TEIdMap::iterator	it = _EIdMap.find(eid);
 //	if (it != _EIdMap.end())

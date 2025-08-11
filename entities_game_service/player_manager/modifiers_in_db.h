@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef RY_MODIFIERS_DB_H
 #define RY_MODIFIERS_DB_H
 
@@ -27,10 +26,10 @@
 // struct for modifier written in DB
 struct CModifierInDB
 {
-	NLMISC::TGameCycle	ActivationDate;
-	NLMISC::CSheetId	SheetId;
-	bool				Disabled;
-	
+	NLMISC::TGameCycle ActivationDate;
+	NLMISC::CSheetId SheetId;
+	bool Disabled;
+
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
 	// At time of writing it evaluated to:
@@ -51,9 +50,9 @@ struct CModifierInDB
 /// struct for disabled modifiers
 struct CModifiersInDB
 {
-	std::vector<CModifierInDB>	Bonus;
-	std::vector<CModifierInDB>	Malus;
-	
+	std::vector<CModifierInDB> Bonus;
+	std::vector<CModifierInDB> Malus;
+
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
 	// At time of writing it evaluated to:
@@ -81,14 +80,12 @@ struct CModifiersInDB
 
 	/// disable an effect
 	void disableEffect(uint8 index, bool bonus, NLMISC::TGameCycle activationDate, CCDBSynchronised &database);
-	
+
 private:
-	void _addBonus(const CModifierInDB& bonus);
-	void _addMalus(const CModifierInDB& malus);
+	void _addBonus(const CModifierInDB &bonus);
+	void _addMalus(const CModifierInDB &malus);
 };
 
-
-#endif //RY_MODIFIERS_DB_H
-
+#endif // RY_MODIFIERS_DB_H
 
 /* End of modifiers_in_db.h */

@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 //-------------------------------------------------------------------------------------------------
 // includes
 //-------------------------------------------------------------------------------------------------
@@ -26,7 +25,6 @@
 #include "stat_globals.h"
 #include "fdc_cache.h"
 
-
 //-------------------------------------------------------------------------------------------------
 // namespaces
 //-------------------------------------------------------------------------------------------------
@@ -34,43 +32,41 @@
 using namespace std;
 using namespace NLMISC;
 
-
 //-------------------------------------------------------------------------------------------------
 // Handy Utilities
 //-------------------------------------------------------------------------------------------------
 
 // The following routine builds a timestamp value from a date string in the format <dd>/<mm>/<yyyy>
 // If the text doesn't match the expected format then ~0u is returned
-static uint32 buildTimestampFromDateStr(const NLMISC::CSString& dateStr)
+static uint32 buildTimestampFromDateStr(const NLMISC::CSString &dateStr)
 {
 	// setup a new time structure, extracting the day, month and year values from the argument string
 	struct tm tmstruct;
-	NLMISC::CSString txt= dateStr.strip();
-	tmstruct.tm_mday	= txt.splitTo('/',true,true).atoi();
-	tmstruct.tm_mon		= txt.splitTo('/',true,true).atoi() -1;
-	tmstruct.tm_year	= txt.atoi();
-	if (tmstruct.tm_year<100)
-		tmstruct.tm_year= ((tmstruct.tm_year+30)%100)+1970;
+	NLMISC::CSString txt = dateStr.strip();
+	tmstruct.tm_mday = txt.splitTo('/', true, true).atoi();
+	tmstruct.tm_mon = txt.splitTo('/', true, true).atoi() - 1;
+	tmstruct.tm_year = txt.atoi();
+	if (tmstruct.tm_year < 100)
+		tmstruct.tm_year = ((tmstruct.tm_year + 30) % 100) + 1970;
 
 	// make sure the day month and year are valid
-	DROP_IF(tmstruct.tm_year<1970 || tmstruct.tm_year>=2100,"FILE_LIST_BUILDER 'Since' invalid year: "+dateStr,return ~0u);
-	DROP_IF(tmstruct.tm_mon<0 || tmstruct.tm_mon>=12,"FILE_LIST_BUILDER 'Since' invalid month: "+dateStr,return ~0u);
-	DROP_IF(tmstruct.tm_mday<1 || tmstruct.tm_mday>31,"FILE_LIST_BUILDER 'Since' invalid day: "+dateStr,return ~0u);
+	DROP_IF(tmstruct.tm_year < 1970 || tmstruct.tm_year >= 2100, "FILE_LIST_BUILDER 'Since' invalid year: " + dateStr, return ~0u);
+	DROP_IF(tmstruct.tm_mon < 0 || tmstruct.tm_mon >= 12, "FILE_LIST_BUILDER 'Since' invalid month: " + dateStr, return ~0u);
+	DROP_IF(tmstruct.tm_mday < 1 || tmstruct.tm_mday > 31, "FILE_LIST_BUILDER 'Since' invalid day: " + dateStr, return ~0u);
 
 	// complete initialisation of tm struct (and map year into range from 1970 up
-	tmstruct.tm_year	-= 1900;
-	tmstruct.tm_wday	= 0;
-	tmstruct.tm_yday	= 0;
-	tmstruct.tm_isdst	= 0;
+	tmstruct.tm_year -= 1900;
+	tmstruct.tm_wday = 0;
+	tmstruct.tm_yday = 0;
+	tmstruct.tm_isdst = 0;
 
 	// build a time_t value for the start of the day
-	tmstruct.tm_sec		= 0;
-	tmstruct.tm_min		= 0;
-	tmstruct.tm_hour	= 0;
-	
-	return (uint32)mktime( &tmstruct );
-}
+	tmstruct.tm_sec = 0;
+	tmstruct.tm_min = 0;
+	tmstruct.tm_hour = 0;
 
+	return (uint32)mktime(&tmstruct);
+}
 
 // The following routine returns the account id for a given file name
 // returns 0 for files that do not contain a recognisable account id.
@@ -80,123 +76,117 @@ static uint32 getAccountIdFromFileName(NLMISC::CSString filename)
 	uint32 accountId;
 	do
 	{
-		DROP_IF(filename.empty(),"No account number found in file: "+filename,return 0);
-		accountId= filename.strtok("_.").atoui();
-	}
-	while (accountId==0);
+		DROP_IF(filename.empty(), "No account number found in file: " + filename, return 0);
+		accountId = filename.strtok("_.").atoui();
+	} while (accountId == 0);
 	return accountId;
 }
-
 
 // The following routine resizes the result vector to match the size of the fdc container and fills it with values corresponding to the files in the fdc
 // the accountId is set to 0 for files that do not contain a recognisable account id.
 // The account id is assumed to be the first integer found between 2 '_' characters. eg for file 'account_123_4_pdr.bin' the value would be 123
-static void calculateAccountIdsForFiles(const CFileDescriptionContainer& fdc, std::vector<uint32>& result)
+static void calculateAccountIdsForFiles(const CFileDescriptionContainer &fdc, std::vector<uint32> &result)
 {
 	// initialise the accountIds container for the array of account ids corresponding to entries in fdc
 	result.clear();
-	result.resize(fdc.size(),0);
+	result.resize(fdc.size(), 0);
 
 	// generate the account numbers corresponding to the file names in the fdc
 	// also initialise bestDate map entries for all of the account numbers found
-	for (uint32 i=fdc.size();i--;)
+	for (uint32 i = fdc.size(); i--;)
 	{
-		result[i]= getAccountIdFromFileName(NLMISC::CFile::getFilename(fdc[i].FileName));
+		result[i] = getAccountIdFromFileName(NLMISC::CFile::getFilename(fdc[i].FileName));
 	}
 }
-
 
 // The following routine sets up a map of account numbers to time stamps with the most recent file time corresponding to each identified account number
 // On entry accountIds must be exatly the same size as fdc
 // The result is generated by comparing the timestamps of all files in fdc that share the same values in the corrsponding entries in accountIds
-static void calculateMaxAccountTimeStamps(const CFileDescriptionContainer& fdc, const std::vector<uint32>& accountIds, std::map<uint32,uint32>& result)
+static void calculateMaxAccountTimeStamps(const CFileDescriptionContainer &fdc, const std::vector<uint32> &accountIds, std::map<uint32, uint32> &result)
 {
 	// initialise the result container before we begin...
 	result.clear();
 
 	// sanity checks...
-	nlassert(fdc.size()==accountIds.size());
-	
+	nlassert(fdc.size() == accountIds.size());
+
 	// generate the account numbers corresponding to the file names in the fdc
 	// also initialise bestDate map entries for all of the account numbers found
-	for (uint32 i=fdc.size();i--;)
+	for (uint32 i = fdc.size(); i--;)
 	{
-		uint32 accountId= accountIds[i];
-		result[accountId]= 0;
+		uint32 accountId = accountIds[i];
+		result[accountId] = 0;
 	}
-	
+
 	// setup the most recent files times for each account
-	for (uint32 i=fdc.size();i--;)
+	for (uint32 i = fdc.size(); i--;)
 	{
-		uint32 accountId= accountIds[i];
-		uint32& bestTime= result[accountId];
-		uint32 timeStamp= fdc[i].FileTimeStamp;
-		bestTime=std::max(timeStamp,bestTime);
+		uint32 accountId = accountIds[i];
+		uint32 &bestTime = result[accountId];
+		uint32 timeStamp = fdc[i].FileTimeStamp;
+		bestTime = std::max(timeStamp, bestTime);
 	}
 }
-
 
 // The following routine sets up a map of account numbers to file sizes with the largest file size corresponding to each identified account number
 // On entry accountIds must be exatly the same size as fdc
 // The result is generated by comparing the file sizes of all files in fdc that share the same values in the corrsponding entries in accountIds
-static void calculateAccountMaxFileSizes(const CFileDescriptionContainer& fdc, const std::vector<uint32>& accountIds, std::map<uint32,uint32>& result)
+static void calculateAccountMaxFileSizes(const CFileDescriptionContainer &fdc, const std::vector<uint32> &accountIds, std::map<uint32, uint32> &result)
 {
 	// initialise the result container before we begin...
 	result.clear();
 
 	// sanity checks...
-	nlassert(fdc.size()==accountIds.size());
-	
+	nlassert(fdc.size() == accountIds.size());
+
 	// generate the account numbers corresponding to the file names in the fdc
 	// also initialise bestDate map entries for all of the account numbers found
-	for (uint32 i=fdc.size();i--;)
+	for (uint32 i = fdc.size(); i--;)
 	{
-		uint32 accountId= accountIds[i];
-		result[accountId]=0;
+		uint32 accountId = accountIds[i];
+		result[accountId] = 0;
 	}
-	
+
 	// setup the largest file sizes for each account
-	for (uint32 i=fdc.size();i--;)
+	for (uint32 i = fdc.size(); i--;)
 	{
-		uint32 accountId= accountIds[i];
-		uint32& bestSize= result[accountId];
-		uint32 size= fdc[i].FileSize;
-		bestSize= std::max(size,bestSize);
+		uint32 accountId = accountIds[i];
+		uint32 &bestSize = result[accountId];
+		uint32 size = fdc[i].FileSize;
+		bestSize = std::max(size, bestSize);
 	}
 }
-
 
 // The following routine resizes the result vector to the same size as the file description container and fills it with
 // time stamps corresponding to the most recently used file belonging to the same account as the corresponding entry in the fdc
 // eg: if fdc[4].FileName=="account_123_1_pdr.bin" then result[4] will contain the time stamp of the most recently accessed file for account 123
-static void calculateTimestampByAccount(const CFileDescriptionContainer& fdc, std::vector<uint32>& result)
+static void calculateTimestampByAccount(const CFileDescriptionContainer &fdc, std::vector<uint32> &result)
 {
 	// initialise the result vector before we begin...
 	result.clear();
-	result.resize(fdc.size(),0);
+	result.resize(fdc.size(), 0);
 
 	// generate the array of account ids corresponding to entries in fdc
 	std::vector<uint32> accountIds;
-	calculateAccountIdsForFiles(fdc,accountIds);
-	
-	//generate the map of account number to most recent time stamp for files belonging to the account
-	std::map<uint32,uint32> bestTimes;
-	calculateMaxAccountTimeStamps(fdc,accountIds,bestTimes);
-	
+	calculateAccountIdsForFiles(fdc, accountIds);
+
+	// generate the map of account number to most recent time stamp for files belonging to the account
+	std::map<uint32, uint32> bestTimes;
+	calculateMaxAccountTimeStamps(fdc, accountIds, bestTimes);
+
 	// fill in the result vector...
-	for (uint32 i=fdc.size();i--;)
+	for (uint32 i = fdc.size(); i--;)
 	{
-		uint32 accountId= accountIds[i];
-		result[i]= bestTimes[accountId];
+		uint32 accountId = accountIds[i];
+		result[i] = bestTimes[accountId];
 	}
 }
-
 
 //-------------------------------------------------------------------------------------------------
 // FILE_LIST_BUILDER Implementations
 //-------------------------------------------------------------------------------------------------
 
-FILE_LIST_BUILDER(AddFiles,"<filespec> [<filespec>[...]]")
+FILE_LIST_BUILDER(AddFiles, "<filespec> [<filespec>[...]]")
 {
 	nldebug("Applying 'AddFiles' rule...");
 
@@ -204,19 +194,19 @@ FILE_LIST_BUILDER(AddFiles,"<filespec> [<filespec>[...]]")
 		return false;
 
 	CVectorSString fspecs;
-	_RawArgs.strip().splitByOneOfSeparators(" \t",fspecs);
+	_RawArgs.strip().splitByOneOfSeparators(" \t", fspecs);
 
-	uint32 oldNumFiles= fdc.size();
-	for (uint32 i=0;i<fspecs.size();++i)
+	uint32 oldNumFiles = fdc.size();
+	for (uint32 i = 0; i < fspecs.size(); ++i)
 		fdc.addFileSpec(STAT_GLOBALS::getInputFilePath(fspecs[i].unquoteIfQuoted()));
 
 	// display a little log...
-	nlinfo("AddFiles: added %u files => new total %u",oldNumFiles,fdc.size());
+	nlinfo("AddFiles: added %u files => new total %u", oldNumFiles, fdc.size());
 
 	return true;
 }
 
-FILE_LIST_BUILDER(AddFilesRecurse,"<filespec> [<filespec>[...]]")
+FILE_LIST_BUILDER(AddFilesRecurse, "<filespec> [<filespec>[...]]")
 {
 	nldebug("Applying 'AddFilesRecurse' rule...");
 
@@ -224,19 +214,19 @@ FILE_LIST_BUILDER(AddFilesRecurse,"<filespec> [<filespec>[...]]")
 		return false;
 
 	CVectorSString fspecs;
-	_RawArgs.strip().splitByOneOfSeparators(" \t",fspecs);
+	_RawArgs.strip().splitByOneOfSeparators(" \t", fspecs);
 
-	uint32 oldNumFiles= fdc.size();
-	for (uint32 i=0;i<fspecs.size();++i)
-		fdc.addFileSpec(STAT_GLOBALS::getInputFilePath(fspecs[i].unquoteIfQuoted()),true);
+	uint32 oldNumFiles = fdc.size();
+	for (uint32 i = 0; i < fspecs.size(); ++i)
+		fdc.addFileSpec(STAT_GLOBALS::getInputFilePath(fspecs[i].unquoteIfQuoted()), true);
 
 	// display a little log...
-	nlinfo("AddFilesRecurse: added %u files => new total %u",fdc.size()-oldNumFiles,fdc.size());
+	nlinfo("AddFilesRecurse: added %u files => new total %u", fdc.size() - oldNumFiles, fdc.size());
 
 	return true;
 }
 
-FILE_LIST_BUILDER(AddFilesFromFdcCache,"")
+FILE_LIST_BUILDER(AddFilesFromFdcCache, "")
 {
 	nldebug("Applying 'AddFilesFromFdcCache' rule...");
 
@@ -244,286 +234,286 @@ FILE_LIST_BUILDER(AddFilesFromFdcCache,"")
 		return false;
 
 	// get hold of the file set from the fdc cache
-	const CFileDescriptionContainer& fdcCache= CFdcCache::getInstance().getFdc();
+	const CFileDescriptionContainer &fdcCache = CFdcCache::getInstance().getFdc();
 
 	// add the files from the fdc cache to the current fdc
-	uint32 oldNumFiles= fdc.size();
+	uint32 oldNumFiles = fdc.size();
 	fdc.addFiles(fdcCache);
 
 	// display a little log...
-	nlinfo("AddFilesFromFdcCache: added %u files => new total %u",fdc.size()-oldNumFiles,fdc.size());
+	nlinfo("AddFilesFromFdcCache: added %u files => new total %u", fdc.size() - oldNumFiles, fdc.size());
 
 	return true;
 }
 
-FILE_LIST_BUILDER(MinFileSize,"<min_file_size>")
+FILE_LIST_BUILDER(MinFileSize, "<min_file_size>")
 {
 	nldebug("Applying 'MinFileSize' rule...");
 
-	uint32 minSize= _RawArgs.atoi();
-	if (minSize<1)
+	uint32 minSize = _RawArgs.atoi();
+	if (minSize < 1)
 	{
-		nlwarning("Bad minimum file size: %s",_RawArgs.c_str());
+		nlwarning("Bad minimum file size: %s", _RawArgs.c_str());
 		return false;
 	}
 
-	uint32 ttlNumFiles= fdc.size();
-	for (uint32 i=ttlNumFiles;i--;)
+	uint32 ttlNumFiles = fdc.size();
+	for (uint32 i = ttlNumFiles; i--;)
 	{
-		if (fdc[i].FileSize<minSize)
+		if (fdc[i].FileSize < minSize)
 			fdc.removeFile(i);
 	}
 
 	// display a little log...
-	nlinfo("MinFileSize %s: matched %u of %u files",_RawArgs.c_str(),fdc.size(),ttlNumFiles);
+	nlinfo("MinFileSize %s: matched %u of %u files", _RawArgs.c_str(), fdc.size(), ttlNumFiles);
 
 	return true;
 }
 
-FILE_LIST_BUILDER(MaxFileSize,"<max_file_size>")
+FILE_LIST_BUILDER(MaxFileSize, "<max_file_size>")
 {
 	nldebug("Applying 'MaxFileSize' rule...");
 
-	uint32 maxSize= _RawArgs.atoi();
-	if (maxSize<1)
+	uint32 maxSize = _RawArgs.atoi();
+	if (maxSize < 1)
 	{
-		nlwarning("Bad maximum file size: %s",_RawArgs.c_str());
+		nlwarning("Bad maximum file size: %s", _RawArgs.c_str());
 		return false;
 	}
 
-	uint32 ttlNumFiles= fdc.size();
-	for (uint32 i=ttlNumFiles;i--;)
+	uint32 ttlNumFiles = fdc.size();
+	for (uint32 i = ttlNumFiles; i--;)
 	{
-		if (fdc[i].FileSize>maxSize)
+		if (fdc[i].FileSize > maxSize)
 			fdc.removeFile(i);
 	}
 
 	// display a little log...
-	nlinfo("MaxFileSize %s: matched %u of %u files",_RawArgs.c_str(),fdc.size(),ttlNumFiles);
+	nlinfo("MaxFileSize %s: matched %u of %u files", _RawArgs.c_str(), fdc.size(), ttlNumFiles);
 
 	return true;
 }
 
-FILE_LIST_BUILDER(FileAge,"<min> [<max>]")
+FILE_LIST_BUILDER(FileAge, "<min> [<max>]")
 {
 	nldebug("Applying 'FileAge' rule...");
 
 	// the args here are min and max numbers of days for file ages
 
 	CVectorSString args;
-	_RawArgs.strip().splitByOneOfSeparators(" \t",args);
+	_RawArgs.strip().splitByOneOfSeparators(" \t", args);
 
-	uint32 min=0;
-	uint32 max=~0u;
+	uint32 min = 0;
+	uint32 max = ~0u;
 	switch (args.size())
 	{
-	case 2:	// deal with explicit 'max' arg (if there is one)
-		max= args[1].atoi();
-		DROP_IF(args[1]!=NLMISC::toString("%u",max),"Invalid arg for FileAge: "+_RawArgs,return false);
+	case 2: // deal with explicit 'max' arg (if there is one)
+		max = args[1].atoi();
+		DROP_IF(args[1] != NLMISC::toString("%u", max), "Invalid arg for FileAge: " + _RawArgs, return false);
 		// drop through to deal with the 'min' argument
 
-	case 1:	// deal with 'min' arg
-		min= args[0].atoi();
-		DROP_IF(args[0]!=NLMISC::toString("%u",min),"Invalid arg for FileAge: "+_RawArgs,return false);
+	case 1: // deal with 'min' arg
+		min = args[0].atoi();
+		DROP_IF(args[0] != NLMISC::toString("%u", min), "Invalid arg for FileAge: " + _RawArgs, return false);
 		break;
 
-	default:	// no args or too many args
-		DROP("Bad number of Arguments found for FileAge: "+_RawArgs,return false);
+	default: // no args or too many args
+		DROP("Bad number of Arguments found for FileAge: " + _RawArgs, return false);
 	}
 
 	// calculate the timestamp value of midnight today
 	time_t theTime;
 	time(&theTime);
-	uint32 dateToday= (uint32)(theTime/(24*64*60)*(24*64*60));
+	uint32 dateToday = (uint32)(theTime / (24 * 64 * 60) * (24 * 64 * 60));
 
 	// calculate the maximum and minimum timestamp values corresponding to the dates that we've been given
-	uint32 minFileTime= (max==~0u)? 0: dateToday-(max*24*60*60);
-	uint32 maxFileTime= dateToday-(min*24*60*60);
+	uint32 minFileTime = (max == ~0u) ? 0 : dateToday - (max * 24 * 60 * 60);
+	uint32 maxFileTime = dateToday - (min * 24 * 60 * 60);
 
 	// remove files that don't meet our time criteria
-	uint32 ttlNumFiles= fdc.size();
-	for (uint32 i=ttlNumFiles;i--;)
+	uint32 ttlNumFiles = fdc.size();
+	for (uint32 i = ttlNumFiles; i--;)
 	{
-		if (fdc[i].FileTimeStamp>=maxFileTime || fdc[i].FileTimeStamp<minFileTime)
+		if (fdc[i].FileTimeStamp >= maxFileTime || fdc[i].FileTimeStamp < minFileTime)
 			fdc.removeFile(i);
 	}
 
 	// display a little log...
-	nlinfo("FileAge %s: matched %u of %u files",_RawArgs.c_str(),fdc.size(),ttlNumFiles);
+	nlinfo("FileAge %s: matched %u of %u files", _RawArgs.c_str(), fdc.size(), ttlNumFiles);
 
 	return true;
 }
 
-FILE_LIST_BUILDER(UserMostRecentFileAge,"<min> [<max>]")
+FILE_LIST_BUILDER(UserMostRecentFileAge, "<min> [<max>]")
 {
 	nldebug("Applying 'UserMostRecentFileAge' rule...");
 
 	// the args here are min and max numbers of days for file ages
 	CVectorSString args;
-	_RawArgs.strip().splitByOneOfSeparators(" \t",args);
+	_RawArgs.strip().splitByOneOfSeparators(" \t", args);
 
-	uint32 min=0;
-	uint32 max=~0u;
+	uint32 min = 0;
+	uint32 max = ~0u;
 	switch (args.size())
 	{
-	case 2:	// deal with explicit 'max' arg (if there is one)
-		max= args[1].atoi();
-		DROP_IF(args[1]!=NLMISC::toString("%u",max),"Invalid arg for FileAge: "+_RawArgs,return false);
+	case 2: // deal with explicit 'max' arg (if there is one)
+		max = args[1].atoi();
+		DROP_IF(args[1] != NLMISC::toString("%u", max), "Invalid arg for FileAge: " + _RawArgs, return false);
 		// drop through to deal with the 'min' argument
 
-	case 1:	// deal with 'min' arg
-		min= args[0].atoi();
-		DROP_IF(args[0]!=NLMISC::toString("%u",min),"Invalid arg for FileAge: "+_RawArgs,return false);
+	case 1: // deal with 'min' arg
+		min = args[0].atoi();
+		DROP_IF(args[0] != NLMISC::toString("%u", min), "Invalid arg for FileAge: " + _RawArgs, return false);
 		break;
 
-	default:	// no args or too many args
-		DROP("Bad number of Arguments found for FileAge: "+_RawArgs,return false);
+	default: // no args or too many args
+		DROP("Bad number of Arguments found for FileAge: " + _RawArgs, return false);
 	}
 
 	// calculate the timestamp value of midnight today
 	time_t theTime;
 	time(&theTime);
-	uint32 dateToday= (uint32)(theTime/(24*64*60)*(24*64*60));
+	uint32 dateToday = (uint32)(theTime / (24 * 64 * 60) * (24 * 64 * 60));
 
 	// calculate the maximum and minimum timestamp values corresponding to the dates that we've been given
-	uint32 minFileTime= (max==~0u)? 0: dateToday-(max*24*60*60);
-	uint32 maxFileTime= dateToday-(min*24*60*60);
+	uint32 minFileTime = (max == ~0u) ? 0 : dateToday - (max * 24 * 60 * 60);
+	uint32 maxFileTime = dateToday - (min * 24 * 60 * 60);
 
 	// setup array of timestamps by account
 	std::vector<uint32> timestampByAccount;
-	calculateTimestampByAccount(fdc,timestampByAccount);
+	calculateTimestampByAccount(fdc, timestampByAccount);
 
 	// remove files that don't meet our time criteria
-	uint32 ttlNumFiles= fdc.size();
-	for (uint32 i=ttlNumFiles;i--;)
+	uint32 ttlNumFiles = fdc.size();
+	for (uint32 i = ttlNumFiles; i--;)
 	{
-		uint32 timestamp= timestampByAccount[i];
-		if (timestamp>=maxFileTime || timestamp<minFileTime)
+		uint32 timestamp = timestampByAccount[i];
+		if (timestamp >= maxFileTime || timestamp < minFileTime)
 			fdc.removeFile(i);
 	}
 
 	// display a little log...
-	nlinfo("UserMostRecentFileAge %s: matched %u of %u files",_RawArgs.c_str(),fdc.size(),ttlNumFiles);
+	nlinfo("UserMostRecentFileAge %s: matched %u of %u files", _RawArgs.c_str(), fdc.size(), ttlNumFiles);
 
 	return true;
 }
 
-FILE_LIST_BUILDER(Since,"<dd>/<mm>/<yyyy> - include only files modified on or after given date")
+FILE_LIST_BUILDER(Since, "<dd>/<mm>/<yyyy> - include only files modified on or after given date")
 {
 	nldebug("Applying 'Since' rule...");
 
 	// setup the timestamp corresponding to the input parameteres
-	uint32 minFileTime= buildTimestampFromDateStr(_RawArgs);
-	DROP_IF(minFileTime==~0u,"FILE_LIST_BUILDER 'Since' buildTimestampFromDateStr() failed: "+_RawArgs,return false);
+	uint32 minFileTime = buildTimestampFromDateStr(_RawArgs);
+	DROP_IF(minFileTime == ~0u, "FILE_LIST_BUILDER 'Since' buildTimestampFromDateStr() failed: " + _RawArgs, return false);
 
 	// remove files that don't meet our time criteria
-	uint32 ttlNumFiles= fdc.size();
-	for (uint32 i=ttlNumFiles;i--;)
+	uint32 ttlNumFiles = fdc.size();
+	for (uint32 i = ttlNumFiles; i--;)
 	{
-		if (fdc[i].FileTimeStamp<(uint32)minFileTime)
+		if (fdc[i].FileTimeStamp < (uint32)minFileTime)
 			fdc.removeFile(i);
 	}
 
 	// display a little log...
-	nlinfo("Since %s: matched %u of %u files",_RawArgs.c_str(),fdc.size(),ttlNumFiles);
+	nlinfo("Since %s: matched %u of %u files", _RawArgs.c_str(), fdc.size(), ttlNumFiles);
 
 	return true;
 }
 
-FILE_LIST_BUILDER(UserMostRecentSince,"<dd>/<mm>/<yyyy> - include only files modified on or after given date")
+FILE_LIST_BUILDER(UserMostRecentSince, "<dd>/<mm>/<yyyy> - include only files modified on or after given date")
 {
 	nldebug("Applying 'UserMostRecentSince' rule...");
 
 	// setup the timestamp corresponding to the input parameteres
-	uint32 minFileTime= buildTimestampFromDateStr(_RawArgs);
-	DROP_IF(minFileTime==~0u,"FILE_LIST_BUILDER 'Since' buildTimestampFromDateStr() failed: "+_RawArgs,return false);
+	uint32 minFileTime = buildTimestampFromDateStr(_RawArgs);
+	DROP_IF(minFileTime == ~0u, "FILE_LIST_BUILDER 'Since' buildTimestampFromDateStr() failed: " + _RawArgs, return false);
 
 	// setup array of timestamps by account
 	std::vector<uint32> timestampByAccount;
-	calculateTimestampByAccount(fdc,timestampByAccount);
+	calculateTimestampByAccount(fdc, timestampByAccount);
 
 	// remove files that don't meet our time criteria
-	uint32 ttlNumFiles= fdc.size();
-	for (uint32 i=ttlNumFiles;i--;)
+	uint32 ttlNumFiles = fdc.size();
+	for (uint32 i = ttlNumFiles; i--;)
 	{
-		if (timestampByAccount[i]<(uint32)minFileTime)
+		if (timestampByAccount[i] < (uint32)minFileTime)
 			fdc.removeFile(i);
 	}
 
 	// display a little log...
-	nlinfo("UserMostRecentSince %s: matched %u of %u files",_RawArgs.c_str(),fdc.size(),ttlNumFiles);
+	nlinfo("UserMostRecentSince %s: matched %u of %u files", _RawArgs.c_str(), fdc.size(), ttlNumFiles);
 
 	return true;
 }
 
-FILE_LIST_BUILDER(Before,"<dd>/<mm>/<yyyy> - include only files modified strictly before given date")
+FILE_LIST_BUILDER(Before, "<dd>/<mm>/<yyyy> - include only files modified strictly before given date")
 {
 	nldebug("Applying 'Before' rule...");
 
 	// setup the timestamp corresponding to the input parameteres
-	uint32 maxFileTime= buildTimestampFromDateStr(_RawArgs);
-	DROP_IF(maxFileTime==~0u,"FILE_LIST_BUILDER 'Before' mktime() failed: "+_RawArgs,return false);
+	uint32 maxFileTime = buildTimestampFromDateStr(_RawArgs);
+	DROP_IF(maxFileTime == ~0u, "FILE_LIST_BUILDER 'Before' mktime() failed: " + _RawArgs, return false);
 
 	// remove files that don't meet our time criteria
-	uint32 ttlNumFiles= fdc.size();
-	for (uint32 i=ttlNumFiles;i--;)
+	uint32 ttlNumFiles = fdc.size();
+	for (uint32 i = ttlNumFiles; i--;)
 	{
-		if (fdc[i].FileTimeStamp>=(uint32)maxFileTime)
+		if (fdc[i].FileTimeStamp >= (uint32)maxFileTime)
 			fdc.removeFile(i);
 	}
 
 	// display a little log...
-	nlinfo("Before %s: matched %u of %u files",_RawArgs.c_str(),fdc.size(),ttlNumFiles);
+	nlinfo("Before %s: matched %u of %u files", _RawArgs.c_str(), fdc.size(), ttlNumFiles);
 
 	return true;
 }
 
-FILE_LIST_BUILDER(UserMostRecentBefore,"<dd>/<mm>/<yyyy> - include only files modified strictly before given date")
+FILE_LIST_BUILDER(UserMostRecentBefore, "<dd>/<mm>/<yyyy> - include only files modified strictly before given date")
 {
 	nldebug("Applying 'UserMostRecentBefore' rule...");
 
 	// setup the timestamp corresponding to the input parameteres
-	uint32 maxFileTime= buildTimestampFromDateStr(_RawArgs);
-	DROP_IF(maxFileTime==~0u,"FILE_LIST_BUILDER 'Before' mktime() failed: "+_RawArgs,return false);
+	uint32 maxFileTime = buildTimestampFromDateStr(_RawArgs);
+	DROP_IF(maxFileTime == ~0u, "FILE_LIST_BUILDER 'Before' mktime() failed: " + _RawArgs, return false);
 
 	// setup array of timestamps by account
 	std::vector<uint32> timestampByAccount;
-	calculateTimestampByAccount(fdc,timestampByAccount);
+	calculateTimestampByAccount(fdc, timestampByAccount);
 
 	// remove files that don't meet our time criteria
-	uint32 ttlNumFiles= fdc.size();
-	for (uint32 i=ttlNumFiles;i--;)
+	uint32 ttlNumFiles = fdc.size();
+	for (uint32 i = ttlNumFiles; i--;)
 	{
-		if (timestampByAccount[i]>=(uint32)maxFileTime)
+		if (timestampByAccount[i] >= (uint32)maxFileTime)
 			fdc.removeFile(i);
 	}
 
 	// display a little log...
-	nlinfo("UserMostRecentBefore %s: matched %u of %u files",_RawArgs.c_str(),fdc.size(),ttlNumFiles);
+	nlinfo("UserMostRecentBefore %s: matched %u of %u files", _RawArgs.c_str(), fdc.size(), ttlNumFiles);
 
 	return true;
 }
 
-FILE_LIST_BUILDER(NewestFile,"remove all but the latest file for each account (assuming files are of format .*_<nnnn>_.*)")
+FILE_LIST_BUILDER(NewestFile, "remove all but the latest file for each account (assuming files are of format .*_<nnnn>_.*)")
 {
 	nldebug("Applying 'NewestFile' rule...");
 
 	// generate the array of account ids corresponding to entries in fdc
 	std::vector<uint32> accountIds;
-	calculateAccountIdsForFiles(fdc,accountIds);
-	
-	//generate the map of account number to most recent time stamp for files belonging to the account
-	std::map<uint32,uint32> bestTimes;
-	calculateMaxAccountTimeStamps(fdc,accountIds,bestTimes);
+	calculateAccountIdsForFiles(fdc, accountIds);
+
+	// generate the map of account number to most recent time stamp for files belonging to the account
+	std::map<uint32, uint32> bestTimes;
+	calculateMaxAccountTimeStamps(fdc, accountIds, bestTimes);
 
 	// remove files that are not the most recent ones
-	uint32 ttlNumFiles= fdc.size();
-	for (uint32 i=ttlNumFiles;i--;)
+	uint32 ttlNumFiles = fdc.size();
+	for (uint32 i = ttlNumFiles; i--;)
 	{
-		uint32 accountId= accountIds[i];
-		uint32& bestTime= bestTimes[accountId];
-		uint32 timeStamp= fdc[i].FileTimeStamp;
-		if (bestTime!=timeStamp || bestTime==std::numeric_limits<uint32>::max())
+		uint32 accountId = accountIds[i];
+		uint32 &bestTime = bestTimes[accountId];
+		uint32 timeStamp = fdc[i].FileTimeStamp;
+		if (bestTime != timeStamp || bestTime == std::numeric_limits<uint32>::max())
 		{
 			fdc.removeFile(i);
 			continue;
@@ -533,31 +523,31 @@ FILE_LIST_BUILDER(NewestFile,"remove all but the latest file for each account (a
 	}
 
 	// display a little log...
-	nlinfo("NewestFile: matched %u of %u files",fdc.size(),ttlNumFiles);
+	nlinfo("NewestFile: matched %u of %u files", fdc.size(), ttlNumFiles);
 
 	return true;
 }
 
-FILE_LIST_BUILDER(LargestFile,"remove all but the largest file for each account (assuming files are of format .*_<nnnn>_.*)")
+FILE_LIST_BUILDER(LargestFile, "remove all but the largest file for each account (assuming files are of format .*_<nnnn>_.*)")
 {
 	nldebug("Applying 'LargestFile' rule...");
 
 	// generate the array of account ids corresponding to entries in fdc
 	std::vector<uint32> accountIds;
-	calculateAccountIdsForFiles(fdc,accountIds);
+	calculateAccountIdsForFiles(fdc, accountIds);
 
 	// generate the map of account number to largest file sizes
-	std::map<uint32,uint32> bestSizes;
-	calculateAccountMaxFileSizes(fdc,accountIds,bestSizes);
+	std::map<uint32, uint32> bestSizes;
+	calculateAccountMaxFileSizes(fdc, accountIds, bestSizes);
 
 	// remove files that are not the most recent ones
-	uint32 ttlNumFiles= fdc.size();
-	for (uint32 i=ttlNumFiles;i--;)
+	uint32 ttlNumFiles = fdc.size();
+	for (uint32 i = ttlNumFiles; i--;)
 	{
-		uint32 accountId= accountIds[i];
-		uint32& bestSize= bestSizes[accountId];
-		uint32 size= fdc[i].FileSize;
-		if (bestSize!=size || accountId==0)
+		uint32 accountId = accountIds[i];
+		uint32 &bestSize = bestSizes[accountId];
+		uint32 size = fdc[i].FileSize;
+		if (bestSize != size || accountId == 0)
 		{
 			fdc.removeFile(i);
 			continue;
@@ -567,7 +557,7 @@ FILE_LIST_BUILDER(LargestFile,"remove all but the largest file for each account 
 	}
 
 	// display a little log...
-	nlinfo("LargestFile: matched %u of %u files",fdc.size(),ttlNumFiles);
+	nlinfo("LargestFile: matched %u of %u files", fdc.size(), ttlNumFiles);
 
 	return true;
 }

@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 // misc
@@ -38,25 +36,22 @@
 #include "shop_type/static_items.h"
 #include "server_share/log_item_gen.h"
 
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 using namespace NLGEORGES;
 
-extern CMirror			Mirror;
-extern CMirroredDataSet	*FeTempDataset;
+extern CMirror Mirror;
+extern CMirroredDataSet *FeTempDataset;
 #ifdef TheDataset
-#else 
-#define TheDataset		(*FeTempDataset)
+#else
+#define TheDataset (*FeTempDataset)
 #endif
 
 CGameItemManager GameItemManager;
 
-std::vector< CGameItemPtr > CGameItemManager::_NpcSpecificItems;
+std::vector<CGameItemPtr> CGameItemManager::_NpcSpecificItems;
 extern CVariable<bool> EGSLight;
-
-
 
 //---------------------------------------------------
 // CGameItemManager :
@@ -64,32 +59,30 @@ extern CVariable<bool> EGSLight;
 //---------------------------------------------------
 CGameItemManager::CGameItemManager()
 {
-//	_CreatedItemCount = 0; // note : must be save and reload
+	//	_CreatedItemCount = 0; // note : must be save and reload
 
 	// delay in ticks ( if tick time step is 100ms --> 5 min )
-//	DecayDelay = 5 * 60 * 10; 
-//	CorpseToCarrionDelay = 5 * 60 * 10; 
-//	CarrionDecayDelay = 5 * 60 * 10; 
-	
-//	CorpseMaxCount = 2;
-	
-} // CGameItemManager //
+	//	DecayDelay = 5 * 60 * 10;
+	//	CorpseToCarrionDelay = 5 * 60 * 10;
+	//	CarrionDecayDelay = 5 * 60 * 10;
 
+	//	CorpseMaxCount = 2;
+
+} // CGameItemManager //
 
 //---------------------------------------------------
 // init :
 //
 //---------------------------------------------------
-//void CGameItemManager::init()
+// void CGameItemManager::init()
 //{
 //} // init //
-
 
 //---------------------------------------------------
 // getItemsOnTheGround :
 //
 //---------------------------------------------------
-//void CGameItemManager::getItemsOnTheGround( list<CGameItemPtr>& itemsOnGround )
+// void CGameItemManager::getItemsOnTheGround( list<CGameItemPtr>& itemsOnGround )
 //{
 //	map<CEntityId,CGameItemPtr>::const_iterator itItem;
 //	for( itItem = _Items.begin(); itItem != _Items.end(); ++itItem )
@@ -101,12 +94,11 @@ CGameItemManager::CGameItemManager()
 //	}
 //} // getItemsOnTheGround //
 
-
 //---------------------------------------------------
 // getItem :
 //
 //---------------------------------------------------
-//CGameItemPtr CGameItemManager::getItem( const CEntityId& id )
+// CGameItemPtr CGameItemManager::getItem( const CEntityId& id )
 //{
 //	map<CEntityId,CGameItemPtr>::iterator itItem = _Items.find( id );
 //	if( itItem != _Items.end() )
@@ -120,59 +112,58 @@ CGameItemManager::CGameItemManager()
 //
 //} // getItem //
 
-
 //---------------------------------------------------
 // getNewItem :
 //
 //---------------------------------------------------
-//CGameItemPtr CGameItemManager::getNewItem( CEntityId& id, CSheetId& sheetId, uint16 quality, bool destroyable , bool dropable)
-CGameItemPtr CGameItemManager::getNewItem( const CSheetId& sheetId, uint16 quality, bool destroyable , bool dropable)
+// CGameItemPtr CGameItemManager::getNewItem( CEntityId& id, CSheetId& sheetId, uint16 quality, bool destroyable , bool dropable)
+CGameItemPtr CGameItemManager::getNewItem(const CSheetId &sheetId, uint16 quality, bool destroyable, bool dropable)
 {
-	CAllStaticItems::const_iterator itForm = CSheets::getItemMapForm().find( sheetId );
-	if( itForm != CSheets::getItemMapForm().end() )
+	CAllStaticItems::const_iterator itForm = CSheets::getItemMapForm().find(sheetId);
+	if (itForm != CSheets::getItemMapForm().end())
 	{
 		// get the slot count
-//		sint16 slotCount = 0;
-		//nldebug("<CGameItemManager::getNewItem> Family type: %s", ITEMFAMILY::toString( (*itForm).second.Family ).c_str() );
-//		if( ( (*itForm).second.Family == ITEMFAMILY::BAG ) || ( (*itForm).second.Family == ITEMFAMILY::STACK ) )
-//		{
-//			slotCount = (*itForm).second.SlotCount;
-//		}
-		
+		//		sint16 slotCount = 0;
+		// nldebug("<CGameItemManager::getNewItem> Family type: %s", ITEMFAMILY::toString( (*itForm).second.Family ).c_str() );
+		//		if( ( (*itForm).second.Family == ITEMFAMILY::BAG ) || ( (*itForm).second.Family == ITEMFAMILY::STACK ) )
+		//		{
+		//			slotCount = (*itForm).second.SlotCount;
+		//		}
+
 		// create the item
 		CGameItemPtr item;
-//		item.newItem( id, sheetId, quality, slotCount, destroyable, dropable );
-		item.newItem( sheetId, quality, destroyable, dropable );
+		//		item.newItem( id, sheetId, quality, slotCount, destroyable, dropable );
+		item.newItem(sheetId, quality, destroyable, dropable);
 
-//		if( item!=NULL )
-//		{
-			// init the dynamic values from sheet -> DONE in CGameItemCreator
-			//(*item).Quality = (*itForm).second.Quality;
-			//(*item).HP = (*itForm).second.HitPoints;
-			
-			// if this item contains sub items we create them
-//			if( (*itForm).second.Family == ITEMFAMILY::CORPSE || (*itForm).second.Family == ITEMFAMILY::CARRION )
-//			{
-				// create the content
-/*				for (uint i=0; i < (*itForm).second.Content.size(); i++)
-				{
-					CSheetId itemSheetId( (*itForm).second.Content[i] );
-					createItem( itemSheetId, quality, id, -1, destroyable,dropable );
-				}
-*/
-				// if the item is a corpse, we push it to list and erase the olds one if we reached max corpse count
-//				if( (*itForm).second.Family == ITEMFAMILY::CORPSE )
-//				{
-//					_Corpses.push( item );
-//					if( _Corpses.size() > CorpseMaxCount )
-//					{
-//						CGameItemPtr itemTmp = _Corpses.front();
-//						destroyItem( itemTmp );
-//						_Corpses.pop();
-//					}
-//				}
-//			}
-//		}
+		//		if( item!=NULL )
+		//		{
+		// init the dynamic values from sheet -> DONE in CGameItemCreator
+		//(*item).Quality = (*itForm).second.Quality;
+		//(*item).HP = (*itForm).second.HitPoints;
+
+		// if this item contains sub items we create them
+		//			if( (*itForm).second.Family == ITEMFAMILY::CORPSE || (*itForm).second.Family == ITEMFAMILY::CARRION )
+		//			{
+		// create the content
+		/*				for (uint i=0; i < (*itForm).second.Content.size(); i++)
+		                {
+		                    CSheetId itemSheetId( (*itForm).second.Content[i] );
+		                    createItem( itemSheetId, quality, id, -1, destroyable,dropable );
+		                }
+		*/
+		// if the item is a corpse, we push it to list and erase the olds one if we reached max corpse count
+		//				if( (*itForm).second.Family == ITEMFAMILY::CORPSE )
+		//				{
+		//					_Corpses.push( item );
+		//					if( _Corpses.size() > CorpseMaxCount )
+		//					{
+		//						CGameItemPtr itemTmp = _Corpses.front();
+		//						destroyItem( itemTmp );
+		//						_Corpses.pop();
+		//					}
+		//				}
+		//			}
+		//		}
 
 		return item;
 	}
@@ -180,67 +171,64 @@ CGameItemPtr CGameItemManager::getNewItem( const CSheetId& sheetId, uint16 quali
 
 } // getNewItem //
 
-
-
-
 //---------------------------------------------------
 // createItem :
 //
 //---------------------------------------------------
-//CGameItemPtr CGameItemManager::createItem( CEntityId& id, CSheetId& sheetId, uint16 quality, sint16 slot, bool destroyable, bool dropable , const CEntityId &creatorId )
-CGameItemPtr CGameItemManager::createItem( const CSheetId& sheetId, uint16 quality, bool destroyable, bool dropable , const CEntityId &creatorId )
+// CGameItemPtr CGameItemManager::createItem( CEntityId& id, CSheetId& sheetId, uint16 quality, sint16 slot, bool destroyable, bool dropable , const CEntityId &creatorId )
+CGameItemPtr CGameItemManager::createItem(const CSheetId &sheetId, uint16 quality, bool destroyable, bool dropable, const CEntityId &creatorId)
 {
 	H_AUTO(GIM_createItem1);
-	
+
 	// test if the item already exists
-//	map<CEntityId,CGameItemPtr>::iterator itIt = _Items.find( id );
-//	if( itIt != _Items.end() )
-//	{
-//		nlwarning("<CGameItemManager::createItem> The item %s already exists",id.toString().c_str());
-//		return NULL;
-//	}
+	//	map<CEntityId,CGameItemPtr>::iterator itIt = _Items.find( id );
+	//	if( itIt != _Items.end() )
+	//	{
+	//		nlwarning("<CGameItemManager::createItem> The item %s already exists",id.toString().c_str());
+	//		return NULL;
+	//	}
 
-// MALKAV 22/01/03 :  get owner, if owner not found, returns before creating the item and display a simple warning
-//	CGameItemPtr ownerItem = NULL;
-//	if( owner != CEntityId::Unknown )
-//	{
-//		ownerItem = getItem( owner );
-//		BOMB_IF(ownerItem == NULL ,"Bad owner found for item",return NULL);
-//	}
-//
+	// MALKAV 22/01/03 :  get owner, if owner not found, returns before creating the item and display a simple warning
+	//	CGameItemPtr ownerItem = NULL;
+	//	if( owner != CEntityId::Unknown )
+	//	{
+	//		ownerItem = getItem( owner );
+	//		BOMB_IF(ownerItem == NULL ,"Bad owner found for item",return NULL);
+	//	}
+	//
 	// create a new item
-//	CGameItemPtr item = getNewItem( id, sheetId, quality, destroyable, dropable );
-	CGameItemPtr item = getNewItem(sheetId, quality, destroyable, dropable );
-	if( item != NULL )
+	//	CGameItemPtr item = getNewItem( id, sheetId, quality, destroyable, dropable );
+	CGameItemPtr item = getNewItem(sheetId, quality, destroyable, dropable);
+	if (item != NULL)
 	{
-//		nldebug("<CGameItemManager::createItem> create item %s with owner %s",id.toString().c_str(), owner.toString().c_str());
+		//		nldebug("<CGameItemManager::createItem> create item %s with owner %s",id.toString().c_str(), owner.toString().c_str());
 
-//		(*item)->Owner = owner;
-		(*item)->setCreator( creatorId );
-		
+		//		(*item)->Owner = owner;
+		(*item)->setCreator(creatorId);
+
 		// insert the item in the map
-//		_Items.insert( make_pair(id,item) );
-//		_Items.insert( item );
+		//		_Items.insert( make_pair(id,item) );
+		//		_Items.insert( item );
 
 		// insert the item in the children of the owner
-// MALKAV 22/01/03 : test the owner existence sooner and use a warning instead of an nlerror to keep going
-//		if( owner != CEntityId::Unknown )
-//		{
-//		 	CGameItemPtr ownerItem = getItem( owner );
-//			if( ownerItem!=NULL )
-//			{
-//				(*ownerItem)->addChild( item, slot );
-//			}
-//			else
-//			{				
-//				nlerror("<CGameItemManager::createItem> Can't find the owner item %s",owner.toString().c_str());
-//			}
-//		}
+		// MALKAV 22/01/03 : test the owner existence sooner and use a warning instead of an nlerror to keep going
+		//		if( owner != CEntityId::Unknown )
+		//		{
+		//		 	CGameItemPtr ownerItem = getItem( owner );
+		//			if( ownerItem!=NULL )
+		//			{
+		//				(*ownerItem)->addChild( item, slot );
+		//			}
+		//			else
+		//			{
+		//				nlerror("<CGameItemManager::createItem> Can't find the owner item %s",owner.toString().c_str());
+		//			}
+		//		}
 		log_Item_Create(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
 	}
 	else
 	{
-//		nlwarning("<CGameItemManager::createItem> Can't create the item %s with invalid sheet '%s'", id.toString().c_str(), sheetId.toString().c_str());
+		//		nlwarning("<CGameItemManager::createItem> Can't create the item %s with invalid sheet '%s'", id.toString().c_str(), sheetId.toString().c_str());
 		nlwarning("<CGameItemManager::createItem> Can't create an item with invalid sheet '%s'", sheetId.toString().c_str());
 	}
 
@@ -248,12 +236,11 @@ CGameItemPtr CGameItemManager::createItem( const CSheetId& sheetId, uint16 quali
 
 } // createItem //
 
-
 //---------------------------------------------------
 // createRootItem :
 //
 //---------------------------------------------------
-//CGameItemPtr CGameItemManager::createRootItem( CEntityId& id, CSheetId& sheetId, uint16 quality, const CEntityId& ownerPlayer, uint16 inventory , sint16 slot, bool destroyable, bool dropable, const CEntityId &creatorId )
+// CGameItemPtr CGameItemManager::createRootItem( CEntityId& id, CSheetId& sheetId, uint16 quality, const CEntityId& ownerPlayer, uint16 inventory , sint16 slot, bool destroyable, bool dropable, const CEntityId &creatorId )
 //{
 //	// test if the item already exists
 //	map<CEntityId,CGameItemPtr>::iterator itIt = _Items.find( id );
@@ -272,7 +259,7 @@ CGameItemPtr CGameItemManager::createItem( const CSheetId& sheetId, uint16 quali
 //
 //		(*item)->Owner = ownerId;
 //		(*item)->setCreator( creatorId );
-//		
+//
 //		// insert the item in the map
 //		_Items.insert( make_pair(id,item) );
 //	}
@@ -288,18 +275,17 @@ CGameItemPtr CGameItemManager::createItem( const CSheetId& sheetId, uint16 quali
 // createRootItem :
 //
 //---------------------------------------------------
-//CGameItemPtr CGameItemManager::createRootItem( CSheetId& sheetId, uint16 quality, const CEntityId& ownerPlayer, uint16 inventory, sint16 slot, bool destroyable, bool dropable, const CEntityId &creatorId )
+// CGameItemPtr CGameItemManager::createRootItem( CSheetId& sheetId, uint16 quality, const CEntityId& ownerPlayer, uint16 inventory, sint16 slot, bool destroyable, bool dropable, const CEntityId &creatorId )
 //{
 //	CEntityId itemId(RYZOMID::object,_CreatedItemCount++);
 //	return createRootItem( itemId, sheetId, quality, ownerPlayer, inventory, slot, destroyable, dropable, creatorId );
 //} // createRootItem //
 
-
 //---------------------------------------------------
 // createItem :
 //
 //---------------------------------------------------
-//CGameItemPtr CGameItemManager::createItem( CEntityId& id, CSheetId& sheetId, uint16 quality, sint32 x, sint32 y, sint32 z, bool destroyable, bool dropable, const NLMISC::CEntityId &creatorId )
+// CGameItemPtr CGameItemManager::createItem( CEntityId& id, CSheetId& sheetId, uint16 quality, sint32 x, sint32 y, sint32 z, bool destroyable, bool dropable, const NLMISC::CEntityId &creatorId )
 //{
 //	H_AUTO(GIM_createItem2);
 //
@@ -319,12 +305,12 @@ CGameItemPtr CGameItemManager::createItem( const CSheetId& sheetId, uint16 quali
 //		(*item)->Loc.Pos.Z = z;
 //
 //		(*item)->setCreator( creatorId );
-//		
+//
 //		// insert the item in the map
 //		_Items.insert( make_pair(id,item) );
 //
 ////	Obsolete code, keep for not forget ADD_IA_OBJECT GPMS functionality but at this time AI creature don't care about loot on corps
-////  So at this time, we don't insert in GPMS a loot of creature 
+////  So at this time, we don't insert in GPMS a loot of creature
 ///*		if( id.getType() == RYZOMID::creature_loot )
 //		{
 ///*			CMessage msgout2("ADD_IA_OBJECT");
@@ -340,7 +326,7 @@ CGameItemPtr CGameItemManager::createItem( const CSheetId& sheetId, uint16 quali
 //		}
 //		else
 //*/		{
-//			// add the item in the GPMS *** +++ Make this in EGS +++ *** 
+//			// add the item in the GPMS *** +++ Make this in EGS +++ ***
 //			Mirror.addEntity( false, id );
 //			TDataSetRow entityIndex = TheDataset.getDataSetRow( id );
 //			if ( TheDataset.isAccessible( entityIndex ))
@@ -370,27 +356,23 @@ CGameItemPtr CGameItemManager::createItem( const CSheetId& sheetId, uint16 quali
 //
 //} // createItem //
 
-
-
 //---------------------------------------------------
 // createItem :
 //
 //---------------------------------------------------
-//CGameItemPtr CGameItemManager::createItem( CSheetId& sheetId, uint16 quality, const CEntityId& owner, sint16 slot, bool destroyable,bool dropable, const NLMISC::CEntityId &creatorId )
-//CGameItemPtr CGameItemManager::createItem( CSheetId& sheetId, uint16 quality, bool destroyable, bool dropable, const NLMISC::CEntityId &creatorId )
+// CGameItemPtr CGameItemManager::createItem( CSheetId& sheetId, uint16 quality, const CEntityId& owner, sint16 slot, bool destroyable,bool dropable, const NLMISC::CEntityId &creatorId )
+// CGameItemPtr CGameItemManager::createItem( CSheetId& sheetId, uint16 quality, bool destroyable, bool dropable, const NLMISC::CEntityId &creatorId )
 //{
 //	CEntityId itemId(RYZOMID::object,_CreatedItemCount++);
 ////	return createItem( itemId, sheetId, quality, owner, slot, destroyable,dropable, creatorId );
 //	return createItem( sheetId, quality, slot, destroyable,dropable, creatorId );
 //} // createItem //
-	
-
 
 //---------------------------------------------------
 // createItem :
 //
 //---------------------------------------------------
-//CGameItemPtr CGameItemManager::createItem( CSheetId& sheetId, uint16 quality, sint32 x, sint32 y, sint32 z, bool destroyable,bool dropable, const NLMISC::CEntityId &creatorId )
+// CGameItemPtr CGameItemManager::createItem( CSheetId& sheetId, uint16 quality, sint32 x, sint32 y, sint32 z, bool destroyable,bool dropable, const NLMISC::CEntityId &creatorId )
 //{
 //	CEntityId itemId(RYZOMID::object,_CreatedItemCount++);
 ////	return createItem( itemId, sheetId, quality, x ,y ,z, destroyable,dropable, creatorId);
@@ -401,17 +383,17 @@ CGameItemPtr CGameItemManager::createItem( const CSheetId& sheetId, uint16 quali
 //-----------------------------------------------
 // createInGameItem
 //-----------------------------------------------
-CGameItemPtr CGameItemManager::createInGameItem( uint16 quality, uint32 quantity, const NLMISC::CSheetId &sheet, const CEntityId &creatorId , const std::string * phraseId)
+CGameItemPtr CGameItemManager::createInGameItem(uint16 quality, uint32 quantity, const NLMISC::CSheetId &sheet, const CEntityId &creatorId, const std::string *phraseId)
 {
 	H_AUTO(GIM_createInGameItem);
 
 	static const CSheetId preorderSheetId("pre_order.sitem");
-	
-	if ( quantity == 0 || quality ==0 )
+
+	if (quantity == 0 || quality == 0)
 		return NULL;
 
-//	static const CSheetId idSheetStack("stack.sitem");
-	const CStaticItem* form = CSheets::getForm( sheet );
+	//	static const CSheetId idSheetStack("stack.sitem");
+	const CStaticItem *form = CSheets::getForm(sheet);
 	if (!form)
 	{
 		nlwarning("<CCharacter::createInGameItem> Cannot find form of item %s", sheet.toString().c_str());
@@ -421,19 +403,18 @@ CGameItemPtr CGameItemManager::createInGameItem( uint16 quality, uint32 quantity
 	CGameItemPtr item;
 	CGameItemPtr sellingItem;
 	// if item can be sold, get it in the sold items list
-	if (	form->Family != ITEMFAMILY::RAW_MATERIAL 
-		&&	form->Family != ITEMFAMILY::HARVEST_TOOL
-		&&	form->Family != ITEMFAMILY::CRAFTING_TOOL
-		&&	form->Family != ITEMFAMILY::CRYSTALLIZED_SPELL
-		&&	form->Family != ITEMFAMILY::ITEM_SAP_RECHARGE
-		&&	form->Family != ITEMFAMILY::FOOD
-		)
+	if (form->Family != ITEMFAMILY::RAW_MATERIAL
+	    && form->Family != ITEMFAMILY::HARVEST_TOOL
+	    && form->Family != ITEMFAMILY::CRAFTING_TOOL
+	    && form->Family != ITEMFAMILY::CRYSTALLIZED_SPELL
+	    && form->Family != ITEMFAMILY::ITEM_SAP_RECHARGE
+	    && form->Family != ITEMFAMILY::FOOD)
 	{
-		vector< CGameItemPtr >::const_iterator it;
-		const vector< CGameItemPtr >::const_iterator itEnd = CStaticItems::getStaticItems().end();
-		for( it = CStaticItems::getStaticItems().begin(); it != itEnd; ++it )
+		vector<CGameItemPtr>::const_iterator it;
+		const vector<CGameItemPtr>::const_iterator itEnd = CStaticItems::getStaticItems().end();
+		for (it = CStaticItems::getStaticItems().begin(); it != itEnd; ++it)
 		{
-			if( (*it)->getSheetId() == sheet )
+			if ((*it)->getSheetId() == sheet)
 			{
 				sellingItem = *it;
 				break;
@@ -441,42 +422,40 @@ CGameItemPtr CGameItemManager::createInGameItem( uint16 quality, uint32 quantity
 		}
 	}
 
-	switch( form->Family )
+	switch (form->Family)
 	{
-		case ITEMFAMILY::CRAFTING_TOOL:
-		case ITEMFAMILY::HARVEST_TOOL:
-		case ITEMFAMILY::RAW_MATERIAL:
-		case ITEMFAMILY::TELEPORT:
-		case ITEMFAMILY::CRYSTALLIZED_SPELL:
-		case ITEMFAMILY::ITEM_SAP_RECHARGE:
-		case ITEMFAMILY::MISSION_ITEM:
-		case ITEMFAMILY::PET_ANIMAL_TICKET:
-		case ITEMFAMILY::HANDLED_ITEM:
-		case ITEMFAMILY::CONSUMABLE:
-		case ITEMFAMILY::XP_CATALYSER:
-		case ITEMFAMILY::SCROLL:
-		case ITEMFAMILY::FOOD:
-		case ITEMFAMILY::SCROLL_R2:
-		case ITEMFAMILY::GENERIC_ITEM:
+	case ITEMFAMILY::CRAFTING_TOOL:
+	case ITEMFAMILY::HARVEST_TOOL:
+	case ITEMFAMILY::RAW_MATERIAL:
+	case ITEMFAMILY::TELEPORT:
+	case ITEMFAMILY::CRYSTALLIZED_SPELL:
+	case ITEMFAMILY::ITEM_SAP_RECHARGE:
+	case ITEMFAMILY::MISSION_ITEM:
+	case ITEMFAMILY::PET_ANIMAL_TICKET:
+	case ITEMFAMILY::HANDLED_ITEM:
+	case ITEMFAMILY::CONSUMABLE:
+	case ITEMFAMILY::XP_CATALYSER:
+	case ITEMFAMILY::SCROLL:
+	case ITEMFAMILY::FOOD:
+	case ITEMFAMILY::SCROLL_R2:
+	case ITEMFAMILY::GENERIC_ITEM: {
+		item = GameItemManager.createItem(const_cast<CSheetId &>(sheet), quality, true, true, creatorId);
+	}
+	break;
+	default: {
+		if (sellingItem != NULL)
 		{
-			item = GameItemManager.createItem( const_cast< CSheetId& > ( sheet ), quality, true, true, creatorId);
+			item = sellingItem->getItemCopy();
+			item->quality(quality);
+			if (phraseId)
+				item->setPhraseIdInternal(*phraseId);
 		}
-		break;
-	default:
+		else if (sheet == preorderSheetId)
 		{
-			if( sellingItem != NULL )
-			{
-				item = sellingItem->getItemCopy();
-				item->quality( quality );
-				if ( phraseId )
-					item->setPhraseIdInternal(*phraseId);
-			}
-			else if (sheet == preorderSheetId)
-			{
-				item = GameItemManager.createItem(sheet, quality, true, form->DropOrSell, creatorId);
-			}
+			item = GameItemManager.createItem(sheet, quality, true, form->DropOrSell, creatorId);
 		}
-		if( item == NULL)
+	}
+		if (item == NULL)
 		{
 			nlwarning("<CCharacter::createInGameItem> Error while creating item : NULL pointer");
 			return NULL;
@@ -491,10 +470,10 @@ CGameItemPtr CGameItemManager::createInGameItem( uint16 quality, uint32 quantity
 // destroyItem :
 //
 //---------------------------------------------------
-void CGameItemManager::destroyItem( CGameItemPtr &ptr )
+void CGameItemManager::destroyItem(CGameItemPtr &ptr)
 {
 	H_AUTO(GIM_destroyItem);
-	
+
 	if (ptr == NULL)
 		return;
 
@@ -515,17 +494,15 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 
 } // destroyItem //
 
-
-
 //---------------------------------------------------
 // dropOnTheGround :
 //
 //---------------------------------------------------
-//void CGameItemManager::dropOnTheGround( const CEntityId& id, sint32 x, sint32 y, sint32 z ) 
+// void CGameItemManager::dropOnTheGround( const CEntityId& id, sint32 x, sint32 y, sint32 z )
 //{
 //	// until debugged
 //	return;
-//	
+//
 //	// get the item to drop
 //	CGameItemPtr item = getItem( id );
 //	nlassert( item!=NULL );
@@ -599,14 +576,14 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 //			}
 //		}
 //	}
-//	
+//
 //	// if no close bag exist or if the bag is full, we create one
 //	if( bagItem == NULL  )
 //	{
 //		try
 //		{
 ////			nldebug("CGameItemManager::dropOnTheGround> Creating bag on the ground at pos %d %d %d",x,y,z);
-//			
+//
 //			const CStaticItem* itemForm = CSheets::getForm( (*item)->getSheetId() );
 //			if( itemForm )
 //			{
@@ -640,12 +617,12 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 //		nlwarning("<CGameItemManager::dropOnTheGround> could not create a bag item with sheet %s",(*item)->getSheetId().toString().c_str());
 //		return;
 //	}
-//	
+//
 //	// detach item from its owner
 //	CGameItemPtr ownerItem = getItem( (*item)->Owner );
 //	if ( ownerItem!=NULL )
 //		ownerItem()->detachChild( (*item)->Loc.Slot );
-//	
+//
 //	// add the item in the bag
 //	(*bagItem)->addChild( item );
 //
@@ -662,13 +639,11 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 //
 //} // dropOnTheGround //
 
-
-
 //---------------------------------------------------
 // getContent :
 //
 //---------------------------------------------------
-//void CGameItemManager::getContent( CEntityId& itemId, list<CSheetId>& content )
+// void CGameItemManager::getContent( CEntityId& itemId, list<CSheetId>& content )
 //{
 //	map<CEntityId,CGameItemPtr>::iterator itItem = _Items.find( itemId );
 //	if( itItem != _Items.end() )
@@ -698,7 +673,7 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 // getContent :
 //
 //---------------------------------------------------
-//void CGameItemManager::getContent( CEntityId& itemId, vector<CSheetId>& content )
+// void CGameItemManager::getContent( CEntityId& itemId, vector<CSheetId>& content )
 //{
 //	map<CEntityId,CGameItemPtr>::iterator itItem = _Items.find( itemId );
 //	if( itItem != _Items.end() )
@@ -724,12 +699,11 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 //
 //} // getContent //
 
-
 //---------------------------------------------------
 // getContent :
 //
 //---------------------------------------------------
-//void CGameItemManager::getContent( CEntityId& itemId, list<CEntitySheetId>& content )
+// void CGameItemManager::getContent( CEntityId& itemId, list<CEntitySheetId>& content )
 //{
 //	map<CEntityId,CGameItemPtr>::iterator itItem = _Items.find( itemId );
 //	if( itItem != _Items.end() )
@@ -759,7 +733,7 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 // getContent :
 //
 //---------------------------------------------------
-//void CGameItemManager::getContent( CEntityId& itemId, vector<CEntitySheetId>& content )
+// void CGameItemManager::getContent( CEntityId& itemId, vector<CEntitySheetId>& content )
 //{
 //	map<CEntityId,CGameItemPtr>::iterator itItem = _Items.find( itemId );
 //	if( itItem != _Items.end() )
@@ -784,17 +758,16 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 //	}
 //
 //} // getContent //
-
 
 //---------------------------------------------------
 // dumpGameItemList :
 //
 //---------------------------------------------------
-//void CGameItemManager::dumpGameItemList( const string& fileName )
+// void CGameItemManager::dumpGameItemList( const string& fileName )
 //{
 //	FILE * f;
 //	f = nlfopen(fileName, "w");
-//	
+//
 //	if(f)
 //	{
 //		map<CEntityId,CGameItemPtr>::const_iterator itItem;
@@ -813,7 +786,6 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 //} // dumpGameItemList //
 //
 
-
 //----------------------------------------------------------------------------
 // CGameItemManager::buildNpcSpecificItems
 //----------------------------------------------------------------------------
@@ -822,34 +794,33 @@ void CGameItemManager::buildNpcSpecificItems()
 	if (EGSLight)
 		return;
 
-	for( CAllStaticItems::const_iterator it = CSheets::getItemMapForm().begin(); it != CSheets::getItemMapForm().end(); ++it )
+	for (CAllStaticItems::const_iterator it = CSheets::getItemMapForm().begin(); it != CSheets::getItemMapForm().end(); ++it)
 	{
 		// only keep npc items
-//		if( (*it).first.toString().substr(0,4) != "npc_" ) //obsolete, now we want be able to have all non craftable item
-		if( (*it).first.toString().substr(0,2) == "ic" )
+		//		if( (*it).first.toString().substr(0,4) != "npc_" ) //obsolete, now we want be able to have all non craftable item
+		if ((*it).first.toString().substr(0, 2) == "ic")
 		{
 			continue;
 		}
-		
+
 		CGameItemPtr item;
-//		item.newItem( CEntityId::Unknown, (*it).first, 1, 0, false,false );
-		item.newItem( it->first, 1, false,false );
-		
+		//		item.newItem( CEntityId::Unknown, (*it).first, 1, 0, false,false );
+		item.newItem(it->first, 1, false, false);
+
 		_NpcSpecificItems.push_back(item);
-		
+
 #ifdef NL_DEBUG
 		nldebug("built npc item item %s", (*it).first.toString().c_str());
 #endif
 	}
 } // CGameItemManager //
 
-
 //-----------------------------------------------
 // createItem :
 //-----------------------------------------------
-NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality>")
+NLMISC_COMMAND(createItem, "create a new item", "<sheet id><quality>")
 {
-	if( args.size() < 2 )
+	if (args.size() < 2)
 	{
 		return false;
 	}
@@ -861,15 +832,15 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality>")
 	uint16 quality;
 	NLMISC::fromString(args[1], quality);
 
-	//uint32 ownerIdTmp;
-	//NLMISC::fromString(args[2], ownerIdTmp);
-	//CEntityId ownerId(RYZOMID::object,ownerIdTmp);	
+	// uint32 ownerIdTmp;
+	// NLMISC::fromString(args[2], ownerIdTmp);
+	// CEntityId ownerId(RYZOMID::object,ownerIdTmp);
 
-//	CGameItemPtr item = GameItemManager.createItem( sheetId, quality, ownerId, -1, true,true );
-	CGameItemPtr item = GameItemManager.createItem( sheetId, quality, true, true );
+	//	CGameItemPtr item = GameItemManager.createItem( sheetId, quality, ownerId, -1, true,true );
+	CGameItemPtr item = GameItemManager.createItem(sheetId, quality, true, true);
 	if (item != NULL)
 	{
-//		log.displayNL("<createItem> Creating item %d",(*item).getItemId().getRawId());
+		//		log.displayNL("<createItem> Creating item %d",(*item).getItemId().getRawId());
 		log.displayNL("<createItem> Item created");
 	}
 	else
@@ -885,7 +856,7 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality>")
 //-----------------------------------------------
 // displayItem :
 //-----------------------------------------------
-//NLMISC_COMMAND(displayItem,"display item characteristics","<item id>")
+// NLMISC_COMMAND(displayItem,"display item characteristics","<item id>")
 //{
 //	if( args.size() != 1 )
 //	{
@@ -896,7 +867,7 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality>")
 //	NLMISC::fromString(args[0], itemId)
 //
 //	CEntityId itemId(RYZOMID::object, itemId);
-//	
+//
 //	CGameItemPtr item = GameItemManager.getItem(itemId);
 //	if (item != NULL)
 //	{
@@ -913,7 +884,7 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality>")
 //-----------------------------------------------
 // drop :
 //-----------------------------------------------
-//NLMISC_COMMAND(drop,"drop an item to the ground","<item id><quality><x><y><z>")
+// NLMISC_COMMAND(drop,"drop an item to the ground","<item id><quality><x><y><z>")
 //{
 //	if( args.size() < 5 )
 //	{
@@ -923,7 +894,7 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality>")
 //	CEntityId itemId( RYZOMID::object, NLMISC::fromString(args[0]) );
 //	//uint16 quality;
 //	//NLMISC::fromString(args[1]; quality);
-//	
+//
 //	sint32 x;
 //	NLMISC::fromString(args[2], x);
 //	x *= 1000;
@@ -942,7 +913,7 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality>")
 //-----------------------------------------------
 // spawn :
 //-----------------------------------------------
-//NLMISC_COMMAND(spawn,"create an item on the ground","[<item id>]<sheet id><quality><x><y><z>")
+// NLMISC_COMMAND(spawn,"create an item on the ground","[<item id>]<sheet id><quality><x><y><z>")
 //{
 //	if( args.size() < 5 )
 //	{
@@ -977,16 +948,16 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality>")
 //-----------------------------------------------
 // destroy_item :
 //-----------------------------------------------
-//NLMISC_COMMAND(destroyItem,"destroy the specified item","<item id(id:type:crea:dyn)>")
+// NLMISC_COMMAND(destroyItem,"destroy the specified item","<item id(id:type:crea:dyn)>")
 //{
 //	if( args.size() < 1 )
 //	{
 //		return false;
 //	}
-//	
+//
 //	CEntityId itemId( RYZOMID::object, NLMISC::fromString(args[0].c_str()) );
 //	CGameItemPtr ptr = GameItemManager.getItem(itemId);
 //	GameItemManager.destroyItem( ptr );
-//	
+//
 //	return true;
 //} // destroy_item //

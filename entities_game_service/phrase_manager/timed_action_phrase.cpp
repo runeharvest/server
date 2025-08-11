@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // game share
 #include "game_share/brick_families.h"
@@ -32,8 +30,7 @@
 #include "egs_sheets/egs_sheets.h"
 //
 
-
-DEFAULT_SPHRASE_FACTORY( CTimedActionPhrase, BRICK_TYPE::TIMED_ACTION );
+DEFAULT_SPHRASE_FACTORY(CTimedActionPhrase, BRICK_TYPE::TIMED_ACTION);
 
 using namespace std;
 using namespace NLMISC;
@@ -68,116 +65,111 @@ CTimedActionPhrase::~CTimedActionPhrase()
 //-----------------------------------------------
 // CTimedActionPhrase build
 //-----------------------------------------------
-bool CTimedActionPhrase::build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute )
+bool CTimedActionPhrase::build(const TDataSetRow &actorRowId, const std::vector<const CStaticBrick *> &bricks, bool buildToExecute)
 {
 	_ActorRowId = actorRowId;
 
-	for (uint i = 0 ; i < bricks.size() ; ++i)
+	for (uint i = 0; i < bricks.size(); ++i)
 	{
 		const CStaticBrick *brick = bricks[i];
 		nlassert(brick != NULL);
 
-		if (i==0)
+		if (i == 0)
 			_RootSheetId = brick->SheetId;
 
 		// process params
-		for ( uint j = 0 ; j < brick->Params.size() ; ++j)
+		for (uint j = 0; j < brick->Params.size(); ++j)
 		{
-			TBrickParam::IId	*param = brick->Params[j];
+			TBrickParam::IId *param = brick->Params[j];
 			if (!param) continue;
 
-			switch(param->id())
+			switch (param->id())
 			{
-			case TBrickParam::TA_TELEPORT:
+			case TBrickParam::TA_TELEPORT: {
+				_TimedAction = new CTPTimedAction();
+				if (_TimedAction == NULL)
 				{
-					_TimedAction = new CTPTimedAction();
-					if (_TimedAction == NULL)
-					{
-						nlwarning("Error allocating new CTPTimedAction object");
-						return false;
-					}
-					_ExecutionDuration = DelayBeforeItemTP;
-					_ActionType = CLIENT_ACTION_TYPE::Teleport;
+					nlwarning("Error allocating new CTPTimedAction object");
+					return false;
 				}
-				break;
+				_ExecutionDuration = DelayBeforeItemTP;
+				_ActionType = CLIENT_ACTION_TYPE::Teleport;
+			}
+			break;
 
-			case TBrickParam::TA_DISCONNECT:
+			case TBrickParam::TA_DISCONNECT: {
+				_TimedAction = new CDisconnectTimedAction();
+				if (_TimedAction == NULL)
 				{
-					_TimedAction = new CDisconnectTimedAction();
-					if (_TimedAction == NULL)
-					{
-						nlwarning("Error allocating new CTPTimedAction object");
-						return false;
-					}
-
-					_ExecutionDuration = TimeBeforeDisconnection;
-					if (IsRingShard)
-					{
-						// Find out how much time to wait depending on the role of the character
-						CCharacter* player = PlayerManager.getChar(_ActorRowId);
-						if (player)
-						{
-							// In Ring edition and animation mode, take a short cut when Far Teleporting
-							R2::TUserRole role = player->sessionUserRole();
-							if ((role == R2::TUserRole::ur_editor) || (role == R2::TUserRole::ur_animator))
-								_ExecutionDuration = 1;
-						}
-					}
-					_ActionType = CLIENT_ACTION_TYPE::Disconnect;
+					nlwarning("Error allocating new CTPTimedAction object");
+					return false;
 				}
-				break;
 
-			case TBrickParam::TA_MOUNT:
+				_ExecutionDuration = TimeBeforeDisconnection;
+				if (IsRingShard)
 				{
-					_TimedAction = new CMountTimedAction();
-					if (_TimedAction == NULL)
-					{
-						nlwarning("Error allocating new CTPTimedAction object");
-						return false;
-					}
-					_ExecutionDuration = MountDuration;
-					_ActionType = CLIENT_ACTION_TYPE::Mount;
-				}
-				break;
-
-			case TBrickParam::TA_UNMOUNT:
-				{
-					_TimedAction = new CUnmountTimedAction();
-					if (_TimedAction == NULL)
-					{
-						nlwarning("Error allocating new CTPTimedAction object");
-						return false;
-					}
-					_ExecutionDuration = UnmountDuration;
-					_ActionType = CLIENT_ACTION_TYPE::Unmount;
-				}
-				break;
-
-			case TBrickParam::TA_CONSUME:
-				{
-					_TimedAction = new CConsumeItemTimedAction();
-					if (_TimedAction == NULL)
-					{
-						nlwarning("Error allocating new CConsumeItemTimedAction object");
-						return false;
-					}
-					// get item to consume to init consumption time
-					CCharacter *player = PlayerManager.getChar(actorRowId);
+					// Find out how much time to wait depending on the role of the character
+					CCharacter *player = PlayerManager.getChar(_ActorRowId);
 					if (player)
 					{
-						CGameItemPtr item =player->getConsumedItem();
-						if (item != NULL)
+						// In Ring edition and animation mode, take a short cut when Far Teleporting
+						R2::TUserRole role = player->sessionUserRole();
+						if ((role == R2::TUserRole::ur_editor) || (role == R2::TUserRole::ur_animator))
+							_ExecutionDuration = 1;
+					}
+				}
+				_ActionType = CLIENT_ACTION_TYPE::Disconnect;
+			}
+			break;
+
+			case TBrickParam::TA_MOUNT: {
+				_TimedAction = new CMountTimedAction();
+				if (_TimedAction == NULL)
+				{
+					nlwarning("Error allocating new CTPTimedAction object");
+					return false;
+				}
+				_ExecutionDuration = MountDuration;
+				_ActionType = CLIENT_ACTION_TYPE::Mount;
+			}
+			break;
+
+			case TBrickParam::TA_UNMOUNT: {
+				_TimedAction = new CUnmountTimedAction();
+				if (_TimedAction == NULL)
+				{
+					nlwarning("Error allocating new CTPTimedAction object");
+					return false;
+				}
+				_ExecutionDuration = UnmountDuration;
+				_ActionType = CLIENT_ACTION_TYPE::Unmount;
+			}
+			break;
+
+			case TBrickParam::TA_CONSUME: {
+				_TimedAction = new CConsumeItemTimedAction();
+				if (_TimedAction == NULL)
+				{
+					nlwarning("Error allocating new CConsumeItemTimedAction object");
+					return false;
+				}
+				// get item to consume to init consumption time
+				CCharacter *player = PlayerManager.getChar(actorRowId);
+				if (player)
+				{
+					CGameItemPtr item = player->getConsumedItem();
+					if (item != NULL)
+					{
+						const CStaticItem *form = item->getStaticForm();
+						if (form && form->ConsumableItem)
 						{
-							const CStaticItem *form = item->getStaticForm();
-							if (form && form->ConsumableItem)
-							{
-								_ExecutionDuration = TGameCycle(form->ConsumableItem->ConsumptionTime / CTickEventHandler::getGameTimeStep());
-							}
+							_ExecutionDuration = TGameCycle(form->ConsumableItem->ConsumptionTime / CTickEventHandler::getGameTimeStep());
 						}
 					}
-					_ActionType = CLIENT_ACTION_TYPE::ConsumeItem;
 				}
-				break;
+				_ActionType = CLIENT_ACTION_TYPE::ConsumeItem;
+			}
+			break;
 
 			default:;
 			};
@@ -185,8 +177,7 @@ bool CTimedActionPhrase::build( const TDataSetRow & actorRowId, const std::vecto
 	}
 
 	return true;
-}// CTimedActionPhrase build
-
+} // CTimedActionPhrase build
 
 //-----------------------------------------------
 // CTimedActionPhrase evaluate
@@ -194,8 +185,7 @@ bool CTimedActionPhrase::build( const TDataSetRow & actorRowId, const std::vecto
 bool CTimedActionPhrase::evaluate()
 {
 	return true;
-}// CTimedActionPhrase evaluate
-
+} // CTimedActionPhrase evaluate
 
 //-----------------------------------------------
 // CTimedActionPhrase validate
@@ -211,54 +201,51 @@ bool CTimedActionPhrase::validate()
 		return _TimedAction->validate(this, entity);
 
 	return true;
-}// CTimedActionPhrase validate
-
+} // CTimedActionPhrase validate
 
 //-----------------------------------------------
 // CTimedActionPhrase update
 //-----------------------------------------------
-bool  CTimedActionPhrase::update()
+bool CTimedActionPhrase::update()
 {
 	// nothing to do
 	return true;
-}// CTimedActionPhrase update
-
+} // CTimedActionPhrase update
 
 //-----------------------------------------------
 // CTimedActionPhrase execute
 //-----------------------------------------------
-void  CTimedActionPhrase::execute()
+void CTimedActionPhrase::execute()
 {
 	_ExecutionEndDate = CTickEventHandler::getGameCycle() + _ExecutionDuration;
 
-	CCharacter* player = PlayerManager.getChar(_ActorRowId);
+	CCharacter *player = PlayerManager.getChar(_ActorRowId);
 	if (player)
 	{
 		if (_IsStatic)
 		{
-			switch( _ActionType )
+			switch (_ActionType)
 			{
-				case CLIENT_ACTION_TYPE::Mount :
-					player->staticActionInProgress(true, STATIC_ACT_TYPES::Mount);
-					break;
-				default:
-					player->staticActionInProgress(true, STATIC_ACT_TYPES::Teleport);
+			case CLIENT_ACTION_TYPE::Mount:
+				player->staticActionInProgress(true, STATIC_ACT_TYPES::Mount);
+				break;
+			default:
+				player->staticActionInProgress(true, STATIC_ACT_TYPES::Teleport);
 			}
 		}
 		else
 			player->cancelStaticActionInProgress();
-		
+
 		player->setCurrentAction(_ActionType, _ExecutionEndDate);
 		if (_RootSheetId != CSheetId::Unknown)
 		{
-//			player->_PropertyDatabase.setProp( "EXECUTE_PHRASE:SHEET", _RootSheetId.asInt() );
+			//			player->_PropertyDatabase.setProp( "EXECUTE_PHRASE:SHEET", _RootSheetId.asInt() );
 			CBankAccessor_PLR::getEXECUTE_PHRASE().setSHEET(player->_PropertyDatabase, _RootSheetId);
-//			player->_PropertyDatabase.setProp( "EXECUTE_PHRASE:PHRASE", 0 );
+			//			player->_PropertyDatabase.setProp( "EXECUTE_PHRASE:PHRASE", 0 );
 			CBankAccessor_PLR::getEXECUTE_PHRASE().setPHRASE(player->_PropertyDatabase, 0);
 		}
 	}
-}// CTimedActionPhrase execute
-
+} // CTimedActionPhrase execute
 
 //-----------------------------------------------
 // CTimedActionPhrase launch
@@ -268,8 +255,7 @@ bool CTimedActionPhrase::launch()
 	// apply immediatly
 	_ApplyDate = 0;
 	return true;
-}//CTimedActionPhrase launch
-
+} // CTimedActionPhrase launch
 
 //-----------------------------------------------
 // CTimedActionPhrase apply
@@ -288,15 +274,14 @@ void CTimedActionPhrase::apply()
 	if (_TimedAction != NULL)
 		_TimedAction->applyAction(this, actor);
 
-}//CTimedActionPhrase apply
-
+} // CTimedActionPhrase apply
 
 //-----------------------------------------------
 // CTimedActionPhrase end
 //-----------------------------------------------
 void CTimedActionPhrase::end()
 {
-	CCharacter* player = PlayerManager.getChar(_ActorRowId);
+	CCharacter *player = PlayerManager.getChar(_ActorRowId);
 	if (player)
 	{
 		player->clearCurrentAction();
@@ -308,7 +293,7 @@ void CTimedActionPhrase::end()
 //-----------------------------------------------
 void CTimedActionPhrase::stop()
 {
-	CCharacter* player = PlayerManager.getChar(_ActorRowId);
+	CCharacter *player = PlayerManager.getChar(_ActorRowId);
 	if (player)
 	{
 		player->clearCurrentAction();
@@ -322,16 +307,16 @@ void CTimedActionPhrase::stop()
 //-----------------------------------------------
 void CTimedActionPhrase::stopBeforeExecution()
 {
-	CCharacter* player = PlayerManager.getChar(_ActorRowId);
-	if ( player != NULL && _TimedAction != NULL)
+	CCharacter *player = PlayerManager.getChar(_ActorRowId);
+	if (player != NULL && _TimedAction != NULL)
 		_TimedAction->stopBeforeExecution(this, player);
 } // stopBeforeExecution //
 
 //-----------------------------------------------
-bool CTimedActionPhrase::testCancelOnHit( sint32 attackSkillValue, CEntityBase * entity, CEntityBase * defender)
+bool CTimedActionPhrase::testCancelOnHit(sint32 attackSkillValue, CEntityBase *entity, CEntityBase *defender)
 {
 	if (_TimedAction != NULL)
 		return _TimedAction->testCancelOnHit(attackSkillValue, entity, defender);
 
-	return false;	
+	return false;
 }

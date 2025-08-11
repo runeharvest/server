@@ -17,15 +17,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_CLIENT_ID_LOOKUP_H
 #define NL_CLIENT_ID_LOOKUP_H
 
 #include "nel/misc/types_nl.h"
 #include "game_share/ryzom_entity_id.h"
 #include "fe_types.h"
-
 
 /**
  * CClientIdLookup.
@@ -40,16 +37,15 @@
 class CClientIdLookup
 {
 public:
-
 	/// Constructor
-	CClientIdLookup() {}
+	CClientIdLookup() { }
 
 	/// Init
-	void					init( TDataSetIndex maxNbRows )
+	void init(TDataSetIndex maxNbRows)
 	{
-		_EntityIndexToClient.resize( maxNbRows );
+		_EntityIndexToClient.resize(maxNbRows);
 		uint i;
-		for ( i=0; i!=maxNbRows; ++i )
+		for (i = 0; i != maxNbRows; ++i)
 		{
 			_EntityIndexToClient[i] = INVALID_CLIENT;
 		}
@@ -58,11 +54,11 @@ public:
 	/** Return the client id corresponding to the specified CEntityId,
 	 * or INVALID_CLIENT if there is no such client on this frontend service.
 	 */
-	TClientId				getClientId( const NLMISC::CEntityId& id )
+	TClientId getClientId(const NLMISC::CEntityId &id)
 	{
-		//nlinfo( "get: %u elements", _IdToClientMap.size() );
-		TIdToClientMap::const_iterator iecm = _IdToClientMap.find( id );
-		if ( iecm != _IdToClientMap.end() )
+		// nlinfo( "get: %u elements", _IdToClientMap.size() );
+		TIdToClientMap::const_iterator iecm = _IdToClientMap.find(id);
+		if (iecm != _IdToClientMap.end())
 			return (*iecm).second;
 		else
 			return INVALID_CLIENT;
@@ -71,68 +67,69 @@ public:
 	/** Return the client id corresponding to the specified entity index (fast),
 	 * or INVALID_CLIENT if there is no such client on this frontend service.
 	 */
-	TClientId				getClientId( const TEntityIndex& entityindex )
+	TClientId getClientId(const TEntityIndex &entityindex)
 	{
 		return _EntityIndexToClient[entityindex.getIndex()];
 	}
 
 	/// Test if an entity id is present
-	bool					findEntityId( const NLMISC::CEntityId& id )
+	bool findEntityId(const NLMISC::CEntityId &id)
 	{
-		return _IdToClientMap.find( id ) != _IdToClientMap.end();
+		return _IdToClientMap.find(id) != _IdToClientMap.end();
 	}
 
 	/// Add an id mapping
-	bool					addId( const NLMISC::CEntityId& id, TClientId clientid )
+	bool addId(const NLMISC::CEntityId &id, TClientId clientid)
 	{
-		nlassert( clientid <= MaxNbClients );
-		return _IdToClientMap.insert( std::make_pair( id, clientid ) ).second; // false if Entity Index added twice to CClientIdLookup
-		//nlinfo( "add: %u elements", _IdToClientMap.size() );
+		nlassert(clientid <= MaxNbClients);
+		return _IdToClientMap.insert(std::make_pair(id, clientid)).second; // false if Entity Index added twice to CClientIdLookup
+		// nlinfo( "add: %u elements", _IdToClientMap.size() );
 	}
 
 	/// Add an entity index mapping for fast access
-	void					addEntityIndex( const TEntityIndex& entityindex, TClientId clientid )
+	void addEntityIndex(const TEntityIndex &entityindex, TClientId clientid)
 	{
-		nlassert( clientid <= MaxNbClients );
-		if ( _EntityIndexToClient[entityindex.getIndex()] != INVALID_CLIENT )
-			nlwarning( "Trying to remap an entityindex to a different clientid");
+		nlassert(clientid <= MaxNbClients);
+		if (_EntityIndexToClient[entityindex.getIndex()] != INVALID_CLIENT)
+			nlwarning("Trying to remap an entityindex to a different clientid");
 		_EntityIndexToClient[entityindex.getIndex()] = clientid;
 	}
 
 	/// Remove a id mapping
-	void					removeEId( const NLMISC::CEntityId& id )
+	void removeEId(const NLMISC::CEntityId &id)
 	{
-		if ( _IdToClientMap.erase( id ) == 0 )
-			nlwarning ("Cannot find EntityId %s to remove in EntityToClient (multiple use of the same account?)", id.toString().c_str() );
+		if (_IdToClientMap.erase(id) == 0)
+			nlwarning("Cannot find EntityId %s to remove in EntityToClient (multiple use of the same account?)", id.toString().c_str());
 	}
 
 	/// Remove an entity index mapping
-	void					removeEntityIndex( const TEntityIndex& entityindex )
+	void removeEntityIndex(const TEntityIndex &entityindex)
 	{
 		_EntityIndexToClient[entityindex.getIndex()] = INVALID_CLIENT;
 	}
 
-	
 private:
-
 	typedef std::vector<TClientId> TEntityIndexToClient;
 
 	struct CIdHash
 	{
-		enum { bucket_size = 4, min_buckets = 8 };
-		size_t	operator () (NLMISC::CEntityId id) const { return (uint32)id.getShortId(); }
-		bool operator() (const NLMISC::CEntityId& left, const NLMISC::CEntityId& right) { return left < right; }
+		enum
+		{
+			bucket_size = 4,
+			min_buckets = 8
+		};
+		size_t operator()(NLMISC::CEntityId id) const { return (uint32)id.getShortId(); }
+		bool operator()(const NLMISC::CEntityId &left, const NLMISC::CEntityId &right) { return left < right; }
 	};
 
-	typedef CHashMap<NLMISC::CEntityId, TClientId, CIdHash>	TIdToClientMap;
+	typedef CHashMap<NLMISC::CEntityId, TClientId, CIdHash> TIdToClientMap;
 
 	/// Access TClientId indexed by TEntityIndex (if the entity is a client connected on this FS)
-	TEntityIndexToClient		_EntityIndexToClient;
+	TEntityIndexToClient _EntityIndexToClient;
 
 	/// Access TClientId using a id
-	TIdToClientMap				_IdToClientMap;
+	TIdToClientMap _IdToClientMap;
 };
-
 
 #endif // NL_CLIENT_ID_LOOKUP_H
 

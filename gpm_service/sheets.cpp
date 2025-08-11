@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 // Misc
@@ -36,7 +34,6 @@
 // Local
 #include "sheets.h"
 
-
 ///////////
 // USING //
 ///////////
@@ -48,9 +45,8 @@ using namespace NLGEORGES;
 //-------------------------------------------------------------------------
 // the singleton data
 
-std::map<CSheetId,CGpmSheets::CSheet> CGpmSheets::_sheets;
-bool CGpmSheets::_initialised=false;
-
+std::map<CSheetId, CGpmSheets::CSheet> CGpmSheets::_sheets;
+bool CGpmSheets::_initialised = false;
 
 //-------------------------------------------------------------------------
 // init
@@ -67,20 +63,19 @@ void CGpmSheets::init()
 	filters.push_back("player");
 
 	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
-	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths")) != NULL))
 	{
-		loadForm(filters, IService::getInstance()->WriteFilesDirectory.toString()+"gpms.packed_sheets", _sheets, false, false);
+		loadForm(filters, IService::getInstance()->WriteFilesDirectory.toString() + "gpms.packed_sheets", _sheets, false, false);
 	}
 
 	// if we haven't succeeded in minimal scan (or 'GeorgePaths' wasn't found in config file) then perform standard scan
 	if (_sheets.empty())
 	{
-		loadForm(filters, IService::getInstance()->WriteFilesDirectory.toString()+"gpms.packed_sheets", _sheets, true);
+		loadForm(filters, IService::getInstance()->WriteFilesDirectory.toString() + "gpms.packed_sheets", _sheets, true);
 	}
 
-	_initialised=true;
+	_initialised = true;
 }
-
 
 //-------------------------------------------------------------------------
 // display
@@ -89,31 +84,28 @@ void CGpmSheets::display()
 {
 	nlassert(_initialised);
 
-	std::map<CSheetId,CGpmSheets::CSheet>::iterator it;
-	for(it=_sheets.begin();it!=_sheets.end();++it)
+	std::map<CSheetId, CGpmSheets::CSheet>::iterator it;
+	for (it = _sheets.begin(); it != _sheets.end(); ++it)
 	{
-		nlinfo("SHEET:%s Walk:%f Run:%f Radius:%f Height:%f Bounding:%f Scale:%f",(*it).first.toString().c_str(),
-			(*it).second.WalkSpeed, (*it).second.RunSpeed, (*it).second.Radius, (*it).second.Height, (*it).second.BoundingRadius, (*it).second.Scale);
+		nlinfo("SHEET:%s Walk:%f Run:%f Radius:%f Height:%f Bounding:%f Scale:%f", (*it).first.toString().c_str(),
+		    (*it).second.WalkSpeed, (*it).second.RunSpeed, (*it).second.Radius, (*it).second.Height, (*it).second.BoundingRadius, (*it).second.Scale);
 	}
 }
-
 
 //-------------------------------------------------------------------------
 // lookup
 
-const CGpmSheets::CSheet *CGpmSheets::lookup( CSheetId id )
+const CGpmSheets::CSheet *CGpmSheets::lookup(CSheetId id)
 {
 	nlassert(_initialised);
 
 	// setup an iterator and lookup the sheet id in the map
-	std::map<CSheetId,CGpmSheets::CSheet>::iterator it;
-	it=_sheets.find(id);
+	std::map<CSheetId, CGpmSheets::CSheet>::iterator it;
+	it = _sheets.find(id);
 
 	// if we found a valid entry return a pointer to the creature record otherwise 0
-	if (it!=_sheets.end())
+	if (it != _sheets.end())
 		return &((*it).second);
 	else
 		return 0;
 }
-
-

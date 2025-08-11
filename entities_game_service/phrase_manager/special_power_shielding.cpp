@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -39,9 +36,8 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 bool CSpecialPowerShielding::validate(std::string &errorCode)
 {
@@ -56,64 +52,63 @@ bool CSpecialPowerShielding::validate(std::string &errorCode)
 	TGameCycle endDate;
 	if (!actor->canUsePower(_PowerType, std::numeric_limits<uint16>::max(), endDate))
 	{
-		uint16 seconds = uint16((endDate - CTickEventHandler::getGameCycle())*CTickEventHandler::getGameTimeStep());
-		uint8 minutes = uint8(seconds/60);
-		seconds = seconds%60;
-		
+		uint16 seconds = uint16((endDate - CTickEventHandler::getGameCycle()) * CTickEventHandler::getGameTimeStep());
+		uint8 minutes = uint8(seconds / 60);
+		seconds = seconds % 60;
+
 		SM_STATIC_PARAMS_3(params, STRING_MANAGER::power_type, STRING_MANAGER::integer, STRING_MANAGER::integer);
 		params[0].Enum = POWERS::Shielding;
 		params[1].Int = minutes;
 		params[2].Int = seconds;
-		
+
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "POWER_DISABLED", params);
 		DEBUGLOG("<CSpecialPowerShielding::validate> Cannot use shielding yet, still disabled");
 		return false;
 	}
-	
+
 	// get targets
 	const std::vector<TDataSetRow> &targets = _Phrase->getTargets();
 
 	if (targets.empty())
 	{
-		PHRASE_UTILITIES::sendSimpleMessage( _ActorRowId, "INVALID_TARGET" );
+		PHRASE_UTILITIES::sendSimpleMessage(_ActorRowId, "INVALID_TARGET");
 		return false;
 	}
 
 	CEntityBase *entity = CEntityBaseManager::getEntityBasePtr(targets[0]);
 	if (!entity)
 	{
-		PHRASE_UTILITIES::sendSimpleMessage( _ActorRowId, "INVALID_TARGET" );
+		PHRASE_UTILITIES::sendSimpleMessage(_ActorRowId, "INVALID_TARGET");
 		return false;
 	}
 
 	// if target is dead, returns
 	if (entity->isDead())
 	{
-		PHRASE_UTILITIES::sendSimpleMessage( _ActorRowId, "INVALID_TARGET" );
+		PHRASE_UTILITIES::sendSimpleMessage(_ActorRowId, "INVALID_TARGET");
 		return false;
 	}
-	
 
-/*	// check distance ?
-	const double distance = PHRASE_UTILITIES::getDistance(_ActorRowId, targets[0]);
-	if ( distance > (double)_Range)
-	{
-		TVectorParamCheck params;
-		params.resize(1);
-		params[0].Type = STRING_MANAGER::entity;
-		params[0].EId = entity->getId();
-		
-		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "POWER_TAUNT_TARGET_TOO_FAR", params);
+	/*	// check distance ?
+	    const double distance = PHRASE_UTILITIES::getDistance(_ActorRowId, targets[0]);
+	    if ( distance > (double)_Range)
+	    {
+	        TVectorParamCheck params;
+	        params.resize(1);
+	        params[0].Type = STRING_MANAGER::entity;
+	        params[0].EId = entity->getId();
 
-		DEBUGLOG("<CSpecialPowerShielding::validate> Target out of range");
-		return false;
-	}
-*/
+	        PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "POWER_TAUNT_TARGET_TOO_FAR", params);
+
+	        DEBUGLOG("<CSpecialPowerShielding::validate> Target out of range");
+	        return false;
+	    }
+	*/
 
 	// TODO check protected entity is valid (not an creature, an attackable npc, ??)
 	if (entity->getId().getType() != RYZOMID::player)
 	{
-		PHRASE_UTILITIES::sendSimpleMessage( _ActorRowId, "INVALID_TARGET" );
+		PHRASE_UTILITIES::sendSimpleMessage(_ActorRowId, "INVALID_TARGET");
 		return false;
 	}
 
@@ -121,7 +116,7 @@ bool CSpecialPowerShielding::validate(std::string &errorCode)
 } // validate //
 
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CSpecialPowerShielding::apply()
 {
@@ -142,8 +137,8 @@ void CSpecialPowerShielding::apply()
 	const std::vector<TDataSetRow> &targets = _Phrase->getTargets();
 
 	const TGameCycle endDate = _Duration + CTickEventHandler::getGameCycle();
-	
-	// only apply on main target 
+
+	// only apply on main target
 	if (!targets.empty())
 	{
 		// get target entity
@@ -154,27 +149,27 @@ void CSpecialPowerShielding::apply()
 		}
 
 		// create effect and apply it on target
-		CShieldingEffect *effect = new CShieldingEffect(_ActorRowId, targets[0], endDate, 0/*power*/);
+		CShieldingEffect *effect = new CShieldingEffect(_ActorRowId, targets[0], endDate, 0 /*power*/);
 		if (!effect)
 		{
 			nlwarning("<CSpecialPowerShielding::apply> Failed to allocate new CShieldingEffect");
 			return;
 		}
 
-		effect->setNoShieldProtection( _NoShieldFactor, _NoShieldMaxProtection );
-		effect->setBucklerProtection( _BucklerFactor, _BucklerMaxProtection );
-		effect->setShieldProtection( _ShieldFactor, _ShieldMaxProtection );
+		effect->setNoShieldProtection(_NoShieldFactor, _NoShieldMaxProtection);
+		effect->setBucklerProtection(_BucklerFactor, _BucklerMaxProtection);
+		effect->setShieldProtection(_ShieldFactor, _ShieldMaxProtection);
 
 		target->addSabrinaEffect(effect);
 
 		// send messages
-//		TVectorParamCheck params;
+		//		TVectorParamCheck params;
 		SM_STATIC_PARAMS_2(params, STRING_MANAGER::entity, STRING_MANAGER::power_type);
 
 		// for actor
 		if (actor->getId().getType() == RYZOMID::player)
 		{
-			params[0].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias( target->getId() ) );
+			params[0].setEIdAIAlias(target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()));
 			params[1].Enum = POWERS::Shielding;
 			PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "POWER_USE_ON_TARGET", params);
 		}
@@ -182,37 +177,37 @@ void CSpecialPowerShielding::apply()
 		// for target
 		if (target->getId().getType() == RYZOMID::player)
 		{
-			params[0].setEIdAIAlias( actor->getId(), CAIAliasTranslator::getInstance()->getAIAlias( actor->getId() ) );
+			params[0].setEIdAIAlias(actor->getId(), CAIAliasTranslator::getInstance()->getAIAlias(actor->getId()));
 			params[1].Enum = POWERS::Shielding;
 			PHRASE_UTILITIES::sendDynamicSystemMessage(target->getEntityRowId(), "POWER_USE_ON_TARGET_TARGET", params);
 		}
 
 		// for spectators
-//		CEntityId senderId;
-//		if (actor->getId().getType() == RYZOMID::player || actor->getId().getType() == RYZOMID::npc)
-//		{
-//			senderId = actor->getId();
-//		}
-//		else if (target->getId().getType() == RYZOMID::player || target->getId().getType() == RYZOMID::npc)
-//		{
-//			senderId = target->getId();
-//		}
-//
-//		if (senderId != CEntityId::Unknown)
-//		{
-//			vector<CEntityId> excluded;
-//			excluded.push_back(actor->getId());
-//			excluded.push_back(target->getId());
-//
-//			params.resize(3);
-//			params[0].Type = STRING_MANAGER::entity;
-//			params[0].EId = actor->getId();
-//			params[1].Type = STRING_MANAGER::entity;
-//			params[1].EId = target->getId();
-//			params[2].Type = STRING_MANAGER::power_type;
-//			params[2].Enum = POWERS::Shielding;
-//			PHRASE_UTILITIES::sendDynamicGroupSystemMessage(TheDataset.getDataSetRow(senderId), excluded, "POWER_USE_ON_TARGET_SPECTATORS", params);
-//		}
+		//		CEntityId senderId;
+		//		if (actor->getId().getType() == RYZOMID::player || actor->getId().getType() == RYZOMID::npc)
+		//		{
+		//			senderId = actor->getId();
+		//		}
+		//		else if (target->getId().getType() == RYZOMID::player || target->getId().getType() == RYZOMID::npc)
+		//		{
+		//			senderId = target->getId();
+		//		}
+		//
+		//		if (senderId != CEntityId::Unknown)
+		//		{
+		//			vector<CEntityId> excluded;
+		//			excluded.push_back(actor->getId());
+		//			excluded.push_back(target->getId());
+		//
+		//			params.resize(3);
+		//			params[0].Type = STRING_MANAGER::entity;
+		//			params[0].EId = actor->getId();
+		//			params[1].Type = STRING_MANAGER::entity;
+		//			params[1].EId = target->getId();
+		//			params[2].Type = STRING_MANAGER::power_type;
+		//			params[2].Enum = POWERS::Shielding;
+		//			PHRASE_UTILITIES::sendDynamicGroupSystemMessage(TheDataset.getDataSetRow(senderId), excluded, "POWER_USE_ON_TARGET_SPECTATORS", params);
+		//		}
 	}
 
 } // apply //

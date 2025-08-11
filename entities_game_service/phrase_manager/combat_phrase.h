@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #ifndef RY_COMBAT_PHRASE_H
 #define RY_COMBAT_PHRASE_H
 
@@ -41,52 +38,59 @@ class CStaticAiAction;
 // struct used to store the aimed slot
 struct CAimedSlot
 {
-	CAimedSlot() : BodyType(BODY::UnknownBodyType), Slot(SLOT_EQUIPMENT::UNDEFINED)
-	{}
+	CAimedSlot()
+	    : BodyType(BODY::UnknownBodyType)
+	    , Slot(SLOT_EQUIPMENT::UNDEFINED)
+	{
+	}
 
 	/// get factor according to refValue
 	inline float applyFactor(uint16 refValue)
 	{
 		if (PowerValue == 0) return 0.0f;
-		if (PowerValue>=refValue) return 1.0f; // so refValue cannot be = 0 as PowerValue is uint
-		return (1.0f * float(PowerValue)/refValue  );
+		if (PowerValue >= refValue) return 1.0f; // so refValue cannot be = 0 as PowerValue is uint
+		return (1.0f * float(PowerValue) / refValue);
 	}
 
-	uint16							PowerValue;
-	BODY::TBodyType					BodyType;
-	SLOT_EQUIPMENT::TSlotEquipment	Slot;
+	uint16 PowerValue;
+	BODY::TBodyType BodyType;
+	SLOT_EQUIPMENT::TSlotEquipment Slot;
 };
 
 // struct used to store the aimed slot for AIActions
 struct CAIAimedSlot
 {
-	CAIAimedSlot() : AiAimingType(AI_AIMING_TYPE::Random)
-	{}
+	CAIAimedSlot()
+	    : AiAimingType(AI_AIMING_TYPE::Random)
+	{
+	}
 
-	AI_AIMING_TYPE::TAiAimingType	AiAimingType;
+	AI_AIMING_TYPE::TAiAimingType AiAimingType;
 };
 
-
 // dynamic modifier
-template <class T, sint32 initValue> class CDynValue
+template <class T, sint32 initValue>
+class CDynValue
 {
 public:
-	CDynValue(): PowerValue(0),
-					MinValue( (T)initValue),
-					MaxValue( (T)initValue)
-	{}
+	CDynValue()
+	    : PowerValue(0)
+	    , MinValue((T)initValue)
+	    , MaxValue((T)initValue)
+	{
+	}
 
 	/// get apply value according to refValue
 	inline T applyValue(uint16 refValue)
 	{
 		if (PowerValue == 0) return MinValue;
-		if (PowerValue>=refValue) return MaxValue; // so refValue cannot be = 0 as PowerValue is uint
-		return T( MinValue + (MaxValue - MinValue) * float(PowerValue)/refValue  );
+		if (PowerValue >= refValue) return MaxValue; // so refValue cannot be = 0 as PowerValue is uint
+		return T(MinValue + (MaxValue - MinValue) * float(PowerValue) / refValue);
 	}
 
-	uint16	PowerValue;
-	T		MinValue;
-	T		MaxValue;
+	uint16 PowerValue;
+	T MinValue;
+	T MaxValue;
 };
 
 typedef CDynValue<float, 1> CDynFactor;
@@ -95,36 +99,40 @@ typedef CDynValue<float, 1> CDynFactor;
 struct CDamageFactor : public CDynFactor
 {
 	/// ctor
-	CDamageFactor() : CDynFactor (),
-						Classification(EGSPD::CClassificationType::EndClassificationType),
-						Race(EGSPD::CPeople::EndPeople),
-						Season(EGSPD::CSeason::EndSeason),
-						Ecosystem(ECOSYSTEM::unknown)
-	{}
+	CDamageFactor()
+	    : CDynFactor()
+	    , Classification(EGSPD::CClassificationType::EndClassificationType)
+	    , Race(EGSPD::CPeople::EndPeople)
+	    , Season(EGSPD::CSeason::EndSeason)
+	    , Ecosystem(ECOSYSTEM::unknown)
+	{
+	}
 
 	/// test compatiblity with entity
 	bool entityMatchRequirements(CEntityBase *entity);
 
-
-	EGSPD::CSeason::TSeason				Season;
-	ECOSYSTEM::EECosystem			Ecosystem;
-	EGSPD::CClassificationType::TClassificationType	Classification;
-	EGSPD::CPeople::TPeople				Race;
+	EGSPD::CSeason::TSeason Season;
+	ECOSYSTEM::EECosystem Ecosystem;
+	EGSPD::CClassificationType::TClassificationType Classification;
+	EGSPD::CPeople::TPeople Race;
 };
 
 // struct used for armor absorption modifier
 struct CArmorAborption : public CDynFactor
 {
 	/// ctor
-	CArmorAborption() : CDynFactor(), ArmorType(ARMORTYPE::UNKNOWN), CreatureType(EGSPD::CClassificationType::EndClassificationType)
-	{}
+	CArmorAborption()
+	    : CDynFactor()
+	    , ArmorType(ARMORTYPE::UNKNOWN)
+	    , CreatureType(EGSPD::CClassificationType::EndClassificationType)
+	{
+	}
 
 	// homins armor type
-	ARMORTYPE::EArmorType			ArmorType;
+	ARMORTYPE::EArmorType ArmorType;
 	// creature armor
-	EGSPD::CClassificationType::TClassificationType	CreatureType;
+	EGSPD::CClassificationType::TClassificationType CreatureType;
 };
-
 
 /**
  * Specialized phrase for combat actions
@@ -138,39 +146,49 @@ public:
 	struct TTargetInfos
 	{
 		TTargetInfos()
-			: Target(NULL), Distance(0.f), DamageFactor(1.f), DodgeFactor(1.f), InflictedNaturalDamage(0), InflictedDamage(0), NbParryDodgeFlyingTextRequired(0)
+		    : Target(NULL)
+		    , Distance(0.f)
+		    , DamageFactor(1.f)
+		    , DodgeFactor(1.f)
+		    , InflictedNaturalDamage(0)
+		    , InflictedDamage(0)
+		    , NbParryDodgeFlyingTextRequired(0)
 		{
 		}
 
-		CCombatDefenderPtr	Target;
-		float				Distance;
-		float				DamageFactor;
-		float				DodgeFactor;
-		sint32				InflictedNaturalDamage;
-		sint32				InflictedDamage;
-		sint32				NbParryDodgeFlyingTextRequired;
+		CCombatDefenderPtr Target;
+		float Distance;
+		float DamageFactor;
+		float DodgeFactor;
+		sint32 InflictedNaturalDamage;
+		sint32 InflictedDamage;
+		sint32 NbParryDodgeFlyingTextRequired;
 	};
 
 public:
 	/// default Constructor
-	CCombatPhrase() { init(); _Attacker = NULL; }
+	CCombatPhrase()
+	{
+		init();
+		_Attacker = NULL;
+	}
 
 	/// destructor
 	virtual ~CCombatPhrase();
 
 	/// build the phrase
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true );
+	virtual bool build(const TDataSetRow &actorRowId, const std::vector<const CStaticBrick *> &bricks, bool buildToExecute = true);
 
 	/// build the phrase from an ai action
-	virtual bool initPhraseFromAiAction( const TDataSetRow & actorRowId, const CStaticAiAction *aiAction, float damageCoeff, float speedCoeff );
+	virtual bool initPhraseFromAiAction(const TDataSetRow &actorRowId, const CStaticAiAction *aiAction, float damageCoeff, float speedCoeff);
 
 	/**
 	 * set the primary target
 	 * \param entityId id of the primary target
 	 */
-	virtual void setPrimaryTarget( const TDataSetRow &entityRowId )
+	virtual void setPrimaryTarget(const TDataSetRow &entityRowId)
 	{
-//		_TargetRowId = entityRowId;
+		//		_TargetRowId = entityRowId;
 	}
 
 	/**
@@ -219,8 +237,7 @@ public:
 	 * set attacker
 	 * \param attacker
 	 */
-//	inline void setAttacker( CCombatAttacker* attacker) { _Attacker = attacker; }
-
+	//	inline void setAttacker( CCombatAttacker* attacker) { _Attacker = attacker; }
 
 	/// set the disengageOnEnd flag
 	inline void disengageOnEnd(bool flag) { _DisengageOnEnd = flag; }
@@ -228,10 +245,10 @@ public:
 	inline bool disengageOnEnd() const { return _DisengageOnEnd; }
 
 	/// get PhraseSuccessDamageFactor
-//	inline float getPhraseSuccessDamageFactor() const { return _PhraseSuccessDamageFactor; }
+	//	inline float getPhraseSuccessDamageFactor() const { return _PhraseSuccessDamageFactor; }
 
 	/// set root sheet id for database entry
-	inline void setRootSheetId( const NLMISC::CSheetId &id) { _RootSheetId = id; }
+	inline void setRootSheetId(const NLMISC::CSheetId &id) { _RootSheetId = id; }
 
 	/// get attacker weapon sabrina value
 	inline uint16 weaponSabrinaValue() const { return _WeaponSabrinaValue; }
@@ -255,10 +272,10 @@ public:
 	}
 
 	/// get attacker
-	inline const CCombatAttacker* getAttacker() const { return _Attacker; }
+	inline const CCombatAttacker *getAttacker() const { return _Attacker; }
 
 	/// get targets
-	inline const std::vector<TTargetInfos> & getTargets()
+	inline const std::vector<TTargetInfos> &getTargets()
 	{
 		return _Targets;
 	}
@@ -290,7 +307,7 @@ public:
 	inline SLOT_EQUIPMENT::TSlotEquipment getHitLocalisation() const { return _HitLocalisation; }
 
 	// BRIANCODE Added to support mission evaluation of combat bricks
-	virtual void setBrickSheets( const std::vector<NLMISC::CSheetId> & bricks)
+	virtual void setBrickSheets(const std::vector<NLMISC::CSheetId> &bricks)
 	{
 		_BrickSheets = bricks;
 	}
@@ -298,14 +315,14 @@ public:
 protected:
 	struct TApplyAction
 	{
-		CCombatDefenderPtr					Target;
-		bool								MainTarget;
-		sint16								DeltaLevel;
-		float								DodgeFactor;
-		SLOT_EQUIPMENT::TSlotEquipment		HitLocalisation;
-		sint32								InflictedDamageBeforeArmor;
-		sint32								InflictedNaturalDamage;
-		sint32								InflictedDamage;
+		CCombatDefenderPtr Target;
+		bool MainTarget;
+		sint16 DeltaLevel;
+		float DodgeFactor;
+		SLOT_EQUIPMENT::TSlotEquipment HitLocalisation;
+		sint32 InflictedDamageBeforeArmor;
+		sint32 InflictedNaturalDamage;
+		sint32 InflictedDamage;
 	};
 
 protected:
@@ -316,7 +333,7 @@ protected:
 	 * add a brick to the phrase
 	 * \param brick the added brick
 	 */
-	void addBrick( const CStaticBrick &brick );
+	void addBrick(const CStaticBrick &brick);
 
 	/**
 	 * test attacker skill against opponent defense
@@ -345,7 +362,7 @@ protected:
 	 * \param madnessCaster if isMad == true then this is the caster of the madness spell
 	 * \return true if the attack is successful
 	 */
-	bool launchAttack(CEntityBase * actingEntity, bool rightHand, bool isMad, TDataSetRow madnessCaster);
+	bool launchAttack(CEntityBase *actingEntity, bool rightHand, bool isMad, TDataSetRow madnessCaster);
 
 	/**
 	 * launch attack on given target
@@ -358,22 +375,22 @@ protected:
 	 * \param errorCode the string that will receive the error code if any
 	 * \return true if the target is valid
 	 */
-	bool checkTargetValidity( const TDataSetRow &targetRowId, std::string &errorCode );
+	bool checkTargetValidity(const TDataSetRow &targetRowId, std::string &errorCode);
 
 	/**
 	 * check the attacker can pay phrase's costs
 	 */
-	bool checkPhraseCost( std::string &errorCode );
+	bool checkPhraseCost(std::string &errorCode);
 
 	/**
 	 * check target distance and orientation
 	 */
-	bool checkOrientation( const CEntityBase *actor, const CEntityBase *target );
+	bool checkOrientation(const CEntityBase *actor, const CEntityBase *target);
 
 	/**
 	 * create the defender structure from given row id
 	 */
-	CCombatDefenderPtr createDefender( const TDataSetRow &targetRowId );
+	CCombatDefenderPtr createDefender(const TDataSetRow &targetRowId);
 
 	/**
 	 * validate combat actions
@@ -385,12 +402,12 @@ protected:
 	 * \param actingEntity the attacker
 	 * \param rightHand true if attack uses the right hand, false if it uses left hand
 	 */
-	void applyAttack(CEntityBase * actingEntity, bool rightHand);
+	void applyAttack(CEntityBase *actingEntity, bool rightHand);
 
 	/**
 	 * apply an action
 	 */
-	void applyAction(TApplyAction & action, std::vector<TReportAction> & actionReports, bool rightHand);
+	void applyAction(TApplyAction &action, std::vector<TReportAction> &actionReports, bool rightHand);
 
 	/**
 	 * apply combat special actions
@@ -405,7 +422,7 @@ protected:
 	/**
 	 * apply special effect due to localisation of the hit
 	 */
-	void applyLocalisationSpecialEffect( CCombatDefenderPtr &defender, SLOT_EQUIPMENT::TSlotEquipment slot, sint32 damage, sint32 &lostStamina);
+	void applyLocalisationSpecialEffect(CCombatDefenderPtr &defender, SLOT_EQUIPMENT::TSlotEquipment slot, sint32 damage, sint32 &lostStamina);
 
 	/**
 	 * apply defender armor damage reduction
@@ -443,7 +460,7 @@ protected:
 			return false;
 		else
 		{
-			for (uint i = 0 ; i < _BrickDefinedFlags.size() ; ++i)
+			for (uint i = 0; i < _BrickDefinedFlags.size(); ++i)
 			{
 				if (_BrickDefinedFlags[i] == BRICK_FLAGS::Feint)
 					return true;
@@ -456,170 +473,170 @@ protected:
 	sint16 computeDeltaLevel(CCombatDefenderPtr &combatDefender, bool rightHand);
 
 	/// return sabrina cost with relative cost added
-	uint16 sabrinaCost() const { return (uint16) ( _SabrinaCost * _SabrinaRelativeCost ); }
+	uint16 sabrinaCost() const { return (uint16)(_SabrinaCost * _SabrinaRelativeCost); }
 
 	/// return sabrina cost with relative cost added
-	uint16 sabrinaCredit() const { return (uint16) ( _SabrinaCredit * _SabrinaRelativeCredit ); }
+	uint16 sabrinaCredit() const { return (uint16)(_SabrinaCredit * _SabrinaRelativeCredit); }
 
 protected:
 	// total cost (sabrina system)
-	uint16					_SabrinaCost;
+	uint16 _SabrinaCost;
 
 	// Relative cost must be added to total cost
-	float					_SabrinaRelativeCost;
+	float _SabrinaRelativeCost;
 
 	/// brick max sabrina cost
-	uint16					_BrickMaxSabrinaCost;
+	uint16 _BrickMaxSabrinaCost;
 
 	// total credit (sabrina system)
-	uint16					_SabrinaCredit;
+	uint16 _SabrinaCredit;
 
 	// Relative credit must be added to total credit
-	float					_SabrinaRelativeCredit;
+	float _SabrinaRelativeCredit;
 
 	/// stamina cost of the attack
-	sint32					_StaminaCost;
+	sint32 _StaminaCost;
 
 	/// Stamina weapon weight cost factor
-	float					_StaminaWeightFactorCost;
+	float _StaminaWeightFactorCost;
 
 	// hp cost
-	sint32					_HPCost;
+	sint32 _HPCost;
 
 	/// execution length modifier (in ticks)
-	sint32					_ExecutionLengthModifier;
+	sint32 _ExecutionLengthModifier;
 
 	/// hit rate modifier (in ticks)
-	sint32					_HitRateModifier;
+	sint32 _HitRateModifier;
 
 	/// latency factor
-	float					_LatencyFactor;
+	float _LatencyFactor;
 
 	/// latency factor
-	CDynValue<float,1>		_LatencyFactorDyn;
+	CDynValue<float, 1> _LatencyFactorDyn;
 
 	/// modifier on dealt damage (whatever the success factor (the factor is applied on damage + damage mod afterwards))
-	sint32					_DamageModifier;
+	sint32 _DamageModifier;
 
 	/// factor on dealt damage
-	float					_DamageFactor;
+	float _DamageFactor;
 
 	/// modifier on dealt damage
-	CDamageFactor			_DamageFactorOnSuccess;
+	CDamageFactor _DamageFactorOnSuccess;
 
 	/// base damage, independent from target
-	float					_BaseDamage;
+	float _BaseDamage;
 
 	/// natural damage, amount of damage without any modifiers
-	sint32					_NaturalDamage;
+	sint32 _NaturalDamage;
 
 	// aimed slot if any (for players)
-	CAimedSlot						_AimedSlot;
+	CAimedSlot _AimedSlot;
 	// aimed slot if any (for AI)
-	AI_AIMING_TYPE::TAiAimingType	_AiAimingType;
+	AI_AIMING_TYPE::TAiAimingType _AiAimingType;
 
 	/// skill used by the root brick
-	SKILLS::ESkills			_RootSkill;
+	SKILLS::ESkills _RootSkill;
 
 	/// skill modifier for attack
-	CDynValue<sint32,0>		_AttackSkillModifier;
+	CDynValue<sint32, 0> _AttackSkillModifier;
 
 	/// special hit, set to true to use special fx
-	bool					_SpecialHit;
+	bool _SpecialHit;
 
 	/// stamina loss factor
-	CDynValue<float,1>		_StaminaLossDynFactor;
+	CDynValue<float, 1> _StaminaLossDynFactor;
 	/// sap loss factor
-	CDynValue<float,1>		_SapLossDynFactor;
+	CDynValue<float, 1> _SapLossDynFactor;
 
 	/// opening needed
 	std::vector<BRICK_FLAGS::TBrickFlag> _OpeningNeededFlags;
 
 	/// flag indicating if the attacker is disengaged at the end of this phrase
-	bool					_DisengageOnEnd;
+	bool _DisengageOnEnd;
 
 	/// If the specified sheetId is != CSheetId::Unknown, init player database entry "EXECUTE_PHRASE:SHEET" with it
-	NLMISC::CSheetId		_RootSheetId;
+	NLMISC::CSheetId _RootSheetId;
 
 	/// Critical Hit Chances Modifier (-100 +100)
-	CDynValue<sint8,0>		_CriticalHitChancesModifier;
+	CDynValue<sint8, 0> _CriticalHitChancesModifier;
 
 	/// weapon wear modifier
-	CDynValue<float,0>		_WeaponWearModifier;
+	CDynValue<float, 0> _WeaponWearModifier;
 
 	/// hit all melee aggressors ?
-	bool					_HitAllMeleeAggressors;
-	CDynValue<float,1>		_MultiTargetGlobalDamageFactor;
+	bool _HitAllMeleeAggressors;
+	CDynValue<float, 1> _MultiTargetGlobalDamageFactor;
 
 	// actor behaviour
-	MBEHAV::CBehaviour		_Behaviour;
+	MBEHAV::CBehaviour _Behaviour;
 	/// behaviour weight (sabrina cost of associated brick or 0)
-	uint16					_BehaviourWeight;
+	uint16 _BehaviourWeight;
 
 	/// armor absorption factor
-	CArmorAborption			_ArmorAbsorptionFactor;
+	CArmorAborption _ArmorAbsorptionFactor;
 
 	/// factor on target aggressivity (aggro) (1.0 = default; 1.2 = +20% ; 0.6 = -40%)
-	float					_AggroMultiplier;
+	float _AggroMultiplier;
 	/// modifier on target aggressivity (aggro)
-	sint32					_AggroModifier;
+	sint32 _AggroModifier;
 
 	//\name damage multipliers for ranged attacks
 	//@{
-	float			 		_DamagePointBlank;
-	float			 		_DamageShortRange;
-	float			 		_DamageMediumRange;
-	float			 		_DamageLongRange;
+	float _DamagePointBlank;
+	float _DamageShortRange;
+	float _DamageMediumRange;
+	float _DamageLongRange;
 	//@}
 
 	/// vector of ai event report structures if target is managed by ai (ie. not a player)
-	//std::vector<CAiEventReport*>	_AiEventReports;
-	CAiEventReport			_AiEventReport;
+	// std::vector<CAiEventReport*>	_AiEventReports;
+	CAiEventReport _AiEventReport;
 
 	/// \name temp vars
 	//@{
 	/// success damage factor (>1 if real success, < 1 if partial success, 0 = total failure)
-	float					_PhraseSuccessDamageFactor;
+	float _PhraseSuccessDamageFactor;
 	/// critical hit
-	bool					_CriticalHit;
+	bool _CriticalHit;
 	/// skill used to attack
-	SKILLS::ESkills			_AttackSkill;
+	SKILLS::ESkills _AttackSkill;
 	/// validated flag
-	bool					_Validated;
+	bool _Validated;
 	/// \name flags indicated if an error message has been sent already (when in idle mode)
 	//@{
-	bool					_TargetTooFarMsg;
-	bool					_NotEnoughHpMsg;
-	bool					_NotEnoughStaminaMsg;
-	bool					_NoAmmoMsg;
-	bool					_BadOrientationMsg;
+	bool _TargetTooFarMsg;
+	bool _NotEnoughHpMsg;
+	bool _NotEnoughStaminaMsg;
+	bool _NoAmmoMsg;
+	bool _BadOrientationMsg;
 	//}@
 	/// is current target valid ?
-	bool					_CurrentTargetIsValid;
+	bool _CurrentTargetIsValid;
 	/// melee or range combat
-	bool					_MeleeCombat;
+	bool _MeleeCombat;
 	/// total stamina cost
-	sint32					_TotalStaminaCost;
+	sint32 _TotalStaminaCost;
 	/// total hp cost
-	sint32					_TotalHPCost;
+	sint32 _TotalHPCost;
 	/// the total sabrina cost
-	sint32					_TotalSabrinaCost;
+	sint32 _TotalSabrinaCost;
 	/// right weapon sabrina value
-	uint16					_WeaponSabrinaValue;
+	uint16 _WeaponSabrinaValue;
 	/// left weapon sabrina value
-	uint16					_LeftWeaponSabrinaValue;
+	uint16 _LeftWeaponSabrinaValue;
 	/// hit localisation on main target
 	SLOT_EQUIPMENT::TSlotEquipment _HitLocalisation;
 	/// madness caster
-	TDataSetRow				_MadnessCaster;
+	TDataSetRow _MadnessCaster;
 	/// is mad ?
-	bool					_IsMad;
+	bool _IsMad;
 	/// if attacker is mad, keep here the skill used by caster to cast the mad effect (if applicable)
-	SKILLS::ESkills			_MadSkill;
+	SKILLS::ESkills _MadSkill;
 	//}@
 
 	/// combat special actions (such as stun, bleed, slow etc)
-	std::vector<CCombatAction*>	_CombatActions;
+	std::vector<CCombatAction *> _CombatActions;
 
 	/// targets
 	std::vector<TTargetInfos> _Targets;
@@ -631,13 +648,13 @@ protected:
 	std::vector<TApplyAction> _LeftApplyActions;
 
 	/// attacker
-	CCombatAttacker*		_Attacker;
+	CCombatAttacker *_Attacker;
 	/// used ammo
-	CCombatWeapon			_Ammo;
+	CCombatWeapon _Ammo;
 	// used right weapon
-	CCombatWeapon			_RightWeapon;
+	CCombatWeapon _RightWeapon;
 	// used left weapon
-	CCombatWeapon			_LeftWeapon;
+	CCombatWeapon _LeftWeapon;
 
 	/// flags defined by used bricks (needed for openings)
 	std::vector<BRICK_FLAGS::TBrickFlag> _BrickDefinedFlags;
@@ -651,28 +668,27 @@ protected:
 	// List of event to be processed during the apply() stage of the combat phrase.
 	enum TDelayedEventType
 	{
-		EventEvade=0,			// the attacker miss (=> defender "evade")
-		EventDodge,				// the defender dodged
-		EventParry,				// the defender parried
-		EventMeleeDodgeOpening,	// the defender is a player and he dodged a melee attack
-		EventMeleeParryOpening,	// the defender is a player and he parried a melee attack
+		EventEvade = 0, // the attacker miss (=> defender "evade")
+		EventDodge, // the defender dodged
+		EventParry, // the defender parried
+		EventMeleeDodgeOpening, // the defender is a player and he dodged a melee attack
+		EventMeleeParryOpening, // the defender is a player and he parried a melee attack
 	};
-	struct	CDelayedEvent
+	struct CDelayedEvent
 	{
-		TDataSetRow			DefenderRowId;
-		TDelayedEventType	EventType;
-		bool				SendFlyingText;	// true if must apply the flying text
+		TDataSetRow DefenderRowId;
+		TDelayedEventType EventType;
+		bool SendFlyingText; // true if must apply the flying text
 	};
-	std::vector<CDelayedEvent>	_DelayedEvents;
-	bool						_MissFlyingTextTriggered;
+	std::vector<CDelayedEvent> _DelayedEvents;
+	bool _MissFlyingTextTriggered;
 
 	// add a special event that will resolved in the apply() step
-	void		addDelayedEvent(TDataSetRow defenderId, TDelayedEventType eventType, bool sendFlyingText= true);
+	void addDelayedEvent(TDataSetRow defenderId, TDelayedEventType eventType, bool sendFlyingText = true);
 
 	// apply the events and clear the list
-	void		flushDelayedEvents();
+	void flushDelayedEvents();
 	// @}
-
 };
 
 typedef NLMISC::CSmartPtr<CCombatPhrase> CCombatPhrasePtr;
@@ -680,6 +696,3 @@ typedef NLMISC::CSmartPtr<CCombatPhrase> CCombatPhrasePtr;
 #endif // RY_COMBAT_PHRASE_H
 
 /* End of combat_phrase.h */
-
-
-

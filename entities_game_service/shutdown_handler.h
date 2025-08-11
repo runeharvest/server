@@ -23,7 +23,6 @@
 
 #include "nel/misc/ucstring.h"
 
-
 /**
  * This singleton handles shutdown events
  * \author Benjamin Legros
@@ -33,29 +32,25 @@
 class CShutdownHandler
 {
 public:
-
 	/// \name Basic Management
 	// @{
 
 	/**
 	 * Inits Handler
 	 */
-	static void		init();
+	static void init();
 
 	/**
 	 * Update Handler
 	 */
-	static void		update();
+	static void update();
 
 	/**
 	 * Release Handler
 	 */
-	static void		release();
+	static void release();
 
 	// @}
-
-
-
 
 	/// \name Handler Commands Declaration
 	// @{
@@ -63,24 +58,20 @@ public:
 	/**
 	 * Start Shutdown Counter
 	 */
-	static void		startShutdown(sint shutdownCounter = -1, sint broadcastMessageRate = -1);
+	static void startShutdown(sint shutdownCounter = -1, sint broadcastMessageRate = -1);
 
 	/**
 	 * Cancel Shutdown
 	 */
-	static void		cancelShutdown();
+	static void cancelShutdown();
 
 	/**
 	 * Restart shard
 	 * Actually reset WS ShardOpen variable to OpenForAll
 	 */
-	static void		restartShard();
+	static void restartShard();
 
 	// @}
-
-
-
-
 
 	/// \name Info queries
 	// @{
@@ -88,13 +79,11 @@ public:
 	/**
 	 * Get current shard state
 	 */
-	static std::string	getState();
+	static std::string getState();
 
 	// @}
 
-
 private:
-
 	enum TState
 	{
 		Running = 0,
@@ -103,30 +92,29 @@ private:
 	};
 
 	/// Shutdown State
-	static TState			_State;
+	static TState _State;
 
 	/// Shutdown Timeout
-	static NLMISC::TTime	_ShutdownTimeout;
+	static NLMISC::TTime _ShutdownTimeout;
 
 	/// Shutdown Timeout
-	static NLMISC::TTime	_NextBroadcastMessage;
+	static NLMISC::TTime _NextBroadcastMessage;
 
 	/// ShardOpen has been closed
-	static bool				_ShardClosed;
+	static bool _ShardClosed;
 
 	/// Broadcast Message Rate
-	static uint				_BroadcastMessageRate;
+	static uint _BroadcastMessageRate;
 
 	/// Broadcast Shutdown message
-	static void				broadcastShutdownMessage();
+	static void broadcastShutdownMessage();
 
 	/// Broadcast message
-	static void				broadcastMessage(const ucstring& message);
+	static void broadcastMessage(const ucstring &message);
 
 	/// Disconnect all players
-	static void				disconnectPlayers();
+	static void disconnectPlayers();
 };
-
 
 typedef uint32 TSecTime; // unit of NLMISC::CTime::getSecondsSince1970()
 
@@ -136,25 +124,22 @@ typedef uint32 TSecTime; // unit of NLMISC::CTime::getSecondsSince1970()
 class CAutomaticShutdownHandler
 {
 public:
-
 	/// Update Handler
-	static void					update();
+	static void update();
 
 	/// Uses daily shutdown sequence time to compute next time
-	static void					computePlannedShutdownTimes( NLMISC::CLog *log=NLMISC::InfoLog );
-
+	static void computePlannedShutdownTimes(NLMISC::CLog *log = NLMISC::InfoLog);
 
 private:
 	/// Game cycle of last config file check
-	static NLMISC::TGameCycle	_LastGCChecked;
+	static NLMISC::TGameCycle _LastGCChecked;
 
 	/// Time of next planned shutdown sequence start
-	static TSecTime				_NextPlannedShutdownStartTime;
+	static TSecTime _NextPlannedShutdownStartTime;
 
 	/// Time of next planned shutdown sequence end
-	static TSecTime				_NextPlannedShutdownEndTime;
+	static TSecTime _NextPlannedShutdownEndTime;
 };
-
 
 #endif // EGS_SHUTDOWN_HANDLER_H
 

@@ -22,12 +22,10 @@
 #include <set>
 #include "game_item_manager/guild_inv.h"
 
-
 class CCharacter;
 class IDataProvider;
 
 typedef NLMISC::CEntityId CCDBRecipient;
-
 
 /**
  * Database group.
@@ -83,16 +81,16 @@ typedef NLMISC::CEntityId CCDBRecipient;
 class CCDBGroup
 {
 public:
-
 	/// Flags for sendDeltas
-	enum {
-		SendDeltasToRecipients		=	0,			///< If specified, send the deltas to the group's recipent list
-		SendDeltasToAll				=	1,			///< If specified, send the deltas to everyong (broadcast), ignores the recipent list
+	enum
+	{
+		SendDeltasToRecipients = 0, ///< If specified, send the deltas to the group's recipent list
+		SendDeltasToAll = 1, ///< If specified, send the deltas to everyong (broadcast), ignores the recipent list
 	};
 
 	/// Init (the singleton of CCDBStructBanks must have been initialized before)
-	void				init( TCDBBank bank ) { Database.init( bank, true ); }
-	
+	void init(TCDBBank bank) { Database.init(bank, true); }
+
 	/**
 	 * Add a recipient.
 	 * - recipient must be ready for writing (e.g. at state 1 of above tutorial), because it will
@@ -101,39 +99,35 @@ public:
 	 * //- recipient must neither move in memory nor be removed between calls of addRecipient() and
 	 * //removeRecipient(). Beware with vectors and reallocation.
 	 */
-	void				addRecipient( const CCDBRecipient& recipient );
+	void addRecipient(const CCDBRecipient &recipient);
 
 	/// Remove a recipient
-	void				removeRecipient( const CCDBRecipient& recipient );
+	void removeRecipient(const CCDBRecipient &recipient);
 
 	/// Use Database to set properties
-	CCDBSynchronised	Database;
+	CCDBSynchronised Database;
 
 	/// Write and send the delta to all recipients, if there's something to write. Set maxBitSize to ~0 for no limit.
 	/// @param[in] sendFlags A combination of Flags (see enum above) indicating how the deltas are to be sent
-	void				sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint8 sendFlags);
+	void sendDeltas(uint32 maxBitSize, IDataProvider &dataProvider, uint8 sendFlags);
 
 	/// Simpler version
 	/// @param[in] sendFlags A combination of Flags (see enum above) indicating how the deltas are to be sent
-	void				sendDeltas( uint32 maxBitSize, uint8 sendFlags)
+	void sendDeltas(uint32 maxBitSize, uint8 sendFlags)
 	{
 		CFakeDataProvider dp;
-		sendDeltas( maxBitSize, dp, sendFlags );
+		sendDeltas(maxBitSize, dp, sendFlags);
 	}
-	
 
 private:
-
-	typedef std::set< CCDBRecipient > CRecipientList;
+	typedef std::set<CCDBRecipient> CRecipientList;
 
 	/// Recipients
-	CRecipientList					_Recipients;
+	CRecipientList _Recipients;
 
 	/// New recipients since the latest sendDeltas()
-	std::vector< CCDBRecipient >	_NewRecipients;
+	std::vector<CCDBRecipient> _NewRecipients;
 };
-
-
 
 #endif // NL_CDB_GROUP_H
 

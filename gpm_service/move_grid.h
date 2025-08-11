@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_MOVE_GRID_H
 #define NL_MOVE_GRID_H
 
@@ -30,16 +28,20 @@
  * \param T the type of item
  * \param TPtr a pointer to T to use in list (useful for smartpointer)
  */
-template<class TT>
+template <class TT>
 class CMoveGridObjectList
 {
 public:
-	TT									*Head;
-	TT									*Tail;
+	TT *Head;
+	TT *Tail;
 
-	CMoveGridObjectList() : Head(NULL), Tail(NULL) {}
+	CMoveGridObjectList()
+	    : Head(NULL)
+	    , Tail(NULL)
+	{
+	}
 
-	void	insertAtHead(TT *object)
+	void insertAtHead(TT *object)
 	{
 		nlassert(object->Next == NULL);
 		nlassert(object->Previous == NULL);
@@ -52,7 +54,7 @@ public:
 		Head = object;
 	}
 
-	void	insertAtTail(TT *object)
+	void insertAtTail(TT *object)
 	{
 		nlassert(object->Next == NULL);
 		nlassert(object->Previous == NULL);
@@ -65,7 +67,7 @@ public:
 		Tail = object;
 	}
 
-	void	remove(TT *object)
+	void remove(TT *object)
 	{
 		// if object at head
 		if (object->Previous == NULL)
@@ -83,8 +85,8 @@ public:
 		object->Next = NULL;
 	}
 
-	TT			*getHead() { return (TT*)Head; }
-	TT			*getTail() { return (TT*)Tail; }
+	TT *getHead() { return (TT *)Head; }
+	TT *getTail() { return (TT *)Tail; }
 };
 
 /**
@@ -93,7 +95,7 @@ public:
  * \author Nevrax France
  * \date 2001
  */
-template<typename T, int CELLS, int CSIZE>
+template <typename T, int CELLS, int CSIZE>
 class CMoveGrid
 {
 public:
@@ -105,7 +107,6 @@ protected:
 	class CNode;
 
 public:
-
 	/// Constructor
 	CMoveGrid();
 
@@ -113,90 +114,93 @@ public:
 	~CMoveGrid();
 
 	/// Clear
-	void		clear();
-
+	void clear();
 
 	/// Insert an element in move grid. Return an iterator towards the inserted object
-	CIterator	insert(const T &object, const NLMISC::CVector &position);
-
+	CIterator insert(const T &object, const NLMISC::CVector &position);
 
 	/// Move an object in grid.
-	void		move(CIterator &it, const NLMISC::CVector &position);
-
+	void move(CIterator &it, const NLMISC::CVector &position);
 
 	/// Remove
-	void		remove(CIterator &it);
-	void		insertNode(CIterator &it, sint x, sint y);
-	void		removeNode(CIterator &it);
-
-
-	/// select
-	void		select(const NLMISC::CVector &position);
+	void remove(CIterator &it);
+	void insertNode(CIterator &it, sint x, sint y);
+	void removeNode(CIterator &it);
 
 	/// select
-	void		select(const NLMISC::CAABBox &bbox);
+	void select(const NLMISC::CVector &position);
+
+	/// select
+	void select(const NLMISC::CAABBox &bbox);
 
 	/// begin
-	CIterator	begin();
+	CIterator begin();
 
 	/// end
-	CIterator	end();
+	CIterator end();
 
 	/// clearSelection
-	void		clearSelection();
+	void clearSelection();
 
 	/// round value so it is a half of a segment
-	double		round(double v)
+	double round(double v)
 	{
-		const double	INV = 1000.0 / (double)CSIZE;
-		return (floor(v*INV)+0.5)*(double)CSIZE*0.001;
+		const double INV = 1000.0 / (double)CSIZE;
+		return (floor(v * INV) + 0.5) * (double)CSIZE * 0.001;
 	}
 
 	/// Serial
-	void		serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 
 protected:
-	sint		convert(float v)
+	sint convert(float v)
 	{
-		const float	INV = 1000.0f / (float)CSIZE;
-		return (sint)(v*INV);
+		const float INV = 1000.0f / (float)CSIZE;
+		return (sint)(v * INV);
 	}
 
-	sint		convertGrid(float v)
+	sint convertGrid(float v)
 	{
-		const float	INV = 1000.0f / (float)CSIZE;
-		return (sint)(v*INV)&(CELLS-1);
+		const float INV = 1000.0f / (float)CSIZE;
+		return (sint)(v * INV) & (CELLS - 1);
 	}
 
-	sint		convertGrid(sint v)
+	sint convertGrid(sint v)
 	{
-		return v&(CELLS-1);
+		return v & (CELLS - 1);
 	}
 
-	void		select(sint X, sint Y);
-
+	void select(sint X, sint Y);
 
 protected:
-
 	/// A node that contains an objects.
-	typedef CMoveGridObjectList<CNode>		TNodeList;
+	typedef CMoveGridObjectList<CNode> TNodeList;
 	/// A node that is a cell, containing a list of node inside this cell.
-	typedef CMoveGridObjectList<CCellNode>	TCellNodeList;
+	typedef CMoveGridObjectList<CCellNode> TCellNodeList;
 
 	class CCellNode
 	{
 	public:
-		sint32		X, Y;
-		sint32		GridX, GridY;
+		sint32 X, Y;
+		sint32 GridX, GridY;
 
-		TNodeList	NodeList;
+		TNodeList NodeList;
 
-		CCellNode	*Previous, *Next;
-		CCellNode	*Selection;
+		CCellNode *Previous, *Next;
+		CCellNode *Selection;
 
-		CCellNode() : X(0), Y(0), GridX(0), GridY(0), Previous(NULL), Next(NULL), Selection(NULL) {}
+		CCellNode()
+		    : X(0)
+		    , Y(0)
+		    , GridX(0)
+		    , GridY(0)
+		    , Previous(NULL)
+		    , Next(NULL)
+		    , Selection(NULL)
+		{
+		}
 
-		void		serial(NLMISC::IStream &f)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial(X, Y, GridX, GridY);
 		}
@@ -205,48 +209,60 @@ protected:
 	class CNode
 	{
 	public:
-		CNode		*Previous, *Next;
-		CCellNode	*Root;
-		T			Object;
+		CNode *Previous, *Next;
+		CCellNode *Root;
+		T Object;
 
-		CNode() : Previous(NULL), Next(NULL), Root(NULL) {}
+		CNode()
+		    : Previous(NULL)
+		    , Next(NULL)
+		    , Root(NULL)
+		{
+		}
 
-		void		serial(NLMISC::IStream &f)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial(Object);
 		}
 	};
 
 	/// The map of cell nodes
-	TCellNodeList	_Grid[CELLS][CELLS];
+	TCellNodeList _Grid[CELLS][CELLS];
 
 	/// The first selected cell node
-	CCellNode		*_Selection;
+	CCellNode *_Selection;
 
 	/// The allocator of nodes
-	NLMISC::CBlockMemory<CNode>		_NodeAllocator;
+	NLMISC::CBlockMemory<CNode> _NodeAllocator;
 	/// The allocator of cell nodes
-	NLMISC::CBlockMemory<CCellNode>	_CellNodeAllocator;
+	NLMISC::CBlockMemory<CCellNode> _CellNodeAllocator;
 
 public:
 	class CIterator
 	{
 		friend class CMoveGrid<T, CELLS, CSIZE>;
+
 	public:
-		CIterator(CNode *node = NULL) : _Node(node) {}
-		CIterator(const CIterator &it) : _Node(it._Node) {}
+		CIterator(CNode *node = NULL)
+		    : _Node(node)
+		{
+		}
+		CIterator(const CIterator &it)
+		    : _Node(it._Node)
+		{
+		}
 
-		T			& operator * () { return _Node->Object; }
+		T &operator*() { return _Node->Object; }
 
-		CIterator	& operator ++ ()
-		{ 
+		CIterator &operator++()
+		{
 			if (_Node->Next != NULL)
 			{
 				_Node = _Node->Next;
 			}
 			else
 			{
-				CCellNode	*nextCell = _Node->Root->Selection;
+				CCellNode *nextCell = _Node->Root->Selection;
 				_Node = NULL;
 				// iterate till we have a non empty selected cell
 				while (nextCell != NULL && (_Node = nextCell->NodeList.getHead()) == NULL)
@@ -254,20 +270,24 @@ public:
 			}
 			return *this;
 		}
-		CIterator	operator ++ (int)
-		{ 
+		CIterator operator++(int)
+		{
 			CIterator ret(_Node);
 			++(*this);
 			return ret;
 		}
 
-		bool		operator == (const CIterator &it) const { return it._Node == _Node; }
-		bool		operator != (const CIterator &it) const { return !(*this == it); }
+		bool operator==(const CIterator &it) const { return it._Node == _Node; }
+		bool operator!=(const CIterator &it) const { return !(*this == it); }
 
-		CIterator	operator = (const CIterator &it) { _Node = it._Node; return *this; }
+		CIterator operator=(const CIterator &it)
+		{
+			_Node = it._Node;
+			return *this;
+		}
 
 	protected:
-		CNode	*_Node;
+		CNode *_Node;
 	};
 };
 
@@ -275,29 +295,27 @@ public:
 // TEMPLATE IMPLEMENTATION
 //
 
-
-
 // Serial
-template<typename T, int CELLS, int CSIZE>
-void	CMoveGrid<T, CELLS, CSIZE>::serial(NLMISC::IStream &f)
+template <typename T, int CELLS, int CSIZE>
+void CMoveGrid<T, CELLS, CSIZE>::serial(NLMISC::IStream &f)
 {
-	sint	version = f.serialVersion(0);
+	sint version = f.serialVersion(0);
 	f.serialCheck((sint32)CELLS);
 	f.serialCheck((sint32)CSIZE);
 
 	if (f.isReading())
 	{
 		clear();
-		sint	i, j;
-		uint32	nc, nn;
+		sint i, j;
+		uint32 nc, nn;
 
-		for (i=0; i<CELLS; ++i)
+		for (i = 0; i < CELLS; ++i)
 		{
-			for (j=0; j<CELLS; ++j)
+			for (j = 0; j < CELLS; ++j)
 			{
-				TCellNodeList	&list = _Grid[i][j];
-				CCellNode		*cellNode;
-				CNode			*node;
+				TCellNodeList &list = _Grid[i][j];
+				CCellNode *cellNode;
+				CNode *node;
 
 				f.serial(nc);
 				while (nc-- > 0)
@@ -320,16 +338,16 @@ void	CMoveGrid<T, CELLS, CSIZE>::serial(NLMISC::IStream &f)
 	}
 	else
 	{
-		sint	i, j;
-		uint32	nc, nn;
+		sint i, j;
+		uint32 nc, nn;
 
-		for (i=0; i<CELLS; ++i)
+		for (i = 0; i < CELLS; ++i)
 		{
-			for (j=0; j<CELLS; ++j)
+			for (j = 0; j < CELLS; ++j)
 			{
-				TCellNodeList	&list = _Grid[i][j];
-				CCellNode		*cellNode;
-				CNode			*node;
+				TCellNodeList &list = _Grid[i][j];
+				CCellNode *cellNode;
+				CNode *node;
 
 				cellNode = list.getHead();
 				nc = 0;
@@ -362,20 +380,19 @@ void	CMoveGrid<T, CELLS, CSIZE>::serial(NLMISC::IStream &f)
 	}
 }
 
-
 //
-template<typename T, int CELLS, int CSIZE>
-void	CMoveGrid<T, CELLS, CSIZE>::clear()
+template <typename T, int CELLS, int CSIZE>
+void CMoveGrid<T, CELLS, CSIZE>::clear()
 {
-	sint	i, j;
+	sint i, j;
 
-	for (i=0; i<CELLS; ++i)
+	for (i = 0; i < CELLS; ++i)
 	{
-		for (j=0; j<CELLS; ++j)
+		for (j = 0; j < CELLS; ++j)
 		{
-			TCellNodeList	&list = _Grid[i][j];
-			CCellNode		*cellNode;
-			CNode			*node;
+			TCellNodeList &list = _Grid[i][j];
+			CCellNode *cellNode;
+			CNode *node;
 			while ((cellNode = list.getHead()) != NULL)
 			{
 				while ((node = cellNode->NodeList.getHead()) != NULL)
@@ -393,25 +410,24 @@ void	CMoveGrid<T, CELLS, CSIZE>::clear()
 }
 
 //
-template<typename T, int CELLS, int CSIZE>
+template <typename T, int CELLS, int CSIZE>
 CMoveGrid<T, CELLS, CSIZE>::CMoveGrid()
 {
 	_Selection = NULL;
 }
 
-
 //
-template<typename T, int CELLS, int CSIZE>
+template <typename T, int CELLS, int CSIZE>
 CMoveGrid<T, CELLS, CSIZE>::~CMoveGrid()
 {
 	clear();
 }
 
 //
-template<typename T, int CELLS, int CSIZE>
-void	CMoveGrid<T, CELLS, CSIZE>::insertNode(CIterator &it, sint x, sint y)
+template <typename T, int CELLS, int CSIZE>
+void CMoveGrid<T, CELLS, CSIZE>::insertNode(CIterator &it, sint x, sint y)
 {
-	sint	gridX, gridY;
+	sint gridX, gridY;
 	gridX = convertGrid(x);
 	gridY = convertGrid(y);
 
@@ -434,19 +450,19 @@ void	CMoveGrid<T, CELLS, CSIZE>::insertNode(CIterator &it, sint x, sint y)
 }
 
 //
-template<typename T, int CELLS, int CSIZE>
-void	CMoveGrid<T, CELLS, CSIZE>::removeNode(CIterator &it)
+template <typename T, int CELLS, int CSIZE>
+void CMoveGrid<T, CELLS, CSIZE>::removeNode(CIterator &it)
 {
 	it._Node->Root->NodeList.remove(it._Node);
 }
 
 //
-template<typename T, int CELLS, int CSIZE>
-typename::CMoveGrid<T, CELLS, CSIZE>::CIterator	CMoveGrid<T, CELLS, CSIZE>::insert(const T &object, const NLMISC::CVector &position)
+template <typename T, int CELLS, int CSIZE>
+typename ::CMoveGrid<T, CELLS, CSIZE>::CIterator CMoveGrid<T, CELLS, CSIZE>::insert(const T &object, const NLMISC::CVector &position)
 {
-	CNode	*node = _NodeAllocator.allocate();
+	CNode *node = _NodeAllocator.allocate();
 
-	sint	X, Y;
+	sint X, Y;
 
 	X = convert(position.x);
 	Y = convert(position.y);
@@ -458,14 +474,14 @@ typename::CMoveGrid<T, CELLS, CSIZE>::CIterator	CMoveGrid<T, CELLS, CSIZE>::inse
 	return CIterator(node);
 }
 
-template<typename T, int CELLS, int CSIZE>
-void	CMoveGrid<T, CELLS, CSIZE>::move(CIterator &it, const NLMISC::CVector &position)
+template <typename T, int CELLS, int CSIZE>
+void CMoveGrid<T, CELLS, CSIZE>::move(CIterator &it, const NLMISC::CVector &position)
 {
-	sint	X, Y;
+	sint X, Y;
 	X = convert(position.x);
 	Y = convert(position.y);
 
-	CNode	*node = it._Node;
+	CNode *node = it._Node;
 
 	if (X == node->Root->X && Y == node->Root->Y)
 		return;
@@ -474,10 +490,10 @@ void	CMoveGrid<T, CELLS, CSIZE>::move(CIterator &it, const NLMISC::CVector &posi
 	insertNode(it, X, Y);
 }
 
-template<typename T, int CELLS, int CSIZE>
-void	CMoveGrid<T, CELLS, CSIZE>::remove(CIterator &it)
+template <typename T, int CELLS, int CSIZE>
+void CMoveGrid<T, CELLS, CSIZE>::remove(CIterator &it)
 {
-	CNode	*node = it._Node;
+	CNode *node = it._Node;
 
 	removeNode(it);
 	it._Node = NULL;
@@ -485,39 +501,38 @@ void	CMoveGrid<T, CELLS, CSIZE>::remove(CIterator &it)
 	_NodeAllocator.freeBlock(node);
 }
 
-
-template<typename T, int CELLS, int CSIZE>
-void	CMoveGrid<T, CELLS, CSIZE>::select(const NLMISC::CVector &position)
+template <typename T, int CELLS, int CSIZE>
+void CMoveGrid<T, CELLS, CSIZE>::select(const NLMISC::CVector &position)
 {
 	select(convert(position.x), convert(position.y));
 }
 
-template<typename T, int CELLS, int CSIZE>
-void	CMoveGrid<T, CELLS, CSIZE>::select(const NLMISC::CAABBox &bbox)
+template <typename T, int CELLS, int CSIZE>
+void CMoveGrid<T, CELLS, CSIZE>::select(const NLMISC::CAABBox &bbox)
 {
-	sint	x0, x1;
-	sint	y0, y1;
+	sint x0, x1;
+	sint y0, y1;
 
-	x0 = convert(bbox.getCenter().x-bbox.getHalfSize().x);
-	x1 = convert(bbox.getCenter().x+bbox.getHalfSize().x);
+	x0 = convert(bbox.getCenter().x - bbox.getHalfSize().x);
+	x1 = convert(bbox.getCenter().x + bbox.getHalfSize().x);
 
-	y0 = convert(bbox.getCenter().y-bbox.getHalfSize().y);
-	y1 = convert(bbox.getCenter().y+bbox.getHalfSize().y);
+	y0 = convert(bbox.getCenter().y - bbox.getHalfSize().y);
+	y1 = convert(bbox.getCenter().y + bbox.getHalfSize().y);
 
-	sint	x, y;
+	sint x, y;
 
-	for (y=y0; y<=y1; ++y)
-		for (x=x0; x<=x1; ++x)
+	for (y = y0; y <= y1; ++y)
+		for (x = x0; x <= x1; ++x)
 			select(x, y);
 }
 
-template<typename T, int CELLS, int CSIZE>
-void	CMoveGrid<T, CELLS, CSIZE>::select(sint x, sint y)
+template <typename T, int CELLS, int CSIZE>
+void CMoveGrid<T, CELLS, CSIZE>::select(sint x, sint y)
 {
-	sint	gx = convertGrid(x),
-			gy = convertGrid(y);
+	sint gx = convertGrid(x),
+	     gy = convertGrid(y);
 
-	CCellNode	*cellNode = _Grid[gx][gy].getHead();
+	CCellNode *cellNode = _Grid[gx][gy].getHead();
 	while (cellNode != NULL && (cellNode->X != x || cellNode->Y != y))
 		cellNode = cellNode->Next;
 
@@ -528,32 +543,31 @@ void	CMoveGrid<T, CELLS, CSIZE>::select(sint x, sint y)
 	}
 }
 
-template<typename T, int CELLS, int CSIZE>
-typename::CMoveGrid<T, CELLS, CSIZE>::CIterator	CMoveGrid<T, CELLS, CSIZE>::begin()
+template <typename T, int CELLS, int CSIZE>
+typename ::CMoveGrid<T, CELLS, CSIZE>::CIterator CMoveGrid<T, CELLS, CSIZE>::begin()
 {
 	return (_Selection != NULL) ? CIterator(_Selection->NodeList.getHead()) : CIterator(NULL);
 }
 
-template<typename T, int CELLS, int CSIZE>
-typename::CMoveGrid<T, CELLS, CSIZE>::CIterator	CMoveGrid<T, CELLS, CSIZE>::end()
+template <typename T, int CELLS, int CSIZE>
+typename ::CMoveGrid<T, CELLS, CSIZE>::CIterator CMoveGrid<T, CELLS, CSIZE>::end()
 {
 	return CIterator(NULL);
 }
 
-template<typename T, int CELLS, int CSIZE>
-void	CMoveGrid<T, CELLS, CSIZE>::clearSelection()
+template <typename T, int CELLS, int CSIZE>
+void CMoveGrid<T, CELLS, CSIZE>::clearSelection()
 {
-	CCellNode	*cellNode = _Selection;
+	CCellNode *cellNode = _Selection;
 	_Selection = NULL;
 
 	while (cellNode != NULL)
 	{
-		CCellNode	*nd = cellNode;
+		CCellNode *nd = cellNode;
 		cellNode = cellNode->Selection;
 		nd->Selection = NULL;
 	}
 }
-
 
 #endif // NL_MOVE_GRID_H
 

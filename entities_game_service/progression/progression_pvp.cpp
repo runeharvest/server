@@ -45,27 +45,23 @@
 using namespace std;
 using namespace NLMISC;
 
-
-namespace PROGRESSIONPVP
-{
-
+namespace PROGRESSIONPVP {
 
 NL_INSTANCE_COUNTER_IMPL(CCharacterProgressionPVP);
 
-CVariable<double>	MaxDistanceForPVPPointsGain("egs", "MaxDistanceForPVPPointsGain", "max distance from PvP combat to gain PvP points (faction and HoF points) from team PvP kills (in meters)", 50.0, 0, true);
-CVariable<sint32>	MinPVPDeltaLevel("egs", "MinPVPDeltaLevel", "minimum delta level used to compute the faction points gain", -50, 0, true);
-CVariable<sint32>	MaxPVPDeltaLevel("egs", "MaxPVPDeltaLevel", "maximum delta level used to compute the faction points gain", 50, 0, true);
-CVariable<double>	PVPTeamMemberDivisorValue("egs", "PVPTeamMemberDivisorValue", "for team PvP progression add this value to the faction points divisor for each team member above one", 1.0, 0, true);
-CVariable<double>	PVPFactionPointBase("egs", "PVPFactionPointBase", "it is the base used in faction point gain formula", 5.0, 0, true);
-CVariable<double>	PVPHoFPointBase("egs", "PVPHoFPointBase", "it is the base used in HoF point gain formula", 5.0, 0, true);
-CVariable<double>	PVPFactionPointLossFactor("egs", "PVPFactionPointLossFactor", "in faction PvP the killed players loses the faction points gained per killer multiplied by this factor", 0.1, 0, true);
-CVariable<double>	PVPHoFPointLossFactor("egs", "PVPHoFPointLossFactor", "in faction PvP the killed players loses the HoF points gained per killer multiplied by this factor", 0.5, 0, true);
-CVariable<uint32>	TimeWithoutPointForSamePVPKill("egs", "TimeWithoutPointForSamePVPKill", "players will not get any point for the same PvP kill for this time in seconds", 300, 0, true);
+CVariable<double> MaxDistanceForPVPPointsGain("egs", "MaxDistanceForPVPPointsGain", "max distance from PvP combat to gain PvP points (faction and HoF points) from team PvP kills (in meters)", 50.0, 0, true);
+CVariable<sint32> MinPVPDeltaLevel("egs", "MinPVPDeltaLevel", "minimum delta level used to compute the faction points gain", -50, 0, true);
+CVariable<sint32> MaxPVPDeltaLevel("egs", "MaxPVPDeltaLevel", "maximum delta level used to compute the faction points gain", 50, 0, true);
+CVariable<double> PVPTeamMemberDivisorValue("egs", "PVPTeamMemberDivisorValue", "for team PvP progression add this value to the faction points divisor for each team member above one", 1.0, 0, true);
+CVariable<double> PVPFactionPointBase("egs", "PVPFactionPointBase", "it is the base used in faction point gain formula", 5.0, 0, true);
+CVariable<double> PVPHoFPointBase("egs", "PVPHoFPointBase", "it is the base used in HoF point gain formula", 5.0, 0, true);
+CVariable<double> PVPFactionPointLossFactor("egs", "PVPFactionPointLossFactor", "in faction PvP the killed players loses the faction points gained per killer multiplied by this factor", 0.1, 0, true);
+CVariable<double> PVPHoFPointLossFactor("egs", "PVPHoFPointLossFactor", "in faction PvP the killed players loses the HoF points gained per killer multiplied by this factor", 0.5, 0, true);
+CVariable<uint32> TimeWithoutPointForSamePVPKill("egs", "TimeWithoutPointForSamePVPKill", "players will not get any point for the same PvP kill for this time in seconds", 300, 0, true);
 
-
-const TDataSetRow						CDamageScoreTable::_FakeCreatureRowId; // INVALID_DATASET_ROW
-CDamageScoreTable::IReferenceTracker *	CDamageScoreTable::_ReferenceTracker = NULL;
-CCharacterProgressionPVP *				CCharacterProgressionPVP::_Instance = NULL;
+const TDataSetRow CDamageScoreTable::_FakeCreatureRowId; // INVALID_DATASET_ROW
+CDamageScoreTable::IReferenceTracker *CDamageScoreTable::_ReferenceTracker = NULL;
+CCharacterProgressionPVP *CCharacterProgressionPVP::_Instance = NULL;
 
 //-----------------------------------------------------------------------------
 // helpers
@@ -75,7 +71,7 @@ CCharacterProgressionPVP *				CCharacterProgressionPVP::_Instance = NULL;
 // remove an element from a vector (only the first matching element is removed and the vector order is changed)
 // \return true if element was found and removed
 template <typename TElem>
-static inline bool removeElementFromVector(TElem elem, std::vector<TElem> & vec)
+static inline bool removeElementFromVector(TElem elem, std::vector<TElem> &vec)
 {
 	for (uint i = 0; i < vec.size(); i++)
 	{
@@ -91,7 +87,7 @@ static inline bool removeElementFromVector(TElem elem, std::vector<TElem> & vec)
 }
 
 //-----------------------------------------------------------------------------
-static inline CRewardedKills::CRewardedKiller * getRewardedKiller(NLMISC::CEntityId playerId, vector<CRewardedKills::CRewardedKiller> & rewardedKillers)
+static inline CRewardedKills::CRewardedKiller *getRewardedKiller(NLMISC::CEntityId playerId, vector<CRewardedKills::CRewardedKiller> &rewardedKillers)
 {
 	for (uint i = 0; i < rewardedKillers.size(); i++)
 	{
@@ -107,13 +103,14 @@ static inline CRewardedKills::CRewardedKiller * getRewardedKiller(NLMISC::CEntit
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-void CDamageScoreTable::setReferenceTracker(IReferenceTracker * refTracker)
+void CDamageScoreTable::setReferenceTracker(IReferenceTracker *refTracker)
 {
 	_ReferenceTracker = refTracker;
 }
 
 //-----------------------------------------------------------------------------
-CDamageScoreTable::CDamageScoreTable(TDataSetRow ownerRowId) : _OwnerRowId(ownerRowId)
+CDamageScoreTable::CDamageScoreTable(TDataSetRow ownerRowId)
+    : _OwnerRowId(ownerRowId)
 {
 }
 
@@ -149,7 +146,7 @@ void CDamageScoreTable::addTeamDamage(TTeamId teamId, uint32 damage)
 {
 	nlassert(damage > 0);
 
-	CTeamDamageScore * teamScore = getTeamDamageScore(teamId);
+	CTeamDamageScore *teamScore = getTeamDamageScore(teamId);
 	if (teamScore == NULL)
 	{
 		_TeamDamageScores.push_back(CTeamDamageScore(teamId, damage, 0));
@@ -167,7 +164,7 @@ void CDamageScoreTable::addPlayerDamage(TDataSetRow playerRowId, uint32 damage)
 {
 	nlassert(damage > 0);
 
-	CPlayerDamageScore * playerScore = getPlayerDamageScore(playerRowId);
+	CPlayerDamageScore *playerScore = getPlayerDamageScore(playerRowId);
 	if (playerScore == NULL)
 	{
 		_PlayerDamageScores.push_back(CPlayerDamageScore(playerRowId, damage, 0));
@@ -188,13 +185,13 @@ void CDamageScoreTable::addCreatureDamage(TDataSetRow creatureRowId, uint32 dama
 	CCreatureDamageScore * creatureScore = getCreatureDamageScore(creatureRowId);
 	if (creatureScore == NULL)
 	{
-		_CreatureDamageScores.push_back(CCreatureDamageScore(creatureRowId, damage));
-		if (_ReferenceTracker != NULL)
-			_ReferenceTracker->cbCreatureReferenceAdded(_OwnerRowId, creatureRowId);
+	    _CreatureDamageScores.push_back(CCreatureDamageScore(creatureRowId, damage));
+	    if (_ReferenceTracker != NULL)
+	        _ReferenceTracker->cbCreatureReferenceAdded(_OwnerRowId, creatureRowId);
 	}
 	else
 	{
-		creatureScore->TotalDamage += damage;
+	    creatureScore->TotalDamage += damage;
 	}
 	*/
 }
@@ -273,7 +270,7 @@ void CDamageScoreTable::changeAllDamageEquitably(sint32 damageDelta)
 //-----------------------------------------------------------------------------
 void CDamageScoreTable::teamUsedSkillWithValue(TTeamId teamId, uint32 skillValue)
 {
-	CTeamDamageScore * teamScore = getTeamDamageScore(teamId);
+	CTeamDamageScore *teamScore = getTeamDamageScore(teamId);
 	if (teamScore == NULL)
 		return;
 
@@ -284,7 +281,7 @@ void CDamageScoreTable::teamUsedSkillWithValue(TTeamId teamId, uint32 skillValue
 //-----------------------------------------------------------------------------
 void CDamageScoreTable::playerUsedSkillWithValue(TDataSetRow playerRowId, uint32 skillValue)
 {
-	CPlayerDamageScore * playerScore = getPlayerDamageScore(playerRowId);
+	CPlayerDamageScore *playerScore = getPlayerDamageScore(playerRowId);
 	if (playerScore == NULL)
 		return;
 
@@ -295,8 +292,8 @@ void CDamageScoreTable::playerUsedSkillWithValue(TDataSetRow playerRowId, uint32
 //-----------------------------------------------------------------------------
 void CDamageScoreTable::playerJoinsTeam(TDataSetRow playerRowId, TTeamId teamId)
 {
-	CTeamDamageScore * teamScore = getTeamDamageScore(teamId);
-	CPlayerDamageScore * playerScore = getPlayerDamageScore(playerRowId);
+	CTeamDamageScore *teamScore = getTeamDamageScore(teamId);
+	CPlayerDamageScore *playerScore = getPlayerDamageScore(playerRowId);
 
 	// nothing to do if the player has no score
 	if (playerScore == NULL)
@@ -332,14 +329,14 @@ void CDamageScoreTable::playerJoinsTeam(TDataSetRow playerRowId, TTeamId teamId)
 //-----------------------------------------------------------------------------
 void CDamageScoreTable::playerLeavesTeam(TDataSetRow playerRowId, TTeamId teamId)
 {
-	CTeamDamageScore * teamScore = getTeamDamageScore(teamId);
-	CPlayerDamageScore * playerScore = getPlayerDamageScore(playerRowId);
+	CTeamDamageScore *teamScore = getTeamDamageScore(teamId);
+	CPlayerDamageScore *playerScore = getPlayerDamageScore(playerRowId);
 
 	// nothing to do if the team has no score
 	if (teamScore == NULL)
 		return;
 
-	vector<TDataSetRow> & beneficiaries = teamScore->Beneficiaries;
+	vector<TDataSetRow> &beneficiaries = teamScore->Beneficiaries;
 	const uint32 nbBeneficiaries = (uint32)beneficiaries.size();
 
 	// remove player from beneficiaries
@@ -372,11 +369,11 @@ void CDamageScoreTable::playerLeavesTeam(TDataSetRow playerRowId, TTeamId teamId
 //-----------------------------------------------------------------------------
 void CDamageScoreTable::addTeamBeneficiary(TTeamId teamId, TDataSetRow playerRowId)
 {
-	CTeamDamageScore * teamScore = getTeamDamageScore(teamId);
+	CTeamDamageScore *teamScore = getTeamDamageScore(teamId);
 	if (teamScore == NULL)
 		return;
 
-	vector<TDataSetRow> & beneficiaries = teamScore->Beneficiaries;
+	vector<TDataSetRow> &beneficiaries = teamScore->Beneficiaries;
 	for (uint i = 0; i < beneficiaries.size(); i++)
 	{
 		if (beneficiaries[i] == playerRowId)
@@ -388,7 +385,7 @@ void CDamageScoreTable::addTeamBeneficiary(TTeamId teamId, TDataSetRow playerRow
 //-----------------------------------------------------------------------------
 void CDamageScoreTable::removeTeamBeneficiary(TTeamId teamId, TDataSetRow playerRowId)
 {
-	CTeamDamageScore * teamScore = getTeamDamageScore(teamId);
+	CTeamDamageScore *teamScore = getTeamDamageScore(teamId);
 	if (teamScore == NULL)
 		return;
 
@@ -398,7 +395,7 @@ void CDamageScoreTable::removeTeamBeneficiary(TTeamId teamId, TDataSetRow player
 //-----------------------------------------------------------------------------
 void CDamageScoreTable::removeTeam(TTeamId teamId, bool transferDamages)
 {
-	CTeamDamageScore * teamScore = getTeamDamageScore(teamId);
+	CTeamDamageScore *teamScore = getTeamDamageScore(teamId);
 	if (teamScore == NULL)
 		return;
 
@@ -417,7 +414,7 @@ void CDamageScoreTable::removeTeam(TTeamId teamId, bool transferDamages)
 //-----------------------------------------------------------------------------
 void CDamageScoreTable::removePlayer(TDataSetRow playerRowId, bool transferDamages)
 {
-	CPlayerDamageScore * playerScore = getPlayerDamageScore(playerRowId);
+	CPlayerDamageScore *playerScore = getPlayerDamageScore(playerRowId);
 	if (playerScore == NULL)
 		return;
 
@@ -436,7 +433,7 @@ void CDamageScoreTable::removePlayer(TDataSetRow playerRowId, bool transferDamag
 //-----------------------------------------------------------------------------
 void CDamageScoreTable::removeCreature(TDataSetRow creatureRowId, bool transferDamages)
 {
-	CCreatureDamageScore * creatureScore = getCreatureDamageScore(creatureRowId);
+	CCreatureDamageScore *creatureScore = getCreatureDamageScore(creatureRowId);
 	if (creatureScore == NULL)
 		return;
 
@@ -453,7 +450,7 @@ void CDamageScoreTable::removeCreature(TDataSetRow creatureRowId, bool transferD
 }
 
 //-----------------------------------------------------------------------------
-bool CDamageScoreTable::getWinners(std::vector<CWinner> & winners)
+bool CDamageScoreTable::getWinners(std::vector<CWinner> &winners)
 {
 	winners.clear();
 
@@ -472,9 +469,9 @@ bool CDamageScoreTable::getWinners(std::vector<CWinner> & winners)
 		if (_TeamDamageScores[i].Beneficiaries.size() > 0)
 		{
 			CWinner winner;
-			winner.Players			= _TeamDamageScores[i].Beneficiaries;
-			winner.MaxSkillValue	= _TeamDamageScores[i].MaxSkillValue;
-			winner.TotalDamageRatio	= _TeamDamageScores[i].TotalDamage;
+			winner.Players = _TeamDamageScores[i].Beneficiaries;
+			winner.MaxSkillValue = _TeamDamageScores[i].MaxSkillValue;
+			winner.TotalDamageRatio = _TeamDamageScores[i].TotalDamage;
 			winners.push_back(winner);
 		}
 		playersDamage += _TeamDamageScores[i].TotalDamage;
@@ -486,8 +483,8 @@ bool CDamageScoreTable::getWinners(std::vector<CWinner> & winners)
 
 		CWinner winner;
 		winner.Players.push_back(_PlayerDamageScores[i].PlayerRowId);
-		winner.MaxSkillValue	= _PlayerDamageScores[i].MaxSkillValue;
-		winner.TotalDamageRatio	= _PlayerDamageScores[i].TotalDamage;
+		winner.MaxSkillValue = _PlayerDamageScores[i].MaxSkillValue;
+		winner.TotalDamageRatio = _PlayerDamageScores[i].TotalDamage;
 		winners.push_back(winner);
 
 		playersDamage += _PlayerDamageScores[i].TotalDamage;
@@ -515,21 +512,21 @@ bool CDamageScoreTable::getWinners(std::vector<CWinner> & winners)
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreTable::dumpDamageScoreTable(NLMISC::CLog & log) const
+void CDamageScoreTable::dumpDamageScoreTable(NLMISC::CLog &log) const
 {
 	// dump team scores
 	for (uint i = 0; i < _TeamDamageScores.size(); i++)
 	{
-		const CTeamDamageScore & teamScore = _TeamDamageScores[i];
+		const CTeamDamageScore &teamScore = _TeamDamageScores[i];
 
 		CEntityId leaderId;
 		string leaderName;
 
-		CTeam * team = TeamManager.getTeam(teamScore.TeamId);
+		CTeam *team = TeamManager.getTeam(teamScore.TeamId);
 		if (team != NULL)
 		{
 			leaderId = team->getLeader();
-			CCharacter * leaderChar = PlayerManager.getChar(leaderId);
+			CCharacter *leaderChar = PlayerManager.getChar(leaderId);
 			if (leaderChar != NULL)
 			{
 				leaderName = leaderChar->getName().toUtf8();
@@ -539,7 +536,7 @@ void CDamageScoreTable::dumpDamageScoreTable(NLMISC::CLog & log) const
 		string beneficiaries;
 		for (uint k = 0; k < teamScore.Beneficiaries.size(); k++)
 		{
-			CCharacter * beneficiaryChar = PlayerManager.getChar(teamScore.Beneficiaries[k]);
+			CCharacter *beneficiaryChar = PlayerManager.getChar(teamScore.Beneficiaries[k]);
 			if (beneficiaryChar != NULL)
 				beneficiaries += "'" + beneficiaryChar->getName().toUtf8() + "'";
 			else
@@ -550,23 +547,22 @@ void CDamageScoreTable::dumpDamageScoreTable(NLMISC::CLog & log) const
 		}
 
 		log.displayNL("Team %u, leader %s '%s', damage = %g, max skill value = %u, beneficiaries = (%s)",
-			teamScore.TeamId,
-			leaderId.toString().c_str(),
-			leaderName.c_str(),
-			teamScore.TotalDamage,
-			teamScore.MaxSkillValue,
-			beneficiaries.c_str()
-			);
+		    teamScore.TeamId,
+		    leaderId.toString().c_str(),
+		    leaderName.c_str(),
+		    teamScore.TotalDamage,
+		    teamScore.MaxSkillValue,
+		    beneficiaries.c_str());
 	}
 
 	// dump single player scores
 	for (uint i = 0; i < _PlayerDamageScores.size(); i++)
 	{
-		const CPlayerDamageScore & playerScore = _PlayerDamageScores[i];
+		const CPlayerDamageScore &playerScore = _PlayerDamageScores[i];
 
 		CEntityId playerId;
 		string playerName;
-		CCharacter * playerChar = PlayerManager.getChar(playerScore.PlayerRowId);
+		CCharacter *playerChar = PlayerManager.getChar(playerScore.PlayerRowId);
 		if (playerChar != NULL)
 		{
 			playerId = playerChar->getId();
@@ -574,17 +570,16 @@ void CDamageScoreTable::dumpDamageScoreTable(NLMISC::CLog & log) const
 		}
 
 		log.displayNL("Single player %s '%s', damage = %g, max skill value = %u",
-			playerId.toString().c_str(),
-			playerName.c_str(),
-			playerScore.TotalDamage,
-			playerScore.MaxSkillValue
-			);
+		    playerId.toString().c_str(),
+		    playerName.c_str(),
+		    playerScore.TotalDamage,
+		    playerScore.MaxSkillValue);
 	}
 
 	// dump creature scores
 	for (uint i = 0; i < _CreatureDamageScores.size(); i++)
 	{
-		const CCreatureDamageScore & creatureScore = _CreatureDamageScores[i];
+		const CCreatureDamageScore &creatureScore = _CreatureDamageScores[i];
 
 		if (creatureScore.CreatureRowId == _FakeCreatureRowId)
 		{
@@ -594,7 +589,7 @@ void CDamageScoreTable::dumpDamageScoreTable(NLMISC::CLog & log) const
 
 		CEntityId creatureId;
 		string creatureName;
-		CCreature * creature = CreatureManager.getCreature(creatureScore.CreatureRowId);
+		CCreature *creature = CreatureManager.getCreature(creatureScore.CreatureRowId);
 		if (creature != NULL)
 		{
 			creatureId = creature->getId();
@@ -605,15 +600,14 @@ void CDamageScoreTable::dumpDamageScoreTable(NLMISC::CLog & log) const
 		}
 
 		log.displayNL("Creature %s '%s', damage = %g",
-			creatureId.toString().c_str(),
-			creatureName.c_str(),
-			creatureScore.TotalDamage
-			);
+		    creatureId.toString().c_str(),
+		    creatureName.c_str(),
+		    creatureScore.TotalDamage);
 	}
 }
 
 //-----------------------------------------------------------------------------
-CDamageScoreTable::CTeamDamageScore * CDamageScoreTable::getTeamDamageScore(TTeamId teamId)
+CDamageScoreTable::CTeamDamageScore *CDamageScoreTable::getTeamDamageScore(TTeamId teamId)
 {
 	for (uint i = 0; i < _TeamDamageScores.size(); i++)
 	{
@@ -624,7 +618,7 @@ CDamageScoreTable::CTeamDamageScore * CDamageScoreTable::getTeamDamageScore(TTea
 }
 
 //-----------------------------------------------------------------------------
-CDamageScoreTable::CPlayerDamageScore * CDamageScoreTable::getPlayerDamageScore(TDataSetRow playerRowId)
+CDamageScoreTable::CPlayerDamageScore *CDamageScoreTable::getPlayerDamageScore(TDataSetRow playerRowId)
 {
 	for (uint i = 0; i < _PlayerDamageScores.size(); i++)
 	{
@@ -635,7 +629,7 @@ CDamageScoreTable::CPlayerDamageScore * CDamageScoreTable::getPlayerDamageScore(
 }
 
 //-----------------------------------------------------------------------------
-CDamageScoreTable::CCreatureDamageScore * CDamageScoreTable::getCreatureDamageScore(TDataSetRow creatureRowId)
+CDamageScoreTable::CCreatureDamageScore *CDamageScoreTable::getCreatureDamageScore(TDataSetRow creatureRowId)
 {
 	// cannot get fake creatures index (they all have the same row id)
 	if (creatureRowId == _FakeCreatureRowId)
@@ -660,7 +654,7 @@ void CDamageScoreTable::addFakeCreature(double damage)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-void CWoundedPlayers::getPlayersWoundedByTeam(TTeamId teamId, std::vector<TDataSetRow> & woundedPlayers) const
+void CWoundedPlayers::getPlayersWoundedByTeam(TTeamId teamId, std::vector<TDataSetRow> &woundedPlayers) const
 {
 	TPlayersWoundedByTeam::const_iterator it = _PlayersWoundedByTeam.find(teamId);
 	if (it == _PlayersWoundedByTeam.end())
@@ -670,7 +664,7 @@ void CWoundedPlayers::getPlayersWoundedByTeam(TTeamId teamId, std::vector<TDataS
 }
 
 //-----------------------------------------------------------------------------
-void CWoundedPlayers::getPlayersWoundedByPlayer(TDataSetRow playerRowId, std::vector<TDataSetRow> & woundedPlayers) const
+void CWoundedPlayers::getPlayersWoundedByPlayer(TDataSetRow playerRowId, std::vector<TDataSetRow> &woundedPlayers) const
 {
 	TPlayersWoundedByEntity::const_iterator it = _PlayersWoundedByPlayer.find(playerRowId);
 	if (it == _PlayersWoundedByPlayer.end())
@@ -680,7 +674,7 @@ void CWoundedPlayers::getPlayersWoundedByPlayer(TDataSetRow playerRowId, std::ve
 }
 
 //-----------------------------------------------------------------------------
-void CWoundedPlayers::getPlayersWoundedByCreature(TDataSetRow creatureRowId, std::vector<TDataSetRow> & woundedPlayers) const
+void CWoundedPlayers::getPlayersWoundedByCreature(TDataSetRow creatureRowId, std::vector<TDataSetRow> &woundedPlayers) const
 {
 	TPlayersWoundedByEntity::const_iterator it = _PlayersWoundedByCreature.find(creatureRowId);
 	if (it == _PlayersWoundedByCreature.end())
@@ -692,7 +686,7 @@ void CWoundedPlayers::getPlayersWoundedByCreature(TDataSetRow creatureRowId, std
 //-----------------------------------------------------------------------------
 void CWoundedPlayers::cbTeamReferenceAdded(TDataSetRow ownerRowId, TTeamId teamId)
 {
-	vector<TDataSetRow> & targets = _PlayersWoundedByTeam[teamId];
+	vector<TDataSetRow> &targets = _PlayersWoundedByTeam[teamId];
 
 #ifdef NL_DEBUG
 	nlassert(!removeElementFromVector(ownerRowId, targets));
@@ -707,7 +701,7 @@ void CWoundedPlayers::cbTeamReferenceRemoved(TDataSetRow ownerRowId, TTeamId tea
 	TPlayersWoundedByTeam::iterator it = _PlayersWoundedByTeam.find(teamId);
 	BOMB_IF(it == _PlayersWoundedByTeam.end(), "wounded player not found!", return);
 
-	vector<TDataSetRow> & targets = (*it).second;
+	vector<TDataSetRow> &targets = (*it).second;
 	if (removeElementFromVector(ownerRowId, targets))
 	{
 		if (targets.empty())
@@ -720,7 +714,7 @@ void CWoundedPlayers::cbTeamReferenceRemoved(TDataSetRow ownerRowId, TTeamId tea
 //-----------------------------------------------------------------------------
 void CWoundedPlayers::cbPlayerReferenceAdded(TDataSetRow ownerRowId, TDataSetRow playerRowId)
 {
-	vector<TDataSetRow> & targets = _PlayersWoundedByPlayer[playerRowId];
+	vector<TDataSetRow> &targets = _PlayersWoundedByPlayer[playerRowId];
 
 #ifdef NL_DEBUG
 	nlassert(!removeElementFromVector(ownerRowId, targets));
@@ -735,7 +729,7 @@ void CWoundedPlayers::cbPlayerReferenceRemoved(TDataSetRow ownerRowId, TDataSetR
 	TPlayersWoundedByEntity::iterator it = _PlayersWoundedByPlayer.find(playerRowId);
 	BOMB_IF(it == _PlayersWoundedByPlayer.end(), "wounded player not found!", return);
 
-	vector<TDataSetRow> & targets = (*it).second;
+	vector<TDataSetRow> &targets = (*it).second;
 	if (removeElementFromVector(ownerRowId, targets))
 	{
 		if (targets.empty())
@@ -748,7 +742,7 @@ void CWoundedPlayers::cbPlayerReferenceRemoved(TDataSetRow ownerRowId, TDataSetR
 //-----------------------------------------------------------------------------
 void CWoundedPlayers::cbCreatureReferenceAdded(TDataSetRow ownerRowId, TDataSetRow creatureRowId)
 {
-	vector<TDataSetRow> & targets = _PlayersWoundedByCreature[creatureRowId];
+	vector<TDataSetRow> &targets = _PlayersWoundedByCreature[creatureRowId];
 
 #ifdef NL_DEBUG
 	nlassert(!removeElementFromVector(ownerRowId, targets));
@@ -763,7 +757,7 @@ void CWoundedPlayers::cbCreatureReferenceRemoved(TDataSetRow ownerRowId, TDataSe
 	TPlayersWoundedByEntity::iterator it = _PlayersWoundedByCreature.find(creatureRowId);
 	BOMB_IF(it == _PlayersWoundedByCreature.end(), "wounded player not found!", return);
 
-	vector<TDataSetRow> & targets = (*it).second;
+	vector<TDataSetRow> &targets = (*it).second;
 	if (removeElementFromVector(ownerRowId, targets))
 	{
 		if (targets.empty())
@@ -793,7 +787,7 @@ void CRewardedKills::tickUpdate()
 	TRewardedKillersByVictim::iterator it = _RewardedKillersByVictim.begin();
 	while (it != _RewardedKillersByVictim.end())
 	{
-		vector<CRewardedKiller> & rewardedKillers = (*it).second;
+		vector<CRewardedKiller> &rewardedKillers = (*it).second;
 
 		uint i = 0;
 		while (i < rewardedKillers.size())
@@ -821,24 +815,24 @@ void CRewardedKills::tickUpdate()
 }
 
 //-----------------------------------------------------------------------------
-void CRewardedKills::addRewardedKill(NLMISC::CEntityId victimId, const std::vector<NLMISC::CEntityId> & killers)
+void CRewardedKills::addRewardedKill(NLMISC::CEntityId victimId, const std::vector<NLMISC::CEntityId> &killers)
 {
 	if (killers.empty())
 		return;
 
 	const TGameCycle currentDate = CTickEventHandler::getGameCycle();
-	vector<CRewardedKiller> & rewardedKillers = _RewardedKillersByVictim[victimId];
+	vector<CRewardedKiller> &rewardedKillers = _RewardedKillersByVictim[victimId];
 	for (uint i = 0; i < killers.size(); i++)
 	{
 		addRewardedKiller(CRewardedKiller(killers[i], currentDate), rewardedKillers);
 		CCharacter *killer = PlayerManager.getChar(killers[i]);
-		CMissionEventKillPlayer killevent( TheDataset.getDataSetRow(victimId) );
-		killer->processMissionEvent( killevent );
+		CMissionEventKillPlayer killevent(TheDataset.getDataSetRow(victimId));
+		killer->processMissionEvent(killevent);
 	}
 }
 
 //-----------------------------------------------------------------------------
-void CRewardedKills::getRewardedKillers(NLMISC::CEntityId victimId, std::vector<CRewardedKiller> & rewardedKillers) const
+void CRewardedKills::getRewardedKillers(NLMISC::CEntityId victimId, std::vector<CRewardedKiller> &rewardedKillers) const
 {
 	rewardedKillers.clear();
 
@@ -850,7 +844,7 @@ void CRewardedKills::getRewardedKillers(NLMISC::CEntityId victimId, std::vector<
 }
 
 //-----------------------------------------------------------------------------
-void CRewardedKills::addRewardedKiller(const CRewardedKiller & rewardedKiller, std::vector<CRewardedKiller> & rewardedKillers) const
+void CRewardedKills::addRewardedKiller(const CRewardedKiller &rewardedKiller, std::vector<CRewardedKiller> &rewardedKillers) const
 {
 	for (uint i = 0; i < rewardedKillers.size(); i++)
 	{
@@ -887,18 +881,18 @@ void CDamageScoreManager::tickUpdate()
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::reportAction(const TReportAction & action)
+void CDamageScoreManager::reportAction(const TReportAction &action)
 {
 	H_AUTO(CDamageScoreManager_reportAction);
 
-	CEntityBase * actor = CEntityBaseManager::getEntityBasePtr(action.ActorRowId);
+	CEntityBase *actor = CEntityBaseManager::getEntityBasePtr(action.ActorRowId);
 	if (actor == NULL)
 	{
 		nlwarning("received report action with unknown actor entity");
 		return;
 	}
 
-	CEntityBase * target = CEntityBaseManager::getEntityBasePtr(action.TargetRowId);
+	CEntityBase *target = CEntityBaseManager::getEntityBasePtr(action.TargetRowId);
 
 	const bool isOffensive = isOffensiveAction(action);
 	const bool isCurative = isCurativeAction(action);
@@ -917,10 +911,10 @@ void CDamageScoreManager::reportAction(const TReportAction & action)
 	if (!isOffensive && !isCurative)
 		return;
 
-	CCharacter * actorChar = dynamic_cast<CCharacter *>(actor);
+	CCharacter *actorChar = dynamic_cast<CCharacter *>(actor);
 	BOMB_IF(actorChar == NULL, "not a character!", return);
 
-	CCharacter * targetChar = NULL;
+	CCharacter *targetChar = NULL;
 	if (target && target->getId().getType() == RYZOMID::player)
 		targetChar = dynamic_cast<CCharacter *>(target);
 
@@ -965,7 +959,7 @@ void CDamageScoreManager::reportAction(const TReportAction & action)
 			TDamageScoreTablesByPlayer::iterator it = _DamageScoreTablesByPlayer.find(teamTargets[i]);
 			BOMB_IF(it == _DamageScoreTablesByPlayer.end(), "player damage score table not found!", continue);
 
-			CDamageScoreTable & scoreTable = (*it).second;
+			CDamageScoreTable &scoreTable = (*it).second;
 			scoreTable.teamUsedSkillWithValue(actorChar->getTeamId(), skillValue);
 			scoreTable.addTeamBeneficiary(actorChar->getTeamId(), actorChar->getEntityRowId());
 		}
@@ -989,14 +983,14 @@ void CDamageScoreManager::reportAction(const TReportAction & action)
 			TDamageScoreTablesByPlayer::iterator it = _DamageScoreTablesByPlayer.find(playerTargets[i]);
 			BOMB_IF(it == _DamageScoreTablesByPlayer.end(), "player damage score table not found!", continue);
 
-			CDamageScoreTable & scoreTable = (*it).second;
+			CDamageScoreTable &scoreTable = (*it).second;
 			scoreTable.playerUsedSkillWithValue(actorChar->getEntityRowId(), skillValue);
 		}
 	}
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::playerJoinsTeam(const CCharacter * playerChar, TTeamId teamId)
+void CDamageScoreManager::playerJoinsTeam(const CCharacter *playerChar, TTeamId teamId)
 {
 	H_AUTO(CDamageScoreManager_playerJoinsTeam);
 
@@ -1012,13 +1006,13 @@ void CDamageScoreManager::playerJoinsTeam(const CCharacter * playerChar, TTeamId
 		TDamageScoreTablesByPlayer::iterator it = _DamageScoreTablesByPlayer.find(targets[i]);
 		BOMB_IF(it == _DamageScoreTablesByPlayer.end(), "found no table!", continue);
 
-		CDamageScoreTable & scoreTable = (*it).second;
+		CDamageScoreTable &scoreTable = (*it).second;
 		scoreTable.playerJoinsTeam(playerChar->getEntityRowId(), teamId);
 	}
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::playerLeavesTeam(const CCharacter * playerChar, TTeamId teamId)
+void CDamageScoreManager::playerLeavesTeam(const CCharacter *playerChar, TTeamId teamId)
 {
 	H_AUTO(CDamageScoreManager_playerLeavesTeam);
 
@@ -1034,20 +1028,20 @@ void CDamageScoreManager::playerLeavesTeam(const CCharacter * playerChar, TTeamI
 		TDamageScoreTablesByPlayer::iterator it = _DamageScoreTablesByPlayer.find(targets[i]);
 		BOMB_IF(it == _DamageScoreTablesByPlayer.end(), "found no table!", continue);
 
-		CDamageScoreTable & scoreTable = (*it).second;
+		CDamageScoreTable &scoreTable = (*it).second;
 		scoreTable.playerLeavesTeam(playerChar->getEntityRowId(), teamId);
 	}
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::disbandTeam(TTeamId teamId, const std::list<NLMISC::CEntityId> & members)
+void CDamageScoreManager::disbandTeam(TTeamId teamId, const std::list<NLMISC::CEntityId> &members)
 {
 	H_AUTO(CDamageScoreManager_disbandTeam);
 
 	vector<TDataSetRow> memberRowIds;
 	for (list<CEntityId>::const_iterator itMember = members.begin(); itMember != members.end(); ++itMember)
 	{
-		const CCharacter * memberChar = PlayerManager.getChar(*itMember);
+		const CCharacter *memberChar = PlayerManager.getChar(*itMember);
 		if (memberChar == NULL || !playerInFactionPvP(memberChar))
 			continue;
 
@@ -1061,7 +1055,7 @@ void CDamageScoreManager::disbandTeam(TTeamId teamId, const std::list<NLMISC::CE
 		TDamageScoreTablesByPlayer::iterator it = _DamageScoreTablesByPlayer.find(targets[i]);
 		BOMB_IF(it == _DamageScoreTablesByPlayer.end(), "found no table!", continue);
 
-		CDamageScoreTable & scoreTable = (*it).second;
+		CDamageScoreTable &scoreTable = (*it).second;
 		for (uint k = 0; k < memberRowIds.size(); k++)
 		{
 			scoreTable.playerLeavesTeam(memberRowIds[k], teamId);
@@ -1077,7 +1071,7 @@ void CDamageScoreManager::disbandTeam(TTeamId teamId, const std::list<NLMISC::CE
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::playerRegenHP(const CCharacter * playerChar, sint32 regenHP)
+void CDamageScoreManager::playerRegenHP(const CCharacter *playerChar, sint32 regenHP)
 {
 	H_AUTO(CDamageScoreManager_playerRegenHP);
 
@@ -1093,30 +1087,30 @@ void CDamageScoreManager::playerRegenHP(const CCharacter * playerChar, sint32 re
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter * finalBlower)
+void CDamageScoreManager::playerDeath(CCharacter *victimChar, const CCharacter *finalBlower)
 {
 	H_AUTO(CDamageScoreManager_playerDeath);
 
 	nlassert(victimChar != NULL);
 
-//	PVP_CLAN::TPVPClan victimFaction;
+	//	PVP_CLAN::TPVPClan victimFaction;
 	bool victimLosesFactionPoints = false;
-//	if (!playerInFactionPvP(victimChar, &victimFaction, &victimLosesFactionPoints))
-//		return;
+	//	if (!playerInFactionPvP(victimChar, &victimFaction, &victimLosesFactionPoints))
+	//		return;
 
-//	PVP_CLAN::TPVPClan finalBlowerFaction;
-//	if (!playerInFactionPvP(finalBlower, &finalBlowerFaction))
-//		return;
+	//	PVP_CLAN::TPVPClan finalBlowerFaction;
+	//	if (!playerInFactionPvP(finalBlower, &finalBlowerFaction))
+	//		return;
 
 	// check if victim and final blower are in PvP Faction (by tag or by a pvp versus zone)
 	/* if(!CPVPManager2::getInstance()->factionWarOccurs(victimFaction, finalBlowerFaction))
 	{
-		CPVPVersusZone * zone = dynamic_cast<CPVPVersusZone *>(const_cast<CPVPInterface &>(victimChar->getPVPInterface()).getPVPSession());
-		if( zone == 0 )
-			return;
-		PVP_RELATION::TPVPRelation pvpRelation = zone->getPVPRelation(victimChar, const_cast<CCharacter*>(finalBlower));
-		if( pvpRelation != PVP_RELATION::Ennemy )
-			return;
+	    CPVPVersusZone * zone = dynamic_cast<CPVPVersusZone *>(const_cast<CPVPInterface &>(victimChar->getPVPInterface()).getPVPSession());
+	    if( zone == 0 )
+	        return;
+	    PVP_RELATION::TPVPRelation pvpRelation = zone->getPVPRelation(victimChar, const_cast<CCharacter*>(finalBlower));
+	    if( pvpRelation != PVP_RELATION::Ennemy )
+	        return;
 	}*/
 
 	// a dead player loses his damage points
@@ -1126,7 +1120,7 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 	if (it == _DamageScoreTablesByPlayer.end())
 		return;
 
-	CDamageScoreTable & scoreTable = (*it).second;
+	CDamageScoreTable &scoreTable = (*it).second;
 
 	vector<CDamageScoreTable::CWinner> winners;
 	if (!scoreTable.getWinners(winners))
@@ -1135,9 +1129,8 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 		if (VerboseFactionPoint.get())
 		{
 			nlinfo("Faction PvP kill: no winner for killed player %s '%s' (creatures won!)",
-				victimChar->getId().toString().c_str(),
-				victimChar->getName().toUtf8().c_str()
-				);
+			    victimChar->getId().toString().c_str(),
+			    victimChar->getName().toUtf8().c_str());
 			nlinfo("Damage score table:\n");
 			scoreTable.dumpDamageScoreTable(*InfoLog);
 			nlinfo("----------------------------------------------------------------------------");
@@ -1153,10 +1146,9 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 	if (VerboseFactionPoint.get())
 	{
 		nlinfo("Faction PvP kill: killed player %s '%s' (best skill value = %u)",
-			victimChar->getId().toString().c_str(),
-			victimChar->getName().toUtf8().c_str(),
-			victimSkillValue
-			);
+		    victimChar->getId().toString().c_str(),
+		    victimChar->getName().toUtf8().c_str(),
+		    victimSkillValue);
 		nlinfo("Damage score table:\n");
 		scoreTable.dumpDamageScoreTable(*InfoLog);
 		nlinfo("----------------------------------------------------------------------------");
@@ -1190,21 +1182,20 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 		if (VerboseFactionPoint.get())
 		{
 			nlinfo("Winner %u (%u players): damage percent = %.1f%%, faction points = %u (%u per player), HoF points = %u (%u per player)",
-				i,
-				winners[i].Players.size(),
-				winners[i].TotalDamageRatio * 100.0,
-				fpForWinner,
-				fpPerPlayer,
-				hofpForWinner,
-				hofpPerPlayer
-				);
+			    i,
+			    winners[i].Players.size(),
+			    winners[i].TotalDamageRatio * 100.0,
+			    fpForWinner,
+			    fpPerPlayer,
+			    hofpForWinner,
+			    hofpPerPlayer);
 		}
 
 		uint nbRewardedMembers = 0; // nb of rewarded members in the team
-		const vector<TDataSetRow> & players = winners[i].Players;
+		const vector<TDataSetRow> &players = winners[i].Players;
 		for (uint k = 0; k < players.size(); k++)
 		{
-			CCharacter * winnerChar = PlayerManager.getChar(players[k]);
+			CCharacter *winnerChar = PlayerManager.getChar(players[k]);
 			BOMB_IF(winnerChar == NULL, "invalid winner!", continue);
 
 			PVP_CLAN::TPVPClan winnerFaction = PVP_CLAN::Neutral;
@@ -1213,10 +1204,10 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 			if (!canPlayerWinPoints(winnerChar, victimChar))
 				continue;
 
-			//if(!playerInFactionPvP(winnerChar, &winnerFaction, &winnerGainFactionPoints))
+			// if(!playerInFactionPvP(winnerChar, &winnerFaction, &winnerGainFactionPoints))
 			//	continue; // can be in Duel or in other pvp mode.
 
-			CRewardedKills::CRewardedKiller * noPointPlayer = getRewardedKiller(winnerChar->getId(), noPointPlayers);
+			CRewardedKills::CRewardedKiller *noPointPlayer = getRewardedKiller(winnerChar->getId(), noPointPlayers);
 			if (noPointPlayer != NULL)
 			{
 				// player cannot gain point for this kill until endDate
@@ -1243,16 +1234,14 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 					sint32 victimFame = CFameInterface::getInstance().getFameIndexed(victimChar->getId(), fameIdx);
 					sint32 winnerFame = CFameInterface::getInstance().getFameIndexed(winnerChar->getId(), fameIdx);
 
-					if ( (victimFame >= 25*6000 && winnerFame <= -25*6000) || 
-						 (winnerFame >= 25*6000 && victimFame <= -25*6000) )
+					if ((victimFame >= 25 * 6000 && winnerFame <= -25 * 6000) || (winnerFame >= 25 * 6000 && victimFame <= -25 * 6000))
 						fameFactor++;
 
-					if ( (victimFame >= 25*6000 && winnerFame >= 25*6000) || 
-						 (victimFame <= -25*6000 && winnerFame <= -25*6000) )
-						fameFactor--;						
+					if ((victimFame >= 25 * 6000 && winnerFame >= 25 * 6000) || (victimFame <= -25 * 6000 && winnerFame <= -25 * 6000))
+						fameFactor--;
 				}
 				clamp(fameFactor, 0, 3);
-				//nlinfo("points = %d * %d", fpPerPlayer, fameFactor);
+				// nlinfo("points = %d * %d", fpPerPlayer, fameFactor);
 
 				// player gains faction points
 				changePlayerPvpPoints(winnerChar, sint32(fpPerPlayer) * fameFactor);
@@ -1265,16 +1254,16 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 			}
 
 			// player gains HoF points
-			// Episode 2 is finished, they are no reason for win HoF point again, we need to state about if we made future episodes (3, 4..) 
+			// Episode 2 is finished, they are no reason for win HoF point again, we need to state about if we made future episodes (3, 4..)
 			// and a way for known if an episode occurs (and specs for known if other episode pemrti to win HoF point...)
-			//changePlayerHoFPoints(winnerChar, sint32(hofpPerPlayer));
+			// changePlayerHoFPoints(winnerChar, sint32(hofpPerPlayer));
 
 #ifdef RYZOM_EPISODE2_REACTIVATE
 			// PvP faction winner HOF reward
-			CPVPManager2::getInstance()->characterKillerInPvPFaction( winnerChar, winnerFaction, (sint32)fpPerPlayer );
-			if( finalBlower == winnerChar )
+			CPVPManager2::getInstance()->characterKillerInPvPFaction(winnerChar, winnerFaction, (sint32)fpPerPlayer);
+			if (finalBlower == winnerChar)
 			{
-				CPVPManager2::getInstance()->finalBlowerKillerInPvPFaction( winnerChar, winnerFaction, victimChar );
+				CPVPManager2::getInstance()->finalBlowerKillerInPvPFaction(winnerChar, winnerFaction, victimChar);
 			}
 #endif
 
@@ -1323,14 +1312,14 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::spireDestroyed(CCreature * spire, const CCharacter * finalBlower)
+void CDamageScoreManager::spireDestroyed(CCreature *spire, const CCharacter *finalBlower)
 {
-	nlassert( spire->isSpire() );
+	nlassert(spire->isSpire());
 	TDamageScoreTablesByPlayer::iterator it = _DamageScoreTablesByPlayer.find(spire->getEntityRowId());
 	if (it == _DamageScoreTablesByPlayer.end())
 		return;
 
-	CDamageScoreTable & scoreTable = (*it).second;
+	CDamageScoreTable &scoreTable = (*it).second;
 
 	vector<CDamageScoreTable::CWinner> winners;
 	if (!scoreTable.getWinners(winners))
@@ -1339,9 +1328,8 @@ void CDamageScoreManager::spireDestroyed(CCreature * spire, const CCharacter * f
 		if (VerboseFactionPoint.get())
 		{
 			nlinfo("Faction Spire kill: spire is destroyed by creature %s '%s'",
-				spire->getId().toString().c_str(),
-				spire->getName().toUtf8().c_str()
-				);
+			    spire->getId().toString().c_str(),
+			    spire->getName().toUtf8().c_str());
 			nlinfo("Damage score table:\n");
 			scoreTable.dumpDamageScoreTable(*InfoLog);
 			nlinfo("----------------------------------------------------------------------------");
@@ -1355,9 +1343,8 @@ void CDamageScoreManager::spireDestroyed(CCreature * spire, const CCharacter * f
 	if (VerboseFactionPoint.get())
 	{
 		nlinfo("Faction Spire kill: killed player %s '%s'",
-			spire->getId().toString().c_str(),
-			spire->getName().toUtf8().c_str()
-			);
+		    spire->getId().toString().c_str(),
+		    spire->getName().toUtf8().c_str());
 		nlinfo("Damage score table:\n");
 		scoreTable.dumpDamageScoreTable(*InfoLog);
 		nlinfo("----------------------------------------------------------------------------");
@@ -1384,21 +1371,20 @@ void CDamageScoreManager::spireDestroyed(CCreature * spire, const CCharacter * f
 		if (VerboseFactionPoint.get())
 		{
 			nlinfo("Winner %u (%u players): damage percent = %.1f%%, faction points = %u (%u per player), HoF points = %u (%u per player)",
-				i,
-				winners[i].Players.size(),
-				winners[i].TotalDamageRatio * 100.0,
-				fpForWinner,
-				fpPerPlayer,
-				hofpForWinner,
-				hofpPerPlayer
-				);
+			    i,
+			    winners[i].Players.size(),
+			    winners[i].TotalDamageRatio * 100.0,
+			    fpForWinner,
+			    fpPerPlayer,
+			    hofpForWinner,
+			    hofpPerPlayer);
 		}
 
 		uint nbRewardedMembers = 0; // nb of rewarded members in the team
-		const vector<TDataSetRow> & players = winners[i].Players;
+		const vector<TDataSetRow> &players = winners[i].Players;
 		for (uint k = 0; k < players.size(); k++)
 		{
-			CCharacter * winnerChar = PlayerManager.getChar(players[k]);
+			CCharacter *winnerChar = PlayerManager.getChar(players[k]);
 			BOMB_IF(winnerChar == NULL, "invalid winner!", continue);
 
 			PVP_CLAN::TPVPClan winnerFaction;
@@ -1409,19 +1395,19 @@ void CDamageScoreManager::spireDestroyed(CCreature * spire, const CCharacter * f
 			{
 				// player gains faction points
 				changePlayerFactionPoints(winnerChar, winnerFaction, sint32(fpPerPlayer));
-				//winnerChar->sendFactionPointGainKillMessage(winnerFaction, fpPerPlayer, victimChar->getId());
+				// winnerChar->sendFactionPointGainKillMessage(winnerFaction, fpPerPlayer, victimChar->getId());
 				SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
 				params[0].Int = sint32(fpPerPlayer);
-				PHRASE_UTILITIES::sendDynamicSystemMessage(winnerChar->getEntityRowId(),"PVP_SPIRE_FACTION_POINT",params);
+				PHRASE_UTILITIES::sendDynamicSystemMessage(winnerChar->getEntityRowId(), "PVP_SPIRE_FACTION_POINT", params);
 			}
 
 			CPVPFactionRewardManager::getInstance().updateFactionPointPool(winnerFaction, sint32(fpPerPlayer));
 
 			// player gains HoF points
-			//changePlayerHoFPoints(winnerChar, sint32(hofpPerPlayer));
+			// changePlayerHoFPoints(winnerChar, sint32(hofpPerPlayer));
 
 			// PvP faction winner HOF reward
-			CPVPManager2::getInstance()->characterKillerInPvPFaction( winnerChar, winnerFaction, (sint32)fpPerPlayer );
+			CPVPManager2::getInstance()->characterKillerInPvPFaction(winnerChar, winnerFaction, (sint32)fpPerPlayer);
 		}
 
 		// debug info
@@ -1436,7 +1422,7 @@ void CDamageScoreManager::spireDestroyed(CCreature * spire, const CCharacter * f
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::playerResurrected(const CCharacter * victimChar)
+void CDamageScoreManager::playerResurrected(const CCharacter *victimChar)
 {
 	H_AUTO(CDamageScoreManager_playerResurrected);
 
@@ -1451,7 +1437,7 @@ void CDamageScoreManager::playerResurrected(const CCharacter * victimChar)
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::playerRespawn(CCharacter * victimChar)
+void CDamageScoreManager::playerRespawn(CCharacter *victimChar)
 {
 	H_AUTO(CDamageScoreManager_playerRespawn);
 
@@ -1461,14 +1447,14 @@ void CDamageScoreManager::playerRespawn(CCharacter * victimChar)
 	if (it == _PointLossByPlayer.end())
 		return;
 
-	const CPointLoss & pointLoss = (*it).second;
+	const CPointLoss &pointLoss = (*it).second;
 
 	/*
 	if (pointLoss.PlayerLosesFactionPoints)
 	{
-		// victim loses faction points
-		uint32 fpLoss = uint32(abs( changePlayerFactionPoints(victimChar, pointLoss.PlayerFaction, -sint32(pointLoss.FactionPointLoss)) ));
-		victimChar->sendFactionPointLoseMessage(pointLoss.PlayerFaction, fpLoss);
+	    // victim loses faction points
+	    uint32 fpLoss = uint32(abs( changePlayerFactionPoints(victimChar, pointLoss.PlayerFaction, -sint32(pointLoss.FactionPointLoss)) ));
+	    victimChar->sendFactionPointLoseMessage(pointLoss.PlayerFaction, fpLoss);
 	}
 
 	// victim loses HoF points
@@ -1480,7 +1466,7 @@ void CDamageScoreManager::playerRespawn(CCharacter * victimChar)
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::removePlayer(const CCharacter * playerChar)
+void CDamageScoreManager::removePlayer(const CCharacter *playerChar)
 {
 	H_AUTO(CDamageScoreManager_removePlayer);
 
@@ -1494,7 +1480,7 @@ void CDamageScoreManager::removePlayer(const CCharacter * playerChar)
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::removeCreature(const CCreature * creature)
+void CDamageScoreManager::removeCreature(const CCreature *creature)
 {
 	H_AUTO(CDamageScoreManager_removeCreature);
 
@@ -1505,7 +1491,7 @@ void CDamageScoreManager::removeCreature(const CCreature * creature)
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::dumpPlayerDamageScoreTable(const CCharacter * playerChar, NLMISC::CLog & log) const
+void CDamageScoreManager::dumpPlayerDamageScoreTable(const CCharacter *playerChar, NLMISC::CLog &log) const
 {
 	nlassert(playerChar != NULL);
 
@@ -1513,12 +1499,12 @@ void CDamageScoreManager::dumpPlayerDamageScoreTable(const CCharacter * playerCh
 	if (it == _DamageScoreTablesByPlayer.end())
 		return;
 
-	const CDamageScoreTable & scoreTable = (*it).second;
+	const CDamageScoreTable &scoreTable = (*it).second;
 	scoreTable.dumpDamageScoreTable(log);
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::addDamage(const CEntityBase * actor, const CEntityBase * target, uint32 damage)
+void CDamageScoreManager::addDamage(const CEntityBase *actor, const CEntityBase *target, uint32 damage)
 {
 	H_AUTO(CDamageScoreManager_addDamage);
 
@@ -1531,30 +1517,30 @@ void CDamageScoreManager::addDamage(const CEntityBase * actor, const CEntityBase
 
 	if (target->getId().getType() == RYZOMID::player)
 	{
-		const CCharacter * targetChar = dynamic_cast<const CCharacter *>(target);
+		const CCharacter *targetChar = dynamic_cast<const CCharacter *>(target);
 		BOMB_IF(targetChar == NULL, "not a character!", return);
 		if (!playerInFactionPvP(targetChar))
 			return;
 	}
-	else if( target->isSpire() == false)
+	else if (target->isSpire() == false)
 		return;
 
 	// get the damage score table associated to the target (create it if necessary)
 	TDamageScoreTablesByPlayer::iterator itTable = _DamageScoreTablesByPlayer.find(target->getEntityRowId());
 	if (itTable == _DamageScoreTablesByPlayer.end())
 	{
-		pair<TDamageScoreTablesByPlayer::iterator, bool> ret = _DamageScoreTablesByPlayer.insert( make_pair(target->getEntityRowId(), CDamageScoreTable(target->getEntityRowId())) );
+		pair<TDamageScoreTablesByPlayer::iterator, bool> ret = _DamageScoreTablesByPlayer.insert(make_pair(target->getEntityRowId(), CDamageScoreTable(target->getEntityRowId())));
 		BOMB_IF(!ret.second, "failed to insert damage score table!", return);
 		itTable = ret.first;
 	}
 
-	CDamageScoreTable & scoreTable = (*itTable).second;
+	CDamageScoreTable &scoreTable = (*itTable).second;
 
 	// add damage to the score associated to the actor (team/player/creature)
 	// and add the target in the list of players wounded by the actor
 	if (actor->getId().getType() == RYZOMID::player)
 	{
-		const CCharacter * actorChar = dynamic_cast<const CCharacter *>(actor);
+		const CCharacter *actorChar = dynamic_cast<const CCharacter *>(actor);
 		BOMB_IF(actorChar == NULL, "not a character!", return);
 
 		if (actorChar->getTeamId() != CTEAM::InvalidTeamId)
@@ -1569,7 +1555,7 @@ void CDamageScoreManager::addDamage(const CEntityBase * actor, const CEntityBase
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::clearDamages(const CCharacter * playerChar, bool transferDamages)
+void CDamageScoreManager::clearDamages(const CCharacter *playerChar, bool transferDamages)
 {
 	H_AUTO(CDamageScoreManager_clearDamages1);
 
@@ -1585,7 +1571,7 @@ void CDamageScoreManager::clearDamages(const CCharacter * playerChar, bool trans
 			TDamageScoreTablesByPlayer::iterator it = _DamageScoreTablesByPlayer.find(targets[i]);
 			BOMB_IF(it == _DamageScoreTablesByPlayer.end(), "found no table!", continue);
 
-			CDamageScoreTable & scoreTable = (*it).second;
+			CDamageScoreTable &scoreTable = (*it).second;
 
 			// player is not a beneficiary anymore
 			scoreTable.removeTeamBeneficiary(playerChar->getTeamId(), playerChar->getEntityRowId());
@@ -1600,7 +1586,7 @@ void CDamageScoreManager::clearDamages(const CCharacter * playerChar, bool trans
 			TDamageScoreTablesByPlayer::iterator it = _DamageScoreTablesByPlayer.find(targets[i]);
 			BOMB_IF(it == _DamageScoreTablesByPlayer.end(), "found no table!", continue);
 
-			CDamageScoreTable & scoreTable = (*it).second;
+			CDamageScoreTable &scoreTable = (*it).second;
 
 			// remove the player score
 			scoreTable.removePlayer(playerChar->getEntityRowId(), transferDamages);
@@ -1613,7 +1599,7 @@ void CDamageScoreManager::clearDamages(const CCharacter * playerChar, bool trans
 }
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::clearDamages(const CCreature * creature, bool transferDamages)
+void CDamageScoreManager::clearDamages(const CCreature *creature, bool transferDamages)
 {
 	H_AUTO(CDamageScoreManager_clearDamages2);
 
@@ -1626,7 +1612,7 @@ void CDamageScoreManager::clearDamages(const CCreature * creature, bool transfer
 		TDamageScoreTablesByPlayer::iterator it = _DamageScoreTablesByPlayer.find(targets[i]);
 		BOMB_IF(it == _DamageScoreTablesByPlayer.end(), "found no table!", continue);
 
-		CDamageScoreTable & scoreTable = (*it).second;
+		CDamageScoreTable &scoreTable = (*it).second;
 
 		// remove the creature score
 		scoreTable.removeCreature(creature->getEntityRowId(), transferDamages);
@@ -1646,7 +1632,7 @@ void CDamageScoreManager::changeAllDamageEquitably(TDataSetRow playerRowId, sint
 	if (itTable == _DamageScoreTablesByPlayer.end())
 		return;
 
-	CDamageScoreTable & scoreTable = (*itTable).second;
+	CDamageScoreTable &scoreTable = (*itTable).second;
 
 	scoreTable.changeAllDamageEquitably(damageDelta);
 
@@ -1668,7 +1654,7 @@ void CDamageScoreManager::removeDamageScoreTable(TDataSetRow playerRowId)
 }
 
 //-----------------------------------------------------------------------------
-bool CDamageScoreManager::isOffensiveAction(const TReportAction & action) const
+bool CDamageScoreManager::isOffensiveAction(const TReportAction &action) const
 {
 	switch (action.ActionNature)
 	{
@@ -1685,7 +1671,7 @@ bool CDamageScoreManager::isOffensiveAction(const TReportAction & action) const
 }
 
 //-----------------------------------------------------------------------------
-bool CDamageScoreManager::isCurativeAction(const TReportAction & action) const
+bool CDamageScoreManager::isCurativeAction(const TReportAction &action) const
 {
 	switch (action.ActionNature)
 	{
@@ -1696,93 +1682,93 @@ bool CDamageScoreManager::isCurativeAction(const TReportAction & action) const
 }
 
 //-----------------------------------------------------------------------------
-bool CDamageScoreManager::playerInFactionPvP(const CCharacter * playerChar, PVP_CLAN::TPVPClan * faction, bool * withFactionPoints) const
+bool CDamageScoreManager::playerInFactionPvP(const CCharacter *playerChar, PVP_CLAN::TPVPClan *faction, bool *withFactionPoints) const
 {
 	nlassert(playerChar != NULL);
 
 	if (playerChar->getPVPInterface().isValid())
 	{
-		CPVPVersusZone * zone = dynamic_cast<CPVPVersusZone *>(const_cast<CPVPInterface &>(playerChar->getPVPInterface()).getPVPSession());
+		CPVPVersusZone *zone = dynamic_cast<CPVPVersusZone *>(const_cast<CPVPInterface &>(playerChar->getPVPInterface()).getPVPSession());
 		if (zone != NULL)
 		{
 			/*PVP_CLAN::TPVPClan factionInZone = zone->getCharacterClan(playerChar->getId());
 			if (factionInZone == PVP_CLAN::Neutral)
-				return false;
-			
+			    return false;
+
 			BOMB_IF(factionInZone < PVP_CLAN::BeginClans || factionInZone > PVP_CLAN::EndClans, "invalid faction!", return false);
-			
+
 			if (faction)
-				*faction = factionInZone;
-			
+			    *faction = factionInZone;
+
 			if (withFactionPoints)
-				*withFactionPoints = zone->giveFactionPoints();
+			    *withFactionPoints = zone->giveFactionPoints();
 			*/
 			return true;
 		}
 	}
-	else if( playerChar->getPVPFlag(false) )
-	{ 
+	else if (playerChar->getPVPFlag(false))
+	{
 		/*pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance = playerChar->getAllegiance();
 		if( (allegiance.first != PVP_CLAN::Neutral) && (allegiance.first != PVP_CLAN::None) )
 		{
-			if (faction)
-				*faction = allegiance.first;
-			if (withFactionPoints)
-				*withFactionPoints = true;
-			return true;
+		    if (faction)
+		        *faction = allegiance.first;
+		    if (withFactionPoints)
+		        *withFactionPoints = true;
+		    return true;
 		}
 		if ( allegiance.second != PVP_CLAN::Neutral)
 		{
-			if (faction)
-				*faction = allegiance.second;
-			if (withFactionPoints)
-				*withFactionPoints = true;
-			return true;
+		    if (faction)
+		        *faction = allegiance.second;
+		    if (withFactionPoints)
+		        *withFactionPoints = true;
+		    return true;
 		}*/
 		return true;
 	}
 	return false;
 }
 
-bool CDamageScoreManager::canPlayerWinPoints(const CCharacter * winnerChar,  CCharacter * victimeChar) const
+bool CDamageScoreManager::canPlayerWinPoints(const CCharacter *winnerChar, CCharacter *victimeChar) const
 {
 	// Don't win points if in duel
-	if ( winnerChar->getDuelOpponent() && (winnerChar->getDuelOpponent()->getId() == victimeChar->getId()) )
+	if (winnerChar->getDuelOpponent() && (winnerChar->getDuelOpponent()->getId() == victimeChar->getId()))
 		return false;
 
 	if (victimeChar->getPVPRecentActionFlag())
 		nlinfo("PVP recent flag");
 	// Only win points if victime is Flag
-	if( winnerChar->getPVPFlag(false))
+	if (winnerChar->getPVPFlag(false))
 	{
-		 if ( true/*victimeChar->getPVPRecentActionFlag()*/ )
-		 {
+		if (true /*victimeChar->getPVPRecentActionFlag()*/)
+		{
 			nlinfo("Teams : %d, %d", winnerChar->getTeamId(), victimeChar->getTeamId());
 			// Don't win points if in same Team
-			if ( winnerChar->getTeamId() != CTEAM::InvalidTeamId && victimeChar->getTeamId() != CTEAM::InvalidTeamId && (winnerChar->getTeamId() == victimeChar->getTeamId()) )
+			if (winnerChar->getTeamId() != CTEAM::InvalidTeamId && victimeChar->getTeamId() != CTEAM::InvalidTeamId && (winnerChar->getTeamId() == victimeChar->getTeamId()))
 				return false;
 
 			// Don't win points if in same Guild
 			nlinfo("Guild : %d, %d", winnerChar->getGuildId(), victimeChar->getGuildId());
-			if ( winnerChar->getGuildId() != 0 && victimeChar->getGuildId() != 0 && (winnerChar->getGuildId() == victimeChar->getGuildId()) )
+			if (winnerChar->getGuildId() != 0 && victimeChar->getGuildId() != 0 && (winnerChar->getGuildId() == victimeChar->getGuildId()))
 				return false;
 
 			// Don't win points if in same League
-			if ( winnerChar->getLeagueId() != DYN_CHAT_INVALID_CHAN && victimeChar->getLeagueId() != DYN_CHAT_INVALID_CHAN && (winnerChar->getLeagueId() == victimeChar->getLeagueId()) )
+			if (winnerChar->getLeagueId() != DYN_CHAT_INVALID_CHAN && victimeChar->getLeagueId() != DYN_CHAT_INVALID_CHAN && (winnerChar->getLeagueId() == victimeChar->getLeagueId()))
 				return false;
 
 			return true;
-		 }
+		}
 	}
 
 	return false;
 }
 
 //-----------------------------------------------------------------------------
-uint32 CDamageScoreManager::computeFactionPointsForWinner(const CDamageScoreTable::CWinner & winner, uint32 victimSkillValue)
+uint32 CDamageScoreManager::computeFactionPointsForWinner(const CDamageScoreTable::CWinner &winner, uint32 victimSkillValue)
 {
 	double factionPoints;
-	
+
 	// compute base number of faction points for the victim
 	factionPoints = PVPFactionPointBase.get() * pow(2.0, double(victimSkillValue) / 50.0);
 
@@ -1812,10 +1798,10 @@ uint32 CDamageScoreManager::computeFactionPointsForWinner(const CDamageScoreTabl
 }
 
 //-----------------------------------------------------------------------------
-uint32 CDamageScoreManager::computeHoFPointsForWinner(const CDamageScoreTable::CWinner & winner, uint32 victimSkillValue)
+uint32 CDamageScoreManager::computeHoFPointsForWinner(const CDamageScoreTable::CWinner &winner, uint32 victimSkillValue)
 {
 	double hofPoints;
-	
+
 	// base number of HoF points
 	hofPoints = PVPHoFPointBase.get();
 
@@ -1845,7 +1831,7 @@ uint32 CDamageScoreManager::computeHoFPointsForWinner(const CDamageScoreTable::C
 }
 
 //-----------------------------------------------------------------------------
-sint32 CDamageScoreManager::changePlayerFactionPoints(CCharacter * playerChar, PVP_CLAN::TPVPClan faction, sint32 fpDelta)
+sint32 CDamageScoreManager::changePlayerFactionPoints(CCharacter *playerChar, PVP_CLAN::TPVPClan faction, sint32 fpDelta)
 {
 	nlassert(playerChar != NULL);
 	BOMB_IF(faction < PVP_CLAN::BeginClans || faction > PVP_CLAN::EndClans, "invalid PvP faction!", return 0);
@@ -1868,7 +1854,7 @@ sint32 CDamageScoreManager::changePlayerFactionPoints(CCharacter * playerChar, P
 
 #ifdef RYZOM_FORGE
 //-----------------------------------------------------------------------------
-sint32 CDamageScoreManager::changePlayerPvpPoints(CCharacter * playerChar, sint32 fpDelta)
+sint32 CDamageScoreManager::changePlayerPvpPoints(CCharacter *playerChar, sint32 fpDelta)
 {
 	nlassert(playerChar != NULL);
 
@@ -1890,7 +1876,7 @@ sint32 CDamageScoreManager::changePlayerPvpPoints(CCharacter * playerChar, sint3
 #endif
 
 //-----------------------------------------------------------------------------
-void CDamageScoreManager::changePlayerHoFPoints(CCharacter * playerChar, sint32 hofpDelta)
+void CDamageScoreManager::changePlayerHoFPoints(CCharacter *playerChar, sint32 hofpDelta)
 {
 	nlassert(playerChar != NULL);
 	if (hofpDelta == 0)
@@ -1911,10 +1897,10 @@ void CDamageScoreManager::changePlayerHoFPoints(CCharacter * playerChar, sint32 
 			if (VerboseFactionPoint.get())
 			{
 				nlinfo("player %s '%s' gets %d HoF points at path '%s'",
-					playerChar->getId().toString().c_str(),
-					playerChar->getName().toUtf8().c_str(),
-					hofpDelta,
-					sdbPvPPath.c_str());
+				    playerChar->getId().toString().c_str(),
+				    playerChar->getName().toUtf8().c_str(),
+				    hofpDelta,
+				    sdbPvPPath.c_str());
 			}
 		}
 		else
@@ -1924,6 +1910,4 @@ void CDamageScoreManager::changePlayerHoFPoints(CCharacter * playerChar, sint32 
 	}
 }
 
-
 } // namespace PROGRESSIONPVP
-

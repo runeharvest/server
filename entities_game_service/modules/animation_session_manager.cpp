@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "nel/net/module_builder_parts.h"
 #include "game_share/ring_session_manager_itf.h"
@@ -28,41 +27,39 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-class CAnimSessionMgr 
-	:	public IAnimSessionMgr,
-		public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
-		public IModuleTrackerCb
+class CAnimSessionMgr
+    : public IAnimSessionMgr,
+      public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase>>>,
+      public IModuleTrackerCb
 {
-	typedef uint32	TCharId;	typedef uint32	TSessionId;
+	typedef uint32 TCharId;
+	typedef uint32 TSessionId;
 
-	typedef CModuleTracker<TModuleClassPred>	TMyModuleTracker;
+	typedef CModuleTracker<TModuleClassPred> TMyModuleTracker;
 	/// A tracker to track the SU module 'RingSessionManager'.
-	TMyModuleTracker							_RingSessionManagerTracker;
+	TMyModuleTracker _RingSessionManagerTracker;
 	/// A tracker to track the DSS module 'ServerAnimationModule'
-	TMyModuleTracker							_ServerAnimationModuleTracker;
-
+	TMyModuleTracker _ServerAnimationModuleTracker;
 
 	/// Struct to hold info about active animation session
-	typedef map<TSessionId, TAnimSessionInfo>	TAnimSessionInfos;
+	typedef map<TSessionId, TAnimSessionInfo> TAnimSessionInfos;
 	/// Storage for all active animation sessions
-	TAnimSessionInfos							_AnimSessionInfos;
+	TAnimSessionInfos _AnimSessionInfos;
 
-	typedef map<TCharId, TSessionId>			TCharCurrentAnimSession;
+	typedef map<TCharId, TSessionId> TCharCurrentAnimSession;
 	/// a map that store the current anim session for each character
-	TCharCurrentAnimSession						_CharCurrentAnimSession;
-
+	TCharCurrentAnimSession _CharCurrentAnimSession;
 
 public:
 	CAnimSessionMgr()
-		:	_RingSessionManagerTracker(TModuleClassPred("RingSessionManager")),
-			_ServerAnimationModuleTracker(TModuleClassPred("ServerAnimationModule"))
+	    : _RingSessionManagerTracker(TModuleClassPred("RingSessionManager"))
+	    , _ServerAnimationModuleTracker(TModuleClassPred("ServerAnimationModule"))
 	{
 		// init the tracker without callback
 		_RingSessionManagerTracker.init(this);
 		// init the tracker with a callback
 		_ServerAnimationModuleTracker.init(this, this);
 	}
-
 
 	///////////////////////////////////////////////////////////////////////////
 	// implementation if IModuleTrackerCb
@@ -85,19 +82,19 @@ public:
 	void animSessionStarted(uint32 sessionId, const R2::TRunningScenarioInfo &scenarioInfo)
 	{
 		nldebug("animSessionStarted : session %u started with scenario '%s', desc '%s', md5 '%s', owner %u, author '%s'",
-			sessionId,
-			scenarioInfo.getScenarioTitle().c_str(),
-			scenarioInfo.getScenarioDesc().c_str(),
-			scenarioInfo.getScenarioKey().toString().c_str(),
-			scenarioInfo.getSessionAnimatorCharId(),
-			scenarioInfo.getScenarioAuthorName().c_str());
+		    sessionId,
+		    scenarioInfo.getScenarioTitle().c_str(),
+		    scenarioInfo.getScenarioDesc().c_str(),
+		    scenarioInfo.getScenarioKey().toString().c_str(),
+		    scenarioInfo.getSessionAnimatorCharId(),
+		    scenarioInfo.getScenarioAuthorName().c_str());
 		// create a record for this session
 		_AnimSessionInfos[sessionId].ScenarioInfo = scenarioInfo;
 		_AnimSessionInfos[sessionId].Participants.clear();
 		_AnimSessionInfos[sessionId].RRPGained = 0;
 	}
 
-	/** An animation session is ended, report the RRP gained to SU and release 
+	/** An animation session is ended, report the RRP gained to SU and release
 	 *	session resources.
 	 */
 	void animSessionEnded(uint32 sessionId, uint32 scenarioScore, NLMISC::TTime timeTaken)
@@ -105,7 +102,7 @@ public:
 		nldebug("animSessionEnded : session %u ended", sessionId);
 
 		TAnimSessionInfos::iterator it(_AnimSessionInfos.find(sessionId));
-		BOMB_IF(it == _AnimSessionInfos.end(), "No info for session "<<sessionId<<" in the anim session manager", return);
+		BOMB_IF(it == _AnimSessionInfos.end(), "No info for session " << sessionId << " in the anim session manager", return);
 
 		TAnimSessionInfo &asi = it->second;
 
@@ -133,7 +130,7 @@ public:
 		// remember the current session for this char (in order to cumulate points in the right scenario)
 		_CharCurrentAnimSession[charId] = sessionId;
 		TAnimSessionInfos::iterator it(_AnimSessionInfos.find(sessionId));
-		BOMB_IF(it == _AnimSessionInfos.end(), "No info for session "<<sessionId<<" in the anim session manager", return);
+		BOMB_IF(it == _AnimSessionInfos.end(), "No info for session " << sessionId << " in the anim session manager", return);
 
 		TAnimSessionInfo &asi = it->second;
 
@@ -142,9 +139,9 @@ public:
 
 		// set the session level in the character RRP object (if character in game)
 		ICharacter *ichar = ICharacter::getInterface(charId, true);
-		BOMB_IF(ichar==0, "characterEnterAnimSession: ICharacter::getInterface("<<charId<<", true) return NULL", return);
-		BOMB_IF(!ichar->getEnterFlag(), "characterEnterAnimSession: character "<<charId<<" has enterFlag false", return);
-		
+		BOMB_IF(ichar == 0, "characterEnterAnimSession: ICharacter::getInterface(" << charId << ", true) return NULL", return);
+		BOMB_IF(!ichar->getEnterFlag(), "characterEnterAnimSession: character " << charId << " has enterFlag false", return);
+
 		CRingRewardPoints &rrp = ichar->getRingRewardPoints();
 		rrp.setScenarioLevel(asi.ScenarioInfo.getSessionLevel());
 
@@ -164,22 +161,22 @@ public:
 			_CharCurrentAnimSession.erase(it);
 		else
 			nlwarning("characterLeaveAnimSession : the character %u is currently in session %u, not %u",
-				charId, it->second, sessionId);
+			    charId, it->second, sessionId);
 
 		log_Ring_LeaveSession(CEntityId(RYZOMID::player, uint64(charId)), sessionId);
 	}
 
 	/** A character has done something 'active' so update their last activity timestamp
 	 */
-	virtual void flagCharAsActive(uint32 charId,uint32 level)
+	virtual void flagCharAsActive(uint32 charId, uint32 level)
 	{
 		/// retrieve the session this character belong to
 		TAnimSessionInfo *sessionInfo = getAnimSessionForChar(charId);
-		BOMB_IF(sessionInfo == NULL, "Failed to retrieve the current anim session of char "<<charId, return);
+		BOMB_IF(sessionInfo == NULL, "Failed to retrieve the current anim session of char " << charId, return);
 		/// set last activity timestamp and best action level
-		TAnimSessionInfo::TParticipantInfo& theParticipantInfo= sessionInfo->ParticipantInfos[charId];
-		theParticipantInfo.LastActivityTime= CTickEventHandler::getGameCycle();
-		theParticipantInfo.BestActionLevel= std::max(theParticipantInfo.BestActionLevel,level);
+		TAnimSessionInfo::TParticipantInfo &theParticipantInfo = sessionInfo->ParticipantInfos[charId];
+		theParticipantInfo.LastActivityTime = CTickEventHandler::getGameCycle();
+		theParticipantInfo.BestActionLevel = std::max(theParticipantInfo.BestActionLevel, level);
 	}
 
 	/** A character has gained some ring points, add them to their curent anim session
@@ -188,22 +185,22 @@ public:
 	{
 		/// retrieve the session this character belong to
 		TAnimSessionInfo *sessionInfo = getAnimSessionForChar(charId);
-		BOMB_IF(sessionInfo == NULL, "Failed to retrieve the current anim session of char "<<charId, return);
-		
+		BOMB_IF(sessionInfo == NULL, "Failed to retrieve the current anim session of char " << charId, return);
+
 		/// add ring points to global accumulator for entire scenario
 		sessionInfo->RRPGained += nbRingPoints;
 
 		/// get a refference to the participant info for the character, create new record if required
-		TAnimSessionInfo::TParticipantInfo& theParticipantInfo= sessionInfo->ParticipantInfos[charId];
+		TAnimSessionInfo::TParticipantInfo &theParticipantInfo = sessionInfo->ParticipantInfos[charId];
 
 		/// add ring points to given player's personal accumulator
-		theParticipantInfo.PointsGainedThisSession+= nbRingPoints;
+		theParticipantInfo.PointsGainedThisSession += nbRingPoints;
 
 		/// incremenet the counter of number of times RRPs have been gained this session
-		theParticipantInfo.NumRRPGains ++;
+		theParticipantInfo.NumRRPGains++;
 
 		/// reset the best action level for the character
-		theParticipantInfo.BestActionLevel= 0;
+		theParticipantInfo.BestActionLevel = 0;
 	}
 
 	/** Retrieve the current anim session info for a char
@@ -220,19 +217,19 @@ public:
 		TAnimSessionInfos::iterator it2(_AnimSessionInfos.find(sessionId));
 		if (it2 == _AnimSessionInfos.end())
 			return NULL;
-		
+
 		return &(it2->second);
 	}
 
 	virtual const TAnimSessionInfo *getAnimSessionForChar(uint32 charId) const
 	{
-		return const_cast<CAnimSessionMgr*>(this)->getAnimSessionForChar(charId);
+		return const_cast<CAnimSessionMgr *>(this)->getAnimSessionForChar(charId);
 	}
 
 	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CAnimSessionMgr, CModuleBase)
-		NLMISC_COMMAND_HANDLER_ADD(CAnimSessionMgr, dump, "dump the session manager internal state", "no param");
-		NLMISC_COMMAND_HANDLER_ADD(CAnimSessionMgr, listAnimSession, "list all know anim session", "no param");
-		NLMISC_COMMAND_HANDLER_ADD(CAnimSessionMgr, dumpAnimSession, "dump the state of an anim session", "<sessionId>");
+	NLMISC_COMMAND_HANDLER_ADD(CAnimSessionMgr, dump, "dump the session manager internal state", "no param");
+	NLMISC_COMMAND_HANDLER_ADD(CAnimSessionMgr, listAnimSession, "list all know anim session", "no param");
+	NLMISC_COMMAND_HANDLER_ADD(CAnimSessionMgr, dumpAnimSession, "dump the state of an anim session", "<sessionId>");
 	NLMISC_COMMAND_HANDLER_TABLE_END
 
 	NLMISC_CLASS_COMMAND_DECL(dumpAnimSession)
@@ -257,14 +254,14 @@ public:
 		TAnimSessionInfo &asi = it->second;
 
 		log.displayNL("Dumping session %u :", sessionId);
-		log.displayNL("  md5       = %s",		asi.ScenarioInfo.getScenarioKey().toString().c_str());
-		log.displayNL("  title     = '%s'",		asi.ScenarioInfo.getScenarioTitle().c_str());
-		log.displayNL("  desc      = '%s'",		asi.ScenarioInfo.getScenarioDesc().c_str());
-		log.displayNL("  level     = %s",		asi.ScenarioInfo.getSessionLevel().toString().c_str());
-		log.displayNL("  author    = '%s'",		asi.ScenarioInfo.getScenarioAuthorName().c_str());
-		log.displayNL("  animatorId= %u",		asi.ScenarioInfo.getSessionAnimatorCharId());
-		log.displayNL("  mode      = %s",		asi.ScenarioInfo.getDMLess() ? "dmless" : "mastered");
-		log.displayNL("  RRP fained= %u",		asi.RRPGained);
+		log.displayNL("  md5       = %s", asi.ScenarioInfo.getScenarioKey().toString().c_str());
+		log.displayNL("  title     = '%s'", asi.ScenarioInfo.getScenarioTitle().c_str());
+		log.displayNL("  desc      = '%s'", asi.ScenarioInfo.getScenarioDesc().c_str());
+		log.displayNL("  level     = %s", asi.ScenarioInfo.getSessionLevel().toString().c_str());
+		log.displayNL("  author    = '%s'", asi.ScenarioInfo.getScenarioAuthorName().c_str());
+		log.displayNL("  animatorId= %u", asi.ScenarioInfo.getSessionAnimatorCharId());
+		log.displayNL("  mode      = %s", asi.ScenarioInfo.getDMLess() ? "dmless" : "mastered");
+		log.displayNL("  RRP fained= %u", asi.RRPGained);
 
 		return true;
 	}
@@ -281,11 +278,11 @@ public:
 		{
 			const TAnimSessionInfo &asi = first->second;
 			log.displayNL("  Session %u use scenario '%s' (md5 %s) and has seen %u player up to now and has gained %u RRP.",
-				first->first,
-				asi.ScenarioInfo.getScenarioTitle().c_str(),
-				asi.ScenarioInfo.getScenarioKey().toString().c_str(),
-				asi.Participants.size(),
-				asi.RRPGained);
+			    first->first,
+			    asi.ScenarioInfo.getScenarioTitle().c_str(),
+			    asi.ScenarioInfo.getScenarioKey().toString().c_str(),
+			    asi.Participants.size(),
+			    asi.RRPGained);
 		}
 
 		return true;
@@ -301,12 +298,12 @@ public:
 		log.displayNL("--------------------------------");
 
 		// dump some general information
-		log.displayNL(" This module know %u ring session manager module, %u server animation module", 
-			_RingSessionManagerTracker.getTrackedModules().size(),
-			_ServerAnimationModuleTracker.getTrackedModules().size());
+		log.displayNL(" This module know %u ring session manager module, %u server animation module",
+		    _RingSessionManagerTracker.getTrackedModules().size(),
+		    _ServerAnimationModuleTracker.getTrackedModules().size());
 		log.displayNL(" There are %u running anim session and %u character in anim session",
-			_AnimSessionInfos.size(),
-			_CharCurrentAnimSession.size());
+		    _AnimSessionInfos.size(),
+		    _CharCurrentAnimSession.size());
 
 		return true;
 	}

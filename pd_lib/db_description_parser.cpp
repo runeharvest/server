@@ -24,21 +24,17 @@
 #include "game_share/backup_service_interface.h"
 
 #include "pds_common.h"
-//#include "pds_type.h"
+// #include "pds_type.h"
 
 /*
  * Globals
  */
-namespace RY_PDS
-{
-	extern NLMISC::CVariable<bool> PDUseBS;
+namespace RY_PDS {
+extern NLMISC::CVariable<bool> PDUseBS;
 }
-
-
 
 using namespace std;
 using namespace NLMISC;
-
 
 using namespace RY_PDS;
 
@@ -49,24 +45,23 @@ CDBDescriptionParser::CDBDescriptionParser()
 {
 }
 
-
 /*
  * Load database description
  */
-bool	CDBDescriptionParser::loadDescriptionFile(const string& filename)
+bool CDBDescriptionParser::loadDescriptionFile(const string &filename)
 {
-	CIFile	ifile;
+	CIFile ifile;
 
 	if (!ifile.open(filename))
 		return false;
 
-	uint	sz = ifile.getFileSize();
-	uint8*	buffer = new uint8[sz+1];
+	uint sz = ifile.getFileSize();
+	uint8 *buffer = new uint8[sz + 1];
 
 	ifile.serialBuffer(buffer, sz);
 	buffer[sz] = 0;
 
-	bool	success = loadDescription(buffer);
+	bool success = loadDescription(buffer);
 
 	delete[] buffer;
 	return success;
@@ -75,21 +70,21 @@ bool	CDBDescriptionParser::loadDescriptionFile(const string& filename)
 /*
  * Load database description
  */
-bool	CDBDescriptionParser::loadDescription(const uint8* description)
+bool CDBDescriptionParser::loadDescription(const uint8 *description)
 {
-	uint	sz = (uint)strlen((const char*)description);
+	uint sz = (uint)strlen((const char *)description);
 
 	// set description and compute hashkey
-	_Description = (const char*)description;
+	_Description = (const char *)description;
 	_HashKey = getSHA1(description, sz);
 
 	// init stream
-	CMemStream	stream(true);
+	CMemStream stream(true);
 	stream.fill(description, sz);
 
 	// check file parsed
-	CIXml		xmlStream;
-	bool		xmlParsed = false;
+	CIXml xmlStream;
+	bool xmlParsed = false;
 
 	try
 	{
@@ -111,15 +106,13 @@ bool	CDBDescriptionParser::loadDescription(const uint8* description)
 	return loadDescription(xmlStream);
 }
 
-
-
 /*
  * Load database description
  */
-bool	CDBDescriptionParser::loadDescription(NLMISC::CIXml& xmlStream)
+bool CDBDescriptionParser::loadDescription(NLMISC::CIXml &xmlStream)
 {
 	// check root node
-	xmlNodePtr		root = xmlStream.getRootNode();
+	xmlNodePtr root = xmlStream.getRootNode();
 	if (root == NULL)
 	{
 		nlwarning("CDBDescriptionParser::loadDescription(): failed, unable to getRootNode in XML stream");
@@ -127,7 +120,7 @@ bool	CDBDescriptionParser::loadDescription(NLMISC::CIXml& xmlStream)
 	}
 
 	// check db node
-	xmlNodePtr		dbNode = CIXml::getFirstChildNode(root, "db");
+	xmlNodePtr dbNode = CIXml::getFirstChildNode(root, "db");
 	if (dbNode == NULL)
 	{
 		nlwarning("CDBDescriptionParser::loadDescription(): failed, unable to get XML 'db' childNode in XML stream");
@@ -137,11 +130,10 @@ bool	CDBDescriptionParser::loadDescription(NLMISC::CIXml& xmlStream)
 	return loadDatabase(dbNode);
 }
 
-
 /*
  * Save database description
  */
-//bool	CDBDescriptionParser::saveDescription(const std::string& filename)
+// bool	CDBDescriptionParser::saveDescription(const std::string& filename)
 //{
 //	// get a pointer to the buffer that we want to output to file
 //	char*	buffer = const_cast<char*>(_Description.c_str());
@@ -167,19 +159,17 @@ bool	CDBDescriptionParser::loadDescription(NLMISC::CIXml& xmlStream)
 //	}
 //
 //	return true;
-//}
-
-
+// }
 
 /*
  * Load Database
  */
-bool	CDBDescriptionParser::loadDatabase(xmlNodePtr node)
+bool CDBDescriptionParser::loadDatabase(xmlNodePtr node)
 {
 	if (!getProperty(node, "name", _Database.Name))
 		return false;
 
-	xmlNodePtr		typeNode;
+	xmlNodePtr typeNode;
 	FOREACH_CHILD(typeNode, node, typedef)
 	{
 		if (!loadType(typeNode))
@@ -189,7 +179,7 @@ bool	CDBDescriptionParser::loadDatabase(xmlNodePtr node)
 		}
 	}
 
-	xmlNodePtr		tableNode;
+	xmlNodePtr tableNode;
 	FOREACH_CHILD(tableNode, node, classdef)
 	{
 		if (!loadTable(tableNode))
@@ -199,7 +189,7 @@ bool	CDBDescriptionParser::loadDatabase(xmlNodePtr node)
 		}
 	}
 
-	xmlNodePtr		logNode;
+	xmlNodePtr logNode;
 	FOREACH_CHILD(logNode, node, logmsg)
 	{
 		if (!loadLog(logNode))
@@ -215,9 +205,9 @@ bool	CDBDescriptionParser::loadDatabase(xmlNodePtr node)
 /*
  * Load Type
  */
-bool	CDBDescriptionParser::loadType(xmlNodePtr node)
+bool CDBDescriptionParser::loadType(xmlNodePtr node)
 {
-	uint	id;
+	uint id;
 	if (!getProperty(node, "id", id))
 	{
 		nlwarning("CDBDescriptionParser::loadType(): missing property 'id' in type node");
@@ -225,19 +215,16 @@ bool	CDBDescriptionParser::loadType(xmlNodePtr node)
 	}
 
 	if (id >= _Database.Types.size())
-		_Database.Types.resize(id+1);
+		_Database.Types.resize(id + 1);
 
-	CTypeNode&	typeNode = _Database.Types[id];
+	CTypeNode &typeNode = _Database.Types[id];
 
-	string		storage;
-	string		type;
+	string storage;
+	string type;
 
 	typeNode.Id = id;
 
-	if (!getProperty(node, "name", typeNode.Name) ||
-		!getProperty(node, "size", typeNode.ByteSize) ||
-		!getProperty(node, "storage", storage) ||
-		!getProperty(node, "type", type))
+	if (!getProperty(node, "name", typeNode.Name) || !getProperty(node, "size", typeNode.ByteSize) || !getProperty(node, "storage", storage) || !getProperty(node, "type", type))
 	{
 		nlwarning("CDBDescriptionParser::loadType(): missing property in type node");
 		return false;
@@ -250,14 +237,13 @@ bool	CDBDescriptionParser::loadType(xmlNodePtr node)
 		typeNode.Type = CTypeNode::TypeEnum;
 		typeNode.Dimension = 0;
 
-		xmlNodePtr	enumNode;
+		xmlNodePtr enumNode;
 		FOREACH_CHILD(enumNode, node, enumvalue)
 		{
-			string	name;
-			uint32	value;
+			string name;
+			uint32 value;
 
-			if (!getProperty(enumNode, "name", name) ||
-				!getProperty(enumNode, "value", value))
+			if (!getProperty(enumNode, "name", name) || !getProperty(enumNode, "value", value))
 			{
 				nlwarning("CDBDescriptionParser::loadType(): missing property in enum node");
 				return false;
@@ -295,9 +281,9 @@ bool	CDBDescriptionParser::loadType(xmlNodePtr node)
 /*
  * Load Table description
  */
-bool	CDBDescriptionParser::loadTable(xmlNodePtr node)
+bool CDBDescriptionParser::loadTable(xmlNodePtr node)
 {
-	uint	id;
+	uint id;
 	if (!getProperty(node, "id", id))
 	{
 		nlwarning("CDBDescriptionParser::loadTable(): missing property 'id' in table node");
@@ -305,9 +291,9 @@ bool	CDBDescriptionParser::loadTable(xmlNodePtr node)
 	}
 
 	if (id >= _Database.Tables.size())
-		_Database.Tables.resize(id+1);
+		_Database.Tables.resize(id + 1);
 
-	CTableNode&	table = _Database.Tables[id];
+	CTableNode &table = _Database.Tables[id];
 
 	table.Id = id;
 
@@ -321,7 +307,7 @@ bool	CDBDescriptionParser::loadTable(xmlNodePtr node)
 	getProperty(node, "mapped", table.Mapped, -1);
 	getProperty(node, "key", table.Key, -1);
 
-	xmlNodePtr	attributeNode;
+	xmlNodePtr attributeNode;
 	FOREACH_CHILD(attributeNode, node, attribute)
 	{
 		if (!loadAttribute(attributeNode, table))
@@ -337,9 +323,9 @@ bool	CDBDescriptionParser::loadTable(xmlNodePtr node)
 /**
  * Load attribute description
  */
-bool	CDBDescriptionParser::loadAttribute(xmlNodePtr node, CTableNode& table)
+bool CDBDescriptionParser::loadAttribute(xmlNodePtr node, CTableNode &table)
 {
-	uint	id;
+	uint id;
 	if (!getProperty(node, "id", id))
 	{
 		nlwarning("CDBDescriptionParser::loadAttribute(): missing property 'id' in attribute node");
@@ -347,18 +333,15 @@ bool	CDBDescriptionParser::loadAttribute(xmlNodePtr node, CTableNode& table)
 	}
 
 	if (id >= table.Attributes.size())
-		table.Attributes.resize(id+1);
+		table.Attributes.resize(id + 1);
 
-	CAttributeNode&	attribute = table.Attributes[id];
+	CAttributeNode &attribute = table.Attributes[id];
 
 	attribute.Id = id;
 	attribute.AllowNull = false;
-	string	type;
+	string type;
 
-	if (!getProperty(node, "name", attribute.Name) ||
-		!getProperty(node, "columnid", attribute.ColumnId) ||
-		!getProperty(node, "columns", attribute.Columns) ||
-		!getProperty(node, "type", type))
+	if (!getProperty(node, "name", attribute.Name) || !getProperty(node, "columnid", attribute.ColumnId) || !getProperty(node, "columns", attribute.Columns) || !getProperty(node, "type", type))
 	{
 		nlwarning("CDBDescriptionParser::loadAttribute(): missing property in attribute node");
 		return false;
@@ -397,8 +380,7 @@ bool	CDBDescriptionParser::loadAttribute(xmlNodePtr node, CTableNode& table)
 		break;
 
 	case PDS_BackRef:
-		if (!getProperty(node, "classid", attribute.TypeId) ||
-			!getProperty(node, "backreferentid", attribute.Reference))
+		if (!getProperty(node, "classid", attribute.TypeId) || !getProperty(node, "backreferentid", attribute.Reference))
 		{
 			nlwarning("CDBDescriptionParser::loadAttribute(): missing property 'classid' or 'backreferentid' in attribute node");
 			return false;
@@ -406,16 +388,14 @@ bool	CDBDescriptionParser::loadAttribute(xmlNodePtr node, CTableNode& table)
 		break;
 
 	case PDS_ArrayRef:
-		if (!getProperty(node, "indexid", attribute.Index) ||
-			!getProperty(node, "allownull", attribute.AllowNull))
+		if (!getProperty(node, "indexid", attribute.Index) || !getProperty(node, "allownull", attribute.AllowNull))
 		{
 			nlwarning("CDBDescriptionParser::loadAttribute(): missing property 'indexid' in attribute node");
 			return false;
 		}
 	case PDS_ForwardRef:
 	case PDS_Set:
-		if (!getProperty(node, "classid", attribute.TypeId) ||
-			!getProperty(node, "forwardreferedid", attribute.Reference))
+		if (!getProperty(node, "classid", attribute.TypeId) || !getProperty(node, "forwardreferedid", attribute.Reference))
 		{
 			nlwarning("CDBDescriptionParser::loadAttribute(): missing property 'classid' or 'forwardreferedid' in attribute node");
 			return false;
@@ -431,9 +411,9 @@ bool	CDBDescriptionParser::loadAttribute(xmlNodePtr node, CTableNode& table)
 /**
  * Load attribute description
  */
-bool	CDBDescriptionParser::loadLog(xmlNodePtr node)
+bool CDBDescriptionParser::loadLog(xmlNodePtr node)
 {
-	uint	id;
+	uint id;
 	if (!getProperty(node, "id", id))
 	{
 		nlwarning("CDBDescriptionParser::loadLog(): missing property 'id' in logmsg node");
@@ -441,9 +421,9 @@ bool	CDBDescriptionParser::loadLog(xmlNodePtr node)
 	}
 
 	if (id >= _Database.Logs.size())
-		_Database.Logs.resize(id+1);
+		_Database.Logs.resize(id + 1);
 
-	CLogNode&	log = _Database.Logs[id];
+	CLogNode &log = _Database.Logs[id];
 
 	log.Id = id;
 
@@ -453,10 +433,10 @@ bool	CDBDescriptionParser::loadLog(xmlNodePtr node)
 		return false;
 	}
 
-	xmlNodePtr	paramNode;
+	xmlNodePtr paramNode;
 	FOREACH_CHILD(paramNode, node, param)
 	{
-		uint	id;
+		uint id;
 		if (!getProperty(paramNode, "id", id))
 		{
 			nlwarning("CDBDescriptionParser::loadLog(): missing property 'id' in logmsg.param node");
@@ -464,9 +444,9 @@ bool	CDBDescriptionParser::loadLog(xmlNodePtr node)
 		}
 
 		if (id >= log.Parameters.size())
-			log.Parameters.resize(id+1);
+			log.Parameters.resize(id + 1);
 
-		std::string	logType;
+		std::string logType;
 
 		if (getProperty(paramNode, "typeid", logType))
 		{
@@ -486,9 +466,9 @@ bool	CDBDescriptionParser::loadLog(xmlNodePtr node)
 		}
 	}
 
-	uint	i;
-	uint	byteOffset = 0;
-	for (i=0; i<log.Parameters.size(); ++i)
+	uint i;
+	uint byteOffset = 0;
+	for (i = 0; i < log.Parameters.size(); ++i)
 	{
 		if (log.Parameters[i].TypeId == ExtLogTypeString)
 		{
@@ -505,7 +485,7 @@ bool	CDBDescriptionParser::loadLog(xmlNodePtr node)
 		byteOffset += log.Parameters[i].ByteSize;
 	}
 
-	xmlNodePtr	msgNode = CIXml::getFirstChildNode(node, "msg");
+	xmlNodePtr msgNode = CIXml::getFirstChildNode(node, "msg");
 	if (msgNode == NULL)
 	{
 		nlwarning("CDBDescriptionParser::loadLog(): failed to find msg child node in logmsg node");
@@ -521,16 +501,15 @@ bool	CDBDescriptionParser::loadLog(xmlNodePtr node)
 	return true;
 }
 
-
 /*
  * Build Columns
  */
-bool	CDBDescriptionParser::buildColumns()
+bool CDBDescriptionParser::buildColumns()
 {
-	bool	success = true;
+	bool success = true;
 
-	uint	i;
-	for (i=0; i<_Database.Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Database.Tables.size(); ++i)
 	{
 		if (!buildColumns(i))
 		{
@@ -545,193 +524,184 @@ bool	CDBDescriptionParser::buildColumns()
 /*
  * Build Table Columns
  */
-bool	CDBDescriptionParser::buildColumns(uint tableIndex)
+bool CDBDescriptionParser::buildColumns(uint tableIndex)
 {
 	if (tableIndex >= _Database.Tables.size())
 		return false;
 
-	CTableNode&		table = _Database.Tables[tableIndex];
+	CTableNode &table = _Database.Tables[tableIndex];
 
 	if (table.ColumnsBuilt)
 		return true;
 
-	uint	i;
-	for (i=0; i<table.Attributes.size(); ++i)
+	uint i;
+	for (i = 0; i < table.Attributes.size(); ++i)
 	{
-		CAttributeNode&	attribute = table.Attributes[i];
-		CColumnNode		column;
+		CAttributeNode &attribute = table.Attributes[i];
+		CColumnNode column;
 
 		switch (attribute.MetaType)
 		{
-		case PDS_Type:
+		case PDS_Type: {
+			if (attribute.TypeId >= _Database.Types.size())
 			{
-				if (attribute.TypeId >= _Database.Types.size())
-				{
-					nlwarning("CDBDescriptionParser::buildColumns(): Can't access type %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
-					return false;
-				}
+				nlwarning("CDBDescriptionParser::buildColumns(): Can't access type %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
+				return false;
+			}
 
+			column.Index = (uint)table.Columns.size();
+			column.Name = attribute.Name;
+			column.TypeId = attribute.TypeId;
+			column.DataType = _Database.Types[attribute.TypeId].DataType;
+			column.ByteSize = _Database.Types[attribute.TypeId].ByteSize;
+			table.Columns.push_back(column);
+		}
+		break;
+
+		case PDS_Class: {
+			if (attribute.TypeId >= _Database.Tables.size())
+			{
+				nlwarning("CDBDescriptionParser::buildColumns(): Can't access table %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
+				return false;
+			}
+
+			if (!buildColumns(attribute.TypeId))
+			{
+				nlwarning("CDBDescriptionParser::buildColumns(): Failed to build columns for table %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
+				return false;
+			}
+
+			CTableNode &subtable = _Database.Tables[attribute.TypeId];
+
+			uint j;
+			for (j = 0; j < subtable.Columns.size(); ++j)
+			{
+				CColumnNode &copy = subtable.Columns[j];
 				column.Index = (uint)table.Columns.size();
-				column.Name = attribute.Name;
-				column.TypeId = attribute.TypeId;
-				column.DataType = _Database.Types[attribute.TypeId].DataType;
-				column.ByteSize = _Database.Types[attribute.TypeId].ByteSize;
+				column.Name = attribute.Name + "." + copy.Name;
+				column.TypeId = copy.TypeId;
+				column.DataType = copy.DataType;
+				column.ByteSize = copy.ByteSize;
 				table.Columns.push_back(column);
 			}
-			break;
+		}
+		break;
 
-		case PDS_Class:
+		case PDS_BackRef: {
+			column.Index = (uint)table.Columns.size();
+			column.Name = attribute.Name;
+			column.TypeId = attribute.TypeId;
+			column.DataType = PDS_Index;
+			column.ByteSize = 8; /// \todo remove hardcoded value
+			table.Columns.push_back(column);
+		}
+		break;
+
+		case PDS_ForwardRef: {
+			column.Index = (uint)table.Columns.size();
+			column.Name = attribute.Name;
+			column.TypeId = attribute.TypeId;
+			column.DataType = PDS_Index;
+			column.ByteSize = 8; /// \todo remove hardcoded value
+			table.Columns.push_back(column);
+		}
+		break;
+
+		case PDS_ArrayType: {
+			if (attribute.TypeId >= _Database.Types.size())
 			{
-				if (attribute.TypeId >= _Database.Tables.size())
-				{
-					nlwarning("CDBDescriptionParser::buildColumns(): Can't access table %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
-					return false;
-				}
+				nlwarning("CDBDescriptionParser::buildColumns(): Can't access type %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
+				return false;
+			}
 
-				if (!buildColumns(attribute.TypeId))
-				{
-					nlwarning("CDBDescriptionParser::buildColumns(): Failed to build columns for table %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
-					return false;
-				}
+			if (attribute.Index >= _Database.Types.size() || (_Database.Types[attribute.Index].Type != CTypeNode::TypeEnum && _Database.Types[attribute.Index].Type != CTypeNode::TypeDimension))
+			{
+				nlwarning("CDBDescriptionParser::buildColumns(): Can't access index %d (or is not index) in database '%s'", attribute.Index, _Database.Name.c_str());
+				return false;
+			}
 
-				CTableNode&	subtable = _Database.Tables[attribute.TypeId];
+			CTypeNode &index = _Database.Types[attribute.Index];
+			uint j;
+			for (j = 0; j < index.Dimension; ++j)
+			{
+				column.Index = (uint)table.Columns.size();
+				column.Name = attribute.Name + '[' + (index.Type == CTypeNode::TypeDimension ? toString(j) : index.getEnumName(j)) + ']';
+				column.TypeId = attribute.TypeId;
+				column.DataType = _Database.Types[attribute.TypeId].DataType;
+				table.Columns.push_back(column);
+			}
+		}
+		break;
 
-				uint	j;
-				for (j=0; j<subtable.Columns.size(); ++j)
+		case PDS_ArrayClass: {
+			if (attribute.TypeId >= _Database.Tables.size())
+			{
+				nlwarning("CDBDescriptionParser::buildColumns(): Can't access table %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
+				return false;
+			}
+
+			if (attribute.Index >= _Database.Types.size() || (_Database.Types[attribute.Index].Type != CTypeNode::TypeEnum && _Database.Types[attribute.Index].Type != CTypeNode::TypeDimension))
+			{
+				nlwarning("CDBDescriptionParser::buildColumns(): Can't access index %d (or is not index) in database '%s'", attribute.Index, _Database.Name.c_str());
+				return false;
+			}
+
+			if (!buildColumns(attribute.TypeId))
+			{
+				nlwarning("CDBDescriptionParser::buildColumns(): Failed to build columns for table %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
+				return false;
+			}
+
+			CTableNode &subtable = _Database.Tables[attribute.TypeId];
+			CTypeNode &index = _Database.Types[attribute.Index];
+			uint j;
+			for (j = 0; j < index.Dimension; ++j)
+			{
+				uint k;
+				for (k = 0; k < subtable.Columns.size(); ++k)
 				{
-					CColumnNode&	copy = subtable.Columns[j];
+					CColumnNode &copy = subtable.Columns[k];
 					column.Index = (uint)table.Columns.size();
-					column.Name = attribute.Name+"."+copy.Name;
+					column.Name = attribute.Name + '[' + (index.Type == CTypeNode::TypeDimension ? toString(j) : index.getEnumName(j)) + ']' + '.' + copy.Name;
 					column.TypeId = copy.TypeId;
 					column.DataType = copy.DataType;
 					column.ByteSize = copy.ByteSize;
 					table.Columns.push_back(column);
 				}
 			}
-			break;
+		}
+		break;
 
-		case PDS_BackRef:
+		case PDS_ArrayRef: {
+			if (attribute.Index >= _Database.Types.size() || (_Database.Types[attribute.Index].Type != CTypeNode::TypeEnum && _Database.Types[attribute.Index].Type != CTypeNode::TypeDimension))
+			{
+				nlwarning("CDBDescriptionParser::buildColumns(): Can't access index %d (or is not index) in database '%s'", attribute.Index, _Database.Name.c_str());
+				return false;
+			}
+
+			CTypeNode &index = _Database.Types[attribute.Index];
+			uint j;
+			for (j = 0; j < index.Dimension; ++j)
 			{
 				column.Index = (uint)table.Columns.size();
-				column.Name = attribute.Name;
+				column.Name = attribute.Name + '[' + (index.Type == CTypeNode::TypeDimension ? toString(j) : index.getEnumName(j)) + ']';
 				column.TypeId = attribute.TypeId;
 				column.DataType = PDS_Index;
-				column.ByteSize = 8;	/// \todo remove hardcoded value
+				column.ByteSize = 8; /// \todo remove hardcoded value
 				table.Columns.push_back(column);
 			}
-			break;
+		}
+		break;
 
-		case PDS_ForwardRef:
-			{
-				column.Index = (uint)table.Columns.size();
-				column.Name = attribute.Name;
-				column.TypeId = attribute.TypeId;
-				column.DataType = PDS_Index;
-				column.ByteSize = 8;	/// \todo remove hardcoded value
-				table.Columns.push_back(column);
-			}
-			break;
-
-		case PDS_ArrayType:
-			{
-				if (attribute.TypeId >= _Database.Types.size())
-				{
-					nlwarning("CDBDescriptionParser::buildColumns(): Can't access type %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
-					return false;
-				}
-
-				if (attribute.Index >= _Database.Types.size() || (_Database.Types[attribute.Index].Type != CTypeNode::TypeEnum && _Database.Types[attribute.Index].Type != CTypeNode::TypeDimension))
-				{
-					nlwarning("CDBDescriptionParser::buildColumns(): Can't access index %d (or is not index) in database '%s'", attribute.Index, _Database.Name.c_str());
-					return false;
-				}
-
-				CTypeNode&	index = _Database.Types[attribute.Index];
-				uint	j;
-				for (j=0; j<index.Dimension; ++j)
-				{
-					column.Index = (uint)table.Columns.size();
-					column.Name = attribute.Name + '[' + (index.Type == CTypeNode::TypeDimension ? toString(j) : index.getEnumName(j)) + ']';
-					column.TypeId = attribute.TypeId;
-					column.DataType = _Database.Types[attribute.TypeId].DataType;
-					table.Columns.push_back(column);
-				}
-			}
-			break;
-
-		case PDS_ArrayClass:
-			{
-				if (attribute.TypeId >= _Database.Tables.size())
-				{
-					nlwarning("CDBDescriptionParser::buildColumns(): Can't access table %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
-					return false;
-				}
-
-				if (attribute.Index >= _Database.Types.size() || (_Database.Types[attribute.Index].Type != CTypeNode::TypeEnum && _Database.Types[attribute.Index].Type != CTypeNode::TypeDimension))
-				{
-					nlwarning("CDBDescriptionParser::buildColumns(): Can't access index %d (or is not index) in database '%s'", attribute.Index, _Database.Name.c_str());
-					return false;
-				}
-
-				if (!buildColumns(attribute.TypeId))
-				{
-					nlwarning("CDBDescriptionParser::buildColumns(): Failed to build columns for table %d in database '%s'", attribute.TypeId, _Database.Name.c_str());
-					return false;
-				}
-
-				CTableNode&	subtable = _Database.Tables[attribute.TypeId];
-				CTypeNode&	index = _Database.Types[attribute.Index];
-				uint	j;
-				for (j=0; j<index.Dimension; ++j)
-				{
-					uint	k;
-					for (k=0; k<subtable.Columns.size(); ++k)
-					{
-						CColumnNode&	copy = subtable.Columns[k];
-						column.Index = (uint)table.Columns.size();
-						column.Name = attribute.Name + '[' + (index.Type == CTypeNode::TypeDimension ? toString(j) : index.getEnumName(j)) + ']' + '.' + copy.Name;
-						column.TypeId = copy.TypeId;
-						column.DataType = copy.DataType;
-						column.ByteSize = copy.ByteSize;
-						table.Columns.push_back(column);
-					}
-				}
-
-			}
-			break;
-
-		case PDS_ArrayRef:
-			{
-				if (attribute.Index >= _Database.Types.size() || (_Database.Types[attribute.Index].Type != CTypeNode::TypeEnum && _Database.Types[attribute.Index].Type != CTypeNode::TypeDimension))
-				{
-					nlwarning("CDBDescriptionParser::buildColumns(): Can't access index %d (or is not index) in database '%s'", attribute.Index, _Database.Name.c_str());
-					return false;
-				}
-
-				CTypeNode&	index = _Database.Types[attribute.Index];
-				uint	j;
-				for (j=0; j<index.Dimension; ++j)
-				{
-					column.Index = (uint)table.Columns.size();
-					column.Name = attribute.Name + '[' + (index.Type == CTypeNode::TypeDimension ? toString(j) : index.getEnumName(j)) + ']';
-					column.TypeId = attribute.TypeId;
-					column.DataType = PDS_Index;
-					column.ByteSize = 8;	/// \todo remove hardcoded value
-					table.Columns.push_back(column);
-				}
-			}
-			break;
-
-		case PDS_Set:
-			{
-				column.Index = (uint)table.Columns.size();
-				column.Name = attribute.Name;
-				column.TypeId = attribute.TypeId;
-				column.DataType = PDS_List;
-				column.ByteSize = 4;	/// \todo remove hardcoded value
-				table.Columns.push_back(column);
-			}
-			break;
+		case PDS_Set: {
+			column.Index = (uint)table.Columns.size();
+			column.Name = attribute.Name;
+			column.TypeId = attribute.TypeId;
+			column.DataType = PDS_List;
+			column.ByteSize = 4; /// \todo remove hardcoded value
+			table.Columns.push_back(column);
+		}
+		break;
 		default:
 			break;
 		}
@@ -741,16 +711,15 @@ bool	CDBDescriptionParser::buildColumns(uint tableIndex)
 	return true;
 }
 
-
 /*
  * Display whole database node info
  */
-void	CDBDescriptionParser::display(NLMISC::CLog& log) const
+void CDBDescriptionParser::display(NLMISC::CLog &log) const
 {
 	log.displayNL("Display of database '%s'", _Database.Name.c_str());
 
-	uint	i;
-	for (i=0; i<_Database.Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Database.Tables.size(); ++i)
 	{
 		log.displayNL("%2d: %32s %d columns", i, _Database.Tables[i].Name.c_str(), _Database.Tables[i].Columns.size());
 	}
@@ -761,19 +730,19 @@ void	CDBDescriptionParser::display(NLMISC::CLog& log) const
 /*
  * Display Table node info
  */
-void	CDBDescriptionParser::displayTable(uint table, NLMISC::CLog& log) const
+void CDBDescriptionParser::displayTable(uint table, NLMISC::CLog &log) const
 {
 	if (table >= _Database.Tables.size())
 		return;
 
 	log.displayNL("Display of table '%s'", _Database.Tables[table].Name.c_str());
 
-	uint	i;
-	for (i=0; i<_Database.Tables[table].Columns.size(); ++i)
+	uint i;
+	for (i = 0; i < _Database.Tables[table].Columns.size(); ++i)
 	{
 		if (checkStrictDataType(_Database.Tables[table].Columns[i].DataType))
 		{
-			const CTypeNode&	type = _Database.Types[_Database.Tables[table].Columns[i].TypeId];
+			const CTypeNode &type = _Database.Types[_Database.Tables[table].Columns[i].TypeId];
 			log.displayNL("%5d: %32s %s", i, _Database.Tables[table].Columns[i].Name.c_str(), type.Name.c_str());
 		}
 		else
@@ -784,4 +753,3 @@ void	CDBDescriptionParser::displayTable(uint table, NLMISC::CLog& log) const
 
 	log.displayNL("End of table '%s'", _Database.Tables[table].Name.c_str());
 }
-

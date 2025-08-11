@@ -14,29 +14,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_DEPOSIT_RAW_MATERIAL_H
 #define RY_DEPOSIT_RAW_MATERIAL_H
 
 // Struct deposit parameters
 struct CDepositRawMaterial
 {
-	NLMISC::CSheetId	MaterialSheet;
-	//uint16				MaxAmount;
+	NLMISC::CSheetId MaterialSheet;
+	// uint16				MaxAmount;
 
 	// defined operator = to fill structure with CStaticDeposit::CStaticDepositRawMaterial
-	const CDepositRawMaterial &operator = (const CStaticDeposit::CStaticDepositRawMaterial& form )
+	const CDepositRawMaterial &operator=(const CStaticDeposit::CStaticDepositRawMaterial &form)
 	{
 		MaterialSheet = form.MaterialSheet;
-		//MaxAmount = form.MaxAmount;
+		// MaxAmount = form.MaxAmount;
 		return *this;
 	}
 
 	/// serialize
-//	void serial(NLMISC::IStream &f) 
-//	{
-//	}
+	//	void serial(NLMISC::IStream &f)
+	//	{
+	//	}
 };
 
 #endif // RY_DEPOSIT_RAW_MATERIAL_H

@@ -17,15 +17,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
 
 #include <nel/misc/stop_watch.h>
@@ -56,7 +54,7 @@
 #include "game_share/system_message.h"
 #include "game_share/generic_xml_msg_mngr.h"
 
-//#include "gpm_service/gpm_service.h"
+// #include "gpm_service/gpm_service.h"
 
 #include "frontend_service.h"
 #include "module_manager.h"
@@ -74,14 +72,12 @@ using namespace NLNET;
 using namespace NLMISC;
 using namespace CLFECOMMON;
 
-
-
-//#define FE_MULTITHREADED
+// #define FE_MULTITHREADED
 
 // callback for module security system
 void cbEntityIdChanged(CClientHost *clienthost);
 
-CGenericXmlMsgHeaderManager	GenericXmlMsgHeaderMngr;
+CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 NLNET::TServiceId SelfServiceId;
 
 bool UseTickService = false;
@@ -99,36 +95,36 @@ uint MaxNbClients = 1000;
 // Size of UDP/IP/Ethernet headers: 8+20+14 = 42
 const uint32 UDP_IP_ETH_HEADER_SIZE = 42;
 
-CVariable<bool>		DontNeedBackend("FS", "DontNeedBackend", "Debug feature to allow client connection without backend (1=always allow connection , 0=backend must be up)", false, 0, true);
+CVariable<bool> DontNeedBackend("FS", "DontNeedBackend", "Debug feature to allow client connection without backend (1=always allow connection , 0=backend must be up)", false, 0, true);
 
-CVariable<bool>		UseSendThread("FS", "UseSendThread", "Use thread for sending", false, 0, true);
+CVariable<bool> UseSendThread("FS", "UseSendThread", "Use thread for sending", false, 0, true);
 
-CVariable<bool>		UseWebPatchServer("FS", "UseWebPatchServer", "Use Web Server for patching", true, 0, true);
-CVariable<bool>		AcceptClientsAtStartup("FS", "AcceptClientsAtStartup", "Set Frontend Accept mode (1=accept clients, 0=patching mode)", false, 0, true);
-CVariable<string>	PatchingURLFooter("FS", "PatchingURLFooter", "Patching server listenning port + directory (default is ':43435/patch')", ":43435/patch", 0, true);
-CVariable<string>	StartWebServerSysCommand("FS", "StartWebServerSysCommand", "System command to execute when to start Web Patch Server", "", 0, true);
-CVariable<string>	StopWebServerSysCommand("FS", "StopWebServerSysCommand", "System command to execute when to stop Web Patch Server", "", 0, true);
-CVariable<bool>		PublishFSHostAsIP("FS", "PublishFSHostAsIP", "Publish FSHost to the WS as IP:port instead of hostname:post", false, 0, true);
-CVariable<uint32>	DelayBeforeUPDAlert("FS", "DelayBeforeUPDAlert", "Delay (in s) before raising an alert when the service has not received UPD packet", 10*60, 0, true);	// 10m, default
+CVariable<bool> UseWebPatchServer("FS", "UseWebPatchServer", "Use Web Server for patching", true, 0, true);
+CVariable<bool> AcceptClientsAtStartup("FS", "AcceptClientsAtStartup", "Set Frontend Accept mode (1=accept clients, 0=patching mode)", false, 0, true);
+CVariable<string> PatchingURLFooter("FS", "PatchingURLFooter", "Patching server listenning port + directory (default is ':43435/patch')", ":43435/patch", 0, true);
+CVariable<string> StartWebServerSysCommand("FS", "StartWebServerSysCommand", "System command to execute when to start Web Patch Server", "", 0, true);
+CVariable<string> StopWebServerSysCommand("FS", "StopWebServerSysCommand", "System command to execute when to stop Web Patch Server", "", 0, true);
+CVariable<bool> PublishFSHostAsIP("FS", "PublishFSHostAsIP", "Publish FSHost to the WS as IP:port instead of hostname:post", false, 0, true);
+CVariable<uint32> DelayBeforeUPDAlert("FS", "DelayBeforeUPDAlert", "Delay (in s) before raising an alert when the service has not received UPD packet", 10 * 60, 0, true); // 10m, default
 
-CVariable<bool>		VerboseFEStatsTime("fs", "VerboseFEStatsTime", "Verbose FESTATS and FETIME", false, 0, true);
+CVariable<bool> VerboseFEStatsTime("fs", "VerboseFEStatsTime", "Verbose FESTATS and FETIME", false, 0, true);
 
-std::string	getPatchingAddress()
+std::string getPatchingAddress()
 {
-	std::string	la;
+	std::string la;
 
 	if (IService::getInstance()->haveArg('D'))
 	{
 		// use the command line param if set
 		la = IService::getInstance()->getArg('D');
 	}
-	else if (IService::getInstance()->ConfigFile.exists ("ListenAddress"))
+	else if (IService::getInstance()->ConfigFile.exists("ListenAddress"))
 	{
 		// use the config file param if set
-		la = IService::getInstance()->ConfigFile.getVar ("ListenAddress").asString();
+		la = IService::getInstance()->ConfigFile.getVar("ListenAddress").asString();
 	}
 
-	NLNET::CInetAddress	addr(la);
+	NLNET::CInetAddress addr(la);
 
 	return string("http://") + addr.ipAddress() + PatchingURLFooter.get();
 }
@@ -136,17 +132,15 @@ std::string	getPatchingAddress()
 /*
  * Conditional beep
  */
-void beepIfAllowed( uint freq, uint duration )
+void beepIfAllowed(uint freq, uint duration)
 {
-	if ( AllowBeep )
-		beep( freq, duration );
+	if (AllowBeep)
+		beep(freq, duration);
 }
-
 
 /***
  *** Global functions for easy multithreadization
  ***/
-
 
 /*
  * Update task
@@ -156,22 +150,20 @@ void beepIfAllowed( uint freq, uint duration )
 void updatePriorities()
 {
 	H_AUTO(UpdatePriorities);
-	//CFrontEndService::instance()->entityContainer().update(); // now called by the mirror notification callback
+	// CFrontEndService::instance()->entityContainer().update(); // now called by the mirror notification callback
 
 	CFrontEndService::instance()->PrioSub.update();
 }
-
 
 // Update clients states
 void updateClientsStates()
 {
 	H_AUTO(RemoveDeadClients);
 #ifndef SIMUL_CLIENTS
-	CFrontEndService	*service = CFrontEndService::instance();
+	CFrontEndService *service = CFrontEndService::instance();
 	service->updateClientsStates();
 #endif
 }
-
 
 /*
  * Send task (see CFeSendSub::update())
@@ -185,30 +177,28 @@ void prepareHeadersAndFillImpulses()
 	CFrontEndService::instance()->SendWatch.start();
 
 	CFrontEndService::instance()->sendSub()->prepareSendCycle();
-	if ( ! CFrontEndService::instance()->receiveSub()->clientMap().empty() )
+	if (!CFrontEndService::instance()->receiveSub()->clientMap().empty())
 	{
 		CFrontEndService::instance()->sendSub()->prepareHeadersAndFillImpulses();
 	}
 }
 
-
 // Fill prioritized actions
 void fillPrioritizedActionsToSend()
 {
 	H_AUTO(FillPrioritizedActions);
-	if ( ! CFrontEndService::instance()->receiveSub()->clientMap().empty() )
+	if (!CFrontEndService::instance()->receiveSub()->clientMap().empty())
 	{
 		CFrontEndService::instance()->sendSub()->fillPrioritizedActions();
 	}
 }
-
 
 // Swap send buffers
 void swapSendBuffers()
 {
 	H_AUTO(WaitAndSwapSendBuffers);
 
-    // Wait for the end of flushMessagesToSend()
+	// Wait for the end of flushMessagesToSend()
 	CAtomicLockFast::enter(FlushInProgress);
 
 	// Swap the buffers
@@ -216,7 +206,6 @@ void swapSendBuffers()
 
 	CFrontEndService::instance()->SendWatch.stop();
 }
-
 
 // Flush messages
 void flushMessagesToSend()
@@ -231,7 +220,11 @@ void flushMessagesToSend()
 class CSendRunnable : public IRunnable
 {
 public:
-	CSendRunnable() : m_StopThread(false), m_SendBuffer(false) {}
+	CSendRunnable()
+	    : m_StopThread(false)
+	    , m_SendBuffer(false)
+	{
+	}
 
 	virtual void run()
 	{
@@ -270,7 +263,6 @@ private:
 	bool m_SendBuffer;
 	std::condition_variable m_CondVar;
 	std::mutex m_Mutex;
-
 };
 
 CSendRunnable *SendTask;
@@ -287,7 +279,6 @@ void swapReadBuffers()
 	CFrontEndService::instance()->receiveSub()->swapReadQueues();
 }
 
-
 // Read incoming data from the current read queue
 void readIncomingData()
 {
@@ -295,52 +286,49 @@ void readIncomingData()
 	CFrontEndService::instance()->receiveSub()->readIncomingData();
 }
 
-
-
 /**************************
  *         INIT           *
  **************************/
 
-
 /*
  * Send an impulsion message to a destination client (warning: channel is "level", in fact)
  */
-void sendImpulsion( TClientId clientid, CMessage& msgin, uint8 channel, const char *extendedMsg, bool forceSingleShot )
+void sendImpulsion(TClientId clientid, CMessage &msgin, uint8 channel, const char *extendedMsg, bool forceSingleShot)
 {
 	uint32 bytelen;
-	msgin.serial( bytelen ); // sent with serialBufferWithSize(), the following is the buffer
+	msgin.serial(bytelen); // sent with serialBufferWithSize(), the following is the buffer
 
-	CActionGeneric *ag = (CActionGeneric *)CActionFactory::getInstance()->create( INVALID_SLOT, ACTION_GENERIC_CODE );
-	ag->setFromMessage( msgin, bytelen );
+	CActionGeneric *ag = (CActionGeneric *)CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_GENERIC_CODE);
+	ag->setFromMessage(msgin, bytelen);
 	ag->AllowExceedingMaxSize = forceSingleShot;
-	sint32 impulseBitSize = (sint32)CActionFactory::getInstance ()->size( ag );
-	sint32 maxImpulseBitSize = CFrontEndService::instance()->getImpulseMaxBitSize( channel );
-	if ( forceSingleShot || (impulseBitSize < maxImpulseBitSize) )
+	sint32 impulseBitSize = (sint32)CActionFactory::getInstance()->size(ag);
+	sint32 maxImpulseBitSize = CFrontEndService::instance()->getImpulseMaxBitSize(channel);
+	if (forceSingleShot || (impulseBitSize < maxImpulseBitSize))
 	{
 		// Simple impulsion
 #ifdef TRACE_SHARD_MESSAGES
 		LOG_IMPULSION_INFO("FETRACE:%u: Preparing simple impulsion %p for C%hu, %s (len=%u, %d/%d bits)", CTickEventHandler::getGameCycle(), ag, clientid, extendedMsg, bytelen, impulseBitSize, maxImpulseBitSize);
 #endif
-		CFrontEndService::instance()->addImpulseToClient (clientid, ag, channel);
+		CFrontEndService::instance()->addImpulseToClient(clientid, ag, channel);
 	}
 	else
 	{
 		// MultiPart impulsion
-		CActionFactory::getInstance()->remove((CActionImpulsion*&)ag);
-		CActionGenericMultiPart *agmp = (CActionGenericMultiPart *)CActionFactory::getInstance ()->create (INVALID_SLOT, ACTION_GENERIC_MULTI_PART_CODE);
-		sint32 minimumBitSizeForMP = CActionFactory::getInstance ()->size (agmp);
+		CActionFactory::getInstance()->remove((CActionImpulsion *&)ag);
+		CActionGenericMultiPart *agmp = (CActionGenericMultiPart *)CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_GENERIC_MULTI_PART_CODE);
+		sint32 minimumBitSizeForMP = CActionFactory::getInstance()->size(agmp);
 
 		sint32 availableSize = (maxImpulseBitSize - minimumBitSizeForMP) / 8; // (in bytes)
 #ifdef NL_DEBUG
-		nlassert( availableSize > 0 ); // the available size must be larger than the 'empty' size
+		nlassert(availableSize > 0); // the available size must be larger than the 'empty' size
 #endif
 		sint32 nbBlock = (bytelen + availableSize - 1) / availableSize;
 
-		TClientIdCont	&cont = CFrontEndService::instance()->receiveSub()->clientIdCont();
+		TClientIdCont &cont = CFrontEndService::instance()->receiveSub()->clientIdCont();
 		if (clientid >= cont.size() || cont[clientid] == NULL)
 		{
-			nlwarning ("Can't send impulse to client %u (doesn't exist)", clientid);
-			CActionFactory::getInstance()->remove((CActionImpulsion*&)agmp);
+			nlwarning("Can't send impulse to client %u (doesn't exist)", clientid);
+			CActionFactory::getInstance()->remove((CActionImpulsion *&)agmp);
 			return;
 		}
 		uint8 num = cont[clientid]->ImpulseMultiPartNumber++;
@@ -351,49 +339,48 @@ void sendImpulsion( TClientId clientid, CMessage& msgin, uint8 channel, const ch
 		for (sint32 i = 0; i < nbBlock; i++)
 		{
 			if (i != 0)
-				agmp = (CActionGenericMultiPart *)CActionFactory::getInstance ()->create (INVALID_SLOT, ACTION_GENERIC_MULTI_PART_CODE);
+				agmp = (CActionGenericMultiPart *)CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_GENERIC_MULTI_PART_CODE);
 
 			agmp->set(num, (uint16)i, msgin.buffer() + msgin.getPos(), bytelen, availableSize, (uint16)nbBlock);
-//			nldebug ("num %d part %d avail %d nbblock %d", num, i, availableSize, nbBlock);
-			CFrontEndService::instance()->addImpulseToClient (clientid, agmp, channel);
+			//			nldebug ("num %d part %d avail %d nbblock %d", num, i, availableSize, nbBlock);
+			CFrontEndService::instance()->addImpulseToClient(clientid, agmp, channel);
 		}
 	}
-	//nldebug( "Contents of impulsion: '%s'", toHexaString(ImpulseBMS.bufferAsVector()).c_str() );
+	// nldebug( "Contents of impulsion: '%s'", toHexaString(ImpulseBMS.bufferAsVector()).c_str() );
 }
-
 
 /*
  * Callback called when the input service gives a login mapping
  */
-void cbMapIdToUid( CMessage& msgin, const string& serviceName, NLNET::TServiceId serviceId )
+void cbMapIdToUid(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
 	// Serial in the CEntityId and the Uid
 	TUid uid;
 	CEntityId id;
-	msgin.serial( uid );
-	msgin.serial( id );
+	msgin.serial(uid);
+	msgin.serial(id);
 
 	// Search the Uid in client hosts
 	CFrontEndService *fe = CFrontEndService::instance();
-	CClientHost *clienthost = fe->receiveSub()->findClientHostByUid( uid );
-	if ( clienthost != NULL )
+	CClientHost *clienthost = fe->receiveSub()->findClientHostByUid(uid);
+	if (clienthost != NULL)
 	{
-		nlinfo( "%u: Mapping CEntityId %s to uid %u for client %u", CTickEventHandler::getGameCycle(), id.toString().c_str(), uid, clienthost->clientId() );
-		if( clienthost->eId() != CEntityId::Unknown )
+		nlinfo("%u: Mapping CEntityId %s to uid %u for client %u", CTickEventHandler::getGameCycle(), id.toString().c_str(), uid, clienthost->clientId());
+		if (clienthost->eId() != CEntityId::Unknown)
 		{
-			nlwarning( "Client %u had already a CEntityId: %s !", uid, clienthost->eId().toString().c_str() );
+			nlwarning("Client %u had already a CEntityId: %s !", uid, clienthost->eId().toString().c_str());
 			return;
 		}
-		clienthost->setEId( id );
+		clienthost->setEId(id);
 		// update security for client module
 		cbEntityIdChanged(clienthost);
 
-		if ( fe->receiveSub()->EntityToClient.findEntityId( id ) )
+		if (fe->receiveSub()->EntityToClient.findEntityId(id))
 		{
-			nlwarning( "The CEntityId %s is already owned by another client!", id.toString().c_str() );
+			nlwarning("The CEntityId %s is already owned by another client!", id.toString().c_str());
 			return;
 		}
-		fe->receiveSub()->EntityToClient.addId( id, clienthost->clientId() );
+		fe->receiveSub()->EntityToClient.addId(id, clienthost->clientId());
 
 		// The entity index will be set later, in CVisionProvider::processVision()
 		// The forwarding to the client is done by an impulsion from the back-end
@@ -403,22 +390,20 @@ void cbMapIdToUid( CMessage& msgin, const string& serviceName, NLNET::TServiceId
 		// cannot update its properties
 		/*for ( uint32 p = FIRST_DISCREET_PROPINDEX; p < fe->PrioSub.PropTranslator.nbPropertiesByEntityId( id ); ++p )
 		{
-			clienthost->PropDispatcher.setPriority( 0, (TPropIndex)p, fe->PrioSub.VisionArray.prioLoc( clienthost->clientId(), 0, (TPropIndex)p ), (TPriority)HIGHEST_PRIORITY );
+		    clienthost->PropDispatcher.setPriority( 0, (TPropIndex)p, fe->PrioSub.VisionArray.prioLoc( clienthost->clientId(), 0, (TPropIndex)p ), (TPriority)HIGHEST_PRIORITY );
 		}*/
-
 	}
 	else
 	{
-		nlwarning( "Uid not found for client login (%s %u)", id.toString().c_str(), uid );
+		nlwarning("Uid not found for client login (%s %u)", id.toString().c_str(), uid);
 	}
 }
-
 
 /*
  * Receive an impulsion to send to a client, using a uid (user account id).
  * This is used for messages sent to a client before he has choosen his id (entity id).
  */
-void cbImpulsionUid (CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId)
+void cbImpulsionUid(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
 	// Serialize in Uid
 	TUid uid;
@@ -428,48 +413,46 @@ void cbImpulsionUid (CMessage& msgin, const string &serviceName, NLNET::TService
 	CClientHost *clienthost;
 
 	// Find the client using the Uid (either in limbo or in online clients)
-	clienthost = frs->findClientHostByUid( uid, true );
-	if ( clienthost != NULL )
+	clienthost = frs->findClientHostByUid(uid, true);
+	if (clienthost != NULL)
 	{
 		// Send message to the client
-		sendImpulsion( clienthost->clientId(), msgin, 1, toString( "from %s to UId %u", serviceName.c_str(), uid ).c_str(), false );
+		sendImpulsion(clienthost->clientId(), msgin, 1, toString("from %s to UId %u", serviceName.c_str(), uid).c_str(), false);
 	}
 	else
 	{
 		// The client has left
-		nldebug( "Invalid recipient client uid for impulsion (%u) from %s", uid, serviceName.c_str() );
+		nldebug("Invalid recipient client uid for impulsion (%u) from %s", uid, serviceName.c_str());
 	}
 }
-
 
 /*
  * Receive an impulsion to send to a client, using a id
  */
-void cbImpulsionId (CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId)
+void cbImpulsionId(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
 	// Serialize in CEntityId
 	CEntityId id;
 	msgin.serial(id);
 
 	// Find the client using the id
-	TClientId clientid = CFrontEndService::instance()->receiveSub()->EntityToClient.getClientId( id );
-	if ( clientid != INVALID_CLIENT )
+	TClientId clientid = CFrontEndService::instance()->receiveSub()->EntityToClient.getClientId(id);
+	if (clientid != INVALID_CLIENT)
 	{
 		// Send message
-		sendImpulsion( clientid, msgin, 1, toString( "from %s to Id %s", serviceName.c_str(), id.toString().c_str() ).c_str(), false );
+		sendImpulsion(clientid, msgin, 1, toString("from %s to Id %s", serviceName.c_str(), id.toString().c_str()).c_str(), false);
 	}
 	else
 	{
 		// The client has left
-		nldebug( "Invalid recipient client id for impulsion (%s)", id.toString().c_str() );
+		nldebug("Invalid recipient client id for impulsion (%s)", id.toString().c_str());
 	}
 }
-
 
 /*
  * Receive an impulsion, to send to a client, using a id and level (abusively called channel)
  */
-void cbImpulsionIdChannel (CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId)
+void cbImpulsionIdChannel(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
 	// Serialize in CEntityId
 	CEntityId id;
@@ -478,33 +461,32 @@ void cbImpulsionIdChannel (CMessage& msgin, const string &serviceName, NLNET::TS
 	msgin.serial(channel);
 
 	// Find the client using the id
-	TClientId clientid = CFrontEndService::instance()->receiveSub()->EntityToClient.getClientId( id );
-	if ( clientid != INVALID_CLIENT )
+	TClientId clientid = CFrontEndService::instance()->receiveSub()->EntityToClient.getClientId(id);
+	if (clientid != INVALID_CLIENT)
 	{
-		if ( channel > 2 )
-			nlwarning( "Invalid level %hu for impulsion from %s", (uint16)channel, serviceName.c_str() );
+		if (channel > 2)
+			nlwarning("Invalid level %hu for impulsion from %s", (uint16)channel, serviceName.c_str());
 		// Send message
-		sendImpulsion( clientid, msgin, channel, toString( "with level %hu from %s to Id %s", (uint16)channel, serviceName.c_str(), id.toString().c_str() ).c_str(), false );
+		sendImpulsion(clientid, msgin, channel, toString("with level %hu from %s to Id %s", (uint16)channel, serviceName.c_str(), id.toString().c_str()).c_str(), false);
 	}
 	else
 	{
-		nldebug( "Invalid recipient client id for impulsion (level %hu) (%s)", (uint16)channel, id.toString().c_str() );
+		nldebug("Invalid recipient client id for impulsion (level %hu) (%s)", (uint16)channel, id.toString().c_str());
 	}
 }
-
 
 /*
  * Receive an impulsion, to send to a client, for a database update
  */
-void cbImpulsionDatabase (CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId)
+void cbImpulsionDatabase(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
 	// Serialize in CEntityId
 	CEntityId id;
 	msgin.serial(id);
 
 	// Find the client using the id
-	TClientId clientid = CFrontEndService::instance()->receiveSub()->EntityToClient.getClientId( id );
-	if ( clientid != INVALID_CLIENT )
+	TClientId clientid = CFrontEndService::instance()->receiveSub()->EntityToClient.getClientId(id);
+	if (clientid != INVALID_CLIENT)
 	{
 		// Send database message into level 2.
 		// The level 2 has 4 subchannels => subsequents sendings are not garanteed to be delivered
@@ -512,29 +494,29 @@ void cbImpulsionDatabase (CMessage& msgin, const string &serviceName, NLNET::TSe
 		//
 		// Warning: the channel has a limited size. If the database if flooded by updates, further
 		// database impulsions will be blocked.
-		sendImpulsion( clientid, msgin, 2, toString( "for database from %s to Id %s", serviceName.c_str(), id.toString().c_str() ).c_str(), false ); // TEMP: multipart allowed (because first sending with no constraints)
+		sendImpulsion(clientid, msgin, 2, toString("for database from %s to Id %s", serviceName.c_str(), id.toString().c_str()).c_str(), false); // TEMP: multipart allowed (because first sending with no constraints)
 	}
 	else
 	{
-		nldebug( "Invalid recipient client id for database impulsion (%s)", id.toString().c_str() );
+		nldebug("Invalid recipient client id for database impulsion (%s)", id.toString().c_str());
 	}
 }
-
 
 /*
  *
  */
-void cbImpulsionMultiDatabase (CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId)
+void cbImpulsionMultiDatabase(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
-	enum {
-		SendDeltasToAll = 1,			// From class CCDBGroup; must match ;)
+	enum
+	{
+		SendDeltasToAll = 1, // From class CCDBGroup; must match ;)
 	};
 
 	uint nbSent = 0;
 
 	// Read message flag
-	uint8	sendFlags = 0;				// Make warning C4700 silent
-	msgin.serial (sendFlags);
+	uint8 sendFlags = 0; // Make warning C4700 silent
+	msgin.serial(sendFlags);
 
 	if ((sendFlags & SendDeltasToAll) == SendDeltasToAll)
 	{
@@ -544,21 +526,19 @@ void cbImpulsionMultiDatabase (CMessage& msgin, const string &serviceName, NLNET
 
 		// All connected clients
 		THostMap::iterator ihm;
-		for (ihm =CFrontEndService::instance()->receiveSub()->clientMap().begin();
-			 ihm!=CFrontEndService::instance()->receiveSub()->clientMap().end(); ++ihm )
+		for (ihm = CFrontEndService::instance()->receiveSub()->clientMap().begin();
+		     ihm != CFrontEndService::instance()->receiveSub()->clientMap().end(); ++ihm)
 		{
 			// See cbImpulsionDatabase
 			CClientHost *destClient = GETCLIENTA(ihm);
 
 			// Check if client is still online and has chosen a player to play with
-			if (!destClient->isDisconnected () &&
-				!destClient->eId ().isUnknownId())
+			if (!destClient->isDisconnected() && !destClient->eId().isUnknownId())
 			{
 				// Set message position back
-				msgin.seek( msgPosBeforeData, NLMISC::IStream::begin );
+				msgin.seek(msgPosBeforeData, NLMISC::IStream::begin);
 
-
-				sendImpulsion( destClient->clientId(), msgin, 2, "", false ); // multipart allowed
+				sendImpulsion(destClient->clientId(), msgin, 2, "", false); // multipart allowed
 				// One more...
 				++nbSent;
 			}
@@ -569,23 +549,23 @@ void cbImpulsionMultiDatabase (CMessage& msgin, const string &serviceName, NLNET
 		// Explicit list of clients is specified
 		// Read recipient list
 		vector<CEntityId> recipientIds;
-		msgin.serialCont( recipientIds );
+		msgin.serialCont(recipientIds);
 
 		// Store current position in input message
 		sint32 msgPosAfterRecipients = msgin.getPos();
 
-		for ( vector<CEntityId>::const_iterator itr=recipientIds.begin(); itr!=recipientIds.end(); ++itr )
+		for (vector<CEntityId>::const_iterator itr = recipientIds.begin(); itr != recipientIds.end(); ++itr)
 		{
 			// Find the client using the id
-			const CEntityId& id = *itr;
-			TClientId clientid = CFrontEndService::instance()->receiveSub()->EntityToClient.getClientId( id );
-			if ( clientid != INVALID_CLIENT )
+			const CEntityId &id = *itr;
+			TClientId clientid = CFrontEndService::instance()->receiveSub()->EntityToClient.getClientId(id);
+			if (clientid != INVALID_CLIENT)
 			{
 				// Set message position back
-				msgin.seek( msgPosAfterRecipients, NLMISC::IStream::begin );
+				msgin.seek(msgPosAfterRecipients, NLMISC::IStream::begin);
 
 				// See cbImpulsionDatabase
-				sendImpulsion( clientid, msgin, 2, "", false ); // multipart allowed
+				sendImpulsion(clientid, msgin, 2, "", false); // multipart allowed
 
 				++nbSent;
 			}
@@ -593,36 +573,34 @@ void cbImpulsionMultiDatabase (CMessage& msgin, const string &serviceName, NLNET
 		}
 	}
 
-	//if ( nbSent != 0 )
+	// if ( nbSent != 0 )
 	//	nldebug( "Sent CDB_MULTI_IMPULSION to %u clients", nbSent );
 }
-
 
 /*
  * Set the names requested to the IOS
  */
-void cbSetEntityNames( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
+void cbSetEntityNames(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
 	uint32 len;
-	msgin.serial( len );
-	for ( uint32 i=0; i!=len; ++i )
+	msgin.serial(len);
+	for (uint32 i = 0; i != len; ++i)
 	{
 		TDataSetRow entityIndex;
 		string name;
-		msgin.serial( entityIndex );
-		msgin.serial( name );
-		CFrontEndService::instance()->EntityNames[ entityIndex.getIndex() ] = name;
+		msgin.serial(entityIndex);
+		msgin.serial(name);
+		CFrontEndService::instance()->EntityNames[entityIndex.getIndex()] = name;
 	}
-	nlinfo( "Got %u names from service %hu", len, serviceId.get() );
+	nlinfo("Got %u names from service %hu", len, serviceId.get());
 }
-
 
 /*
  * Server request frontend to disconnect a client
  */
-void cbServerDisconnectClient( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
+void cbServerDisconnectClient(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
-	uint32	userId;
+	uint32 userId;
 	msgin.serial(userId);
 
 	cbDisconnectClient(userId, serviceName);
@@ -631,27 +609,27 @@ void cbServerDisconnectClient( CMessage& msgin, const string &serviceName, NLNET
 /*
  * Server request frontend to disconnect a client
  */
-void cbDisconnectAllClients( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
+void cbDisconnectAllClients(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
-	for (THostMap::iterator it = CFrontEndService::instance()->receiveSub()->clientMap().begin (); it != CFrontEndService::instance()->receiveSub()->clientMap().end (); it++)
+	for (THostMap::iterator it = CFrontEndService::instance()->receiveSub()->clientMap().begin(); it != CFrontEndService::instance()->receiveSub()->clientMap().end(); it++)
 	{
 		// Ask the client to disconnect
-		CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
+		CActionDisconnection *act = (CActionDisconnection *)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
 		GETCLIENTA(it)->ImpulseEncoder.add(act, 0);
 
 		// Prepare removal of client on the front-end
-		CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(it)->clientId() ); // prevent to insert it twice
-		CFrontEndService::instance()->receiveSub()->addToRemoveList( GETCLIENTA(it)->clientId() );
+		CFrontEndService::instance()->receiveSub()->removeFromRemoveList(GETCLIENTA(it)->clientId()); // prevent to insert it twice
+		CFrontEndService::instance()->receiveSub()->addToRemoveList(GETCLIENTA(it)->clientId());
 	}
 }
 
 /*
  * Return the name of an entity (if previously retrieved or "" if no name)
  */
-std::string				getEntityName( const TDataSetRow& entityIndex )
+std::string getEntityName(const TDataSetRow &entityIndex)
 {
-	TEntityNamesMap::const_iterator itn = CFrontEndService::instance()->EntityNames.find( entityIndex.getIndex() );
-	if ( itn != CFrontEndService::instance()->EntityNames.end() )
+	TEntityNamesMap::const_iterator itn = CFrontEndService::instance()->EntityNames.find(entityIndex.getIndex());
+	if (itn != CFrontEndService::instance()->EntityNames.end())
 	{
 		return (*itn).second;
 	}
@@ -660,7 +638,6 @@ std::string				getEntityName( const TDataSetRow& entityIndex )
 		return string("");
 	}
 }
-
 
 /*
  * Welcome Service request frontend to switch to Accept Clients mode
@@ -674,19 +651,16 @@ void setAcceptClients()
 /*
  * Welcome Service request frontend to switch to Accept Clients mode
  */
-void cbAcceptClients( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
+void cbAcceptClients(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
 	nlinfo("cbAcceptClients: asked by service %s %d to accept clients (patching is no longer available on this server)", serviceName.c_str(), serviceId.get());
 	setAcceptClients();
 }
 
-
-
 /*
  *
  */
-TUnifiedCallbackItem cbFrontEndArray [] =
-{
+TUnifiedCallbackItem cbFrontEndArray[] = {
 	{ "IMPULSION_ID", cbImpulsionId },
 	{ "IMPULS_CH_ID", cbImpulsionIdChannel },
 	{ "CDB_IMPULSION", cbImpulsionDatabase },
@@ -694,284 +668,266 @@ TUnifiedCallbackItem cbFrontEndArray [] =
 	{ "IMPULSION_UID", cbImpulsionUid },
 	{ "CL_ID", cbMapIdToUid },
 	{ "ENTITY_NAMES", cbSetEntityNames },
-	{ "DISCONNECT_CLIENT", cbServerDisconnectClient },		// Called by server to disconnect a client
-	{ "DISCONNECT_ALL_CLIENTS", cbDisconnectAllClients },	// Called by server to disconnect all clients at once
+	{ "DISCONNECT_CLIENT", cbServerDisconnectClient }, // Called by server to disconnect a client
+	{ "DISCONNECT_ALL_CLIENTS", cbDisconnectAllClients }, // Called by server to disconnect all clients at once
 
 	{ "FS_ACCEPT", cbAcceptClients }
 };
 
-
-
 //
-void cfcbPriorityMode( CConfigFile::CVar& var )
+void cfcbPriorityMode(CConfigFile::CVar &var)
 {
 	uint8 pm = var.asInt();
-	if ( pm == 0 )
+	if (pm == 0)
 	{
-		nlwarning( "PriorityMode 0 (DistanceOnly) is not obsolete and not supported!" );
+		nlwarning("PriorityMode 0 (DistanceOnly) is not obsolete and not supported!");
 	}
-	//CFrontEndService::instance()->PrioSub.Prioritizer.setPrioStrategy( (CPrioritizer::TPrioStrategy)1 );
-	//nlinfo( "\tPriorityMode is now %hu", (uint16)pm );
-	nlinfo( "Priority strategy is DistanceDelta" );
+	// CFrontEndService::instance()->PrioSub.Prioritizer.setPrioStrategy( (CPrioritizer::TPrioStrategy)1 );
+	// nlinfo( "\tPriorityMode is now %hu", (uint16)pm );
+	nlinfo("Priority strategy is DistanceDelta");
 }
 
-
 //
-void cfcbTotalBandwidth( CConfigFile::CVar& var )
+void cfcbTotalBandwidth(CConfigFile::CVar &var)
 {
 	uint32 tb = var.asInt();
-	CFrontEndService::instance()->_SendSub.setTotalBandwidth( tb );
+	CFrontEndService::instance()->_SendSub.setTotalBandwidth(tb);
 	// Not implemented anymore
-	//nlinfo( "\tTotalBandwidth is now %u", tb );
+	// nlinfo( "\tTotalBandwidth is now %u", tb );
 	/*if ( CFrontEndService::instance()->_SendSub.clientBandwidth() != 0 )
 	    nlinfo( "\tTotalbandwidth corresponds to %0.2f client buffers",
-		    (float)CFrontEndService::instance()->_SendSub.totalBandwidth()/(float)CFrontEndService::instance()->_SendSub.clientBandwidth() );
+	        (float)CFrontEndService::instance()->_SendSub.totalBandwidth()/(float)CFrontEndService::instance()->_SendSub.clientBandwidth() );
 	*/
 }
 
-
 //
-void cfcbClientBandwidth( CConfigFile::CVar& var )
+void cfcbClientBandwidth(CConfigFile::CVar &var)
 {
 	uint32 cb = var.asInt();
-	if ( cb != 0 )
+	if (cb != 0)
 	{
 #ifdef INCLUDE_FE_STATS_IN_PACKETS
 		cb += STAT_HEADER_SIZE - UDP_IP_ETH_HEADER_SIZE;
 #else
 		cb -= UDP_IP_ETH_HEADER_SIZE;
 #endif
-	    CFrontEndService::instance()->_SendSub.setClientBandwidth( cb );
-	    nlinfo( "\tClientBandwidth is now %u bytes per game cycle, including UDP/IP/Ethernet headers (%u)", cb + UDP_IP_ETH_HEADER_SIZE, UDP_IP_ETH_HEADER_SIZE );
+		CFrontEndService::instance()->_SendSub.setClientBandwidth(cb);
+		nlinfo("\tClientBandwidth is now %u bytes per game cycle, including UDP/IP/Ethernet headers (%u)", cb + UDP_IP_ETH_HEADER_SIZE, UDP_IP_ETH_HEADER_SIZE);
 #ifdef INCLUDE_FE_STATS_IN_PACKETS
-		nlinfo( "\t(also including stat header of %u bytes)", STAT_HEADER_SIZE );
+		nlinfo("\t(also including stat header of %u bytes)", STAT_HEADER_SIZE);
 #endif
 	}
 }
 
-
 //
-void cfcbClientTimeOut( CConfigFile::CVar& var )
+void cfcbClientTimeOut(CConfigFile::CVar &var)
 {
 	uint32 ct = var.asInt();
 	CFrontEndService::instance()->_ClientTimeOut = ct;
-	nlinfo( "\tClientTimeOut is now %u", ct );
+	nlinfo("\tClientTimeOut is now %u", ct);
 }
 
-
 //
-void cfcbLimboTimeOut( CConfigFile::CVar& var )
+void cfcbLimboTimeOut(CConfigFile::CVar &var)
 {
 	uint32 ct = var.asInt();
 	CFrontEndService::instance()->_LimboTimeOut = ct;
-	nlinfo( "\tLimboTimeOut is now %u", ct );
+	nlinfo("\tLimboTimeOut is now %u", ct);
 }
-
 
 //
-void cfcbDisplayInfo( CConfigFile::CVar& var )
+void cfcbDisplayInfo(CConfigFile::CVar &var)
 {
-	nlinfo ("\tDisplayInfo is now %s", var.asInt()!=0?"on":"off");
-	if ( var.asInt() != 0 )
+	nlinfo("\tDisplayInfo is now %s", var.asInt() != 0 ? "on" : "off");
+	if (var.asInt() != 0)
 	{
-		InfoLog->removeFilter ("FE:");
+		InfoLog->removeFilter("FE:");
 	}
 	else
 	{
-		InfoLog->addNegativeFilter ("FE:");
+		InfoLog->addNegativeFilter("FE:");
 	}
 }
 
-
-void cfcbClientMonitor( CConfigFile::CVar& var )
+void cfcbClientMonitor(CConfigFile::CVar &var)
 {
 	TClientId clientid = var.asInt();
-	CFrontEndService::instance()->monitorClient( clientid );
-	if ( clientid != 0 )
+	CFrontEndService::instance()->monitorClient(clientid);
+	if (clientid != 0)
 	{
-		if ( clientid <= MAX_NB_CLIENTS )
-			nlinfo( "\tNow monitoring client %hu", clientid );
+		if (clientid <= MAX_NB_CLIENTS)
+			nlinfo("\tNow monitoring client %hu", clientid);
 		else
-			nlinfo( "Invalid client id for monitoring" );
+			nlinfo("Invalid client id for monitoring");
 	}
 	else
 	{
-		nlinfo( "\tClient monitoring is now off" );
+		nlinfo("\tClient monitoring is now off");
 	}
 }
 
-
-void cfcbAllowBeep( CConfigFile::CVar& var )
+void cfcbAllowBeep(CConfigFile::CVar &var)
 {
 	AllowBeep = (var.asInt() == 1);
-	nlinfo( "\tAllowBeep is now %hu", (uint16)AllowBeep );
+	nlinfo("\tAllowBeep is now %hu", (uint16)AllowBeep);
 }
 
-
-void cfcbGameCycleRatio( CConfigFile::CVar& var )
+void cfcbGameCycleRatio(CConfigFile::CVar &var)
 {
 	sint gcratio = var.asInt();
-	CFrontEndService::instance()->setGameCycleRatio( gcratio );
-	nlinfo( "\tGameCycleRatio is now %d", gcratio );
+	CFrontEndService::instance()->setGameCycleRatio(gcratio);
+	nlinfo("\tGameCycleRatio is now %d", gcratio);
 }
 
-
-void cfcbCalcDistanceExecutionPeriod( CConfigFile::CVar& var )
+void cfcbCalcDistanceExecutionPeriod(CConfigFile::CVar &var)
 {
 	sint period = var.asInt();
 	CFrontEndService::instance()->PrioSub.VisionProvider.DistanceSpreader.ExecutionPeriod = period;
-	nlinfo( "\tCalcDistanceExecutionPeriod is now %d", period );
+	nlinfo("\tCalcDistanceExecutionPeriod is now %d", period);
 }
 
-
-void cfcbSortPrioExecutionPeriod( CConfigFile::CVar& var )
+void cfcbSortPrioExecutionPeriod(CConfigFile::CVar &var)
 {
 	sint period = var.asInt();
 	CFrontEndService::instance()->PrioSub.Prioritizer.SortSpreader.ExecutionPeriod = period;
-	nlinfo( "\tSortPrioExecutionPeriod is now %d", period );
+	nlinfo("\tSortPrioExecutionPeriod is now %d", period);
 }
 
-
-void cfcbDistanceDeltaRatioForPos( CConfigFile::CVar& var )
+void cfcbDistanceDeltaRatioForPos(CConfigFile::CVar &var)
 {
 	uint32 ddratio = var.asInt();
-	CFrontEndService::instance()->PrioSub.Prioritizer.setDistanceDeltaRatioForPos( ddratio );
-	nlinfo( "\tDistanceDeltaRatioForPos is now %u", ddratio );
+	CFrontEndService::instance()->PrioSub.Prioritizer.setDistanceDeltaRatioForPos(ddratio);
+	nlinfo("\tDistanceDeltaRatioForPos is now %u", ddratio);
 }
 
 //
 
 /*void cfcbPositionPrioExecutionPeriod( CConfigFile::CVar& var )
 {
-	sint period = var.asInt();
-	CFrontEndService::instance()->PrioSub.Prioritizer.PositionSpreader.ExecutionPeriod = period;
-	nlinfo( "\tPositionPrioExecutionPeriod is now %d", period );
+    sint period = var.asInt();
+    CFrontEndService::instance()->PrioSub.Prioritizer.PositionSpreader.ExecutionPeriod = period;
+    nlinfo( "\tPositionPrioExecutionPeriod is now %d", period );
 }
 
 
 void cfcbOrientationPrioExecutionPeriod( CConfigFile::CVar& var )
 {
-	sint period = var.asInt();
-	CFrontEndService::instance()->PrioSub.Prioritizer.OrientationSpreader.ExecutionPeriod = period;
-	nlinfo( "\tOrientationPrioExecutionPeriod is now %d", period );
+    sint period = var.asInt();
+    CFrontEndService::instance()->PrioSub.Prioritizer.OrientationSpreader.ExecutionPeriod = period;
+    nlinfo( "\tOrientationPrioExecutionPeriod is now %d", period );
 }
 
 
 void cfcbDiscreetPrioExecutionPeriod( CConfigFile::CVar& var )
 {
-	sint period = var.asInt();
-	CFrontEndService::instance()->PrioSub.Prioritizer.DiscreetSpreader.ExecutionPeriod = period;
-	nlinfo( "\tDiscreetPrioExecutionPeriod is now %d", period );
+    sint period = var.asInt();
+    CFrontEndService::instance()->PrioSub.Prioritizer.DiscreetSpreader.ExecutionPeriod = period;
+    nlinfo( "\tDiscreetPrioExecutionPeriod is now %d", period );
 }*/
-
 
 /*
  * Init variable from config file, at startup
  */
-void initConfigVar( CConfigFile& cf, const char *varname, uint& var, const uint maxvalue )
+void initConfigVar(CConfigFile &cf, const char *varname, uint &var, const uint maxvalue)
 {
-	var = cf.getVar( varname ).asInt();
-	if ( var > maxvalue )
+	var = cf.getVar(varname).asInt();
+	if (var > maxvalue)
 	{
-		nlwarning( "%s=%u exceeding maximum", varname, var );
+		nlwarning("%s=%u exceeding maximum", varname, var);
 		var = maxvalue;
 	}
-	nlinfo( "\t%s = %u", varname, var );
+	nlinfo("\t%s = %u", varname, var);
 }
-
 
 /*
  * Install callback and init variable from config file
  */
-void installConfigVar( CConfigFile& cf, const char *varname, void (*callback) (CConfigFile::CVar&) )
+void installConfigVar(CConfigFile &cf, const char *varname, void (*callback)(CConfigFile::CVar &))
 {
-	cf.setCallback( varname, callback );
-	callback( cf.getVar( varname ) );
+	cf.setCallback(varname, callback);
+	callback(cf.getVar(varname));
 }
-
 
 /*
  *  Login system callback
  */
-void cbDisconnectClient (TUid userId, const std::string &reqServiceName)
+void cbDisconnectClient(TUid userId, const std::string &reqServiceName)
 {
-	for (THostMap::iterator it = CFrontEndService::instance()->receiveSub()->clientMap().begin (); it != CFrontEndService::instance()->receiveSub()->clientMap().end (); it++)
+	for (THostMap::iterator it = CFrontEndService::instance()->receiveSub()->clientMap().begin(); it != CFrontEndService::instance()->receiveSub()->clientMap().end(); it++)
 	{
-		if ( GETCLIENTA(it)->Uid == userId)
+		if (GETCLIENTA(it)->Uid == userId)
 		{
 			// Ask the client to disconnect
-			CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
+			CActionDisconnection *act = (CActionDisconnection *)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
 			GETCLIENTA(it)->ImpulseEncoder.add(act, 0);
-			nlinfo( "%s asked to remove player %hu (uid %u)",
-				reqServiceName.c_str(),
-				GETCLIENTA(it)->clientId(),
-				userId );
+			nlinfo("%s asked to remove player %hu (uid %u)",
+			    reqServiceName.c_str(),
+			    GETCLIENTA(it)->clientId(),
+			    userId);
 
 			// Prepare removal of client on the front-end
-			CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(it)->clientId() ); // prevent to insert it twice
-			CFrontEndService::instance()->receiveSub()->addToRemoveList( GETCLIENTA(it)->clientId() );
+			CFrontEndService::instance()->receiveSub()->removeFromRemoveList(GETCLIENTA(it)->clientId()); // prevent to insert it twice
+			CFrontEndService::instance()->receiveSub()->addToRemoveList(GETCLIENTA(it)->clientId());
 
 			return;
 		}
 	}
-	nlwarning( "%s asked to remove an unknown player (uid %u)", reqServiceName.c_str(), userId );
+	nlwarning("%s asked to remove an unknown player (uid %u)", reqServiceName.c_str(), userId);
 }
-
 
 /*
  * Get the last target entity position that was sent to a client at a specified tick in the past
  */
-void cbGetTargetPosAtTick( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
+void cbGetTargetPosAtTick(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
 	// Read input
 	TDataSetRow clientEntityIndex;
 	TGameCycle tick;
-	msgin.serial( clientEntityIndex );
-	msgin.serial( tick );
+	msgin.serial(clientEntityIndex);
+	msgin.serial(tick);
 
 	// Search
 	bool found = false;
-	TCoord x,y;
-	TClientId clientId = CFrontEndService::instance()->receiveSub()->EntityToClient.getClientId( clientEntityIndex );
-	if ( clientId != INVALID_CLIENT )
+	TCoord x, y;
+	TClientId clientId = CFrontEndService::instance()->receiveSub()->EntityToClient.getClientId(clientEntityIndex);
+	if (clientId != INVALID_CLIENT)
 	{
-		CFrontEndService::instance()->history()->getTargetPosAtTick( clientId, tick, x, y );
+		CFrontEndService::instance()->history()->getTargetPosAtTick(clientId, tick, x, y);
 		found = (x != 0); // && (y != 0); // not needed
 	}
 
 	// Write output
-	CMessage msgout( "TG_POS_AT" );
-	msgout.serial( found );
-	if ( found )
-		msgout.serial( x, y );
-	CUnifiedNetwork::getInstance()->send( serviceId, msgout ); // direct (reply)
+	CMessage msgout("TG_POS_AT");
+	msgout.serial(found);
+	if (found)
+		msgout.serial(x, y);
+	CUnifiedNetwork::getInstance()->send(serviceId, msgout); // direct (reply)
 }
-
 
 static bool IosUp = false, EgsUp = false;
 
 /*
  * Callback called at service connexion
  */
-void cbServiceUp( const string& serviceName, NLNET::TServiceId serviceId, void * )
+void cbServiceUp(const string &serviceName, NLNET::TServiceId serviceId, void *)
 {
-	if ( serviceName == "IOS" )
+	if (serviceName == "IOS")
 		IosUp = true;
-	else if ( serviceName == "EGS" )
+	else if (serviceName == "EGS")
 		EgsUp = true;
-	else if ( serviceName == "WS" )
+	else if (serviceName == "WS")
 	{
 		if (UseWebPatchServer)
 		{
 			// send patch server address
-			CMessage			msgAddr("FEPA");
+			CMessage msgAddr("FEPA");
 
 			// serial address as string
-			std::string			patchAddress = getPatchingAddress();
+			std::string patchAddress = getPatchingAddress();
 			msgAddr.serial(patchAddress);
 
 			// serial current frontend state
-			bool				acceptClients = CFrontEndService::instance()->AcceptClients;
+			bool acceptClients = CFrontEndService::instance()->AcceptClients;
 			msgAddr.serial(acceptClients);
 
 			// send it to incoming WS
@@ -984,11 +940,10 @@ void cbServiceUp( const string& serviceName, NLNET::TServiceId serviceId, void *
 			}
 		}
 
-
 		// send number of players on FS
-		CMessage			msgPlr("NBPLAYERS2");
-		uint32				nbClients = (uint32)CFrontEndService::instance()->receiveSub()->clientMap().size();
-		uint32				nbPendingClients = CLoginServer::getNbPendingUsers();
+		CMessage msgPlr("NBPLAYERS2");
+		uint32 nbClients = (uint32)CFrontEndService::instance()->receiveSub()->clientMap().size();
+		uint32 nbPendingClients = CLoginServer::getNbPendingUsers();
 
 		msgPlr.serial(nbClients);
 		msgPlr.serial(nbPendingClients);
@@ -999,75 +954,71 @@ void cbServiceUp( const string& serviceName, NLNET::TServiceId serviceId, void *
 		nldebug("WS %d welcome service is up, reported %d online users", serviceId.get(), nbClients);
 	}
 
-	if ( EgsUp )
+	if (EgsUp)
 	{
 		CFrontEndService::instance()->ShardDown = false;
-		nlinfo( "Leaving SERVER_DOWN mode" );
+		nlinfo("Leaving SERVER_DOWN mode");
 	}
 }
-
 
 /*
  * Callback called when service becomes down
  */
-void cbServiceDown( const string& serviceName, NLNET::TServiceId serviceId, void * )
+void cbServiceDown(const string &serviceName, NLNET::TServiceId serviceId, void *)
 {
-	if ( serviceName == "GPMS" )
+	if (serviceName == "GPMS")
 	{
 		// Reset the slots of the clients before the property_receiver deletes the entities
 		CFrontEndService::instance()->PrioSub.VisionProvider.resetVision();
 	}
-	else if ( serviceName == "IOS" )
+	else if (serviceName == "IOS")
 	{
 		IosUp = false;
 	}
-	else if ( serviceName == "EGS" )
+	else if (serviceName == "EGS")
 	{
 		EgsUp = false;
 	}
 
-	if ( ! (EgsUp) ) // now the IOS shutdown is tolerated
+	if (!(EgsUp)) // now the IOS shutdown is tolerated
 	{
-		if ( ! CFrontEndService::instance()->ShardDown ) // prevent from doing it several times
+		if (!CFrontEndService::instance()->ShardDown) // prevent from doing it several times
 		{
 			/*while( (ihm=CFrontEndService::instance()->receiveSub()->clientMap().begin()) != CFrontEndService::instance()->receiveSub()->clientMap().end() )
 			{
-				// Cannot use cbDisconnect() because we need the client to be removed at once, otherwise
-				// the property receiver could raise an assert in assignIndexToId(clientsid)
-				//CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(ihm)->clientId() );
-				//CFrontEndService::instance()->receiveSub()->removeClientById( GETCLIENTA(ihm)->clientId() );
+			    // Cannot use cbDisconnect() because we need the client to be removed at once, otherwise
+			    // the property receiver could raise an assert in assignIndexToId(clientsid)
+			    //CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(ihm)->clientId() );
+			    //CFrontEndService::instance()->receiveSub()->removeClientById( GETCLIENTA(ihm)->clientId() );
 			}*/
 
 			CFrontEndService::instance()->ShardDown = true;
-			nlinfo( "Entering SERVER_DOWN mode" );
+			nlinfo("Entering SERVER_DOWN mode");
 
 			// remove all limbo clients
-			uint	clientsInLimbo = (uint)CFrontEndService::instance()->receiveSub()->LimboClients.size();
+			uint clientsInLimbo = (uint)CFrontEndService::instance()->receiveSub()->LimboClients.size();
 			CFrontEndService::instance()->receiveSub()->LimboClients.clear();
 			nlinfo("Removed %d clients in limbo mode", clientsInLimbo);
 		}
 	}
 
-	beepIfAllowed( 440, 150 );
-	beepIfAllowed( 400, 150 );
+	beepIfAllowed(440, 150);
+	beepIfAllowed(400, 150);
 }
-
 
 /*
  * Impulse ack callbacks
  */
-void	cbAckUnknown(CClientHost *client, CAction *action)
+void cbAckUnknown(CClientHost *client, CAction *action)
 {
 	nldebug("FERECV: client %d acked action %d", client->clientId(), action->Code);
 }
 
-
-void	cbAckDummy(CClientHost *client, CAction *action)
+void cbAckDummy(CClientHost *client, CAction *action)
 {
-	CActionDummy	*dummy = (CActionDummy*)(action);
+	CActionDummy *dummy = (CActionDummy *)(action);
 	nldebug("FERECV: Client %d acked dummy %d", client->clientId(), dummy->Dummy1);
 }
-
 
 /*
  * Init module manager
@@ -1076,41 +1027,40 @@ void	cbAckDummy(CClientHost *client, CAction *action)
 const sint FE_MAIN = 0;
 const sint FE_FLUSH = 1;
 
-void	CFrontEndService::initModuleManagers()
+void CFrontEndService::initModuleManagers()
 {
-/*
-	CModuleManager::init(16);
+	/*
+	    CModuleManager::init(16);
 
-	// Warning: with several modules, the front-end service shows 100% of CPU in the
-	// Windows Task Manager. This is normal, and the service is still nice to other programs.
-	// For more information, see comment in CModuleManager::waitAllReady().
+	    // Warning: with several modules, the front-end service shows 100% of CPU in the
+	    // Windows Task Manager. This is normal, and the service is still nice to other programs.
+	    // For more information, see comment in CModuleManager::waitAllReady().
 
-	CModuleManager	*mainMgr = new CModuleManager("FE_MAIN", false);
-	CModuleManager  *flushMgr = new CModuleManager("FE_FLUSH", true);
-	_ModuleManagers.push_back(mainMgr);
-	_ModuleManagers.push_back(flushMgr);
+	    CModuleManager	*mainMgr = new CModuleManager("FE_MAIN", false);
+	    CModuleManager  *flushMgr = new CModuleManager("FE_FLUSH", true);
+	    _ModuleManagers.push_back(mainMgr);
+	    _ModuleManagers.push_back(flushMgr);
 
-#ifdef MEASURE_SENDING
-	nlinfo( "MEASURE_SENDING enabled" );
-	mainMgr->addModule(0, swapReadBuffers);
-	mainMgr->addModule(1, readIncomingData);
-	mainMgr->addModule(2, swapSendBuffers);
-	flushMgr->addWait(2);
-	flushMgr->addModule(3, flushMessagesToSend);
-#else
-	mainMgr->addModule(0, swapReadBuffers);
-	mainMgr->addModule(1, readIncomingData);
-	mainMgr->addModule(2, ::updateClientsStates);
-	mainMgr->addModule(3, updatePriorities);
-	mainMgr->addModule(4, prepareHeadersAndFillImpulses);
-	mainMgr->addModule(5, fillPrioritizedActionsToSend);
-	mainMgr->addModule(6, swapSendBuffers); // waits for the end of flushMessagesToSend using the boolean FlushInProgress (with addWait there would be a deadlock at the beginning)
-	flushMgr->addWait(6);
-	flushMgr->addModule(7, flushMessagesToSend);
-#endif // MEASURE_SENDING
-*/
+	#ifdef MEASURE_SENDING
+	    nlinfo( "MEASURE_SENDING enabled" );
+	    mainMgr->addModule(0, swapReadBuffers);
+	    mainMgr->addModule(1, readIncomingData);
+	    mainMgr->addModule(2, swapSendBuffers);
+	    flushMgr->addWait(2);
+	    flushMgr->addModule(3, flushMessagesToSend);
+	#else
+	    mainMgr->addModule(0, swapReadBuffers);
+	    mainMgr->addModule(1, readIncomingData);
+	    mainMgr->addModule(2, ::updateClientsStates);
+	    mainMgr->addModule(3, updatePriorities);
+	    mainMgr->addModule(4, prepareHeadersAndFillImpulses);
+	    mainMgr->addModule(5, fillPrioritizedActionsToSend);
+	    mainMgr->addModule(6, swapSendBuffers); // waits for the end of flushMessagesToSend using the boolean FlushInProgress (with addWait there would be a deadlock at the beginning)
+	    flushMgr->addWait(6);
+	    flushMgr->addModule(7, flushMessagesToSend);
+	#endif // MEASURE_SENDING
+	*/
 }
-
 
 /*
  *
@@ -1120,11 +1070,10 @@ inline void cbUpdate()
 	CFrontEndService::instance()->onTick();
 }
 
-
 /*
  *
  */
-inline void	CFrontEndService::onTick()
+inline void CFrontEndService::onTick()
 {
 	LastTickTime = CTime::getLocalTime();
 
@@ -1133,12 +1082,12 @@ inline void	CFrontEndService::onTick()
 		setClientsToSynchronizeState();
 	}
 
-	if ( _GCCount == 0 )
+	if (_GCCount == 0)
 	{
 		// Run manager's task
 		UserLWatch.start();
-		//H_BEFORE(UserUpdate);
-		if ( CFrontEndService::instance()->entityContainer().mirrorIsReady() )
+		// H_BEFORE(UserUpdate);
+		if (CFrontEndService::instance()->entityContainer().mirrorIsReady())
 		{
 			//_ModuleManagers[0]->runOnce();
 
@@ -1158,11 +1107,11 @@ inline void	CFrontEndService::onTick()
 				flushMessagesToSend();
 			}
 		}
-		//H_AFTER(UserUpdate);
+		// H_AFTER(UserUpdate);
 		UserLWatch.stop();
 		TMsDuration userduration = UserLWatch.getDuration();
 		UserDurationPAverage = UserLWatch.getPartialAverage();
-		//nlinfo( "Sent actions: %u", CFrontEndService::instance()->SentActionsLastCycle );
+		// nlinfo( "Sent actions: %u", CFrontEndService::instance()->SentActionsLastCycle );
 
 		_GCCount = _GCRatio;
 	}
@@ -1170,59 +1119,58 @@ inline void	CFrontEndService::onTick()
 	--_GCCount;
 }
 
-
 /*
  * Initialization
  */
 
-//CDebugDisplayer	FEDebugDisplayer("frontend_service_straight.log", true, "FE_DD");
+// CDebugDisplayer	FEDebugDisplayer("frontend_service_straight.log", true, "FE_DD");
 
 void CFrontEndService::init()
 {
-	setVersion (RYZOM_PRODUCT_VERSION);
+	setVersion(RYZOM_PRODUCT_VERSION);
 
-	nlinfo( "Initializing front-end service..." );
+	nlinfo("Initializing front-end service...");
 
 	try
 	{
 		// Load config
-		nlinfo( "Loading configuration from %s", ConfigFile.getFilename().c_str() );
-		initConfigVar( ConfigFile, "ClientLimit", MaxNbClients, MAX_NB_CLIENTS );
-		installConfigVar( ConfigFile, "ClientTimeOut", cfcbClientTimeOut );
-		installConfigVar( ConfigFile, "LimboTimeOut", cfcbLimboTimeOut );
-		installConfigVar( ConfigFile, "DisplayInfo", cfcbDisplayInfo );
-		installConfigVar( ConfigFile, "ClientMonitor", cfcbClientMonitor );
-		installConfigVar( ConfigFile, "AllowBeep", cfcbAllowBeep );
-		installConfigVar( ConfigFile, "GameCycleRatio", cfcbGameCycleRatio );
-		installConfigVar( ConfigFile, "CalcDistanceExecutionPeriod", cfcbCalcDistanceExecutionPeriod );
-		installConfigVar( ConfigFile, "SortPrioExecutionPeriod", cfcbSortPrioExecutionPeriod );
-		installConfigVar( ConfigFile, "DistanceDeltaRatioForPos", cfcbDistanceDeltaRatioForPos );
+		nlinfo("Loading configuration from %s", ConfigFile.getFilename().c_str());
+		initConfigVar(ConfigFile, "ClientLimit", MaxNbClients, MAX_NB_CLIENTS);
+		installConfigVar(ConfigFile, "ClientTimeOut", cfcbClientTimeOut);
+		installConfigVar(ConfigFile, "LimboTimeOut", cfcbLimboTimeOut);
+		installConfigVar(ConfigFile, "DisplayInfo", cfcbDisplayInfo);
+		installConfigVar(ConfigFile, "ClientMonitor", cfcbClientMonitor);
+		installConfigVar(ConfigFile, "AllowBeep", cfcbAllowBeep);
+		installConfigVar(ConfigFile, "GameCycleRatio", cfcbGameCycleRatio);
+		installConfigVar(ConfigFile, "CalcDistanceExecutionPeriod", cfcbCalcDistanceExecutionPeriod);
+		installConfigVar(ConfigFile, "SortPrioExecutionPeriod", cfcbSortPrioExecutionPeriod);
+		installConfigVar(ConfigFile, "DistanceDeltaRatioForPos", cfcbDistanceDeltaRatioForPos);
 		/*installConfigVar( ConfigFile, "PositionPrioExecutionPeriod", cfcbPositionPrioExecutionPeriod );
 		installConfigVar( ConfigFile, "OrientationPrioExecutionPeriod", cfcbOrientationPrioExecutionPeriod );
 		installConfigVar( ConfigFile, "DiscreetPrioExecutionPeriod", cfcbDiscreetPrioExecutionPeriod );*/
 
 #ifdef NL_OS_WINDOWS
-		CConfigFile::CVar *lowerCPUPriority = ConfigFile.getVarPtr( "LowerCPUPriority" );
-		if ( lowerCPUPriority && (lowerCPUPriority->asInt() == 1) )
+		CConfigFile::CVar *lowerCPUPriority = ConfigFile.getVarPtr("LowerCPUPriority");
+		if (lowerCPUPriority && (lowerCPUPriority->asInt() == 1))
 		{
-			SetPriorityClass( GetCurrentProcess(), /*BELOW_NORMAL_PRIORITY_CLASS*/ 0x00004000 ); // not the constant because I don't have the latest version of the Platform SDK!
-			nlinfo( "Starting with LowerCPUPriority" );
+			SetPriorityClass(GetCurrentProcess(), /*BELOW_NORMAL_PRIORITY_CLASS*/ 0x00004000); // not the constant because I don't have the latest version of the Platform SDK!
+			nlinfo("Starting with LowerCPUPriority");
 		}
 #endif
 
-		CSheetId::init( false );
+		CSheetId::init(false);
 
 		// The filename is used with george's sheets to know which properties correspond to the entity types
 		//	nlinfo( "Loading georges forms..." );
-		//CFrontEndPropertyReceiver::init( string("single"), &PrioSub.PropTranslator, &_ReceiveSub.EntityToClient );
-		nlinfo( "Initializing entity container and mirror..." );
-		_EntityContainer.init( &_ReceiveSub.EntityToClient, cbUpdate );
+		// CFrontEndPropertyReceiver::init( string("single"), &PrioSub.PropTranslator, &_ReceiveSub.EntityToClient );
+		nlinfo("Initializing entity container and mirror...");
+		_EntityContainer.init(&_ReceiveSub.EntityToClient, cbUpdate);
 
 		// Init the login system
-		nlinfo( "Initializing login subsystem..." );
-		CLoginServer::init( "", cbDisconnectClient );
+		nlinfo("Initializing login subsystem...");
+		CLoginServer::init("", cbDisconnectClient);
 
-//		// Init front end listening port
+		//		// Init front end listening port
 		CInetHost listenHost = CLoginServer::getListenHost();
 		uint16 frontendPort = listenHost.port();
 
@@ -1231,44 +1179,44 @@ void CFrontEndService::init()
 			// set a default listen port
 			frontendPort = 47851;
 		}
-//		if (IService::getInstance()->haveArg('p'))
-//		{
-//			// use the command line param if set
-//			frontendPort = NLMISC::fromString(IService::getInstance()->getArg('p').c_str());
-//		}
-//		else
-//		{
-//			// use the config file param otherwise
-//			frontendPort = ConfigFile.getVar( "FrontendPort" ).asInt();
-//		}
+		//		if (IService::getInstance()->haveArg('p'))
+		//		{
+		//			// use the command line param if set
+		//			frontendPort = NLMISC::fromString(IService::getInstance()->getArg('p').c_str());
+		//		}
+		//		else
+		//		{
+		//			// use the config file param otherwise
+		//			frontendPort = ConfigFile.getVar( "FrontendPort" ).asInt();
+		//		}
 
-		CConfigFile::CVar *plafp = ConfigFile.getVarPtr( "LastAcceptableFSUDPPort" );
+		CConfigFile::CVar *plafp = ConfigFile.getVarPtr("LastAcceptableFSUDPPort");
 		uint16 lastAcceptableFrontendPort = frontendPort + 10; // default: try up to 10 ports
-		if ( plafp )
+		if (plafp)
 		{
-			if ( plafp->asInt() >= frontendPort )
+			if (plafp->asInt() >= frontendPort)
 				lastAcceptableFrontendPort = plafp->asInt();
 			else
-				nlwarning( "Invalid LastAcceptableFSUDPPort: %u (port from ListenAddress: %hu); using %hu", plafp->asInt(), frontendPort, lastAcceptableFrontendPort );
+				nlwarning("Invalid LastAcceptableFSUDPPort: %u (port from ListenAddress: %hu); using %hu", plafp->asInt(), frontendPort, lastAcceptableFrontendPort);
 		}
 
 		// Initialize the receiving subsystem and find an available port
-		_DgramLength = ConfigFile.getVar( "DatagramLength" ).asInt();
-		nlinfo( "\tDatagramLength = %u bytes", _DgramLength );
-		nlinfo( "Initializing receiving subsystem..." );
-		_ReceiveSub.init( frontendPort, lastAcceptableFrontendPort, _DgramLength, &_History, &_SendSub.clientIdCont() );
+		_DgramLength = ConfigFile.getVar("DatagramLength").asInt();
+		nlinfo("\tDatagramLength = %u bytes", _DgramLength);
+		nlinfo("Initializing receiving subsystem...");
+		_ReceiveSub.init(frontendPort, lastAcceptableFrontendPort, _DgramLength, &_History, &_SendSub.clientIdCont());
 		frontendPort = _ReceiveSub.dataSock()->localAddr().port();
-		listenHost.setPort( frontendPort );
+		listenHost.setPort(frontendPort);
 		CLoginServer::setListenAddress(PublishFSHostAsIP.get() ? listenHost.address().asIPString() : listenHost.toString());
 
 		StalledMode = false;
 		LastTickTime = 0;
 		ShardDown = true; // waiting for connection of the EGS
-		CUnifiedNetwork::getInstance()->setServiceUpCallback( "*", cbServiceUp, NULL );
-		CUnifiedNetwork::getInstance()->setServiceDownCallback( string("*"), cbServiceDown, 0);
+		CUnifiedNetwork::getInstance()->setServiceUpCallback("*", cbServiceUp, NULL);
+		CUnifiedNetwork::getInstance()->setServiceDownCallback(string("*"), cbServiceDown, 0);
 		SelfServiceId = getServiceId();
 
-		std::string	patchAddress = getPatchingAddress();
+		std::string patchAddress = getPatchingAddress();
 		nlinfo("Patch Server base address is '%s'", patchAddress.c_str());
 
 		// set accept mode
@@ -1285,38 +1233,38 @@ void CFrontEndService::init()
 		}
 
 		// Register actions
-		CActionFactory::getInstance()->registerAction( ACTION_POSITION_CODE, CActionPosition::create );
-		CActionFactory::getInstance()->registerAction( ACTION_SYNC_CODE, CActionSync::create );
-		CActionFactory::getInstance()->registerAction( ACTION_DISCONNECTION_CODE, CActionDisconnection::create );
-		CActionFactory::getInstance()->registerAction( ACTION_ASSOCIATION_CODE, CActionAssociation::create );
-		CActionFactory::getInstance()->registerAction( ACTION_LOGIN_CODE, CActionLogin::create );
-		CActionFactory::getInstance()->registerAction( ACTION_GENERIC_CODE, CActionGeneric::create );
-		CActionFactory::getInstance()->registerAction( ACTION_GENERIC_MULTI_PART_CODE, CActionGenericMultiPart::create );
-		CActionFactory::getInstance()->registerAction( ACTION_SINT64, CActionSint64::create );
-		CActionFactory::getInstance()->registerAction( ACTION_TARGET_SLOT_CODE, CActionTargetSlot::create );
-//#ifdef DISABLE_PRIOTABLE
-		CActionFactory::getInstance()->registerAction( ACTION_DUMMY_CODE, CActionDummy::create );
-//#endif
+		CActionFactory::getInstance()->registerAction(ACTION_POSITION_CODE, CActionPosition::create);
+		CActionFactory::getInstance()->registerAction(ACTION_SYNC_CODE, CActionSync::create);
+		CActionFactory::getInstance()->registerAction(ACTION_DISCONNECTION_CODE, CActionDisconnection::create);
+		CActionFactory::getInstance()->registerAction(ACTION_ASSOCIATION_CODE, CActionAssociation::create);
+		CActionFactory::getInstance()->registerAction(ACTION_LOGIN_CODE, CActionLogin::create);
+		CActionFactory::getInstance()->registerAction(ACTION_GENERIC_CODE, CActionGeneric::create);
+		CActionFactory::getInstance()->registerAction(ACTION_GENERIC_MULTI_PART_CODE, CActionGenericMultiPart::create);
+		CActionFactory::getInstance()->registerAction(ACTION_SINT64, CActionSint64::create);
+		CActionFactory::getInstance()->registerAction(ACTION_TARGET_SLOT_CODE, CActionTargetSlot::create);
+		// #ifdef DISABLE_PRIOTABLE
+		CActionFactory::getInstance()->registerAction(ACTION_DUMMY_CODE, CActionDummy::create);
+		// #endif
 
 		// Init send subsystem
-		nlinfo( "Initializing sending subsystem..." );
+		nlinfo("Initializing sending subsystem...");
 #ifdef HALF_FREQUENCY_SENDING_TO_CLIENT
-		nlinfo( " Half-frequency mode" );
+		nlinfo(" Half-frequency mode");
 #else
-		nlinfo( " Full-frequency mode" );
+		nlinfo(" Full-frequency mode");
 #endif
-		_SendSub.init( _ReceiveSub.dataSock(), &_ReceiveSub.clientMap(), &_History, &PrioSub );
-		installConfigVar( ConfigFile, "ClientBandwidth", cfcbClientBandwidth );
-		installConfigVar( ConfigFile, "TotalBandwidth", cfcbTotalBandwidth );
+		_SendSub.init(_ReceiveSub.dataSock(), &_ReceiveSub.clientMap(), &_History, &PrioSub);
+		installConfigVar(ConfigFile, "ClientBandwidth", cfcbClientBandwidth);
+		installConfigVar(ConfigFile, "TotalBandwidth", cfcbTotalBandwidth);
 
 		// Init history
-		nlinfo( "Initializing history..." );
-		_History.init( MaxNbClients+1 ); // clientids begin at 1
+		nlinfo("Initializing history...");
+		_History.init(MaxNbClients + 1); // clientids begin at 1
 
 		// Init priority table
-		nlinfo( "Initializing priority tables..." );
-		PrioSub.init( /*&_SendSub.clientIdCont()*/ &_History, &_ReceiveSub.EntityToClient );
-		installConfigVar( ConfigFile, "PriorityMode", cfcbPriorityMode );
+		nlinfo("Initializing priority tables...");
+		PrioSub.init(/*&_SendSub.clientIdCont()*/ &_History, &_ReceiveSub.EntityToClient);
+		installConfigVar(ConfigFile, "PriorityMode", cfcbPriorityMode);
 
 		// Register property nbbits
 		CActionSint64::registerNumericPropertiesRyzom();
@@ -1325,14 +1273,14 @@ void CFrontEndService::init()
 		setUpdateTimeout(100);
 
 		// Init the XML message manager
-		nlinfo( "Initializing XML message manager..." );
-		const string& pathXmlMsg = CPath::lookup( "msg.xml" );
-		GenericXmlMsgHeaderMngr.init( pathXmlMsg );
+		nlinfo("Initializing XML message manager...");
+		const string &pathXmlMsg = CPath::lookup("msg.xml");
+		GenericXmlMsgHeaderMngr.init(pathXmlMsg);
 		initImpulsionId();
 		initImpulsionUid();
 
 		// Init module manager
-		nlinfo( "Initializing module manager..." );
+		nlinfo("Initializing module manager...");
 		initModuleManagers();
 
 		if (UseSendThread)
@@ -1347,44 +1295,39 @@ void CFrontEndService::init()
 		// add a callback in the LoginServer to be warned when a cookie become acceptable
 		CLoginServer::addNewCookieCallback(newCookieCallback);
 
-		nlinfo( "Waiting for the local Mirror Service..." );
+		nlinfo("Waiting for the local Mirror Service...");
 
 		CActionGeneric::ServerSide = true;
 	}
 	catch (const Exception &e)
 	{
-		nlerror( "Error: %s", e.what() );
+		nlerror("Error: %s", e.what());
 	}
 }
-
-
 
 /*
  * After mirror system is ready
  */
-void	CFrontEndService::postInit()
+void CFrontEndService::postInit()
 {
-	nlinfo( "Subscribing to mirror properties..." );
+	nlinfo("Subscribing to mirror properties...");
 	_EntityContainer.initMirror();
 
 	// Init modules
-	nlinfo( "Starting modules..." );
-	//CModuleManager::startAll();
+	nlinfo("Starting modules...");
+	// CModuleManager::startAll();
 
 	// Init impulse encoder callbacks
 	CImpulseEncoder::setReceivedCallback(cbAckUnknown, -1);
 	CImpulseEncoder::setReceivedCallback(cbAckDummy, ACTION_DUMMY_CODE);
 
 	// and the remaining ones...
-	setSimlagValues (ConfigFile.getVar("Lag").asInt(), ConfigFile.getVar("PacketLoss").asInt(), ConfigFile.getVar("PacketDuplication").asInt(), ConfigFile.getVar("PacketDisordering").asInt());
+	setSimlagValues(ConfigFile.getVar("Lag").asInt(), ConfigFile.getVar("PacketLoss").asInt(), ConfigFile.getVar("PacketDuplication").asInt(), ConfigFile.getVar("PacketDisordering").asInt());
 }
-
 
 /**************************
  *       RELEASE          *
  **************************/
-
-
 
 /*
  *
@@ -1398,20 +1341,20 @@ void CFrontEndService::release()
 
 	_ReceiveSub.release();
 
-	//CModuleManager::stopAll();
+	// CModuleManager::stopAll();
 
 	//
-	//uint	i;
-	//for (i=0; i<_ModuleManagers.size(); ++i)
+	// uint	i;
+	// for (i=0; i<_ModuleManagers.size(); ++i)
 	//	delete _ModuleManagers[i];
 
 	//_ModuleManagers.clear();
-	//CModuleManager::release();
+	// CModuleManager::release();
 
 	CActionFactory::release();
 
-	InfoLog->removeFilter( "FEHTIMER" );
-	InfoLog->removeFilter( "FE" );
+	InfoLog->removeFilter("FEHTIMER");
+	InfoLog->removeFilter("FE");
 
 	if (SendThread != NULL)
 	{
@@ -1428,21 +1371,17 @@ void CFrontEndService::release()
 	SendTask = NULL;
 }
 
-
-
 /**************************
  *        UPDATE          *
  **************************/
 
-
-//#define LOOP_IN_MAIN_THREAD
-//#define TEST_THREAD_CPU_USAGE
+// #define LOOP_IN_MAIN_THREAD
+// #define TEST_THREAD_CPU_USAGE
 
 // This variable helps testing the bug that produced the warning
 // "handleReceivedMsg : FERECV: client %d sent messages dated in future"
 // after a Stall Mode recovery.
-//CVariable<bool> SimulateStalled("fs", "SimulateStalled", "", false );
-
+// CVariable<bool> SimulateStalled("fs", "SimulateStalled", "", false );
 
 /*
  * Update
@@ -1450,47 +1389,47 @@ void CFrontEndService::release()
 bool CFrontEndService::update()
 {
 #ifdef LOOP_IN_MAIN_THREAD
-	while ( true );
+	while (true);
 #endif
 #ifdef TEST_THREAD_CPU_USAGE
-	double sum=0.0;
+	double sum = 0.0;
 	uint32 n = 0;
-	while ( true )
+	while (true)
 	{
 		++n;
 		TTicks ticks = CTime::getPerformanceTime();
 		uint32 k;
-		for ( uint32 i=0; i!=0x10000000; ++i )
+		for (uint32 i = 0; i != 0x10000000; ++i)
 		{
-			k=i*2;
+			k = i * 2;
 		}
-		double t = CTime::ticksToSecond( CTime::getPerformanceTime()-ticks );
+		double t = CTime::ticksToSecond(CTime::getPerformanceTime() - ticks);
 		sum += t;
-		nlinfo( "Time: %.3f ms, average: %.3f ms, k=%u", t*1000.0, 1000.0*sum/(double)n, k );
+		nlinfo("Time: %.3f ms, average: %.3f ms, k=%u", t * 1000.0, 1000.0 * sum / (double)n, k);
 	}
 #endif
 
-/*
-	map<TUid,CLimboClient>::iterator	it;
-	TTime								timeout = CTime::getLocalTime()-_LimboTimeOut;
-	for (it=_ReceiveSub.LimboClients.begin(); it!=_ReceiveSub.LimboClients.end(); )
-	{
-		map<TUid,CLimboClient>::iterator	itr = it++;
-		// removes limbo client if it timed out
-		if ((*it).second.Timeout < timeout)
-			_ReceiveSub.LimboClients.erase(itr);
-	}
-*/
+	/*
+	    map<TUid,CLimboClient>::iterator	it;
+	    TTime								timeout = CTime::getLocalTime()-_LimboTimeOut;
+	    for (it=_ReceiveSub.LimboClients.begin(); it!=_ReceiveSub.LimboClients.end(); )
+	    {
+	        map<TUid,CLimboClient>::iterator	itr = it++;
+	        // removes limbo client if it timed out
+	        if ((*it).second.Timeout < timeout)
+	            _ReceiveSub.LimboClients.erase(itr);
+	    }
+	*/
 
 	// If the back-end is down, set all clients to "server down" state
 	// (this breaks the tick synchronisation of the clients, anyway the clients disconnect after receiving "server down")
-	if ( !DontNeedBackend && ShardDown )
+	if (!DontNeedBackend && ShardDown)
 	{
 		static TTime lastSent = CTime::getLocalTime();
 		TTime now = CTime::getLocalTime();
-		if ( now - lastSent > 2000 )
+		if (now - lastSent > 2000)
 		{
-			sendServerProblemStateToClients( CClientHost::ServerDown );
+			sendServerProblemStateToClients(CClientHost::ServerDown);
 			lastSent = now;
 		}
 	}
@@ -1501,7 +1440,7 @@ bool CFrontEndService::update()
 	{
 		if (!StalledMode)
 		{
-			nlinfo( "Entering STALLED mode" );
+			nlinfo("Entering STALLED mode");
 			StalledMode = true;
 			LastStallTime = 0;
 		}
@@ -1509,7 +1448,7 @@ bool CFrontEndService::update()
 		if ((CTime::getLocalTime() - LastStallTime > 1000) /*|| (SimulateStalled.get() == 1)*/)
 		{
 			LastStallTime = CTime::getLocalTime();
-			sendServerProblemStateToClients( CClientHost::Stalled );
+			sendServerProblemStateToClients(CClientHost::Stalled);
 		}
 	}
 
@@ -1519,22 +1458,21 @@ bool CFrontEndService::update()
 	// Display statistics
 	CycleWatch.stop();
 	static TTime lastdisplay = CTime::getLocalTime();
-	if ( VerboseFEStatsTime.get() && (CTime::getLocalTime() - lastdisplay > 1000) )
+	if (VerboseFEStatsTime.get() && (CTime::getLocalTime() - lastdisplay > 1000))
 	{
 		TMsDuration cyclepartialaverage = CycleWatch.getPartialAverage();
-		nlinfo( "FETIME: Time in ms: Receive=%u Send=%u UserLoop=%u Cycle=%u (%.1f cps)",
-				ReceiveWatch.getPartialAverage(), SendWatch.getPartialAverage(), UserDurationPAverage,
-				cyclepartialaverage, 1000.0f/(float)cyclepartialaverage );
+		nlinfo("FETIME: Time in ms: Receive=%u Send=%u UserLoop=%u Cycle=%u (%.1f cps)",
+		    ReceiveWatch.getPartialAverage(), SendWatch.getPartialAverage(), UserDurationPAverage,
+		    cyclepartialaverage, 1000.0f / (float)cyclepartialaverage);
 		lastdisplay = CTime::getLocalTime();
 	}
 	CycleWatch.start();
-
 
 	uint32 now = CTime::getSecondsSince1970();
 	bool noRecentComm = now - CFEReceiveTask::LastUDPPacketReceived > DelayBeforeUPDAlert;
 	// check for potential communication problem
 	if (CLoginServer::getNbPendingUsers() != 0
-		|| this->_ReceiveSub.getNbClient() != 0)
+	    || this->_ReceiveSub.getNbClient() != 0)
 	{
 		if (noRecentComm)
 		{
@@ -1552,17 +1490,16 @@ bool CFrontEndService::update()
 	return true;
 }
 
-
 /*
  * Add an impulse to a specific client
  */
-void	CFrontEndService::addImpulseToClient(TClientId client, CActionImpulsion *action, uint level)
+void CFrontEndService::addImpulseToClient(TClientId client, CActionImpulsion *action, uint level)
 {
-	TClientIdCont	&cont = _ReceiveSub.clientIdCont();
+	TClientIdCont &cont = _ReceiveSub.clientIdCont();
 
 	if (client >= cont.size() || cont[client] == NULL)
 	{
-		nlwarning ("Can't send impulse to client %d (doesn't exist)", client);
+		nlwarning("Can't send impulse to client %d (doesn't exist)", client);
 		return;
 	}
 
@@ -1572,9 +1509,9 @@ void	CFrontEndService::addImpulseToClient(TClientId client, CActionImpulsion *ac
 /*
  * Add an impulse to a specific entity provided it is a client
  */
-void	CFrontEndService::addImpulseToEntity( const TEntityIndex& entity, CActionImpulsion *action, uint level )
+void CFrontEndService::addImpulseToEntity(const TEntityIndex &entity, CActionImpulsion *action, uint level)
 {
-	TClientId	client = _ReceiveSub.EntityToClient.getClientId( entity );
+	TClientId client = _ReceiveSub.EntityToClient.getClientId(entity);
 
 	if (client != INVALID_CLIENT)
 	{
@@ -1582,38 +1519,37 @@ void	CFrontEndService::addImpulseToEntity( const TEntityIndex& entity, CActionIm
 	}
 	else
 	{
-		nlwarning ("Can't send impulse to E%u (doesn't exist or not a client)", entity.getIndex());
+		nlwarning("Can't send impulse to E%u (doesn't exist or not a client)", entity.getIndex());
 		return;
 	}
 }
-
 
 /*
  * Remove clients that do not send datagrams anymore
  */
 void CFrontEndService::updateClientsStates()
 {
-	TTime	ctime = CTime::getLocalTime();
+	TTime ctime = CTime::getLocalTime();
 
 	THostMap::iterator iclient, icremove;
-	for ( iclient=_ReceiveSub.clientMap().begin(); iclient!=_ReceiveSub.clientMap().end(); )
+	for (iclient = _ReceiveSub.clientMap().begin(); iclient != _ReceiveSub.clientMap().end();)
 	{
-		CClientHost	*client = GETCLIENTA(iclient);
+		CClientHost *client = GETCLIENTA(iclient);
 		// Check if receive time is not too old
-		TTime	cltime = ctime - client->receiveTime();
-/*
-		// TEMP BEN
-		CActionDummy	*dummy = (CActionDummy*)(CActionFactory::getInstance()->create(ACTION_DUMMY_CODE));
-		dummy->Dummy1 = ++(client->LastSentDummy);
-		addImpulseToClient(client->clientId(), dummy, 1);
-		// TEMP BEN
-*/
+		TTime cltime = ctime - client->receiveTime();
+		/*
+		        // TEMP BEN
+		        CActionDummy	*dummy = (CActionDummy*)(CActionFactory::getInstance()->create(ACTION_DUMMY_CODE));
+		        dummy->Dummy1 = ++(client->LastSentDummy);
+		        addImpulseToClient(client->clientId(), dummy, 1);
+		        // TEMP BEN
+		*/
 		switch (client->ConnectionState)
 		{
 		default:
 			if (cltime > _ClientLagTime)
 			{
-				//nlwarning( "Client %u lags (no incoming data for %u ms), setting probe mode", GETCLIENTA(iclient)->clientId(), _ClientLagTime );
+				// nlwarning( "Client %u lags (no incoming data for %u ms), setting probe mode", GETCLIENTA(iclient)->clientId(), _ClientLagTime );
 				client->setProbeState();
 			}
 			else
@@ -1622,13 +1558,13 @@ void CFrontEndService::updateClientsStates()
 			}
 			break;
 		case CClientHost::Probe:
-			if ( cltime > _ClientTimeOut )
+			if (cltime > _ClientTimeOut)
 			{
-				nlinfo( "Client %u %s seems dead (no incoming data for %u ms)", GETCLIENTA(iclient)->clientId(), GETCLIENTA(iclient)->address().asString().c_str(), _ClientTimeOut );
+				nlinfo("Client %u %s seems dead (no incoming data for %u ms)", GETCLIENTA(iclient)->clientId(), GETCLIENTA(iclient)->address().asString().c_str(), _ClientTimeOut);
 				icremove = iclient;
 				++iclient;
-				_ReceiveSub.removeFromRemoveList( GETCLIENTA(icremove)->clientId() );
-				_ReceiveSub.removeClientById( GETCLIENTA(icremove)->clientId() );
+				_ReceiveSub.removeFromRemoveList(GETCLIENTA(icremove)->clientId());
+				_ReceiveSub.removeClientById(GETCLIENTA(icremove)->clientId());
 			}
 			else
 			{
@@ -1639,14 +1575,13 @@ void CFrontEndService::updateClientsStates()
 	}
 }
 
-
 /*
  * Set clients to stalled or "server down" mode (and send stalled msg immediately)
  */
-void CFrontEndService::sendServerProblemStateToClients( uint connectionState )
+void CFrontEndService::sendServerProblemStateToClients(uint connectionState)
 {
 	uint8 systemMsgCode;
-	switch ( connectionState )
+	switch (connectionState)
 	{
 	case CClientHost::ServerDown:
 		systemMsgCode = SYSTEM_SERVER_DOWN_CODE;
@@ -1657,45 +1592,44 @@ void CFrontEndService::sendServerProblemStateToClients( uint connectionState )
 	default:
 		nlstop;
 	}
-	//nldebug( "Sending %s to clients", SystemMessagesNames[systemMsgCode] );
-	//uint numClients = 0;
+	// nldebug( "Sending %s to clients", SystemMessagesNames[systemMsgCode] );
+	// uint numClients = 0;
 	THostMap::iterator iclient;
-	for ( iclient=_ReceiveSub.clientMap().begin(); iclient!=_ReceiveSub.clientMap().end(); ++iclient )
+	for (iclient = _ReceiveSub.clientMap().begin(); iclient != _ReceiveSub.clientMap().end(); ++iclient)
 	{
 		// Send the stalled or server down code. Note: client->setupSystemHeader() calls getNextSendNumber().
 		// If this is called more than once per tick (or less), the client's CurrentServerTick will get shifted,
 		// leading to the warning "handleReceivedMsg : FERECV: client %d sent messages dated in future".
 		// To avoid this, the FS *must* resynchronize the clients when exiting from stalled mode
 		// (see setClientsToSynchronizeState()).
-		CClientHost	*client = GETCLIENTA(iclient);
+		CClientHost *client = GETCLIENTA(iclient);
 		client->ConnectionState = connectionState;
-		_SendSub.enableSendBuffer( client->clientId() );
-		TOutBox& outbox = _SendSub.outBox( client->clientId() );
+		_SendSub.enableSendBuffer(client->clientId());
+		TOutBox &outbox = _SendSub.outBox(client->clientId());
 		outbox.resetBufPos();
-		client->setupSystemHeader( outbox, systemMsgCode );
+		client->setupSystemHeader(outbox, systemMsgCode);
 
-		//outbox.displayStream(toString("STALLED:displayOutbox for %u:", client->clientId()).c_str());
+		// outbox.displayStream(toString("STALLED:displayOutbox for %u:", client->clientId()).c_str());
 		//++numClients;
 	}
 	swapSendBuffers(); // waits for the end of the previous background flushing
 	flushMessagesToSend(); // flushes (blocking operation in the main thread)
 
-	//nldebug( "Sent %s to %u clients", SystemMessagesNames[systemMsgCode], numClients );
+	// nldebug( "Sent %s to %u clients", SystemMessagesNames[systemMsgCode], numClients );
 }
-
 
 /*
  * Set clients to synchronize state
  */
 void CFrontEndService::setClientsToSynchronizeState()
 {
-	nlinfo( "Leaving STALLED mode" );
+	nlinfo("Leaving STALLED mode");
 	StalledMode = false;
 
 	THostMap::iterator iclient;
-	for ( iclient=_ReceiveSub.clientMap().begin(); iclient!=_ReceiveSub.clientMap().end(); ++iclient )
+	for (iclient = _ReceiveSub.clientMap().begin(); iclient != _ReceiveSub.clientMap().end(); ++iclient)
 	{
-		CClientHost	*client = GETCLIENTA(iclient);
+		CClientHost *client = GETCLIENTA(iclient);
 
 		// Set to Force Synchronize state to ensure an ack_sync received from client
 		// will not overwrite the state with Connected
@@ -1714,59 +1648,52 @@ void CFrontEndService::newCookieCallback(const NLNET::CLoginCookie &cookie)
 	}
 }
 
-
-
 /*
  *
  */
 
-NLMISC_DYNVARIABLE( bool, StalledMode, "true if no tick for 2 seconds" )
+NLMISC_DYNVARIABLE(bool, StalledMode, "true if no tick for 2 seconds")
 {
-	if ( get )
+	if (get)
 		*pointer = CFrontEndService::instance()->StalledMode;
 }
 
-
-NLMISC_DYNVARIABLE( uint32, UserTime, "User duration partial average" )
+NLMISC_DYNVARIABLE(uint32, UserTime, "User duration partial average")
 {
-	if ( get )
+	if (get)
 		*pointer = CFrontEndService::instance()->UserDurationPAverage;
 }
 
-
-NLMISC_DYNVARIABLE( uint32, SentActions, "User duration partial average" )
+NLMISC_DYNVARIABLE(uint32, SentActions, "User duration partial average")
 {
-	if ( get )
+	if (get)
 		*pointer = CFrontEndService::instance()->SentActionsLastCycle;
 }
-
 
 bool Stats = false;
 
 // This assumes the negative filter "FESTATS" is in the config file
-NLMISC_COMMAND( switchStats, "Switch stats", "" )
+NLMISC_COMMAND(switchStats, "Switch stats", "")
 {
-	Stats = ! Stats;
-	if ( Stats )
-		InfoLog->removeFilter( "FESTATS" );
+	Stats = !Stats;
+	if (Stats)
+		InfoLog->removeFilter("FESTATS");
 	else
-		InfoLog->addNegativeFilter( "FESTATS" );
+		InfoLog->addNegativeFilter("FESTATS");
 	return true;
 }
 
-
-NLMISC_COMMAND( monitorClient, "Set the client id to monitor", "<clientid>" )
+NLMISC_COMMAND(monitorClient, "Set the client id to monitor", "<clientid>")
 {
 	if (args.size() != 1) return false;
 	TClientId clientid;
 	NLMISC::fromString(args[0], clientid);
-	if ( clientid <= MAX_NB_CLIENTS )
-		CFrontEndService::instance()->monitorClient( clientid );
+	if (clientid <= MAX_NB_CLIENTS)
+		CFrontEndService::instance()->monitorClient(clientid);
 	return true;
 }
 
-
-NLMISC_COMMAND( disconnectClient, "Disconnect a client", "<clientid>" )
+NLMISC_COMMAND(disconnectClient, "Disconnect a client", "<clientid>")
 {
 	if (args.size() != 1) return false;
 
@@ -1774,36 +1701,34 @@ NLMISC_COMMAND( disconnectClient, "Disconnect a client", "<clientid>" )
 	NLMISC::fromString(args[0], clientid);
 
 	CClientHost *clienthost;
-	if ( (clientid <= MaxNbClients) && ((clienthost = CFrontEndService::instance()->sendSub()->clientIdCont()[clientid]) != NULL) )
+	if ((clientid <= MaxNbClients) && ((clienthost = CFrontEndService::instance()->sendSub()->clientIdCont()[clientid]) != NULL))
 	{
-		cbDisconnectClient( clienthost->Uid, "FS user command" );
+		cbDisconnectClient(clienthost->Uid, "FS user command");
 	}
 	else
 	{
-		log.displayNL( "There is no such a client id" );
+		log.displayNL("There is no such a client id");
 	}
 	return true;
 }
 
-
-NLMISC_COMMAND( verboseImpulsions, "Turn on/off or check the state of verbose logging of impulsions", "" )
+NLMISC_COMMAND(verboseImpulsions, "Turn on/off or check the state of verbose logging of impulsions", "")
 {
-	if ( args.size() == 1 )
+	if (args.size() == 1)
 	{
-		if ( args[0] == string("on") || args[0] == string("1") )
-			verboseImpulsions=true;
-		else if ( args[0] == string("off") || args[0] == string("0") )
-			verboseImpulsions=false;
+		if (args[0] == string("on") || args[0] == string("1"))
+			verboseImpulsions = true;
+		else if (args[0] == string("off") || args[0] == string("0"))
+			verboseImpulsions = false;
 	}
 
-	log.displayNL( "verboseImpulsions is %s", verboseImpulsions ? "on" : "off" );
+	log.displayNL("verboseImpulsions is %s", verboseImpulsions ? "on" : "off");
 	return true;
 }
 
-
-NLMISC_COMMAND( getTargetPosAtTick, "Get the last target entity position that was sent to a client at a specified tick in the past", "<clientId> <tick>" )
+NLMISC_COMMAND(getTargetPosAtTick, "Get the last target entity position that was sent to a client at a specified tick in the past", "<clientId> <tick>")
 {
-	if ( args.size() < 2 )
+	if (args.size() < 2)
 		return false;
 	TClientId clientId;
 	NLMISC::fromString(args[0], clientId);
@@ -1812,64 +1737,61 @@ NLMISC_COMMAND( getTargetPosAtTick, "Get the last target entity position that wa
 
 	// Search
 	bool found = false;
-	TCoord x,y;
-	if ( (clientId != INVALID_CLIENT) && (clientId <= MAX_NB_CLIENTS) )
+	TCoord x, y;
+	if ((clientId != INVALID_CLIENT) && (clientId <= MAX_NB_CLIENTS))
 	{
-		CFrontEndService::instance()->history()->getTargetPosAtTick( clientId, tick, x, y );
-		log.displayNL( "Position of target of C%hu was %d %d", clientId, x, y );
+		CFrontEndService::instance()->history()->getTargetPosAtTick(clientId, tick, x, y);
+		log.displayNL("Position of target of C%hu was %d %d", clientId, x, y);
 	}
 	else
 	{
-		log.displayNL( "Invalid client id" );
+		log.displayNL("Invalid client id");
 	}
 
 	return true;
 }
 
-
 class CImpulseStatPred
 {
 public:
-
-	typedef	std::pair<float, CClientHost*>	TItem;
-	bool	operator () (const TItem& a, const TItem& b) const
+	typedef std::pair<float, CClientHost *> TItem;
+	bool operator()(const TItem &a, const TItem &b) const
 	{
 		return a.first < b.first;
 	}
-
 };
 
-NLMISC_COMMAND( dumpImpulseStats, "Dump Impulse stat to XML log", "<logfile> [[-]<num> [efficiency|queue]]")
+NLMISC_COMMAND(dumpImpulseStats, "Dump Impulse stat to XML log", "<logfile> [[-]<num> [efficiency|queue]]")
 {
 	if (args.size() < 1)
 		return false;
 
-	sint	maxdump = -1;
+	sint maxdump = -1;
 	if (args.size() >= 2)
 	{
 		NLMISC::fromString(args[1], maxdump);
 		maxdump = abs(maxdump);
 	}
 
-	bool	reverse = (args.size() >= 2 && args[1][0] == '-');
+	bool reverse = (args.size() >= 2 && args[1][0] == '-');
 
-	std::string	criterion;
+	std::string criterion;
 	if (args.size() >= 3)
 		criterion = args[2];
 
-	uint	ucriterion = 0;
+	uint ucriterion = 0;
 	if (criterion == "efficiency")
 		ucriterion = 1;
 	if (criterion == "queue")
 		ucriterion = 2;
 
-	std::vector<std::pair<float, CClientHost*> >	result;
+	std::vector<std::pair<float, CClientHost *>> result;
 
-	THostMap&	clientmap = CFrontEndService::instance()->receiveSub()->clientMap();
-	for (THostMap::iterator it = clientmap.begin (); it != clientmap.end (); it++)
+	THostMap &clientmap = CFrontEndService::instance()->receiveSub()->clientMap();
+	for (THostMap::iterator it = clientmap.begin(); it != clientmap.end(); it++)
 	{
-		CClientHost*	client = GETCLIENTA(it);
-		float			comp = 0.0f;
+		CClientHost *client = GETCLIENTA(it);
+		float comp = 0.0f;
 
 		if (ucriterion == 1)
 		{
@@ -1883,7 +1805,7 @@ NLMISC_COMMAND( dumpImpulseStats, "Dump Impulse stat to XML log", "<logfile> [[-
 		if (reverse)
 			comp = -comp;
 
-		result.push_back(std::pair<float, CClientHost*>(comp, client));
+		result.push_back(std::pair<float, CClientHost *>(comp, client));
 	}
 
 	if (ucriterion != 0 && !result.empty())
@@ -1891,20 +1813,19 @@ NLMISC_COMMAND( dumpImpulseStats, "Dump Impulse stat to XML log", "<logfile> [[-
 		std::sort(result.begin(), result.end(), CImpulseStatPred());
 	}
 
-
-	std::string	filename = args[0];
-	COFile	file;
-	COXml	xml;
+	std::string filename = args[0];
+	COFile file;
+	COXml xml;
 
 	if (!file.open(filename) || !xml.init(&file))
 		return false;
 
 	xml.xmlPush("ImpulseDump");
 
-	uint	num;
-	for (num=0; num<result.size() && (maxdump <= 0 || num < uint(maxdump)); ++num)
+	uint num;
+	for (num = 0; num < result.size() && (maxdump <= 0 || num < uint(maxdump)); ++num)
 	{
-		CClientHost*	client = result[num].second;
+		CClientHost *client = result[num].second;
 		client->ImpulseEncoder.dump(xml);
 	}
 
@@ -1913,15 +1834,13 @@ NLMISC_COMMAND( dumpImpulseStats, "Dump Impulse stat to XML log", "<logfile> [[-
 	return true;
 }
 
-
-
 /*
  * Patching setup
  * Apache start/stop commands
  */
 
 // Start Apache server
-NLMISC_COMMAND( startWebPatchServer, "start Web server for patching", "")
+NLMISC_COMMAND(startWebPatchServer, "start Web server for patching", "")
 {
 	if (!UseWebPatchServer.get())
 		return true;
@@ -1937,7 +1856,7 @@ NLMISC_COMMAND( startWebPatchServer, "start Web server for patching", "")
 }
 
 // Stop Apache server
-NLMISC_COMMAND( stopWebPatchServer, "stop Web server for patching", "")
+NLMISC_COMMAND(stopWebPatchServer, "stop Web server for patching", "")
 {
 	if (!UseWebPatchServer.get())
 		return true;
@@ -1953,7 +1872,7 @@ NLMISC_COMMAND( stopWebPatchServer, "stop Web server for patching", "")
 }
 
 // Stop Apache server
-NLMISC_COMMAND( acceptClients, "tells manually frontend to accept clients", "")
+NLMISC_COMMAND(acceptClients, "tells manually frontend to accept clients", "")
 {
 	setAcceptClients();
 	return true;
@@ -1965,15 +1884,14 @@ NLMISC_CLASS_COMMAND_IMPL(CFrontEndService, dump)
 		return false;
 
 	log.displayNL("Frontend internal state :");
-	log.displayNL("Listen address: %s", CLoginServer::getListenAddress().c_str() );
-	log.displayNL("UDP sock listening on %s", _ReceiveSub.dataSock()->localAddr().asString().c_str() );
+	log.displayNL("Listen address: %s", CLoginServer::getListenAddress().c_str());
+	log.displayNL("UDP sock listening on %s", _ReceiveSub.dataSock()->localAddr().asString().c_str());
 	return true;
 }
-
 
 /*
  * Declare a service with the class CFrontEndService, the names "FS" (short) and "frontend_service" (long).
  * The port is set to 37000 and the main callback array is CallbackArray.
  * Note: this is the port towards the other services of the shard (TCP communication).
  */
-NLNET_SERVICE_MAIN( CFrontEndService, "FS", "frontend_service", 0, cbFrontEndArray, "", "" )
+NLNET_SERVICE_MAIN(CFrontEndService, "FS", "frontend_service", 0, cbFrontEndArray, "", "")

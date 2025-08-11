@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_RANGE_SELECTOR_H
 #define RY_RANGE_SELECTOR_H
 
@@ -30,12 +28,11 @@
 class CRangeSelector
 {
 public:
-	
 	/// init the range selector with the specified entity
-	/// actor 
+	/// actor
 	/// x,y are the initial position , in EGS coords ( millimeters, y < 0, x > 0)
 	/// radius is the radius in meters
-	void buildDisc( CEntityBase * actor, sint32 x, sint32 y,float radius, CEntityMatrix & matrix, bool offensiveAction, bool ignoreMainTarget = false);
+	void buildDisc(CEntityBase *actor, sint32 x, sint32 y, float radius, CEntityMatrix &matrix, bool offensiveAction, bool ignoreMainTarget = false);
 
 	/// init the range selector with the specified disc
 	/// source is the cone source
@@ -52,41 +49,32 @@ public:
 	/// /     |         \
 	// /-----------------\
 	///     maxWidth
-	void buildCone(CEntityBase* source , CEntityBase* target,float height,float minWidth, float maxWidth, CEntityMatrix & matrix, bool offensiveAction, bool ignoreMainTarget = false);
+	void buildCone(CEntityBase *source, CEntityBase *target, float height, float minWidth, float maxWidth, CEntityMatrix &matrix, bool offensiveAction, bool ignoreMainTarget = false);
 
-	void buildChain( CEntityBase* actor, CEntityBase* target, float range,uint maxEntities, CEntityMatrix & matrix, ACTNATURE::TActionNature nature, bool ignoreMainTarget = false);
+	void buildChain(CEntityBase *actor, CEntityBase *target, float range, uint maxEntities, CEntityMatrix &matrix, ACTNATURE::TActionNature nature, bool ignoreMainTarget = false);
 
 	inline void clear()
 	{
 		_Entities.clear();
 	}
 
-	inline const std::vector< CEntityBase* > & getEntities()
+	inline const std::vector<CEntityBase *> &getEntities()
 	{
 		return _Entities;
 	}
 
-	inline const std::vector< float > & getDistances()
+	inline const std::vector<float> &getDistances()
 	{
 		return _Distances;
 	}
-	
-	
-protected:
-	
-	/// entities affected by the area. Slot zero is the main entity
-	std::vector< CEntityBase* >			_Entities;
-	/// distances from main target. We store the distance between caster and main target in slot 0
-	std::vector< float >		_Distances;
-};
 
+protected:
+	/// entities affected by the area. Slot zero is the main entity
+	std::vector<CEntityBase *> _Entities;
+	/// distances from main target. We store the distance between caster and main target in slot 0
+	std::vector<float> _Distances;
+};
 
 #endif // RY_RANGE_SELECTOR_H
 
 /* End of range_selector.h */
-
-
-
-
-
-

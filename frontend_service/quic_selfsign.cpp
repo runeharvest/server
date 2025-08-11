@@ -744,8 +744,7 @@ CreateSelfSignedCertificate(
 	KeyProvInfo.rgProvParam = NULL;
 	KeyProvInfo.dwKeySpec = AT_KEYEXCHANGE;
 
-#pragma prefast(suppress \
-                : __WARNING_33088, "Test Only Usage of Self-Signed Certs.")
+#pragma prefast(suppress : __WARNING_33088, "Test Only Usage of Self-Signed Certs.")
 	CertContext = CertCreateSelfSignCertificate(
 	    Key,
 	    &SubjectNameBlob,

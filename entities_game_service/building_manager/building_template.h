@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef RY_BUILDING_TEMPLATE_H
 #define RY_BUILDING_TEMPLATE_H
 
@@ -24,14 +23,12 @@
 
 class CBuildingTemplate;
 
-
 /// structure containing intermediate data used during building parsing only
 struct CBuildingParseData
 {
 	/// buildings templates sorted by names
-	std::map< std::string, CBuildingTemplate *> BuildingTemplates;
+	std::map<std::string, CBuildingTemplate *> BuildingTemplates;
 };
-
 
 /**
  * A room template. Used to describe a room organization and content . Example : THE fyros guild council room
@@ -44,16 +41,16 @@ class CRoomTemplate
 {
 public:
 	/// build room fromm data
-	bool build ( const NLLIGO::IPrimitive* prim, CBuildingParseData & parseData );
+	bool build(const NLLIGO::IPrimitive *prim, CBuildingParseData &parseData);
 
 	/// name of the room
-	std::string									Name;
+	std::string Name;
 	/// name id to display on client
-	std::string									PhraseId;
+	std::string PhraseId;
 	/// icon  to display on client
-	LIFT_ICONS::TLiftIcon						Icon;
+	LIFT_ICONS::TLiftIcon Icon;
 	/// names of the bot
-	std::vector< TAIAlias >						Bots;
+	std::vector<TAIAlias> Bots;
 	/// restriction to go to this destination
 	std::vector<ROOM_RESTRICTION::TRestriction> Restrictions;
 };
@@ -68,21 +65,16 @@ public:
 class CBuildingTemplate
 {
 	NL_INSTANCE_COUNTER_DECL(CBuildingTemplate);
+
 public:
 	/// build the template from data.
-	bool build ( const NLLIGO::IPrimitive* prim, CBuildingParseData & parseData );
+	bool build(const NLLIGO::IPrimitive *prim, CBuildingParseData &parseData);
 
 	/// type of the building
-	BUILDING_TYPES::TBuildingType	Type;
+	BUILDING_TYPES::TBuildingType Type;
 	/// rooms in the building
-	std::vector<CRoomTemplate>		Rooms;
+	std::vector<CRoomTemplate> Rooms;
 };
-
-
-
-	
-
-
 
 #endif // RY_BUILDING_TEMPLATE_H
 

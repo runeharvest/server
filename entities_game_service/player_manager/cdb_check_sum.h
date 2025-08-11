@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_CDB_CHECK_SUM_H
 #define NL_CDB_CHECK_SUM_H
-
 
 /**
  * class implementing check sum for the client database
@@ -30,55 +27,53 @@
 class CCDBCheckSum
 {
 public:
-	///constructor
+	/// constructor
 	CCDBCheckSum();
 
-	//clear the sum
+	// clear the sum
 	void clear()
 	{
 		_Sum = 0;
 	};
 
-	///add an uint8 to the sum
+	/// add an uint8 to the sum
 	void add(uint8 el);
 
-	///add a value to the check sum
+	/// add a value to the check sum
 	template <class T>
-	void add(const T & el)
+	void add(const T &el)
 	{
 		T value = el;
-		for (uint8 i=0; i< sizeof(T); i++)
+		for (uint8 i = 0; i < sizeof(T); i++)
 		{
 			uint8 tmp = (uint8)(value & 0xFF);
 			add(tmp);
-			value >>=8;
+			value >>= 8;
 		}
 	}
 
-	///add a vector to the sum
+	/// add a vector to the sum
 	template <class T>
-	void addVector(const std::vector<T> &  vect)
+	void addVector(const std::vector<T> &vect)
 	{
 		for (typename std::vector<T>::const_iterator it = vect.begin(); it != vect.end(); ++it)
 			add(*it);
 	}
-	
+
 	uint32 getSum()
 	{
 		return _Sum;
 	}
+
 private:
-	///the checsum result
+	/// the checsum result
 	uint32 _Sum;
 
-	///the following values are used in the check algorithm
+	/// the following values are used in the check algorithm
 	uint32 _Factor;
-    uint32 _Const1;
-    uint32 _Const2;
-    
+	uint32 _Const1;
+	uint32 _Const2;
 };
-
-
 
 #endif // NL_CDB_CHECK_SUM_H
 

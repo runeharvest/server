@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYAI_STATE_H
 #define RYAI_STATE_H
 
@@ -29,153 +27,161 @@
 
 class CStateMachine;
 
-class CAIState : 
-	public	NLMISC::CDbgRefCount<CAIState>,
-	public	CKeyWordOwner, 
-	public	CAliasChild<CStateMachine>, 
-	public	NLMISC::CRefCount,
-	public	CProfileInState
+class CAIState : public NLMISC::CDbgRefCount<CAIState>,
+                 public CKeyWordOwner,
+                 public CAliasChild<CStateMachine>,
+                 public NLMISC::CRefCount,
+                 public CProfileInState
 {
 public:
-	
 	// ctor & dtor ------------------------------------------------------
-	CAIState(const CStateMachine	*container,CAIAliasDescriptionNode *aliasTree)
-		: CKeyWordOwner(), 
-		CAliasChild<CStateMachine>(const_cast<CStateMachine*>(container),aliasTree)
-	{}
+	CAIState(const CStateMachine *container, CAIAliasDescriptionNode *aliasTree)
+	    : CKeyWordOwner()
+	    , CAliasChild<CStateMachine>(const_cast<CStateMachine *>(container), aliasTree)
+	{
+	}
 
-	CAIState(CStateMachine const* container, uint32 alias, std::string const& name)
-	: CKeyWordOwner()
-	, CAliasChild<CStateMachine>(const_cast<CStateMachine*>(container), alias, name)
-	{}
-	
+	CAIState(CStateMachine const *container, uint32 alias, std::string const &name)
+	    : CKeyWordOwner()
+	    , CAliasChild<CStateMachine>(const_cast<CStateMachine *>(container), alias, name)
+	{
+	}
+
 	virtual ~CAIState()
-	{}
+	{
+	}
 
-	std::string	getIndexString	()	const;
+	std::string getIndexString() const;
 
-	virtual bool isPositional	()	const	=0;
+	virtual bool isPositional() const = 0;
 
 	// Profile property accessors --------------------------------------
 
-	const CAliasCont<CAIStateProfile>&	profiles() const
+	const CAliasCont<CAIStateProfile> &profiles() const
 	{
-		return	_Profiles;
+		return _Profiles;
 	}
 
-	const CAliasCont<CAIStateChat>&		chats() const
+	const CAliasCont<CAIStateChat> &chats() const
 	{
-		return	_Chats;
+		return _Chats;
 	}
-	
-	IAliasCont*			getAliasCont		(AITYPES::TAIType	type);
-	CAliasTreeOwner*	createChild			(IAliasCont	*cont,	CAIAliasDescriptionNode	*aliasTree);
-	void				updateDependencies	(const	CAIAliasDescriptionNode	&aliasTree, CAliasTreeOwner *aliasTreeOwner);
+
+	IAliasCont *getAliasCont(AITYPES::TAIType type);
+	CAliasTreeOwner *createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree);
+	void updateDependencies(const CAIAliasDescriptionNode &aliasTree, CAliasTreeOwner *aliasTreeOwner);
 
 protected:
-	CAliasCont<CAIStateProfile>	_Profiles;
-	CAliasCont<CAIStateChat>	_Chats;
+	CAliasCont<CAIStateProfile> _Profiles;
+	CAliasCont<CAIStateChat> _Chats;
 };
 
-class CAIStatePunctual: public CAIState  
+class CAIStatePunctual : public CAIState
 {
 public:
-	virtual	bool	isPositional	()	const
+	virtual bool isPositional() const
 	{
 		return false;
 	}
-	
-	CAIStatePunctual(const CStateMachine	*container,CAIAliasDescriptionNode *aliasTree)
-		: CAIState(container,aliasTree) 
-	{}
+
+	CAIStatePunctual(const CStateMachine *container, CAIAliasDescriptionNode *aliasTree)
+	    : CAIState(container, aliasTree)
+	{
+	}
 
 private:
 };
 
 class CShape
-:public CPlaceRandomPos
+    : public CPlaceRandomPos
 {
 public:
-	CShape(bool acceptInvalidPos=false)
-		: _GeometryType(NONE)
-		, _AcceptInvalidPos(acceptInvalidPos)
-	{}
-	virtual	~CShape()
-	{}
-	
-	typedef	RYAI_MAP_CRUNCH::CWorldPosition	TPosition;
-	
-	// methods for managing geometry
-	bool	setPath(AITYPES::TVerticalPos verticalPos, const std::vector <CAIVector> &points);
-	
-	bool	setPatat(AITYPES::TVerticalPos verticalPos, const std::vector <CAIVector> &points);
-	
-	// dumb little geometry type reporting accessors
-	bool	hasPath		()	const	{ return _GeometryType==PATH && hasPoints(); } 
-	bool	hasPatat	()	const	{ return _GeometryType==PATAT && hasPoints(); } 
-	bool	hasPoints	()	const	{ return _Geometry.size()!=0; } 
-	
-	// accessors for path & patat geometry - whichever of the 2 exists
-	uint32 numPoints()						{ return (uint32)_Geometry.size(); }
-	const TPosition *point(uint32 idx)		{ return idx<_Geometry.size()? &_Geometry[idx]: NULL; }
-	
-	const std::vector<TPosition>	&getGeometry()	const { return	_Geometry; }
-	
-	bool	contains	(const	CAIVector	&pos)	const;
+	CShape(bool acceptInvalidPos = false)
+	    : _GeometryType(NONE)
+	    , _AcceptInvalidPos(acceptInvalidPos)
+	{
+	}
+	virtual ~CShape()
+	{
+	}
 
-	bool	calcRandomPos(CAIPos &pos)	const;	
-	
+	typedef RYAI_MAP_CRUNCH::CWorldPosition TPosition;
+
+	// methods for managing geometry
+	bool setPath(AITYPES::TVerticalPos verticalPos, const std::vector<CAIVector> &points);
+
+	bool setPatat(AITYPES::TVerticalPos verticalPos, const std::vector<CAIVector> &points);
+
+	// dumb little geometry type reporting accessors
+	bool hasPath() const { return _GeometryType == PATH && hasPoints(); }
+	bool hasPatat() const { return _GeometryType == PATAT && hasPoints(); }
+	bool hasPoints() const { return _Geometry.size() != 0; }
+
+	// accessors for path & patat geometry - whichever of the 2 exists
+	uint32 numPoints() { return (uint32)_Geometry.size(); }
+	const TPosition *point(uint32 idx) { return idx < _Geometry.size() ? &_Geometry[idx] : NULL; }
+
+	const std::vector<TPosition> &getGeometry() const { return _Geometry; }
+
+	bool contains(const CAIVector &pos) const;
+
+	bool calcRandomPos(CAIPos &pos) const;
+
 protected:
 private:
-	enum { NONE, PATH, PATAT  }	_GeometryType;
-	std::vector<TPosition>		_Geometry;
-	
+	enum
+	{
+		NONE,
+		PATH,
+		PATAT
+	} _GeometryType;
+	std::vector<TPosition> _Geometry;
+
 	/// bouding box info
-	CAIVector	_VMin, _VMax;
-	bool	_AcceptInvalidPos;
+	CAIVector _VMin, _VMax;
+	bool _AcceptInvalidPos;
 };
 
 class CAIStatePositional
-:public	NLMISC::CDbgRefCount<const CAIStatePositional>
-,public	NLMISC::CDbgRefCount<CAIStatePositional>
-,public CAIState
+    : public NLMISC::CDbgRefCount<const CAIStatePositional>,
+      public NLMISC::CDbgRefCount<CAIStatePositional>,
+      public CAIState
 {
 public:
-	CAIStatePositional (const CStateMachine	*container,CAIAliasDescriptionNode *aliasTree) 
-	: CAIState(container,aliasTree)
+	CAIStatePositional(const CStateMachine *container, CAIAliasDescriptionNode *aliasTree)
+	    : CAIState(container, aliasTree)
 	{
 	}
-	CAIStatePositional(CStateMachine const* container, uint32 alias, std::string const& name) 
-	: CAIState(container, alias, name)
+	CAIStatePositional(CStateMachine const *container, uint32 alias, std::string const &name)
+	    : CAIState(container, alias, name)
 	{
 	}
-	
-	virtual	bool	isPositional	()	const
+
+	virtual bool isPositional() const
 	{
 		return true;
 	}
-	const std::vector<CShape::TPosition>	&getGeometry()	const
+	const std::vector<CShape::TPosition> &getGeometry() const
 	{
-		return	_Shape.getGeometry();
+		return _Shape.getGeometry();
 	}
-	bool	contains	(const	CAIVector	&pos)	const
+	bool contains(const CAIVector &pos) const
 	{
-		return	_Shape.contains(pos);
-	}
-
-	CShape	&shape()
-	{
-		return	_Shape;
+		return _Shape.contains(pos);
 	}
 
-	const	CShape	&shape()	const
+	CShape &shape()
 	{
-		return	_Shape;
+		return _Shape;
 	}
-	
+
+	const CShape &shape() const
+	{
+		return _Shape;
+	}
+
 private:
-	CShape	_Shape;
+	CShape _Shape;
 };
 
 #endif
-

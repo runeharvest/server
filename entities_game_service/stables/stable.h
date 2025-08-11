@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_STABLE_H
 #define RYZOM_STABLE_H
 
@@ -33,8 +31,8 @@
 class CStable
 {
 	NL_INSTANCE_COUNTER_DECL(CStable);
-public:
 
+public:
 	struct TStableData
 	{
 		std::string StableName;
@@ -45,61 +43,40 @@ public:
 		float Theta;
 	};
 
-	typedef std::map< uint16, TStableData > TStableContainer;
-	
-	// initialize 
-	static CStable* getInstance() 
+	typedef std::map<uint16, TStableData> TStableContainer;
+
+	// initialize
+	static CStable *getInstance()
 	{
-		if(_Instance == NULL)
+		if (_Instance == NULL)
 		{
 			_Instance = new CStable();
 		}
 		return _Instance;
 	}
-	
+
 	/// constructor
-	CStable(); 
+	CStable();
 
 	/// destructor
 	virtual ~CStable();
 
 	/// add a stable
-	void addStable( const std::string& stableName, uint16 placeId, const std::string& continent, float x, float y, float z, float theta );
+	void addStable(const std::string &stableName, uint16 placeId, const std::string &continent, float x, float y, float z, float theta);
 
 	/// return stable entry point coordinate
-	bool getStableData( uint16 placeId, TStableData& stableData ) const;
+	bool getStableData(uint16 placeId, TStableData &stableData) const;
 
 	/// return true if name corresponding to a stable
-	inline bool isStable( uint16 placeId ) const { return _Stables.find( placeId ) != _Stables.end(); }
+	inline bool isStable(uint16 placeId) const { return _Stables.find(placeId) != _Stables.end(); }
 
 private:
 	// singleton instance
-	static CStable * _Instance;
-	
+	static CStable *_Instance;
+
 	// re-spawn name and datas
 	TStableContainer _Stables;
 };
 #endif // RYZOM_STABLE_H
 
 /* End of file stable.h */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

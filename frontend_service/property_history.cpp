@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
-
 
 #include "nel/misc/debug.h"
 #include "nel/misc/vector.h"
@@ -42,74 +39,74 @@ CPropertyHistory::CPropertyHistory()
 	_MaxDeltaSend = DefaultMaxDeltaSend;
 }
 
-void	CPropertyHistory::clear()
+void CPropertyHistory::clear()
 {
-	uint32	num = (uint32)_ClientEntries.size();
+	uint32 num = (uint32)_ClientEntries.size();
 	_ClientEntries.clear();
 	_ClientEntries.resize(num);
 }
 
-void	CPropertyHistory::setMaximumClient(uint maxClient)
+void CPropertyHistory::setMaximumClient(uint maxClient)
 {
 	_ClientEntries.resize(maxClient);
 }
 
 //
 
-void	CPropertyHistory::addClient(TClientId clientId)
+void CPropertyHistory::addClient(TClientId clientId)
 {
 	nlassert(clientId < _ClientEntries.size() && !_ClientEntries[clientId].EntryUsed);
 
-	CClientEntry	&entry = _ClientEntries[clientId];
+	CClientEntry &entry = _ClientEntries[clientId];
 	entry.reset();
 	entry.EntryUsed = true;
 }
 
-void	CPropertyHistory::removeClient(TClientId clientId)
+void CPropertyHistory::removeClient(TClientId clientId)
 {
 	nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
 	_ClientEntries[clientId].reset();
 }
 
-void	CPropertyHistory::resetClient(TClientId clientId)
+void CPropertyHistory::resetClient(TClientId clientId)
 {
 	nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
 
-	CClientEntry	&entry = _ClientEntries[clientId];
-	uint	i;
-	for (i=0; i<MAX_SEEN_ENTITIES_PER_CLIENT; ++i)
+	CClientEntry &entry = _ClientEntries[clientId];
+	uint i;
+	for (i = 0; i < MAX_SEEN_ENTITIES_PER_CLIENT; ++i)
 		entry.Entities[i].clearEntityEntry();
 }
 
-bool	CPropertyHistory::isValidClient(TClientId clientId)
+bool CPropertyHistory::isValidClient(TClientId clientId)
 {
 	return (clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
 }
 
 //
 
-bool	CPropertyHistory::addEntityToClient(TCLEntityId entityId, TClientId clientId)
+bool CPropertyHistory::addEntityToClient(TCLEntityId entityId, TClientId clientId)
 {
 	nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
 
 	// adds entity to the table in the client entry
-	CEntityEntry	&entity = _ClientEntries[clientId].Entities[entityId];
+	CEntityEntry &entity = _ClientEntries[clientId].Entities[entityId];
 	if (entity.Used)
 	{
-		return false;	
+		return false;
 	}
 	entity.resetEntityEntry();
 	entity.Used = true;
 	return true;
 }
 
-void	CPropertyHistory::removeEntityOfClient(TCLEntityId entityId, TClientId clientId)
+void CPropertyHistory::removeEntityOfClient(TCLEntityId entityId, TClientId clientId)
 {
 	nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
 
-	CEntityEntry	&entity = _ClientEntries[clientId].Entities[entityId];
-	if ( ! entity.Used )
-		nlwarning( "Removing entity S%hu of client C%hu in history, but not used", (uint16)entityId, clientId );
+	CEntityEntry &entity = _ClientEntries[clientId].Entities[entityId];
+	if (!entity.Used)
+		nlwarning("Removing entity S%hu of client C%hu in history, but not used", (uint16)entityId, clientId);
 	entity.resetEntityEntry();
 }
 
@@ -117,179 +114,177 @@ void	CPropertyHistory::removeEntityOfClient(TCLEntityId entityId, TClientId clie
 /*
 bool	CPropertyHistory::packDelta(TClientId clientId, CAction &action, bool allowPack)
 {
-	nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
+    nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
 
-	if (!action.isContinuous())
-	{
-		return false;
-	}
+    if (!action.isContinuous())
+    {
+        return false;
+    }
 
-	// cast action
-	CContinuousAction	&act = static_cast<CContinuousAction &>(action);
+    // cast action
+    CContinuousAction	&act = static_cast<CContinuousAction &>(action);
 
-	if (act.isDelta())
-	{
-		return true;
-	}
+    if (act.isDelta())
+    {
+        return true;
+    }
 
-	// search if entity is already used
-	CEntityEntry		&entity = _ClientEntries[clientId].Entities[action.CLEntityId];
-	nlassert(entity.Used);
+    // search if entity is already used
+    CEntityEntry		&entity = _ClientEntries[clientId].Entities[action.CLEntityId];
+    nlassert(entity.Used);
 
-	// This asumes the continuous properties are the same for everyone
-	uint16				propIndex = act.PropertyCode;
-	CPropertyEntry		&entry = entity.Properties[propIndex];
+    // This asumes the continuous properties are the same for everyone
+    uint16				propIndex = act.PropertyCode;
+    CPropertyEntry		&entry = entity.Properties[propIndex];
 
-	if (entry.AllowDelta > 0 && allowPack)
-	{
-		if (--entry.AllowDelta > 0)
-		{
-			act.packDelta(entry.Garanted);
-			return true;
-		}
-		else
-		{
-			// disable next incoming garanted packets
-			// until we send a garanted packet
-			entry.Packet = 0xFFFFFFFF;
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
+    if (entry.AllowDelta > 0 && allowPack)
+    {
+        if (--entry.AllowDelta > 0)
+        {
+            act.packDelta(entry.Garanted);
+            return true;
+        }
+        else
+        {
+            // disable next incoming garanted packets
+            // until we send a garanted packet
+            entry.Packet = 0xFFFFFFFF;
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
 }
 
 //
 
 bool	CPropertyHistory::packDelta(TClientId clientId, CActionPosition &action, bool allowPack)
 {
-	nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
+    nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
 
-	if (action.isDelta())
-	{
-		return true;
-	}
+    if (action.isDelta())
+    {
+        return true;
+    }
 
-	// search if entity is already used
-	CEntityEntry		&entity = _ClientEntries[clientId].Entities[action.CLEntityId];
-	nlassert(entity.Used);
+    // search if entity is already used
+    CEntityEntry		&entity = _ClientEntries[clientId].Entities[action.CLEntityId];
+    nlassert(entity.Used);
 
-	CPropertyEntry		&ex = entity.Properties[PROPERTY_POSX];
+    CPropertyEntry		&ex = entity.Properties[PROPERTY_POSX];
 
-	if (ex.AllowDelta > 0 && allowPack)
-	{
-		if (--ex.AllowDelta > 0)
-		{
-			action.packDelta(entity.Properties[PROPERTY_POSX].Garanted,
-							 entity.Properties[PROPERTY_POSY].Garanted,
-							 entity.Properties[PROPERTY_POSZ].Garanted);
-			return true;
-		}
-		else
-		{
-			// disable next incoming garanted packets
-			// until we send a garanted packet
-			ex.Packet = 0xFFFFFFFF;
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
+    if (ex.AllowDelta > 0 && allowPack)
+    {
+        if (--ex.AllowDelta > 0)
+        {
+            action.packDelta(entity.Properties[PROPERTY_POSX].Garanted,
+                             entity.Properties[PROPERTY_POSY].Garanted,
+                             entity.Properties[PROPERTY_POSZ].Garanted);
+            return true;
+        }
+        else
+        {
+            // disable next incoming garanted packets
+            // until we send a garanted packet
+            ex.Packet = 0xFFFFFFFF;
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
 }
 */
 //
 
 //
 
-
 //
 
-void	CPropertyHistory::ackProperty(TClientId clientId, TCLEntityId entityId, uint32 packet, TPropIndex propId)
+void CPropertyHistory::ackProperty(TClientId clientId, TCLEntityId entityId, uint32 packet, TPropIndex propId)
 {
-	//nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
-/*
-	if (!isContinuousProperty(propId))
-		return;
+	// nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
+	/*
+	    if (!isContinuousProperty(propId))
+	        return;
 
-	CEntityEntry		&entity = _ClientEntries[clientId].Entities[entityId];
+	    CEntityEntry		&entity = _ClientEntries[clientId].Entities[entityId];
 
-	// search if entity exists already
-	if (!entity.Used)
-		return;
+	    // search if entity exists already
+	    if (!entity.Used)
+	        return;
 
-	CPropertyEntry		&entry = entity.Properties[propId];
+	    CPropertyEntry		&entry = entity.Properties[propId];
 
-	// assume all previous packet have been ack'ed (ack- or ack+)
-	if (packet == entry.Packet)
-	{
-		if (entry.AllowDelta == 0)
-			entry.AllowDelta = _MaxDeltaSend;
+	    // assume all previous packet have been ack'ed (ack- or ack+)
+	    if (packet == entry.Packet)
+	    {
+	        if (entry.AllowDelta == 0)
+	            entry.AllowDelta = _MaxDeltaSend;
 
-		if (propId == PROPERTY_POSITION)
-		{
-			entity.garantyPosition();
-		}
-		else
-		{
-			entry.Garanted = entry.ToGaranty;
-		}
+	        if (propId == PROPERTY_POSITION)
+	        {
+	            entity.garantyPosition();
+	        }
+	        else
+	        {
+	            entry.Garanted = entry.ToGaranty;
+	        }
 
-		entry.Packet = 0xFFFFFFFF;
-//		nldebug("FECONTH: Ack Garanted CL=%d CEId=%d Pk=%d (%.2f,%.2f)", clientId, entityId, packet, entry.Garanted.Float);
-	}
-*/
+	        entry.Packet = 0xFFFFFFFF;
+	//		nldebug("FECONTH: Ack Garanted CL=%d CEId=%d Pk=%d (%.2f,%.2f)", clientId, entityId, packet, entry.Garanted.Float);
+	    }
+	*/
 }
 
-void	CPropertyHistory::negAckProperty(TClientId clientId, TCLEntityId entityId, uint32 packet, TPropIndex propId)
+void CPropertyHistory::negAckProperty(TClientId clientId, TCLEntityId entityId, uint32 packet, TPropIndex propId)
 {
-/*
-	nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
+	/*
+	    nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
 
-	CEntityEntry		&entity = _ClientEntries[clientId].Entities[entityId];
+	    CEntityEntry		&entity = _ClientEntries[clientId].Entities[entityId];
 
-	// search if entity exists already
-	if (!entity.Used)
-		return;
+	    // search if entity exists already
+	    if (!entity.Used)
+	        return;
 
-	CPropertyEntry		&entry = entity.Properties[propId];
+	    CPropertyEntry		&entry = entity.Properties[propId];
 
-	if (packet == entry.Packet)
-	{
-		entry.Packet = 0xFFFFFFFF;
-//		nldebug("FECONTH: negAcked CL=%d CEId=%d Pk=%d", entityId, propId, packet);
-	}
-*/
+	    if (packet == entry.Packet)
+	    {
+	        entry.Packet = 0xFFFFFFFF;
+	//		nldebug("FECONTH: negAcked CL=%d CEId=%d Pk=%d", entityId, propId, packet);
+	    }
+	*/
 }
 
-
-void	CPropertyHistory::ackProperties(TClientId clientId, TCLEntityId entityId, uint32 packet, const vector<TPropIndex> &ids)
+void CPropertyHistory::ackProperties(TClientId clientId, TCLEntityId entityId, uint32 packet, const vector<TPropIndex> &ids)
 {
-/*
-	nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
+	/*
+	    nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
 
-	CEntityEntry	&entity = _ClientEntries[clientId].Entities[entityId];
+	    CEntityEntry	&entity = _ClientEntries[clientId].Entities[entityId];
 
-	// search if entity exists already
-	nlassert(entity.Used);
+	    // search if entity exists already
+	    nlassert(entity.Used);
 
-	uint	i;
-	for (i=0; i<ids.size(); ++i)
-	{
-		TPropIndex	id = ids[i];
-		if (!isContinuousProperty(id))
-			continue;
+	    uint	i;
+	    for (i=0; i<ids.size(); ++i)
+	    {
+	        TPropIndex	id = ids[i];
+	        if (!isContinuousProperty(id))
+	            continue;
 
-		if (packet == entity.Properties[id].Packet)
-		{
-			entity.Properties[id].Garanted = entity.Properties[id].ToGaranty;
-			entity.Properties[id].Packet = 0xFFFFFFFF;
-		}
-	}
-*/
+	        if (packet == entity.Properties[id].Packet)
+	        {
+	            entity.Properties[id].Garanted = entity.Properties[id].ToGaranty;
+	            entity.Properties[id].Packet = 0xFFFFFFFF;
+	        }
+	    }
+	*/
 }
 
 //
@@ -297,14 +292,13 @@ void	CPropertyHistory::ackProperties(TClientId clientId, TCLEntityId entityId, u
 /*
 void	CPropertyHistory::setPropertyConversion(uint32 property, sint8 conversion)
 {
-	_PropertiesTranslation[property] = (conversion >= 0 ? conversion : -1);
+    _PropertiesTranslation[property] = (conversion >= 0 ? conversion : -1);
 }
 
 void	CPropertyHistory::setPropertyConversion(CPropertyTranslation *properties, sint numProperties)
 {
-	sint	i;
-	for (i=0; i<numProperties; ++i)
-		_PropertiesTranslation[properties[i].Property] = (properties[i].Translation >= 0 ? properties[i].Translation : -1);
+    sint	i;
+    for (i=0; i<numProperties; ++i)
+        _PropertiesTranslation[properties[i].Property] = (properties[i].Translation >= 0 ? properties[i].Translation : -1);
 }
 */
-

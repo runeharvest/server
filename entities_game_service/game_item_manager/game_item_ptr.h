@@ -22,7 +22,6 @@
 
 // #define ITEM_DEBUG
 
-
 class CGameItem;
 
 //------------------------------------------------------------------------
@@ -44,14 +43,14 @@ public:
 	~CGameItemPtr();
 
 	// equivalent to: new CGameItem
-	CGameItem *newItem(bool destroyable=true,bool dropable=true);
+	CGameItem *newItem(bool destroyable = true, bool dropable = true);
 
 	// equivalent to: if (this==NULL) {return new CGameItem;} else {return this;}
-	CGameItem *newItemIfNull(bool destroyable=true,bool dropable=true);
+	CGameItem *newItemIfNull(bool destroyable = true, bool dropable = true);
 
 	// equivalent to: new CGameItem(...)
-//	CGameItem *newItem( const NLMISC::CEntityId& id, const NLMISC::CSheetId& sheetId, uint32 recommended, sint16 slotCount, bool destroyable, bool dropable );
-	CGameItem *newItem( const NLMISC::CSheetId& sheetId, uint32 recommended, bool destroyable, bool dropable );
+	//	CGameItem *newItem( const NLMISC::CEntityId& id, const NLMISC::CSheetId& sheetId, uint32 recommended, sint16 slotCount, bool destroyable, bool dropable );
+	CGameItem *newItem(const NLMISC::CSheetId &sheetId, uint32 recommended, bool destroyable, bool dropable);
 
 	// equivalent to: delete (for a CGameItem*)
 	void deleteItem();
@@ -80,7 +79,7 @@ public:
 	uint32 getUniqueIndex() { return m_Idx; }
 
 	// For set and map
-	bool operator < (const CGameItemPtr &other) const;
+	bool operator<(const CGameItemPtr &other) const;
 
 	// operator bool() { return m_Idx; }
 	// bool operator!() { return !m_Idx; }
@@ -93,10 +92,6 @@ private:
 
 	// index into the CGameItem singleton's _Items vector
 	uint32 m_Idx;
-
 };
 
-
-
-
-#endif //GAME_ITEM_PTR_H
+#endif // GAME_ITEM_PTR_H

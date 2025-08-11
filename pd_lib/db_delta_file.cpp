@@ -35,14 +35,13 @@ CDBDeltaFile::~CDBDeltaFile()
 {
 }
 
-
 /*
  * Setup file name and path
  */
-void	CDBDeltaFile::setup(const std::string& name, const std::string& path, uint32 rowSize, const CTimestamp& startTimestamp, const CTimestamp& endTimestamp)
+void CDBDeltaFile::setup(const std::string &name, const std::string &path, uint32 rowSize, const CTimestamp &startTimestamp, const CTimestamp &endTimestamp)
 {
-	uint32		tableId;
-	CTimestamp	timestamp;
+	uint32 tableId;
+	CTimestamp timestamp;
 	nlassert(isDeltaFileName(name, tableId, timestamp));
 
 	_Name = name;
@@ -58,19 +57,17 @@ void	CDBDeltaFile::setup(const std::string& name, const std::string& path, uint3
 /*
  * Setup file name and path
  */
-void	CDBDeltaFile::setup(const std::string& filepath, uint32 rowSize, const CTimestamp& startTimestamp, const CTimestamp& endTimestamp)
+void CDBDeltaFile::setup(const std::string &filepath, uint32 rowSize, const CTimestamp &startTimestamp, const CTimestamp &endTimestamp)
 {
 	setup(CFile::getFilename(filepath), NLMISC::CPath::standardizePath(CFile::getPath(filepath)), rowSize, startTimestamp, endTimestamp);
 }
 
-
-
 /*
  * Write next row modification
  */
-bool	CDBDeltaFile::write(uint32 index, const uint8* rowdata)
+bool CDBDeltaFile::write(uint32 index, const uint8 *rowdata)
 {
-	string	filepath = _Path+_Name;
+	string filepath = _Path + _Name;
 
 	// check file already open
 	if (_File == NULL)
@@ -101,7 +98,7 @@ bool	CDBDeltaFile::write(uint32 index, const uint8* rowdata)
 				return false;
 			}
 		}
-		catch (const Exception& e)
+		catch (const Exception &e)
 		{
 			nlwarning("CDBDeltaFile::write(): failed, cannot write file '%s' header, exception '%s'", filepath.c_str(), e.what());
 			return false;
@@ -109,11 +106,11 @@ bool	CDBDeltaFile::write(uint32 index, const uint8* rowdata)
 	}
 
 	// check row doesn't belong to map yet
-	TIndexMap::iterator	it = _IndexMap.find(index);
+	TIndexMap::iterator it = _IndexMap.find(index);
 	if (it == _IndexMap.end())
 	{
 		// seek to end (should be after last row)
-		uint32	rowSeek = _DataStart + _Header.FullRowSize*(uint32)_IndexMap.size();
+		uint32 rowSeek = _DataStart + _Header.FullRowSize * (uint32)_IndexMap.size();
 
 		// a little check
 		if (fseek(_File, 0, SEEK_END) != 0)
@@ -130,8 +127,8 @@ bool	CDBDeltaFile::write(uint32 index, const uint8* rowdata)
 
 		_IndexMap[index] = rowSeek;
 
-		static uint8	rowHdrBuffer[32];
-		*(uint32*)rowHdrBuffer = index;
+		static uint8 rowHdrBuffer[32];
+		*(uint32 *)rowHdrBuffer = index;
 
 		// write data
 		if (!writeBuffer(rowHdrBuffer, getRowHeaderSize()))
@@ -142,10 +139,10 @@ bool	CDBDeltaFile::write(uint32 index, const uint8* rowdata)
 	}
 	else
 	{
-		uint32	rowSeek = (*it).second;
+		uint32 rowSeek = (*it).second;
 
 		// a little check
-		if (fseek(_File, rowSeek+getRowHeaderSize(), SEEK_SET) != 0)
+		if (fseek(_File, rowSeek + getRowHeaderSize(), SEEK_SET) != 0)
 		{
 			nlwarning("CDBDeltaFile::write(): failed to seek to index '%d' data of file '%s'", index, filepath.c_str());
 			return false;
@@ -165,9 +162,9 @@ bool	CDBDeltaFile::write(uint32 index, const uint8* rowdata)
 /*
  * Read next row modification
  */
-bool	CDBDeltaFile::read(uint32& index, uint8* rowdata)
+bool CDBDeltaFile::read(uint32 &index, uint8 *rowdata)
 {
-	string	filepath = _Path+_Name;
+	string filepath = _Path + _Name;
 
 	if (!preload())
 	{
@@ -175,10 +172,10 @@ bool	CDBDeltaFile::read(uint32& index, uint8* rowdata)
 		return false;
 	}
 
-	static uint8	rowHdrBuffer[32];
+	static uint8 rowHdrBuffer[32];
 
 	// read data
-	uint			readLen;
+	uint readLen;
 	if (!readBuffer(rowHdrBuffer, getRowHeaderSize(), readLen))
 	{
 		// failed to read, check if end of file
@@ -192,7 +189,7 @@ bool	CDBDeltaFile::read(uint32& index, uint8* rowdata)
 		return false;
 	}
 
-	index = *(uint32*)rowHdrBuffer;
+	index = *(uint32 *)rowHdrBuffer;
 
 	// write data
 	if (!readBuffer(rowdata, _Header.RowSize))
@@ -204,18 +201,16 @@ bool	CDBDeltaFile::read(uint32& index, uint8* rowdata)
 	return true;
 }
 
-
-
 /*
  * Preload file
  */
-bool	CDBDeltaFile::preload()
+bool CDBDeltaFile::preload()
 {
 	// check file already open
 	if (_File != NULL)
 		return true;
 
-	string	filepath = _Path+_Name;
+	string filepath = _Path + _Name;
 
 	// not?
 	// check file exists
@@ -243,7 +238,7 @@ bool	CDBDeltaFile::preload()
 			return false;
 		}
 	}
-	catch (const Exception& e)
+	catch (const Exception &e)
 	{
 		nlwarning("CDBDeltaFile::read(): failed, cannot write file '%s' header, exception '%s'", filepath.c_str(), e.what());
 		return false;
@@ -252,20 +247,18 @@ bool	CDBDeltaFile::preload()
 	return true;
 }
 
-
-
 /*
  * Serial file header
  */
-bool	CDBDeltaFile::serialHeader()
+bool CDBDeltaFile::serialHeader()
 {
 	serialCheck(NELID("DbDt"));
-	uint	version = serialVersion(0);
+	uint version = serialVersion(0);
 
 	if (isReading())
 	{
 		// on reading, read header in a temp buffer
-		CDeltaHeader	hdr;
+		CDeltaHeader hdr;
 		serial(hdr);
 
 		// check header complies
@@ -287,14 +280,12 @@ bool	CDBDeltaFile::serialHeader()
 	return true;
 }
 
-
-
 /*
  * Concats a delta file to this one
  */
-bool	CDBDeltaFile::concat(CDBDeltaFile& delta, const CTimestamp& starttime, const CTimestamp& endtime)
+bool CDBDeltaFile::concat(CDBDeltaFile &delta, const CTimestamp &starttime, const CTimestamp &endtime)
 {
-	string	filepath = _Path+_Name;
+	string filepath = _Path + _Name;
 
 	if (!delta.preload())
 	{
@@ -320,8 +311,7 @@ bool	CDBDeltaFile::concat(CDBDeltaFile& delta, const CTimestamp& starttime, cons
 		_Header.StartDeltaId = delta._Header.StartDeltaId;
 		_Header.EndDeltaId = delta._Header.EndDeltaId;
 	}
-	else if (_Header.EndDeltaId == delta._Header.StartDeltaId ||
-			 _Header.EndDeltaId == delta._Header.StartDeltaId-1)
+	else if (_Header.EndDeltaId == delta._Header.StartDeltaId || _Header.EndDeltaId == delta._Header.StartDeltaId - 1)
 	{
 		// update delta id
 		_Header.EndDeltaId = delta._Header.EndDeltaId;
@@ -333,10 +323,10 @@ bool	CDBDeltaFile::concat(CDBDeltaFile& delta, const CTimestamp& starttime, cons
 		return false;
 	}
 
-	vector<uint8>	databuffer(_Header.RowSize);
-	uint8*			data = &(databuffer[0]);
+	vector<uint8> databuffer(_Header.RowSize);
+	uint8 *data = &(databuffer[0]);
 
-	uint32			row;
+	uint32 row;
 
 	// read a row, and write it if read row is valid
 	// loop till there are rows to read

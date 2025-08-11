@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 
 #include "pvp_manager/pvp_challenge.h"
@@ -27,14 +26,12 @@
 #include "pvp_manager/pvp_manager.h"
 #include "pvp_manager/pvp.h"
 
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
 //----------------------------------------------------------------------------
-CPVPChallenge::CPVPChallenge(CCharacter *user1, CCharacter * user2)
+CPVPChallenge::CPVPChallenge(CCharacter *user1, CCharacter *user2)
 {
 	// allocate a PVP island
 	_CellId = CPVPManager::getInstance()->allocatePVPIsland(this);
@@ -42,69 +39,68 @@ CPVPChallenge::CPVPChallenge(CCharacter *user1, CCharacter * user2)
 	addUserTeam(user1);
 	addUserTeam(user2);
 
-	for ( uint i = 0; i < _Teams.size(); i++ )
-		sendChallengeMessage(i, "CHALLENGE_STARTS" , TVectorParamCheck() );
+	for (uint i = 0; i < _Teams.size(); i++)
+		sendChallengeMessage(i, "CHALLENGE_STARTS", TVectorParamCheck());
 }
 
 //----------------------------------------------------------------------------
-PVP_RELATION::TPVPRelation CPVPChallenge::getPVPRelation( CCharacter * user, CEntityBase * target ) const
+PVP_RELATION::TPVPRelation CPVPChallenge::getPVPRelation(CCharacter *user, CEntityBase *target) const
 {
 	nlassert(user);
 	nlassert(target);
-	
-	uint16 teamIdx1,teamIdx2,memberIdx;
-	
+
+	uint16 teamIdx1, teamIdx2, memberIdx;
+
 	// here we should be in the user interface
-	if ( !getMember( user->getEntityRowId(), teamIdx1, memberIdx ) )
+	if (!getMember(user->getEntityRowId(), teamIdx1, memberIdx))
 	{
-		nlwarning("<PVP>user %s is not in its PVP interface", user->getId().toString().c_str() );
+		nlwarning("<PVP>user %s is not in its PVP interface", user->getId().toString().c_str());
 		return PVP_RELATION::Unknown;
 	}
 
 	// check if target and user must are in the same challenge
-	if ( !getMember( target->getEntityRowId(), teamIdx2, memberIdx ) )
+	if (!getMember(target->getEntityRowId(), teamIdx2, memberIdx))
 	{
 		return PVP_RELATION::Neutral;
 	}
-	
+
 	// check if ennemy or ally
-	if ( teamIdx1 != teamIdx2 )
-	{	
+	if (teamIdx1 != teamIdx2)
+	{
 		return PVP_RELATION::Ennemy;
 	}
 	else
-	{	
+	{
 		return PVP_RELATION::Ally;
 	}
 }
-
 
 //----------------------------------------------------------------------------
 void CPVPChallenge::addUserTeam(CCharacter *user)
 {
 	nlassert(user);
-	const CTpSpawnZone * zone = CPVPManager::getInstance()->getChallengeSpawnZone( (uint)_Teams.size() );
+	const CTpSpawnZone *zone = CPVPManager::getInstance()->getChallengeSpawnZone((uint)_Teams.size());
 	nlassert(zone);
-	sint32 x,y,z;
+	sint32 x, y, z;
 	float heading;
-	
+
 	// add the user team
-	CTeam * team = TeamManager.getRealTeam( user->getTeamId() );
+	CTeam *team = TeamManager.getRealTeam(user->getTeamId());
 	CTeamEntry entry;
-	if ( team )
+	if (team)
 	{
 		entry.TeamId = user->getTeamId();
-		for ( list<CEntityId>::const_iterator it = team->getTeamMembers().begin(); it != team->getTeamMembers().end(); ++it )
+		for (list<CEntityId>::const_iterator it = team->getTeamMembers().begin(); it != team->getTeamMembers().end(); ++it)
 		{
-			CCharacter * c = PlayerManager.getChar( *it );
-			if ( c )
+			CCharacter *c = PlayerManager.getChar(*it);
+			if (c)
 			{
 				// actually add the user to the team
-				addUserToTeam( entry,c );
+				addUserToTeam(entry, c);
 				// tp the user
-				zone->getRandomPoint(x,y,z,heading);
+				zone->getRandomPoint(x, y, z, heading);
 				c->forbidNearPetTp();
-				c->tpWanted(x,y,z,true,heading,0xFF,_CellId);
+				c->tpWanted(x, y, z, true, heading, 0xFF, _CellId);
 			}
 		}
 	}
@@ -112,124 +108,121 @@ void CPVPChallenge::addUserTeam(CCharacter *user)
 	{
 		entry.TeamId = CTEAM::InvalidTeamId;
 		// actually add the user to the team
-		addUserToTeam( entry,user );
+		addUserToTeam(entry, user);
 		// tp the user
-		zone->getRandomPoint(x,y,z,heading);
+		zone->getRandomPoint(x, y, z, heading);
 		user->forbidNearPetTp();
-		user->tpWanted(x,y,z,true,heading,0xFF,_CellId);
+		user->tpWanted(x, y, z, true, heading, 0xFF, _CellId);
 	}
 	_Teams.push_back(entry);
 }
 
 //----------------------------------------------------------------------------
-void CPVPChallenge::addUserToTeam( CTeamEntry & entry, CCharacter *user )
+void CPVPChallenge::addUserToTeam(CTeamEntry &entry, CCharacter *user)
 {
 	// backup member properties
 	nlassert(user);
 	entry.Members.push_back(CMember());
 	entry.Members.back().Row = user->getEntityRowId();
-	user->getState().setCOfflineEntityState( entry.Members.back().OldCoords );// what a strange API!!! // AS: what a strange comment, if you not like this API, change it instead write useless comment or shut up ! (and where are your cojones for making critic anonymous comment ?) !
-	//AS: for Noobs:
-	// these lines are equivalents of the 3 previous you have difficult to understand it's seem, more readable for Noob you are:
-	// CMember member;
-	// member.Row = user->getEntityRowId();
-	// COfflineEntityState& offlineEntityState = user->getState();
-	// offlineEntityState.setCOfflineEntityState( member.OldCoord );
-	// entry.Members.push_back( member );
+	user->getState().setCOfflineEntityState(entry.Members.back().OldCoords); // what a strange API!!! // AS: what a strange comment, if you not like this API, change it instead write useless comment or shut up ! (and where are your cojones for making critic anonymous comment ?) !
+	// AS: for Noobs:
+	//  these lines are equivalents of the 3 previous you have difficult to understand it's seem, more readable for Noob you are:
+	//  CMember member;
+	//  member.Row = user->getEntityRowId();
+	//  COfflineEntityState& offlineEntityState = user->getState();
+	//  offlineEntityState.setCOfflineEntityState( member.OldCoord );
+	//  entry.Members.push_back( member );
 	//
-	// So if you found any strange API here, return to read your C/C++ language manual...
-	// if you found setting var by reference as var parameter of function calling instead use a return value and = operator: (ex: COfflineEntityState::setCOfflineEntityState() method in case of you not reconize about what i'm speaking..)
+	//  So if you found any strange API here, return to read your C/C++ language manual...
+	//  if you found setting var by reference as var parameter of function calling instead use a return value and = operator: (ex: COfflineEntityState::setCOfflineEntityState() method in case of you not reconize about what i'm speaking..)
 	//		1: that allow return error code can be used eventually
 	//		2: that is massively used in Nel even with void return value, and you never found that strange before...
 	//		3: think a little before write stupid comments.
-	entry.Members.back().OldCaracs.resize( SCORES::NUM_SCORES );
-	for ( uint i = 0; i < SCORES::NUM_SCORES; ++i )
+	entry.Members.back().OldCaracs.resize(SCORES::NUM_SCORES);
+	for (uint i = 0; i < SCORES::NUM_SCORES; ++i)
 	{
-		CPhysicalScores & scores = user->getScores();
-		nlassert( i < scores._PhysicalScores.size() );
+		CPhysicalScores &scores = user->getScores();
+		nlassert(i < scores._PhysicalScores.size());
 		entry.Members.back().OldCaracs[i] = scores._PhysicalScores[i].Current;
 	}
-//	user->_PropertyDatabase.setProp("USER:IN_PVP_CHALLENGE",true );
-	CBankAccessor_PLR::getUSER().setIN_PVP_CHALLENGE(user->_PropertyDatabase,true );
+	//	user->_PropertyDatabase.setProp("USER:IN_PVP_CHALLENGE",true );
+	CBankAccessor_PLR::getUSER().setIN_PVP_CHALLENGE(user->_PropertyDatabase, true);
 	user->updateTarget();
 	user->getPVPInterface().init(this);
 }
 
 //----------------------------------------------------------------------------
-bool CPVPChallenge::leavePVP( CCharacter * user, IPVP::TEndType type )
+bool CPVPChallenge::leavePVP(CCharacter *user, IPVP::TEndType type)
 {
-	//remettre l'abandon en place pour leader uniquement. Dans ce cas tp tous les gus
+	// remettre l'abandon en place pour leader uniquement. Dans ce cas tp tous les gus
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 
-		
 	nlassert(user);
-	uint16 teamIdx,memberIdx;
-	const CMember* member =getMember(user->getEntityRowId(),teamIdx, memberIdx );
-	if ( !member )
+	uint16 teamIdx, memberIdx;
+	const CMember *member = getMember(user->getEntityRowId(), teamIdx, memberIdx);
+	if (!member)
 	{
-		
+
 		return true;
 	}
-	switch ( type )
+	switch (type)
 	{
-	case IPVP::AbandonChallenge:
+	case IPVP::AbandonChallenge: {
+		params[0].setEIdAIAlias(user->getId(), CAIAliasTranslator::getInstance()->getAIAlias(user->getId()));
+		for (uint i = 0; i < _Teams.size(); i++)
 		{
-			params[0].setEIdAIAlias( user->getId(), CAIAliasTranslator::getInstance()->getAIAlias(user->getId()) );
-			for ( uint i = 0; i < _Teams.size(); i++ )
+			if (i == teamIdx)
 			{
-				if ( i == teamIdx )
-				{
-					sendChallengeMessage( i, "CHALLENGE_YOU_ABANDON",params);
-					sendChallengeMessage( i, "CHALLENGE_LOST");
-				}
-				else
-					sendChallengeMessage( i, "CHALLENGE_HE_ABANDON",params);
+				sendChallengeMessage(i, "CHALLENGE_YOU_ABANDON", params);
+				sendChallengeMessage(i, "CHALLENGE_LOST");
 			}
-
-			const uint size = (uint)_Teams[ teamIdx ].Members.size();
-			for ( uint i = 0; i < size; i++ )
-			{
-				CCharacter * c = PlayerManager.getChar( _Teams[ teamIdx ].Members[i].Row );
-				if ( c )
-				{
-					restoreScores(c,_Teams[ teamIdx ].Members[i]);
-					// copy former coords, as this object will be de delete through smart pointer deallocation
-					COfflineEntityState oldState = member->OldCoords;
-					// reset the PVP interface of the user
-					c->getPVPInterface().reset();
-					// tp the user to the former coords
-//					c->_PropertyDatabase.setProp("USER:IN_PVP_CHALLENGE",false );
-					CBankAccessor_PLR::getUSER().setIN_PVP_CHALLENGE(c->_PropertyDatabase,false );
-					c->updateTarget();
-					// tell team
-					c->forbidNearPetTp();
-					c->tpWanted( member->OldCoords.X, member->OldCoords.Y, member->OldCoords.Z,true,member->OldCoords.Heading);
-				}
-			}
-			_Teams[ teamIdx ].Members.clear();
+			else
+				sendChallengeMessage(i, "CHALLENGE_HE_ABANDON", params);
 		}
-		break;
+
+		const uint size = (uint)_Teams[teamIdx].Members.size();
+		for (uint i = 0; i < size; i++)
+		{
+			CCharacter *c = PlayerManager.getChar(_Teams[teamIdx].Members[i].Row);
+			if (c)
+			{
+				restoreScores(c, _Teams[teamIdx].Members[i]);
+				// copy former coords, as this object will be de delete through smart pointer deallocation
+				COfflineEntityState oldState = member->OldCoords;
+				// reset the PVP interface of the user
+				c->getPVPInterface().reset();
+				// tp the user to the former coords
+				//					c->_PropertyDatabase.setProp("USER:IN_PVP_CHALLENGE",false );
+				CBankAccessor_PLR::getUSER().setIN_PVP_CHALLENGE(c->_PropertyDatabase, false);
+				c->updateTarget();
+				// tell team
+				c->forbidNearPetTp();
+				c->tpWanted(member->OldCoords.X, member->OldCoords.Y, member->OldCoords.Z, true, member->OldCoords.Heading);
+			}
+		}
+		_Teams[teamIdx].Members.clear();
+	}
+	break;
 	case IPVP::Disconnect:
 	case IPVP::Death:
-	case IPVP::QuitTeam:
-		{
-			restoreScores(user, *member );
-			if ( _Teams[teamIdx].Members.size() == 1 )
-				sendChallengeMessage( teamIdx, "CHALLENGE_LOST");
-			// reset the PVP interface of the user
-			user->getPVPInterface().reset();
-			user->forbidNearPetTp();
-			user->tpWanted( member->OldCoords.X, member->OldCoords.Y, member->OldCoords.Z,true,member->OldCoords.Heading);
-			_Teams[teamIdx].Members[memberIdx] = _Teams[teamIdx].Members.back();
-			_Teams[teamIdx].Members.pop_back();
-			break;
-		}
+	case IPVP::QuitTeam: {
+		restoreScores(user, *member);
+		if (_Teams[teamIdx].Members.size() == 1)
+			sendChallengeMessage(teamIdx, "CHALLENGE_LOST");
+		// reset the PVP interface of the user
+		user->getPVPInterface().reset();
+		user->forbidNearPetTp();
+		user->tpWanted(member->OldCoords.X, member->OldCoords.Y, member->OldCoords.Z, true, member->OldCoords.Heading);
+		_Teams[teamIdx].Members[memberIdx] = _Teams[teamIdx].Members.back();
+		_Teams[teamIdx].Members.pop_back();
 		break;
+	}
+	break;
 	case IPVP::Teleport:
-		restoreScores(user, *member );
+		restoreScores(user, *member);
 		// only reset the user interface
-		if ( _Teams[teamIdx].Members.size() == 1 )
-			sendChallengeMessage( teamIdx, "CHALLENGE_LOST");
+		if (_Teams[teamIdx].Members.size() == 1)
+			sendChallengeMessage(teamIdx, "CHALLENGE_LOST");
 		_Teams[teamIdx].Members[memberIdx] = _Teams[teamIdx].Members.back();
 		_Teams[teamIdx].Members.pop_back();
 		user->getPVPInterface().reset();
@@ -237,19 +230,19 @@ bool CPVPChallenge::leavePVP( CCharacter * user, IPVP::TEndType type )
 	default:
 		return true;
 	}
-	
-//	user->_PropertyDatabase.setProp("USER:IN_PVP_CHALLENGE",false );
-	CBankAccessor_PLR::getUSER().setIN_PVP_CHALLENGE(user->_PropertyDatabase,false );
+
+	//	user->_PropertyDatabase.setProp("USER:IN_PVP_CHALLENGE",false );
+	CBankAccessor_PLR::getUSER().setIN_PVP_CHALLENGE(user->_PropertyDatabase, false);
 	user->updateTarget();
-	
+
 	/// check if there remains only 1 team
 	uint lastTeamIdx = ~0;
 	const uint size = (uint)_Teams.size();
-	for ( uint i = 0; i < size; i++ )
+	for (uint i = 0; i < size; i++)
 	{
-		if ( !_Teams[i].Members.empty() )
+		if (!_Teams[i].Members.empty())
 		{
-			if ( lastTeamIdx == ~0 )
+			if (lastTeamIdx == ~0)
 				lastTeamIdx = i;
 			else
 			{
@@ -259,19 +252,19 @@ bool CPVPChallenge::leavePVP( CCharacter * user, IPVP::TEndType type )
 		}
 	}
 
-	if ( lastTeamIdx != ~0 )
+	if (lastTeamIdx != ~0)
 	{
 		CPVPManager::getInstance()->freePVPIsland(_CellId);
-		sendChallengeMessage( lastTeamIdx, "CHALLENGE_WON");
+		sendChallengeMessage(lastTeamIdx, "CHALLENGE_WON");
 		// free the island
-		nlassert( lastTeamIdx < _Teams.size() );
-		const uint size = (uint)_Teams[ lastTeamIdx ].Members.size();
-		for ( uint i = 0; i < size; i++ )
+		nlassert(lastTeamIdx < _Teams.size());
+		const uint size = (uint)_Teams[lastTeamIdx].Members.size();
+		for (uint i = 0; i < size; i++)
 		{
-			CCharacter * c = PlayerManager.getChar( _Teams[ lastTeamIdx ].Members[i].Row );
-			if ( c )
+			CCharacter *c = PlayerManager.getChar(_Teams[lastTeamIdx].Members[i].Row);
+			if (c)
 			{
-				restoreScores( c,_Teams[ lastTeamIdx ].Members[i] );
+				restoreScores(c, _Teams[lastTeamIdx].Members[i]);
 				// copy former coords, as this object will be de delete through smart pointer deallocation
 				COfflineEntityState oldState = member->OldCoords;
 				// tp the user to the former coords
@@ -283,9 +276,9 @@ bool CPVPChallenge::leavePVP( CCharacter * user, IPVP::TEndType type )
 				float heading = member->OldCoords.Heading;
 				c->getPVPInterface().reset();
 				c->forbidNearPetTp();
-				c->tpWanted( x, y, z,true,heading);
-//				c->_PropertyDatabase.setProp("USER:IN_PVP_CHALLENGE",false );
-				CBankAccessor_PLR::getUSER().setIN_PVP_CHALLENGE(c->_PropertyDatabase, false );
+				c->tpWanted(x, y, z, true, heading);
+				//				c->_PropertyDatabase.setProp("USER:IN_PVP_CHALLENGE",false );
+				CBankAccessor_PLR::getUSER().setIN_PVP_CHALLENGE(c->_PropertyDatabase, false);
 				c->updateTarget();
 			}
 		}
@@ -294,56 +287,56 @@ bool CPVPChallenge::leavePVP( CCharacter * user, IPVP::TEndType type )
 }
 
 //----------------------------------------------------------------------------
-bool CPVPChallenge::canUserHurtTarget(CCharacter * user, CEntityBase * target) const
+bool CPVPChallenge::canUserHurtTarget(CCharacter *user, CEntityBase *target) const
 {
 	nlassert(user);
 	nlassert(target);
 
-	uint16 teamIdx1,teamIdx2,memberIdx;
+	uint16 teamIdx1, teamIdx2, memberIdx;
 	// here we should be in the user interface
-	if ( !getMember( user->getEntityRowId(), teamIdx1, memberIdx ) )
+	if (!getMember(user->getEntityRowId(), teamIdx1, memberIdx))
 	{
-		nlwarning("<PVP>user %s is not in its PVP interface", user->getId().toString().c_str() );
+		nlwarning("<PVP>user %s is not in its PVP interface", user->getId().toString().c_str());
 		return false;
 	}
 	// target and user must be in the same challenge
-	if ( !getMember( target->getEntityRowId(), teamIdx2, memberIdx ) )
+	if (!getMember(target->getEntityRowId(), teamIdx2, memberIdx))
 		return false;
 	// target and user must not be in the same team
-	if ( teamIdx1 == teamIdx2 )
+	if (teamIdx1 == teamIdx2)
 		return false;
 	return true;
 }
 
 //----------------------------------------------------------------------------
-bool CPVPChallenge::canUserHelpTarget(CCharacter * user, CEntityBase * target) const
+bool CPVPChallenge::canUserHelpTarget(CCharacter *user, CEntityBase *target) const
 {
 	nlassert(user);
 	nlassert(target);
-	uint16 teamIdx1,teamIdx2,memberIdx;
+	uint16 teamIdx1, teamIdx2, memberIdx;
 	// here we should be in the user interface
-	if ( !getMember( user->getEntityRowId(), teamIdx1, memberIdx ) )
+	if (!getMember(user->getEntityRowId(), teamIdx1, memberIdx))
 	{
-		nlwarning("<PVP>user %s is not in its PVP interface", user->getId().toString().c_str() );
+		nlwarning("<PVP>user %s is not in its PVP interface", user->getId().toString().c_str());
 		return false;
 	}
 	// target and user must be in the same challenge
-	if ( !getMember( target->getEntityRowId(), teamIdx2, memberIdx ) )
+	if (!getMember(target->getEntityRowId(), teamIdx2, memberIdx))
 		return false;
 	// target and user must be in the same team
-	if ( teamIdx1 != teamIdx2 )
+	if (teamIdx1 != teamIdx2)
 		return false;
 	return true;
 }
 
 //----------------------------------------------------------------------------
-bool CPVPChallenge::canApplyAreaEffect(CCharacter * caster, CEntityBase * areaTarget, bool offensive, bool ignoreMainTarget) const
+bool CPVPChallenge::canApplyAreaEffect(CCharacter *caster, CEntityBase *areaTarget, bool offensive, bool ignoreMainTarget) const
 {
 	nlassert(caster);
 	nlassert(areaTarget);
 
 	// Allow hitting bots
-	if ( offensive && areaTarget->getId().getType() != RYZOMID::player )
+	if (offensive && areaTarget->getId().getType() != RYZOMID::player)
 		return true;
 
 	if (offensive)
@@ -353,15 +346,15 @@ bool CPVPChallenge::canApplyAreaEffect(CCharacter * caster, CEntityBase * areaTa
 }
 
 //----------------------------------------------------------------------------
-const CPVPChallenge::CMember * CPVPChallenge::getMember( const TDataSetRow & userRow, uint16& teamIdx, uint16 & memberIdx )const
+const CPVPChallenge::CMember *CPVPChallenge::getMember(const TDataSetRow &userRow, uint16 &teamIdx, uint16 &memberIdx) const
 {
 	const uint size = (uint)_Teams.size();
-	for  ( uint i = 0; i < size ; i++ )
+	for (uint i = 0; i < size; i++)
 	{
 		const uint size2 = (uint)_Teams[i].Members.size();
-		for  ( uint j = 0; j < size2 ; j++ )
+		for (uint j = 0; j < size2; j++)
 		{
-			if ( userRow == _Teams[i].Members[j].Row )
+			if (userRow == _Teams[i].Members[j].Row)
 			{
 				teamIdx = i;
 				memberIdx = j;
@@ -373,39 +366,38 @@ const CPVPChallenge::CMember * CPVPChallenge::getMember( const TDataSetRow & use
 }
 
 //----------------------------------------------------------------------------
-void CPVPChallenge::sendChallengeMessage(uint16 teamIdx, const std::string & msg, const TVectorParamCheck & params)const
+void CPVPChallenge::sendChallengeMessage(uint16 teamIdx, const std::string &msg, const TVectorParamCheck &params) const
 {
-	nlassert( teamIdx < _Teams.size() );
-	if ( _Teams[teamIdx].TeamId != CTEAM::InvalidTeamId )
+	nlassert(teamIdx < _Teams.size());
+	if (_Teams[teamIdx].TeamId != CTEAM::InvalidTeamId)
 	{
-		CTeam * team = TeamManager.getTeam(_Teams[teamIdx].TeamId);
-		if ( !team )
+		CTeam *team = TeamManager.getTeam(_Teams[teamIdx].TeamId);
+		if (!team)
 		{
-			nlwarning("<PVP>team id %u is invamlid",_Teams[teamIdx].TeamId );
+			nlwarning("<PVP>team id %u is invamlid", _Teams[teamIdx].TeamId);
 			return;
 		}
-		team->sendDynamicMessageToMembers(msg,params);
+		team->sendDynamicMessageToMembers(msg, params);
 	}
 	else
 	{
-		if ( !_Teams[teamIdx].Members.empty() )
+		if (!_Teams[teamIdx].Members.empty())
 		{
-			CCharacter::sendDynamicSystemMessage( _Teams[teamIdx].Members[0].Row,msg,params );
+			CCharacter::sendDynamicSystemMessage(_Teams[teamIdx].Members[0].Row, msg, params);
 		}
 	}
 }
 
 //----------------------------------------------------------------------------
-void CPVPChallenge::restoreScores(CCharacter * user, const CMember& member )
+void CPVPChallenge::restoreScores(CCharacter *user, const CMember &member)
 {
 	nlassert(user);
-	for ( uint i = 0; i < SCORES::NUM_SCORES; ++i )
+	for (uint i = 0; i < SCORES::NUM_SCORES; ++i)
 	{
-		CPhysicalScores & scores = user->getScores();
-		nlassert( i < scores._PhysicalScores.size() );
-		nlassert( i < member.OldCaracs.size() );
+		CPhysicalScores &scores = user->getScores();
+		nlassert(i < scores._PhysicalScores.size());
+		nlassert(i < member.OldCaracs.size());
 		user->getScores()._PhysicalScores[i].Current = member.OldCaracs[i];
 	}
 	user->removeAllSpells();
 }
-

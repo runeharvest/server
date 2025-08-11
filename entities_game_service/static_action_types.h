@@ -14,24 +14,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_STATIC_ACTION_TYPES_H
 #define RY_STATIC_ACTION_TYPES_H
 
-
-namespace STATIC_ACT_TYPES
+namespace STATIC_ACT_TYPES {
+enum TStaticActTypes
 {
-	enum TStaticActTypes
-	{
-		Neutral,
-		Casting,
-		Forage,
-		BotChat,
-		Teleport,
-		Mount,
-		Unknown,
-	};
+	Neutral,
+	Casting,
+	Forage,
+	BotChat,
+	Teleport,
+	Mount,
+	Unknown,
+};
 }
 
 #endif // RY_STATIC_ACTION_TYPES_H

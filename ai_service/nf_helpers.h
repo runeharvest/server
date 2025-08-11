@@ -19,26 +19,26 @@
 
 extern AITYPES::CPropertySet readSet(std::string strings, std::string separator = "|");
 
-extern AIVM::IScriptContext* spawnNewGroup(CStateInstance* entity, AIVM::CScriptStack& stack, CAIInstance* aiInstance, CAIVector const& spawnPosition, sint32 baseLevel, double dispersionRadius);
-extern void getZoneWithFlags_helper(CStateInstance* entity, AIVM::CScriptStack& stack, CAIInstance* const aiInstance, CZoneScorer const& scorer);
+extern AIVM::IScriptContext *spawnNewGroup(CStateInstance *entity, AIVM::CScriptStack &stack, CAIInstance *aiInstance, CAIVector const &spawnPosition, sint32 baseLevel, double dispersionRadius);
+extern void getZoneWithFlags_helper(CStateInstance *entity, AIVM::CScriptStack &stack, CAIInstance *const aiInstance, CZoneScorer const &scorer);
 
 //----------------------------------------------------------------------------
 class CZoneScorerMandatoryAndOneOfPlusExcept
-: public CZoneScorer
+    : public CZoneScorer
 {
 public:
-	CZoneScorerMandatoryAndOneOfPlusExcept(AITYPES::CPropertySet const& oneOfSet, AITYPES::CPropertySet const& mandatorySet, AITYPES::CPropertySet const& exceptSet, CNpcZone const* zone)
-		: CZoneScorer()
-		, _oneOfSet(oneOfSet)
-		, _mandatorySet(mandatorySet)
-		, _exceptSet(exceptSet)
-		, _zone(zone)
+	CZoneScorerMandatoryAndOneOfPlusExcept(AITYPES::CPropertySet const &oneOfSet, AITYPES::CPropertySet const &mandatorySet, AITYPES::CPropertySet const &exceptSet, CNpcZone const *zone)
+	    : CZoneScorer()
+	    , _oneOfSet(oneOfSet)
+	    , _mandatorySet(mandatorySet)
+	    , _exceptSet(exceptSet)
+	    , _zone(zone)
 	{
 	}
-	
-	float getScore(CNpcZone const& zone) const
+
+	float getScore(CNpcZone const &zone) const
 	{
-		if (&zone==_zone)
+		if (&zone == _zone)
 			return -1.f;
 		if (!zone.properties().containsPartOfNotStrict(_oneOfSet))
 			return -1.f;
@@ -48,60 +48,62 @@ public:
 			return -1.f;
 		return zone.getFreeAreaScore();
 	}
+
 private:
-	AITYPES::CPropertySet	_oneOfSet;
-	AITYPES::CPropertySet	_mandatorySet;
-	AITYPES::CPropertySet	_exceptSet;
-	CNpcZone const*			_zone;
+	AITYPES::CPropertySet _oneOfSet;
+	AITYPES::CPropertySet _mandatorySet;
+	AITYPES::CPropertySet _exceptSet;
+	CNpcZone const *_zone;
 };
 
 class CZoneScorerMandatoryAndOneOfAndDist
-: public CZoneScorer
+    : public CZoneScorer
 {
 public:
-	CZoneScorerMandatoryAndOneOfAndDist(AITYPES::CPropertySet const& oneOfSet, AITYPES::CPropertySet const& mandatorySet, AITYPES::CPropertySet const& exceptSet, CAIVector const& pos)
-		: CZoneScorer()
-		, _oneOfSet(oneOfSet)
-		, _mandatorySet(mandatorySet)
-		, _exceptSet(exceptSet)
-		, _Pos(pos)
+	CZoneScorerMandatoryAndOneOfAndDist(AITYPES::CPropertySet const &oneOfSet, AITYPES::CPropertySet const &mandatorySet, AITYPES::CPropertySet const &exceptSet, CAIVector const &pos)
+	    : CZoneScorer()
+	    , _oneOfSet(oneOfSet)
+	    , _mandatorySet(mandatorySet)
+	    , _exceptSet(exceptSet)
+	    , _Pos(pos)
 	{
 	}
-	
-	float getScore(CNpcZone const& zone) const
+
+	float getScore(CNpcZone const &zone) const
 	{
 		if (!zone.properties().containsPartOfNotStrict(_oneOfSet))
-			return	-1.f;
+			return -1.f;
 		if (!zone.properties().containsAllOf(_mandatorySet))
-			return	-1.f;
+			return -1.f;
 		if (zone.properties().containsPartOfStrict(_exceptSet))
-			return	-1.f;
-		return 1.f/getDist(zone);
+			return -1.f;
+		return 1.f / getDist(zone);
 	}
-	virtual float getParam(CNpcZone	const& zone) const { return getDist(zone); };
+	virtual float getParam(CNpcZone const &zone) const { return getDist(zone); };
+
 private:
-	float getDist(CNpcZone const& zone) const
+	float getDist(CNpcZone const &zone) const
 	{
-		return (float)zone.midPos().quickDistTo(_Pos)+0.0001f;
+		return (float)zone.midPos().quickDistTo(_Pos) + 0.0001f;
 	}
-	AITYPES::CPropertySet	_oneOfSet;
-	AITYPES::CPropertySet	_mandatorySet;
-	AITYPES::CPropertySet	_exceptSet;
-	CAIVector				_Pos;
+	AITYPES::CPropertySet _oneOfSet;
+	AITYPES::CPropertySet _mandatorySet;
+	AITYPES::CPropertySet _exceptSet;
+	CAIVector _Pos;
 };
 
 class CZoneScorerMandatoryAndOneOfAndDistAndSpace
-: public CZoneScorerMandatoryAndOneOfAndDist
+    : public CZoneScorerMandatoryAndOneOfAndDist
 {
 public:
-	CZoneScorerMandatoryAndOneOfAndDistAndSpace(AITYPES::CPropertySet const& oneOfSet, AITYPES::CPropertySet const& mandatorySet, AITYPES::CPropertySet const& exceptSet, CAIVector const& pos)
-	: CZoneScorerMandatoryAndOneOfAndDist(oneOfSet, mandatorySet, exceptSet, pos)
+	CZoneScorerMandatoryAndOneOfAndDistAndSpace(AITYPES::CPropertySet const &oneOfSet, AITYPES::CPropertySet const &mandatorySet, AITYPES::CPropertySet const &exceptSet, CAIVector const &pos)
+	    : CZoneScorerMandatoryAndOneOfAndDist(oneOfSet, mandatorySet, exceptSet, pos)
 	{
 	}
-	
-	float getScore(CNpcZone const& zone) const
+
+	float getScore(CNpcZone const &zone) const
 	{
-		return (float)(zone.getFreeAreaScore()*CZoneScorerMandatoryAndOneOfAndDist::getScore(zone));
+		return (float)(zone.getFreeAreaScore() * CZoneScorerMandatoryAndOneOfAndDist::getScore(zone));
 	}
 };
 
@@ -117,29 +119,29 @@ public:
 	virtual void doOnCellZone(CCellZone *cz) const = 0;
 };
 
-extern bool doOnFamily(std::vector<std::string> const& args, CDoOnFamily* fam);
+extern bool doOnFamily(std::vector<std::string> const &args, CDoOnFamily *fam);
 
 //----------------------------------------------------------------------------
 class CDoOnFamilyCopyDynEnergy
-:public	CDoOnFamily
+    : public CDoOnFamily
 {
 public:
 	CDoOnFamilyCopyDynEnergy(size_t indexSrc, size_t indexDest)
 	{
 		_IndexSrc = indexSrc;
 		_IndexDest = indexDest;
-		if (_IndexSrc>3 || _IndexDest>3)
+		if (_IndexSrc > 3 || _IndexDest > 3)
 			nlwarning("CDoOnFamilyCopyDynEnergy: index out of bounds (0-3)");
-		nlassert(_IndexSrc<4 && _IndexDest<4);
+		nlassert(_IndexSrc < 4 && _IndexDest < 4);
 	}
-	
-	void doOnFamily(CFamilyBehavior* fb) const
+
+	void doOnFamily(CFamilyBehavior *fb) const
 	{
 		float value = fb->getModifier((uint32)_IndexSrc);
 		fb->setModifier(value, (uint32)_IndexDest);
 	}
-	void doOnCellZone(CCellZone* cz) const { }
-	
+	void doOnCellZone(CCellZone *cz) const { }
+
 private:
 	size_t _IndexSrc;
 	size_t _IndexDest;
@@ -147,30 +149,30 @@ private:
 
 //----------------------------------------------------------------------------
 class CDoOnFamilySetDynEnergy
-:public	CDoOnFamily
+    : public CDoOnFamily
 {
 public:
-	CDoOnFamilySetDynEnergy	(size_t index, float value)
+	CDoOnFamilySetDynEnergy(size_t index, float value)
 	{
-		_index=index;
-		_value=value;
+		_index = index;
+		_value = value;
 	}
-	
-	void	doOnFamily(CFamilyBehavior	*fb)	const
+
+	void doOnFamily(CFamilyBehavior *fb) const
 	{
-		if	(_value==-1)	//	not for affectation.
+		if (_value == -1) //	not for affectation.
 			return;
-		
-		if	(_index==std::numeric_limits<size_t>::max())	//	all indexs ?
+
+		if (_index == std::numeric_limits<size_t>::max()) //	all indexs ?
 		{
-			for	(uint32 nrjIndex=0;nrjIndex<4;nrjIndex++)
-				fb->setModifier	(_value, nrjIndex);
+			for (uint32 nrjIndex = 0; nrjIndex < 4; nrjIndex++)
+				fb->setModifier(_value, nrjIndex);
 			return;
 		}
-		fb->setModifier	(_value, (uint32)_index);
+		fb->setModifier(_value, (uint32)_index);
 	}
 	void doOnCellZone(CCellZone *cz) const { }
-	
+
 private:
 	size_t _index;
 	float _value;

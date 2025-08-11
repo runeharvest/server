@@ -22,15 +22,15 @@
 NL_INSTANCE_COUNTER_IMPL(CGuildOfficerModule);
 
 //----------------------------------------------------------------------------
-bool CGuildOfficerModule::canAffectGrade(EGSPD::CGuildGrade::TGuildGrade grade)const
+bool CGuildOfficerModule::canAffectGrade(EGSPD::CGuildGrade::TGuildGrade grade) const
 {
-	return ( grade == EGSPD::CGuildGrade::Member );
+	return (grade == EGSPD::CGuildGrade::Member);
 }
 
 //----------------------------------------------------------------------------
-bool CGuildOfficerModule::canInvite()const
+bool CGuildOfficerModule::canInvite() const
 {
-	CGuild * guild = MODULE_CAST<CGuild*>( _GuildMemberCore->getGuild() );
-	MODULE_AST( guild );
+	CGuild *guild = MODULE_CAST<CGuild *>(_GuildMemberCore->getGuild());
+	MODULE_AST(guild);
 	return !(guild->isProxy());
 }

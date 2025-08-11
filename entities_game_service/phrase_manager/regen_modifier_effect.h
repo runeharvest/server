@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_REGEN_MODIFIER_EFFECT_H
 #define RY_REGEN_MODIFIER_EFFECT_H
 
@@ -23,7 +21,6 @@
 #include "game_share/scores.h"
 //
 #include "phrase_manager/s_effect.h"
-
 
 /**
  * Effect class for simple effects
@@ -37,24 +34,24 @@ public:
 	NLMISC_DECLARE_CLASS(CRegenModifierEffect)
 
 	///\ctor
-	CRegenModifierEffect(	const TDataSetRow & creatorRowId,
-							const TDataSetRow & targetRowId,
-							EFFECT_FAMILIES::TEffectFamily family,
-							uint32 endDate,
-							uint8 power,
-							float factor,
-							SCORES::TScores score)
-		:CSTimedEffect(creatorRowId, targetRowId, family, false, 0, power, endDate),
-		_AffectedScore(score),
-		_DebuffFactor(factor),
-		_FirstUpdate(true)
+	CRegenModifierEffect(const TDataSetRow &creatorRowId,
+	    const TDataSetRow &targetRowId,
+	    EFFECT_FAMILIES::TEffectFamily family,
+	    uint32 endDate,
+	    uint8 power,
+	    float factor,
+	    SCORES::TScores score)
+	    : CSTimedEffect(creatorRowId, targetRowId, family, false, 0, power, endDate)
+	    , _AffectedScore(score)
+	    , _DebuffFactor(factor)
+	    , _FirstUpdate(true)
 	{
 	}
 
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent *event, bool applyEffect);
 
 	/// callback called when the effect is actually removed
 	virtual void removed();
@@ -66,24 +63,23 @@ public:
 
 private:
 	/// affected score
-	SCORES::TScores			_AffectedScore;
+	SCORES::TScores _AffectedScore;
 
 	/// debuff factor
-	float					_DebuffFactor;
+	float _DebuffFactor;
 
 	/// "name" of the effect, used for client chat messages
-	std::string				_EffectName;
+	std::string _EffectName;
 
 	/// flag, true if first update
-	bool					_FirstUpdate;
+	bool _FirstUpdate;
 
 	/// the value added to the regen modifier (<0)
-	float					_RegenModifier;
+	float _RegenModifier;
 
 	// private ctor for use in NLMISC class registry
-	CRegenModifierEffect() {}
+	CRegenModifierEffect() { }
 };
-
 
 #endif // RY_REGEN_MODIFIER_EFFECT_H
 

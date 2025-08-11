@@ -20,7 +20,7 @@
 #include "gameplay_module_lib/gameplay_module_lib.h"
 #include "game_share/string_manager_sender.h"
 #include "egs_pd.h"
-//#include "player_manager/character.h"
+// #include "player_manager/character.h"
 
 class CCreature;
 
@@ -36,36 +36,37 @@ public:
 	/// ctor. used to build a proxy from a module ( use IModule::getProxy( CGuildCharProxy ) )
 	CGuildCharProxy();
 	// ctor*. Used to build the proxy from a character
-	CGuildCharProxy( IModuleCore * user );
+	CGuildCharProxy(IModuleCore *user);
 
 	// get a child module of the core of this proxy
-	template <class T> bool getModule( T* & module )
+	template <class T>
+	bool getModule(T *&module)
 	{
-		return _ModuleCore->getModuleParent().getModule( module );
+		return _ModuleCore->getModuleParent().getModule(module);
 	}
-	
+
 	///\name The following methods are self-explanatory : the are just accessors to the module core
 	//@{
-	const EGSPD::TCharacterId & getId();
-	const TDataSetRow & getRowId();
+	const EGSPD::TCharacterId &getId();
+	const TDataSetRow &getRowId();
 	void cancelAFK();
-	CCreature * getInterlocutor();
-	CModuleParent & getModuleParent();
-	void sendSystemMessage( const std::string &  msg, const TVectorParamCheck & params);
-	void sendSystemMessage( const std::string &  msg);
-	void sendDynamicMessageToChatGroup( const std::string &  msg, CChatGroup::TGroupType type, const TVectorParamCheck & params  =  TVectorParamCheck() );
+	CCreature *getInterlocutor();
+	CModuleParent &getModuleParent();
+	void sendSystemMessage(const std::string &msg, const TVectorParamCheck &params);
+	void sendSystemMessage(const std::string &msg);
+	void sendDynamicMessageToChatGroup(const std::string &msg, CChatGroup::TGroupType type, const TVectorParamCheck &params = TVectorParamCheck());
 	uint64 getMoney();
 	void spendMoney(uint64 money);
 	bool isTrialPlayer();
 	void endBotChat();
-	bool getTarget(CGuildCharProxy & proxy);
-	void setGuildId(uint32 guildId );
+	bool getTarget(CGuildCharProxy &proxy);
+	void setGuildId(uint32 guildId);
 	uint32 getGuildId();
 	void updateTarget();
 	uint16 getMainPlace();
 	void updateTargetingChars();
-	const TDataSetRow & getEntityRowId();
-	void tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading = false, float heading = 0.0f , uint8 continent = 0xFF, sint32 cell = 0);
+	const TDataSetRow &getEntityRowId();
+	void tpWanted(sint32 x, sint32 y, sint32 z, bool useHeading = false, float heading = 0.0f, uint8 continent = 0xFF, sint32 cell = 0);
 	void updateOutpostAdminFlagInDB();
 	//@}
 };

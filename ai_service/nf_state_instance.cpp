@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include	"stdpch.h"
+#include "stdpch.h"
 
 #include "script_compiler.h"
 
@@ -36,7 +36,6 @@ using namespace AICOMP;
 using namespace AITYPES;
 using namespace RYAI_MAP_CRUNCH;
 
-
 //----------------------------------------------------------------------------
 /** @page code
 
@@ -52,33 +51,31 @@ Arguments: f(EventId) ->
 
 */
 // CStateInstance
-void setEvent_f_(CStateInstance* entity, CScriptStack& stack)
+void setEvent_f_(CStateInstance *entity, CScriptStack &stack)
 {
 	size_t const eventIndex = (size_t)(float)stack.top();
 	stack.pop();
-	
+
 	if (!entity)
 	{
 		nlwarning("sendEvent failed");
 		return;
 	}
-	
-	nlassert(eventIndex<10);
 
+	nlassert(eventIndex < 10);
 
 	if (IsRingShard.get())
 	{
-		if ( entity->isUserEventBlocked( (uint32)eventIndex)	) { return; } // Do not allow uservent recursion on ring shard
+		if (entity->isUserEventBlocked((uint32)eventIndex)) { return; } // Do not allow uservent recursion on ring shard
 		entity->blockUserEvent((uint32)eventIndex);
-	}	
-	
+	}
+
 	entity->processStateEvent(entity->getPersistentStateInstance()->getEventContainer().EventUserEvent[eventIndex]);
 
 	if (IsRingShard.get())
 	{
 		entity->unblockUserEvent((uint32)eventIndex);
 	}
-
 }
 
 //----------------------------------------------------------------------------
@@ -97,27 +94,27 @@ Arguments: f(DeltaTime), f(TimerId) ->
 
 */
 // CStateInstance
-void setTimer_ff_(CStateInstance* si, CScriptStack& stack)
+void setTimer_ff_(CStateInstance *si, CScriptStack &stack)
 {
 	size_t const timerId = (int)(float)stack.top();
 	stack.pop();
 	size_t const deltaTime = (int)(float)stack.top();
 	stack.pop();
-	
+
 	if (!si)
 	{
 		nlwarning("setTimer failed");
 		return;
 	}
-	
-	if (timerId<0 || timerId>3)
+
+	if (timerId < 0 || timerId > 3)
 	{
 		string errStr("critical, native function setTimer used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
 		nlwarning(errStr.c_str());
 		nlassert(false);
 	}
-	
+
 	si->timerUser((uint)timerId).set((uint32)deltaTime);
 }
 
@@ -138,7 +135,7 @@ Arguments: f(TimerId), f(Hour), f(Minute) ->
 
 */
 // CStateInstance
-void timerSetRyzomDaytime_fff_(CStateInstance* si, CScriptStack& stack)
+void timerSetRyzomDaytime_fff_(CStateInstance *si, CScriptStack &stack)
 {
 
 	float const minute = (float)stack.top();
@@ -149,14 +146,13 @@ void timerSetRyzomDaytime_fff_(CStateInstance* si, CScriptStack& stack)
 
 	size_t const timerId = (int)(float)stack.top();
 	stack.pop();
-	
-	if ( !(0 <= minute && minute <=59 && 0 <= hour && hour <= 23) )
+
+	if (!(0 <= minute && minute <= 59 && 0 <= hour && hour <= 23))
 	{
 		return;
 	}
 
-	float datime = hour + (minute * 100.f)/(60.f*100.f);
-	
+	float datime = hour + (minute * 100.f) / (60.f * 100.f);
 
 	float currentTime = CTimeInterface::getRyzomTime().getRyzomTime();
 	if (datime < currentTime)
@@ -168,22 +164,21 @@ void timerSetRyzomDaytime_fff_(CStateInstance* si, CScriptStack& stack)
 	// convert to ticks
 	uint32 timeTicks = uint32(deltaTime * RYZOM_HOURS_IN_TICKS);
 
-
 	if (!si)
 	{
 		nlwarning("timerSetRyzomDaytime failed");
 		return;
 	}
-	
-	if (timerId<0 || timerId>3)
+
+	if (timerId < 0 || timerId > 3)
 	{
 		string errStr("critical, native function timerSetRyzomDaytime used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
 		nlwarning(errStr.c_str());
 		return;
 	}
-	
-	si->timerUser((uint)timerId).set((uint32)timeTicks);		
+
+	si->timerUser((uint)timerId).set((uint32)timeTicks);
 }
 
 //----------------------------------------------------------------------------
@@ -202,26 +197,25 @@ Arguments: f(TimerId) -> f(IsEnabled)
 
 */
 // CStateInstance
-void timerIsEnabled_f_f(CStateInstance* si, CScriptStack& stack)
+void timerIsEnabled_f_f(CStateInstance *si, CScriptStack &stack)
 {
 	size_t const timerId = (int)(float)stack.top();
 	stack.pop();
-	
-	
+
 	if (!si)
 	{
 		nlwarning("timerIsEnabled failed");
 		return;
 	}
-	
-	if (timerId<0 || timerId>3)
+
+	if (timerId < 0 || timerId > 3)
 	{
 		string errStr("critical, native function timerIsEnabled used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
 		nlwarning(errStr.c_str());
 		return;
 	}
-	
+
 	float isEnabled = si->timerUser((uint)timerId).isEnabled();
 	stack.push(isEnabled);
 }
@@ -242,26 +236,25 @@ Arguments: f(TimerId) -> f(IsSuspended)
 
 */
 // CStateInstance
-void timerIsSuspended_f_f(CStateInstance* si, CScriptStack& stack)
+void timerIsSuspended_f_f(CStateInstance *si, CScriptStack &stack)
 {
 	size_t const timerId = (int)(float)stack.top();
 	stack.pop();
-	
-	
+
 	if (!si)
 	{
 		nlwarning("timerIsSuspended failed");
 		return;
 	}
-	
-	if (timerId<0 || timerId>3)
+
+	if (timerId < 0 || timerId > 3)
 	{
 		string errStr("critical, native function timerIsSuspended used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
 		nlwarning(errStr.c_str());
 		return;
 	}
-	
+
 	float isSuspended = si->timerUser((uint)timerId).isSuspended();
 	stack.push(isSuspended);
 }
@@ -281,26 +274,25 @@ Arguments: f(TimerId) ->
 
 */
 // CStateInstance
-void timerSuspend_f_(CStateInstance* si, CScriptStack& stack)
+void timerSuspend_f_(CStateInstance *si, CScriptStack &stack)
 {
 	size_t const timerId = (int)(float)stack.top();
 	stack.pop();
-	
-	
+
 	if (!si)
 	{
 		nlwarning("timerSuspend failed");
 		return;
 	}
-	
-	if (timerId<0 || timerId>3)
+
+	if (timerId < 0 || timerId > 3)
 	{
 		string errStr("critical, native function timerSuspend used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
 		nlwarning(errStr.c_str());
 		return;
 	}
-	
+
 	si->timerUser((uint)timerId).suspend();
 }
 
@@ -319,26 +311,25 @@ Arguments: f(TimerId) ->
 
 */
 // CStateInstance
-void timerDisable_f_(CStateInstance* si, CScriptStack& stack)
+void timerDisable_f_(CStateInstance *si, CScriptStack &stack)
 {
 	size_t const timerId = (int)(float)stack.top();
 	stack.pop();
-	
-	
+
 	if (!si)
 	{
 		nlwarning("timerDisable failed");
 		return;
 	}
-	
-	if (timerId<0 || timerId>3)
+
+	if (timerId < 0 || timerId > 3)
 	{
 		string errStr("critical, native function timerDisable used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
 		nlwarning(errStr.c_str());
 		return;
 	}
-	
+
 	si->timerUser((uint)timerId).disable();
 }
 
@@ -357,27 +348,26 @@ Arguments: f(TimerId) ->
 
 */
 // CStateInstance
-void timerResume_f_(CStateInstance* si, CScriptStack& stack)
+void timerResume_f_(CStateInstance *si, CScriptStack &stack)
 {
 	size_t const timerId = (int)(float)stack.top();
 	stack.pop();
-	
-	
+
 	if (!si)
 	{
 		nlwarning("timerResume failed");
 		return;
 	}
-	
-	if (timerId<0 || timerId>3)
+
+	if (timerId < 0 || timerId > 3)
 	{
 		string errStr("critical, native function timerResume used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
 		nlwarning(errStr.c_str());
 		return;
 	}
-	
-	si->timerUser((uint)timerId).resume();	
+
+	si->timerUser((uint)timerId).resume();
 }
 
 //----------------------------------------------------------------------------
@@ -397,7 +387,7 @@ Arguments: f(TimerId), f(DeltaTime) ->
 
 */
 // CStateInstance
-void timerAdd_ff_(CStateInstance* si, CScriptStack& stack)
+void timerAdd_ff_(CStateInstance *si, CScriptStack &stack)
 {
 
 	float const dt = (float)stack.top();
@@ -405,21 +395,21 @@ void timerAdd_ff_(CStateInstance* si, CScriptStack& stack)
 
 	size_t const timerId = (int)(float)stack.top();
 	stack.pop();
-	
+
 	if (!si)
 	{
 		nlwarning("timerAdd failed");
 		return;
 	}
-	
-	if (timerId<0 || timerId>3)
+
+	if (timerId < 0 || timerId > 3)
 	{
 		string errStr("critical, native function timerAdd used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
 		nlwarning(errStr.c_str());
 		return;
 	}
-	
+
 	if (dt > 0)
 	{
 		uint32 dt2 = static_cast<uint32>(dt);
@@ -449,18 +439,16 @@ Arguments: f(SessionId), f(ActId)->
 
 */
 // CStateInstance
-void dssStartAct_ff_(CStateInstance* si, CScriptStack& stack)
+void dssStartAct_ff_(CStateInstance *si, CScriptStack &stack)
 {
 
 	float const actId = (float)stack.top();
 	stack.pop();
 
-
-	float const sessionId= (float)stack.top();
+	float const sessionId = (float)stack.top();
 	stack.pop();
 
-	
-	if ( !(0 <= actId && 0 <= sessionId) )
+	if (!(0 <= actId && 0 <= sessionId))
 	{
 		return;
 	}
@@ -484,7 +472,7 @@ Arguments: s(StateName) ->
 
 */
 // CStateInstance
-void postNextState_s_(CStateInstance* si, CScriptStack& stack)
+void postNextState_s_(CStateInstance *si, CScriptStack &stack)
 {
 	string NextStateName = stack.top();
 	stack.pop();
@@ -493,14 +481,14 @@ void postNextState_s_(CStateInstance* si, CScriptStack& stack)
 		nlwarning("postNextState failed!");
 		return;
 	}
-	CAIState* const state = si->getPersistentStateInstance()->getEventContainer().cstStates().getChildByName(NextStateName);
+	CAIState *const state = si->getPersistentStateInstance()->getEventContainer().cstStates().getChildByName(NextStateName);
 	if (!state)
 	{
 		string errStr;
 		if (si->getGroup())
-			errStr="state "+NextStateName+" not found for "+si->getGroup()->getName();
+			errStr = "state " + NextStateName + " not found for " + si->getGroup()->getName();
 		else
-			errStr="state "+NextStateName+" not found for unnamed group";
+			errStr = "state " + NextStateName + " not found for unnamed group";
 		nlwarning(errStr.c_str());
 		return;
 	}
@@ -524,14 +512,14 @@ Arguments: s(libName) ->
 
 */
 // CStateInstance
-void import_s_(CStateInstance* entity, CScriptStack& stack)
+void import_s_(CStateInstance *entity, CScriptStack &stack)
 {
 	string LibName = stack.top();
 	stack.pop();
-	
-	CSmartPtr<const CByteCode> const& codePtr = AIVM::CLibrary::getInstance().getLib(LibName);
-	
-	if (codePtr!=NULL)
+
+	CSmartPtr<const CByteCode> const &codePtr = AIVM::CLibrary::getInstance().getLib(LibName);
+
+	if (codePtr != NULL)
 		entity->interpretCode(NULL, codePtr);
 	else
 		nlwarning("unknown library %s", LibName.c_str());
@@ -554,23 +542,23 @@ Arguments: s(varId),f(value) ->
 
 */
 // CStateInstance
-void setNelVar_sf_(CStateInstance* entity, CScriptStack& stack)
+void setNelVar_sf_(CStateInstance *entity, CScriptStack &stack)
 {
 	float value = (float)stack.top();
 	stack.pop();
 	std::string varId = (std::string)stack.top();
 	stack.pop();
-	
+
 	entity->setNelVar(varId, value);
 }
 
-void setGlobalNelVar_sf_(CStateInstance* entity, CScriptStack& stack)
+void setGlobalNelVar_sf_(CStateInstance *entity, CScriptStack &stack)
 {
 	float value = (float)stack.top();
 	stack.pop();
 	std::string varId = (std::string)stack.top();
 	stack.pop();
-	
+
 	CStateInstance::setGlobalNelVar(varId, value);
 }
 
@@ -591,10 +579,10 @@ Arguments: s(varId) -> f(value)
 
 */
 // CStateInstance
-void getNelVar_s_f(CStateInstance* entity, CScriptStack& stack)
+void getNelVar_s_f(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string varId = (std::string)stack.top();
-	
+
 	stack.top() = entity->getNelVar(varId);
 }
 
@@ -615,7 +603,7 @@ Arguments: s(varId) ->
 
 */
 // CStateInstance
-void delNelVar_sf_(CStateInstance* entity, CScriptStack& stack)
+void delNelVar_sf_(CStateInstance *entity, CScriptStack &stack)
 {
 	stack.pop();
 	std::string varId = (std::string)stack.top();
@@ -640,23 +628,23 @@ Arguments: s(varId),s(value) ->
 
 */
 // CStateInstance
-void setNelVar_ss_(CStateInstance* entity, CScriptStack& stack)
+void setNelVar_ss_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string value = (std::string)stack.top();
 	stack.pop();
 	std::string varId = (std::string)stack.top();
 	stack.pop();
-	
+
 	entity->setStrNelVar(varId, value);
 }
 
-void setGlobalNelVar_ss_(CStateInstance* entity, CScriptStack& stack)
+void setGlobalNelVar_ss_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string value = (std::string)stack.top();
 	stack.pop();
 	std::string varId = (std::string)stack.top();
 	stack.pop();
-	
+
 	CStateInstance::setGlobalNelVar(varId, value);
 }
 
@@ -677,10 +665,10 @@ Arguments: s(varId) -> s(value)
 
 */
 // CStateInstance
-void getNelVar_s_s(CStateInstance* entity, CScriptStack& stack)
+void getNelVar_s_s(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string varId = (std::string)stack.top();
-	
+
 	stack.top() = entity->getStrNelVar(varId);
 }
 
@@ -701,7 +689,7 @@ Arguments: s(varId) ->
 
 */
 // CStateInstance
-void delNelVar_ss_(CStateInstance* entity, CScriptStack& stack)
+void delNelVar_ss_(CStateInstance *entity, CScriptStack &stack)
 {
 	stack.pop();
 	std::string varId = (std::string)stack.top();
@@ -724,22 +712,22 @@ Arguments: -> s(StateName)
 
 */
 // CStateInstance
-void getStateName__s(CStateInstance* si, CScriptStack& stack)
+void getStateName__s(CStateInstance *si, CScriptStack &stack)
 {
 	string str;
-	
+
 	breakable
 	{
 		if (!si)
 			break;
-		
-		CAIState const* const curState = si->getState();
+
+		CAIState const *const curState = si->getState();
 		if (!curState)
 			break;
-		
+
 		str = curState->getName();
 	}
-	
+
 	stack.push(str);
 }
 
@@ -749,26 +737,26 @@ void getStateName__s(CStateInstance* si, CScriptStack& stack)
 
 //----------------------------------------------------------------------------
 // CStateInstance
-void loadFile_s_(CStateInstance* entity, CScriptStack& stack)
+void loadFile_s_(CStateInstance *entity, CScriptStack &stack)
 {
 	string fileName = stack.top();
 	stack.pop();
-	
+
 	try
 	{
 		NLMISC::CIFile file(NLMISC::CPath::lookup(fileName));
-		
+
 		vector<string> lines;
 		while (!file.eof())
 		{
-			const size_t bufferSize = 4*1024;
+			const size_t bufferSize = 4 * 1024;
 			char buffer[bufferSize];
 			file.getline(buffer, bufferSize);
 			lines.push_back(buffer);
 		}
 		// Compile the buffer
 		CSmartPtr<const CByteCode> codePtr = CCompiler::getInstance().compileCode(lines, fileName);
-		
+
 		// Interpret the code for the group
 		entity->interpretCode(NULL, codePtr);
 	}
@@ -783,9 +771,9 @@ void loadFile_s_(CStateInstance* entity, CScriptStack& stack)
 std::map<std::string, FScrptNativeFunc> nfGetStateInstanceNativeFunctions()
 {
 	std::map<std::string, FScrptNativeFunc> functions;
-	
+
 #define REGISTER_NATIVE_FUNC(cont, func) cont.insert(std::make_pair(std::string(#func), &func))
-	
+
 	REGISTER_NATIVE_FUNC(functions, setEvent_f_);
 	REGISTER_NATIVE_FUNC(functions, setTimer_ff_);
 	REGISTER_NATIVE_FUNC(functions, timerSetRyzomDaytime_fff_);
@@ -808,8 +796,8 @@ std::map<std::string, FScrptNativeFunc> nfGetStateInstanceNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, setGlobalNelVar_ss_);
 	REGISTER_NATIVE_FUNC(functions, getStateName__s);
 	REGISTER_NATIVE_FUNC(functions, loadFile_s_);
-	
+
 #undef REGISTER_NATIVE_FUNC
-	
+
 	return functions;
 }

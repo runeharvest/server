@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_COMBAT_ACTION_DOT_H
 #define RY_COMBAT_ACTION_DOT_H
-
 
 #include "combat_action.h"
 #include "game_share/effect_families.h"
@@ -36,58 +33,39 @@ public:
 	}
 
 	/// build from an ai action
-	virtual bool initFromAiAction( const CStaticAiAction *aiAction, CCombatPhrase *phrase );
+	virtual bool initFromAiAction(const CStaticAiAction *aiAction, CCombatPhrase *phrase);
 
 	// validate
-	virtual bool validate(CCombatPhrase * phrase, std::string &errorCode) 
-	{ return true; }
+	virtual bool validate(CCombatPhrase *phrase, std::string &errorCode)
+	{
+		return true;
+	}
 
 	// apply
 	virtual void apply(CCombatPhrase *phrase);
 
 	/// apply on entity
-	virtual void applyOnEntity( CEntityBase *entity, float successFactor );
-protected:	
+	virtual void applyOnEntity(CEntityBase *entity, float successFactor);
+
+protected:
 	/// apply combat action effects on target
-	void applyOnTarget( uint8 targetIndex, CCombatPhrase *phrase);
+	void applyOnTarget(uint8 targetIndex, CCombatPhrase *phrase);
 
 protected:
 	/// effect family
 	EFFECT_FAMILIES::TEffectFamily _EffectFamily;
 	/// effect duration
-	NLMISC::TGameCycle		_EffectDuration;
+	NLMISC::TGameCycle _EffectDuration;
 	/// UpdateFrequency
-	NLMISC::TGameCycle		_UpdateFrequency;
+	NLMISC::TGameCycle _UpdateFrequency;
 	/// Affected score
-	SCORES::TScores			_AffectedScore;
+	SCORES::TScores _AffectedScore;
 	/// effect param value
-	sint32					_TotalDamageValue;
+	sint32 _TotalDamageValue;
 	/// damage type
-	DMGTYPE::EDamageType	_DamageType;
+	DMGTYPE::EDamageType _DamageType;
 };
-
 
 #endif // RY_COMBAT_ACTION_DOT_H
 
 /* End of combat_action_dot.h */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

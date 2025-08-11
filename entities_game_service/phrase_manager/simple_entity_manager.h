@@ -14,14 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_SIMPLE_ENTITY_MANAGER_H
 #define NL_SIMPLE_ENTITY_MANAGER_H
 
 #include "nel/misc/vector_2f.h"
 #include "game_share/base_types.h"
-
 
 /**
  *
@@ -30,16 +27,15 @@ template <class T>
 class CSimpleEntityManager
 {
 public:
-
-	typedef std::vector<T*> CSimpleEntityVec;
+	typedef std::vector<T *> CSimpleEntityVec;
 
 	/// Initialization
-	void		init( TDataSetIndex baseRowIndex, TDataSetIndex size );
+	void init(TDataSetIndex baseRowIndex, TDataSetIndex size);
 
 	/// Add an entity object
-	void		addEntity( T *object )
+	void addEntity(T *object)
 	{
-		TDataSetIndex index = rowIdToVecIndex( object->rowId() );
+		TDataSetIndex index = rowIdToVecIndex(object->rowId());
 		if (index < _SimpleEntities.size())
 		{
 			_SimpleEntities[index] = object;
@@ -53,42 +49,41 @@ public:
 	//{ _SimpleEntities.insert( std::make_pair( object->rowId(), object ) ); }
 
 	/// Destroy an entity object
-	void		destroyEntity( const TDataSetRow& entityRowId );
+	void destroyEntity(const TDataSetRow &entityRowId);
 
 	/// Access an entity object
-	T *			getEntity( const TDataSetRow& entityRowId )
+	T *getEntity(const TDataSetRow &entityRowId)
 	{
-		if ( ! TheDataset.isAccessible2(entityRowId) ) // allow unpublished entities
+		if (!TheDataset.isAccessible2(entityRowId)) // allow unpublished entities
 		{
-			nlwarning( "E%u is not anymore in mirror", entityRowId.getIndex() );
+			nlwarning("E%u is not anymore in mirror", entityRowId.getIndex());
 			return NULL;
 		}
 
-		TDataSetIndex index = rowIdToVecIndex( entityRowId );
-		if ( index >= _SimpleEntities.size() )
+		TDataSetIndex index = rowIdToVecIndex(entityRowId);
+		if (index >= _SimpleEntities.size())
 		{
-			nlwarning( "E%u is out of range, vector size is %u", index, _SimpleEntities.size() );
+			nlwarning("E%u is out of range, vector size is %u", index, _SimpleEntities.size());
 			return NULL;
 		}
-		
+
 		return _SimpleEntities[index];
 		/*CSimpleEntityVec::iterator ism = _SimpleEntities.find( entityRowId );
 		if ( ism != _SimpleEntities.end() )
-			return (*ism).second;
+		    return (*ism).second;
 		else
-			return NULL;*/
+		    return NULL;*/
 	}
 
 	/// Return the number of valid entities
-	uint		nbEntities() const { return _NbEntities; }
+	uint nbEntities() const { return _NbEntities; }
 
 	/// Update (call it at every tick)
-	void		tickUpdate();
+	void tickUpdate();
 
 protected:
-
 	///
-	TDataSetIndex		rowIdToVecIndex( const TDataSetRow& rowId )
+	TDataSetIndex rowIdToVecIndex(const TDataSetRow &rowId)
 	{
 		return rowId.getIndex() - _BaseIndex;
 	}
@@ -97,40 +92,37 @@ protected:
 	static CSimpleEntityManager<T> *_Instance;
 
 private:
-	
 	/// Source container
-	CSimpleEntityVec	_SimpleEntities;
+	CSimpleEntityVec _SimpleEntities;
 
 	/// Beginning row index of the entities
-	TDataSetIndex		_BaseIndex;
+	TDataSetIndex _BaseIndex;
 
 	/// Number of valid entities
-	uint				_NbEntities;
+	uint _NbEntities;
 };
-
 
 /*
  *
  */
 template <class T>
-void CSimpleEntityManager<T>::init( TDataSetIndex baseRowIndex, TDataSetIndex size )
+void CSimpleEntityManager<T>::init(TDataSetIndex baseRowIndex, TDataSetIndex size)
 {
-	nlassert( ! _Instance );
+	nlassert(!_Instance);
 	_Instance = this;
 
-	_SimpleEntities.resize( size, NULL );
+	_SimpleEntities.resize(size, NULL);
 	_BaseIndex = baseRowIndex;
 	_NbEntities = 0;
 }
 
-
 /*
  *
  */
 template <class T>
-void CSimpleEntityManager<T>::destroyEntity( const TDataSetRow& entityRowId )
+void CSimpleEntityManager<T>::destroyEntity(const TDataSetRow &entityRowId)
 {
-	TDataSetIndex index = rowIdToVecIndex( entityRowId );
+	TDataSetIndex index = rowIdToVecIndex(entityRowId);
 	if (index >= _SimpleEntities.size())
 	{
 		nlwarning("<CSimpleEntityManager::destroyEntity> entity index %u is out of range, vector size is %u", index, _SimpleEntities.size());
@@ -151,11 +143,10 @@ void CSimpleEntityManager<T>::destroyEntity( const TDataSetRow& entityRowId )
 	/*CHarvestSourceMap::iterator ism = _RunningSources.find( sourceRowId );
 	if ( ism != _RunningSources.end() )
 	{
-		delete (*ism).second;
-		_RunningSources.erase( ism );
+	    delete (*ism).second;
+	    _RunningSources.erase( ism );
 	}*/
 }
-
 
 /*
  * Update (call it at every tick)
@@ -164,13 +155,13 @@ template <class T>
 void CSimpleEntityManager<T>::tickUpdate()
 {
 	// Update sources
-	for ( typename CSimpleEntityVec::iterator isv=_SimpleEntities.begin(); isv!=_SimpleEntities.end(); ++isv )
+	for (typename CSimpleEntityVec::iterator isv = _SimpleEntities.begin(); isv != _SimpleEntities.end(); ++isv)
 	{
 		T *object = (*isv);
-		if ( ! object )
+		if (!object)
 			continue;
 
-		if ( ! object->update() )
+		if (!object->update())
 		{
 			delete object;
 			(*isv) = NULL;
@@ -183,20 +174,19 @@ void CSimpleEntityManager<T>::tickUpdate()
 	// Update sources
 	for ( CHarvestSourceMap::iterator ism=_RunningSources.begin(); ism!=_RunningSources.end(); ++ism )
 	{
-		CHarvestSource *hsource = (*ism).second;
-		if ( ! hsource->update() )
-		{
-			toDestroy.push_back( hsource->rowId() );
-		}
+	    CHarvestSource *hsource = (*ism).second;
+	    if ( ! hsource->update() )
+	    {
+	        toDestroy.push_back( hsource->rowId() );
+	    }
 	}
 
 	// Destroy "dead" sources
 	for ( vector<TDataSetRow>::iterator it=toDestroy.begin(); it!=toDestroy.end(); ++it )
 	{
-		destroySource( *it );
+	    destroySource( *it );
 	}*/
 }
-
 
 #endif // NL_SIMPLE_ENTITY_MANAGER_H
 

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef CHAT_STATS_H
 #define CHAT_STATS_H
 
@@ -26,8 +24,6 @@
 #include <map>
 #include <string>
 
-
- 
 /**
  * CChatStats
  * \author Stephane Coutelas
@@ -36,20 +32,16 @@
  */
 class CChatStats
 {
-public :
-	
+public:
 	/**
 	 * Add an occurence of a string, create entry if this string is new
 	 */
-	void addOccurence( const std::string& str );
+	void addOccurence(const std::string &str);
 
-private :
-
+private:
 	/// occurrences of the strings
-	std::map<std::string,uint32> _Occurences;
-	
+	std::map<std::string, uint32> _Occurences;
 };
-
 
 #endif // CHAT_STATS_H
 

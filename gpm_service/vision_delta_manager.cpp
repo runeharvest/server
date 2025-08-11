@@ -22,33 +22,32 @@
 
 const std::string FrontEndVisionMessageType = std::string("VISIONS_DELTA_2");
 
-
-void CVisionDeltaManager::addVisionDelta(const CPlayerVisionDelta& visionDelta)
+void CVisionDeltaManager::addVisionDelta(const CPlayerVisionDelta &visionDelta)
 {
 	// identify the correct front end for the player in question from the player id in the vision delta
-	NLMISC::CEntityId eid= TheDataset.getEntityId(visionDelta.PlayerIndex);
+	NLMISC::CEntityId eid = TheDataset.getEntityId(visionDelta.PlayerIndex);
 
 	// serialise the result into the message
 	NLNET::TServiceId dynamicId(eid.getDynamicId());
-	if (_FrontEnds.find(dynamicId)==_FrontEnds.end())
+	if (_FrontEnds.find(dynamicId) == _FrontEnds.end())
 	{
 		// if the message didn't exist then intialise it
 		_FrontEnds[dynamicId].setType(FrontEndVisionMessageType);
 	}
-	_FrontEnds[dynamicId].serial(const_cast<CPlayerVisionDelta&>(visionDelta));
+	_FrontEnds[dynamicId].serial(const_cast<CPlayerVisionDelta &>(visionDelta));
 }
 
 void CVisionDeltaManager::update()
 {
 	TFrontEnds::iterator it;
-	for (it=_FrontEnds.begin();it!=_FrontEnds.end();++it)
+	for (it = _FrontEnds.begin(); it != _FrontEnds.end(); ++it)
 	{
 		// extract the message and destination values from the map iterator
-		const NLNET::TServiceId& destination	= it->first;
-		NLNET::CMessage& msg	= it->second;
+		const NLNET::TServiceId &destination = it->first;
+		NLNET::CMessage &msg = it->second;
 
 		// send the message
-		sendMessageViaMirror( destination, msg );
+		sendMessageViaMirror(destination, msg);
 
 		// clear out the message and prepare it for next time
 		msg.clear();

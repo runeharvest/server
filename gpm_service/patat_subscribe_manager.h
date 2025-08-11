@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_PATAT_SUBSCRIBE_MANAGER_H
 #define NL_PATAT_SUBSCRIBE_MANAGER_H
 
@@ -32,9 +30,8 @@
 #include <vector>
 #include <string>
 
-namespace NLPACS
-{
-	class UMoveContainer;
+namespace NLPACS {
+class UMoveContainer;
 };
 
 /**
@@ -49,7 +46,7 @@ namespace NLPACS
  * Once this is done, you can't add more patats (won't be inserted anyway.)
  * Subscription is done by calling subscribe(), and removed by unsubscribe().
  * Call getNewEntryIndex() to update the patats events, and call emitChanges() at each update.
- * 
+ *
  * \author Benjamin Legros
  * \author Nevrax France
  * \date 2002
@@ -57,47 +54,49 @@ namespace NLPACS
 class CPatatSubscribeManager
 {
 public:
-	typedef uint16	TPatatId;
+	typedef uint16 TPatatId;
 
-	typedef std::pair<std::string, TPatatId>	TPatatSubscription;
+	typedef std::pair<std::string, TPatatId> TPatatSubscription;
 
 protected:
-
 	class CPatat;
 	class CSubscriber;
 
 	/// A Map of subscribed patats
-	typedef std::map<sint32, CPatat>		TPatatMap;
+	typedef std::map<sint32, CPatat> TPatatMap;
 
 	/// A Map of subscribers
-	typedef std::map<NLNET::TServiceId, CSubscriber>	TSubscriberMap;
+	typedef std::map<NLNET::TServiceId, CSubscriber> TSubscriberMap;
 
 	/// A Map of id
-	typedef std::map<std::string, sint32>	TTriggerIdMap;
+	typedef std::map<std::string, sint32> TTriggerIdMap;
 
 	/// A patat subscriber
 	class CPatatSubscriber
 	{
 	public:
-		NLNET::TServiceId				Service;
-		TSubscriberMap::iterator		SubscriberIterator;
-		TPatatId						PatatId;
+		NLNET::TServiceId Service;
+		TSubscriberMap::iterator SubscriberIterator;
+		TPatatId PatatId;
 	};
 
 	/// A patat
 	class CPatat
 	{
 	public:
-		CPatat() : Modified(false) {}
-		std::string						Name;
-		sint32							InternalPatatId;
-		std::vector<CPatatSubscriber>	Subscribers;
-		std::vector<NLMISC::CEntityId>	Ins;
-		std::vector<NLMISC::CEntityId>	Outs;
-		std::set<NLMISC::CEntityId>		StillIns;
-		bool							Modified;
+		CPatat()
+		    : Modified(false)
+		{
+		}
+		std::string Name;
+		sint32 InternalPatatId;
+		std::vector<CPatatSubscriber> Subscribers;
+		std::vector<NLMISC::CEntityId> Ins;
+		std::vector<NLMISC::CEntityId> Outs;
+		std::set<NLMISC::CEntityId> StillIns;
+		bool Modified;
 
-		void	serial(NLMISC::IStream &f)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial(Name);
 			f.serial(InternalPatatId);
@@ -105,48 +104,51 @@ protected:
 	};
 
 	/// A list of modified patats
-	typedef std::vector<TPatatMap::iterator>	TModifiedPatats;
+	typedef std::vector<TPatatMap::iterator> TModifiedPatats;
 
 	/// A subscribed patat
 	class CSubscribedPatat
 	{
 	public:
-		sint32							InternalPatatId;
-		TPatatId						PatatId;
-		TPatatMap::iterator				PatatIterator;
+		sint32 InternalPatatId;
+		TPatatId PatatId;
+		TPatatMap::iterator PatatIterator;
 	};
 
 	/// A subscriber
 	class CSubscriber
 	{
 	public:
-		CSubscriber() : OutsMessage("",false), InsMessage("",false) {} // always output messages
+		CSubscriber()
+		    : OutsMessage("", false)
+		    , InsMessage("", false)
+		{
+		} // always output messages
 
-		NLNET::TServiceId				Service;
-		NLNET::CMessage					OutsMessage;
-		uint32							OutsMsgSize;
-		NLNET::CMessage					InsMessage;
-		uint32							InsMsgSize;
-		std::vector<CSubscribedPatat>	Patats;
+		NLNET::TServiceId Service;
+		NLNET::CMessage OutsMessage;
+		uint32 OutsMsgSize;
+		NLNET::CMessage InsMessage;
+		uint32 InsMsgSize;
+		std::vector<CSubscribedPatat> Patats;
 	};
 
 	/// Patat grid
-	CPatatGrid		_PatatGrid;
+	CPatatGrid _PatatGrid;
 
 	/// Subscribed patats
-	TPatatMap		_PatatMap;
+	TPatatMap _PatatMap;
 
 	/// Subscribers
-	TSubscriberMap	_SubscriberMap;
+	TSubscriberMap _SubscriberMap;
 
 	/// Triggers map
-	TTriggerIdMap	_TriggerMap;
+	TTriggerIdMap _TriggerMap;
 
 	/// Modified patats
-	TModifiedPatats	_ModifiedPatats;
+	TModifiedPatats _ModifiedPatats;
 
 public:
-
 	/// Constructor
 	CPatatSubscribeManager();
 
@@ -154,75 +156,71 @@ public:
 	~CPatatSubscribeManager();
 
 	/// Init
-	void	init();
+	void init();
 
 	/// Serial
-	void	serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f);
 
 	/// Use a prim file, patats in file will be processed at build() time.
-	void	usePrim(const std::string &primFile);
+	void usePrim(const std::string &primFile);
 
 	/// Register a pacs trigger id
-	void	usePacsTrigger(sint32 id, const std::string &name);
+	void usePacsTrigger(sint32 id, const std::string &name);
 
 	/// Checks if patat exists
-	bool	exist(const std::string &name) const { return _PatatGrid.exist(name); }
+	bool exist(const std::string &name) const { return _PatatGrid.exist(name); }
 
 	/// Subscribe to a patat
-	void	subscribe(NLNET::TServiceId service, const TPatatSubscription &patat);
+	void subscribe(NLNET::TServiceId service, const TPatatSubscription &patat);
 
 	/// Unsubscribe
-	void	unsubscribe(NLNET::TServiceId service, TPatatId patat);
+	void unsubscribe(NLNET::TServiceId service, TPatatId patat);
 
 	/// Unsubscribe for a whole service
-	void	unsubscribe(NLNET::TServiceId service);
-
+	void unsubscribe(NLNET::TServiceId service);
 
 	/// Get entry index at pos
-	uint32	getEntryIndex(const NLMISC::CVector &pos)	{ return _PatatGrid.getEntryIndex(pos); }
+	uint32 getEntryIndex(const NLMISC::CVector &pos) { return _PatatGrid.getEntryIndex(pos); }
 
 	/// Move entity and get its new patats entry index
-	uint32	getNewEntryIndex(const NLMISC::CEntityId &id, const NLMISC::CVector &pos, uint32 previousEntryIndex);
+	uint32 getNewEntryIndex(const NLMISC::CEntityId &id, const NLMISC::CVector &pos, uint32 previousEntryIndex);
 
 	/// Set entry index
-	void	setNewEntryIndex(const NLMISC::CEntityId &id, uint32 newEntryIndex, uint32 previousEntryIndex);
+	void setNewEntryIndex(const NLMISC::CEntityId &id, uint32 newEntryIndex, uint32 previousEntryIndex);
 
 	/// Process pacs trigger collisions
-	void	processPacsTriggers(NLPACS::UMoveContainer *moveContainer);
+	void processPacsTriggers(NLPACS::UMoveContainer *moveContainer);
 
 	/// Emit changes
-	void	emitChanges();
-
-
-	/// Display info for trigger
-	void	displayTriggers(NLMISC::CLog *log = NLMISC::InfoLog);
+	void emitChanges();
 
 	/// Display info for trigger
-	void	displayTriggerInfo(const std::string &name, NLMISC::CLog *log = NLMISC::InfoLog);
+	void displayTriggers(NLMISC::CLog *log = NLMISC::InfoLog);
 
 	/// Display info for trigger
-	void	displaySubscribers(NLMISC::CLog *log = NLMISC::InfoLog);
+	void displayTriggerInfo(const std::string &name, NLMISC::CLog *log = NLMISC::InfoLog);
 
 	/// Display info for trigger
-	void	displaySubscriberInfo(NLNET::TServiceId service, NLMISC::CLog *log = NLMISC::InfoLog);
+	void displaySubscribers(NLMISC::CLog *log = NLMISC::InfoLog);
+
+	/// Display info for trigger
+	void displaySubscriberInfo(NLNET::TServiceId service, NLMISC::CLog *log = NLMISC::InfoLog);
 
 	/// Display patat grid info
-	void	displayPatatGridInfo(NLMISC::CLog *log = NLMISC::InfoLog)
+	void displayPatatGridInfo(NLMISC::CLog *log = NLMISC::InfoLog)
 	{
 		_PatatGrid.displayInfo(log);
 	}
 
-
 	/// Add CPrimZone class filter
-	void	addPrimZoneFilter(const std::string &filter)	{ _PatatGrid.addPrimZoneFilter(filter); }
+	void addPrimZoneFilter(const std::string &filter) { _PatatGrid.addPrimZoneFilter(filter); }
 
 	/// Remove CPrimZone class filter
-	void	removePrimZoneFilter(const std::string &filter)	{ _PatatGrid.removePrimZoneFilter(filter); }
+	void removePrimZoneFilter(const std::string &filter) { _PatatGrid.removePrimZoneFilter(filter); }
 
 	/// Reset CPrimZone class filter
-	void	resetPrimZoneFilter()							{ _PatatGrid.resetPrimZoneFilter(); }
+	void resetPrimZoneFilter() { _PatatGrid.resetPrimZoneFilter(); }
 };
-
 
 #endif // NL_PATAT_SUBSCRIBE_MANAGER_H
 

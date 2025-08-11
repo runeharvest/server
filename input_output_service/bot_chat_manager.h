@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef BOT_CHAT_MANAGER_H
 #define BOT_CHAT_MANAGER_H
 
-/////////////////////////////////////////// DEPRECATED /////////////////////////////////////////// 
+/////////////////////////////////////////// DEPRECATED ///////////////////////////////////////////
 /*
 // misc
 #include "nel/misc/types_nl.h"
@@ -33,21 +31,23 @@
 #include <map>
 #include <string>
 
- 
+
 /**
  * CBotChatManager
  * \author Vianney Lecroart
  * \author Nevrax France
  * \date 2002
- *//*
-class CBotChatManager 
+ */
+/*
+class CBotChatManager
 {
 public :
 
-	/**
-	 * Init the manager.
-	 *//*
-	void init ();
+ /**
+  * Init the manager.
+  */
+/*
+void init ();
 };
 */
 

@@ -26,7 +26,6 @@
 #include "stats_guild_scan_job.h"
 #include "stat_globals.h"
 
-
 //-----------------------------------------------------------------------------
 // Namespaces
 //-----------------------------------------------------------------------------
@@ -34,94 +33,92 @@
 using namespace std;
 using namespace NLMISC;
 
-
 //-----------------------------------------------------------------------------
 // Globals
 //-----------------------------------------------------------------------------
 
 NLMISC::CSmartPtr<CStatGuildContainer> GuildContainer;
 
-
 //-----------------------------------------------------------------------------
 // Commands - character and account names
 //-----------------------------------------------------------------------------
 
-NLMISC_CATEGORISED_COMMAND(Stats,loadCharacterNames,"load the character_names.txt file for a given shard","[<file name>] [<shard>]")
+NLMISC_CATEGORISED_COMMAND(Stats, loadCharacterNames, "load the character_names.txt file for a given shard", "[<file name>] [<shard>]")
 {
-	CSString shardName= "default";
-	CSString fileName= "character_names.txt";
+	CSString shardName = "default";
+	CSString fileName = "character_names.txt";
 
-	switch(args.size())
+	switch (args.size())
 	{
-	case 2: shardName=args[1];
-	case 1: fileName=args[0];
+	case 2: shardName = args[1];
+	case 1: fileName = args[0];
 	case 0: break;
 	default: return false;
 	}
 
 	CSString fileContent;
 	fileContent.readFromFile(fileName);
-	DROP_IF(fileContent.empty(),"Failed to read character names file: "+fileName,return true);
+	DROP_IF(fileContent.empty(), "Failed to read character names file: " + fileName, return true);
 
 	CVectorSString lines;
 	fileContent.splitLines(lines);
-	for (uint32 i=0;i<lines.size();++i)
+	for (uint32 i = 0; i < lines.size(); ++i)
 	{
 		// ignore blank lines
 		if (lines[i].strip().empty())
 			continue;
 
 		// break line into fields
-		CSString name= lines[i].word(0);
-		uint32 account= lines[i].word(1).atoui();
-		uint32 slot= lines[i].word(2).atoi();
-		DROP_IF(lines[i].countWords()!=3 || account==0 || slot>15,"Skipping bad character name mapping: "+lines[i],continue);
+		CSString name = lines[i].word(0);
+		uint32 account = lines[i].word(1).atoui();
+		uint32 slot = lines[i].word(2).atoi();
+		DROP_IF(lines[i].countWords() != 3 || account == 0 || slot > 15, "Skipping bad character name mapping: " + lines[i], continue);
 
 		// add the new mapping to the character name singleton
-		STAT_GLOBALS::addCharacterNameMapping(shardName,account,slot,name);
+		STAT_GLOBALS::addCharacterNameMapping(shardName, account, slot, name);
 	}
 
 	return true;
 }
 
-NLMISC_CATEGORISED_COMMAND(Stats,loadAccountNames,"load an account_names.txt file","[<file name>]")
+NLMISC_CATEGORISED_COMMAND(Stats, loadAccountNames, "load an account_names.txt file", "[<file name>]")
 {
-	CSString fileName= "account_names.txt";
+	CSString fileName = "account_names.txt";
 
-	switch(args.size())
+	switch (args.size())
 	{
-	case 1: fileName=args[0];
+	case 1: fileName = args[0];
 	case 0: break;
 	default: return false;
 	}
 
 	CSString fileContent;
 	fileContent.readFromFile(fileName);
-	DROP_IF(fileContent.empty(),"Failed to read account names file: "+fileName,return true);
+	DROP_IF(fileContent.empty(), "Failed to read account names file: " + fileName, return true);
 
 	CVectorSString lines;
 	fileContent.splitLines(lines);
-	for (uint32 i=0;i<lines.size();++i)
+	for (uint32 i = 0; i < lines.size(); ++i)
 	{
 		// ignore blank lines
 		if (lines[i].strip().empty())
 			continue;
 
 		// break line into fields
-		CSString name= lines[i].word(0);
-		uint32 account= lines[i].word(1).atoui();
-		DROP_IF(lines[i].countWords()!=2 || account==0,"Skipping bad account name mapping: "+lines[i],continue);
+		CSString name = lines[i].word(0);
+		uint32 account = lines[i].word(1).atoui();
+		DROP_IF(lines[i].countWords() != 2 || account == 0, "Skipping bad account name mapping: " + lines[i], continue);
 
 		// add the new mapping to the character name singleton
-		STAT_GLOBALS::addAccountNameMapping(account,name);
+		STAT_GLOBALS::addAccountNameMapping(account, name);
 	}
 
 	return true;
 }
 
-NLMISC_CATEGORISED_COMMAND(Stats,loadSheetNames,"load a txt file containing sheet names","<file name>")
+NLMISC_CATEGORISED_COMMAND(Stats, loadSheetNames, "load a txt file containing sheet names", "<file name>")
 {
-	if (args.size()!=0)
+	if (args.size() != 0)
 		return false;
 
 	nlwarning("*** todo ***");
@@ -129,9 +126,9 @@ NLMISC_CATEGORISED_COMMAND(Stats,loadSheetNames,"load a txt file containing shee
 	return true;
 }
 
-NLMISC_CATEGORISED_COMMAND(Stats,clearCharacterNames,"load the character_names.txt file for a given shard","[<shard>] <file name>")
+NLMISC_CATEGORISED_COMMAND(Stats, clearCharacterNames, "load the character_names.txt file for a given shard", "[<shard>] <file name>")
 {
-	switch(args.size())
+	switch (args.size())
 	{
 	case 0: STAT_GLOBALS::clearAllCharacterNames(); return true;
 	case 1: STAT_GLOBALS::clearCharacterNames(args[0]); return true;
@@ -139,9 +136,9 @@ NLMISC_CATEGORISED_COMMAND(Stats,clearCharacterNames,"load the character_names.t
 	return false;
 }
 
-NLMISC_CATEGORISED_COMMAND(Stats,clearAccountNames,"load an account_names.txt file","<file name>")
+NLMISC_CATEGORISED_COMMAND(Stats, clearAccountNames, "load an account_names.txt file", "<file name>")
 {
-	if (args.size()!=0)
+	if (args.size() != 0)
 		return false;
 
 	STAT_GLOBALS::clearAccountNames();
@@ -149,9 +146,9 @@ NLMISC_CATEGORISED_COMMAND(Stats,clearAccountNames,"load an account_names.txt fi
 	return true;
 }
 
-NLMISC_CATEGORISED_COMMAND(Stats,clearSheetNames,"load a txt file containing sheet names","<file name>")
+NLMISC_CATEGORISED_COMMAND(Stats, clearSheetNames, "load a txt file containing sheet names", "<file name>")
 {
-	if (args.size()!=0)
+	if (args.size() != 0)
 		return false;
 
 	STAT_GLOBALS::clearSheetNames();
@@ -159,24 +156,23 @@ NLMISC_CATEGORISED_COMMAND(Stats,clearSheetNames,"load a txt file containing she
 	return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // Commands - guild scanner
 //-----------------------------------------------------------------------------
 
-NLMISC_CATEGORISED_COMMAND(Stats,guildScan,"scan a set of guild files","<file specs>[ <file specs>[...]]")
+NLMISC_CATEGORISED_COMMAND(Stats, guildScan, "scan a set of guild files", "<file specs>[ <file specs>[...]]")
 {
 	CNLSmartLogOverride logOverride(&log);
 
-	if (args.size()==0)
+	if (args.size() == 0)
 		return false;
 
 	// create a new job
-	GuildContainer= new CStatGuildContainer;
-	NLMISC::CSmartPtr<CGuildScanJob> theJob= new CGuildScanJob(GuildContainer,STAT_GLOBALS::getOutputFilePath());
+	GuildContainer = new CStatGuildContainer;
+	NLMISC::CSmartPtr<CGuildScanJob> theJob = new CGuildScanJob(GuildContainer, STAT_GLOBALS::getOutputFilePath());
 
 	// setup the file specs for scanning
-	for (uint32 i=0;i<args.size();++i)
+	for (uint32 i = 0; i < args.size(); ++i)
 	{
 		theJob->addFileSpec(args[i]);
 	}
@@ -184,9 +180,7 @@ NLMISC_CATEGORISED_COMMAND(Stats,guildScan,"scan a set of guild files","<file sp
 	// start the job running
 	CJobManager::getInstance()->addJob(&*theJob);
 
-
 	return true;
 }
-
 
 //-----------------------------------------------------------------------------

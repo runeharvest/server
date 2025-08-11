@@ -35,7 +35,7 @@
 
 #include "../pd_lib/pd_utils.h"
 #include "../pd_lib/pd_server_utils.h"
-//#include "../pd_lib/pd_string_manager.h"
+// #include "../pd_lib/pd_string_manager.h"
 #include "../pd_lib/pd_string_mapper.h"
 
 //
@@ -49,9 +49,8 @@ class CTable;
 class CAttribute;
 class CColumn;
 
-namespace RY_PDS
-{
-	class CDbMessageQueue;
+namespace RY_PDS {
+class CDbMessageQueue;
 };
 
 /**
@@ -64,128 +63,110 @@ namespace RY_PDS
 class CDatabase : public CPDSLogger, public ITaskEventListener, public RY_PDS::ITableContainer
 {
 public:
-
 	/**
 	 * Constructor
 	 */
 	CDatabase(uint32 id);
-
 
 	/**
 	 * Destructor
 	 */
 	virtual ~CDatabase();
 
-
 	/**
 	 * Massive Database clear
 	 */
-	void					clear();
-
+	void clear();
 
 	/**
 	 * Init database
 	 */
-	bool					init();
+	bool init();
 
 	/**
 	 * Map to a service
 	 */
-	void					mapToService(NLNET::TServiceId serviceId)	{ _ServiceId = serviceId; }
+	void mapToService(NLNET::TServiceId serviceId) { _ServiceId = serviceId; }
 
 	/**
 	 * Get Mapped Service Id
 	 */
-	NLNET::TServiceId		getMappedService() const		{ return _ServiceId; }
-
+	NLNET::TServiceId getMappedService() const { return _ServiceId; }
 
 	/// Initialized yet?
-	bool					initialised() const			{ return _Init; }
+	bool initialised() const { return _Init; }
 
 	/**
 	 * Adapt database to new description
 	 * \param description is the latest xml description of the database
 	 * \returns a pointer the valid database, or NULL if failed
 	 */
-	CDatabase*				adapt(const std::string& description);
+	CDatabase *adapt(const std::string &description);
 
 	/**
 	 * Initialise internal timestamps
 	 */
-	void					initTimestamps();
-
+	void initTimestamps();
 
 	/**
 	 * Checkup database
 	 */
-	bool					checkup();
-
+	bool checkup();
 
 	/**
 	 * Get Name
 	 */
-	const std::string&		getName() const				{ return _State.Name; }
-
-
+	const std::string &getName() const { return _State.Name; }
 
 	/**
 	 * Get Type
 	 */
-	const CType*			getType(TTypeId typeId) const;
+	const CType *getType(TTypeId typeId) const;
 
 	/**
 	 * Get Type
 	 */
-	const CType*			getType(const std::string &name) const;
-
-
+	const CType *getType(const std::string &name) const;
 
 	/**
 	 * Get Table
 	 */
-	const CTable*			getTable(TTypeId tableId) const;
+	const CTable *getTable(TTypeId tableId) const;
 
 	/**
 	 * Get Table
 	 */
-	const CTable*			getTable(const std::string &name) const;
-
-
+	const CTable *getTable(const std::string &name) const;
 
 	/**
 	 * Get Attribute
 	 */
-	const CAttribute*		getAttribute(uint32 tableId, uint32 attributeId) const;
+	const CAttribute *getAttribute(uint32 tableId, uint32 attributeId) const;
 
 	/**
 	 * Get Column
 	 */
-	const CColumn*			getColumn(uint32 tableId, uint32 columnId) const;
-
-
-
+	const CColumn *getColumn(uint32 tableId, uint32 columnId) const;
 
 	/**
 	 * Get value as a string
 	 * \param path is of the form 'Table[index|key].attrib1.attrib2'
 	 */
-	std::string				getValue(const CLocatePath::TLocatePath &path);
-
-
+	std::string getValue(const CLocatePath::TLocatePath &path);
 
 	/**
 	 * Allocate a row in a table
 	 * \param index is the table/row to allocate
 	 * Return true if succeded
 	 */
-	bool					allocate(const RY_PDS::CObjectIndex &index);
+	bool allocate(const RY_PDS::CObjectIndex &index);
 
 	/**
 	 * Deallocate a row in a table
 	 * \param index is the table/row to deallocate
 	 * Return true if succeded
 	 */
-	bool					deallocate(const RY_PDS::CObjectIndex &index);
+	bool deallocate(const RY_PDS::CObjectIndex &index);
 
 	/**
 	 * Map a row in a table
@@ -193,7 +174,7 @@ public:
 	 * \param key is the 64 bits row key
 	 * Return true if succeded
 	 */
-	bool					mapRow(const RY_PDS::CObjectIndex &index, uint64 key);
+	bool mapRow(const RY_PDS::CObjectIndex &index, uint64 key);
 
 	/**
 	 * Unmap a row in a table
@@ -201,7 +182,7 @@ public:
 	 * \param key is the 64 bits row key
 	 * Return true if succeded
 	 */
-	bool					unmapRow(RY_PDS::TTableIndex tableIndex, uint64 key);
+	bool unmapRow(RY_PDS::TTableIndex tableIndex, uint64 key);
 
 	/**
 	 * Get a mapped row
@@ -209,48 +190,45 @@ public:
 	 * \param key is the 64 bits row key
 	 * Return a valid CObjectIndex if success
 	 */
-	RY_PDS::CObjectIndex	getMappedRow(RY_PDS::TTableIndex tableIndex, uint64 key) const;
+	RY_PDS::CObjectIndex getMappedRow(RY_PDS::TTableIndex tableIndex, uint64 key) const;
 
 	/**
 	 * Search object in database using its key
 	 * \param key is the 64 bits row key to search through all tables
 	 * Return true if key matches at lease one object
 	 */
-	bool					searchObjectIndex(uint64 key, std::set<RY_PDS::CObjectIndex>& indexes) const;
+	bool searchObjectIndex(uint64 key, std::set<RY_PDS::CObjectIndex> &indexes) const;
 
 	/**
 	 * Release a row in a table
 	 * \param index is the table/row to release
 	 * Return true if succeded
 	 */
-	bool					release(const RY_PDS::CObjectIndex &index);
+	bool release(const RY_PDS::CObjectIndex &index);
 
 	/**
 	 * Release all rows in all table
 	 * Typically, the client disconnected, there is no need to keep rows
 	 */
-	bool					releaseAll();
+	bool releaseAll();
 
 	/**
 	 * Tells if an object is allocated
 	 * \param object is the object index to test
 	 */
-	bool					isAllocated(const RY_PDS::CObjectIndex &index) const;
-
-
+	bool isAllocated(const RY_PDS::CObjectIndex &index) const;
 
 	/**
 	 * Set an item in database, located by its table, row and column.
 	 * \param datasize is provided for validation check (1, 2, 4 or 8 bytes)
-	 * \param dataptr points to raw data, which may be 1, 2, 4 or 8 bytes, as indicated by datasize 
+	 * \param dataptr points to raw data, which may be 1, 2, 4 or 8 bytes, as indicated by datasize
 	 */
-	bool					set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void* dataptr);
+	bool set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void *dataptr);
 
 	/**
 	 * Set an object parent
 	 */
-	bool					setParent(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const RY_PDS::CObjectIndex &parent);
-
+	bool setParent(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const RY_PDS::CObjectIndex &parent);
 
 	/**
 	 * Set an item from database, located by its table, row and column.
@@ -259,157 +237,135 @@ public:
 	 * truncated, if possible
 	 * \param type is the TDataType of data stored at dataptr
 	 */
-	bool					get(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint& datasize, void* dataptr, TDataType& type);
-
-
-
-
+	bool get(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint &datasize, void *dataptr, TDataType &type);
 
 	/**
 	 * Get Table (non const)
 	 */
-	CTable*					getNonConstTable(RY_PDS::TTableIndex table);
+	CTable *getNonConstTable(RY_PDS::TTableIndex table);
 
 	/**
 	 * Get Object list
 	 */
-	RY_PDS::CSetMap&		getSetMap()			{ return _SetMap; }
+	RY_PDS::CSetMap &getSetMap() { return _SetMap; }
 
 	/**
 	 * Get Object list
 	 */
-	const RY_PDS::CSetMap&	getSetMap()	const	{ return _SetMap; }
+	const RY_PDS::CSetMap &getSetMap() const { return _SetMap; }
 
 	/**
 	 * Get String Manager
 	 */
-//	RY_PDS::CPDStringManager&	getStringManager()	{ return _StringManager; }
+	//	RY_PDS::CPDStringManager&	getStringManager()	{ return _StringManager; }
 
 	/**
 	 * Fetch data
 	 */
-	bool					fetch(const RY_PDS::CObjectIndex& index, RY_PDS::CPData &data, bool fetchIndex = true);
-
-
-
+	bool fetch(const RY_PDS::CObjectIndex &index, RY_PDS::CPData &data, bool fetchIndex = true);
 
 	/**
 	 * Display database
 	 */
-	void					display(NLMISC::CLog* log = NLMISC::InfoLog, bool displayHeader = false) const;
+	void display(NLMISC::CLog *log = NLMISC::InfoLog, bool displayHeader = false) const;
 
 	/**
 	 * Set value with human readable parameters
 	 */
-	bool					set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const std::string& type, const std::string &value);
-
-
-
+	bool set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const std::string &type, const std::string &value);
 
 	/**
 	 * Dump database content and info of an object to xml
 	 */
-	void					dumpToXml(const RY_PDS::CObjectIndex& index, NLMISC::IStream& xml, sint expandDepth = -1);
-
-
-
-
+	void dumpToXml(const RY_PDS::CObjectIndex &index, NLMISC::IStream &xml, sint expandDepth = -1);
 
 	/**
 	 * Get Update Queue for id
 	 * May return NULL if message was already received
 	 */
-	RY_PDS::CDbMessageQueue*	getUpdateMessageQueue(uint32 updateId);
+	RY_PDS::CDbMessageQueue *getUpdateMessageQueue(uint32 updateId);
 
 	/**
 	 * Receive update
 	 */
-	void					receiveUpdate(uint32 id);
+	void receiveUpdate(uint32 id);
 
 	/**
 	 * Get Last Update Id
 	 */
-	uint32					getLastUpdateId() const			{ return _State.LastUpdateId; }
+	uint32 getLastUpdateId() const { return _State.LastUpdateId; }
 
 	/**
 	 * Flush updates
 	 */
-	void					flushUpdates(std::vector<uint32>& acknowledged);
-
-
+	void flushUpdates(std::vector<uint32> &acknowledged);
 
 	/**
 	 * Serialise SheetId String Mapper
 	 */
-	void					serialSheetIdStringMapper(NLMISC::IStream& f);
-
+	void serialSheetIdStringMapper(NLMISC::IStream &f);
 
 private:
-
 	/// Initialised yet?
-	bool						_Init;
+	bool _Init;
 
 	/// Current Database State
-	CDatabaseState				_State;
+	CDatabaseState _State;
 
 	/// Service Id mapped
-	NLNET::TServiceId			_ServiceId;
+	NLNET::TServiceId _ServiceId;
 
 	/// Description
-	CDBDescriptionParser		_Description;
+	CDBDescriptionParser _Description;
 
 	/// Reference index
-	CRefIndex					_Reference;
+	CRefIndex _Reference;
 
 	/// Types in database
-	std::vector<CType*>			_Types;
+	std::vector<CType *> _Types;
 
 	/// Tables in database
-	std::vector<CTable*>		_Tables;
+	std::vector<CTable *> _Tables;
 
 	/// Common object list
-	RY_PDS::CSetMap				_SetMap;
+	RY_PDS::CSetMap _SetMap;
 
 	/// String manager
-//	RY_PDS::CPDStringManager	_StringManager;
+	//	RY_PDS::CPDStringManager	_StringManager;
 
 	/// Last Minute Update Timestamp
-	CTimestamp					_MinuteUpdateTimestamp;
+	CTimestamp _MinuteUpdateTimestamp;
 
 	/// Last Minute Update Timestamp
-	CTimestamp					_HourUpdateTimestamp;
+	CTimestamp _HourUpdateTimestamp;
 
 	/// Last Minute Update Timestamp
-	CTimestamp					_DayUpdateTimestamp;
+	CTimestamp _DayUpdateTimestamp;
 
 	/// Creation Timestamp
-	CTimestamp					_CreationTimestamp;
+	CTimestamp _CreationTimestamp;
 
 	/// Received updates
-	std::vector<uint32>			_ReceivedUpdates;
+	std::vector<uint32> _ReceivedUpdates;
 
 	/// SheetId String Mapper
-	CPDStringMapper				_SheetIdStringMapper;
-
-
+	CPDStringMapper _SheetIdStringMapper;
 
 	/// FIFO of logs
-	typedef std::list<RY_PDS::CUpdateLog>	TUpdateLogQueue;
+	typedef std::list<RY_PDS::CUpdateLog> TUpdateLogQueue;
 
 	/// Log of database updates
-	TUpdateLogQueue				_LogQueue;
-
+	TUpdateLogQueue _LogQueue;
 
 public:
-
 	/// \name RBS Task Event listener interface
 	// @{
 
 	/// Task ran successfully
-	virtual void			taskSuccessful(void* arg);
+	virtual void taskSuccessful(void *arg);
 
 	/// Task failed!
-	virtual void			taskFailed(void* arg);
+	virtual void taskFailed(void *arg);
 
 	// @}
 
@@ -417,118 +373,101 @@ public:
 	// @{
 
 	/// Get Table Index from name
-	virtual RY_PDS::TTableIndex	getTableIndex(const std::string& tableName) const;
+	virtual RY_PDS::TTableIndex getTableIndex(const std::string &tableName) const;
 
 	/// Get Table Index from name
-	virtual std::string			getTableName(RY_PDS::TTableIndex index) const;
+	virtual std::string getTableName(RY_PDS::TTableIndex index) const;
 
 	// @}
 
 protected:
-
-	virtual std::string	getLoggerIdentifier() const	{ return NLMISC::toString("db:%s", (_State.Name.empty() ? "<unnamed>" : _State.Name.c_str())); }
+	virtual std::string getLoggerIdentifier() const { return NLMISC::toString("db:%s", (_State.Name.empty() ? "<unnamed>" : _State.Name.c_str())); }
 
 public:
-
-
-
-
 	/**
 	 * Load previous database state and create a new temporary reference if needed (after a crash, for instance)
 	 */
-	bool					loadState();
-
+	bool loadState();
 
 	/**
 	 * Check if reference is still the same
 	 */
-	bool					checkReferenceChange();
-
+	bool checkReferenceChange();
 
 	/**
 	 * Create new database from scratch, setup everything needed (references, etc.)
 	 * \param description is the xml database description
 	 */
-	bool					createFromScratch(const std::string& description);
-
+	bool createFromScratch(const std::string &description);
 
 	/**
 	 * Check if reference is up to date
 	 * Returns true if reference is the latest valid database image
 	 */
-	bool					isReferenceUpToDate();
-
+	bool isReferenceUpToDate();
 
 	/**
 	 * Build a up to date reference in a temp directory.
 	 * Setup 'ref' file, so that it points to new reference.
 	 */
-	bool					buildReference();
+	bool buildReference();
 
 	/**
 	 * Build the delta files and purge all dirty rows in tables
 	 */
-	bool					buildDelta(const CTimestamp& starttime, const CTimestamp& endtime);
+	bool buildDelta(const CTimestamp &starttime, const CTimestamp &endtime);
 
 	/**
 	 * Flush database from released rows
 	 */
-	bool					flushReleased();
+	bool flushReleased();
 
 	/**
 	 * Notify a new reference is ready
 	 */
-	bool					notifyNewReference(bool validateRef = true);
-
-
+	bool notifyNewReference(bool validateRef = true);
 
 	/**
 	 * Build index allocators
 	 * One per table
 	 */
-	bool					buildIndexAllocators(std::vector<RY_PDS::CIndexAllocator> &allocators);
+	bool buildIndexAllocators(std::vector<RY_PDS::CIndexAllocator> &allocators);
 
 	/**
 	 * Rebuild forwardrefs from backrefs
 	 */
-	bool					rebuildForwardRefs();
+	bool rebuildForwardRefs();
 
 	/**
 	 * Rebuild table maps
 	 */
-	bool					rebuildTableMaps();
+	bool rebuildTableMaps();
 
 	/**
 	 * Reset dirty lists
 	 */
-	bool					resetDirtyTags();
+	bool resetDirtyTags();
 
 	/**
 	 * Reset and rebuild all maps, references, lists...
 	 */
-	bool					rebuildVolatileData();
-
-
+	bool rebuildVolatileData();
 
 	/**
 	 * Static Check for update rate
 	 */
-	static void				checkUpdateRates();
+	static void checkUpdateRates();
 
 	/**
 	 * Send Delta/Reference build commands
 	 */
-	bool					sendBuildCommands(const CTimestamp& current);
-
+	bool sendBuildCommands(const CTimestamp &current);
 
 private:
-
 	friend class CDatabaseAdapter;
 };
-
 
 // include inlines
 #include "pds_database_inline.h"
 
-#endif //RY_PDS_DATABASE_H
-
+#endif // RY_PDS_DATABASE_H

@@ -14,14 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_CDB_DATA_INSTANCE_CONTAINER_H
 #define NL_CDB_DATA_INSTANCE_CONTAINER_H
 
 #include "server_share/fixed_size_int_vector.h"
 #include "cdb_struct_banks.h"
-
 
 /**
  *
@@ -29,32 +26,36 @@
 class CCDBChangeTracker
 {
 protected:
-
 	friend class CCDBDataInstanceContainer;
 
 	/// Constructor
-	CCDBChangeTracker() : _FirstChanged(CDB_LAST_CHANGED), _LastChanged( CDB_INVALID_DATA_INDEX), _ChangedCount(0) {}
+	CCDBChangeTracker()
+	    : _FirstChanged(CDB_LAST_CHANGED)
+	    , _LastChanged(CDB_INVALID_DATA_INDEX)
+	    , _ChangedCount(0)
+	{
+	}
 
 	/// Init
-	void	init( TCDBDataIndex size ) { _TrackVec.init( size, CDB_INVALID_DATA_INDEX ); }
+	void init(TCDBDataIndex size) { _TrackVec.init(size, CDB_INVALID_DATA_INDEX); }
 
 	/// Record a change (push)
-	inline void		recordChange( TCDBDataIndex index );
+	inline void recordChange(TCDBDataIndex index);
 
 	/// Record a change (push) in the backward-linnked-list which entry-point is subtrackerLast
-	inline void		recordChangeSublist( TCDBDataIndex& subtrackerLast, TCDBDataIndex index );
-	
+	inline void recordChangeSublist(TCDBDataIndex &subtrackerLast, TCDBDataIndex index);
+
 	/// Get the entity index of the first changed. Returns CDB_LAST_CHANGED if there is no change.
-	TCDBDataIndex	getFirstChanged() const { return _FirstChanged; }
+	TCDBDataIndex getFirstChanged() const { return _FirstChanged; }
 
 	/// Get the entity index of the next changed (assumes dataIndex is valid). Returns LAST_CHANGED if there is no more change.
-	TCDBDataIndex	getNextChanged( TCDBDataIndex index ) const { return _TrackVec[index]; }
+	TCDBDataIndex getNextChanged(TCDBDataIndex index) const { return _TrackVec[index]; }
 
 	/// Pop the first change out of the tracker. Do not call if getFirstChanged() returned CDB_LAST_CHANGED.
-	void			popFirstChanged()
+	void popFirstChanged()
 	{
 #ifdef NL_DEBUG
-		nlassert( _FirstChanged != CDB_LAST_CHANGED );
+		nlassert(_FirstChanged != CDB_LAST_CHANGED);
 #endif
 		TCDBDataIndex *queueFront = &(_TrackVec[_FirstChanged]);
 		_FirstChanged = *queueFront;
@@ -64,9 +65,9 @@ protected:
 	}
 
 	/// Pop the last change out of the subtracker, or return CDB_INVALID_DATA_INDEX if no more changes
-	TCDBDataIndex	popChangedIndexInAtomSubstrackerLast( TCDBDataIndex& subtrackerLast )
-	{ 
-		if ( subtrackerLast == CDB_LAST_CHANGED )
+	TCDBDataIndex popChangedIndexInAtomSubstrackerLast(TCDBDataIndex &subtrackerLast)
+	{
+		if (subtrackerLast == CDB_LAST_CHANGED)
 		{
 			return subtrackerLast;
 		}
@@ -80,22 +81,21 @@ protected:
 	}
 
 	/// Finish cleaning the change tracker to allow adding new changes when all changes have been popped by popFirstChanged()
-	void			quickCleanChanges()
+	void quickCleanChanges()
 	{
-		if ( _FirstChanged == CDB_LAST_CHANGED )
+		if (_FirstChanged == CDB_LAST_CHANGED)
 		{
 			_LastChanged = CDB_INVALID_DATA_INDEX;
 		}
 	}
 
 	/// Return true if the specified property is marked as changed (no bound check)
-	bool			isChanged( TCDBDataIndex index ) const { return (_TrackVec[index] != CDB_INVALID_DATA_INDEX); }
+	bool isChanged(TCDBDataIndex index) const { return (_TrackVec[index] != CDB_INVALID_DATA_INDEX); }
 
 	/// Return the number of changes
-	uint			getChangedPropertyCount() const { return _ChangedCount; }
+	uint getChangedPropertyCount() const { return _ChangedCount; }
 
 private:
-
 	/**
 	 * Storage for the main tracker and all subtrackers, which are
 	 * single-linked list implemented by this array of the same size as _DataArray.
@@ -108,22 +108,21 @@ private:
 	 * Each changed item either points to the previous changed or is the value CDB_INVALID_DATA_INDEX.
 	 * If the item state is 'unchanged', the value is CDB_INVALID_DATA_INDEX.
 	 */
-	CFixedSizeIntVector<TCDBDataIndex>	_TrackVec;
+	CFixedSizeIntVector<TCDBDataIndex> _TrackVec;
 
 	/** First changed item (useful to read the changed from the beginning).
 	 * When there is no change to read, First equals CDB_LAST_CHANGED.
 	 */
-	TCDBDataIndex				_FirstChanged;
+	TCDBDataIndex _FirstChanged;
 
 	/** Last changed item (useful to link the last changed to a newly changed item).
 	 * When there is no change yet, Last equals CDB_INVALID_DATA_INDEX.
 	 */
-	TCDBDataIndex				_LastChanged;
+	TCDBDataIndex _LastChanged;
 
 	/// Number of changes still to pop
-	sint						_ChangedCount;
+	sint _ChangedCount;
 };
-
 
 /**
  * There are two levels of trackers. The main tracker is accessed with getFirstChanged(),
@@ -140,30 +139,29 @@ private:
 class CCDBDataInstanceContainer
 {
 public:
-
 	/// Initialization
-	void			init( TCDBDataIndex size, bool usePermanentTracker  );
+	void init(TCDBDataIndex size, bool usePermanentTracker);
 
 	/// Init/reset the atom group subtracker at index (must be called for every index which corresponding node is an atom branch)
-	void			resetSubTracker( TCDBDataIndex index ) { _DataArray[index] = CDB_LAST_CHANGED; }
+	void resetSubTracker(TCDBDataIndex index) { _DataArray[index] = CDB_LAST_CHANGED; }
 
 	/// Get the value of the property (no bound check)
-	inline sint64	getValue64( TCDBDataIndex index ) const { return _DataArray[index]; }
+	inline sint64 getValue64(TCDBDataIndex index) const { return _DataArray[index]; }
 
 	/// Set the value of the property (no bound check, sets the change flag if value different than previous or forceSending is true).
-	bool			setValue64( TCDBDataIndex index, sint64 value, bool forceSending );
-	
+	bool setValue64(TCDBDataIndex index, sint64 value, bool forceSending);
+
 	/// Set the value of the property (no bound check, does NOT modify the change flag).
-	void			setValue64NoChange( TCDBDataIndex index, sint64 value ) { _DataArray[index] = value; }
+	void setValue64NoChange(TCDBDataIndex index, sint64 value) { _DataArray[index] = value; }
 
 	/// Set the value of the property (no bound check, set the change flag in an atom group if value different than previous or forceSending is true)
-	bool			setValue64InAtom( TCDBDataIndex index, sint64 value, TCDBDataIndex atomGroupIndex, bool forceSending );
+	bool setValue64InAtom(TCDBDataIndex index, sint64 value, TCDBDataIndex atomGroupIndex, bool forceSending);
 
 	/// Copy the current value to the last sent value of the property (no bound check)
-	//void			archiveCurrentValue( TCDBDataIndex index ) { _LastSentDataArray[index] = _DataArray[index]; }
+	// void			archiveCurrentValue( TCDBDataIndex index ) { _LastSentDataArray[index] = _DataArray[index]; }
 
 	/// Get the difference (delta) between the last sent value and the current one (no bound check)
-	//sint64		getDeltaFromArchive( TCDBDataIndex index ) { return _DataArray[index] - _LastSentDataArray[index]; }
+	// sint64		getDeltaFromArchive( TCDBDataIndex index ) { return _DataArray[index] - _LastSentDataArray[index]; }
 
 	/// Set the value of the property (no bound check, does NOT modify the change flag).
 	/*inline sint32	getValue32( TCDBDataIndex index ) const { return *((sint32*)&(_DataArray[index])); }
@@ -176,66 +174,64 @@ public:
 	void			setValueBool( TCDBDataIndex index, bool value ) { setValue64( index, (sint64)value ); }*/
 
 	/// Return true if the specified index is valid in the container
-	bool			checkIndex( TCDBDataIndex index ) const { return (index >= 0) && (index < (TCDBDataIndex)_DataArray.size()); }
+	bool checkIndex(TCDBDataIndex index) const { return (index >= 0) && (index < (TCDBDataIndex)_DataArray.size()); }
 
 	/// Get the entity index of the first changed. Returns CDB_LAST_CHANGED if there is no change.
-	TCDBDataIndex	getFirstChanged() const { return _ChangeTracker.getFirstChanged(); }
+	TCDBDataIndex getFirstChanged() const { return _ChangeTracker.getFirstChanged(); }
 
 	/// Get the entity index of the next changed (assumes dataIndex is valid). Returns LAST_CHANGED if there is no more change.
-	TCDBDataIndex	getNextChanged( TCDBDataIndex index ) const { return _ChangeTracker.getNextChanged( index ); }
+	TCDBDataIndex getNextChanged(TCDBDataIndex index) const { return _ChangeTracker.getNextChanged(index); }
 
 	/// Pop the first change out of the tracker. Do not call if getFirstChanged() returned CDB_LAST_CHANGED.
-	void			popFirstChanged() { _ChangeTracker.popFirstChanged(); }
-	
+	void popFirstChanged() { _ChangeTracker.popFirstChanged(); }
+
 	/// Pop the last change out of the subtracker referenced at the specified index in the data array, or return CDB_INVALID_DATA_INDEX if no more changes
-	TCDBDataIndex	popChangedIndexInAtom( TCDBDataIndex atomGroupIndex )
+	TCDBDataIndex popChangedIndexInAtom(TCDBDataIndex atomGroupIndex)
 	{
-		TCDBDataIndex& subtrackerLast = (TCDBDataIndex&)(_DataArray[atomGroupIndex]);
-		return _ChangeTracker.popChangedIndexInAtomSubstrackerLast( subtrackerLast );
+		TCDBDataIndex &subtrackerLast = (TCDBDataIndex &)(_DataArray[atomGroupIndex]);
+		return _ChangeTracker.popChangedIndexInAtomSubstrackerLast(subtrackerLast);
 	}
 
 	/// Debug
-	void			displayAtomChanges( TCDBDataIndex atomGroupIndex );
+	void displayAtomChanges(TCDBDataIndex atomGroupIndex);
 
 	/// Finish cleaning the change tracker to allow adding new changes when all changes have been popped by popFirstChanged()
-	void			quickCleanChanges() { _ChangeTracker.quickCleanChanges(); }
+	void quickCleanChanges() { _ChangeTracker.quickCleanChanges(); }
 
 	/// Return true if the specified property is marked as changed (no bound check)
-	bool			isChanged( TCDBDataIndex index ) const { return _ChangeTracker.isChanged( index ); }
+	bool isChanged(TCDBDataIndex index) const { return _ChangeTracker.isChanged(index); }
 
 	/// Return the number of changes
-	uint			getChangedPropertyCount() const { return _ChangeTracker.getChangedPropertyCount(); }
+	uint getChangedPropertyCount() const { return _ChangeTracker.getChangedPropertyCount(); }
 
 	/// Get the entity index of the first changed. Returns CDB_LAST_CHANGED if there is no change.
-	TCDBDataIndex	getPermanentFirstChanged() const { return _PermanentTracker.getFirstChanged(); }
+	TCDBDataIndex getPermanentFirstChanged() const { return _PermanentTracker.getFirstChanged(); }
 
 	/// Get the entity index of the next changed (assumes dataIndex is valid). Returns LAST_CHANGED if there is no more change.
-	TCDBDataIndex	getPermanentNextChanged( TCDBDataIndex index ) const { return _PermanentTracker.getNextChanged( index ); }
+	TCDBDataIndex getPermanentNextChanged(TCDBDataIndex index) const { return _PermanentTracker.getNextChanged(index); }
 
 	/// Return true if the specified property is marked as changed (no bound check)
-	bool			isPermanentChanged( TCDBDataIndex index ) const { return _PermanentTracker.isChanged( index ); }
+	bool isPermanentChanged(TCDBDataIndex index) const { return _PermanentTracker.isChanged(index); }
 
 	/// Return the number of changes
-	uint			getPermanentChangedPropertyCount() const { return _PermanentTracker.getChangedPropertyCount(); }
+	uint getPermanentChangedPropertyCount() const { return _PermanentTracker.getChangedPropertyCount(); }
 
 private:
-
 	/// Array of property values, indexed by TCDBDataIndex
-	CFixedSizeIntVector<sint64>	_DataArray;
+	CFixedSizeIntVector<sint64> _DataArray;
 
 	/// Array of the last sent property values, indexed by TCDBDataIndex
-	//std::vector<sint64>		_LastSentDataArray;
+	// std::vector<sint64>		_LastSentDataArray;
 
 	/// Regular change tracker
-	CCDBChangeTracker			_ChangeTracker;
+	CCDBChangeTracker _ChangeTracker;
 
 	/// Additional tracker for changes since the beginning (optional)
-	CCDBChangeTracker			_PermanentTracker;
+	CCDBChangeTracker _PermanentTracker;
 
 	/// Enable additionnal tracker
-	bool						_UsePermanentTracker;
+	bool _UsePermanentTracker;
 };
-
 
 #endif // NL_CDB_DATA_INSTANCE_CONTAINER_H
 

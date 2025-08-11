@@ -17,7 +17,7 @@
 #include "stdpch.h"
 #include "position_flag_manager.h"
 
-//net
+// net
 #include "nel/net/service.h"
 
 // misc
@@ -34,23 +34,21 @@
 #include "player_manager/player.h"
 #include "zone_manager.h"
 
-
 using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
-
-void CPositionFlagManager::setFlag(const std::string & flagName, const CFlagPosition & flagPos)
+void CPositionFlagManager::setFlag(const std::string &flagName, const CFlagPosition &flagPos)
 {
 	_FlagPositions[flagName] = flagPos;
 }
 
-void CPositionFlagManager::removeFlag(const std::string & flagName)
+void CPositionFlagManager::removeFlag(const std::string &flagName)
 {
 	_FlagPositions.erase(flagName);
 }
 
-const CFlagPosition * CPositionFlagManager::getFlagPosition(const std::string & flagName) const
+const CFlagPosition *CPositionFlagManager::getFlagPosition(const std::string &flagName) const
 {
 	TFlagPositionMap::const_iterator it = _FlagPositions.find(flagName);
 	if (it != _FlagPositions.end())
@@ -60,12 +58,12 @@ const CFlagPosition * CPositionFlagManager::getFlagPosition(const std::string & 
 	return NULL;
 }
 
-bool CPositionFlagManager::flagExists(const std::string & flagName) const
+bool CPositionFlagManager::flagExists(const std::string &flagName) const
 {
 	return (_FlagPositions.find(flagName) != _FlagPositions.end());
 }
 
-void CPositionFlagManager::serial(NLMISC::IStream & f)
+void CPositionFlagManager::serial(NLMISC::IStream &f)
 {
 	H_AUTO(CPositionFlagManagerSerial);
 
@@ -123,13 +121,13 @@ void CPositionFlagManager::serial(NLMISC::IStream & f)
 		TFlagPositionMap::iterator it;
 		for (it = _FlagPositions.begin(); it != _FlagPositions.end(); ++it)
 		{
-			const string & flagName = (*it).first;
-			CFlagPosition & flagPos = (*it).second;
+			const string &flagName = (*it).first;
+			CFlagPosition &flagPos = (*it).second;
 
 			f.xmlPushBegin("Flag");
 			{
 				f.xmlSetAttrib("name");
-				f.serial( const_cast<string &>(flagName) );
+				f.serial(const_cast<string &>(flagName));
 
 				f.xmlSetAttrib("x");
 				f.serial(flagPos.X);
@@ -145,10 +143,10 @@ void CPositionFlagManager::serial(NLMISC::IStream & f)
 		}
 	}
 
-	f.xmlPop ();
+	f.xmlPop();
 }
 
-void CPositionFlagManager::saveToFile(const std::string & fileName)
+void CPositionFlagManager::saveToFile(const std::string &fileName)
 {
 	CMemStream stream;
 	try
@@ -162,53 +160,57 @@ void CPositionFlagManager::saveToFile(const std::string & fileName)
 		serial(output);
 		output.flush();
 	}
-	catch (const Exception & e)
+	catch (const Exception &e)
 	{
 		nlwarning("<CPositionFlagManager::saveToFile> cannot save file %s : %s", fileName.c_str(), e.what());
 	}
 
 	nlinfo("CPositionFlagManager::saveToFile: send message to BS");
-	CBackupMsgSaveFile msg( fileName, CBackupMsgSaveFile::SaveFile, Bsi );
-	msg.DataMsg.serialBuffer((uint8*)stream.buffer(), stream.length());
-	Bsi.sendFile( msg );
+	CBackupMsgSaveFile msg(fileName, CBackupMsgSaveFile::SaveFile, Bsi);
+	msg.DataMsg.serialBuffer((uint8 *)stream.buffer(), stream.length());
+	Bsi.sendFile(msg);
 }
 
-struct CPositionFlagManagerFileLoadCallback: public IBackupFileReceiveCallback
+struct CPositionFlagManagerFileLoadCallback : public IBackupFileReceiveCallback
 {
-	CPositionFlagManager* Parent;
+	CPositionFlagManager *Parent;
 	std::string FileName;
 
-	CPositionFlagManagerFileLoadCallback(CPositionFlagManager* parent,const std::string& fileName): Parent(parent), FileName(fileName)  {}
+	CPositionFlagManagerFileLoadCallback(CPositionFlagManager *parent, const std::string &fileName)
+	    : Parent(parent)
+	    , FileName(fileName)
+	{
+	}
 
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream)
 	{
 		// if the file isn't found then just give up
-		DROP_IF(fileDescription.FileName.empty(),"<CPositionFlagManager::loadFromFile> file not found: "<< FileName, return);
+		DROP_IF(fileDescription.FileName.empty(), "<CPositionFlagManager::loadFromFile> file not found: " << FileName, return);
 
 		try
 		{
 			// setup an xml wrapper round the input stream
 			CIXml input;
-			DROP_IF(!input.init(dataStream),"<CPositionFlagManager::loadFromFile> cannot init XML input for file: "<< FileName, return);
+			DROP_IF(!input.init(dataStream), "<CPositionFlagManager::loadFromFile> cannot init XML input for file: " << FileName, return);
 
 			// serialise the input data (in xml format)
 			Parent->serial(input);
 		}
-		catch (const Exception & e)
+		catch (const Exception &e)
 		{
-			STOP("<CPositionFlagManager::loadFromFile> cannot parse file: "<< FileName << ": " << e.what());
+			STOP("<CPositionFlagManager::loadFromFile> cannot parse file: " << FileName << ": " << e.what());
 		}
 	}
 };
 
-void CPositionFlagManager::loadFromFile(const std::string & fileName)
+void CPositionFlagManager::loadFromFile(const std::string &fileName)
 {
-	Bsi.syncLoadFile(fileName, new CPositionFlagManagerFileLoadCallback(this,fileName));
+	Bsi.syncLoadFile(fileName, new CPositionFlagManagerFileLoadCallback(this, fileName));
 }
 
-void CPositionFlagManager::sendFlagsList(const NLMISC::CEntityId & eid, bool shortFormat, uint32 radius) const
+void CPositionFlagManager::sendFlagsList(const NLMISC::CEntityId &eid, bool shortFormat, uint32 radius) const
 {
-	CCharacter * c = PlayerManager.getChar(eid);
+	CCharacter *c = PlayerManager.getChar(eid);
 	if (c == NULL)
 		return;
 
@@ -217,33 +219,33 @@ void CPositionFlagManager::sendFlagsList(const NLMISC::CEntityId & eid, bool sho
 	TFlagPositionMap::const_iterator it;
 	for (it = _FlagPositions.begin(); it != _FlagPositions.end(); ++it)
 	{
-		const std::string & flagName = (*it).first;
-		const CFlagPosition & flagPos = (*it).second;
+		const std::string &flagName = (*it).first;
+		const CFlagPosition &flagPos = (*it).second;
 
 		// check distance
 		if (radius)
 		{
-			const double dx = flagPos.X - c->getState().X()/1000;
-			const double dy = flagPos.Y - c->getState().Y()/1000;
-			if ( sqr(dx) + sqr(dy) > sqr((double) radius) )
+			const double dx = flagPos.X - c->getState().X() / 1000;
+			const double dy = flagPos.Y - c->getState().Y() / 1000;
+			if (sqr(dx) + sqr(dy) > sqr((double)radius))
 				continue;
 		}
 
 		if (shortFormat)
 		{
-			params[0].Literal.fromUtf8( NLMISC::toString("&SYS&<CSR> %s", flagName.c_str()) );
+			params[0].Literal.fromUtf8(NLMISC::toString("&SYS&<CSR> %s", flagName.c_str()));
 		}
 		else
 		{
 			string regionDesc;
-			const CContinent * continent = NULL;
-			const CRegion * region = NULL;
-			if (CZoneManager::getInstance().getRegion(flagPos.X*1000, flagPos.Y*1000, &region, &continent) && continent && region)
+			const CContinent *continent = NULL;
+			const CRegion *region = NULL;
+			if (CZoneManager::getInstance().getRegion(flagPos.X * 1000, flagPos.Y * 1000, &region, &continent) && continent && region)
 			{
 				regionDesc = continent->getName() + ", " + region->getName();
 			}
 
-			params[0].Literal.fromUtf8( NLMISC::toString("&SYS&<CSR> %s : %d, %d, %d [%s]", flagName.c_str(), flagPos.X, flagPos.Y, flagPos.Z, regionDesc.c_str()) );
+			params[0].Literal.fromUtf8(NLMISC::toString("&SYS&<CSR> %s : %d, %d, %d [%s]", flagName.c_str(), flagPos.X, flagPos.Y, flagPos.Z, regionDesc.c_str()));
 		}
 
 		CCharacter::sendDynamicSystemMessage(eid, "LITERAL", params);

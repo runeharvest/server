@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef RING_REWARD_POINTS_H
 #define RING_REWARD_POINTS_H
 
@@ -27,14 +26,12 @@
 
 #include "game_share/r2_share_itf.h"
 
-
 //-------------------------------------------------------------------------------------------------
 // forward decalarations
 //-------------------------------------------------------------------------------------------------
 
 class CRingRewardPointsImpl;
 class CCharacter;
-
 
 //-------------------------------------------------------------------------------------------------
 // class CRingRewardPoints
@@ -51,34 +48,34 @@ class CRingRewardPoints
 {
 public:
 	// define the level ranges (as used everywhere else in Ryzom)
-//	enum TLevel
-//	{
-//		LEVEL_A,	//   0 -  20
-//		LEVEL_B,	//  21 -  50
-//		LEVEL_C,	//  51 - 100
-//		LEVEL_D,	// 101 - 150
-//		LEVEL_E,	// 151 - 200
-//		LEVEL_F,	// 201 - 250
-//		NUM_LEVELS,
-//		INVALID_LEVEL= NUM_LEVELS
-//	};
+	//	enum TLevel
+	//	{
+	//		LEVEL_A,	//   0 -  20
+	//		LEVEL_B,	//  21 -  50
+	//		LEVEL_C,	//  51 - 100
+	//		LEVEL_D,	// 101 - 150
+	//		LEVEL_E,	// 151 - 200
+	//		LEVEL_F,	// 201 - 250
+	//		NUM_LEVELS,
+	//		INVALID_LEVEL= NUM_LEVELS
+	//	};
 
 	enum TGenerateRewardResult
 	{
 		/// ok, reward generated (one or more item gained)
-		grr_ok,	
+		grr_ok,
 		/// ok, but rare item where generated !
 		grr_ok_rare,
 		/// not enough place to hold all possible reward (perhaps no item where gained at all)
 		grr_no_place,
-		/// not enough points to gain one item 
+		/// not enough points to gain one item
 		grr_no_points,
 		/// no reward because of invalid context (e.g edit session)
 		grr_invalid,
 	};
 
 	// default ctor
-	CRingRewardPoints(CCharacter* theCharacter);
+	CRingRewardPoints(CCharacter *theCharacter);
 
 	// dtor
 	~CRingRewardPoints();
@@ -95,7 +92,7 @@ public:
 	// initalise the scenario level (to be called on connection of player to a scenario)
 	void setScenarioLevel(R2::TSessionLevel scenarioLevel);
 
-	// method called whenever XP would normally be added to the player (called instead of 
+	// method called whenever XP would normally be added to the player (called instead of
 	// standard XP treatment if IsRingShard is true)
 	void addXp(R2::TSessionLevel xpLevel, uint32 xpValue);
 
@@ -105,11 +102,9 @@ public:
 	// otherwise the method returns FALSE.
 	TGenerateRewardResult generateReward(R2::TSessionLevel rewardLevel);
 
-
 private:
 	// a pointer to the object used to implement the ring reward points functionaliity
-	CRingRewardPointsImpl* _Implementation;
+	CRingRewardPointsImpl *_Implementation;
 };
-
 
 #endif // RING_REWARD_POINTS_H

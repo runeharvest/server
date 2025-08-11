@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "aids_interface.h"
 #include "ai_share/aids_messages.h"
@@ -27,9 +25,9 @@ using namespace std;
 //---------------------------------------------------------------------------------
 // service up and service down callbacks
 
-static void cbServiceUp( const std::string& serviceName, NLNET::TServiceId serviceId, void * )
+static void cbServiceUp(const std::string &serviceName, NLNET::TServiceId serviceId, void *)
 {
-	if (serviceName=="AIDS")
+	if (serviceName == "AIDS")
 	{
 		// send a message to the service to say 'I exist'
 		CMsgAIServiceUp().send(serviceId);
@@ -37,10 +35,9 @@ static void cbServiceUp( const std::string& serviceName, NLNET::TServiceId servi
 	}
 }
 
-static void cbServiceDown( const std::string& serviceName, NLNET::TServiceId serviceId, void * )
+static void cbServiceDown(const std::string &serviceName, NLNET::TServiceId serviceId, void *)
 {
 }
-
 
 //---------------------------------------------------------------------------------
 // classic init() and release()
@@ -48,7 +45,7 @@ void CAIDSInterface::init()
 {
 	// register the service up and service down callbacks
 	CUnifiedNetwork::getInstance()->setServiceUpCallback("AIDS", cbServiceUp, 0);
-	CUnifiedNetwork::getInstance()->setServiceDownCallback( "AIDS", cbServiceDown, 0);
+	CUnifiedNetwork::getInstance()->setServiceDownCallback("AIDS", cbServiceDown, 0);
 }
 
 void CAIDSInterface::release()
@@ -59,19 +56,18 @@ void CAIDSInterface::release()
 // send text messages back to the AIDS
 void CAIDSInterface::info(const std::string &s)
 {
-	string str = string("AIS: %3d: INF: ")+s;
+	string str = string("AIS: %3d: INF: ") + s;
 	CMsgAIFeedback(str).send("AIDS");
 }
 
 void CAIDSInterface::debug(const std::string &s)
 {
-	string str = string("AIS: %3d: DBG: ")+s;
+	string str = string("AIS: %3d: DBG: ") + s;
 	CMsgAIFeedback(str).send("AIDS");
 }
 
 void CAIDSInterface::warning(const std::string &s)
 {
-	string str = string("AIS: %3d: WRN: ")+s;
+	string str = string("AIS: %3d: WRN: ") + s;
 	CMsgAIFeedback(str).send("AIDS");
 }
-

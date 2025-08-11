@@ -22,11 +22,9 @@
 #include "stdpch.h"
 #include "database_outpost.h"
 
-	
-
 TCDBBank CBankAccessor_OUTPOST::BankTag;
 
-		CBankAccessor_OUTPOST::TOUTPOST_SELECTED	CBankAccessor_OUTPOST::_OUTPOST_SELECTED;
+CBankAccessor_OUTPOST::TOUTPOST_SELECTED CBankAccessor_OUTPOST::_OUTPOST_SELECTED;
 
 void CBankAccessor_OUTPOST::init()
 {
@@ -34,23 +32,22 @@ void CBankAccessor_OUTPOST::init()
 	if (!inited)
 	{
 		// retreive the bank structure
-		CCDBStructBanks	*bank = CCDBStructBanks::instance();
+		CCDBStructBanks *bank = CCDBStructBanks::instance();
 		BankTag = CCDBStructBanks::readBankName("OUTPOST");
 
 		ICDBStructNode *node;
 
 		// branch init
-		
-		node  = bank->getICDBStructNodeFromName( BankTag, "OUTPOST_SELECTED" );
+
+		node = bank->getICDBStructNodeFromName(BankTag, "OUTPOST_SELECTED");
 		nlassert(node != NULL);
 		// call sub branch init
 		_OUTPOST_SELECTED.init(node);
-		
 
 		inited = true;
 	}
 }
-		
+
 void CBankAccessor_OUTPOST::TOUTPOST_SELECTED::init(ICDBStructNode *parent)
 {
 	ICDBStructNode *node = parent;
@@ -58,80 +55,77 @@ void CBankAccessor_OUTPOST::TOUTPOST_SELECTED::init(ICDBStructNode *parent)
 	_BranchNode = node;
 
 	// leaf init
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("SHEET"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("SHEET"), false);
 	nlassert(node != NULL);
 	_SHEET = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("LEVEL"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("LEVEL"), false);
 	nlassert(node != NULL);
 	_LEVEL = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("STATUS"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("STATUS"), false);
 	nlassert(node != NULL);
 	_STATUS = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("STATE_END_DATE"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("STATE_END_DATE"), false);
 	nlassert(node != NULL);
 	_STATE_END_DATE = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("DISPLAY_CRASH"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("DISPLAY_CRASH"), false);
 	nlassert(node != NULL);
 	_DISPLAY_CRASH = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("WARCOST"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("WARCOST"), false);
 	nlassert(node != NULL);
 	_WARCOST = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("ROUND_LVL_THRESHOLD"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("ROUND_LVL_THRESHOLD"), false);
 	nlassert(node != NULL);
 	_ROUND_LVL_THRESHOLD = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("ROUND_LVL_MAX_ATT"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("ROUND_LVL_MAX_ATT"), false);
 	nlassert(node != NULL);
 	_ROUND_LVL_MAX_ATT = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("ROUND_LVL_MAX_DEF"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("ROUND_LVL_MAX_DEF"), false);
 	nlassert(node != NULL);
 	_ROUND_LVL_MAX_DEF = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("ROUND_LVL_CUR"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("ROUND_LVL_CUR"), false);
 	nlassert(node != NULL);
 	_ROUND_LVL_CUR = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("ROUND_ID_CUR"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("ROUND_ID_CUR"), false);
 	nlassert(node != NULL);
 	_ROUND_ID_CUR = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("ROUND_ID_MAX"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("ROUND_ID_MAX"), false);
 	nlassert(node != NULL);
 	_ROUND_ID_MAX = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("TIME_RANGE_DEF_WANTED"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("TIME_RANGE_DEF_WANTED"), false);
 	nlassert(node != NULL);
 	_TIME_RANGE_DEF_WANTED = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("TIME_RANGE_DEF"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("TIME_RANGE_DEF"), false);
 	nlassert(node != NULL);
 	_TIME_RANGE_DEF = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("TIME_RANGE_ATT"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("TIME_RANGE_ATT"), false);
 	nlassert(node != NULL);
 	_TIME_RANGE_ATT = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("TIME_RANGE_LENGTH"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("TIME_RANGE_LENGTH"), false);
 	nlassert(node != NULL);
 	_TIME_RANGE_LENGTH = node;
-	
 
 	// branch init
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("GUILD"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("GUILD"), false);
 	nlassert(node != NULL);
 	_GUILD.init(node);
-	
 }
-
 
 void CBankAccessor_OUTPOST::TOUTPOST_SELECTED::TGUILD::init(ICDBStructNode *parent)
 {
@@ -140,25 +134,22 @@ void CBankAccessor_OUTPOST::TOUTPOST_SELECTED::TGUILD::init(ICDBStructNode *pare
 	_BranchNode = node;
 
 	// leaf init
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("NAME"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("NAME"), false);
 	nlassert(node != NULL);
 	_NAME = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("ICON"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("ICON"), false);
 	nlassert(node != NULL);
 	_ICON = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("TRIBE"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("TRIBE"), false);
 	nlassert(node != NULL);
 	_TRIBE = node;
-	
-	node  = parent->getNode( ICDBStructNode::CTextId("NAME_ATT"), false );
+
+	node = parent->getNode(ICDBStructNode::CTextId("NAME_ATT"), false);
 	nlassert(node != NULL);
 	_NAME_ATT = node;
-	
 
 	// branch init
-	
 }
-

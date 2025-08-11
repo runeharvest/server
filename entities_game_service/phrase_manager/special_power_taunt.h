@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_SPECIAL_POWER_TAUNT_H
 #define RYZOM_SPECIAL_POWER_TAUNT_H
 
 #include "special_power.h"
-
 
 /**
  * Specialized class for power "taunt"
@@ -32,20 +29,23 @@ class CSpecialPowerTaunt : public CSpecialPower
 {
 public:
 	/// Default Constructor
-	CSpecialPowerTaunt() : CSpecialPower()
-	{}
+	CSpecialPowerTaunt()
+	    : CSpecialPower()
+	{
+	}
 
 	/// Constructor
-	CSpecialPowerTaunt(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, uint16 power, float range, float disableTimeInSeconds) 
-		: _TauntPower(power), _Range(range)
+	CSpecialPowerTaunt(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, uint16 power, float range, float disableTimeInSeconds)
+	    : _TauntPower(power)
+	    , _Range(range)
 	{
 		_Phrase = phrase;
-		
+
 		_DisablePowerTime = uint32(disableTimeInSeconds / CTickEventHandler::getGameTimeStep());
 
 		_PowerType = POWERS::Taunt;
-		
-		if(TheDataset.isAccessible(actorRowId))
+
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -61,7 +61,7 @@ public:
 
 protected:
 	/**
-     *test if the taunt works on given entity
+	 *test if the taunt works on given entity
 	 * \param entity the entity to taunt
 	 * \return true if the taunt is successful, false otherwise
 	 */
@@ -69,10 +69,10 @@ protected:
 
 protected:
 	/// taunt power (cannot taunt creatures above this "level")
-	uint16	_TauntPower;
+	uint16 _TauntPower;
 
 	/// max range in meters
-	float	_Range;
+	float _Range;
 };
 
 #endif // RYZOM_SPECIAL_POWER_TAUNT_H

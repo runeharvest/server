@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #include "nel/misc/debug.h"
@@ -33,12 +31,11 @@ using namespace std;
  * Static variables
  */
 
-uint									CModuleManager::_MaxModules = 0;
+uint CModuleManager::_MaxModules = 0;
 
-NLMISC::CMutex							*CModuleManager::_ModMutexes = NULL;
+NLMISC::CMutex *CModuleManager::_ModMutexes = NULL;
 
-vector<CModuleManager*>					CModuleManager::_RegisteredManagers;
-
+vector<CModuleManager *> CModuleManager::_RegisteredManagers;
 
 // Constructor
 CModuleManager::CModuleManager(const char *name, bool independent)
@@ -67,11 +64,9 @@ CModuleManager::~CModuleManager()
 	}
 }
 
-
-
 //
 
-void	CModuleManager::init(uint maxModules)
+void CModuleManager::init(uint maxModules)
 {
 	nlassert(_MaxModules == 0);
 	nlassert(_ModMutexes == NULL);
@@ -82,102 +77,100 @@ void	CModuleManager::init(uint maxModules)
 
 //
 
-void	CModuleManager::release()
+void CModuleManager::release()
 {
 	_MaxModules = 0;
-	delete [] _ModMutexes;
+	delete[] _ModMutexes;
 	_ModMutexes = NULL;
 }
 
 //
 
-void	CModuleManager::startAll()
+void CModuleManager::startAll()
 {
 	// first reset cycle
 	resetCycle();
 
-	uint	i;
+	uint i;
 
 	// and start all managers at once
-	for (i=0; i<_RegisteredManagers.size(); ++i)
+	for (i = 0; i < _RegisteredManagers.size(); ++i)
 		if (_RegisteredManagers[i]->_Independent)
 			_RegisteredManagers[i]->start();
 }
 
-void	CModuleManager::stopAll(TTime timeout)
+void CModuleManager::stopAll(TTime timeout)
 {
-	uint	i;
+	uint i;
 
 	// send soft stop
-	for (i=0; i<_RegisteredManagers.size(); ++i)
+	for (i = 0; i < _RegisteredManagers.size(); ++i)
 		_RegisteredManagers[i]->stop(false, 0);
 
 	// wait for all managers to stop or timeout
-	TTime	before = CTime::getLocalTime();
-	while (!allStopped() && CTime::getLocalTime()-before < timeout)
+	TTime before = CTime::getLocalTime();
+	while (!allStopped() && CTime::getLocalTime() - before < timeout)
 		nlSleep(10);
 
 	// and hard stop
-	for (i=0; i<_RegisteredManagers.size(); ++i)
+	for (i = 0; i < _RegisteredManagers.size(); ++i)
 		_RegisteredManagers[i]->stop(true, 0);
 }
 
-void	CModuleManager::resetCycle()
+void CModuleManager::resetCycle()
 {
-	uint	i;
+	uint i;
 
 	// reset all managers cycle counter
-	for (i=0; i<_RegisteredManagers.size(); ++i)
+	for (i = 0; i < _RegisteredManagers.size(); ++i)
 		_RegisteredManagers[i]->_Cycle = 0;
 }
 
-bool	CModuleManager::allReady()
+bool CModuleManager::allReady()
 {
-	uint	i;
+	uint i;
 
 	// checks if all managers are at the same cycle
-	for (i=0; i<_RegisteredManagers.size()-1; ++i)
-		if (_RegisteredManagers[i]->_Cycle != _RegisteredManagers[i+1]->_Cycle)
+	for (i = 0; i < _RegisteredManagers.size() - 1; ++i)
+		if (_RegisteredManagers[i]->_Cycle != _RegisteredManagers[i + 1]->_Cycle)
 			return false;
 
 	return true;
 }
 
-bool	CModuleManager::allComplete()
+bool CModuleManager::allComplete()
 {
-	uint	i;
+	uint i;
 
 	// checks if all managers have set the stop flag
-	for (i=0; i<_RegisteredManagers.size()-1; ++i)
-		if (_RegisteredManagers[i]->_CompleteCycle != _RegisteredManagers[i+1]->_CompleteCycle)
+	for (i = 0; i < _RegisteredManagers.size() - 1; ++i)
+		if (_RegisteredManagers[i]->_CompleteCycle != _RegisteredManagers[i + 1]->_CompleteCycle)
 			return false;
 
 	return true;
 }
 
-bool	CModuleManager::allStopped()
+bool CModuleManager::allStopped()
 {
-	uint	i;
+	uint i;
 
 	// checks if all managers have set the stop flag
-	for (i=0; i<_RegisteredManagers.size(); ++i)
+	for (i = 0; i < _RegisteredManagers.size(); ++i)
 		if (!_RegisteredManagers[i]->_ThreadStopped)
 			return false;
 
 	return true;
 }
 
-void	CModuleManager::resetManagers()
+void CModuleManager::resetManagers()
 {
 	// clear all registered managers
 	_RegisteredManagers.clear();
 }
 
-
-
 //
 
-void	CModuleManager::addModule(uint id, TModuleExecCallback cb)
+void CModuleManager::addModule(uint id, TModuleExecCallback cb)
 {
 	nlassert(id < _MaxModules);
 	nlassert(cb != NULL);
@@ -194,7 +187,7 @@ void	CModuleManager::addModule(uint id, TModuleExecCallback cb)
 
 //
 
-void	CModuleManager::addWait(uint id)
+void CModuleManager::addWait(uint id)
 {
 	nlassert(id < _MaxModules);
 	nldebug("FEMMAN: [%s] Added wait %d to stack", _StackName.c_str(), id);
@@ -208,7 +201,7 @@ void	CModuleManager::addWait(uint id)
 
 //
 
-void	CModuleManager::start()
+void CModuleManager::start()
 {
 	_Thread = IThread::create(this);
 
@@ -216,17 +209,17 @@ void	CModuleManager::start()
 	_ThreadStopped = false;
 
 	_Thread->start();
-	//nlinfo("FEMMAN: [%s] Start", _StackName.c_str());
+	// nlinfo("FEMMAN: [%s] Start", _StackName.c_str());
 }
 
 //
 
-void	CModuleManager::runOnce()
+void CModuleManager::runOnce()
 {
 	_StopThread = false;
 	_ThreadStopped = false;
 
-	//nlinfo("FEMMAN: [%s] Running one time", _StackName.c_str());
+	// nlinfo("FEMMAN: [%s] Running one time", _StackName.c_str());
 
 	// step cycle
 	stepCycle();
@@ -242,16 +235,16 @@ void	CModuleManager::runOnce()
 	// and wait for all managers to finish entering mutexes
 	waitAllComplete();
 
-	//H_BEFORE(MMExecuteStack);
+	// H_BEFORE(MMExecuteStack);
 	executeStack();
-	//H_AFTER(MMExecuteStack);
+	// H_AFTER(MMExecuteStack);
 
 	_ThreadStopped = true;
 }
 
 //
 
-void	CModuleManager::stop(bool blockingMode, TTime timeout)
+void CModuleManager::stop(bool blockingMode, TTime timeout)
 {
 	// non independent modules (called by main thread) are always stopped at this point, no need to force stop
 	if (!_Independent)
@@ -259,7 +252,6 @@ void	CModuleManager::stop(bool blockingMode, TTime timeout)
 		_ThreadStopped = true;
 		return;
 	}
-
 
 	if (!blockingMode)
 	{
@@ -276,12 +268,12 @@ void	CModuleManager::stop(bool blockingMode, TTime timeout)
 		_StopThread = true;
 
 		// wait for stop or timeout
-		TTime	before = CTime::getLocalTime();
-		while (!_ThreadStopped && CTime::getLocalTime()-before < timeout)
+		TTime before = CTime::getLocalTime();
+		while (!_ThreadStopped && CTime::getLocalTime() - before < timeout)
 			nlSleep(10);
 	}
 
-	if ( _Thread )
+	if (_Thread)
 	{
 		// if timeout, terminate thread
 		if (!_ThreadStopped)
@@ -295,10 +287,9 @@ void	CModuleManager::stop(bool blockingMode, TTime timeout)
 	}
 }
 
-
 //
 
-void	CModuleManager::run()
+void CModuleManager::run()
 {
 	nldebug("FEMMAN: [%s] attached thread loop start", _StackName.c_str());
 
@@ -318,9 +309,9 @@ void	CModuleManager::run()
 		// and wait for all managers to finish entering mutexes
 		waitAllComplete();
 
-		//H_BEFORE(MMExecuteStack);
+		// H_BEFORE(MMExecuteStack);
 		executeStack();
-		//H_AFTER(MMExecuteStack);
+		// H_AFTER(MMExecuteStack);
 
 		// if stop sent, just leave
 		if (_StopThread)
@@ -334,71 +325,71 @@ void	CModuleManager::run()
 
 //
 
-void	CModuleManager::executeStack()
+void CModuleManager::executeStack()
 {
 	// for each item,
-	//   if a module, 
+	//   if a module,
 	//      calls associated callback
 	//      leaves mutex
 	//   else
 	//      enters mutex
 	//      leaves mutex
 
-	//nldebug("FEMMAN: [%s] execute stack", _StackName.c_str());
+	// nldebug("FEMMAN: [%s] execute stack", _StackName.c_str());
 
-	uint	i;
+	uint i;
 
-	for (i=0; i<_ExecutionStack.size(); ++i)
+	for (i = 0; i < _ExecutionStack.size(); ++i)
 	{
-		CExecutionItem	&item = _ExecutionStack[i];
+		CExecutionItem &item = _ExecutionStack[i];
 
 		if (item.Type == Module)
 		{
-			//nldebug("FEMMAN: [%s] execute module %d at %p", _StackName.c_str(), item.Id, item.Cb);
-			//H_BEFORE(MMCall);
+			// nldebug("FEMMAN: [%s] execute module %d at %p", _StackName.c_str(), item.Id, item.Cb);
+			// H_BEFORE(MMCall);
 			item.Cb();
-			//H_AFTER(MMCall);
+			// H_AFTER(MMCall);
 			_ModMutexes[item.Id].leave();
 		}
 		else if (item.Type == Wait)
 		{
-			//nldebug("FEMMAN: [%s] wait for module %d to finish", _StackName.c_str(), item.Id);
-			//H_BEFORE(MMWait);
-			//TTime t = CTime::getLocalTime();
+			// nldebug("FEMMAN: [%s] wait for module %d to finish", _StackName.c_str(), item.Id);
+			// H_BEFORE(MMWait);
+			// TTime t = CTime::getLocalTime();
 			_ModMutexes[item.Id].enter();
-			//nlinfo( "Waited %u ms", (uint32)(CTime::getLocalTime()-t) );
+			// nlinfo( "Waited %u ms", (uint32)(CTime::getLocalTime()-t) );
 			_ModMutexes[item.Id].leave();
-			//H_AFTER(MMWait);
+			// H_AFTER(MMWait);
 		}
 		else
 		{
 			nlwarning("FEMMAN: Unexpected ExecutionItem type (%d) at item %d of the execution stack %s", item.Type, i, _StackName.c_str());
-			uint	j;
-			for (j=0; j<_ExecutionStack.size(); ++j)
-				nlwarning("FEMMAN: > %d [%s] Id=%d Cb=%p", j, (item.Type == Module) ? "MOD" : (item.Type == Wait) ? "WAIT" : "ERR", item.Id, (void *)item.Cb);
+			uint j;
+			for (j = 0; j < _ExecutionStack.size(); ++j)
+				nlwarning("FEMMAN: > %d [%s] Id=%d Cb=%p", j, (item.Type == Module) ? "MOD" : (item.Type == Wait) ? "WAIT"
+				                                                                                                  : "ERR",
+				    item.Id, (void *)item.Cb);
 			nlerror("FEMMAN: Error in execution stack %s", _StackName.c_str());
 		}
 	}
 
-	//nldebug("FEMMAN: [%s] stack executed", _StackName.c_str());
+	// nldebug("FEMMAN: [%s] stack executed", _StackName.c_str());
 }
 
-void	CModuleManager::enterMutexes()
+void CModuleManager::enterMutexes()
 {
 	// enters all controlled mutexes
 
-	//nldebug("FEMMAN: [%s] Entering all controlled mutexes", _StackName.c_str());
+	// nldebug("FEMMAN: [%s] Entering all controlled mutexes", _StackName.c_str());
 
-	uint	i;
+	uint i;
 
-	for (i=0; i<_ExecutedModules.size(); ++i)
+	for (i = 0; i < _ExecutedModules.size(); ++i)
 	{
-		//nldebug("FEMMAN: [%s] Entering mutex %d", _StackName.c_str(), _ExecutedModules[i]);
-		//TTime t = CTime::getLocalTime();
+		// nldebug("FEMMAN: [%s] Entering mutex %d", _StackName.c_str(), _ExecutedModules[i]);
+		// TTime t = CTime::getLocalTime();
 		_ModMutexes[_ExecutedModules[i]].enter();
-		//nlinfo( "Waited %u ms", (uint32)(CTime::getLocalTime()-t) );
+		// nlinfo( "Waited %u ms", (uint32)(CTime::getLocalTime()-t) );
 	}
-	//nldebug("FEMMAN: [%s] All controlled mutexes successfully entered", _StackName.c_str());
+	// nldebug("FEMMAN: [%s] All controlled mutexes successfully entered", _StackName.c_str());
 }
-
-

@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -33,16 +30,14 @@
 #include "player_manager/player.h"
 #include "mod_melee_success_effect.h"
 
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CSpecialPowerModMeleeSuccess::apply()
 {
@@ -60,13 +55,13 @@ void CSpecialPowerModMeleeSuccess::apply()
 	actor->forbidPower(_PowerType, _Phrase->getConsumableFamilyId(), CTickEventHandler::getGameCycle() + _DisablePowerTime);
 
 	const TGameCycle endDate = _Duration + CTickEventHandler::getGameCycle();
-	
+
 	// create effect and apply it on target
-	CModMeleeSuccessEffect *effect = new CModMeleeSuccessEffect(_ActorRowId, 
-													endDate, 
-													EFFECT_FAMILIES::PowerModMeleeSkill,
-													_Modifier1,
-													_Modifier2);
+	CModMeleeSuccessEffect *effect = new CModMeleeSuccessEffect(_ActorRowId,
+	    endDate,
+	    EFFECT_FAMILIES::PowerModMeleeSkill,
+	    _Modifier1,
+	    _Modifier2);
 	if (!effect)
 	{
 		nlwarning("<CSpecialPowerModMeleeSuccess::apply> Failed to allocate new CModMeleeSuccessEffect");
@@ -77,7 +72,7 @@ void CSpecialPowerModMeleeSuccess::apply()
 
 	// send messages
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::power_type);
-//	TVectorParamCheck params;
+	//	TVectorParamCheck params;
 	// for actor
 	if (actor->getId().getType() == RYZOMID::player)
 	{

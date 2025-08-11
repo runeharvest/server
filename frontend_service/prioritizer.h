@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_PRIORITIZER_H
 #define NL_PRIORITIZER_H
 
@@ -23,7 +21,6 @@
 #include "game_share/entity_types.h"
 #include "fe_types.h"
 #include "processing_spreader.h"
-
 
 /*
  * Forward declarations
@@ -34,7 +31,6 @@ class CPropertyDispatcher;
 class CPropertyIdTranslator;
 class CHistory;
 class TPairCE;
-
 
 /**
  * Prioritizer.
@@ -47,29 +43,32 @@ class TPairCE;
 class CPrioritizer
 {
 public:
-
 	/// Type of priority strategy
-	enum TPrioStrategy { DistanceOnly = 0, DistanceDelta = 1 };
+	enum TPrioStrategy
+	{
+		DistanceOnly = 0,
+		DistanceDelta = 1
+	};
 
 	/// Constructor
 	CPrioritizer();
 
 	/// Initialization
-	void					init( CVisionArray *va,
-								  CPropertyIdTranslator* pt, CHistory *h );
+	void init(CVisionArray *va,
+	    CPropertyIdTranslator *pt, CHistory *h);
 
 	/// Calculate the priorities
-	void					calculatePriorities();
+	void calculatePriorities();
 
-	CLFECOMMON::TCoord		getDeltaPos( TEntityIndex entityindex, TClientId clientid, CLFECOMMON::TCLEntityId ceid );
+	CLFECOMMON::TCoord getDeltaPos(TEntityIndex entityindex, TClientId clientid, CLFECOMMON::TCLEntityId ceid);
 
-	CLFECOMMON::TCoord		getDeltaOrientation( TEntityIndex entityindex, TClientId clientid, CLFECOMMON::TCLEntityId ceid );
+	CLFECOMMON::TCoord getDeltaOrientation(TEntityIndex entityindex, TClientId clientid, CLFECOMMON::TCLEntityId ceid);
 
 	/// Return the priority strategy
-	TPrioStrategy			prioStrategy() const { return _PrioStrategy; }
-	
+	TPrioStrategy prioStrategy() const { return _PrioStrategy; }
+
 	// Set the priority strategy
-	//void					setPrioStrategy( TPrioStrategy ps );
+	// void					setPrioStrategy( TPrioStrategy ps );
 
 	// Constants (obsolete)
 	/*
@@ -78,37 +77,33 @@ public:
 	static const TCoord		DistMinThreshold;
 	static const TCoord		DistMaxThreshold;
 	*/
-	static const CLFECOMMON::TCoord	MaxDelta;
+	static const CLFECOMMON::TCoord MaxDelta;
 
-	CProcessingSpreader		PositionSpreader, OrientationSpreader, DiscreetSpreader;
+	CProcessingSpreader PositionSpreader, OrientationSpreader, DiscreetSpreader;
 
 protected:
-
 	/// Calculate the priorities of position for the current cycle
-	void					calculatePriorityOfPosition();
+	void calculatePriorityOfPosition();
 
 	/// Calculate the priorities of orientation for the current cycle
-	void					calculatePriorityOfOrientation();
+	void calculatePriorityOfOrientation();
 
 	/// Calculate the priorities of discreet props for the current cycle
-	void					calculatePriorityOfDiscreet();
+	void calculatePriorityOfDiscreet();
 
 private:
-
 	/// Vision Array
-	CVisionArray			*_VisionArray;
+	CVisionArray *_VisionArray;
 
 	/// Property Id Translator
-	CPropertyIdTranslator	*_PropTranslator;
+	CPropertyIdTranslator *_PropTranslator;
 
 	/// History
-	CHistory				*_History;
+	CHistory *_History;
 
 	/// Strategy
-	TPrioStrategy			_PrioStrategy;
-
+	TPrioStrategy _PrioStrategy;
 };
-
 
 #endif // NL_PRIORITIZER_H
 

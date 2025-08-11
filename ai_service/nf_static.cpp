@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include	"stdpch.h"
+#include "stdpch.h"
 
 #include "script_compiler.h"
 
@@ -62,7 +62,7 @@ Arguments: s(Request), f(IndexSrc), f(IndexDst) ->
 
 */
 // none
-void copyDynEnergy_sff_(CStateInstance* entity, CScriptStack& stack)
+void copyDynEnergy_sff_(CStateInstance *entity, CScriptStack &stack)
 {
 	size_t const destIndex = (int)(float)stack.top();
 	stack.pop();
@@ -70,14 +70,14 @@ void copyDynEnergy_sff_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	string Request = stack.top();
 	stack.pop();
-	
+
 	vector<string> args;
 	{
-		CStringSeparator sep(Request," ");
+		CStringSeparator sep(Request, " ");
 		while (sep.hasNext())
 			args.push_back(sep.get());
 	}
-	
+
 	CDoOnFamilyCopyDynEnergy command(srcIndex, destIndex);
 	doOnFamily(args, &command);
 }
@@ -104,7 +104,7 @@ Arguments: s(Request), f(Index), f(Value) ->
 
 */
 // none
-void setDynEnergy_sff_(CStateInstance* entity, CScriptStack& stack)
+void setDynEnergy_sff_(CStateInstance *entity, CScriptStack &stack)
 {
 	float const value = stack.top();
 	stack.pop();
@@ -112,14 +112,14 @@ void setDynEnergy_sff_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	string Request = stack.top();
 	stack.pop();
-	
+
 	vector<string> args;
 	{
 		CStringSeparator sep(Request, " ");
 		while (sep.hasNext())
 			args.push_back(sep.get());
 	}
-	
+
 	CDoOnFamilySetDynEnergy command(index, value);
 	doOnFamily(args, &command);
 }
@@ -144,22 +144,22 @@ Arguments: f(value),f(lim1),f(lim2) -> f(clamped_value)
 
 */
 // none
-void clamp_fff_f(CStateInstance* entity, CScriptStack& stack)
+void clamp_fff_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
 	float lim2 = stack.top();
 	stack.pop();
 	float lim1 = stack.top();
 	stack.pop();
-	float& value = stack.top();
-	
+	float &value = stack.top();
+
 	// Order limits
-	if (lim1>lim2)
+	if (lim1 > lim2)
 		std::swap(lim1, lim2);
 	// Clamp value
-	if (value<lim1)
+	if (value < lim1)
 		value = lim1;
-	if (value>lim2)
+	if (value > lim2)
 		value = lim2;
 }
 
@@ -180,12 +180,12 @@ Arguments: f(value1),f(value2) -> f(min_value)
 
 */
 // none
-void min_ff_f(CStateInstance* entity, CScriptStack& stack)
+void min_ff_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
 	float value2 = stack.top();
 	stack.pop();
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	value = std::min(value, value2);
 }
@@ -207,12 +207,12 @@ Arguments: f(value1),f(value2) -> f(max_value)
 
 */
 // none
-void max_ff_f(CStateInstance* entity, CScriptStack& stack)
+void max_ff_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
 	float value2 = stack.top();
 	stack.pop();
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	value = std::max(value, value2);
 }
@@ -234,16 +234,16 @@ Arguments: f(min),f(max) -> f(random_value)
 
 */
 // none
-void rndm_ff_f(CStateInstance* entity, CScriptStack& stack)
+void rndm_ff_f(CStateInstance *entity, CScriptStack &stack)
 {
 	float max = stack.top();
 	stack.pop();
 	float min = stack.top();
-	
+
 	// Min value
-	static uint32 const maxLimit = std::numeric_limits<uint32>::max()>>1;
-	double const rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
-	float const value = (float)(rval * (max-min) + min);
+	static uint32 const maxLimit = std::numeric_limits<uint32>::max() >> 1;
+	double const rval = (double)CAIS::rand32(maxLimit) / (double)maxLimit; // [0-1[
+	float const value = (float)(rval * (max - min) + min);
 
 	// Set rets
 	stack.top() = value;
@@ -265,9 +265,9 @@ Arguments: f(value) -> f(floored_value)
 
 */
 // none
-void floor_f_f(CStateInstance* entity, CScriptStack& stack)
+void floor_f_f(CStateInstance *entity, CScriptStack &stack)
 {
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = floorf(value);
@@ -289,10 +289,10 @@ Arguments: f(value) -> f(ceiled_value)
 
 */
 // none
-void ceil_f_f(CStateInstance* entity, CScriptStack& stack)
+void ceil_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = ceilf(value);
@@ -314,13 +314,13 @@ Arguments: f(value) -> f(rounded_value)
 
 */
 // none
-void round_f_f(CStateInstance* entity, CScriptStack& stack)
+void round_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
-	value = floorf(value+0.5f);
+	value = floorf(value + 0.5f);
 }
 
 //----------------------------------------------------------------------------
@@ -339,10 +339,10 @@ Arguments: f(value) -> f(rounded_value)
 
 */
 // none
-void abs_f_f(CStateInstance* entity, CScriptStack& stack)
+void abs_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = fabsf(value);
@@ -364,10 +364,10 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void sin_f_f(CStateInstance* entity, CScriptStack& stack)
+void sin_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = sinf(value);
@@ -389,10 +389,10 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void asin_f_f(CStateInstance* entity, CScriptStack& stack)
+void asin_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = asinf(value);
@@ -414,10 +414,10 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void sinh_f_f(CStateInstance* entity, CScriptStack& stack)
+void sinh_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = sinhf(value);
@@ -439,10 +439,10 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void cos_f_f(CStateInstance* entity, CScriptStack& stack)
+void cos_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = cosf(value);
@@ -464,10 +464,10 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void acos_f_f(CStateInstance* entity, CScriptStack& stack)
+void acos_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = acosf(value);
@@ -489,10 +489,10 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void cosh_f_f(CStateInstance* entity, CScriptStack& stack)
+void cosh_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = coshf(value);
@@ -514,10 +514,10 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void tan_f_f(CStateInstance* entity, CScriptStack& stack)
+void tan_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = tanf(value);
@@ -539,10 +539,10 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void atan_f_f(CStateInstance* entity, CScriptStack& stack)
+void atan_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = atanf(value);
@@ -564,10 +564,10 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void tanh_f_f(CStateInstance* entity, CScriptStack& stack)
+void tanh_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = tanhf(value);
@@ -589,10 +589,10 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void sqrt_f_f(CStateInstance* entity, CScriptStack& stack)
+void sqrt_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = sqrtf(value);
@@ -614,10 +614,10 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void exp_f_f(CStateInstance* entity, CScriptStack& stack)
+void exp_f_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
-	float& value = stack.top();
+	float &value = stack.top();
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
 	value = expf(value);
@@ -640,16 +640,16 @@ Arguments: f(x) -> f(y)
 
 */
 // none
-void pow_ff_f(CStateInstance* entity, CScriptStack& stack)
+void pow_ff_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
 	float const exponent = stack.top();
 	stack.pop();
 	float const base = stack.top();
-	
+
 	// Min value
 	// :FIXME: When used with a conformant standard library use std:: equivalent
-	float const value = powf(base,exponent);
+	float const value = powf(base, exponent);
 	// Set rets
 	stack.top() = value;
 }
@@ -670,11 +670,11 @@ Arguments: s(string) -> s(string)
 
 */
 // none
-void md5sum_s_s(CStateInstance* entity, CScriptStack& stack)
+void md5sum_s_s(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string str = (std::string)stack.top();
 
-	std::string value = NLMISC::getMD5((uint8*)&str[0], (uint32)str.size() ).toString();
+	std::string value = NLMISC::getMD5((uint8 *)&str[0], (uint32)str.size()).toString();
 	nlinfo(value.c_str());
 	stack.top() = value;
 }
@@ -695,9 +695,9 @@ Arguments: s(string) -> f(length)
 
 */
 // none
-void strlen_s_f(CStateInstance* entity, CScriptStack& stack)
+void strlen_s_f(CStateInstance *entity, CScriptStack &stack)
 {
-	stack.top() = (float)((string&)stack.top()).length();
+	stack.top() = (float)((string &)stack.top()).length();
 }
 
 //----------------------------------------------------------------------------
@@ -718,16 +718,16 @@ Arguments: s(string),f(start),f(length) -> s(substring)
 
 */
 // none
-void substr_sff_s(CStateInstance* entity, CScriptStack& stack)
+void substr_sff_s(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
 	int length = (int)(float)stack.top();
 	stack.pop();
 	int start = (int)(float)stack.top();
 	stack.pop();
-	
-	BOMB_IF( ((string&)stack.top()).length() < (uint)(start + length), "String too short for substr_sff_s operation", return );
-	stack.top() = ((string&)stack.top()).substr(start, length);
+
+	BOMB_IF(((string &)stack.top()).length() < (uint)(start + length), "String too short for substr_sff_s operation", return);
+	stack.top() = ((string &)stack.top()).substr(start, length);
 }
 
 //----------------------------------------------------------------------------
@@ -746,14 +746,14 @@ Arguments: s(string) -> f(value)
 
 */
 // none
-void strtof_s_f(CStateInstance* entity, CScriptStack& stack)
+void strtof_s_f(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
 	std::string str = (std::string)stack.top();
 	stack.pop();
-	char* pos = NULL;
+	char *pos = NULL;
 	float f = 0.0;
-	if(str.length() > 0)
+	if (str.length() > 0)
 		f = (float)strtod(str.c_str(), &pos);
 	else
 		BOMB("strtof_s_f try to convert an empty string !", return);
@@ -777,18 +777,18 @@ Arguments: s(string) -> f(value),f(isfloat)
 
 */
 // none
-void strtof_s_ff(CStateInstance* entity, CScriptStack& stack)
+void strtof_s_ff(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
 	std::string str = (std::string)stack.top();
 	stack.pop();
-	char* pos = NULL;
+	char *pos = NULL;
 	float f = 0.0;
-	if(str.length() > 0)
+	if (str.length() > 0)
 		f = (float)strtod(str.c_str(), &pos);
 	else
 		BOMB("strtof_s_ff try to convert an empty string !", return);
-	float success = str.c_str()!=pos?1.f:0.f;
+	float success = str.c_str() != pos ? 1.f : 0.f;
 	stack.push(success);
 	stack.push(f);
 }
@@ -811,19 +811,19 @@ Arguments: s(string) -> f(value),f(isfloat),f(isfull)
 
 */
 // none
-void strtof_s_fff(CStateInstance* entity, CScriptStack& stack)
+void strtof_s_fff(CStateInstance *entity, CScriptStack &stack)
 {
 	// Get args
 	std::string str = (std::string)stack.top();
 	stack.pop();
-	char* pos = NULL;
+	char *pos = NULL;
 	float f = 0.0;
-	if(str.length() > 0)
+	if (str.length() > 0)
 		f = (float)strtod(str.c_str(), &pos);
 	else
 		BOMB("strtof_s_fff try to convert an empty string !", return);
-	float success = str.c_str()!=pos?1.f:0.f;
-	float full = pos[0]=='\0'?1.f:0.f;
+	float success = str.c_str() != pos ? 1.f : 0.f;
+	float full = pos[0] == '\0' ? 1.f : 0.f;
 	stack.push(full);
 	stack.push(success);
 	stack.push(f);
@@ -845,7 +845,7 @@ Arguments: s(name) ->
 
 */
 // none
-void createNamedEntity_s_(CStateInstance* entity, CScriptStack& stack)
+void createNamedEntity_s_(CStateInstance *entity, CScriptStack &stack)
 {
 	CNamedEntityManager::getInstance()->create((std::string)stack.top());
 	stack.pop();
@@ -873,7 +873,7 @@ Arguments: s(name),s(prop),s(content) ->
 
 */
 // none
-void setNamedEntityProp_sss_(CStateInstance* entity, CScriptStack& stack)
+void setNamedEntityProp_sss_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string value = (std::string)stack.top();
 	stack.pop();
@@ -882,7 +882,6 @@ void setNamedEntityProp_sss_(CStateInstance* entity, CScriptStack& stack)
 	std::string name = (std::string)stack.top();
 	stack.pop();
 	CNamedEntityManager::getInstance()->get(name).set(prop, value, false);
-
 }
 
 //----------------------------------------------------------------------------
@@ -904,7 +903,7 @@ Arguments: s(name),s(prop),s(content) ->
 
 */
 // none
-void setNamedEntityPropCb_sss_(CStateInstance* entity, CScriptStack& stack)
+void setNamedEntityPropCb_sss_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string value = (std::string)stack.top();
 	stack.pop();
@@ -913,12 +912,11 @@ void setNamedEntityPropCb_sss_(CStateInstance* entity, CScriptStack& stack)
 	std::string name = (std::string)stack.top();
 	stack.pop();
 	CNamedEntityManager::getInstance()->get(name).set(prop, value, true);
-
 }
 
 //----------------------------------------------------------------------------
 // getNamedEntityProp_ss_s
-// Arguments: s(name) -> 
+// Arguments: s(name) ->
 /** @page code
 
 @subsection getNamedEntityProp_ss_s
@@ -940,12 +938,12 @@ Arguments: s(name),s(prop) -> s(content)
 
 */
 // none
-void getNamedEntityProp_ss_s(CStateInstance* entity, CScriptStack& stack)
+void getNamedEntityProp_ss_s(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string prop = (std::string)stack.top();
 	stack.pop();
 	std::string name = (std::string)stack.top();
-	
+
 	stack.top() = CNamedEntityManager::getInstance()->get(name).get(prop);
 }
 
@@ -964,7 +962,7 @@ Arguments: s(name) ->
 
 */
 // none
-void destroyNamedEntity_s_(CStateInstance* entity, CScriptStack& stack)
+void destroyNamedEntity_s_(CStateInstance *entity, CScriptStack &stack)
 {
 	CNamedEntityManager::getInstance()->destroy((std::string)stack.top());
 	stack.pop();
@@ -986,13 +984,13 @@ Arguments: s(phraseName),s(phraseContent) ->
 
 */
 // none
-void setSimplePhrase_ss_(CStateInstance* entity, CScriptStack& stack)
+void setSimplePhrase_ss_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string phraseContent = (std::string)stack.top();
 	stack.pop();
 	std::string phraseName = (std::string)stack.top();
 	stack.pop();
-	
+
 	std::string phraseContent2;
 	phraseContent2 += phraseName;
 	phraseContent2 += "(){[";
@@ -1001,15 +999,15 @@ void setSimplePhrase_ss_(CStateInstance* entity, CScriptStack& stack)
 
 	ucstring ucPhraseContent;
 	ucPhraseContent.fromUtf8(phraseContent2); // utf-8 version
-	//ucPhraseContent = phraseContent2; // iso-8859-1 version
-	
-	NLNET::CMessage	msgout("SET_PHRASE");
+	// ucPhraseContent = phraseContent2; // iso-8859-1 version
+
+	NLNET::CMessage msgout("SET_PHRASE");
 	msgout.serial(phraseName);
 	msgout.serial(ucPhraseContent);
 	sendMessageViaMirror("IOS", msgout);
 }
 
-void setSimplePhrase_sss_(CStateInstance* entity, CScriptStack& stack)
+void setSimplePhrase_sss_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string lang = (std::string)stack.top();
 	stack.pop();
@@ -1017,7 +1015,7 @@ void setSimplePhrase_sss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string phraseName = (std::string)stack.top();
 	stack.pop();
-	
+
 	std::string phraseContent2;
 	phraseContent2 += phraseName;
 	phraseContent2 += "(){[";
@@ -1026,15 +1024,14 @@ void setSimplePhrase_sss_(CStateInstance* entity, CScriptStack& stack)
 
 	ucstring ucPhraseContent;
 	ucPhraseContent.fromUtf8(phraseContent2); // utf-8 version
-	//ucPhraseContent = phraseContent2; // iso-8859-1 version
-	
-	NLNET::CMessage	msgout("SET_PHRASE_LANG");
+	// ucPhraseContent = phraseContent2; // iso-8859-1 version
+
+	NLNET::CMessage msgout("SET_PHRASE_LANG");
 	msgout.serial(phraseName);
 	msgout.serial(ucPhraseContent);
 	msgout.serial(lang);
 	sendMessageViaMirror("IOS", msgout);
 }
-
 
 //----------------------------------------------------------------------------
 /** @page code
@@ -1054,10 +1051,10 @@ Arguments: s(name) -> s(value)
 
 */
 // none
-void dataGetVar_s_s(CStateInstance* entity, CScriptStack& stack)
+void dataGetVar_s_s(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string varId = (std::string)stack.top();
-	
+
 	stack.top() = CAIScriptDataManager::getInstance()->getVar_s(varId);
 }
 
@@ -1079,10 +1076,10 @@ Arguments: s(name) -> f(value)
 
 */
 // none
-void dataGetVar_s_f(CStateInstance* entity, CScriptStack& stack)
+void dataGetVar_s_f(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string varId = (std::string)stack.top();
-	
+
 	stack.top() = CAIScriptDataManager::getInstance()->getVar_f(varId);
 }
 
@@ -1094,7 +1091,7 @@ Changes the content of a script data variable. Data variable name is composed
 of a file name and a variable name separated with ':', like in
 "file:variable".
 
-Arguments: s(name),s(value) -> 
+Arguments: s(name),s(value) ->
 @param[in] name is a the name of the data variable
 @param[in] value is a the content of the data variable
 
@@ -1104,13 +1101,13 @@ Arguments: s(name),s(value) ->
 
 */
 // none
-void dataSetVar_ss_(CStateInstance* entity, CScriptStack& stack)
+void dataSetVar_ss_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string value = (std::string)stack.top();
 	stack.pop();
 	std::string varId = (std::string)stack.top();
 	stack.pop();
-	
+
 	CAIScriptDataManager::getInstance()->setVar(varId, value);
 }
 
@@ -1122,7 +1119,7 @@ Changes the content of a script data variable. Data variable name is composed
 of a file name and a variable name separated with ':', like in
 "file:variable".
 
-Arguments: s(name),s(value) -> 
+Arguments: s(name),s(value) ->
 @param[in] name is a the name of the data variable
 @param[in] value is a the content of the data variable
 
@@ -1132,13 +1129,13 @@ Arguments: s(name),s(value) ->
 
 */
 // none
-void dataSetVar_sf_(CStateInstance* entity, CScriptStack& stack)
+void dataSetVar_sf_(CStateInstance *entity, CScriptStack &stack)
 {
 	float value = (float)stack.top();
 	stack.pop();
 	std::string varId = (std::string)stack.top();
 	stack.pop();
-	
+
 	CAIScriptDataManager::getInstance()->setVar(varId, value);
 }
 
@@ -1152,7 +1149,7 @@ necessary to save CPU, because writing operations can take time. This also
 permit to ensure data integrity if a crash occurs between the writing of two
 related variables.
 
-Arguments:  -> 
+Arguments:  ->
 
 @code
 ()dataSave();
@@ -1160,9 +1157,9 @@ Arguments:  ->
 
 */
 // none
-void dataSave__(CStateInstance* entity, CScriptStack& stack)
+void dataSave__(CStateInstance *entity, CScriptStack &stack)
 {
-//	CAIScriptDataManager::getInstance()->save();
+	//	CAIScriptDataManager::getInstance()->save();
 }
 
 //----------------------------------------------------------------------------
@@ -1170,18 +1167,18 @@ void dataSave__(CStateInstance* entity, CScriptStack& stack)
 
 @subsection setZoneState_sf_
 
-Arguments:  -> 
+Arguments:  ->
 
 arg0: is the zone name id
 
 arg1:
 if zone is not pvp
-	arg1 is interpreted as a boolean (0 - inactive, 1 - active)
+    arg1 is interpreted as a boolean (0 - inactive, 1 - active)
 if zone is a pvp zone
-	arg1 is interpreted as 
-		0 - inactive
-		1 - active with faction point rewards
-		2 - active without faction point rewards
+    arg1 is interpreted as
+        0 - inactive
+        1 - active with faction point rewards
+        2 - active without faction point rewards
 
 @code
 ()setZoneState("toto", 1.0);
@@ -1189,19 +1186,18 @@ if zone is a pvp zone
 
 */
 // none
-void setZoneState_sf_(CStateInstance* entity, CScriptStack& stack)
+void setZoneState_sf_(CStateInstance *entity, CScriptStack &stack)
 {
 	uint32 state = (uint32)((float)stack.top());
 	stack.pop();
 	std::string zoneName = (std::string)stack.top();
 	stack.pop();
-	
-	NLNET::CMessage	msgout("SET_ZONE_STATE");
+
+	NLNET::CMessage msgout("SET_ZONE_STATE");
 	msgout.serial(zoneName);
 	msgout.serial(state);
 	sendMessageViaMirror("EGS", msgout);
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Undocumented methods                                                     //
@@ -1213,23 +1209,23 @@ void setZoneState_sf_(CStateInstance* entity, CScriptStack& stack)
 // /!\ This function should not be documented as it's not intended to be used
 // by level designers (it immediatly stops the AIS on release versions).
 // none
-void break__(CStateInstance* entity, CScriptStack& stack)
+void break__(CStateInstance *entity, CScriptStack &stack)
 {
 	//	_asm int 3;
 	nlassert(false);
 }
 
-void getName_c_s(CStateInstance* entity, CScriptStack& stack)
+void getName_c_s(CStateInstance *entity, CScriptStack &stack)
 {
-	IScriptContext* ctx = (IScriptContext*)stack.top();
-	CGroup* group = dynamic_cast<CGroup*>(ctx);
+	IScriptContext *ctx = (IScriptContext *)stack.top();
+	CGroup *group = dynamic_cast<CGroup *>(ctx);
 	if (group)
 		stack.top() = group->getName();
 	else
 		stack.top() = string();
 }
 
-void context__c(CStateInstance* entity, CScriptStack& stack)
+void context__c(CStateInstance *entity, CScriptStack &stack)
 {
 	stack.push(entity);
 }
@@ -1241,74 +1237,74 @@ void context__c(CStateInstance* entity, CScriptStack& stack)
 /*
 void	setActivityVa	(CStateInstance	*entity, CScriptStack	&stack)
 {
-	string inSig = stack.top();
-	stack.pop();
-	string outSig = stack.top();
-	stack.pop();
-	
-	// Pop input args
-	std::deque<size_t> params;
-	for (string::size_type i=0; i<inSig.length(); ++i)
-	{
-		params.push_front(stack.top());
-		stack.pop();
-	}
-	vector<size_t> inParams(params.begin(), params.end());
-	params.clear();
-	vector<size_t> outParams(pOutSig->length());
-	
+    string inSig = stack.top();
+    stack.pop();
+    string outSig = stack.top();
+    stack.pop();
+
+    // Pop input args
+    std::deque<size_t> params;
+    for (string::size_type i=0; i<inSig.length(); ++i)
+    {
+        params.push_front(stack.top());
+        stack.pop();
+    }
+    vector<size_t> inParams(params.begin(), params.end());
+    params.clear();
+    vector<size_t> outParams(pOutSig->length());
+
 //////////////////////////////////////////////////////////////////////////////
-	
-	// Content
-	
+
+    // Content
+
 //////////////////////////////////////////////////////////////////////////////
-	
-	// Push output args
-	params.assign(outParams.begin(), outParams.end());
-	for (string::size_type i=0; i<outSig.length(); ++i)
-	{
-		stack.push(params.front());
-		params.pop_front();
-	}
+
+    // Push output args
+    params.assign(outParams.begin(), outParams.end());
+    for (string::size_type i=0; i<outSig.length(); ++i)
+    {
+        stack.push(params.front());
+        params.pop_front();
+    }
 }
 */
 
-void warning_s_(CStateInstance* entity, CScriptStack& stack)
+void warning_s_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string msg = (std::string)stack.top();
 	stack.pop();
 	nlwarning("%s", msg.c_str());
 }
 
-void info_s_(CStateInstance* entity, CScriptStack& stack)
+void info_s_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string msg = (std::string)stack.top();
 	stack.pop();
 	nlinfo("%s", msg.c_str());
 }
 
-void debug_s_(CStateInstance* entity, CScriptStack& stack)
+void debug_s_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string msg = (std::string)stack.top();
 	stack.pop();
 	nldebug("%s", msg.c_str());
 }
 
-void warning_f_(CStateInstance* entity, CScriptStack& stack)
+void warning_f_(CStateInstance *entity, CScriptStack &stack)
 {
 	float val = (float)stack.top();
 	stack.pop();
 	nlwarning("%f", val);
 }
 
-void info_f_(CStateInstance* entity, CScriptStack& stack)
+void info_f_(CStateInstance *entity, CScriptStack &stack)
 {
 	float val = (float)stack.top();
 	stack.pop();
 	nlinfo("%f", val);
 }
 
-void debug_f_(CStateInstance* entity, CScriptStack& stack)
+void debug_f_(CStateInstance *entity, CScriptStack &stack)
 {
 	float val = (float)stack.top();
 	stack.pop();
@@ -1320,9 +1316,9 @@ void debug_f_(CStateInstance* entity, CScriptStack& stack)
 std::map<std::string, FScrptNativeFunc> nfGetStaticNativeFunctions()
 {
 	std::map<std::string, FScrptNativeFunc> functions;
-	
+
 #define REGISTER_NATIVE_FUNC(cont, func) cont.insert(std::make_pair(std::string(#func), &func))
-	
+
 	REGISTER_NATIVE_FUNC(functions, copyDynEnergy_sff_);
 	REGISTER_NATIVE_FUNC(functions, setDynEnergy_sff_);
 	REGISTER_NATIVE_FUNC(functions, clamp_fff_f);
@@ -1373,8 +1369,8 @@ std::map<std::string, FScrptNativeFunc> nfGetStaticNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, warning_f_);
 	REGISTER_NATIVE_FUNC(functions, info_f_);
 	REGISTER_NATIVE_FUNC(functions, debug_f_);
-	
+
 #undef REGISTER_NATIVE_FUNC
-	
+
 	return functions;
 }

@@ -14,10 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#ifndef	LISTENER_EMITTER
-#define	LISTENER_EMITTER
+#ifndef LISTENER_EMITTER
+#define LISTENER_EMITTER
 
 /************************************************************************/
 //	Two classes to use here : CListener and CEmitter
@@ -27,175 +25,176 @@
 //	implementation must be cleaned after first use validation.
 /************************************************************************/
 
-
 //	only used in listener and emitters classes
-template	<class	T>
-class	CLink
+template <class T>
+class CLink
 {
 public:
-	
-	CLink	()	:	_previous(NULL),	_next(NULL)
+	CLink()
+	    : _previous(NULL)
+	    , _next(NULL)
 	{
 	}
-	virtual ~CLink	()
+	virtual ~CLink()
 	{
 	}
 
-	void	attachAfter	(T*	other,	const	int&	which)
+	void attachAfter(T *other, const int &which)
 	{
 		other.list[which].detach(which);
 		if (_next)
-			_next->list[which].previous	=	other;
-		other.list[which].next		=	_next;
-		_next			=	other;
-		other.list[which].previous	=	this;
+			_next->list[which].previous = other;
+		other.list[which].next = _next;
+		_next = other;
+		other.list[which].previous = this;
 	}
 
-	void	detach	(const	int&	which)
+	void detach(const int &which)
 	{
-		if (_previous)	
-			_previous->list[which]._next	=	_next;
+		if (_previous)
+			_previous->list[which]._next = _next;
 		if (_next)
-			_next->list[which].previous		=	_previous;
-		_previous	=	_next	=	NULL;
+			_next->list[which].previous = _previous;
+		_previous = _next = NULL;
 	}
 
-//protected:
-//private:
-	T*	_previous;
-	T*	_next;
+	// protected:
+	// private:
+	T *_previous;
+	T *_next;
 };
 
-template <class T> class CListenerEmitterLink;
-template <class T> class CListener;
-template <class T> class CEmitter;
-
+template <class T>
+class CListenerEmitterLink;
+template <class T>
+class CListener;
+template <class T>
+class CEmitter;
 
 //	listener system classes. never used. to keep.
 
 template <class T>
-class	CListenerEmitterLink
+class CListenerEmitterLink
 {
 public:
-	CListenerEmitterLink () : _listener(NULL), _emitter(NULL)
-	{		
+	CListenerEmitterLink()
+	    : _listener(NULL)
+	    , _emitter(NULL)
+	{
 	}
-	
-	CListenerEmitterLink (CListener<T>* listener, CEmitter<T>* emitter) : _listener(listener), _emitter(emitter)
-	{		
+
+	CListenerEmitterLink(CListener<T> *listener, CEmitter<T> *emitter)
+	    : _listener(listener)
+	    , _emitter(emitter)
+	{
 	}
 	enum
 	{
-		LISTENER=0,
+		LISTENER = 0,
 		EMITTER,
 		MAXLINK
 	};
-	
-	
-	virtual ~CListenerEmitterLink	()
+
+	virtual ~CListenerEmitterLink()
 	{
-		link[LISTENER].detach	(LISTENER);
-		link[EMITTER].detach	(EMITTER);
+		link[LISTENER].detach(LISTENER);
+		link[EMITTER].detach(EMITTER);
 	}
-	
-//protected:
-//private:
-	CLink<CListenerEmitterLink<T> >	link[MAXLINK];	//_nextListener;
 
-	CListener<T>*	_listener;
-	CEmitter<T>*	_emitter;
+	// protected:
+	// private:
+	CLink<CListenerEmitterLink<T>> link[MAXLINK]; //_nextListener;
+
+	CListener<T> *_listener;
+	CEmitter<T> *_emitter;
 };
-
 
 //	T is the message type.
-template	<class	T>
-class	CListener
+template <class T>
+class CListener
 {
 public:
-	CListener	()
+	CListener()
 	{
 	}
-	
-	virtual ~CListener	()
+
+	virtual ~CListener()
 	{
-		CListenerEmitterLink<T>*	current=_emitterList._next;
-		while (current!=NULL)
+		CListenerEmitterLink<T> *current = _emitterList._next;
+		while (current != NULL)
 		{
-			CListenerEmitterLink<T>*	nextcurrent=current->link[CListenerEmitterLink::EMITTER]._next;
-			delete	current;
-			current=nextcurrent;
+			CListenerEmitterLink<T> *nextcurrent = current->link[CListenerEmitterLink::EMITTER]._next;
+			delete current;
+			current = nextcurrent;
 		}
-		
 	}
-	
-	virtual	void	append(const	T&	message)	=	0;
-	
-	//protected:
-	//private:
-	CLink<CListenerEmitterLink<T> >	_emitterList;
+
+	virtual void append(const T &message) = 0;
+
+	// protected:
+	// private:
+	CLink<CListenerEmitterLink<T>> _emitterList;
 };
 
-template	<class	T>
-class	CEmitter
+template <class T>
+class CEmitter
 {
 public:
-	CEmitter	()
+	CEmitter()
 	{
 	}
-	virtual ~CEmitter	()
+	virtual ~CEmitter()
 	{
-		CListenerEmitterLink<T>*	current=_listenerList._next;
-		while (current!=NULL)
+		CListenerEmitterLink<T> *current = _listenerList._next;
+		while (current != NULL)
 		{
-			CListenerEmitterLink<T>*	nextcurrent=current->link[CListenerEmitterLink::LISTENER]._next;
-			delete	current;
-			current=nextcurrent;
+			CListenerEmitterLink<T> *nextcurrent = current->link[CListenerEmitterLink::LISTENER]._next;
+			delete current;
+			current = nextcurrent;
 		}
 	}
-	
-	CListenerEmitterLink<T>*	find	(CListener*	listener)
+
+	CListenerEmitterLink<T> *find(CListener *listener)
 	{
-		CListenerEmitterLink<T>*	current=_listenerList._next;
-		while (current!=NULL	&&	current->_listener!=listener)
+		CListenerEmitterLink<T> *current = _listenerList._next;
+		while (current != NULL && current->_listener != listener)
 		{
-			current=current->list[CListenerEmitterLink::LISTENER]._next;
+			current = current->list[CListenerEmitterLink::LISTENER]._next;
 		};
-		return	current;
+		return current;
 	}
 
-	void	addListener		(CListener*	listener)
+	void addListener(CListener *listener)
 	{
-		if	(!find(listener))
+		if (!find(listener))
 		{
-			CListenerEmitterLink<T>*	link=new	CListenerEmitterLink<T>(listener,this);
-			_listenerList.attachAfter			(link,CListenerEmitterLink::LISTENER);
-			listener->_emitterList.attachAfter	(link,CListenerEmitterLink::EMITTER);
+			CListenerEmitterLink<T> *link = new CListenerEmitterLink<T>(listener, this);
+			_listenerList.attachAfter(link, CListenerEmitterLink::LISTENER);
+			listener->_emitterList.attachAfter(link, CListenerEmitterLink::EMITTER);
 		}
-
 	}
 
-	void	removeListener	(CListener*	listener)
+	void removeListener(CListener *listener)
 	{
-		CListenerEmitterLink<T>*	link=find(listener);
-		if	(link)
-			delete	link;	//	automatic detach ..
+		CListenerEmitterLink<T> *link = find(listener);
+		if (link)
+			delete link; //	automatic detach ..
 	}
-	
-	void	fireEvent	(const	T&	event)
+
+	void fireEvent(const T &event)
 	{
-		CListenerEmitterLink<T>*	current=_listenerList._next;
-		
-		while (current!=NULL)
+		CListenerEmitterLink<T> *current = _listenerList._next;
+
+		while (current != NULL)
 		{
 			current->_listener->append(event);
-			current=current->link[CListenerEmitterLink::LISTENER]._next;
+			current = current->link[CListenerEmitterLink::LISTENER]._next;
 		}
-
 	}
-	
-//protected:
-//private:
-	CLink<CListenerEmitterLink<T> >	_listenerList;
+
+	// protected:
+	// private:
+	CLink<CListenerEmitterLink<T>> _listenerList;
 };
 
 #endif

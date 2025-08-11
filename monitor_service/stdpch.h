@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 //----------------------------------------------------------------
 // external files
 //----------------------------------------------------------------
@@ -26,7 +23,6 @@
 
 #include "nel/misc/types_nl.h"
 
-
 //----------------------------------------------------------------
 // std libs
 
@@ -34,7 +30,6 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <math.h>
-
 
 //----------------------------------------------------------------
 // stl
@@ -45,11 +40,10 @@
 #include <map>
 #include <set>
 #include <algorithm>
-//#include <sstream>
+// #include <sstream>
 #include <exception>
 #include <utility>
 #include <deque>
-
 
 //----------------------------------------------------------------
 // nel
@@ -83,4 +77,3 @@
 #include "game_share/mode_and_behaviour.h"
 #include "game_share/player_visual_properties.h"
 #include "ai_share/ai_event.h"
-

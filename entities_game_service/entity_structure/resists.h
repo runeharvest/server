@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_RESISTS_H
 #define RYZOM_RESISTS_H
 
@@ -30,27 +28,43 @@ class CCharacter;
 class CCreatureResists
 {
 public:
-	uint16	Fear;
-	uint16	Sleep;
-	uint16	Stun;
-	uint16	Root;
-	uint16	Snare;
-	uint16	Slow;
-	uint16	Blind;
-	uint16	Madness;
+	uint16 Fear;
+	uint16 Sleep;
+	uint16 Stun;
+	uint16 Root;
+	uint16 Snare;
+	uint16 Slow;
+	uint16 Blind;
+	uint16 Madness;
 
-	uint16	Acid;
-	uint16	Cold;
-	uint16	Electricity;
-	uint16	Fire;
-	uint16	Poison;
-	uint16	Rot;
-	uint16	Shockwave;
+	uint16 Acid;
+	uint16 Cold;
+	uint16 Electricity;
+	uint16 Fire;
+	uint16 Poison;
+	uint16 Rot;
+	uint16 Shockwave;
+
 public:
 	// ctor
-	CCreatureResists(): Fear(0),Sleep(0), Stun(0), Root(0), Snare(0), Slow(0), Blind(0), Madness(0),
-				Acid(0), Cold(0), Electricity(0), Fire(0), Poison(0), Rot(0), Shockwave(0)
-	{}
+	CCreatureResists()
+	    : Fear(0)
+	    , Sleep(0)
+	    , Stun(0)
+	    , Root(0)
+	    , Snare(0)
+	    , Slow(0)
+	    , Blind(0)
+	    , Madness(0)
+	    , Acid(0)
+	    , Cold(0)
+	    , Electricity(0)
+	    , Fire(0)
+	    , Poison(0)
+	    , Rot(0)
+	    , Shockwave(0)
+	{
+	}
 
 	/// serialize
 	void serial(NLMISC::IStream &f);

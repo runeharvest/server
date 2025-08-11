@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_CHG_CHARAC_EFFECT_H
 #define RY_CHG_CHARAC_EFFECT_H
 
@@ -33,15 +31,18 @@ class CChgCharacEffect : public CSTimedEffect
 {
 public:
 	NLMISC_DECLARE_CLASS(CChgCharacEffect)
-		
+
 	DECLARE_PERSISTENCE_METHODS
 
 	/// default ctor
-	CChgCharacEffect() : CSTimedEffect() {}
+	CChgCharacEffect()
+	    : CSTimedEffect()
+	{
+	}
 
 	///\ctor
-	CChgCharacEffect( const TDataSetRow & creatorRowId, uint32 endDate, EFFECT_FAMILIES::TEffectFamily effectFamily, std::string& affectedCharac, float modifier1, float modifier2)
-		:CSTimedEffect(creatorRowId, creatorRowId, effectFamily, true, 0/*paramvalue*/, 0/*power*/, endDate)
+	CChgCharacEffect(const TDataSetRow &creatorRowId, uint32 endDate, EFFECT_FAMILIES::TEffectFamily effectFamily, std::string &affectedCharac, float modifier1, float modifier2)
+	    : CSTimedEffect(creatorRowId, creatorRowId, effectFamily, true, 0 /*paramvalue*/, 0 /*power*/, endDate)
 	{
 #ifdef NL_DEBUG
 		_LastUpdateDate = CTickEventHandler::getGameCycle();
@@ -50,11 +51,11 @@ public:
 		_Modifier2 = modifier2;
 		_AffectedCharac = affectedCharac;
 	}
-	
+
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent *event, bool applyEffect);
 
 	/// callback called when the effect is actually removed
 	virtual void removed();
@@ -67,22 +68,21 @@ public:
 
 private:
 	// disableTime for targets
-	NLMISC::TGameCycle	_TargetDisableTime;
-	
+	NLMISC::TGameCycle _TargetDisableTime;
+
 	/// affected characteristics
-	std::string			_AffectedCharac;
+	std::string _AffectedCharac;
 
 	/// characteristics modifiers
-	float				_Modifier1;
-	float				_Modifier2;
+	float _Modifier1;
+	float _Modifier2;
 
-	NLMISC::CEntityId	_CreatorEntityId;
+	NLMISC::CEntityId _CreatorEntityId;
 
 #ifdef NL_DEBUG
-	NLMISC::TGameCycle	_LastUpdateDate;
+	NLMISC::TGameCycle _LastUpdateDate;
 #endif
 };
-
 
 #endif // RY_CHG_CHARAC_EFFECT_H
 

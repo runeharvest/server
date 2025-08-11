@@ -22,7 +22,7 @@
 #include "player_manager/character.h"
 #include "egs_sheets/egs_sheets.h"
 
-extern NLMISC::CVariable<uint32>	MaxPlayerBulk;
+extern NLMISC::CVariable<uint32> MaxPlayerBulk;
 
 /////////////////////////////////////////////////////////////
 // CHanlingInventory
@@ -33,7 +33,6 @@ uint32 CHandlingInventory::getMaxSlot() const
 {
 	return INVENTORIES::NB_HAND_SLOT;
 }
-
 
 // ****************************************************************************
 // Take care this code is the same as in CEquipInventory : find a better solution
@@ -68,21 +67,21 @@ void CHandlingInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags 
 	{
 		const CGameItemPtr item = getInventory()->getItem(slot);
 		nlassert(item != NULL);
-		
+
 		updateClientSlot(slot, item);
 
-		const CStaticItem * form = CSheets::getForm( item->getSheetId() );
-		if( !form )
+		const CStaticItem *form = CSheets::getForm(item->getSheetId());
+		if (!form)
 		{
 			nlwarning("Tryng to equip with an item but can't find sheet, problem!");
 			return;
 		}
 		getCharacter()->addWearMalus(form->WearEquipmentMalus);
-		
+
 		getCharacter()->applyItemModifiers(item);
-		
+
 		// if equip right hand item, compute parry level and disengage if player is engaged in combat
-		if (slot == INVENTORIES::right )
+		if (slot == INVENTORIES::right)
 			getCharacter()->updateParry(form->Family, form->Skill);
 	}
 
@@ -90,7 +89,7 @@ void CHandlingInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags 
 	{
 		const CGameItemPtr item = getInventory()->getItem(slot);
 		nlassert(item != NULL);
-		
+
 		updateClientSlot(slot, item);
 	}
 
@@ -115,22 +114,22 @@ void CHandlingInvView::updateClientSlot(uint32 clientSlot, const CGameItemPtr it
 	if (item != NULL)
 	{
 		// equip
-		getCharacter()->updateVisualInformation( INVENTORIES::UNDEFINED, 0, getInventory()->getInventoryId(), uint16(clientSlot), item->getSheetId(), item );
+		getCharacter()->updateVisualInformation(INVENTORIES::UNDEFINED, 0, getInventory()->getInventoryId(), uint16(clientSlot), item->getSheetId(), item);
 	}
 	else
 	{
 		// unequip
-		getCharacter()->updateVisualInformation( getInventory()->getInventoryId(), uint16(clientSlot), INVENTORIES::UNDEFINED, 0, NLMISC::CSheetId::Unknown, 0 );
+		getCharacter()->updateVisualInformation(getInventory()->getInventoryId(), uint16(clientSlot), INVENTORIES::UNDEFINED, 0, NLMISC::CSheetId::Unknown, 0);
 	}
-	
+
 	// do nothing else if client is not ready
 	if (!getCharacter()->getEnterFlag())
 		return;
-	
+
 	if (item != NULL)
-//		getCharacter()->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:HAND:%u:INDEX_IN_BAG", clientSlot ).c_str(), item->getInventorySlot() + 1 );
-		CBankAccessor_PLR::getINVENTORY().getHAND().getArray(clientSlot).setINDEX_IN_BAG(getCharacter()->_PropertyDatabase, checkedCast<uint16>(item->getInventorySlot()+1));
+		//		getCharacter()->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:HAND:%u:INDEX_IN_BAG", clientSlot ).c_str(), item->getInventorySlot() + 1 );
+		CBankAccessor_PLR::getINVENTORY().getHAND().getArray(clientSlot).setINDEX_IN_BAG(getCharacter()->_PropertyDatabase, checkedCast<uint16>(item->getInventorySlot() + 1));
 	else
-//		getCharacter()->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:HAND:%u:INDEX_IN_BAG", clientSlot ).c_str(), 0 );
+		//		getCharacter()->_PropertyDatabase.setProp( NLMISC::toString("INVENTORY:HAND:%u:INDEX_IN_BAG", clientSlot ).c_str(), 0 );
 		CBankAccessor_PLR::getINVENTORY().getHAND().getArray(clientSlot).setINDEX_IN_BAG(getCharacter()->_PropertyDatabase, 0);
 }

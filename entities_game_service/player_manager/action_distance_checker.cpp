@@ -14,13 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "player_manager/action_distance_checker.h"
 #include "player_manager/player.h"
 
-CActionDistanceChecker* CActionDistanceChecker::_Instance = NULL;
+CActionDistanceChecker *CActionDistanceChecker::_Instance = NULL;
 
 //---------------------------------------------------
 // CActionDistanceChecker init
@@ -29,7 +27,7 @@ void CActionDistanceChecker::init()
 {
 	nlassert(_Instance == NULL);
 	_Instance = new CActionDistanceChecker;
-}// init
+} // init
 
 //---------------------------------------------------
 // CActionDistanceChecker release
@@ -39,14 +37,13 @@ void CActionDistanceChecker::release()
 	nlassert(_Instance != NULL);
 	delete _Instance;
 	_Instance = NULL;
-}// init
+} // init
 
 //---------------------------------------------------
 // CActionDistanceChecker ctor
 //---------------------------------------------------
 CActionDistanceChecker::CActionDistanceChecker()
-:_LastCheck(0),_NbCheckPerTick(50)
+    : _LastCheck(0)
+    , _NbCheckPerTick(50)
 {
-}// ctor
-
-
+} // ctor

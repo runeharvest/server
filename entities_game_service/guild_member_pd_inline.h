@@ -14,12 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace EGSPD
-{
-	
+namespace EGSPD {
+
 /* -----------------------------------------
-* Inline implementation of CGuildMemberPD
-* ----------------------------------------- */
+ * Inline implementation of CGuildMemberPD
+ * ----------------------------------------- */
 inline CGuildMemberPD::CGuildMemberPD()
 {
 	__BaseTable = 3;
@@ -29,5 +28,4 @@ inline CGuildMemberPD::~CGuildMemberPD()
 }
 // End of inline implementation of CGuildMemberPD
 
-	
 } // End of EGSPD

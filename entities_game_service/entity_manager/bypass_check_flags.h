@@ -14,31 +14,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_BYPASS_CHECK_FLAGS_H
 #define RY_BYPASS_CHECK_FLAGS_H
 
-
-
-namespace CHECK_FLAG_TYPE
+namespace CHECK_FLAG_TYPE {
+enum TCheckFlagType
 {
-	enum TCheckFlagType
-	{
-		WhileSitting = 0,
-		InWater,
-		OnMount,
-		Fear,
-		Sleep,
-		Invulnerability,
-		Stun,
+	WhileSitting = 0,
+	InWater,
+	OnMount,
+	Fear,
+	Sleep,
+	Invulnerability,
+	Stun,
 
-		Unknown,
-	};
+	Unknown,
+};
 
-	const std::string &toString(TCheckFlagType type);
-	
-	TCheckFlagType fromString(const std::string &str);
+const std::string &toString(TCheckFlagType type);
+
+TCheckFlagType fromString(const std::string &str);
 }
 
 /**
@@ -56,15 +51,15 @@ public:
 
 		struct
 		{
-			uint8	WhileSitting : 1;
-			uint8	InWater : 1;
-			uint8	OnMount : 1;
-			uint8	Fear : 1;
-			uint8	Sleep : 1; // = Mezz
-			uint8	Invulnerability : 1;
-			uint8	Stun : 1;
+			uint8 WhileSitting : 1;
+			uint8 InWater : 1;
+			uint8 OnMount : 1;
+			uint8 Fear : 1;
+			uint8 Sleep : 1; // = Mezz
+			uint8 Invulnerability : 1;
+			uint8 Stun : 1;
 
-			uint8	Unused : 1;
+			uint8 Unused : 1;
 		} Flags;
 	};
 
@@ -74,7 +69,7 @@ public:
 	}
 
 	// set/reset flag from enum
-	void setFlag( CHECK_FLAG_TYPE::TCheckFlagType type, bool on );
+	void setFlag(CHECK_FLAG_TYPE::TCheckFlagType type, bool on);
 
 	static CBypassCheckFlags NoFlags;
 };

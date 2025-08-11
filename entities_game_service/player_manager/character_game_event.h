@@ -17,7 +17,6 @@
 #ifndef EGS_CHARACTER_GAME_EVENT_H
 #define EGS_CHARACTER_GAME_EVENT_H
 
-
 //-----------------------------------------------------------------------------
 // includes
 //-----------------------------------------------------------------------------
@@ -29,10 +28,9 @@
 
 class CCharacter;
 
-
 /**
  * CCharacterGameEvent
- * contains code and data relative to the game event. The methods reset and 
+ * contains code and data relative to the game event. The methods reset and
  * subscribe are called from mission action.
  * \author Matthieu 'Trap' Besson
  * \author Nevrax France
@@ -41,8 +39,8 @@ class CCharacter;
 class CCharacterGameEvent
 {
 	NL_INSTANCE_COUNTER_DECL(CCharacterGameEvent);
-public:
 
+public:
 	CCharacterGameEvent(CCharacter &c);
 
 	DECLARE_PERSISTENCE_METHODS
@@ -65,11 +63,11 @@ public:
 	// --------------
 
 	bool isInGameEvent() { return (_Date != 0); }
-	
+
 	NLMISC::TGameCycle getDate() { return _Date; }
 
-	const std::string & getEventFaction() const { return _EventFaction; }
-	void setEventFaction(const std::string & eventFaction);
+	const std::string &getEventFaction() const { return _EventFaction; }
+	void setEventFaction(const std::string &eventFaction);
 	void clearEventFaction() { setEventFaction(""); }
 
 	// register event faction in IOS
@@ -80,28 +78,25 @@ public:
 	void setEventChannelSessions();
 
 private:
-	
 	/// add a session in the channel for the char
-	void addEventSession( const std::string& channel, bool writeRight, uint32 historicSize );
-	
-	/// remove char session from the channel
-	void removeEventSession( const std::string& channel );
-	
-private:
+	void addEventSession(const std::string &channel, bool writeRight, uint32 historicSize);
 
+	/// remove char session from the channel
+	void removeEventSession(const std::string &channel);
+
+private:
 	// The parent class
 	CCharacter &_Char;
 
 	// Date where the player began the event (default 0 no event participation)
-	NLMISC::TGameCycle	_Date;
+	NLMISC::TGameCycle _Date;
 
 	// Event faction of player
-	std::string			_EventFaction;
-	std::string			_PreviousEventFaction;
+	std::string _EventFaction;
+	std::string _PreviousEventFaction;
 
 	// True if event faction must be registered in IOS
-	bool				_RegisterEventFaction;
-
+	bool _RegisterEventFaction;
 };
 
 #endif // EGS_CHARACTER_GAME_EVENT_H

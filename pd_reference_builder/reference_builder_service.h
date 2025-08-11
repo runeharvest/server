@@ -22,38 +22,34 @@
 
 #include <nel/misc/thread.h>
 
-
 class IRefTask : public NLMISC::IRunnable
 {
 public:
-
 	/**
 	 * Method to task implement behaviour
 	 * Return ture if task successfully executed
 	 */
-	virtual bool	execute() = 0;
-
+	virtual bool execute() = 0;
 
 public:
-
 	/**
 	 * Start the task
 	 */
-	void			start();
+	void start();
 
 	/**
 	 * Ask the task to stop
 	 */
-	virtual void	askStop()	{ AskedToStop = true; }
+	virtual void askStop() { AskedToStop = true; }
 
 	/**
 	 * The service that requested this task
 	 */
-	NLNET::TServiceId		RequesterService;
+	NLNET::TServiceId RequesterService;
 	/**
 	 * The id of the task (id sent by requester)
 	 */
-	uint32			TaskId;
+	uint32 TaskId;
 
 	enum TTaskState
 	{
@@ -67,18 +63,23 @@ public:
 	NLMISC::CAtomicBool ExecutionSuccess;
 
 public:
+	virtual void run();
 
-	virtual void	run();
-
-	IRefTask() : State(NotRunning), _Thread(NULL), ExecutionSuccess(true), AskedToStop(false)	{ }
-	virtual ~IRefTask()														{ if (_Thread != NULL)	delete _Thread; }
+	IRefTask()
+	    : State(NotRunning)
+	    , _Thread(NULL)
+	    , ExecutionSuccess(true)
+	    , AskedToStop(false)
+	{
+	}
+	virtual ~IRefTask()
+	{
+		if (_Thread != NULL) delete _Thread;
+	}
 
 private:
-
-	NLMISC::IThread	*_Thread;
-
+	NLMISC::IThread *_Thread;
 };
-
 
 /**
  * Persistant Data Service Class
@@ -89,37 +90,29 @@ private:
 class CReferenceBuilderService : public NLNET::IService
 {
 public:
-
 	/// Constructor
 	CReferenceBuilderService();
 
-
-
 	/// Initialization
-	virtual void	init();
+	virtual void init();
 
 	/// Release
-	virtual void	release();
+	virtual void release();
 
 	/// Update
-	virtual bool	update();
-
-
+	virtual bool update();
 
 	/// Queue of tasks to run
-	std::deque<IRefTask*>	Tasks;
+	std::deque<IRefTask *> Tasks;
 
 	/// Currently ran task
-	IRefTask*				CurrentTask;
-
+	IRefTask *CurrentTask;
 
 	/**
 	 * Kill All Submitted Task By A Service
 	 */
-	void			killTasks(NLNET::TServiceId serviceId);
-
+	void killTasks(NLNET::TServiceId serviceId);
 };
-
 
 #endif // NL_REFERENCE_BUILDER_SERVICE_H
 

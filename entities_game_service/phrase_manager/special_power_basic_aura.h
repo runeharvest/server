@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_SPECIAL_POWER_BASIC_AURA_H
 #define RYZOM_SPECIAL_POWER_BASIC_AURA_H
 
 #include "special_power.h"
-
 
 /**
  * Specialized class for auras
@@ -32,22 +29,24 @@ class CSpecialPowerBasicAura : public CSpecialPowerAuras
 {
 public:
 	/// Default Constructor
-	CSpecialPowerBasicAura() : CSpecialPowerAuras()
-	{		
+	CSpecialPowerBasicAura()
+	    : CSpecialPowerAuras()
+	{
 	}
 
 	/// Constructor
 	CSpecialPowerBasicAura(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds, float userDisableTimeInSeconds, float targetsDisableTimeInSeconds, POWERS::TPowerType powerType)
-	:CSpecialPowerAuras()
+	    : CSpecialPowerAuras()
 	{
 		_Phrase = phrase;
-		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());;		
+		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());
+		;
 		_DisablePowerTime = NLMISC::TGameCycle(userDisableTimeInSeconds / CTickEventHandler::getGameTimeStep());
 		_TargetsDisableAuraTime = NLMISC::TGameCycle(targetsDisableTimeInSeconds / CTickEventHandler::getGameTimeStep());
 
 		_PowerType = powerType;
-		
-		if(TheDataset.isAccessible(actorRowId))
+
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -70,16 +69,15 @@ public:
 
 protected:
 	/// effect duration
-	NLMISC::TGameCycle		_Duration;
+	NLMISC::TGameCycle _Duration;
 
 	/// param value
-	sint32					_ParamValue;
+	sint32 _ParamValue;
 
 	/// root effect family (used for txt msg)
-	EFFECT_FAMILIES::TEffectFamily	_RootEffectFamily;
+	EFFECT_FAMILIES::TEffectFamily _RootEffectFamily;
 	/// created effect family
-	EFFECT_FAMILIES::TEffectFamily	_CreatedEffectFamily;	
-	
+	EFFECT_FAMILIES::TEffectFamily _CreatedEffectFamily;
 };
 
 #endif // RYZOM_SPECIAL_POWER_BASIC_AURA_H

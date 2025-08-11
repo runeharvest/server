@@ -22,103 +22,92 @@
 
 #include "backup_service.h"
 
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
+namespace BS {
 
-namespace BS
+class CBackupServiceMod : public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase>>>,
+                          public CBackupServiceSkel
 {
-
-
-	class CBackupServiceMod:
-		public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
-		public CBackupServiceSkel
+public:
+	CBackupServiceMod()
 	{
-	public:
+		CBackupServiceSkel::init(this);
+	}
 
-		CBackupServiceMod()
-		{
-			CBackupServiceSkel::init(this);
-		}
+	//		static const std::string &getInitStringHelp()
+	//		{
+	//			static string help("ring_db(host=<mysql_hostname> user=<user> password=<password> base=<database_name>)");
+	//			return help;
+	//		}
+	//
+	//		bool initModule(const TParsedCommandLine &initInfo)
+	//		{
+	//			return CModuleBase::initModule(initInfo);
+	//
+	//		}
 
-//		static const std::string &getInitStringHelp()
-//		{
-//			static string help("ring_db(host=<mysql_hostname> user=<user> password=<password> base=<database_name>)");
-//			return help;
-//		}
-//
-//		bool initModule(const TParsedCommandLine &initInfo)
-//		{
-//			return CModuleBase::initModule(initInfo);
-//
-//		}
+	void onModuleDown(IModuleProxy *proxy)
+	{
+		// we must check that this module is not in the listener list
+		CBackupService::getInstance()->onModuleDown(proxy);
+	}
 
-		void onModuleDown(IModuleProxy *proxy)
-		{
-			// we must check that this module is not in the listener list
-			CBackupService::getInstance()->onModuleDown(proxy);
-		}
+	//		bool onProcessModuleMessage(IModuleProxy *sender, const CMessage &message)
+	//		{
+	//			if (CBackupServiceSkel::onDispatchMessage(sender, message))
+	//				return true;
+	//
+	//			nlwarning("CBackupServiceMod: Unknown message '%s' received", message.getName().c_str());
+	//
+	//			return false;
+	//		}
 
-//		bool onProcessModuleMessage(IModuleProxy *sender, const CMessage &message)
-//		{
-//			if (CBackupServiceSkel::onDispatchMessage(sender, message))
-//				return true;
-//
-//			nlwarning("CBackupServiceMod: Unknown message '%s' received", message.getName().c_str());
-//
-//			return false;
-//		}
+	/////////////////////////////////////////////////////////////
+	//// CBackupServiceSkel interface impl
+	/////////////////////////////////////////////////////////////
 
+	// A module ask to save a file in the backup repository
+	void saveFile(NLNET::IModuleProxy *sender, const std::string &fileName, const NLNET::TBinBuffer &data)
+	{
+		CWriteFile *access = new CWriteFile(fileName, TRequester(sender), 0, data.getBuffer(), data.getBufferSize());
 
-		/////////////////////////////////////////////////////////////
-		//// CBackupServiceSkel interface impl
-		/////////////////////////////////////////////////////////////
+		access->FailureMode = CWriteFile::MajorFailureIfFileUnwritable | CWriteFile::MajorFailureIfFileUnbackupable;
+		access->BackupFile = true;
+		access->Append = false;
 
-		// A module ask to save a file in the backup repository
-		void saveFile(NLNET::IModuleProxy *sender, const std::string &fileName, const NLNET::TBinBuffer &data)
-		{
-			CWriteFile*	access = new CWriteFile(fileName, TRequester(sender), 0, data.getBuffer(), data.getBufferSize());
+		CBackupService::getInstance()->FileManager.stackFileAccess(access);
+	}
 
-			access->FailureMode = CWriteFile::MajorFailureIfFileUnwritable | CWriteFile::MajorFailureIfFileUnbackupable;
-			access->BackupFile = true;
-			access->Append = false;
+	// A module ask to load a file
+	void loadFile(NLNET::IModuleProxy *sender, const std::string &fileName, uint32 requestId)
+	{
+		CLoadFile *access = new CLoadFile(fileName, TRequester(sender), requestId);
 
-			CBackupService::getInstance()->FileManager.stackFileAccess(access);
+		CBackupService::getInstance()->FileManager.stackFileAccess(access);
+	}
 
-		}
+	/////////////////////////////////////////////////////////////
+	//// commands
+	/////////////////////////////////////////////////////////////
 
-		// A module ask to load a file
-		void loadFile(NLNET::IModuleProxy *sender, const std::string &fileName, uint32 requestId)
-		{
-			CLoadFile* access = new CLoadFile(fileName, TRequester(sender), requestId);
+	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CBackupServiceMod, CModuleBase)
+	NLMISC_COMMAND_HANDLER_ADD(CBackupServiceMod, dump, "dump the module internal state", "no param");
+	//			NLMISC_COMMAND_HANDLER_ADD(CMailForumNotifierFwd, simMailNotify, "Simulate a mail notification", "<charId>");
+	NLMISC_COMMAND_HANDLER_TABLE_END
 
-			CBackupService::getInstance()->FileManager.stackFileAccess(access);
-		}
+	NLMISC_CLASS_COMMAND_DECL(dump)
+	{
+		// call the base class dump
+		NLMISC_CLASS_COMMAND_CALL_BASE(CModuleBase, dump);
 
+		return true;
+	}
+};
 
-		/////////////////////////////////////////////////////////////
-		//// commands
-		/////////////////////////////////////////////////////////////
-
-		NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CBackupServiceMod, CModuleBase)
-			NLMISC_COMMAND_HANDLER_ADD(CBackupServiceMod, dump, "dump the module internal state", "no param");
-//			NLMISC_COMMAND_HANDLER_ADD(CMailForumNotifierFwd, simMailNotify, "Simulate a mail notification", "<charId>");
-		NLMISC_COMMAND_HANDLER_TABLE_END
-
-		NLMISC_CLASS_COMMAND_DECL(dump)
-		{
-			// call the base class dump
-			NLMISC_CLASS_COMMAND_CALL_BASE(CModuleBase, dump);
-
-			return true;
-		}
-	};
-
-	NLNET_REGISTER_MODULE_FACTORY(CBackupServiceMod, "BackupServiceMod");
-
-
+NLNET_REGISTER_MODULE_FACTORY(CBackupServiceMod, "BackupServiceMod");
 
 } // namespace RSMGR
 

@@ -42,24 +42,21 @@ class IGuild;
 /** Local interface to the guild unifier module */
 class IGuildUnifier : public NLMISC::CManualSingleton<IGuildUnifier>
 {
-	
+
 public:
-	
 	/// The guild manager ask to send all guild info a all known clients
-	virtual void broadcastAllGuilds() =0;
+	virtual void broadcastAllGuilds() = 0;
 	/// A guild has been added
-	virtual void guildCreated(const CGuild *guild) =0;
+	virtual void guildCreated(const CGuild *guild) = 0;
 	/// A guild has been deleted
-	virtual void guildDeleted(uint32 guildId) =0;
+	virtual void guildDeleted(uint32 guildId) = 0;
 	/// Broadcast a guild message
-	virtual void sendMessageToGuildMembers( const CGuild *guild, const std::string &  msg, const TVectorParamCheck & params ) =0;
+	virtual void sendMessageToGuildMembers(const CGuild *guild, const std::string &msg, const TVectorParamCheck &params) = 0;
 	/// Broadcast a guild update (guilde base data and fames values)
 	virtual void broadcastGuildUpdate(IGuild *guild) = 0;
 
-
 	/// Called by guild manager when about to release it's resource
-	virtual void guildManagerReleased() =0;
+	virtual void guildManagerReleased() = 0;
 };
-
 
 #endif // GUILD_UNIFIER_H

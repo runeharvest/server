@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_HARVEST_PHRASE_H
 #define RYZOM_HARVEST_PHRASE_H
 
 #include "phrase_manager/s_phrase.h"
-
 
 /**
  * This class represents a faber phrase in the Sabrina system. See CSPhrase for methods definitions
@@ -33,7 +30,6 @@
 class CHarvestPhrase : public CSPhrase
 {
 public:
-
 	/// ctor
 	CHarvestPhrase();
 
@@ -42,14 +38,14 @@ public:
 
 	/// \name Override methods from CSPhrase
 	//@{
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true );
+	virtual bool build(const TDataSetRow &actorRowId, const std::vector<const CStaticBrick *> &bricks, bool buildToExecute = true);
 
 	/**
 	 * evaluate phrase
 	 * \return true if eval has been made without errors
 	 */
 	virtual bool evaluate();
-	
+
 	/**
 	 * validate phrase
 	 * \return true if phrase is valide
@@ -62,14 +58,14 @@ public:
 
 	///\unused basic methods from CSPhrase
 	//@{
-	virtual void setPrimaryItem( CGameItemPtr itemPtr ){}
-	virtual void setSecondaryItem( CGameItemPtr itemPtr ){}
-	virtual void addConsumableItem( CGameItemPtr itemPtr ){}
-	virtual void setPrimaryTarget( const TDataSetRow& ) {}
+	virtual void setPrimaryItem(CGameItemPtr itemPtr) { }
+	virtual void setSecondaryItem(CGameItemPtr itemPtr) { }
+	virtual void addConsumableItem(CGameItemPtr itemPtr) { }
+	virtual void setPrimaryTarget(const TDataSetRow &) { }
 	//@}
 
 	//@}
-		
+
 	/**
 	 * called at the end of the latency time
 	 */
@@ -81,17 +77,17 @@ public:
 	virtual void stop();
 	//@}
 
-	inline const TDataSetRow & getActor() const { return _ActorRowId;}
+	inline const TDataSetRow &getActor() const { return _ActorRowId; }
 	inline sint32 getSabrinaCost() const { return (sint32)(_SabrinaCost * _SabrinaRelativeCost); }
 	inline sint32 getSabrinaCredit() const { return (sint32)(_SabrinaCredit * _SabrinaRelativeCredit); }
 
-	inline void setRawMaterial( const NLMISC::CSheetId &rm ) { _RawMaterialId = rm; }
+	inline void setRawMaterial(const NLMISC::CSheetId &rm) { _RawMaterialId = rm; }
 	inline void minQuality(uint16 min) { _MinQuality = min; }
 	inline void maxQuality(uint16 max) { _MaxQuality = max; }
 	inline void quantity(uint16 qty) { _Quantity = qty; }
 
-	//inline void deposit(bool b) { _Deposit = b; }
-	//inline bool deposit() const { return _Deposit; }
+	// inline void deposit(bool b) { _Deposit = b; }
+	// inline bool deposit() const { return _Deposit; }
 
 private:
 	/// process harvest corpse result
@@ -99,37 +95,36 @@ private:
 
 private:
 	/// acting entity
-	TDataSetRow					_ActorRowId;
+	TDataSetRow _ActorRowId;
 
 	/// total cost (sabrina system)
-	sint32						_SabrinaCost;
+	sint32 _SabrinaCost;
 	/// relative cost must be added to total cost
-	float						_SabrinaRelativeCost;
+	float _SabrinaRelativeCost;
 	/// total credit (sabrina system)
-	sint32						_SabrinaCredit;
+	sint32 _SabrinaCredit;
 	/// relative credit must be added to total credit
-	float						_SabrinaRelativeCredit;
+	float _SabrinaRelativeCredit;
 	/// stamina cost of the harvest action
-	sint32						_StaminaCost;
+	sint32 _StaminaCost;
 	/// hp cost
-	sint32						_HPCost;
+	sint32 _HPCost;
 	/// harvest time in ticks
-	NLMISC::TGameCycle			_HarvestTime;
+	NLMISC::TGameCycle _HarvestTime;
 
 	/// harvested raw material
-	NLMISC::CSheetId			_RawMaterialId;
+	NLMISC::CSheetId _RawMaterialId;
 	/// min obtained quality
-	uint16						_MinQuality;
+	uint16 _MinQuality;
 	/// max obtained quality
-	uint16						_MaxQuality;
+	uint16 _MaxQuality;
 	/// harvested quantity
-	uint16						_Quantity;
+	uint16 _Quantity;
 	/// harvest a deposit or a creature (obsolete, deposit now done by foraging actions)
-	//bool						_Deposit;
+	// bool						_Deposit;
 
 	/// root brick sheetId (used to send to client)
-	NLMISC::CSheetId			_RootSheetId;
-
+	NLMISC::CSheetId _RootSheetId;
 };
 
 #endif // RYZOM_HARVEST_PHRASE_H

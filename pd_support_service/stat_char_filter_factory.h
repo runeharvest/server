@@ -24,40 +24,36 @@
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/sstring.h"
 
-
 //-------------------------------------------------------------------------------------------------
 // forward class declarations
 //-------------------------------------------------------------------------------------------------
 
 class CStatsScanCharacter;
 
-
 //-------------------------------------------------------------------------------------------------
 // class ICharFilter
 //-------------------------------------------------------------------------------------------------
 
-class ICharFilter: public NLMISC::CRefCount
+class ICharFilter : public NLMISC::CRefCount
 {
 public:
-	virtual ~ICharFilter() {}
-	virtual std::string toString() const=0;
-	virtual bool evaluate(const CStatsScanCharacter* c)=0;
+	virtual ~ICharFilter() { }
+	virtual std::string toString() const = 0;
+	virtual bool evaluate(const CStatsScanCharacter *c) = 0;
 };
-
 
 //-------------------------------------------------------------------------------------------------
 // class ICharFilterBuilder
 //-------------------------------------------------------------------------------------------------
 
-class ICharFilterBuilder: public NLMISC::CRefCount
+class ICharFilterBuilder : public NLMISC::CRefCount
 {
 public:
-	virtual ~ICharFilterBuilder() {}
-	virtual const char* getName()=0;
-	virtual const char* getDescription()=0;
-	virtual ICharFilter* build(const std::string& rawArgs)=0;
+	virtual ~ICharFilterBuilder() { }
+	virtual const char *getName() = 0;
+	virtual const char *getDescription() = 0;
+	virtual ICharFilter *build(const std::string &rawArgs) = 0;
 };
-
 
 //-------------------------------------------------------------------------------------------------
 // class CCharFilterFactory
@@ -66,30 +62,29 @@ public:
 class CCharFilterFactory
 {
 public:
-	static CCharFilterFactory* getInstance();
+	static CCharFilterFactory *getInstance();
 
 public:
 	// register an info extractor instance
 	void registerFilter(NLMISC::CSmartPtr<ICharFilterBuilder> filter);
 
 	// display the set of names and descriptions of info extractor instances
-	void displayFilterList(NLMISC::CLog* log=NLMISC::InfoLog);
+	void displayFilterList(NLMISC::CLog *log = NLMISC::InfoLog);
 
 	// basic accessors for getting hold of the registered info extractors
 	uint32 getFilterBuilderCount();
-	ICharFilterBuilder* getFilterBuilder(uint32 idx);
+	ICharFilterBuilder *getFilterBuilder(uint32 idx);
 
 	// the all important build method
-	ICharFilter* build(const NLMISC::CSString& cmdLine);
+	ICharFilter *build(const NLMISC::CSString &cmdLine);
 
 private:
 	// this is a singleton so ctor is private
-	CCharFilterFactory() {}
+	CCharFilterFactory() { }
 
-	typedef std::vector<NLMISC::CSmartPtr<ICharFilterBuilder> > TFilters;
+	typedef std::vector<NLMISC::CSmartPtr<ICharFilterBuilder>> TFilters;
 	TFilters _Filters;
 };
-
 
 //-------------------------------------------------------------------------------------------------
 // class CFilterRegisterer
@@ -105,31 +100,30 @@ public:
 	}
 };
 
-
 //-------------------------------------------------------------------------------------------------
 // MACRO FILTER()
 //-------------------------------------------------------------------------------------------------
 
-#define FILTER(name,description)\
-class CFilter_##name: public ICharFilter\
-{\
-public:\
-	CFilter_##name(const std::string& rawArgs) {_RawArgs=rawArgs;}\
-	virtual std::string toString() const {return std::string(#name)+" "+_RawArgs;}\
-	virtual bool evaluate(const CStatsScanCharacter* c);\
-private:\
-	NLMISC::CSString _RawArgs;\
-};\
-class CFilterBuilder_##name: public ICharFilterBuilder\
-{\
-public:\
-	virtual const char* getName()			{return #name;}\
-	virtual const char* getDescription()	{return description;}\
-	virtual ICharFilter* build(const std::string& rawArgs)	{return new CFilter_##name(rawArgs);}\
-};\
-CFilterRegisterer<CFilterBuilder_##name> __Registerer_CFilter_##name;\
-bool CFilter_##name::evaluate(const CStatsScanCharacter* c)
-
+#define FILTER(name, description)                                                                      \
+	class CFilter_##name : public ICharFilter                                                          \
+	{                                                                                                  \
+	public:                                                                                            \
+		CFilter_##name(const std::string &rawArgs) { _RawArgs = rawArgs; }                             \
+		virtual std::string toString() const { return std::string(#name) + " " + _RawArgs; }           \
+		virtual bool evaluate(const CStatsScanCharacter *c);                                           \
+                                                                                                       \
+	private:                                                                                           \
+		NLMISC::CSString _RawArgs;                                                                     \
+	};                                                                                                 \
+	class CFilterBuilder_##name : public ICharFilterBuilder                                            \
+	{                                                                                                  \
+	public:                                                                                            \
+		virtual const char *getName() { return #name; }                                                \
+		virtual const char *getDescription() { return description; }                                   \
+		virtual ICharFilter *build(const std::string &rawArgs) { return new CFilter_##name(rawArgs); } \
+	};                                                                                                 \
+	CFilterRegisterer<CFilterBuilder_##name> __Registerer_CFilter_##name;                              \
+	bool CFilter_##name::evaluate(const CStatsScanCharacter *c)
 
 //-------------------------------------------------------------------------------------------------
 #endif

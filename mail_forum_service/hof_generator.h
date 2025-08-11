@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_HOF_GENERATOR_H
 #define RY_HOF_GENERATOR_H
 
 #include "shard_stat_db_manager.h"
-
 
 /**
  * The Hall of Fame generator
@@ -35,7 +32,7 @@ class CHoFGenerator
 {
 public:
 	/// get the singleton instance
-	static CHoFGenerator * getInstance()
+	static CHoFGenerator *getInstance()
 	{
 		if (_Instance == NULL)
 			_Instance = new CHoFGenerator;
@@ -46,8 +43,8 @@ public:
 	void serviceUpdate();
 
 private:
-	typedef CShardStatDBReader::TPlayerValues	TPlayerValues;
-	typedef CShardStatDBReader::TGuildValues	TGuildValues;
+	typedef CShardStatDBReader::TPlayerValues TPlayerValues;
+	typedef CShardStatDBReader::TGuildValues TGuildValues;
 
 	enum TTableField
 	{
@@ -71,32 +68,32 @@ private:
 
 	struct CValueVar
 	{
-		std::string	VarName;
-		std::string	Path;
+		std::string VarName;
+		std::string Path;
 	};
 
 	struct CTableVar
 	{
-		std::string	VarName;
-		std::string	Path;
-		TTableField	Field;
-		uint32		MaxRows;
+		std::string VarName;
+		std::string Path;
+		TTableField Field;
+		uint32 MaxRows;
 	};
 
 	struct CWildcardValueVar
 	{
-		std::string	VarName;
-		std::string	PathPattern;
-		TWildcardOp	Op;
+		std::string VarName;
+		std::string PathPattern;
+		TWildcardOp Op;
 	};
 
 	struct CWildcardTableVar
 	{
-		std::string	VarName;
-		std::string	PathPattern;
-		TTableField	Field;
-		uint32		MaxRows;
-		TWildcardOp	Op;
+		std::string VarName;
+		std::string PathPattern;
+		TTableField Field;
+		uint32 MaxRows;
+		TWildcardOp Op;
 	};
 
 	struct CParsedData
@@ -111,32 +108,32 @@ private:
 
 		bool isEmpty() const
 		{
-			return (ValueVars.empty() && WValueVars.empty()	&& TableVars.empty() && WTableVars.empty());
+			return (ValueVars.empty() && WValueVars.empty() && TableVars.empty() && WTableVars.empty());
 		}
 
-		std::vector<CValueVar>			ValueVars;
-		std::vector<CTableVar>			TableVars;
-		std::vector<CWildcardValueVar>	WValueVars;
-		std::vector<CWildcardTableVar>	WTableVars;
+		std::vector<CValueVar> ValueVars;
+		std::vector<CTableVar> TableVars;
+		std::vector<CWildcardValueVar> WValueVars;
+		std::vector<CWildcardTableVar> WTableVars;
 	};
 
 	struct CTableRow
 	{
-		bool operator<(const CTableRow & tableRow) const
+		bool operator<(const CTableRow &tableRow) const
 		{
 			return (Value > tableRow.Value);
 		}
 
-		std::string		Name;
-		sint32			Value;
+		std::string Name;
+		sint32 Value;
 	};
 
 	struct CTable
 	{
 		void sort();
 
-		std::vector<CTableRow>	PlayerTable;
-		std::vector<CTableRow>	GuildTable;
+		std::vector<CTableRow> PlayerTable;
+		std::vector<CTableRow> GuildTable;
 	};
 
 private:
@@ -148,42 +145,42 @@ private:
 
 	/// parse a HDT file
 	/// \return false if parsing failed
-	bool parseHDTFile(const std::string & fileName, CParsedData & parsedData);
+	bool parseHDTFile(const std::string &fileName, CParsedData &parsedData);
 
 	/// split parsed data to decompose the PHP generation in several steps
-	void splitParsedData(const CParsedData & parsedData, std::vector<CParsedData> & parsedDataVec);
+	void splitParsedData(const CParsedData &parsedData, std::vector<CParsedData> &parsedDataVec);
 
 	/// generate PHP script from parsed data
 	/// \param parsedData : parsed data to generate script for
 	/// \param statDBReader : the shard SDB reader to use
 	/// \param phpScript : append the generated script to this string
 	/// \return false if generation failed
-	bool generatePHPScript(const CParsedData & parsedData, const CShardStatDBReader & statDBReader, std::string & phpScript);
+	bool generatePHPScript(const CParsedData &parsedData, const CShardStatDBReader &statDBReader, std::string &phpScript);
 
 	/// generate a PHP array from a SDB table
-	void generatePHPArray(const std::string & varName, const CTable & table, TTableField tableField, uint32 maxRows, std::string & phpArray);
+	void generatePHPArray(const std::string &varName, const CTable &table, TTableField tableField, uint32 maxRows, std::string &phpArray);
 
 	/// get sorted tables from a path pattern
 	/// \param statDBReader : shard SDB reader
 	/// \param pathPattern : the path pattern
 	/// \param wildcardTables : return the wildcard tables (ie one table per wildcard operator)
-	bool getSortedWildcardTables(const CShardStatDBReader & statDBReader, const std::string & pathPattern, std::vector<CTable> & wildcardTables) const;
+	bool getSortedWildcardTables(const CShardStatDBReader &statDBReader, const std::string &pathPattern, std::vector<CTable> &wildcardTables) const;
 
 	/// load a table from SDB
-	void loadTable(const CShardStatDBReader & statDBReader, const TPlayerValues & playerValues, const TGuildValues & guildValues, CTable & table) const;
+	void loadTable(const CShardStatDBReader &statDBReader, const TPlayerValues &playerValues, const TGuildValues &guildValues, CTable &table) const;
 
 	/// return the result of 'leftVal op rightVal'
 	sint32 applyWildcardOp(TWildcardOp op, sint32 leftVal, sint32 rightVal) const;
 
-	TTableField toTableField(const std::string & tableField) const;
-	TWildcardOp toWildcardOp(const std::string & op) const;
+	TTableField toTableField(const std::string &tableField) const;
+	TWildcardOp toWildcardOp(const std::string &op) const;
 
 	/// add a variable name in the given vector or return false if the name already exists
-	bool addVarName(std::vector<std::string> & varNames, const std::string & varName) const;
+	bool addVarName(std::vector<std::string> &varNames, const std::string &varName) const;
 
-	const std::string & getCurrentHDTFile();
-	const CShardStatDBReader & getCurrentSDBReader();
-	const CParsedData & getCurrentStep();
+	const std::string &getCurrentHDTFile();
+	const CShardStatDBReader &getCurrentSDBReader();
+	const CParsedData &getCurrentStep();
 
 	void setNextHDTFile();
 	void setNextSDBReader();
@@ -191,26 +188,25 @@ private:
 
 private:
 	/// the singleton instance
-	static CHoFGenerator * _Instance;
+	static CHoFGenerator *_Instance;
 
-	NLMISC::TTime	_LastUpdateTime;
-	NLMISC::TTime	_LastDirUpdateTime;
+	NLMISC::TTime _LastUpdateTime;
+	NLMISC::TTime _LastDirUpdateTime;
 
 	/// HDT files to parse
-	std::vector<std::string>		_HDTFiles;
-	uint32							_CurrentHDTFileIndex;
+	std::vector<std::string> _HDTFiles;
+	uint32 _CurrentHDTFileIndex;
 
 	/// shard SDB readers
-	std::vector<CShardStatDBReader>	_SDBReaders;
-	uint32							_CurrentSDBReaderIndex;
+	std::vector<CShardStatDBReader> _SDBReaders;
+	uint32 _CurrentSDBReaderIndex;
 
 	/// parsed data decomposed in several generation steps
-	std::vector<CParsedData>		_Steps;
-	uint32							_CurrentStepIndex;
+	std::vector<CParsedData> _Steps;
+	uint32 _CurrentStepIndex;
 
 	/// generated PHP script
-	std::string		_GeneratedScript;
+	std::string _GeneratedScript;
 };
-
 
 #endif // RY_HOF_GENERATOR_H

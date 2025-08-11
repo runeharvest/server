@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_SPELL_TARGET_H
 #define RY_SPELL_TARGET_H
 
@@ -34,20 +32,22 @@
 class CSpellTarget
 {
 public:
-	CSpellTarget(){}
+	CSpellTarget() { }
 
-	CSpellTarget(TDataSetRow id) : _TargetRowId(id){}
+	CSpellTarget(TDataSetRow id)
+	    : _TargetRowId(id)
+	{
+	}
 
 	/// set row id, and reset data
 	inline void setId(TDataSetRow id) { _TargetRowId = id; }
 	// get target id
-	inline const TDataSetRow & getId() const { return _TargetRowId; }
-	
+	inline const TDataSetRow &getId() const { return _TargetRowId; }
+
 protected:
 	/// target row id
-	TDataSetRow		_TargetRowId;
+	TDataSetRow _TargetRowId;
 };
-
 
 #endif // RY_SPELL_TARGET_H
 

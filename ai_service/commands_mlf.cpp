@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 using namespace NLMISC;
@@ -30,7 +28,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////////////
 
 static int const MULTI_LINE_FORMATER_maxn = 78;
-void MULTI_LINE_FORMATER::pushTitle(std::vector<std::string>& container, std::string const& text)
+void MULTI_LINE_FORMATER::pushTitle(std::vector<std::string> &container, std::string const &text)
 {
 	const sint maxn = MULTI_LINE_FORMATER_maxn;
 	sint n = maxn - (sint)text.length() - 4;
@@ -41,15 +39,15 @@ void MULTI_LINE_FORMATER::pushTitle(std::vector<std::string>& container, std::st
 	container.back() += std::string(maxn - 1, ' ');
 }
 
-void MULTI_LINE_FORMATER::pushEntry(std::vector<std::string>& container, std::string const& text)
+void MULTI_LINE_FORMATER::pushEntry(std::vector<std::string> &container, std::string const &text)
 {
 	container.push_back("| ");
 	container.back() += text;
 }
 
-void MULTI_LINE_FORMATER::pushFooter(std::vector<std::string>& container)
+void MULTI_LINE_FORMATER::pushFooter(std::vector<std::string> &container)
 {
 	int const maxn = MULTI_LINE_FORMATER_maxn;
 	container.push_back("\\");
-		container.back() += std::string(maxn - 1, '_');
+	container.back() += std::string(maxn - 1, '_');
 }

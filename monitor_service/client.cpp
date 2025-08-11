@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #include "client.h"
@@ -28,22 +26,22 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-extern std::map<TYPE_NAME_STRING_ID, std::string>	StringMap;
-extern std::set<TYPE_NAME_STRING_ID>				StringAsked;
+extern std::map<TYPE_NAME_STRING_ID, std::string> StringMap;
+extern std::set<TYPE_NAME_STRING_ID> StringAsked;
 
 // ***************************************************************************
 
 // Must be a pointer to control when to start listening socket and when stop it
 extern CCallbackServer *Server;
 
-uint32		StillToAdd = 0;
-uint32		StillToRemove = 0;
-uint32		Added = 0;
-uint32		Removed = 0;
-uint32		CurrentlyInVision = 0;
-uint32		SentPos = 0;
-uint32		SentMiscProp = 0;
-uint32		SentStr = 0;
+uint32 StillToAdd = 0;
+uint32 StillToRemove = 0;
+uint32 Added = 0;
+uint32 Removed = 0;
+uint32 CurrentlyInVision = 0;
+uint32 SentPos = 0;
+uint32 SentMiscProp = 0;
+uint32 SentStr = 0;
 
 NLMISC_VARIABLE(uint32, StillToAdd, "");
 NLMISC_VARIABLE(uint32, StillToRemove, "");
@@ -56,16 +54,16 @@ NLMISC_VARIABLE(uint32, SentStr, "");
 
 // ***************************************************************************
 
-vector<NLMISC::CSmartPtr<CMonitorClient> > Clients;
+vector<NLMISC::CSmartPtr<CMonitorClient>> Clients;
 
 // ***************************************************************************
 
 CMonitorClient::CMonitorClient(TSockId sock)
 {
 	_Sock = sock;
-	setWindow(0,0,0,0);
+	setWindow(0, 0, 0, 0);
 	StartOffset = 0;
-	AllowedUploadBandwidth = 2048;	// 2kB per second for a start
+	AllowedUploadBandwidth = 2048; // 2kB per second for a start
 	// counter = 0;
 
 	AddWeight = 3.0f;
@@ -101,21 +99,21 @@ void CMonitorClient::setWindow(float xmin, float ymin, float xmax, float ymax)
 
 // ***************************************************************************
 
-void	CMonitorClient::add (const TDataSetRow &entity)
+void CMonitorClient::add(const TDataSetRow &entity)
 {
-	uint32	index = entity.getIndex();
+	uint32 index = entity.getIndex();
 
 	if (index >= Entites.size())
-		Entites.resize(index+1);
+		Entites.resize(index + 1);
 
 	// don't add twice
-	if ( (Entites[index].Flags & CEntityEntry::Present) != 0)
+	if ((Entites[index].Flags & CEntityEntry::Present) != 0)
 		return;
 
 	// if pending in removal, just remove from PendingRemove list
-	if ( (Entites[index].Flags & CEntityEntry::Pending) != 0)
+	if ((Entites[index].Flags & CEntityEntry::Pending) != 0)
 	{
-		vector<uint32>::iterator	it = find(PendingRemove.begin(), PendingRemove.end(), entity.getIndex());
+		vector<uint32>::iterator it = find(PendingRemove.begin(), PendingRemove.end(), entity.getIndex());
 		if (it != PendingRemove.end())
 			PendingRemove.erase(it);
 		Entites[index].Flags &= (~CEntityEntry::Pending);
@@ -132,20 +130,20 @@ void	CMonitorClient::add (const TDataSetRow &entity)
 
 // ***************************************************************************
 
-void	CMonitorClient::remove (const TDataSetRow &entity)
+void CMonitorClient::remove(const TDataSetRow &entity)
 {
-	uint32	index = entity.getIndex();
+	uint32 index = entity.getIndex();
 
-	nlassert( index < Entites.size() );
+	nlassert(index < Entites.size());
 
 	// don't remove twice
-	if ( (Entites[index].Flags & CEntityEntry::Present) == 0)
+	if ((Entites[index].Flags & CEntityEntry::Present) == 0)
 		return;
 
 	// if pending in addition, just remove from PendingAdd list
-	if ( (Entites[index].Flags & CEntityEntry::Pending) != 0)
+	if ((Entites[index].Flags & CEntityEntry::Pending) != 0)
 	{
-		vector<uint32>::iterator	it = find(PendingAdd.begin(), PendingAdd.end(), entity.getIndex());
+		vector<uint32>::iterator it = find(PendingAdd.begin(), PendingAdd.end(), entity.getIndex());
 		if (it != PendingAdd.end())
 			PendingAdd.erase(it);
 		Entites[index].Flags &= (~(CEntityEntry::Pending | CEntityEntry::Present));
@@ -161,32 +159,32 @@ void	CMonitorClient::remove (const TDataSetRow &entity)
 
 // ***************************************************************************
 
-void	CMonitorClient::resetVision()
+void CMonitorClient::resetVision()
 {
-	uint	i;
+	uint i;
 
-	const CVector	&topleft = getTopLeft();
-	const CVector	&bottomright = getBottomRight();
+	const CVector &topleft = getTopLeft();
+	const CVector &bottomright = getBottomRight();
 
-	for (i=0; i<GlobalEntites.size(); ++i)
+	for (i = 0; i < GlobalEntites.size(); ++i)
 	{
 		if ((GlobalEntites[i].Flags & CGlobalEntityEntry::Present) != 0)
 		{
-			TDataSetRow	entityIndex = TDataSetRow::createFromRawIndex (i);
-			CMirrorPropValueRO<TYPE_POSX> valueX( TheDataset, entityIndex, DSPropertyPOSX );
-			CMirrorPropValueRO<TYPE_POSY> valueY( TheDataset, entityIndex, DSPropertyPOSY );
+			TDataSetRow entityIndex = TDataSetRow::createFromRawIndex(i);
+			CMirrorPropValueRO<TYPE_POSX> valueX(TheDataset, entityIndex, DSPropertyPOSX);
+			CMirrorPropValueRO<TYPE_POSY> valueY(TheDataset, entityIndex, DSPropertyPOSY);
 
-			CVector		pos((float)valueX / 1000.f, (float)valueY / 1000.f, 0.0f);
+			CVector pos((float)valueX / 1000.f, (float)valueY / 1000.f, 0.0f);
 
 			// is entity in client window
-			//nlassert(entityIndex.getIndex() < client.Entites.size());
-			bool	wasPresent = (i < Entites.size() && (Entites[i].Flags & CEntityEntry::Present) != 0);
+			// nlassert(entityIndex.getIndex() < client.Entites.size());
+			bool wasPresent = (i < Entites.size() && (Entites[i].Flags & CEntityEntry::Present) != 0);
 			if (pos.x > topleft.x && pos.x < bottomright.x && pos.y > topleft.y && pos.y < bottomright.y)
 			{
 				if (!wasPresent)
 				{
 					// Add
-					add( entityIndex );
+					add(entityIndex);
 				}
 
 				Entites[i].Flags |= CEntityEntry::DirtyAll;
@@ -194,7 +192,7 @@ void	CMonitorClient::resetVision()
 			else if (wasPresent)
 			{
 				// Rmv
-				remove( entityIndex );
+				remove(entityIndex);
 			}
 		}
 	}
@@ -202,7 +200,7 @@ void	CMonitorClient::resetVision()
 
 // ***************************************************************************
 
-void CMonitorClient::update ()
+void CMonitorClient::update()
 {
 	StillToAdd = 0;
 	StillToRemove = 0;
@@ -213,38 +211,38 @@ void CMonitorClient::update ()
 	SentStr = 0;
 
 	// compute bandwidth spaces allowed for this cycle
-	float		cycleBandw = (float)AllowedUploadBandwidth / 10.0f;
-	float		totalRatio = AddWeight + RemoveWeight + PosWeight + StrWeight + MiscPropWeight;
-	uint		maxAddSize = (uint)(cycleBandw*AddWeight/totalRatio);
-	uint		maxRmvSize = (uint)(cycleBandw*RemoveWeight/totalRatio);
-	uint		maxPosSize = (uint)(cycleBandw*PosWeight/totalRatio);
-	uint		maxStrSize = (uint)(cycleBandw*StrWeight/totalRatio);
-	uint		maxMiscPropSize  = (uint)(cycleBandw*MiscPropWeight/totalRatio);
+	float cycleBandw = (float)AllowedUploadBandwidth / 10.0f;
+	float totalRatio = AddWeight + RemoveWeight + PosWeight + StrWeight + MiscPropWeight;
+	uint maxAddSize = (uint)(cycleBandw * AddWeight / totalRatio);
+	uint maxRmvSize = (uint)(cycleBandw * RemoveWeight / totalRatio);
+	uint maxPosSize = (uint)(cycleBandw * PosWeight / totalRatio);
+	uint maxStrSize = (uint)(cycleBandw * StrWeight / totalRatio);
+	uint maxMiscPropSize = (uint)(cycleBandw * MiscPropWeight / totalRatio);
 
-	const uint	addSize = 4+4+8+4+4+4;
-	const uint	rmvSize = 4;
-	const uint	posSize = 4+4+4+4;
-	const uint	miscPropSize  = 4+4+4+1+1;
+	const uint addSize = 4 + 4 + 8 + 4 + 4 + 4;
+	const uint rmvSize = 4;
+	const uint posSize = 4 + 4 + 4 + 4;
+	const uint miscPropSize = 4 + 4 + 4 + 1 + 1;
 
-	CConfigFile::CVar *var = IService::getInstance()->ConfigFile.getVarPtr ("UpdatePerTick");
+	CConfigFile::CVar *var = IService::getInstance()->ConfigFile.getVarPtr("UpdatePerTick");
 	// here we suppose that position is changing often, whereas other less important
 	// properties are updated less frequently
-	uint		posToSend = 0;
-	uint		miscPropToSend = 0;
+	uint posToSend = 0;
+	uint miscPropToSend = 0;
 	{
 		uint poscount = 10;
 		if (var && (var->Type == CConfigFile::CVar::T_INT))
 			poscount = var->asInt();
 
-		uint	startOffset = StartOffset;
+		uint startOffset = StartOffset;
 		if (startOffset >= InVision.size())
 			startOffset = 0;
 
-		uint	entity = startOffset;
+		uint entity = startOffset;
 		while (poscount > 0 && !InVision.empty())
 		{
 			// is entity dirty ?
-			uint32	entityRawIndex = InVision[entity];
+			uint32 entityRawIndex = InVision[entity];
 			if ((Entites[entityRawIndex].Flags & CEntityEntry::PosDirty) != 0)
 			{
 				if ((Entites[entityRawIndex].Flags & CEntityEntry::Pending) == 0)
@@ -263,59 +261,78 @@ void CMonitorClient::update ()
 		}
 	}
 
-	uint		addTotalSize = (uint)PendingAdd.size()*addSize;
-	uint		rmvTotalSize = (uint)PendingRemove.size()*rmvSize;
-	uint		posTotalSize = posToSend*posSize;
-	uint		miscPropTotalSize = miscPropToSend*miscPropSize;
-	uint		strTotalSize = 0;
+	uint addTotalSize = (uint)PendingAdd.size() * addSize;
+	uint rmvTotalSize = (uint)PendingRemove.size() * rmvSize;
+	uint posTotalSize = posToSend * posSize;
+	uint miscPropTotalSize = miscPropToSend * miscPropSize;
+	uint strTotalSize = 0;
 
-	uint		i;
-	vector< pair<TYPE_NAME_STRING_ID, string*> >	strToSend;
-	for (i=0; i<Str.size() && strTotalSize < (uint)cycleBandw; ++i)
+	uint i;
+	vector<pair<TYPE_NAME_STRING_ID, string *>> strToSend;
+	for (i = 0; i < Str.size() && strTotalSize < (uint)cycleBandw; ++i)
 	{
 		TYPE_NAME_STRING_ID id = Str[i];
-		std::map<TYPE_NAME_STRING_ID, std::string>::iterator ite = StringMap.find (id);
-		nlassert (ite != StringMap.end());
-		strToSend.push_back(std::pair<TYPE_NAME_STRING_ID, string*>(id, &((*ite).second)));
-		strTotalSize += 4+4+(uint)(*ite).second.size();
+		std::map<TYPE_NAME_STRING_ID, std::string>::iterator ite = StringMap.find(id);
+		nlassert(ite != StringMap.end());
+		strToSend.push_back(std::pair<TYPE_NAME_STRING_ID, string *>(id, &((*ite).second)));
+		strTotalSize += 4 + 4 + (uint)(*ite).second.size();
 	}
 
-	bool		restrictAdd =      (addTotalSize > maxAddSize);
-	bool		restrictRmv =      (rmvTotalSize > maxRmvSize);
-	bool		restrictPos =      (posTotalSize > maxPosSize);
-	bool		restrictStr =      (strTotalSize > maxStrSize);
-	bool        restrictMiscProp = (miscPropTotalSize > maxMiscPropSize);
+	bool restrictAdd = (addTotalSize > maxAddSize);
+	bool restrictRmv = (rmvTotalSize > maxRmvSize);
+	bool restrictPos = (posTotalSize > maxPosSize);
+	bool restrictStr = (strTotalSize > maxStrSize);
+	bool restrictMiscProp = (miscPropTotalSize > maxMiscPropSize);
 
-	float		remainingBandw = cycleBandw;
+	float remainingBandw = cycleBandw;
 
-	if (!restrictAdd)	    { totalRatio -= AddWeight; remainingBandw -= addTotalSize; }
-	if (!restrictRmv)	    { totalRatio -= RemoveWeight; remainingBandw -= rmvTotalSize; }
-	if (!restrictPos)	    { totalRatio -= PosWeight; remainingBandw -= posTotalSize; }
-	if (!restrictStr)	    { totalRatio -= StrWeight; remainingBandw -= strTotalSize; }
-	if (!restrictMiscProp)	{ totalRatio -= MiscPropWeight; remainingBandw -= miscPropTotalSize; }
+	if (!restrictAdd)
+	{
+		totalRatio -= AddWeight;
+		remainingBandw -= addTotalSize;
+	}
+	if (!restrictRmv)
+	{
+		totalRatio -= RemoveWeight;
+		remainingBandw -= rmvTotalSize;
+	}
+	if (!restrictPos)
+	{
+		totalRatio -= PosWeight;
+		remainingBandw -= posTotalSize;
+	}
+	if (!restrictStr)
+	{
+		totalRatio -= StrWeight;
+		remainingBandw -= strTotalSize;
+	}
+	if (!restrictMiscProp)
+	{
+		totalRatio -= MiscPropWeight;
+		remainingBandw -= miscPropTotalSize;
+	}
 
-	if (restrictAdd)	    addTotalSize = (uint)(remainingBandw*AddWeight/totalRatio);
-	if (restrictRmv)	    rmvTotalSize = (uint)(remainingBandw*RemoveWeight/totalRatio);
-	if (restrictPos)	    posTotalSize = (uint)(remainingBandw*PosWeight/totalRatio);
-	if (restrictStr)	    strTotalSize = (uint)(remainingBandw*StrWeight/totalRatio);
-	if (restrictMiscProp)	miscPropTotalSize = (uint)(remainingBandw*MiscPropWeight/totalRatio);
-
+	if (restrictAdd) addTotalSize = (uint)(remainingBandw * AddWeight / totalRatio);
+	if (restrictRmv) rmvTotalSize = (uint)(remainingBandw * RemoveWeight / totalRatio);
+	if (restrictPos) posTotalSize = (uint)(remainingBandw * PosWeight / totalRatio);
+	if (restrictStr) strTotalSize = (uint)(remainingBandw * StrWeight / totalRatio);
+	if (restrictMiscProp) miscPropTotalSize = (uint)(remainingBandw * MiscPropWeight / totalRatio);
 
 	// update pending lists
-	uint	pendingAddCount = (addTotalSize/addSize);
+	uint pendingAddCount = (addTotalSize / addSize);
 	while (!PendingAdd.empty() && pendingAddCount > 0)
 	{
-		uint32	entityRawIndex = PendingAdd.back();
+		uint32 entityRawIndex = PendingAdd.back();
 		PendingAdd.pop_back();
-		TDataSetRow	entity = TDataSetRow::createFromRawIndex (entityRawIndex);
-		CMirrorPropValueRO<TYPE_NAME_STRING_ID>	stringId( TheDataset, entity, DSPropertyNAME_STRING_ID);
-		CMirrorPropValueRO<TYPE_SHEET>	sheetId( TheDataset, entity, DSPropertySHEET);
-		CAddData	addData;
+		TDataSetRow entity = TDataSetRow::createFromRawIndex(entityRawIndex);
+		CMirrorPropValueRO<TYPE_NAME_STRING_ID> stringId(TheDataset, entity, DSPropertyNAME_STRING_ID);
+		CMirrorPropValueRO<TYPE_SHEET> sheetId(TheDataset, entity, DSPropertySHEET);
+		CAddData addData;
 		addData.Id = entity.getIndex();
 		addData.StringId = stringId;
-		addData.EntityId = TheDataset.getEntityId (entity);
+		addData.EntityId = TheDataset.getEntityId(entity);
 		addData.SheetId = sheetId;
-		Add.push_back (addData);
+		Add.push_back(addData);
 
 		Entites[entityRawIndex].Flags &= (~CEntityEntry::Pending);
 
@@ -325,17 +342,17 @@ void CMonitorClient::update ()
 		++Added;
 	}
 
-	uint	pendingRemoveCount = (rmvTotalSize/rmvSize);
+	uint pendingRemoveCount = (rmvTotalSize / rmvSize);
 	while (!PendingRemove.empty() && pendingRemoveCount > 0)
 	{
-		uint32	entityRawIndex = PendingRemove.back();
+		uint32 entityRawIndex = PendingRemove.back();
 
-		vector<uint32>::iterator	it = find(InVision.begin(), InVision.end(), entityRawIndex);
+		vector<uint32>::iterator it = find(InVision.begin(), InVision.end(), entityRawIndex);
 		if (it != InVision.end())
 			InVision.erase(it);
 
 		PendingRemove.pop_back();
-		Rmv.push_back (entityRawIndex);
+		Rmv.push_back(entityRawIndex);
 
 		Entites[entityRawIndex].Flags &= (~CEntityEntry::Pending);
 
@@ -350,26 +367,26 @@ void CMonitorClient::update ()
 	if (StartOffset >= InVision.size())
 		StartOffset = 0;
 
-	uint	entity = StartOffset;
-	uint	pendingPosCount = (posTotalSize/posSize);
-	uint	pendingMiscPropCount = (miscPropTotalSize/posSize);
+	uint entity = StartOffset;
+	uint pendingPosCount = (posTotalSize / posSize);
+	uint pendingMiscPropCount = (miscPropTotalSize / posSize);
 	while ((pendingPosCount > 0 || pendingMiscPropCount > 0) && !InVision.empty())
 	{
 		// is entity dirty ?
-		uint32	entityRawIndex = InVision[entity];
+		uint32 entityRawIndex = InVision[entity];
 		if ((Entites[entityRawIndex].Flags & CEntityEntry::PosDirty) != 0 && (Entites[entityRawIndex].Flags & CEntityEntry::Pending) == 0)
 		{
-			TDataSetRow	entityIndex = TDataSetRow::createFromRawIndex (entityRawIndex);
-			CMirrorPropValueRO<TYPE_POSX>			valueX( TheDataset, entityIndex, DSPropertyPOSX );
-			CMirrorPropValueRO<TYPE_POSY>			valueY( TheDataset, entityIndex, DSPropertyPOSY );
-			CMirrorPropValueRO<TYPE_ORIENTATION>	valueT( TheDataset, entityIndex, DSPropertyORIENTATION );
+			TDataSetRow entityIndex = TDataSetRow::createFromRawIndex(entityRawIndex);
+			CMirrorPropValueRO<TYPE_POSX> valueX(TheDataset, entityIndex, DSPropertyPOSX);
+			CMirrorPropValueRO<TYPE_POSY> valueY(TheDataset, entityIndex, DSPropertyPOSY);
+			CMirrorPropValueRO<TYPE_ORIENTATION> valueT(TheDataset, entityIndex, DSPropertyORIENTATION);
 
 			CMonitorClient::CPosData posData;
 			posData.X = (float)valueX / 1000.f;
 			posData.Y = (float)valueY / 1000.f;
 			posData.Id = entityRawIndex;
 			posData.Tetha = valueT;
-			Pos.push_back (posData);
+			Pos.push_back(posData);
 
 			Entites[entityRawIndex].Flags &= (~CEntityEntry::PosDirty);
 
@@ -378,19 +395,19 @@ void CMonitorClient::update ()
 		}
 		if ((Entites[entityRawIndex].Flags & CEntityEntry::MiscPropDirty) != 0 && (Entites[entityRawIndex].Flags & CEntityEntry::Pending) == 0)
 		{
-			TDataSetRow	entityIndex = TDataSetRow::createFromRawIndex (entityRawIndex);
-			CMirrorPropValueRO<TYPE_CURRENT_HIT_POINTS>	    valueCurrentHP( TheDataset, entityIndex, DSPropertyCURRENT_HIT_POINTS);
-			CMirrorPropValueRO<TYPE_MAX_HIT_POINTS>			valueMaxHP( TheDataset, entityIndex, DSPropertyMAX_HIT_POINTS);
-			CMirrorPropValueRO<TYPE_MODE>					valueMode( TheDataset, entityIndex, DSPropertyMODE);
-			CMirrorPropValueRO<TYPE_BEHAVIOUR>				valueBehaviour( TheDataset, entityIndex, DSPropertyBEHAVIOUR);
+			TDataSetRow entityIndex = TDataSetRow::createFromRawIndex(entityRawIndex);
+			CMirrorPropValueRO<TYPE_CURRENT_HIT_POINTS> valueCurrentHP(TheDataset, entityIndex, DSPropertyCURRENT_HIT_POINTS);
+			CMirrorPropValueRO<TYPE_MAX_HIT_POINTS> valueMaxHP(TheDataset, entityIndex, DSPropertyMAX_HIT_POINTS);
+			CMirrorPropValueRO<TYPE_MODE> valueMode(TheDataset, entityIndex, DSPropertyMODE);
+			CMirrorPropValueRO<TYPE_BEHAVIOUR> valueBehaviour(TheDataset, entityIndex, DSPropertyBEHAVIOUR);
 
 			CMonitorClient::CMiscPropData miscPropData;
 			miscPropData.Id = entityRawIndex;
 			miscPropData.CurrentHP = valueCurrentHP;
 			miscPropData.MaxHP = valueMaxHP;
-			miscPropData.Mode = (uint8) valueMode;
-			miscPropData.Behaviour = (uint8) valueBehaviour;
-			MiscProp.push_back (miscPropData);
+			miscPropData.Mode = (uint8)valueMode;
+			miscPropData.Behaviour = (uint8)valueBehaviour;
+			MiscProp.push_back(miscPropData);
 
 			Entites[entityRawIndex].Flags &= (~CEntityEntry::MiscPropDirty);
 
@@ -417,17 +434,17 @@ void CMonitorClient::update ()
 		uint32 count = (uint32)Add.size();
 		msgout.serial(count);
 		uint i;
-		for (i=0; i<count; i++)
+		for (i = 0; i < count; i++)
 		{
-			msgout.serial (Add[i].Id);
-			msgout.serial (Add[i].StringId);
-			msgout.serial (Add[i].EntityId);
-			msgout.serial (Add[i].SheetId);
+			msgout.serial(Add[i].Id);
+			msgout.serial(Add[i].StringId);
+			msgout.serial(Add[i].EntityId);
+			msgout.serial(Add[i].SheetId);
 
 			Entites[Add[i].Id].Flags |= CEntityEntry::Present;
 		}
 		Server->send(msgout, getSock());
-		Add.clear ();
+		Add.clear();
 	}
 
 	// Send a RMV message
@@ -439,13 +456,13 @@ void CMonitorClient::update ()
 		uint32 count = (uint32)Rmv.size();
 		msgout.serial(count);
 		uint i;
-		for (i=0; i<count; i++)
+		for (i = 0; i < count; i++)
 		{
-			msgout.serial (Rmv[i]);
+			msgout.serial(Rmv[i]);
 			Entites[Rmv[i]].Flags &= ~CEntityEntry::Present;
 		}
 		Server->send(msgout, getSock());
-		Rmv.clear ();
+		Rmv.clear();
 	}
 
 	// Send a POS message
@@ -457,15 +474,15 @@ void CMonitorClient::update ()
 		uint32 count = (uint32)Pos.size();
 		msgout.serial(count);
 		uint i;
-		for (i=0; i<count; i++)
+		for (i = 0; i < count; i++)
 		{
-			msgout.serial (Pos[i].Id);
-			msgout.serial (Pos[i].X);
-			msgout.serial (Pos[i].Y);
-			msgout.serial (Pos[i].Tetha);
+			msgout.serial(Pos[i].Id);
+			msgout.serial(Pos[i].X);
+			msgout.serial(Pos[i].Y);
+			msgout.serial(Pos[i].Tetha);
 		}
 		Server->send(msgout, getSock());
-		Pos.clear ();
+		Pos.clear();
 	}
 
 	// Send a MISC_PROP message
@@ -477,18 +494,17 @@ void CMonitorClient::update ()
 		uint32 count = (uint32)MiscProp.size();
 		msgout.serial(count);
 		uint i;
-		for (i=0; i<count; i++)
+		for (i = 0; i < count; i++)
 		{
-			msgout.serial (MiscProp[i].Id);
-			msgout.serial (MiscProp[i].CurrentHP);
-			msgout.serial (MiscProp[i].MaxHP);
-			msgout.serial (MiscProp[i].Mode);
-			msgout.serial (MiscProp[i].Behaviour);
+			msgout.serial(MiscProp[i].Id);
+			msgout.serial(MiscProp[i].CurrentHP);
+			msgout.serial(MiscProp[i].MaxHP);
+			msgout.serial(MiscProp[i].Mode);
+			msgout.serial(MiscProp[i].Behaviour);
 		}
 		Server->send(msgout, getSock());
-		MiscProp.clear ();
+		MiscProp.clear();
 	}
-
 
 	// Send the strings
 	if (!Str.empty() && strTotalSize > 0)
@@ -497,20 +513,20 @@ void CMonitorClient::update ()
 		msgout.setType("STR");
 		msgout.serialVersion(0);
 
-		uint	sentStrSize = 0;
-		uint	i;
-		for (i=0; i<strToSend.size() && sentStrSize < strTotalSize; ++i)
-			sentStrSize += 4+4+(uint)(strToSend[i].second)->size();
+		uint sentStrSize = 0;
+		uint i;
+		for (i = 0; i < strToSend.size() && sentStrSize < strTotalSize; ++i)
+			sentStrSize += 4 + 4 + (uint)(strToSend[i].second)->size();
 
 		uint32 count = i;
 		msgout.serial(count);
-		for (i=0; i<count; i++)
+		for (i = 0; i < count; i++)
 		{
 			msgout.serial(strToSend[i].first);
 			msgout.serial(*(strToSend[i].second));
 		}
 
-		Str.erase(Str.begin(), Str.begin()+count);
+		Str.erase(Str.begin(), Str.begin() + count);
 
 		Server->send(msgout, getSock());
 		SentStr = count;

@@ -50,8 +50,6 @@
 #include "phrase_manager/simple_effect.h"
 #include "phrase_manager/stun_effect.h"
 
-
-
 //-------------------------------------------------------------------------------------------------
 // namespaces
 //-------------------------------------------------------------------------------------------------
@@ -59,18 +57,17 @@
 using namespace std;
 using namespace NLMISC;
 
-
 //-------------------------------------------------------------------------------------------------
 // methods CPersistentEffect
 //-------------------------------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-CPersistentEffect::CPersistentEffect(CCharacter* theCharacter)
+CPersistentEffect::CPersistentEffect(CCharacter *theCharacter)
 {
-	_TheCharacter= theCharacter;
+	_TheCharacter = theCharacter;
 
 	static bool intialized = false;
-	if(intialized == false)
+	if (intialized == false)
 	{
 		intialized = true;
 		NLMISC_REGISTER_CLASS(CAuraRootEffect)
@@ -96,10 +93,8 @@ CPersistentEffect::CPersistentEffect(CCharacter* theCharacter)
 		NLMISC_REGISTER_CLASS(CShootAgainEffect)
 		NLMISC_REGISTER_CLASS(CSimpleEffect)
 		NLMISC_REGISTER_CLASS(CStunEffect)
-
 	}
 }
-
 
 //-----------------------------------------------------------------------------
 CPersistentEffect::~CPersistentEffect()
@@ -109,13 +104,13 @@ CPersistentEffect::~CPersistentEffect()
 //-----------------------------------------------------------------------------
 void CPersistentEffect::collectPersistentEffect()
 {
-	std::vector< CSEffectPtr >& activeEffect = const_cast<std::vector< CSEffectPtr >&>(_TheCharacter->getAllActiveEffects());
-	for(uint32 i = 0; i < activeEffect.size(); ++i)
+	std::vector<CSEffectPtr> &activeEffect = const_cast<std::vector<CSEffectPtr> &>(_TheCharacter->getAllActiveEffects());
+	for (uint32 i = 0; i < activeEffect.size(); ++i)
 	{
-		if(activeEffect[i]->getFamily() >= EFFECT_FAMILIES::BeginPowerEffects && activeEffect[i]->getFamily() <= EFFECT_FAMILIES::EndPowerEffects)
+		if (activeEffect[i]->getFamily() >= EFFECT_FAMILIES::BeginPowerEffects && activeEffect[i]->getFamily() <= EFFECT_FAMILIES::EndPowerEffects)
 		{
-			CSTimedEffect * effect = dynamic_cast<CSTimedEffect *>(&(*activeEffect[i]));
-			if(effect)
+			CSTimedEffect *effect = dynamic_cast<CSTimedEffect *>(&(*activeEffect[i]));
+			if (effect)
 				_PersistentEffects.push_back(effect);
 		}
 	}
@@ -130,7 +125,7 @@ void CPersistentEffect::clear()
 //-----------------------------------------------------------------------------
 void CPersistentEffect::activate()
 {
-	for(uint32 i = 0; i < _PersistentEffects.size(); ++i)
+	for (uint32 i = 0; i < _PersistentEffects.size(); ++i)
 	{
 		CSmartPtr<CSTimedEffect> effect = _PersistentEffects[i];
 		effect->activate();
@@ -139,7 +134,7 @@ void CPersistentEffect::activate()
 }
 
 //-----------------------------------------------------------------------------
-void CPersistentEffect::writePdr(CSTimedEffect * effect, CPersistentDataRecord& pdr) const
+void CPersistentEffect::writePdr(CSTimedEffect *effect, CPersistentDataRecord &pdr) const
 {
 	CPersistentDataRecord::TToken token = pdr.addString(effect->getClassName());
 	pdr.pushStructBegin(token);
@@ -148,10 +143,10 @@ void CPersistentEffect::writePdr(CSTimedEffect * effect, CPersistentDataRecord& 
 }
 
 //-----------------------------------------------------------------------------
-void CPersistentEffect::readPdr(CPersistentDataRecord& pdr)
+void CPersistentEffect::readPdr(CPersistentDataRecord &pdr)
 {
 	// make sure we don't have something completely broken in the code
-	BOMB_IF(pdr.isEndOfStruct(),"CPersistentEffect::readPdr(): There's a bug in the code - I don't know what to do!",throw(NLMISC::Exception()));
+	BOMB_IF(pdr.isEndOfStruct(), "CPersistentEffect::readPdr(): There's a bug in the code - I don't know what to do!", throw(NLMISC::Exception()));
 
 	// we're expecting a start of clause marker - make sure that it's what we have
 	if (!pdr.isStartOfStruct())
@@ -171,10 +166,10 @@ void CPersistentEffect::readPdr(CPersistentDataRecord& pdr)
 	CSmartPtr<CSTimedEffect> effect = CSmartPtr<CSTimedEffect>(safe_cast<CSTimedEffect *>(CClassRegistry::create(className)));
 
 	// did we fail to instantiate an object of the correct type?
-	if(effect == 0)
+	if (effect == 0)
 	{
 		// instantiation of the object failed so display a nasty message, BOMB in debug mode and skip the structure's data
-		string stopMsg = toString("CPersistentEffect::readPdr() failed for className='%s'",className.c_str());
+		string stopMsg = toString("CPersistentEffect::readPdr() failed for className='%s'", className.c_str());
 		STOP(stopMsg);
 		while (!pdr.isEndOfStruct())
 		{
@@ -194,7 +189,6 @@ void CPersistentEffect::readPdr(CPersistentDataRecord& pdr)
 	pdr.popStructEnd(token);
 }
 
-
 //-----------------------------------------------------------------------------
 // Persistent data for CPersistentEffect
 //-----------------------------------------------------------------------------
@@ -202,14 +196,14 @@ void CPersistentEffect::readPdr(CPersistentDataRecord& pdr)
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
 #define PERSISTENT_CLASS CPersistentEffect
 
-#define PERSISTENT_PRE_STORE\
-	const_cast<CPersistentEffect *>(this)->collectPersistentEffect();\
+#define PERSISTENT_PRE_STORE \
+	const_cast<CPersistentEffect *>(this)->collectPersistentEffect();
 
-#define PERSISTENT_POST_STORE\
-	const_cast<CPersistentEffect *>(this)->clear();\
+#define PERSISTENT_POST_STORE \
+	const_cast<CPersistentEffect *>(this)->clear();
 
-#define PERSISTENT_DATA\
-	LSTRUCT_VECT(_PersistentEffects, VECT_LOGIC(_PersistentEffects), writePdr(_PersistentEffects[i], pdr), readPdr(pdr))\
+#define PERSISTENT_DATA \
+	LSTRUCT_VECT(_PersistentEffects, VECT_LOGIC(_PersistentEffects), writePdr(_PersistentEffects[i], pdr), readPdr(pdr))
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

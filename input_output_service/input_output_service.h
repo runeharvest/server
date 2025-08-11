@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef INPUT_OUTPUT_SERVICE_H
 #define INPUT_OUTPUT_SERVICE_H
 
@@ -23,7 +21,7 @@
 #include "nel/net/service.h"
 #include "nel/misc/sstring.h"
 
-//#include "game_share/generic_msg_mngr.h"
+// #include "game_share/generic_msg_mngr.h"
 #include "game_share/generic_xml_msg_mngr.h"
 
 #include "chat_manager.h"
@@ -37,10 +35,9 @@
 
 #include "game_share/r2_basic_types.h"
 
+extern bool ShowChat;
 
-extern bool							ShowChat;
-
-extern uint8 MaxDistSay; 
+extern uint8 MaxDistSay;
 extern uint8 MaxDistShout;
 
 extern TPropertyIndex DSPropertyAI_INSTANCE;
@@ -52,15 +49,12 @@ extern TPropertyIndex DSPropertyCONTEXTUAL;
 
 extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
-
 /*#ifndef TRACE_SHARD_MESSAGES
 #define TRACE_SHARD_MESSAGES
 #endif*/
 
-
 // typedef uint32 TSessionId;
 
- 
 /**
  * CCharacterInfos
  * \author Stephane Coutelas
@@ -70,67 +64,66 @@ extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 class CCharacterInfos
 {
 public:
-
 	/// character id
-	NLMISC::CEntityId	EntityId;
-	TDataSetRow			DataSetIndex;
+	NLMISC::CEntityId EntityId;
+	TDataSetRow DataSetIndex;
 
 	/// Name of the character
-	ucstring						Name;
+	ucstring Name;
 	/// index of the name in the string manager
-	CMirrorPropValue< uint32, CPropLocationPacked<2> >		NameIndex;
+	CMirrorPropValue<uint32, CPropLocationPacked<2>> NameIndex;
 	/// Short name (ie name without the $title$ spec)
-	ucstring						ShortName;
+	ucstring ShortName;
 	/// Short name index
-	uint32							ShortNameIndex;
+	uint32 ShortNameIndex;
 	/// The home mainland session id
-	TSessionId						HomeSessionId;
+	TSessionId HomeSessionId;
 	/// The home mainland session name id (in string mapper)
-	NLMISC::TStringId				HomeSessionNameId;
+	NLMISC::TStringId HomeSessionNameId;
 	/// The title of the bot (if any), ie the '$' delimited part of the name
-	std::string						Title;
+	std::string Title;
 	/// The title string id
-	uint32							TitleIndex;
+	uint32 TitleIndex;
 	/// The untranslated bot name index.
-	uint32							UntranslatedNameIndex;
+	uint32 UntranslatedNameIndex;
 	/// The untranslated bot short name index.
-	uint32							UntranslatedShortNameIndex;
+	uint32 UntranslatedShortNameIndex;
 	/// The untranslated event faction index.
-	uint32							UntranslatedEventFactionId;
-	
+	uint32 UntranslatedEventFactionId;
+
 	/// Gender of the entity
-	CMirrorPropValueRO< SPropVisualA >	VisualPropertyA;
+	CMirrorPropValueRO<SPropVisualA> VisualPropertyA;
 
 	/// Keep the AIInstance
-	CMirrorPropValueRO<uint32>			AIInstance;
-
+	CMirrorPropValueRO<uint32> AIInstance;
 
 	/// TODO : REMOVE when old string DB removed : index of the name in the dynamic string database
-//	uint32	OldNameIndex;
+	//	uint32	OldNameIndex;
 
 	/// id of the front end
-//	uint16 FrontendId;
+	//	uint16 FrontendId;
 
 	/// Language code used by the player.
-	CStringManager::TLanguages	Language;
+	CStringManager::TLanguages Language;
 
 	// character with privilege (true if have privilege)
 	bool HavePrivilege;
 
-		// custom afk text
-	ucstring	AfkCustomTxt;
+	// custom afk text
+	ucstring AfkCustomTxt;
 
 	/**
 	 * Default constructor
 	 */
-	CCharacterInfos() 
-		: /*FrontendId(0),*/
-			HomeSessionId(0),
-			HomeSessionNameId(0),
-			Language(CStringManager::work),
-			UntranslatedEventFactionId(0),
-			HavePrivilege( false )
-	{}
+	CCharacterInfos()
+	    : /*FrontendId(0),*/
+	    HomeSessionId(0)
+	    , HomeSessionNameId(0)
+	    , Language(CStringManager::work)
+	    , UntranslatedEventFactionId(0)
+	    , HavePrivilege(false)
+	{
+	}
 
 	GSGENDER::EGender getGender() const
 	{
@@ -139,8 +132,6 @@ public:
 		return GSGENDER::male;
 	}
 };
-
-
 
 class CAIAliasManager
 {
@@ -153,14 +144,14 @@ class CAIAliasManager
 		{
 			ShortNameIndex = 0;
 			unsigned int first(0), last(0);
-			for ( ; first != last ; ++first)
+			for (; first != last; ++first)
 			{
 				TitleIndex[first] = 0;
 			}
 		}
-
 	};
-	std::map<uint32, TTranslation > _Translation;
+	std::map<uint32, TTranslation> _Translation;
+
 public:
 	void clear();
 
@@ -168,17 +159,12 @@ public:
 
 	bool is(uint32 alias) const;
 
-//	std::string getName(uint32 alias) const;
-	
+	//	std::string getName(uint32 alias) const;
+
 	uint32 getShortNameIndex(uint32 alias) const;
 
 	uint32 getTitleIndex(uint32 alias, CStringManager::TLanguages lang) const;
-
 };
-
-
-
-
 
 /**
  * CInputOutputService
@@ -189,7 +175,8 @@ public:
 class CInputOutputService : public NLNET::IService
 {
 public:
-	typedef std::map<NLMISC::CEntityId, CCharacterInfos *>	TIdToInfos;
+	typedef std::map<NLMISC::CEntityId, CCharacterInfos *> TIdToInfos;
+
 private:
 	/// chat manager
 	CChatManager _ChatManager;
@@ -197,97 +184,95 @@ private:
 	/// infos on a character from his id
 	TIdToInfos _IdToInfos;
 
-	typedef std::map<NLMISC::CSString, CCharacterInfos *, CUnsensitiveSStringLessPred>	TCharInfoCont;
+	typedef std::map<NLMISC::CSString, CCharacterInfos *, CUnsensitiveSStringLessPred> TCharInfoCont;
 	/// infos on a character from his name
-	TCharInfoCont	_NameToInfos;
+	TCharInfoCont _NameToInfos;
 
 	/// Original information about renamed characters
-	TCharInfoCont	_RenamedCharInfos;
+	TCharInfoCont _RenamedCharInfos;
 
-	typedef std::map<NLMISC::CEntityId, std::pair<NLMISC::TGameCycle, CCharacterInfos*> >	TTempCharInfoCont;
+	typedef std::map<NLMISC::CEntityId, std::pair<NLMISC::TGameCycle, CCharacterInfos *>> TTempCharInfoCont;
 	/// Temporary storage for removed entities, will survive here for 3000 ticks.
-	TTempCharInfoCont		_RemovedCharInfos;
+	TTempCharInfoCont _RemovedCharInfos;
 
 	CAIAliasManager _AIAliasManager;
 
-//	typedef uint32 TSessionId;
+	//	typedef uint32 TSessionId;
 
-//public:
-//	struct TSessionName
-//	{
-//		/// The home mainland session Id
-//		TSessionId			SessionId;
-//		/// Display name, as displayed in user interface and appended to player character names
-//		std::string			DisplayName;
-//		/// pre mapped name (in string mapper)
-//		NLMISC::TStringId	DisplayNameId;
-//		/// short name used in user commands like "/tell [<shortName>.]<userName>"
-//		std::string			ShortName;
-//	};
-//
-//	// This container is just a vector because is is very small and brute force parsing will be faster
-//	typedef std::vector<TSessionName>	TSessionNames;
-//private:
-//	/// Table of home session names
-//	TSessionNames	_SessionNames;
+	// public:
+	//	struct TSessionName
+	//	{
+	//		/// The home mainland session Id
+	//		TSessionId			SessionId;
+	//		/// Display name, as displayed in user interface and appended to player character names
+	//		std::string			DisplayName;
+	//		/// pre mapped name (in string mapper)
+	//		NLMISC::TStringId	DisplayNameId;
+	//		/// short name used in user commands like "/tell [<shortName>.]<userName>"
+	//		std::string			ShortName;
+	//	};
+	//
+	//	// This container is just a vector because is is very small and brute force parsing will be faster
+	//	typedef std::vector<TSessionName>	TSessionNames;
+	// private:
+	//	/// Table of home session names
+	//	TSessionNames	_SessionNames;
 
 public:
-
 	/// The list of named shard
-//	CShardNames		ChardNames;
+	//	CShardNames		ChardNames;
 
-	/** 
+	/**
 	 * init the service
 	 */
 	void init();
 
 	/// Init after the mirror init
 	void initMirror();
-	
+
 	void release();
 
 	/**
 	 * main loop
 	 */
 	bool update();
-	
+
 	/**
 	 *	get the alias manager
 	 */
-	CAIAliasManager& getAIAliasManager() { return _AIAliasManager; }
+	CAIAliasManager &getAIAliasManager() { return _AIAliasManager; }
 
 	/**
 	 *	get the chat manager
 	 */
-	CChatManager& getChatManager() { return _ChatManager; }
+	CChatManager &getChatManager() { return _ChatManager; }
 
-
-//	const TSessionNames &getSessionNames() const;
+	//	const TSessionNames &getSessionNames() const;
 
 	/**
 	 *	Add the name of a character
 	 */
-	void addCharacterName( const TDataSetRow& chId, const ucstring& name, TSessionId homeSessionId );
+	void addCharacterName(const TDataSetRow &chId, const ucstring &name, TSessionId homeSessionId);
 
 	/**
 	 * Get the infos of character from its id
 	 */
-	CCharacterInfos * getCharInfos( const NLMISC::CEntityId& chId, bool lookInTemp = true );
+	CCharacterInfos *getCharInfos(const NLMISC::CEntityId &chId, bool lookInTemp = true);
 
 	/**
 	 * Get the infos of character from its name
 	 */
-	CCharacterInfos * getCharInfos( const ucstring& name );
+	CCharacterInfos *getCharInfos(const ucstring &name);
 
 	/**
 	 * Remove an entity
 	 */
-	void removeEntity( const TDataSetRow&chId );
+	void removeEntity(const TDataSetRow &chId);
 
 	/**
 	 *	Remove all the entities managed by a service
 	 */
-	void releaseEntitiesManagedByService( uint16 serviceId );
+	void releaseEntitiesManagedByService(uint16 serviceId);
 
 	/// debug display
 	void display(NLMISC::CLog &log);
@@ -296,18 +281,15 @@ public:
 	void scanMirrorChanges();
 
 	/// char info acces (for string manager)
-	TIdToInfos &getCharInfosCont() { return _IdToInfos;}
+	TIdToInfos &getCharInfosCont() { return _IdToInfos; }
 
-	CMirror				Mirror;
-	CMirroredDataSet	*DataSet;
+	CMirror Mirror;
+	CMirroredDataSet *DataSet;
 };
 
-
-extern CInputOutputService * IOS;
-
+extern CInputOutputService *IOS;
 
 #define TheDataset (*(IOS->DataSet))
-
 
 #endif // INPUT_OUTPUT_SERVICE_H
 

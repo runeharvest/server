@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "world_container.h"
 
@@ -24,16 +22,15 @@
 //	#include "nel/misc/hierarchical_timer.h"
 #include "server_share/msg_ai_service.h"
 
-
 using namespace std;
 using namespace NLMISC;
 using namespace RYAI_MAP_CRUNCH;
 
-RYAI_MAP_CRUNCH::CWorldMap	CWorldContainer::_WorldMaps/*[3]*/;
+RYAI_MAP_CRUNCH::CWorldMap CWorldContainer::_WorldMaps /*[3]*/;
 
-std::vector<std::string>	CWorldContainer::_ContinentNames;
+std::vector<std::string> CWorldContainer::_ContinentNames;
 
-extern	bool	EGSHasMirrorReady;
+extern bool EGSHasMirrorReady;
 
 /*
  * Constructor
@@ -43,20 +40,18 @@ CWorldContainer::CWorldContainer()
 	clear();
 }
 
-
 /*
  * Clear
  */
-void	CWorldContainer::clear()
+void CWorldContainer::clear()
 {
 	_WorldMaps.clear();
 }
 
-
 /*
  * Load Continent
  */
-void	CWorldContainer::loadContinent(const string &name)
+void CWorldContainer::loadContinent(const string &name)
 {
 	nlinfo("Loading continent '%s' in WorldContainer", name.c_str());
 
@@ -68,7 +63,7 @@ void	CWorldContainer::loadContinent(const string &name)
 
 	try
 	{
-		CIFile		f0(CPath::lookup(name+"_0.cwmap2"));
+		CIFile f0(CPath::lookup(name + "_0.cwmap2"));
 
 		_WorldMaps.serial(f0);
 

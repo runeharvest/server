@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_SPECIAL_POWER_SHIELDING_H
 #define RYZOM_SPECIAL_POWER_SHIELDING_H
 
 #include "special_power.h"
-
 
 /**
  * Specialized class for power "shielding"
@@ -32,7 +29,8 @@ class CSpecialPowerShielding : public CSpecialPower
 {
 public:
 	/// Default Constructor
-	CSpecialPowerShielding() : CSpecialPower()
+	CSpecialPowerShielding()
+	    : CSpecialPower()
 	{
 		init();
 	}
@@ -42,12 +40,13 @@ public:
 	{
 		init();
 		_Phrase = phrase;
-		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());;		
+		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());
+		;
 		_DisablePowerTime = NLMISC::TGameCycle(disableTimeInSeconds / CTickEventHandler::getGameTimeStep());
 
 		_PowerType = POWERS::Shielding;
-		
-		if(TheDataset.isAccessible(actorRowId))
+
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -62,9 +61,21 @@ public:
 	virtual void apply();
 
 	// set protections
-	inline void setNoShieldProtection(float factor, uint16 max) { _NoShieldFactor = factor; _NoShieldMaxProtection = max; }
-	inline void setBucklerProtection(float factor, uint16 max) { _BucklerFactor = factor; _BucklerMaxProtection = max; }
-	inline void setShieldProtection(float factor, uint16 max) { _ShieldFactor = factor; _ShieldMaxProtection = max; }
+	inline void setNoShieldProtection(float factor, uint16 max)
+	{
+		_NoShieldFactor = factor;
+		_NoShieldMaxProtection = max;
+	}
+	inline void setBucklerProtection(float factor, uint16 max)
+	{
+		_BucklerFactor = factor;
+		_BucklerMaxProtection = max;
+	}
+	inline void setShieldProtection(float factor, uint16 max)
+	{
+		_ShieldFactor = factor;
+		_ShieldMaxProtection = max;
+	}
 
 protected:
 	inline void init()
@@ -72,7 +83,7 @@ protected:
 		_NoShieldFactor = 0.0f;
 		_BucklerFactor = 0.0f;
 		_ShieldFactor = 0.0f;
-		
+
 		_NoShieldMaxProtection = 0;
 		_BucklerMaxProtection = 0;
 		_ShieldMaxProtection = 0;
@@ -80,18 +91,17 @@ protected:
 		_Duration = 0;
 	}
 
-	/// granted protections 
-	float					_NoShieldFactor;
-	float					_BucklerFactor;
-	float					_ShieldFactor;
-	
-	uint16					_NoShieldMaxProtection;
-	uint16					_BucklerMaxProtection;
-	uint16					_ShieldMaxProtection;
+	/// granted protections
+	float _NoShieldFactor;
+	float _BucklerFactor;
+	float _ShieldFactor;
+
+	uint16 _NoShieldMaxProtection;
+	uint16 _BucklerMaxProtection;
+	uint16 _ShieldMaxProtection;
 
 	// effect duration
-	NLMISC::TGameCycle		_Duration;
-	
+	NLMISC::TGameCycle _Duration;
 };
 
 #endif // RYZOM_SPECIAL_POWER_SHIELDING_H

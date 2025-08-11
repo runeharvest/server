@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 
 // misc
@@ -53,72 +52,68 @@
 #include "sheets.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
-
-
-
 
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-CGlobalPositionManagerService *pCGPMS= NULL;
+CGlobalPositionManagerService *pCGPMS = NULL;
 
 NLLIGO::CLigoConfig LigoConfig;
-
 
 /*
  * Get var from config file
  */
 // Sint version
-bool	getVarFromConfigFile(CConfigFile &cf, const string &name, sint32 &variable, sint32 defaultValue = 0)
+bool getVarFromConfigFile(CConfigFile &cf, const string &name, sint32 &variable, sint32 defaultValue = 0)
 {
-	CConfigFile::CVar	*ptr = cf.getVarPtr(name);
-	bool	success;
+	CConfigFile::CVar *ptr = cf.getVarPtr(name);
+	bool success;
 	variable = ((success = (ptr != NULL)) ? ptr->asInt() : defaultValue);
 	return success;
 }
 // Uint version
-bool	getVarFromConfigFile(CConfigFile &cf, const string &name, uint32 &variable, uint32 defaultValue = 0)
+bool getVarFromConfigFile(CConfigFile &cf, const string &name, uint32 &variable, uint32 defaultValue = 0)
 {
-	CConfigFile::CVar	*ptr = cf.getVarPtr(name);
-	bool	success;
+	CConfigFile::CVar *ptr = cf.getVarPtr(name);
+	bool success;
 	variable = ((success = (ptr != NULL)) ? ptr->asInt() : defaultValue);
 	return success;
 }
 // Bool version
-bool	getVarFromConfigFile(CConfigFile &cf, const string &name, bool &variable, bool defaultValue = false)
+bool getVarFromConfigFile(CConfigFile &cf, const string &name, bool &variable, bool defaultValue = false)
 {
-	CConfigFile::CVar	*ptr = cf.getVarPtr(name);
-	bool	success;
+	CConfigFile::CVar *ptr = cf.getVarPtr(name);
+	bool success;
 	variable = ((success = (ptr != NULL)) ? (ptr->asInt() != 0) : defaultValue);
 	return success;
 }
 // Float version
-bool	getVarFromConfigFile(CConfigFile &cf, const string &name, float &variable, float defaultValue = 0.0f)
+bool getVarFromConfigFile(CConfigFile &cf, const string &name, float &variable, float defaultValue = 0.0f)
 {
-	CConfigFile::CVar	*ptr = cf.getVarPtr(name);
-	bool	success;
+	CConfigFile::CVar *ptr = cf.getVarPtr(name);
+	bool success;
 	variable = ((success = (ptr != NULL)) ? ptr->asFloat() : defaultValue);
 	return success;
 }
 // Double version
-bool	getVarFromConfigFile(CConfigFile &cf, const string &name, double &variable, double defaultValue = 0)
+bool getVarFromConfigFile(CConfigFile &cf, const string &name, double &variable, double defaultValue = 0)
 {
-	CConfigFile::CVar	*ptr = cf.getVarPtr(name);
-	bool	success;
+	CConfigFile::CVar *ptr = cf.getVarPtr(name);
+	bool success;
 	variable = ((success = (ptr != NULL)) ? ptr->asDouble() : defaultValue);
 	return success;
 }
 // String version
-bool	getVarFromConfigFile(CConfigFile &cf, const string &name, string &variable, const string &defaultValue = string(""))
+bool getVarFromConfigFile(CConfigFile &cf, const string &name, string &variable, const string &defaultValue = string(""))
 {
-	CConfigFile::CVar	*ptr = cf.getVarPtr(name);
-	bool	success;
+	CConfigFile::CVar *ptr = cf.getVarPtr(name);
+	bool success;
 	variable = ((success = (ptr != NULL)) ? ptr->asString() : defaultValue);
 	return success;
 }
@@ -126,28 +121,27 @@ bool	getVarFromConfigFile(CConfigFile &cf, const string &name, string &variable,
 #define GET_VAR_FROM_CF(var, def) getVarFromConfigFile(ConfigFile, #var, var, def);
 
 /*-----------------------------------------------------------------*\
-						cbConnection
+                        cbConnection
 \*-----------------------------------------------------------------*/
-void cbConnection( const std::string &serviceName, NLNET::TServiceId serviceId, void *arg )
+void cbConnection(const std::string &serviceName, NLNET::TServiceId serviceId, void *arg)
 {
 } // cbConnection //
-
 
 TGameCycle TickStopGameCycle = 0;
 
 /*-----------------------------------------------------------------*\
-						cbDisconnection
+                        cbDisconnection
 \*-----------------------------------------------------------------*/
-void cbDisconnection( const std::string &serviceName, NLNET::TServiceId serviceId, void *arg )
+void cbDisconnection(const std::string &serviceName, NLNET::TServiceId serviceId, void *arg)
 {
-	if( serviceName == string("TICKS") )
+	if (serviceName == string("TICKS"))
 	{
 		TickStopGameCycle = CTickEventHandler::getGameCycle();
-		nlinfo( "tick stop -> %u", TickStopGameCycle );
+		nlinfo("tick stop -> %u", TickStopGameCycle);
 	}
 
 	// remove all entities created by this service
-	//CWorldPositionManager::removeAiVisionEntitiesForService( serviceId );
+	// CWorldPositionManager::removeAiVisionEntitiesForService( serviceId );
 	if (!IsRingShard)
 	{
 		CWorldPositionManager::triggerUnsubscribe(serviceId);
@@ -155,110 +149,101 @@ void cbDisconnection( const std::string &serviceName, NLNET::TServiceId serviceI
 
 } // cbDisconnection //
 
-
-void cbEGSConnection( const std::string &serviceName, NLNET::TServiceId serviceId, void *arg )
+void cbEGSConnection(const std::string &serviceName, NLNET::TServiceId serviceId, void *arg)
 {
-// The follwoing code commented out by Sadge because no refference could be found to reception of this message
-//	// transmit the names of the used continents to the EGS
-//	try
-//	{
-//		CUsedContinent::TUsedContinentCont continents = CUsedContinent::instance().getContinents();
-//
-//		vector< string > continentsNames;
-//		for (uint i=0; i<continents.size(); ++i)
-//		{
-//			continentsNames.push_back(continents[i].ContinentName);
-//		}
-///*		CConfigFile::CVar& cvUsedContinents = pCGPMS->ConfigFile.getVar("UsedContinents");
-//		for ( uint i = 0; (sint)i<cvUsedContinents.size(); ++i)
-//		{
-//			if (cvUsedContinents.asString(i) != "")
-//			{
-//				continentsNames.push_back(cvUsedContinents.asString(i));
-//			}
-//		}
-//*/
-//		CMessage msgout("USED_CONTINENTS");
-//		msgout.serialCont( continentsNames ),
-//		CUnifiedNetwork::getInstance()->send( "EGS", msgout );
-//	}
-//	catch(const EUnknownVar &)
-//	{
-//		nlwarning("<cbEGSConnection> UsedContinents not found, no continent used");
-//	}
+	// The follwoing code commented out by Sadge because no refference could be found to reception of this message
+	//	// transmit the names of the used continents to the EGS
+	//	try
+	//	{
+	//		CUsedContinent::TUsedContinentCont continents = CUsedContinent::instance().getContinents();
+	//
+	//		vector< string > continentsNames;
+	//		for (uint i=0; i<continents.size(); ++i)
+	//		{
+	//			continentsNames.push_back(continents[i].ContinentName);
+	//		}
+	///*		CConfigFile::CVar& cvUsedContinents = pCGPMS->ConfigFile.getVar("UsedContinents");
+	//		for ( uint i = 0; (sint)i<cvUsedContinents.size(); ++i)
+	//		{
+	//			if (cvUsedContinents.asString(i) != "")
+	//			{
+	//				continentsNames.push_back(cvUsedContinents.asString(i));
+	//			}
+	//		}
+	//*/
+	//		CMessage msgout("USED_CONTINENTS");
+	//		msgout.serialCont( continentsNames ),
+	//		CUnifiedNetwork::getInstance()->send( "EGS", msgout );
+	//	}
+	//	catch(const EUnknownVar &)
+	//	{
+	//		nlwarning("<cbEGSConnection> UsedContinents not found, no continent used");
+	//	}
 
 	// send ESG all IA creatures
-	//CWorldPositionManager::sendAgentsToEGS();
+	// CWorldPositionManager::sendAgentsToEGS();
 
 } // cbEGSConnection //
 
 /*-----------------------------------------------------------------*\
-						EVSConnection
+                        EVSConnection
 \*-----------------------------------------------------------------*/
-void cbEVSConnection( const std::string &serviceName, NLNET::TServiceId serviceId, void *arg )
+void cbEVSConnection(const std::string &serviceName, NLNET::TServiceId serviceId, void *arg)
 {
 	EVSUp = true;
 }
 
 /*-----------------------------------------------------------------*\
-						EVSDisconnection
+                        EVSDisconnection
 \*-----------------------------------------------------------------*/
-void cbEVSDisconnection( const std::string &serviceName, NLNET::TServiceId serviceId, void *arg )
+void cbEVSDisconnection(const std::string &serviceName, NLNET::TServiceId serviceId, void *arg)
 {
 	EVSUp = false;
 }
 
-
 /*--------------------------------------------------------------*\
-						cbSync()
+                        cbSync()
 \*--------------------------------------------------------------*/
 void cbSync()
 {
 	// update World Position Manager time
-	if( !TickStopGameCycle )
+	if (!TickStopGameCycle)
 	{
-		if (!IsRingShard) { CWorldPositionManager::setCurrentTick( CTickEventHandler::getGameCycle() ); }
+		if (!IsRingShard) { CWorldPositionManager::setCurrentTick(CTickEventHandler::getGameCycle()); }
 	}
-	nlinfo( "Sync -> %u", CTickEventHandler::getGameCycle() );
+	nlinfo("Sync -> %u", CTickEventHandler::getGameCycle());
 } // cbSync //
-
-
 
 /*
  * Crash Callback
  */
-string	crashCallback()
+string crashCallback()
 {
 	return CWorldPositionManager::getPlayersPosHistory();
 }
 
-
-
 /****************************************************************\
  ************** callback table for input message ****************
 \****************************************************************/
-TUnifiedCallbackItem CbArray[] =
-{
-	{ "CB_UNUSED",					NULL }
+TUnifiedCallbackItem CbArray[] = {
+	{ "CB_UNUSED", NULL }
 };
-
 
 /*
  * Initialisation 2
  */
-void	cbMirrorIsReady( CMirror *mirror )
+void cbMirrorIsReady(CMirror *mirror)
 {
 	pCGPMS->initMirror();
 }
 
-
 /****************************************************************\
-							init()
+                            init()
 \****************************************************************/
 // init the service
 void CGlobalPositionManagerService::init()
 {
-	setVersion (RYZOM_PRODUCT_VERSION);
+	setVersion(RYZOM_PRODUCT_VERSION);
 
 	// keep pointer on class
 	pCGPMS = this;
@@ -266,24 +251,23 @@ void CGlobalPositionManagerService::init()
 	// set update time out
 	setUpdateTimeout(100);
 
-	CUnifiedNetwork::getInstance()->setServiceUpCallback( string("*"), cbConnection, 0);
-	CUnifiedNetwork::getInstance()->setServiceUpCallback( "EGS", cbEGSConnection, 0);
-	CUnifiedNetwork::getInstance()->setServiceUpCallback( "EVS", cbEVSConnection, 0);
+	CUnifiedNetwork::getInstance()->setServiceUpCallback(string("*"), cbConnection, 0);
+	CUnifiedNetwork::getInstance()->setServiceUpCallback("EGS", cbEGSConnection, 0);
+	CUnifiedNetwork::getInstance()->setServiceUpCallback("EVS", cbEVSConnection, 0);
 
-	CUnifiedNetwork::getInstance()->setServiceDownCallback( string("*"), cbDisconnection, 0);
-	CUnifiedNetwork::getInstance()->setServiceDownCallback( "EVS", cbEVSDisconnection, 0);
+	CUnifiedNetwork::getInstance()->setServiceDownCallback(string("*"), cbDisconnection, 0);
+	CUnifiedNetwork::getInstance()->setServiceDownCallback("EVS", cbEVSDisconnection, 0);
 
-
-	uint32		WorldMapSizeX;
-	uint32		WorldMapSizeY;
-	uint32		VisionDistance;
-	uint32		PrimitiveMaxSize;
-	uint32		NbWorldImages;
-	bool		LoadPacsPrims;
-	bool		LoadPacsCol;
+	uint32 WorldMapSizeX;
+	uint32 WorldMapSizeY;
+	uint32 VisionDistance;
+	uint32 PrimitiveMaxSize;
+	uint32 NbWorldImages;
+	bool LoadPacsPrims;
+	bool LoadPacsCol;
 
 	// init the class transport system
-	TRANSPORT_CLASS_REGISTER (CGPMPlayerPrivilegeInst);
+	TRANSPORT_CLASS_REGISTER(CGPMPlayerPrivilegeInst);
 
 	GET_VAR_FROM_CF(CheckPlayerSpeed, true);
 	GET_VAR_FROM_CF(Verbose, false);
@@ -297,7 +281,6 @@ void CGlobalPositionManagerService::init()
 	GET_VAR_FROM_CF(LoadPacsCol, false);
 	GET_VAR_FROM_CF(LoadPacsPrims, true);
 
-
 	CGpmSheets::init();
 
 	// World Position Manager init
@@ -307,27 +290,27 @@ void CGlobalPositionManagerService::init()
 	}
 
 	// Init ligo
-	if (!LigoConfig.readPrimitiveClass ("world_editor_classes.xml", false))
+	if (!LigoConfig.readPrimitiveClass("world_editor_classes.xml", false))
 	{
 		// Should be in R:\leveldesign\world_editor_files
-		nlerror ("Can't load ligo primitive config file world_editor_classes.xml");
+		nlerror("Can't load ligo primitive config file world_editor_classes.xml");
 	}
-/*	// read the continent name translator
-	map<string, string>	translator;
-	{
-		CConfigFile::CVar *v = IService::getInstance()->ConfigFile.getVarPtr("ContinentNameTranslator");
-		if (v)
-		{
-			for (sint i=0; i<v->size()/2; ++i)
-			{
-				string s1, s2;
-				s1 = v->asString(i*2);
-				s2 = v->asString(i*2+1);
-				translator[s1] = s2;
-			}
-		}
-	}
-*/
+	/*	// read the continent name translator
+	    map<string, string>	translator;
+	    {
+	        CConfigFile::CVar *v = IService::getInstance()->ConfigFile.getVarPtr("ContinentNameTranslator");
+	        if (v)
+	        {
+	            for (sint i=0; i<v->size()/2; ++i)
+	            {
+	                string s1, s2;
+	                s1 = v->asString(i*2);
+	                s2 = v->asString(i*2+1);
+	                translator[s1] = s2;
+	            }
+	        }
+	    }
+	*/
 
 	// todo: r2 GPMS doesn't read pacs for now - this will have to be fixed later
 	if (!IsRingShard)
@@ -336,21 +319,21 @@ void CGlobalPositionManagerService::init()
 		try
 		{
 			CUsedContinent::TUsedContinentCont continents = CUsedContinent::instance().getContinents();
-	//		CConfigFile::CVar& cvUsedContinents = ConfigFile.getVar("UsedContinents");
-	//		uint	i;
-	//		for (i=0; (sint)i<cvUsedContinents.size(); ++i)
-	//			if (cvUsedContinents.asString(i) != "")
-			for (uint i=0; i<continents.size(); ++i)
+			//		CConfigFile::CVar& cvUsedContinents = ConfigFile.getVar("UsedContinents");
+			//		uint	i;
+			//		for (i=0; (sint)i<cvUsedContinents.size(); ++i)
+			//			if (cvUsedContinents.asString(i) != "")
+			for (uint i = 0; i < continents.size(); ++i)
 			{
 				string name = continents[i].ContinentName;
 				name = CUsedContinent::instance().getPhysicalContinentName(name);
-	//			if (translator.find(name) != translator.end())
-	//				name = translator[name];
-	//			CWorldPositionManager::loadContinent(cvUsedContinents.asString(i), cvUsedContinents.asString(i), i);
+				//			if (translator.find(name) != translator.end())
+				//				name = translator[name];
+				//			CWorldPositionManager::loadContinent(cvUsedContinents.asString(i), cvUsedContinents.asString(i), i);
 				CWorldPositionManager::loadContinent(name, continents[i].ContinentName, continents[i].ContinentInstance);
 			}
 		}
-		catch(const EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 			nlwarning("<CGlobalPositionManagerService::init> UsedContinents not found, no continent used");
 		}
@@ -366,63 +349,61 @@ void CGlobalPositionManagerService::init()
 
 	// Init the mirror system
 	vector<string> datasetNames;
-	datasetNames.push_back( "fe_temp" );
-	Mirror.init( datasetNames, cbMirrorIsReady, gpmsUpdate, cbSync );
-	Mirror.setServiceMirrorUpCallback( "EGS", cbEGSConnection, 0);
+	datasetNames.push_back("fe_temp");
+	Mirror.init(datasetNames, cbMirrorIsReady, gpmsUpdate, cbSync);
+	Mirror.setServiceMirrorUpCallback("EGS", cbEGSConnection, 0);
 
 	setCrashCallback(crashCallback);
 
 	if (IsRingShard)
 	{
 		// setup the R2 Vision object and move checker object
-		pCGPMS->RingVisionDeltaManager=new CVisionDeltaManager;
-		pCGPMS->RingVisionUniverse= new R2_VISION::CUniverse;
+		pCGPMS->RingVisionDeltaManager = new CVisionDeltaManager;
+		pCGPMS->RingVisionUniverse = new R2_VISION::CUniverse;
 		pCGPMS->RingVisionUniverse->registerVisionDeltaManager(RingVisionDeltaManager);
-		pCGPMS->MoveChecker= new CMoveChecker;
+		pCGPMS->MoveChecker = new CMoveChecker;
 	}
 
 } // init //
-
 
 /*
  * Init after the mirror init
  */
 void CGlobalPositionManagerService::initMirror()
 {
-/*
-	// Allow to add a few entities manually (using the command addEntity)
-	Mirror.declareEntityTypeOwner( RYZOMID::player, 10 );
-	Mirror.declareEntityTypeOwner( RYZOMID::npc, 500 );
-*/
+	/*
+	    // Allow to add a few entities manually (using the command addEntity)
+	    Mirror.declareEntityTypeOwner( RYZOMID::player, 10 );
+	    Mirror.declareEntityTypeOwner( RYZOMID::npc, 500 );
+	*/
 
 	DataSet = &(Mirror.getDataSet("fe_temp"));
-	DataSet->declareProperty( "X", PSOReadWrite | PSONotifyChanges, "X" );		// group notification on X
-	DataSet->declareProperty( "Y", PSOReadWrite | PSONotifyChanges, "X" );		// group notification on X
-	DataSet->declareProperty( "Z", PSOReadWrite | PSONotifyChanges, "X" );		// group notification on X
-	DataSet->declareProperty( "Theta", PSOReadWrite | PSONotifyChanges, "X" );	// group notification on X
-	DataSet->declareProperty( "AIInstance", PSOReadOnly | PSONotifyChanges );
-	DataSet->declareProperty( "WhoSeesMe", PSOReadOnly | PSONotifyChanges );
-	DataSet->declareProperty( "LocalX", PSOReadWrite );
-	DataSet->declareProperty( "LocalY", PSOReadWrite );
-	DataSet->declareProperty( "LocalZ", PSOReadWrite );
-	DataSet->declareProperty( "TickPos", PSOReadWrite );
-	DataSet->declareProperty( "Sheet", PSOReadWrite );
-	DataSet->declareProperty( "Mode", PSOReadOnly /*| PSONotifyChanges*/ );
-	DataSet->declareProperty( "Behaviour", PSOReadOnly );
-	DataSet->declareProperty( "Cell", PSOReadWrite );
-	DataSet->declareProperty( "VisionCounter", PSOReadWrite );
-	DataSet->declareProperty( "CurrentRunSpeed", PSOReadOnly );
-	DataSet->declareProperty( "CurrentWalkSpeed", PSOReadOnly );
-	DataSet->declareProperty( "RiderEntity", PSOReadOnly );
-	DataSet->declareProperty( "Fuel", PSOReadOnly );
-	initRyzomVisualPropertyIndices( *DataSet );
+	DataSet->declareProperty("X", PSOReadWrite | PSONotifyChanges, "X"); // group notification on X
+	DataSet->declareProperty("Y", PSOReadWrite | PSONotifyChanges, "X"); // group notification on X
+	DataSet->declareProperty("Z", PSOReadWrite | PSONotifyChanges, "X"); // group notification on X
+	DataSet->declareProperty("Theta", PSOReadWrite | PSONotifyChanges, "X"); // group notification on X
+	DataSet->declareProperty("AIInstance", PSOReadOnly | PSONotifyChanges);
+	DataSet->declareProperty("WhoSeesMe", PSOReadOnly | PSONotifyChanges);
+	DataSet->declareProperty("LocalX", PSOReadWrite);
+	DataSet->declareProperty("LocalY", PSOReadWrite);
+	DataSet->declareProperty("LocalZ", PSOReadWrite);
+	DataSet->declareProperty("TickPos", PSOReadWrite);
+	DataSet->declareProperty("Sheet", PSOReadWrite);
+	DataSet->declareProperty("Mode", PSOReadOnly /*| PSONotifyChanges*/);
+	DataSet->declareProperty("Behaviour", PSOReadOnly);
+	DataSet->declareProperty("Cell", PSOReadWrite);
+	DataSet->declareProperty("VisionCounter", PSOReadWrite);
+	DataSet->declareProperty("CurrentRunSpeed", PSOReadOnly);
+	DataSet->declareProperty("CurrentWalkSpeed", PSOReadOnly);
+	DataSet->declareProperty("RiderEntity", PSOReadOnly);
+	DataSet->declareProperty("Fuel", PSOReadOnly);
+	initRyzomVisualPropertyIndices(*DataSet);
 
-	Mirror.setNotificationCallback( IsRingShard? CGlobalPositionManagerService::ringShardProcessMirrorUpdates: CGlobalPositionManagerService::processMirrorUpdates );
+	Mirror.setNotificationCallback(IsRingShard ? CGlobalPositionManagerService::ringShardProcessMirrorUpdates : CGlobalPositionManagerService::processMirrorUpdates);
 }
 
-
 /****************************************************************\
-							update()
+                            update()
 \****************************************************************/
 // main loop
 bool CGlobalPositionManagerService::update()
@@ -430,41 +411,40 @@ bool CGlobalPositionManagerService::update()
 	return true;
 } // update //
 
-
 void CGlobalPositionManagerService::_checkAddCharacterToRingAIInstance(sint32 aiInstance)
 {
-	TCharactersPerAIInstance::iterator it= _CharactersPerAIInstance.find(aiInstance);
-	if (it==_CharactersPerAIInstance.end())
+	TCharactersPerAIInstance::iterator it = _CharactersPerAIInstance.find(aiInstance);
+	if (it == _CharactersPerAIInstance.end())
 	{
 		// this is the first character to be added to this instance so initialise it
-		_CharactersPerAIInstance[aiInstance]=1;
-		nlinfo("Creating new AIInstance in ring vision universe: %d",aiInstance);
-		pCGPMS->RingVisionUniverse->createInstance(aiInstance,0);
+		_CharactersPerAIInstance[aiInstance] = 1;
+		nlinfo("Creating new AIInstance in ring vision universe: %d", aiInstance);
+		pCGPMS->RingVisionUniverse->createInstance(aiInstance, 0);
 	}
 	else
 	{
 		++it->second;
-		nldebug("Increasing number of entities in aiInstance %d to %d",aiInstance,it->second);
+		nldebug("Increasing number of entities in aiInstance %d to %d", aiInstance, it->second);
 	}
 }
 
 void CGlobalPositionManagerService::_checkRemoveCharacterFromRingAIInstance(sint32 aiInstance)
 {
-	TCharactersPerAIInstance::iterator it= _CharactersPerAIInstance.find(aiInstance);
-	BOMB_IF(it==_CharactersPerAIInstance.end(),NLMISC::toString("BUG: Can't find ai instance %d to remove character from",aiInstance),return);
+	TCharactersPerAIInstance::iterator it = _CharactersPerAIInstance.find(aiInstance);
+	BOMB_IF(it == _CharactersPerAIInstance.end(), NLMISC::toString("BUG: Can't find ai instance %d to remove character from", aiInstance), return);
 
 	// decrement count of characters in ai instance and remove the instance if its empty
 	--it->second;
-	if (it->second<1)
+	if (it->second < 1)
 	{
 		// this was the last character in the instance so delete it
-		nlinfo("removing AIInstance because last character has just left: %d",aiInstance);
+		nlinfo("removing AIInstance because last character has just left: %d", aiInstance);
 		_CharactersPerAIInstance.erase(it);
 		pCGPMS->RingVisionUniverse->removeInstance(aiInstance);
 	}
 	else
 	{
-		nldebug("Decreasing number of entities in aiInstance %d to %d",aiInstance,it->second);
+		nldebug("Decreasing number of entities in aiInstance %d to %d", aiInstance, it->second);
 	}
 }
 
@@ -473,27 +453,27 @@ void CGlobalPositionManagerService::ringShardProcessMirrorUpdates()
 	// Process entities added to mirror
 	TheDataset.beginAddedEntities();
 	TDataSetRow entityIndex = TheDataset.getNextAddedEntity();
-	while ( entityIndex != LAST_CHANGED )
+	while (entityIndex != LAST_CHANGED)
 	{
 		// lookup stats for the entity in the mirror
-		const NLMISC::CEntityId &eid= TheDataset.getEntityId( entityIndex );
-		CMirrorPropValueRO<sint32> aiInstance	( TheDataset, entityIndex, DSPropertyAI_INSTANCE );
-		CMirrorPropValueRO<sint32> x			( TheDataset, entityIndex, DSPropertyPOSX );
-		CMirrorPropValueRO<sint32> y			( TheDataset, entityIndex, DSPropertyPOSY );
-		CMirrorPropValueRO<TYPE_WHO_SEES_ME> whoSeesMe	( TheDataset, entityIndex, DSPropertyWHO_SEES_ME );
-		R2_VISION::TInvisibilityLevel invisibility= (R2_VISION::TInvisibilityLevel)(whoSeesMe&((1<<R2_VISION::NUM_WHOSEESME_BITS)-1));
+		const NLMISC::CEntityId &eid = TheDataset.getEntityId(entityIndex);
+		CMirrorPropValueRO<sint32> aiInstance(TheDataset, entityIndex, DSPropertyAI_INSTANCE);
+		CMirrorPropValueRO<sint32> x(TheDataset, entityIndex, DSPropertyPOSX);
+		CMirrorPropValueRO<sint32> y(TheDataset, entityIndex, DSPropertyPOSY);
+		CMirrorPropValueRO<TYPE_WHO_SEES_ME> whoSeesMe(TheDataset, entityIndex, DSPropertyWHO_SEES_ME);
+		R2_VISION::TInvisibilityLevel invisibility = (R2_VISION::TInvisibilityLevel)(whoSeesMe & ((1 << R2_VISION::NUM_WHOSEESME_BITS) - 1));
 
 		// increment count of number of characters in AIInstance, instanciating new instance if required
 		pCGPMS->_checkAddCharacterToRingAIInstance(aiInstance);
 
 		// if we have a player then set them up in the move checker
-		if (eid.getType()==RYZOMID::player)
+		if (eid.getType() == RYZOMID::player)
 		{
 			pCGPMS->MoveChecker->teleport(entityIndex, x, y, CTickEventHandler::getGameCycle());
 		}
 
 		// add entity to the ring vision universe object
-		pCGPMS->RingVisionUniverse->addEntity(entityIndex,aiInstance,x,y,invisibility,eid.getType()==RYZOMID::player);
+		pCGPMS->RingVisionUniverse->addEntity(entityIndex, aiInstance, x, y, invisibility, eid.getType() == RYZOMID::player);
 		entityIndex = TheDataset.getNextAddedEntity();
 	}
 	TheDataset.endAddedEntities();
@@ -501,13 +481,13 @@ void CGlobalPositionManagerService::ringShardProcessMirrorUpdates()
 	// Process entities removed from mirror
 	TheDataset.beginRemovedEntities();
 	CEntityId *id;
-	entityIndex = TheDataset.getNextRemovedEntity( &id );
-	while ( entityIndex != LAST_CHANGED )
+	entityIndex = TheDataset.getNextRemovedEntity(&id);
+	while (entityIndex != LAST_CHANGED)
 	{
 		// check that the character being removed exists in the r2VisionUniverse and get hold of their AIInstance
-		const R2_VISION::SUniverseEntity* theEntity= pCGPMS->RingVisionUniverse->getEntity(entityIndex);
-		BOMB_IF(theEntity==NULL,"Failed to identify the character that the mirror tells us is being removed",continue);
-		uint32 aiInstance= theEntity->AIInstance;
+		const R2_VISION::SUniverseEntity *theEntity = pCGPMS->RingVisionUniverse->getEntity(entityIndex);
+		BOMB_IF(theEntity == NULL, "Failed to identify the character that the mirror tells us is being removed", continue);
+		uint32 aiInstance = theEntity->AIInstance;
 
 		// remove entity from the ring vision universe object
 		pCGPMS->RingVisionUniverse->removeEntity(entityIndex);
@@ -516,46 +496,47 @@ void CGlobalPositionManagerService::ringShardProcessMirrorUpdates()
 		pCGPMS->_checkRemoveCharacterFromRingAIInstance(aiInstance);
 
 		// prepare to iterate...
-		entityIndex = TheDataset.getNextRemovedEntity( &id );
+		entityIndex = TheDataset.getNextRemovedEntity(&id);
 	}
 	TheDataset.endRemovedEntities();
 
 	// Process properties changed and notified in the mirror
 	TPropertyIndex propIndex;
 	TheDataset.beginChangedValues();
-	TheDataset.getNextChangedValue( entityIndex, propIndex );
-	while ( entityIndex != LAST_CHANGED )
+	TheDataset.getNextChangedValue(entityIndex, propIndex);
+	while (entityIndex != LAST_CHANGED)
 	{
 		if (propIndex == DSPropertyAI_INSTANCE)
 		{
 			// lookup stats for the entity in the mirror
-			sint32 aiInstance=	CMirrorPropValueRO<sint32>( TheDataset, entityIndex, DSPropertyAI_INSTANCE );
-			sint32 x= CMirrorPropValueRO<sint32>( TheDataset, entityIndex, DSPropertyPOSX );
-			sint32 y= CMirrorPropValueRO<sint32>( TheDataset, entityIndex, DSPropertyPOSY );
-			CMirrorPropValueRO<TYPE_WHO_SEES_ME> whoSeesMe ( TheDataset, entityIndex, DSPropertyWHO_SEES_ME );
-			R2_VISION::TInvisibilityLevel invisibility= (R2_VISION::TInvisibilityLevel)(whoSeesMe&((1<<R2_VISION::NUM_WHOSEESME_BITS)-1));
+			sint32 aiInstance = CMirrorPropValueRO<sint32>(TheDataset, entityIndex, DSPropertyAI_INSTANCE);
+			sint32 x = CMirrorPropValueRO<sint32>(TheDataset, entityIndex, DSPropertyPOSX);
+			sint32 y = CMirrorPropValueRO<sint32>(TheDataset, entityIndex, DSPropertyPOSY);
+			CMirrorPropValueRO<TYPE_WHO_SEES_ME> whoSeesMe(TheDataset, entityIndex, DSPropertyWHO_SEES_ME);
+			R2_VISION::TInvisibilityLevel invisibility = (R2_VISION::TInvisibilityLevel)(whoSeesMe & ((1 << R2_VISION::NUM_WHOSEESME_BITS) - 1));
 
 			// if we have a player then remove them from the move checker
-			if (TheDataset.getEntityId(entityIndex).getType()==RYZOMID::player)
+			if (TheDataset.getEntityId(entityIndex).getType() == RYZOMID::player)
 			{
 				pCGPMS->MoveChecker->teleport(entityIndex, x, y, CTickEventHandler::getGameCycle());
 			}
 
 			// check that the character being teleported exists in the r2VisionUniverse and get hold of their old AIInstance
-			const R2_VISION::SUniverseEntity* theEntity= pCGPMS->RingVisionUniverse->getEntity(entityIndex);
-			BOMB_IF(theEntity==NULL, "Failed to identify the character that the mirror tells us is being removed",
-				TheDataset.getNextChangedValue( entityIndex, propIndex ); continue);
-			sint32 oldAiInstance= theEntity->AIInstance;
+			const R2_VISION::SUniverseEntity *theEntity = pCGPMS->RingVisionUniverse->getEntity(entityIndex);
+			BOMB_IF(theEntity == NULL, "Failed to identify the character that the mirror tells us is being removed",
+			        TheDataset.getNextChangedValue(entityIndex, propIndex);
+			        continue);
+			sint32 oldAiInstance = theEntity->AIInstance;
 
 			// check whether this is a real teleportation or just a move
-			if (oldAiInstance==aiInstance)
+			if (oldAiInstance == aiInstance)
 			{
 				// the aiInstance hasn't changed so just perform a move
 				// note: this happens systematicaly on appearance of a new entity - the ai instance is
 				// setup once via code that manages appearance of new entities in mirror and it's setup
 				// again here... the coordinates are probably the same too but since I can't guarantee
 				// it I prefer to let the code do its stuff
-				pCGPMS->RingVisionUniverse->setEntityPosition(entityIndex,x,y);
+				pCGPMS->RingVisionUniverse->setEntityPosition(entityIndex, x, y);
 			}
 			else
 			{
@@ -563,7 +544,7 @@ void CGlobalPositionManagerService::ringShardProcessMirrorUpdates()
 				pCGPMS->_checkAddCharacterToRingAIInstance(aiInstance);
 
 				// teleport entity within the ring vision universe
-				pCGPMS->RingVisionUniverse->teleportEntity(entityIndex,aiInstance,x,y,invisibility);
+				pCGPMS->RingVisionUniverse->teleportEntity(entityIndex, aiInstance, x, y, invisibility);
 
 				// if this was the last entity in their old instance then get rid of the instance
 				pCGPMS->_checkRemoveCharacterFromRingAIInstance(oldAiInstance);
@@ -572,30 +553,31 @@ void CGlobalPositionManagerService::ringShardProcessMirrorUpdates()
 		else if (propIndex == DSPropertyPOSX)
 		{
 			// lookup stats for the entity in the mirror
-			CMirrorPropValueRO<sint32> x ( TheDataset, entityIndex, DSPropertyPOSX );
-			CMirrorPropValueRO<sint32> y ( TheDataset, entityIndex, DSPropertyPOSY );
+			CMirrorPropValueRO<sint32> x(TheDataset, entityIndex, DSPropertyPOSX);
+			CMirrorPropValueRO<sint32> y(TheDataset, entityIndex, DSPropertyPOSY);
 
 			// update the cell
-			CMirrorPropValue1DS<TYPE_CELL> cell ( TheDataset, entityIndex, DSPropertyCELL );
-			uint32	cx = (uint16) ( + x()/CWorldPositionManager::getCellSize() );
-			uint32	cy = (uint16) ( - y()/CWorldPositionManager::getCellSize() );
+			CMirrorPropValue1DS<TYPE_CELL> cell(TheDataset, entityIndex, DSPropertyCELL);
+			uint32 cx = (uint16)(+x() / CWorldPositionManager::getCellSize());
+			uint32 cy = (uint16)(-y() / CWorldPositionManager::getCellSize());
 
-			cell = (cx<<16) + cy;
+			cell = (cx << 16) + cy;
 
 			// move entity within the ring vision universe
-			pCGPMS->RingVisionUniverse->setEntityPosition(entityIndex,x,y);
+			pCGPMS->RingVisionUniverse->setEntityPosition(entityIndex, x, y);
 		}
 		else if (propIndex == DSPropertyWHO_SEES_ME)
 		{
 			// lookup stats for the entity in the mirror
-			CMirrorPropValueRO<TYPE_WHO_SEES_ME> whoSeesMe ( TheDataset, entityIndex, DSPropertyWHO_SEES_ME );
+			CMirrorPropValueRO<TYPE_WHO_SEES_ME> whoSeesMe(TheDataset, entityIndex, DSPropertyWHO_SEES_ME);
 
-			uint32 visibilityValue= ((uint32)whoSeesMe==0)? R2_VISION::WHOSEESME_INVISIBLE_DM: ((uint32)(whoSeesMe+1)==0)? R2_VISION::WHOSEESME_VISIBLE_MOB: (uint32)whoSeesMe;
+			uint32 visibilityValue = ((uint32)whoSeesMe == 0) ? R2_VISION::WHOSEESME_INVISIBLE_DM : ((uint32)(whoSeesMe + 1) == 0) ? R2_VISION::WHOSEESME_VISIBLE_MOB
+			                                                                                                                       : (uint32)whoSeesMe;
 
 			// apply the change to the entity
 			pCGPMS->RingVisionUniverse->setEntityInvisibilityInfo(entityIndex, visibilityValue);
 		}
-		TheDataset.getNextChangedValue( entityIndex, propIndex );
+		TheDataset.getNextChangedValue(entityIndex, propIndex);
 	}
 	TheDataset.endChangedValues();
 }
@@ -605,10 +587,10 @@ void CGlobalPositionManagerService::processMirrorUpdates()
 	// Process entities added to mirror
 	TheDataset.beginAddedEntities();
 	TDataSetRow entityIndex = TheDataset.getNextAddedEntity();
-	while ( entityIndex != LAST_CHANGED )
+	while (entityIndex != LAST_CHANGED)
 	{
-		//nldebug( "%u: OnAddEntity %d", CTickEventHandler::getGameCycle(), entityIndex );
-		CWorldPositionManager::onAddEntity( entityIndex );
+		// nldebug( "%u: OnAddEntity %d", CTickEventHandler::getGameCycle(), entityIndex );
+		CWorldPositionManager::onAddEntity(entityIndex);
 		entityIndex = TheDataset.getNextAddedEntity();
 	}
 	TheDataset.endAddedEntities();
@@ -616,28 +598,28 @@ void CGlobalPositionManagerService::processMirrorUpdates()
 	// Process entities removed from mirror
 	TheDataset.beginRemovedEntities();
 	CEntityId *id;
-	entityIndex = TheDataset.getNextRemovedEntity( &id );
-	while ( entityIndex != LAST_CHANGED )
+	entityIndex = TheDataset.getNextRemovedEntity(&id);
+	while (entityIndex != LAST_CHANGED)
 	{
-		//nldebug( "%u: OnRemoveEntity %d", CTickEventHandler::getGameCycle(), entityIndex );
+		// nldebug( "%u: OnRemoveEntity %d", CTickEventHandler::getGameCycle(), entityIndex );
 		CWorldPositionManager::onRemoveEntity(entityIndex);
-		entityIndex = TheDataset.getNextRemovedEntity( &id );
+		entityIndex = TheDataset.getNextRemovedEntity(&id);
 	}
 	TheDataset.endRemovedEntities();
 
 	// Process properties changed and notified in the mirror
 	TPropertyIndex propIndex;
 	TheDataset.beginChangedValues();
-	TheDataset.getNextChangedValue( entityIndex, propIndex );
-	while ( entityIndex != LAST_CHANGED )
+	TheDataset.getNextChangedValue(entityIndex, propIndex);
+	while (entityIndex != LAST_CHANGED)
 	{
-		//nldebug( "%u: OnPosChange %d", CTickEventHandler::getGameCycle(), entityIndex );
-		//nlassert( propIndex == DSPropertyPOSX ); // (X, Y, Z, Theta) use "group notification" with prop X (and are the only ones with notification)
+		// nldebug( "%u: OnPosChange %d", CTickEventHandler::getGameCycle(), entityIndex );
+		// nlassert( propIndex == DSPropertyPOSX ); // (X, Y, Z, Theta) use "group notification" with prop X (and are the only ones with notification)
 
 		if (propIndex == DSPropertyPOSX)
 		{
 			// TEMP: while we don't handle all by entity indices, we need to test if the entityId has been notified (added)
-			CWorldEntity	*entity = CWorldPositionManager::getEntityPtr(entityIndex);
+			CWorldEntity *entity = CWorldPositionManager::getEntityPtr(entityIndex);
 			if (entity)
 			{
 				if (entity->getType() == CWorldEntity::Player && entity->CheckMotion)
@@ -651,24 +633,23 @@ void CGlobalPositionManagerService::processMirrorUpdates()
 				else
 				{
 					H_AUTO(gpmsUpdateServerPosition);
-					//nlinfo("Update %s pos: %d,%d,%d - %d", entity->Id.toString().c_str(), entity->X(), entity->Y(), entity->Z(), entity->X.getWriterServiceId());
+					// nlinfo("Update %s pos: %d,%d,%d - %d", entity->Id.toString().c_str(), entity->X(), entity->Y(), entity->Z(), entity->X.getWriterServiceId());
 					CWorldPositionManager::updateEntityPosition(entity);
 				}
 			}
 		}
-		//nldebug( "Pos changed from mirror E%d", entityIndex  );
-		TheDataset.getNextChangedValue( entityIndex, propIndex );
+		// nldebug( "Pos changed from mirror E%d", entityIndex  );
+		TheDataset.getNextChangedValue(entityIndex, propIndex);
 	}
 	TheDataset.endChangedValues();
 }
 
-
 /****************************************************************\
-						gpmsUpdate()
+                        gpmsUpdate()
 \****************************************************************/
 void CGlobalPositionManagerService::gpmsUpdate()
 {
-	if ( ! pCGPMS->Mirror.mirrorIsReady() )
+	if (!pCGPMS->Mirror.mirrorIsReady())
 		return;
 
 	H_AUTO(gpmsUpdate);
@@ -679,8 +660,8 @@ void CGlobalPositionManagerService::gpmsUpdate()
 		// also update internal clock (increase tick counter by one)
 		H_TIME(PositionManagerUpdate, CWorldPositionManager::update(););
 
-		uint	i;
-		for (i=0; i<pCGPMS->Tracked.size(); ++i)
+		uint i;
+		for (i = 0; i < pCGPMS->Tracked.size(); ++i)
 			CWorldPositionManager::displayEntity(CWorldPositionManager::getEntityIndex(pCGPMS->Tracked[i]));
 	}
 
@@ -694,9 +675,8 @@ void CGlobalPositionManagerService::gpmsUpdate()
 
 } // gpmsUpdate //
 
-
 /****************************************************************\
-							release()
+                            release()
 \****************************************************************/
 void CGlobalPositionManagerService::release()
 {
@@ -709,10 +689,6 @@ void CGlobalPositionManagerService::release()
 
 	CGpmSheets::release();
 
-}// release //
+} // release //
 
-
-
-
-NLNET_SERVICE_MAIN( CGlobalPositionManagerService, "GPMS", "gpm_service", 0, CbArray, "", "" );
-
+NLNET_SERVICE_MAIN(CGlobalPositionManagerService, "GPMS", "gpm_service", 0, CbArray, "", "");

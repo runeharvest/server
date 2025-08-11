@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_AURA_REGEN_EFFECT_H
 #define RY_AURA_REGEN_EFFECT_H
 
 #include "aura_effect.h"
-
 
 /**
  * Effect class for aura affecting regen
@@ -32,11 +29,12 @@ class CRegenAuraEffect : public CAuraBaseEffect
 {
 public:
 	///\ctor
-	CRegenAuraEffect( const CAuraRootEffect &rootEffect, TDataSetRow targetRowId ) : CAuraBaseEffect(rootEffect, targetRowId)
+	CRegenAuraEffect(const CAuraRootEffect &rootEffect, TDataSetRow targetRowId)
+	    : CAuraBaseEffect(rootEffect, targetRowId)
 	{
 		_RegenModifier = float(rootEffect.getParamValue()) / 10.0f;
 
-		switch(_PowerType)
+		switch (_PowerType)
 		{
 		case POWERS::LifeAura:
 			_AffectedScore = SCORES::hit_points;
@@ -53,23 +51,22 @@ public:
 			_AffectedScore = SCORES::unknown;
 		};
 	}
-	
+
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent *event, bool applyEffect);
 
 	/// callback called when the effect is actually removed
 	virtual void removed();
 
 private:
 	/// regen modifier
-	float			_RegenModifier;
+	float _RegenModifier;
 
 	/// affected score
 	SCORES::TScores _AffectedScore;
 };
-
 
 #endif // RY_AURA_REGEN_EFFECT_H
 

@@ -24,14 +24,14 @@ CInventoryBase::TInventoryOpResult CAutoResizeInventory::insertItem(CGameItemPtr
 	if (slot == INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
 	{
 		if (getFreeSlotCount() == 0)
-			setSlotCount(getSlotCount()+1);
+			setSlotCount(getSlotCount() + 1);
 	}
 	else if (slot >= _Items.size())
 	{
-		setSlotCount(slot+1);
+		setSlotCount(slot + 1);
 	}
-	
-	return CInventoryBase::insertItem(item,slot,autoStack);
+
+	return CInventoryBase::insertItem(item, slot, autoStack);
 }
 
 // ****************************************************************************
@@ -40,12 +40,12 @@ void CAutoResizeInventory::forceLoadItem(CGameItemPtr &item, uint32 slot)
 	if (slot == INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
 	{
 		if (getFreeSlotCount() == 0)
-			setSlotCount(getSlotCount()+1);
+			setSlotCount(getSlotCount() + 1);
 	}
 	else if (slot >= _Items.size())
 	{
-		setSlotCount(slot+1);
+		setSlotCount(slot + 1);
 	}
-	
-	CInventoryBase::forceLoadItem(item,slot);
+
+	CInventoryBase::forceLoadItem(item, slot);
 }

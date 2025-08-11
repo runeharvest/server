@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef _OWNERS_
 #define _OWNERS_
 
@@ -25,32 +23,33 @@
 #include "ai_grp_pet.h"
 
 //	used to allow entity to handle pets.
-class	CPetOwner
+class CPetOwner
 {
 public:
-	explicit	CPetOwner	()	:	_petGroup(NULL)
+	explicit CPetOwner()
+	    : _petGroup(NULL)
 	{
 	}
-	virtual ~CPetOwner	();
+	virtual ~CPetOwner();
 
-	virtual	CAIEntityPhysical	&getPhysical()=0;
-	inline	CGrpPet	*getPetGroup()
+	virtual CAIEntityPhysical &getPhysical() = 0;
+	inline CGrpPet *getPetGroup()
 	{
-		return	_petGroup;
+		return _petGroup;
 	}
-	inline	void	setPetGroup(CGrpPet	*petGroup)
+	inline void setPetGroup(CGrpPet *petGroup)
 	{
 		nlassert(!getPetGroup());
-		_petGroup=petGroup;
+		_petGroup = petGroup;
 	}
 
-	inline	void	removePetGroup()
+	inline void removePetGroup()
 	{
-		_petGroup=NULL;
+		_petGroup = NULL;
 	}
 
 private:
-	NLMISC::CSmartPtr<CGrpPet>	_petGroup;
+	NLMISC::CSmartPtr<CGrpPet> _petGroup;
 };
 
 #endif

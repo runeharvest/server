@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_EGS_STATIC_AI_ACTION_H
 #define NL_EGS_STATIC_AI_ACTION_H
 
-//Nel georges
+// Nel georges
 #include "nel/georges/u_form.h"
 //
 #include "ai_share/ai_aiming_type.h"
@@ -30,87 +28,84 @@
 #include "game_share/mode_and_behaviour.h"
 #include "game_share/magic_fx.h"
 
-namespace AI_ACTION
+namespace AI_ACTION {
+enum TAiActionType
 {
-	enum TAiActionType
-	{
-		Melee = 0,
-		Range,
-		HealSpell,
-		DamageSpell,
-		HoTSpell,
-		DoTSpell,
-		EffectSpell,
-		EoTSpell,
-		ToxicCloud,
+	Melee = 0,
+	Range,
+	HealSpell,
+	DamageSpell,
+	HoTSpell,
+	DoTSpell,
+	EffectSpell,
+	EoTSpell,
+	ToxicCloud,
 
-		UnknownType,
-	};
+	UnknownType,
+};
 
-	const std::string	&toString(TAiActionType e);
-	TAiActionType	toAiActionType(const std::string &s);
+const std::string &toString(TAiActionType e);
+TAiActionType toAiActionType(const std::string &s);
 
-	enum TAiEffectType
-	{
-		Stun = 0,
-		Root,
-		Mezz,
-		Blind,
-		Fear,
-		Hatred,
-		MeleeMadness,
-		RangeMadness,
-		MagicMadness,
-		SlowMove,
-		SlowMelee,
-		SlowRange,
-		SlowMagic,
-		ResistDebufAcid,
-		ResistDebufCold,
-		ResistDebufRot,
-		ResistDebufFire,
-		ResistDebufPoison,
-		ResistDebufElectric,
-		ResistDebufShockwave,
-		SkillDebufMelee,
-		SkillDebufRange,
-		SkillDebufMagic,
-		Dot,
-		
-		Stench,
-		Bounce,
-		RedirectAttacks,
-		ReflectDamage,
-		ReverseDamage,
+enum TAiEffectType
+{
+	Stun = 0,
+	Root,
+	Mezz,
+	Blind,
+	Fear,
+	Hatred,
+	MeleeMadness,
+	RangeMadness,
+	MagicMadness,
+	SlowMove,
+	SlowMelee,
+	SlowRange,
+	SlowMagic,
+	ResistDebufAcid,
+	ResistDebufCold,
+	ResistDebufRot,
+	ResistDebufFire,
+	ResistDebufPoison,
+	ResistDebufElectric,
+	ResistDebufShockwave,
+	SkillDebufMelee,
+	SkillDebufRange,
+	SkillDebufMagic,
+	Dot,
 
-		MassDispel,
-		Disarm,
+	Stench,
+	Bounce,
+	RedirectAttacks,
+	ReflectDamage,
+	ReverseDamage,
 
-		UnknownEffect,
-		Normal = UnknownEffect, // only keep it for compatibility
-	};
+	MassDispel,
+	Disarm,
 
-	const std::string	&toString(TAiEffectType e);
-	TAiEffectType	toAiEffectType(const std::string &s);
-	EFFECT_FAMILIES::TEffectFamily toEffectFamily(TAiEffectType effect, TAiActionType action);
+	UnknownEffect,
+	Normal = UnknownEffect, // only keep it for compatibility
+};
+
+const std::string &toString(TAiEffectType e);
+TAiEffectType toAiEffectType(const std::string &s);
+EFFECT_FAMILIES::TEffectFamily toEffectFamily(TAiEffectType effect, TAiActionType action);
 
 };
 
-namespace DURATION_TYPE
+namespace DURATION_TYPE {
+enum TDurationType
 {
-	enum TDurationType
-	{
-		Normal = 0, // seconds
-		Permanent,
-		UntilCasterDeath,
+	Normal = 0, // seconds
+	Permanent,
+	UntilCasterDeath,
 
-		Unknown,
-	};
-	const std::string	&toString(TDurationType e);
-	TDurationType	fromString(const std::string &s);
+	Unknown,
+};
+const std::string &toString(TDurationType e);
+TDurationType fromString(const std::string &s);
 
-
-}; // DURATION_TYPE 
+}; // DURATION_TYPE
 
 /**
  * struct used for melee and range combat action
@@ -148,34 +143,34 @@ struct CCombatParams
 	void serial(NLMISC::IStream &f);
 
 	/// read params from georges
-	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
+	void readForm(const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
 
-	bool		Melee;
-	float		SpeedFactor;
-	float		DamageFactor;	
-	sint32		DamageModifier;
-	/// factor on defender armor protection (0 : ignore defender armor, 1 : normal armor) 
-	float		ArmorFactor; 
+	bool Melee;
+	float SpeedFactor;
+	float DamageFactor;
+	sint32 DamageModifier;
+	/// factor on defender armor protection (0 : ignore defender armor, 1 : normal armor)
+	float ArmorFactor;
 	/// [0,1], if >0 a random test is made to force a critical hit (1 = always a critical hit)
-	float		Critic; 
-	DMGTYPE::EDamageType	DamageType;
-	AI_AIMING_TYPE::TAiAimingType	AimingType;
+	float Critic;
+	DMGTYPE::EDamageType DamageType;
+	AI_AIMING_TYPE::TAiAimingType AimingType;
 
 	// if special dmg
-	float					SpecialDamageFactor;
-	DMGTYPE::EDamageType	SpecialDamageType;
+	float SpecialDamageFactor;
+	DMGTYPE::EDamageType SpecialDamageType;
 
 	// if special effect
-	AI_ACTION::TAiEffectType	EffectFamily;
-	float						EffectValue;
-	NLMISC::TGameCycle			EffectTime;
-	NLMISC::TGameCycle			EffectUpdateFrequency;
-	DMGTYPE::EDamageType		EffectDamageType;
-	SCORES::TScores				EffectAffectedScore;
+	AI_ACTION::TAiEffectType EffectFamily;
+	float EffectValue;
+	NLMISC::TGameCycle EffectTime;
+	NLMISC::TGameCycle EffectUpdateFrequency;
+	DMGTYPE::EDamageType EffectDamageType;
+	SCORES::TScores EffectAffectedScore;
 	DURATION_TYPE::TDurationType EffectDurationType;
 
 	// force a behaviour
-	MBEHAV::EBehaviour			Behaviour;
+	MBEHAV::EBehaviour Behaviour;
 };
 
 /**
@@ -210,25 +205,25 @@ struct CSpellParams
 	void serial(NLMISC::IStream &f);
 
 	/// read params from georges
-	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
+	void readForm(const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
 
-	NLMISC::TGameCycle	CastingTime; // in ticks
-	NLMISC::TGameCycle	PostActionTime; // in ticks
-	SKILLS::ESkills		Skill;
-	uint16				SapCost;
-	uint16				HpCost;
-	SCORES::TScores		AffectedScore;
-	float				SpellParamValue;
-	float				SpellParamValue2;
-	float				SpellPowerFactor;
-	bool				Stackable;
-	float				SpellLevel;
-	
+	NLMISC::TGameCycle CastingTime; // in ticks
+	NLMISC::TGameCycle PostActionTime; // in ticks
+	SKILLS::ESkills Skill;
+	uint16 SapCost;
+	uint16 HpCost;
+	SCORES::TScores AffectedScore;
+	float SpellParamValue;
+	float SpellParamValue2;
+	float SpellPowerFactor;
+	bool Stackable;
+	float SpellLevel;
+
 	// dmg spell
-	DMGTYPE::EDamageType	DamageType;
+	DMGTYPE::EDamageType DamageType;
 
 	// force a behaviour
-	MBEHAV::EBehaviour	Behaviour;
+	MBEHAV::EBehaviour Behaviour;
 
 	// static value indicating oif casting time is set to a special value. In this case, use creature attack speed for casting time
 	static NLMISC::TGameCycle UseAttackSpeedForCastingTime;
@@ -273,13 +268,12 @@ struct COTSpellParams : public CSpellParams
 	}
 
 	/// read params from georges
-	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
+	void readForm(const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
 
-	NLMISC::TGameCycle				UpdateFrequency; // in ticks
-	NLMISC::TGameCycle				Duration; // in ticks
-	DURATION_TYPE::TDurationType	EffectDurationType;
+	NLMISC::TGameCycle UpdateFrequency; // in ticks
+	NLMISC::TGameCycle Duration; // in ticks
+	DURATION_TYPE::TDurationType EffectDurationType;
 };
-
 
 /**
  * struct used for 'Effect' spell aiaction
@@ -303,12 +297,11 @@ struct CEffectSpellParams : public CSpellParams
 	void serial(NLMISC::IStream &f);
 
 	/// read params from georges
-	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
+	void readForm(const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
 
-
-	AI_ACTION::TAiEffectType		EffectFamily;
-	NLMISC::TGameCycle				Duration; // in ticks
-	DURATION_TYPE::TDurationType	EffectDurationType;
+	AI_ACTION::TAiEffectType EffectFamily;
+	NLMISC::TGameCycle Duration; // in ticks
+	DURATION_TYPE::TDurationType EffectDurationType;
 };
 
 /**
@@ -332,19 +325,18 @@ struct COTEffectSpellParams : public COTSpellParams
 	void serial(NLMISC::IStream &f);
 
 	/// read params from georges
-	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
+	void readForm(const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
 
-	AI_ACTION::TAiEffectType	EffectFamily;
+	AI_ACTION::TAiEffectType EffectFamily;
 };
-
 
 // union containing all params struct
 union TAiActionParams
 {
-	CCombatParams		 Combat;
-	CSpellParams		 Spell;
-	COTSpellParams		 OTSpell;
-	CEffectSpellParams	 EffectSpell;
+	CCombatParams Combat;
+	CSpellParams Spell;
+	COTSpellParams OTSpell;
+	CEffectSpellParams EffectSpell;
 	COTEffectSpellParams OTEffectSpell;
 };
 
@@ -356,37 +348,42 @@ union TAiActionParams
  */
 struct TAiArea
 {
-	TAiArea() : AreaType(MAGICFX::UnknownSpellMode), AreaRange(0.0f),
-				ChainFadingFactor(0.0f), ChainMaxTargets(0),
-				SprayHeight(0.0f),SprayBase(0.0f),SprayAngle(0)
-	{}
+	TAiArea()
+	    : AreaType(MAGICFX::UnknownSpellMode)
+	    , AreaRange(0.0f)
+	    , ChainFadingFactor(0.0f)
+	    , ChainMaxTargets(0)
+	    , SprayHeight(0.0f)
+	    , SprayBase(0.0f)
+	    , SprayAngle(0)
+	{
+	}
 
 	/// Serial
 	void serial(NLMISC::IStream &f);
-	
+
 	/// read params from georges
-	void readForm (const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
+	void readForm(const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId, AI_ACTION::TAiActionType type);
 
 	// Area type (none/chain/spray/bomb)
-	MAGICFX::TSpellMode	AreaType;
+	MAGICFX::TSpellMode AreaType;
 	// area range in meters
-	float				AreaRange;
+	float AreaRange;
 	// if bomb, max nb targets
-	uint8				BombMaxTargets;
+	uint8 BombMaxTargets;
 	// if chain, max nb targets
-	uint8				ChainMaxTargets;
+	uint8 ChainMaxTargets;
 	// if chain, fading factor (]0;1])
-	float				ChainFadingFactor;
+	float ChainFadingFactor;
 	// if spray, max height in meters
-	float				SprayHeight;
+	float SprayHeight;
 	// if spray, base width in meters
-	float				SprayBase;
+	float SprayBase;
 	// if spray, angle in degrees
-	uint8				SprayAngle;
+	uint8 SprayAngle;
 	// if spray, max nb targets
-	uint8				SprayMaxTargets;
+	uint8 SprayMaxTargets;
 };
-
 
 /**
  * <Class description>
@@ -397,21 +394,20 @@ struct TAiArea
 class CStaticAiAction
 {
 public:
-
 	/// Constructor
-	CStaticAiAction() {}
+	CStaticAiAction() { }
 
 	/// Read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 
 	/// Return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 21; }
+	inline static uint getVersion() { return 21; }
 
 	/// Serial
 	void serial(NLMISC::IStream &f);
 
 	/// Removed
-	void removed() {}
+	void removed() { }
 
 	/// get ai action type
 	inline AI_ACTION::TAiActionType getType() const { return _Type; }
@@ -427,18 +423,17 @@ public:
 
 protected:
 	/// ai action type
-	AI_ACTION::TAiActionType	_Type;
+	AI_ACTION::TAiActionType _Type;
 
 	/// union containing all the params according to type
-	TAiActionParams				_Data;
+	TAiActionParams _Data;
 
 	/// data to describe the area affected by the action
-	TAiArea						_Area;
+	TAiArea _Area;
 
 	/// associated sheetId
-	NLMISC::CSheetId			_SheetId;
+	NLMISC::CSheetId _SheetId;
 };
-
 
 #endif // NL_EGS_STATIC_AI_ACTION_H
 

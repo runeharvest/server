@@ -29,19 +29,19 @@
 
 NL_INSTANCE_COUNTER_IMPL(CDeathPenalties);
 
-NLMISC::CVariable<bool> DissableDPInRing("egs", "DissableDPInRing", "Enable or dissable DP system in the Ring (should be dissabled unless this provokes bugs", true,0,true);
+NLMISC::CVariable<bool> DissableDPInRing("egs", "DissableDPInRing", "Enable or dissable DP system in the Ring (should be dissabled unless this provokes bugs", true, 0, true);
 
-void CDeathPenalties::updataDb(CCharacter& user)
+void CDeathPenalties::updataDb(CCharacter &user)
 {
-	if ( _DeathXPToGain == 0 )
-//		user._PropertyDatabase.setProp( "USER:DEATH_XP_MALUS", 255 );
-		CBankAccessor_PLR::getUSER().setDEATH_XP_MALUS(user._PropertyDatabase, 255 );
+	if (_DeathXPToGain == 0)
+		//		user._PropertyDatabase.setProp( "USER:DEATH_XP_MALUS", 255 );
+		CBankAccessor_PLR::getUSER().setDEATH_XP_MALUS(user._PropertyDatabase, 255);
 	else
-//		user._PropertyDatabase.setProp( "USER:DEATH_XP_MALUS", uint8( 254 * (1 - _CurrentDeathXP / _DeathXPToGain ) ) );
-		CBankAccessor_PLR::getUSER().setDEATH_XP_MALUS(user._PropertyDatabase, checkedCast<uint8>( 254 * (1 - _CurrentDeathXP / _DeathXPToGain ) ) );
+		//		user._PropertyDatabase.setProp( "USER:DEATH_XP_MALUS", uint8( 254 * (1 - _CurrentDeathXP / _DeathXPToGain ) ) );
+		CBankAccessor_PLR::getUSER().setDEATH_XP_MALUS(user._PropertyDatabase, checkedCast<uint8>(254 * (1 - _CurrentDeathXP / _DeathXPToGain)));
 }
 
-void CDeathPenalties::addDeath(CCharacter& user, float deathPenaltyFactor )
+void CDeathPenalties::addDeath(CCharacter &user, float deathPenaltyFactor)
 {
 	// we don't add death penalty in the ring
 	if (IsRingShard && DissableDPInRing)
@@ -56,8 +56,8 @@ void CDeathPenalties::addDeath(CCharacter& user, float deathPenaltyFactor )
 
 	const double maxMalus = maxXP * user.getSkillBaseValue(expSkill);
 	double xpMalus = ((double)deathPenaltyFactor) * DeathXPFactor * maxMalus;
-	
-	if ( xpMalus + _DeathXPToGain <= maxMalus )
+
+	if (xpMalus + _DeathXPToGain <= maxMalus)
 		_DeathXPToGain += xpMalus;
 	else
 	{
@@ -66,23 +66,23 @@ void CDeathPenalties::addDeath(CCharacter& user, float deathPenaltyFactor )
 		_DeathXPToGain = maxMalus;
 
 		// remove penalty surplus from already paid back Xp debt
-		if ( _CurrentDeathXP >= xpMalus )
+		if (_CurrentDeathXP >= xpMalus)
 			_CurrentDeathXP -= xpMalus;
 		else
 			_CurrentDeathXP = 0.0;
 	}
 	updataDb(user);
-	
-	if( _CurrentDeathXP || _DeathXPToGain )
+
+	if (_CurrentDeathXP || _DeathXPToGain)
 	{
-		SM_STATIC_PARAMS_2(params,STRING_MANAGER::integer,STRING_MANAGER::integer);
-		params[0].Int = sint32(10*_CurrentDeathXP);
-		params[1].Int = sint32(10*_DeathXPToGain);
-		CCharacter::sendDynamicSystemMessage( user.getId(),"DEATH_XP_DEATH",params);
+		SM_STATIC_PARAMS_2(params, STRING_MANAGER::integer, STRING_MANAGER::integer);
+		params[0].Int = sint32(10 * _CurrentDeathXP);
+		params[1].Int = sint32(10 * _DeathXPToGain);
+		CCharacter::sendDynamicSystemMessage(user.getId(), "DEATH_XP_DEATH", params);
 	}
 }
 
-uint32 CDeathPenalties::updateResorption( CCharacter& user )
+uint32 CDeathPenalties::updateResorption(CCharacter &user)
 {
 	// we don't add death penalty in the ring
 	if (IsRingShard && DissableDPInRing)
@@ -91,26 +91,26 @@ uint32 CDeathPenalties::updateResorption( CCharacter& user )
 	}
 
 	uint32 currentTime = NLMISC::CTime::getSecondsSince1970();
-	if ( _NbDeath && _BonusUpdateTime!=0 && _BonusUpdateTime<currentTime )
+	if (_NbDeath && _BonusUpdateTime != 0 && _BonusUpdateTime < currentTime)
 	{
 		SKILLS::ESkills expSkill;
 		double maxXP = user.getSkills().getMaxXPToGain(expSkill);
-		
-		double timeFactor = (double)(currentTime - _BonusUpdateTime) / (60.*60.*24. * user.getDPLossDuration());
-		
+
+		double timeFactor = (double)(currentTime - _BonusUpdateTime) / (60. * 60. * 24. * user.getDPLossDuration());
+
 		const double maxMalus = maxXP * user.getSkillBaseValue(expSkill);
 		double xpBonus = ((double)timeFactor) * maxMalus;
-		
+
 		addXP(user, SKILLS::unknown, xpBonus, xpBonus);
 	}
 	_BonusUpdateTime = currentTime;
-	if ( _NbDeath )
+	if (_NbDeath)
 		return 600;
 	else
 		return 1800;
 }
 
-void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double & xp )
+void CDeathPenalties::addXP(CCharacter &user, SKILLS::ESkills usedSkill, double &xp)
 {
 	// we don't add death penalty in the ring
 	if (IsRingShard && DissableDPInRing)
@@ -118,13 +118,13 @@ void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double
 		return;
 	}
 
-	if ( _NbDeath )
+	if (_NbDeath)
 	{
 		// we multiply gained xp by used skill level
 		const double skillBaseValue = user.getSkillBaseValue(usedSkill);
 		if (skillBaseValue <= 0)
 		{
-			nlwarning("Skill %s base value for char %s is <= 0 !!",SKILLS::toString(usedSkill).c_str(), user.getId().toString().c_str());
+			nlwarning("Skill %s base value for char %s is <= 0 !!", SKILLS::toString(usedSkill).c_str(), user.getId().toString().c_str());
 			xp = 0;
 			return;
 		}
@@ -141,7 +141,7 @@ void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double
 	}
 }
 
-void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double & xp, double xpRaw )
+void CDeathPenalties::addXP(CCharacter &user, SKILLS::ESkills usedSkill, double &xp, double xpRaw)
 {
 	// we don't add death penalty in the ring
 	if (IsRingShard && DissableDPInRing)
@@ -150,15 +150,15 @@ void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double
 	}
 
 	_CurrentDeathXP += xp;
-	
-	if ( _CurrentDeathXP >= _DeathXPToGain )
+
+	if (_CurrentDeathXP >= _DeathXPToGain)
 	{
 		// no more death penalties, only keep the xp surplus
 		xp = _CurrentDeathXP - _DeathXPToGain;
 
 		reset(user);
-		
-		if( _CurrentDeathXP || _DeathXPToGain )
+
+		if (_CurrentDeathXP || _DeathXPToGain)
 		{
 			PHRASE_UTILITIES::sendDynamicSystemMessage(user.getEntityRowId(), "PROGRESS_DEATH_PENALTY_COMPLETE");
 		}
@@ -166,7 +166,7 @@ void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double
 		// consume SpeedUpDPLoss services
 		while (1)
 		{
-			const CStaticItem * form = CItemServiceManager::getInstance()->removePersistentService(ITEM_SERVICE_TYPE::SpeedUpDPLoss, &user);
+			const CStaticItem *form = CItemServiceManager::getInstance()->removePersistentService(ITEM_SERVICE_TYPE::SpeedUpDPLoss, &user);
 			if (form == NULL)
 				break;
 
@@ -178,16 +178,16 @@ void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double
 	else
 	{
 		// Don't send message to user if the xp was penalty resorption
-		if (usedSkill!=SKILLS::unknown)
+		if (usedSkill != SKILLS::unknown)
 		{
 			SM_STATIC_PARAMS_4(params, STRING_MANAGER::integer, STRING_MANAGER::skill, STRING_MANAGER::integer, STRING_MANAGER::integer);
-			params[0].Int = sint32(100*xpRaw);
+			params[0].Int = sint32(100 * xpRaw);
 			params[1].Enum = usedSkill;
-			params[2].Int = sint32(10*xp);
-			params[3].Int = sint32(10*(_DeathXPToGain-_CurrentDeathXP) );
+			params[2].Int = sint32(10 * xp);
+			params[3].Int = sint32(10 * (_DeathXPToGain - _CurrentDeathXP));
 			PHRASE_UTILITIES::sendDynamicSystemMessage(user.getEntityRowId(), "PROGRESS_DEATH_PENALTY_PAYBACK", params);
 		}
-		
+
 		xp = 0.0;
 		updataDb(user);
 	}
@@ -198,10 +198,10 @@ CDeathPenaltiesTimerEvent::CDeathPenaltiesTimerEvent(CCharacter *parent)
 	_Parent = parent;
 }
 
-void CDeathPenaltiesTimerEvent::timerCallback(CTimer* owner)
+void CDeathPenaltiesTimerEvent::timerCallback(CTimer *owner)
 {
 	H_AUTO(CDeathPenaltiesTimerEvent);
-	
+
 	uint32 nextUpdate = _Parent->updateDeathPenaltyResorption();
 	owner->setRemaining(nextUpdate, this);
 }

@@ -17,9 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 #include "ai_logic_action.h"
 #include "event_reaction_container.h"
@@ -50,95 +47,94 @@ extern bool simulateBug(int bugId);
 using namespace std;
 using namespace NLMISC;
 using namespace AITYPES;
-using namespace	AICOMP;
+using namespace AICOMP;
 
-static bool VerboseLog=false;
-#define LOG if (!VerboseLog) {} else nlinfo
-
+static bool VerboseLog = false;
+#define LOG              \
+	if (!VerboseLog) { } \
+	else nlinfo
 
 //////////////////////////////////////////////////////////////////////////
 //	Generic Actions
-
-
 
 //-------------------------------------------------------------------------------------------
 // 	random_select_state
 //-------------------------------------------------------------------------------------------
 
-class	CAILogicActionRandomSelectState:public	IAILogicAction
+class CAILogicActionRandomSelectState : public IAILogicAction
 {
 public:
 	// init is called just after instantiation to give class a chance to parse arguments and
 	// deal with sub actions
 	CAILogicActionRandomSelectState(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
-		_weightSum=0;
+		_weightSum = 0;
 
 		if (!subActions.empty())
 			nlwarning("sub-actions of 'random_select_state' are ignored");
 
-		for (uint i=0;i<args.size();++i)
+		for (uint i = 0; i < args.size(); ++i)
 		{
 			std::string weightStr, stateStr;
-			AI_SHARE::stringToWordAndTail(args[i],weightStr, stateStr);
+			AI_SHARE::stringToWordAndTail(args[i], weightStr, stateStr);
 			sint16 weight;
 			NLMISC::fromString(weightStr, weight);
-			if	(	weight<=0
-				||	NLMISC::toString(weight)!=weightStr)
+			if (weight <= 0
+			    || NLMISC::toString(weight) != weightStr)
 			{
-//				nlinfo("no weight found for state in line '%s' - setting weight to 1",args[i].c_str());
-				stateStr=args[i];
-				weight=1;
+				//				nlinfo("no weight found for state in line '%s' - setting weight to 1",args[i].c_str());
+				stateStr = args[i];
+				weight = 1;
 			}
-			
-			CAIState	*state=container->states().getChildByAlias(eventNode->findAliasByNameAndType(stateStr,AITypeNpcStateRoute));
-			if	(!state) 
-				state=container->states().getChildByAlias(eventNode->findAliasByNameAndType(stateStr,AITypeNpcStateZone));
 
-			if	(!state)
+			CAIState *state = container->states().getChildByAlias(eventNode->findAliasByNameAndType(stateStr, AITypeNpcStateRoute));
+			if (!state)
+				state = container->states().getChildByAlias(eventNode->findAliasByNameAndType(stateStr, AITypeNpcStateZone));
+
+			if (!state)
 			{
-				nlwarning("DATA_BUG: EVENT: %s: Failed to identify state: %s",eventNode->fullName().c_str(),args[i].c_str());
+				nlwarning("DATA_BUG: EVENT: %s: Failed to identify state: %s", eventNode->fullName().c_str(), args[i].c_str());
 				continue;
 			}
 
 			_states.push_back(state);
 			_weights.push_back(weight);
-			_weightSum+=weight;
+			_weightSum += weight;
 		}
 
 		// make sure there's at least one state
-		if (_weightSum==0)
+		if (_weightSum == 0)
 			nlwarning("DATA_BUG: random_select_state: State list is unweighted!");
 	}
 
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		// make sure something was found
-		if (_weightSum==0)
+		if (_weightSum == 0)
 		{
 			nlwarning("random_select_state: State list is unweighted!");
 			return false;
 		}
 
 		// generate a random number in range [0.._weightSum) and find a corresponding doofer
-		sint32 randVal=CAIS::rand32(_weightSum);
+		sint32 randVal = CAIS::rand32(_weightSum);
 		uint i;
-		for (i=0;i<_states.size() && randVal>=_weights[i];++i)
-			randVal-=_weights[i];
+		for (i = 0; i < _states.size() && randVal >= _weights[i]; ++i)
+			randVal -= _weights[i];
 
-		// quick debug test... would be an assert...
+			// quick debug test... would be an assert...
 #ifdef NL_DEBUG
-		nlassert(randVal<=_weights[i]);	// "BUG: Random value outside random range!"
+		nlassert(randVal <= _weights[i]); // "BUG: Random value outside random range!"
 #endif
 
 		if (entity->getDebugHistory()->isRecording())
 		{
 			entity->getDebugHistory()->addHistory("GRP State Change: %s => %s",
-				entity->getState()->getAliasNode()->fullName().c_str(),
-				_states[i]->getAliasNode()->fullName().c_str());
+			    entity->getState()->getAliasNode()->fullName().c_str(),
+			    _states[i]->getAliasNode()->fullName().c_str());
 		}
 
 		entity->setNextState(_states[i]);
@@ -146,55 +142,53 @@ public:
 	}
 
 private:
-	std::vector<CDbgPtr<CAIState> > _states;
+	std::vector<CDbgPtr<CAIState>> _states;
 	std::vector<sint16> _weights;
 	uint16 _weightSum;
 };
-
 
 //-------------------------------------------------------------------------------------------
 // 	begin_state
 //-------------------------------------------------------------------------------------------
 
-class CAILogicActionBeginState: public IAILogicAction
+class CAILogicActionBeginState : public IAILogicAction
 {
 public:
 	// init is called just after instantiation to give class a chance to parse arguments and
 	// deal with sub actions
 	CAILogicActionBeginState(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
-		if	(!subActions.empty())
+		if (!subActions.empty())
 			nlwarning("sub-actions of 'begin_state' are ignored");
 
-		for (uint i=0;i<args.size();++i)
+		for (uint i = 0; i < args.size(); ++i)
 		{
-			CAIState	*state=container->states().getChildByAlias(eventNode->findAliasByNameAndType(args[i],AITypeNpcStateRoute));
+			CAIState *state = container->states().getChildByAlias(eventNode->findAliasByNameAndType(args[i], AITypeNpcStateRoute));
 			breakable
 			{
 				if (state)
 					break;
-				state=container->states().getChildByAlias(eventNode->findAliasByNameAndType(args[i],AITypeNpcStateZone));
+				state = container->states().getChildByAlias(eventNode->findAliasByNameAndType(args[i], AITypeNpcStateZone));
 				if (state)
 					break;
-				state=container->states().getChildByAlias(eventNode->findAliasByNameAndType(args[i],AITypeState));
+				state = container->states().getChildByAlias(eventNode->findAliasByNameAndType(args[i], AITypeState));
 				if (state)
 					break;
-				state=container->states().getChildByAlias(eventNode->findAliasByNameAndType(args[i],AITypePunctualState));
+				state = container->states().getChildByAlias(eventNode->findAliasByNameAndType(args[i], AITypePunctualState));
 				if (state)
 					break;
 
 				nlwarning("Action begin_state: failed to identify state: '%s' in '%s'",
-					args[i].c_str(),
-					eventNode->fullName().c_str());
+				    args[i].c_str(),
+				    eventNode->fullName().c_str());
 				continue;
 			}
 			_states.push_back(state);
 		}
-
 	}
 
-//	CPersistentStateInstance
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	//	CPersistentStateInstance
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 
 		if (_states.empty())
@@ -202,29 +196,28 @@ public:
 			nlwarning("begin_state failed because state list is empty");
 			return false;
 		}
-		uint i=CAIS::rand16((uint32)_states.size());
+		uint i = CAIS::rand16((uint32)_states.size());
 
 		if (entity->getDebugHistory()->isRecording())
 		{
 			entity->getDebugHistory()->addHistory("GRP State Change: %s => %s",
-				entity->getState()->getAliasNode()->fullName().c_str(),
-				_states[i]->getAliasNode()->fullName().c_str());
+			    entity->getState()->getAliasNode()->fullName().c_str(),
+			    _states[i]->getAliasNode()->fullName().c_str());
 		}
-		
+
 		entity->setNextState(_states[i]);
 		return true;
 	}
-	
-private:
-	std::vector<CDbgPtr<CAIState> > _states;
-};
 
+private:
+	std::vector<CDbgPtr<CAIState>> _states;
+};
 
 //-------------------------------------------------------------------------------------------
 // 	user_event
 //-------------------------------------------------------------------------------------------
 
-class IAILogicActionUserEvent: public IAILogicAction
+class IAILogicActionUserEvent : public IAILogicAction
 {
 public:
 	// init is called just after instantiation to give class a chance to parse arguments and
@@ -239,15 +232,15 @@ public:
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
-		if	(	_groups.empty()
-			&&	!_groupsName.empty())
+		if (_groups.empty()
+		    && !_groupsName.empty())
 		{
 			// try to retreive the groups
-			for (uint i=0; i<_groupsName.size(); ++i)
+			for (uint i = 0; i < _groupsName.size(); ++i)
 			{
-				std::vector<CGroup*>	grps;
+				std::vector<CGroup *> grps;
 				if (simulateBug(4))
 				{
 					CAIS::instance().AIList()[0]->findGroup(grps, _groupsName[i]);
@@ -261,9 +254,9 @@ public:
 					nlwarning("Can't find group(s) for the name '%s'", _groupsName[i].c_str());
 					continue;
 				}
-				
+
 				// retreive persistent state instance pointer.
-				for (uint j=0; j<grps.size(); ++j)
+				for (uint j = 0; j < grps.size(); ++j)
 					_groups.push_back(grps[j]->getPersistentStateInstance());
 			}
 			// clear the groupName vector to not redo the job
@@ -276,26 +269,26 @@ public:
 			return false;
 		}
 
-		for (uint i=0;i<_groups.size();++i)
+		for (uint i = 0; i < _groups.size(); ++i)
 		{
-			CPersistentStateInstance *grp=_groups[i];
-			if	(!grp)
+			CPersistentStateInstance *grp = _groups[i];
+			if (!grp)
 				continue;
-			
-			grp->getDebugHistory()->addHistory("GRP User Event: %u",getIndex());
 
-			nlassert(getIndex()<10);
+			grp->getDebugHistory()->addHistory("GRP User Event: %u", getIndex());
+
+			nlassert(getIndex() < 10);
 			grp->processStateEvent(grp->getPersistentStateInstance()->getEventContainer().EventUserEvent[getIndex()]);
 		}
 		return true;
 	}
 
 protected:
-	virtual uint32 getIndex()=0;
+	virtual uint32 getIndex() = 0;
 
-private:	
-	std::vector<CPersistentStateInstance*>	_groups;
-	std::vector<std::string>				_groupsName;
+private:
+	std::vector<CPersistentStateInstance *> _groups;
+	std::vector<std::string> _groupsName;
 };
 
 //-------------------------------------------------------------------------------------------
@@ -303,10 +296,13 @@ private:
 class CAILogicActionUserEvent0 : public IAILogicActionUserEvent
 {
 public:
-	CAILogicActionUserEvent0(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionUserEvent(args,subActions,eventNode,container){}
+	CAILogicActionUserEvent0(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionUserEvent(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
 	virtual uint32 getIndex();
 };
@@ -321,12 +317,15 @@ uint32 CAILogicActionUserEvent0::getIndex()
 class CAILogicActionUserEvent1 : public IAILogicActionUserEvent
 {
 public:
-	CAILogicActionUserEvent1(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionUserEvent(args,subActions,eventNode,container){}
+	CAILogicActionUserEvent1(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionUserEvent(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
-	virtual uint32 getIndex()	{ return 1; }
+	virtual uint32 getIndex() { return 1; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -334,12 +333,15 @@ protected:
 class CAILogicActionUserEvent2 : public IAILogicActionUserEvent
 {
 public:
-	CAILogicActionUserEvent2(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionUserEvent(args,subActions,eventNode,container){}
+	CAILogicActionUserEvent2(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionUserEvent(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
-	virtual uint32 getIndex()	{ return 2; }
+	virtual uint32 getIndex() { return 2; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -347,12 +349,15 @@ protected:
 class CAILogicActionUserEvent3 : public IAILogicActionUserEvent
 {
 public:
-	CAILogicActionUserEvent3(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionUserEvent(args,subActions,eventNode,container){}
+	CAILogicActionUserEvent3(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionUserEvent(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
-	virtual uint32 getIndex()	{ return 3; }
+	virtual uint32 getIndex() { return 3; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -360,12 +365,15 @@ protected:
 class CAILogicActionUserEvent4 : public IAILogicActionUserEvent
 {
 public:
-	CAILogicActionUserEvent4(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionUserEvent(args,subActions,eventNode,container){}
+	CAILogicActionUserEvent4(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionUserEvent(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
-	virtual uint32 getIndex()	{ return 4; }
+	virtual uint32 getIndex() { return 4; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -373,12 +381,15 @@ protected:
 class CAILogicActionUserEvent5 : public IAILogicActionUserEvent
 {
 public:
-	CAILogicActionUserEvent5(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionUserEvent(args,subActions,eventNode,container){}
+	CAILogicActionUserEvent5(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionUserEvent(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
-	virtual uint32 getIndex()	{ return 5; }
+	virtual uint32 getIndex() { return 5; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -386,12 +397,15 @@ protected:
 class CAILogicActionUserEvent6 : public IAILogicActionUserEvent
 {
 public:
-	CAILogicActionUserEvent6(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionUserEvent(args,subActions,eventNode,container){}
+	CAILogicActionUserEvent6(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionUserEvent(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
-	virtual uint32 getIndex()	{ return 6; }
+	virtual uint32 getIndex() { return 6; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -399,12 +413,15 @@ protected:
 class CAILogicActionUserEvent7 : public IAILogicActionUserEvent
 {
 public:
-	CAILogicActionUserEvent7(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionUserEvent(args,subActions,eventNode,container){}
+	CAILogicActionUserEvent7(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionUserEvent(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
-	virtual uint32 getIndex()	{ return 7; }
+	virtual uint32 getIndex() { return 7; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -412,12 +429,15 @@ protected:
 class CAILogicActionUserEvent8 : public IAILogicActionUserEvent
 {
 public:
-	CAILogicActionUserEvent8(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionUserEvent(args,subActions,eventNode,container){}
+	CAILogicActionUserEvent8(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionUserEvent(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
-	virtual uint32 getIndex()	{ return 8; }
+	virtual uint32 getIndex() { return 8; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -425,20 +445,22 @@ protected:
 class CAILogicActionUserEvent9 : public IAILogicActionUserEvent
 {
 public:
-	CAILogicActionUserEvent9(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionUserEvent(args,subActions,eventNode,container){}
-protected:
-	virtual uint32 getIndex()	{ return 9; }
-};
+	CAILogicActionUserEvent9(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionUserEvent(args, subActions, eventNode, container)
+	{
+	}
 
+protected:
+	virtual uint32 getIndex() { return 9; }
+};
 
 //-------------------------------------------------------------------------------------------
 // 	multi_action
 //-------------------------------------------------------------------------------------------
 
-class CAILogicActionMultiAction: public IAILogicAction
+class CAILogicActionMultiAction : public IAILogicAction
 {
 public:
 	// init is called just after instantiation to give class a chance to parse arguments and
@@ -451,14 +473,14 @@ public:
 		if (subActions.empty())
 			nlwarning("no sub-actions found for multi_action action");
 
-		_subActions=subActions;
+		_subActions = subActions;
 	}
 
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-//	virtual bool executeAction(CAIEntity *entity,const IAIEvent *event)
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	//	virtual bool executeAction(CAIEntity *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		if (_subActions.empty())
 		{
@@ -466,17 +488,17 @@ public:
 			return false;
 		}
 
-		bool result=true;
+		bool result = true;
 
-		const	uint32 nbActions=(uint32)_subActions.size();
-		for (uint32 i=0;i<nbActions;i++)
+		const uint32 nbActions = (uint32)_subActions.size();
+		for (uint32 i = 0; i < nbActions; i++)
 		{
-			if(_subActions[i]==NULL)
+			if (_subActions[i] == NULL)
 			{
-				nlwarning("multi actions : _subActions[%d] NULL ! ",i);
+				nlwarning("multi actions : _subActions[%d] NULL ! ", i);
 			}
-			if (!_subActions[i]->executeAction(entity,event))
-				result=false;
+			if (!_subActions[i]->executeAction(entity, event))
+				result = false;
 		}
 		return result;
 	}
@@ -485,63 +507,60 @@ private:
 	std::vector<IAILogicAction::TSmartPtr> _subActions;
 };
 
-
 //-------------------------------------------------------------------------------------------
 // 	punctual_state
 //-------------------------------------------------------------------------------------------
 
-class CAILogicActionPunctualState: public IAILogicAction
+class CAILogicActionPunctualState : public IAILogicAction
 {
 public:
 	// init is called just after instantiation to give class a chance to parse arguments and
 	// deal with sub actions
 	CAILogicActionPunctualState(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
-		if	(!subActions.empty())
+		if (!subActions.empty())
 			nlwarning("sub-actions of 'punctual_state' are ignored");
 
-		for (uint i=0;i<args.size();++i)
+		for (uint i = 0; i < args.size(); ++i)
 		{
-			CAIState	*const	state=container->states().getChildByAlias(eventNode->findAliasByNameAndType(args[i],AITypePunctualState));
+			CAIState *const state = container->states().getChildByAlias(eventNode->findAliasByNameAndType(args[i], AITypePunctualState));
 			if (!state)
 			{
-				nlwarning("Failed to identify punctual state: %s",args[i].c_str());
+				nlwarning("Failed to identify punctual state: %s", args[i].c_str());
 				continue;
 			}
 			_states.push_back(state);
 		}
-
 	}
 
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		if (_states.empty())
 		{
 			nlwarning("begin_punctual_state failed because state list is empty");
 			return false;
 		}
-		entity->setNextPunctualState(_states[CAIS::rand16((uint32)_states.size())]); 
+		entity->setNextPunctualState(_states[CAIS::rand16((uint32)_states.size())]);
 		if (entity->getDebugHistory()->isRecording())
 		{
 			entity->getDebugHistory()->addHistory("GRP BeginPunctual State: %s",
-				entity->getNextPunctualState()->getAliasNode()->fullName().c_str());
+			    entity->getNextPunctualState()->getAliasNode()->fullName().c_str());
 		}
 		return true;
 	}
 
 private:
-	std::vector<CDbgPtr<CAIState> > _states;
+	std::vector<CDbgPtr<CAIState>> _states;
 };
-
 
 //-------------------------------------------------------------------------------------------
 // 	punctual_state_end
 //-------------------------------------------------------------------------------------------
 
-class CAILogicActionPunctualStateEnd: public IAILogicAction
+class CAILogicActionPunctualStateEnd : public IAILogicAction
 {
 public:
 	// init is called just after instantiation to give class a chance to parse arguments and
@@ -558,26 +577,24 @@ public:
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		if (entity->getDebugHistory()->isRecording())
 		{
 			entity->getDebugHistory()->addHistory("GRP End Punctual State: %s",
-				entity->getPunctualState()->getAliasNode()->fullName().c_str());
+			    entity->getPunctualState()->getAliasNode()->fullName().c_str());
 		}
-		
+
 		entity->cancelPunctualState();
 		return true;
 	}
-
 };
-
 
 //-------------------------------------------------------------------------------------------
 // 	random_select
 //-------------------------------------------------------------------------------------------
 
-class CAILogicActionRandomSelect: public IAILogicAction
+class CAILogicActionRandomSelect : public IAILogicAction
 {
 public:
 	// init is called just after instantiation to give class a chance to parse arguments and
@@ -590,20 +607,20 @@ public:
 		if (subActions.empty())
 			nlwarning("no sub-actinos found for random action");
 
-		_subActions=subActions;
+		_subActions = subActions;
 	}
 
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		if (_subActions.empty())
 		{
 			nlwarning("random_select failed because sub-action list is empty");
 			return false;
 		}
-		_subActions[CAIS::rand16((uint32)_subActions.size())]->executeAction(entity,event);
+		_subActions[CAIS::rand16((uint32)_subActions.size())]->executeAction(entity, event);
 
 		return true;
 	}
@@ -612,12 +629,11 @@ private:
 	std::vector<IAILogicAction::TSmartPtr> _subActions;
 };
 
-
 //-------------------------------------------------------------------------------------------
 // 	set_state_timeout
 //-------------------------------------------------------------------------------------------
 
-class CAILogicActionSetStateTimeout: public IAILogicAction
+class CAILogicActionSetStateTimeout : public IAILogicAction
 {
 public:
 	// init is called just after instantiation to give class a chance to parse arguments and
@@ -629,38 +645,41 @@ public:
 
 		switch (args.size())
 		{
-		case 2:	NLMISC::fromString(args[0], _min); if (args[0]!=NLMISC::toString(_min)) goto BadArgs;
-				NLMISC::fromString(args[1], _max); if (args[1]!=NLMISC::toString(_max)) goto BadArgs;
-				break;
-		case 1:	NLMISC::fromString(args[0], _min); if (args[0]!=NLMISC::toString(_min)) goto BadArgs;
-				_max=_min;
-				break;
-		default: 
+		case 2:
+			NLMISC::fromString(args[0], _min);
+			if (args[0] != NLMISC::toString(_min)) goto BadArgs;
+			NLMISC::fromString(args[1], _max);
+			if (args[1] != NLMISC::toString(_max)) goto BadArgs;
+			break;
+		case 1:
+			NLMISC::fromString(args[0], _min);
+			if (args[0] != NLMISC::toString(_min)) goto BadArgs;
+			_max = _min;
+			break;
+		default:
 		BadArgs:
 			nlwarning("Invalid arguments for 'set state timeout'");
-			_min=0;
-			_max=0;
+			_min = 0;
+			_max = 0;
 		}
-
 	}
 
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
-		uint t=_min;
+		uint t = _min;
 		if (_min != _max)
-			t += CAIS::rand32(_max-_min);
+			t += CAIS::rand32(_max - _min);
 		entity->timerStateTimeout().set(t);
 		entity->getDebugHistory()->addHistory("GRP Set State Timeout: %u", t);
 		return true;
 	}
 
 private:
-	uint32 _min,_max;
+	uint32 _min, _max;
 };
-
 
 //-------------------------------------------------------------------------------------------
 // 	set_punctual_state_timeout
@@ -679,11 +698,14 @@ public:
 		switch (args.size())
 		{
 		case 2:
-			NLMISC::fromString(args[0], _min); if (args[0] != NLMISC::toString(_min)) goto BadArgs;
-			NLMISC::fromString(args[1], _max); if (args[1] != NLMISC::toString(_max)) goto BadArgs;
+			NLMISC::fromString(args[0], _min);
+			if (args[0] != NLMISC::toString(_min)) goto BadArgs;
+			NLMISC::fromString(args[1], _max);
+			if (args[1] != NLMISC::toString(_max)) goto BadArgs;
 			break;
 		case 1:
-			NLMISC::fromString(args[0], _min); if (args[0] != NLMISC::toString(_min)) goto BadArgs;
+			NLMISC::fromString(args[0], _min);
+			if (args[0] != NLMISC::toString(_min)) goto BadArgs;
 			_max = _min;
 			break;
 		default:
@@ -711,14 +733,13 @@ private:
 	uint32 _min, _max;
 };
 
-
 //-------------------------------------------------------------------------------------------
 // 	set_timer_t*
 //-------------------------------------------------------------------------------------------
 
 // this class is not instantiated directly. It is derived to refference timers t0,t1,... etc
 
-class IAILogicActionSetTimer: public IAILogicAction
+class IAILogicActionSetTimer : public IAILogicAction
 {
 	enum TTimerMode
 	{
@@ -734,8 +755,7 @@ class IAILogicActionSetTimer: public IAILogicAction
 public:
 	// init is called just after instantiation to give class a chance to parse arguments and
 	// deal with sub actions
-	IAILogicActionSetTimer(	const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	IAILogicActionSetTimer(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
 		_Mode = tm_invalid;
 		_DayTime = 0;
@@ -744,7 +764,7 @@ public:
 
 		if (!subActions.empty())
 			nlwarning("sub-actions of 'set timer' are ignored");
-		if(args.empty())
+		if (args.empty())
 		{
 			nlwarning("Invalid arguments 'for set_timer'");
 			return;
@@ -761,7 +781,7 @@ public:
 				nlwarning("Invalid argument for set timer with daytime(%s) : %s", args[0].c_str(), eventNode->fullName().c_str());
 				_Min = _Max = 0;
 			}
-			else 
+			else
 			{
 				_Mode = tm_daytime;
 				_DayTime = parseDayTime(strs[1]);
@@ -824,24 +844,28 @@ public:
 			_Mode = tm_timer;
 			switch (args.size())
 			{
-			case 2:	NLMISC::fromString(args[0], _Min); if (args[0]!=NLMISC::toString(_Min)) goto BadArgs;
-					NLMISC::fromString(args[1], _Max); if (args[1]!=NLMISC::toString(_Max)) goto BadArgs;
-					break;
-			case 1:	NLMISC::fromString(args[0], _Min); if (args[0]!=NLMISC::toString(_Min)) goto BadArgs;
-					_Max=_Min;
-					break;
-			default: 
+			case 2:
+				NLMISC::fromString(args[0], _Min);
+				if (args[0] != NLMISC::toString(_Min)) goto BadArgs;
+				NLMISC::fromString(args[1], _Max);
+				if (args[1] != NLMISC::toString(_Max)) goto BadArgs;
+				break;
+			case 1:
+				NLMISC::fromString(args[0], _Min);
+				if (args[0] != NLMISC::toString(_Min)) goto BadArgs;
+				_Max = _Min;
+				break;
+			default:
 			BadArgs:
 				nlwarning("Invalid arguments for 'set timer'(%s,%s) : %s",
-					(args.size()==1||args.size()==2)? args[0].c_str(): "BAD ARG COUNT",
-					(args.size()==2)? args[1].c_str(): "" ,
-					eventNode->fullName().c_str());
-				_Min=0;
-				_Max=0;
+				    (args.size() == 1 || args.size() == 2) ? args[0].c_str() : "BAD ARG COUNT",
+				    (args.size() == 2) ? args[1].c_str() : "",
+				    eventNode->fullName().c_str());
+				_Min = 0;
+				_Max = 0;
 				_Mode = tm_invalid;
 			}
 		}
-
 	}
 
 	float parseDayTime(const string &param)
@@ -849,7 +873,7 @@ public:
 		uint hour;
 		uint minute = 0;
 
-		vector<string>	parts;
+		vector<string> parts;
 		explode(param, string(":"), parts, false);
 
 		if (parts.size() == 2)
@@ -858,13 +882,13 @@ public:
 		hour = NLMISC::atoui(parts[0].c_str());
 
 		// convert minute to humdreds of hour to obtain time of day
-		return hour + (minute * 100.f)/(60.f*100.f);
+		return hour + (minute * 100.f) / (60.f * 100.f);
 	}
 
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		// precompute the timer ticks
 		float currentTime = CTimeInterface::getRyzomTime().getRyzomTime();
@@ -879,64 +903,59 @@ public:
 
 		switch (_Mode)
 		{
-		case tm_daytime:
-			{
-				_Min = _Max = timeTicks;
-			}
-			break;
-		case tm_weekday:
-			{
-				uint32 dow = (uint32)CTimeInterface::getRyzomTime().getRyzomDayOfWeek();
-				while (dow < _DayNumber)
-					dow += RYZOM_WEEK_IN_DAY;
+		case tm_daytime: {
+			_Min = _Max = timeTicks;
+		}
+		break;
+		case tm_weekday: {
+			uint32 dow = (uint32)CTimeInterface::getRyzomTime().getRyzomDayOfWeek();
+			while (dow < _DayNumber)
+				dow += RYZOM_WEEK_IN_DAY;
 
-				_Min = _Max = timeTicks + dow * RYZOM_DAY_IN_TICKS;
-			}
-			break;
-		case tm_monthday:
-			{
-				uint32 dom = CTimeInterface::getRyzomTime().getRyzomDayOfMonth();
-				while (dom < _DayNumber)
-					dom += RYZOM_MONTH_IN_DAY;
+			_Min = _Max = timeTicks + dow * RYZOM_DAY_IN_TICKS;
+		}
+		break;
+		case tm_monthday: {
+			uint32 dom = CTimeInterface::getRyzomTime().getRyzomDayOfMonth();
+			while (dom < _DayNumber)
+				dom += RYZOM_MONTH_IN_DAY;
 
-				_Min = _Max = timeTicks + dom * RYZOM_DAY_IN_TICKS;
-			}
-			break;
-		case tm_seasonday:
-			{
-				uint32 dos = CTimeInterface::getRyzomTime().getRyzomDayOfSeason();
-				while (dos < _DayNumber)
-					dos += RYZOM_SEASON_IN_DAY;
+			_Min = _Max = timeTicks + dom * RYZOM_DAY_IN_TICKS;
+		}
+		break;
+		case tm_seasonday: {
+			uint32 dos = CTimeInterface::getRyzomTime().getRyzomDayOfSeason();
+			while (dos < _DayNumber)
+				dos += RYZOM_SEASON_IN_DAY;
 
-				_Min = _Max = timeTicks + dos * RYZOM_DAY_IN_TICKS;
-			}
-			break;
-		case tm_yearday:
-			{
-				uint32 doy = CTimeInterface::getRyzomTime().getRyzomDayOfYear();
-				while (doy < _DayNumber)
-					doy += RYZOM_YEAR_IN_DAY;
+			_Min = _Max = timeTicks + dos * RYZOM_DAY_IN_TICKS;
+		}
+		break;
+		case tm_yearday: {
+			uint32 doy = CTimeInterface::getRyzomTime().getRyzomDayOfYear();
+			while (doy < _DayNumber)
+				doy += RYZOM_YEAR_IN_DAY;
 
-				_Min = _Max = timeTicks + doy * RYZOM_DAY_IN_TICKS;
-			}
-			break;
+			_Min = _Max = timeTicks + doy * RYZOM_DAY_IN_TICKS;
+		}
+		break;
 		}
 
-		uint t=_Min;
+		uint t = _Min;
 		if (_Max != _Min)
-			t+=CAIS::rand32(_Max-_Min);
+			t += CAIS::rand32(_Max - _Min);
 		entity->timerUser(getIndex()).set(t);
 		entity->getDebugHistory()->addHistory("GRP Set  Timer t%i: %u", getIndex(), t);
 		return true;
 	}
- 
+
 protected:
-	virtual uint32 getIndex()=0;
-	TTimerMode	_Mode;
-	uint32		_Min;
-	uint32		_Max;
-	float		_DayTime;
-	uint32		_DayNumber;
+	virtual uint32 getIndex() = 0;
+	TTimerMode _Mode;
+	uint32 _Min;
+	uint32 _Max;
+	float _DayTime;
+	uint32 _DayNumber;
 };
 
 //-------------------------------------------------------------------------------------------
@@ -944,12 +963,15 @@ protected:
 class CAILogicActionSetTimerT0 : public IAILogicActionSetTimer
 {
 public:
-	CAILogicActionSetTimerT0(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionSetTimer(args,subActions,eventNode,container){}
+	CAILogicActionSetTimerT0(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionSetTimer(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
-	virtual uint32 getIndex()	{ return 0; }
+	virtual uint32 getIndex() { return 0; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -957,12 +979,15 @@ protected:
 class CAILogicActionSetTimerT1 : public IAILogicActionSetTimer
 {
 public:
-	CAILogicActionSetTimerT1(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionSetTimer(args,subActions,eventNode,container){}
+	CAILogicActionSetTimerT1(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionSetTimer(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
-	virtual uint32 getIndex()	{ return 1; }
+	virtual uint32 getIndex() { return 1; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -970,12 +995,15 @@ protected:
 class CAILogicActionSetTimerT2 : public IAILogicActionSetTimer
 {
 public:
-	CAILogicActionSetTimerT2(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionSetTimer(args,subActions,eventNode,container){}
+	CAILogicActionSetTimerT2(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionSetTimer(args, subActions, eventNode, container)
+	{
+	}
+
 protected:
-	virtual uint32 getIndex()	{ return 2; }
+	virtual uint32 getIndex() { return 2; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -983,82 +1011,81 @@ protected:
 class CAILogicActionSetTimerT3 : public IAILogicActionSetTimer
 {
 public:
-	CAILogicActionSetTimerT3(const std::vector<std::string> &args, 
-								const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
-								IAILogicActionSetTimer(args,subActions,eventNode,container){}
-protected:
-	virtual uint32 getIndex()	{ return 3; }
-};
+	CAILogicActionSetTimerT3(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	    : IAILogicActionSetTimer(args, subActions, eventNode, container)
+	{
+	}
 
+protected:
+	virtual uint32 getIndex() { return 3; }
+};
 
 //-------------------------------------------------------------------------------------------
 class CAILogicActionSpawn : public IAILogicAction
 {
 public:
-	CAILogicActionSpawn	(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
-	{}
+	CAILogicActionSpawn(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	{
+	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		CGroup *grp = entity->getGroup();
 		if (grp)
 		{
-			if	(grp->isSpawned())
+			if (grp->isSpawned())
 				grp->getSpawnObj()->spawnBots();
 			return true;
 		}
 		else
 		{
-			nlwarning("CAILogicActionSpawn : entity %s is not a group ? ", 
-				entity->aliasTreeOwner()->getAliasString().c_str());
+			nlwarning("CAILogicActionSpawn : entity %s is not a group ? ",
+			    entity->aliasTreeOwner()->getAliasString().c_str());
 			return false;
 		}
-
 	}
-
 };
 //-------------------------------------------------------------------------------------------
 class CAILogicActionDespawn : public IAILogicAction
 {
 public:
-	CAILogicActionDespawn (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	CAILogicActionDespawn(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
 		_immediately = false;
 
 		// look in args to see if the 'immediately' options is here
-		if	(args.empty())
+		if (args.empty())
 			return;
 
 		_immediately = (args[0] == "immediately");
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
-		CGroup *const	grp = entity->getGroup();
-		
+		CGroup *const grp = entity->getGroup();
+
 		if (!grp)
 		{
-			nlwarning("CAILogicActionDespawn : entity %s is not a group ? ", 
-				entity->aliasTreeOwner()->getAliasString().c_str());
-			return false;			
+			nlwarning("CAILogicActionDespawn : entity %s is not a group ? ",
+			    entity->aliasTreeOwner()->getAliasString().c_str());
+			return false;
 		}
 
 		grp->despawnBots(_immediately);
 		return true;
 	}
+
 private:
-	bool	_immediately;
+	bool _immediately;
 };
 
 //-------------------------------------------------------------------------------------------
 class CAILogicActionSendMessage : public IAILogicAction
 {
 public:
-	CAILogicActionSendMessage (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	CAILogicActionSendMessage(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
 		if (args.empty())
 		{
@@ -1068,16 +1095,16 @@ public:
 
 		_destService = args[0];
 
-		std::vector<std::string> temp(args.begin()+1, args.end());
+		std::vector<std::string> temp(args.begin() + 1, args.end());
 
 		_content.swap(temp);
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		if (_destService.empty())
 			return false;
-		
+
 		CCAisActionMsg msg;
 		msg.Alias = entity->aliasTreeOwner()->getAlias();
 		msg.Content = _content;
@@ -1086,21 +1113,21 @@ public:
 
 		return true;
 	}
+
 private:
-	std::string					_destService;
-	std::vector<std::string>	_content;
+	std::string _destService;
+	std::vector<std::string> _content;
 };
 
 // a big bad global var !
-CAIEntityPhysical	*TempSpeaker = NULL;
-CBotPlayer			*TempPlayer = NULL;
+CAIEntityPhysical *TempSpeaker = NULL;
+CBotPlayer *TempPlayer = NULL;
 
 //-------------------------------------------------------------------------------------------
 class CAILogicActionSay : public IAILogicAction
 {
 public:
-	CAILogicActionSay (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	CAILogicActionSay(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
 		_tellToEscort = false;
 		if (args.empty())
@@ -1111,7 +1138,7 @@ public:
 
 		std::string key, tail;
 		AI_SHARE::stringToKeywordAndTail(args[0], key, tail);
-		
+
 		breakable
 		{
 			if (key == "tell")
@@ -1152,46 +1179,46 @@ public:
 		_phraseId = tail;
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
-		if	(_phraseId.empty())
+		if (_phraseId.empty())
 			return false;
 
 		// we must first find the group leader, then send a chat message a 'say' mode
-		const CAIAliasDescriptionNode	*const aliasDesc=entity->aliasTreeOwner()->getAliasNode();
+		const CAIAliasDescriptionNode *const aliasDesc = entity->aliasTreeOwner()->getAliasNode();
 
-		if	(	(aliasDesc && aliasDesc->getType() != AITypeGrp)
-			||	!entity->getGroup()	)
+		if ((aliasDesc && aliasDesc->getType() != AITypeGrp)
+		    || !entity->getGroup())
 		{
 			nlwarning("group can't have 'say' action !");
-			return	true;
+			return true;
 		}
 
 		{
-			const	CSpawnGroup	*const	grp = entity->getGroup()->getSpawnObj();
+			const CSpawnGroup *const grp = entity->getGroup()->getSpawnObj();
 #if !FINAL_VERSION
 			nlassert(grp);
 #endif
-			CSpawnBot	*bot = NULL;
+			CSpawnBot *bot = NULL;
 
-			if	(	TempSpeaker
-				&&	TempSpeaker->isAlive())
-				bot = NLMISC::safe_cast<CSpawnBot*>(TempSpeaker);
+			if (TempSpeaker
+			    && TempSpeaker->isAlive())
+				bot = NLMISC::safe_cast<CSpawnBot *>(TempSpeaker);
 
-			if	(!bot)
+			if (!bot)
 			{
 				CBot *b = grp->getPersistent().getLeader();
 				if (b)
 					bot = b->getSpawnObj();
 			}
 
-			if	(	!bot
-				||	!bot->isAlive())
+			if (!bot
+			    || !bot->isAlive())
 			{
 				LOG("CAILogicActionSay::executeAction : no bots in the group, ignoring action.");
 				return true;
 			}
-						
+
 			// ok, we have the leader, send the chat message.
 			if (!_tellToEscort)
 			{
@@ -1212,7 +1239,7 @@ public:
 				// retrieve the team id of the player, then tell to each member of the team.
 				const uint16 teamId = grp->getPersistent().getEscortTeamId();
 
-				if	(teamId == CTEAM::InvalidTeamId)
+				if (teamId == CTEAM::InvalidTeamId)
 				{
 					nlwarning("CAILogicActionSay::executeAction : can't tell to escort team coz escort is invalid");
 					return false;
@@ -1221,7 +1248,7 @@ public:
 				LOG("CAILogicActionSay::executeAction : telling phrase '%s' to escort team %u", _phraseId.c_str(), teamId);
 
 				{
-					CManagerPlayer	*mgr=grp->getPersistent().getAIInstance()->getPlayerMgr();
+					CManagerPlayer *mgr = grp->getPersistent().getAIInstance()->getPlayerMgr();
 					const std::set<TDataSetRow> team = mgr->getPlayerTeam(teamId);
 					std::set<TDataSetRow>::const_iterator first(team.begin()), last(team.end());
 					for (; first != last; ++first)
@@ -1231,55 +1258,57 @@ public:
 		}
 		return true;
 	}
+
 private:
-	std::string				_phraseId;
-	CChatGroup::TGroupType	_type;
-	bool					_tellToEscort;
+	std::string _phraseId;
+	CChatGroup::TGroupType _type;
+	bool _tellToEscort;
 };
 
-//a class to find a group by its name in a state machine, 
+// a class to find a group by its name in a state machine,
 class CAIGroupFinder
 {
 public:
-static	CGroup* findGroup(const std::string& groupName,CStateMachine *stateMachine)
+	static CGroup *findGroup(const std::string &groupName, CStateMachine *stateMachine)
 	{
-		vector<CGroup*> grps;
+		vector<CGroup *> grps;
 		CWorkPtr::aiInstance()->findGroup(grps, groupName);
 		if (grps.empty())
-			{
-				nlwarning("Can't find group named '%s'", groupName.c_str());
-				return NULL;
-			}
-			
-			if (grps.size() == 1)
-			{
-				return grps.front();
-			}
-			else
-			{
-				CGroup	*igroup=NULL;
-				//	Check if theres a group with the good name in the same stateMachine (and only one).
-				for		(sint32	grpIndex=(sint32)grps.size()-1;grpIndex>=0;grpIndex--)
-				{
-					if	(grps[grpIndex]->getManager().getStateMachine()!=stateMachine)
-						continue;
+		{
+			nlwarning("Can't find group named '%s'", groupName.c_str());
+			return NULL;
+		}
 
-					if	(igroup)
-					{
-						nlwarning("More than one group has the name '%s' in the same manager", groupName.c_str());
-						return NULL;
-					}
-					igroup=grps[grpIndex];
-				}
-				if (!igroup)
+		if (grps.size() == 1)
+		{
+			return grps.front();
+		}
+		else
+		{
+			CGroup *igroup = NULL;
+			//	Check if theres a group with the good name in the same stateMachine (and only one).
+			for (sint32 grpIndex = (sint32)grps.size() - 1; grpIndex >= 0; grpIndex--)
+			{
+				if (grps[grpIndex]->getManager().getStateMachine() != stateMachine)
+					continue;
+
+				if (igroup)
 				{
-					nlwarning("No group has the name '%s'", groupName.c_str());
+					nlwarning("More than one group has the name '%s' in the same manager", groupName.c_str());
 					return NULL;
 				}
-				return igroup;
+				igroup = grps[grpIndex];
 			}
+			if (!igroup)
+			{
+				nlwarning("No group has the name '%s'", groupName.c_str());
+				return NULL;
+			}
+			return igroup;
+		}
 		return NULL;
-	}	
+	}
+
 private:
 	CAIGroupFinder();
 };
@@ -1287,7 +1316,6 @@ private:
 class CAIVariableParser
 {
 public:
-
 	enum TVarType
 	{
 		local_variable,
@@ -1303,50 +1331,50 @@ public:
 		less_equal,
 		greater_equal,
 		not_equal,
-		equal,			
-		assign,			// WARNING : don't change the relative order of this enumerated constante
-		add,			// they must remain grouped from equal up to div
-		sub,			//
-		mult,			//
-		div,			//
+		equal,
+		assign, // WARNING : don't change the relative order of this enumerated constante
+		add, // they must remain grouped from equal up to div
+		sub, //
+		mult, //
+		div, //
 		invalid_operator
-		
+
 	};
 
 	struct TVariable
 	{
-		TVarType	Type;
-		CGroup		*Group;
-		NLMISC::TStringId	VarId;
+		TVarType Type;
+		CGroup *Group;
+		NLMISC::TStringId VarId;
 		//	uint32		VarId;
-		float		Value;
+		float Value;
 
-		TVariable() :
-			Type(invalid_var_type),
-			Group(NULL),
-//			VarId(0),
-			Value(0)
-		{}
+		TVariable()
+		    : Type(invalid_var_type)
+		    , Group(NULL)
+		    ,
+		    //			VarId(0),
+		    Value(0)
+		{
+		}
 	};
 
 	float retreiveValue(CStateInstance *stateInstance, const TVariable &var)
 	{
-		switch	(var.Type)
+		switch (var.Type)
 		{
 		case local_variable:
 			return stateInstance->getLogicVar(var.VarId);
-		case foreign_variable:
-			{
-				CStateInstance	*stateInstance=var.Group->getPersistentStateInstance();
-				return	stateInstance->getLogicVar(var.VarId);
-			}
+		case foreign_variable: {
+			CStateInstance *stateInstance = var.Group->getPersistentStateInstance();
+			return stateInstance->getLogicVar(var.VarId);
+		}
 		case constant:
 			return var.Value;
 		default:
 			nlwarning("retreiveValue from invalid var type ! returning 0");
 			return 0;
 		}
-
 	}
 
 	bool evalCondition(CStateInstance *stateInstance, const TVariable &var1, TOperator op, const TVariable &var2)
@@ -1375,30 +1403,29 @@ public:
 	{
 		struct TOpName
 		{
-			const char	*name;
-			TOperator	op;
+			const char *name;
+			TOperator op;
 		};
 
-		static TOpName	opNames[] =
-		{
-			{"<", less_than},
-			{">", greater_than},
-			{"<=", less_equal},
-			{">=", greater_equal},
-			{"=", assign},
-			{"!=", not_equal},
-			{"<>", not_equal},
-			{"==", equal},		
-			{"+", add},
-			{"-", sub},
-			{"*", mult},
-			{"/", div}
+		static TOpName opNames[] = {
+			{ "<", less_than },
+			{ ">", greater_than },
+			{ "<=", less_equal },
+			{ ">=", greater_equal },
+			{ "=", assign },
+			{ "!=", not_equal },
+			{ "<>", not_equal },
+			{ "==", equal },
+			{ "+", add },
+			{ "-", sub },
+			{ "*", mult },
+			{ "/", div }
 		};
 		const uint32 TABLE_SIZE = sizeof(opNames) / sizeof(TOpName);
 
-		for (uint i=0; i<TABLE_SIZE; ++i)
+		for (uint i = 0; i < TABLE_SIZE; ++i)
 		{
-			if (str!=opNames[i].name)
+			if (str != opNames[i].name)
 				continue;
 
 			op = opNames[i].op;
@@ -1407,11 +1434,9 @@ public:
 		op = invalid_operator;
 		return false;
 	}
-	
-	
 
 	// NB : the second parameter in not passed as const reference because it is modified internaly
-	bool	parseVar(TVariable &var, std::string str,CStateMachine *stateMachine)
+	bool parseVar(TVariable &var, std::string str, CStateMachine *stateMachine)
 	{
 		var.Type = invalid_var_type;
 		string::size_type pos = str.find(":");
@@ -1424,8 +1449,8 @@ public:
 		{
 			// there is a group name, extract it and retreive the group.
 			var.Type = foreign_variable;
-			const	string groupName = str.substr(0, pos);
-			vector<CGroup*> grps;
+			const string groupName = str.substr(0, pos);
+			vector<CGroup *> grps;
 			CWorkPtr::aiInstance()->findGroup(grps, groupName);
 			if (grps.empty())
 			{
@@ -1433,27 +1458,27 @@ public:
 				var.Type = invalid_var_type;
 				return false;
 			}
-			
+
 			if (grps.size() == 1)
 			{
 				var.Group = grps.front();
 			}
 			else
 			{
-				CGroup	*igroup=NULL;
+				CGroup *igroup = NULL;
 				//	Check if theres a group with the good name in the same stateMachine (and only one).
-				for		(sint32	grpIndex=(sint32)grps.size()-1;grpIndex>=0;grpIndex--)
+				for (sint32 grpIndex = (sint32)grps.size() - 1; grpIndex >= 0; grpIndex--)
 				{
-					if	(grps[grpIndex]->getManager().getStateMachine()!=stateMachine)
+					if (grps[grpIndex]->getManager().getStateMachine() != stateMachine)
 						continue;
 
-					if	(igroup)
+					if (igroup)
 					{
 						nlwarning("CAIVariableParser more than one group has the name '%s' in the same manager", groupName.c_str());
 						var.Type = invalid_var_type;
 						return false;
 					}
-					igroup=grps[grpIndex];
+					igroup = grps[grpIndex];
 				}
 				if (!igroup)
 				{
@@ -1461,11 +1486,11 @@ public:
 					var.Type = invalid_var_type;
 					return false;
 				}
-				var.Group=igroup;
+				var.Group = igroup;
 			}
-			str = str.substr(pos+1);
+			str = str.substr(pos + 1);
 		}
-		if	(str.empty())
+		if (str.empty())
 		{
 			nlwarning("CAIVariableParser no char left to read variable id or constante value");
 			var.Type = invalid_var_type;
@@ -1473,50 +1498,48 @@ public:
 		}
 
 		// check if it's a number or a var.
-		//TODO: and negative values ?
-		if ((str[0]<='9' && str[0]>='0')||(str[0]=='-'))	//	its a number
+		// TODO: and negative values ?
+		if ((str[0] <= '9' && str[0] >= '0') || (str[0] == '-')) //	its a number
 		{
 			var.Type = constant;
 			NLMISC::fromString(str, var.Value);
-			return	true;
+			return true;
 		}
 
-//		if (str[0] == 'v' || str[0] == 'V')
+		//		if (str[0] == 'v' || str[0] == 'V')
 		//	its a variable.
 		{
-//			if (str.size() != 2)
-//			{
-//				nlwarning("CAIVariableParser bad string format to read variable index in '%s'. Should be 'vX' (with X in [0-3])", str.c_str());
-//				var.Type = invalid_var_type;
-//				return false;
-//			}
+			//			if (str.size() != 2)
+			//			{
+			//				nlwarning("CAIVariableParser bad string format to read variable index in '%s'. Should be 'vX' (with X in [0-3])", str.c_str());
+			//				var.Type = invalid_var_type;
+			//				return false;
+			//			}
 
 			// this is a variable index
-			if	(var.Type != foreign_variable)
+			if (var.Type != foreign_variable)
 				var.Type = local_variable;
 
 			var.VarId = CStringMapper::map(str);
-//			var.VarId = str[1] - '0';
-//			NLMISC::clamp(var.VarId, (uint32)local_variable, (uint32)invalid_var_type);
+			//			var.VarId = str[1] - '0';
+			//			NLMISC::clamp(var.VarId, (uint32)local_variable, (uint32)invalid_var_type);
 			return true;
 		}
 
 		// try to parse a constant value
-//		var.Type = constant;
-//		double val;
-//		NLMISC::fromString(str, val);
-//		var.Value = float(val);
-//		return true;
+		//		var.Type = constant;
+		//		double val;
+		//		NLMISC::fromString(str, val);
+		//		var.Value = float(val);
+		//		return true;
 	}
-
 };
 //-------------------------------------------------------------------------------------------
 // Same as CAILogicActionConditionIf but the condition is evaluated dynamicaly not at loading of primitive(eg primitive 1 modify primitive 2)
 class CAILogicActionDynamicIf : public IAILogicAction, public CAIVariableParser
 {
 public:
-	CAILogicActionDynamicIf (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	CAILogicActionDynamicIf(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
 		if (args.empty())
 		{
@@ -1533,29 +1556,27 @@ public:
 		//_EventFullName = eventNode->fullName();
 		if (!_Args.empty())
 		{
-			std::string oldValue = _Args[_Args.size()-1];
-			_Args[_Args.size()-1] = std::string("if (") + oldValue + std::string("){()setConditionSuccess(1);} else { ()setConditionSuccess(0); }");
+			std::string oldValue = _Args[_Args.size() - 1];
+			_Args[_Args.size() - 1] = std::string("if (") + oldValue + std::string("){()setConditionSuccess(1);} else { ()setConditionSuccess(0); }");
 		}
-
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
-				// parse the argument string.
+		// parse the argument string.
 
 		if (_Args.empty()) { return false; }
-		if (_SubActions.empty()){ return false;}
-		
-		
-		NLMISC::CSmartPtr<const  AIVM::CByteCode> codePtr =  AICOMP::CCompiler::getInstance().compileCode(_Args, _EventFullName + std::string(":dynamic if"));
-		
+		if (_SubActions.empty()) { return false; }
+
+		NLMISC::CSmartPtr<const AIVM::CByteCode> codePtr = AICOMP::CCompiler::getInstance().compileCode(_Args, _EventFullName + std::string(":dynamic if"));
+
 		CAILogicDynamicIfHelper::setConditionSuccess(false);
 		if (!codePtr.isNull())
 		{
 			entity->getPersistentStateInstance()->interpretCode(entity, codePtr);
 		}
-		
-		if ( CAILogicDynamicIfHelper::getConditionSuccess() )
+
+		if (CAILogicDynamicIfHelper::getConditionSuccess())
 		{
 			_SubActions[0]->executeAction(entity, event);
 		}
@@ -1566,10 +1587,11 @@ public:
 		}
 		return true;
 	}
+
 protected:
-	CAIVariableParser::TVariable	_Var1;
-	CAIVariableParser::TOperator	_Op;
-	CAIVariableParser::TVariable	_Var2;
+	CAIVariableParser::TVariable _Var1;
+	CAIVariableParser::TOperator _Op;
+	CAIVariableParser::TVariable _Var2;
 
 	std::vector<IAILogicAction::TSmartPtr> _SubActions;
 	std::vector<std::string> _Args;
@@ -1582,8 +1604,7 @@ protected:
 class CAILogicActionConditionIf : public IAILogicAction, public CAIVariableParser
 {
 public:
-	CAILogicActionConditionIf (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	CAILogicActionConditionIf(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
 		if (args.empty())
 		{
@@ -1598,7 +1619,7 @@ public:
 		_subActions = subActions;
 
 		// parse the argument string.
-		vector<string>	strs;
+		vector<string> strs;
 		NLMISC::explode(args[0], string(" "), strs, true);
 
 		if (strs.size() != 3)
@@ -1606,12 +1627,12 @@ public:
 			nlwarning("condition_if (%s) invalid condition format '%s'. Need 3 parts, found %u", eventNode->fullName().c_str(), args[0].c_str(), strs.size());
 		}
 
-		if (!parseVar(_Var1, strs[0],container))
+		if (!parseVar(_Var1, strs[0], container))
 		{
 			nlwarning("condition_if (%s) error parsing var 1 in action '%s'", strs[0].c_str(), eventNode->fullName().c_str());
 			return;
 		}
-		if (!parseVar(_Var2, strs[2],container))
+		if (!parseVar(_Var2, strs[2], container))
 		{
 			nlwarning("condition_if (%s) error parsing var 2 in action '%s'", strs[2].c_str(), eventNode->fullName().c_str());
 			return;
@@ -1621,10 +1642,9 @@ public:
 			nlwarning("condition_if (%s) error parsing operator in action '%s'", strs[1].c_str(), eventNode->fullName().c_str());
 			return;
 		}
-
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		if (evalCondition(entity, _Var1, _Op, _Var2))
 		{
@@ -1633,10 +1653,11 @@ public:
 		}
 		return true;
 	}
+
 protected:
-	CAIVariableParser::TVariable	_Var1;
-	CAIVariableParser::TOperator	_Op;
-	CAIVariableParser::TVariable	_Var2;
+	CAIVariableParser::TVariable _Var1;
+	CAIVariableParser::TOperator _Op;
+	CAIVariableParser::TVariable _Var2;
 
 	std::vector<IAILogicAction::TSmartPtr> _subActions;
 };
@@ -1644,20 +1665,19 @@ protected:
 class CAILogicActionConditionIfElse : public CAILogicActionConditionIf
 {
 public:
-	CAILogicActionConditionIfElse (const std::vector<std::string> &args, 
-									const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-									const CAIAliasDescriptionNode *eventNode, 
-									CStateMachine *container)
-	:CAILogicActionConditionIf(args, subActions, eventNode, container)
+	CAILogicActionConditionIfElse(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode,
+	    CStateMachine *container)
+	    : CAILogicActionConditionIf(args, subActions, eventNode, container)
 	{
 		if (subActions.size() != 2)
 		{
 			nlwarning("condition_if_else (%s) should have 2 sub action, %u found", eventNode->fullName().c_str(), subActions.size());
 		}
-
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		if (evalCondition(entity, _Var1, _Op, _Var2))
 		{
@@ -1670,14 +1690,14 @@ public:
 		}
 		return true;
 	}
+
 private:
 };
 //-------------------------------------------------------------------------------------------
 class CAILogicActionModifyVariable : public IAILogicAction, CAIVariableParser
 {
 public:
-	CAILogicActionModifyVariable (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	CAILogicActionModifyVariable(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
 		_Op = invalid_operator;
 		if (args.empty())
@@ -1691,7 +1711,7 @@ public:
 		}
 
 		// parse the argument string.
-		vector<string>	strs;
+		vector<string> strs;
 		NLMISC::explode(args[0], string(" "), strs, true);
 
 		if (strs.size() != 3)
@@ -1709,7 +1729,6 @@ public:
 		{
 			nlwarning("modify_variable (%s) left variable can't be a constant.", eventNode->fullName().c_str(), eventNode->fullName().c_str());
 			return;
-
 		}
 		if (!parseVar(_Var2, strs[2], container))
 		{
@@ -1727,21 +1746,20 @@ public:
 			nlwarning("modify_variable (%s) invalid operator %u", eventNode->fullName().c_str(), _Op);
 			_Op = CAIVariableParser::invalid_operator;
 		}
-
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		if (_Op == invalid_operator)
 			return false;
 
 		float value = retreiveValue(entity, _Var1);
 
-		switch(_Op)
+		switch (_Op)
 		{
 		case assign:
 			value = retreiveValue(entity, _Var2);
-			//nlinfo("retreived value: %f",value);
+			// nlinfo("retreived value: %f",value);
 			break;
 		case add:
 			value += retreiveValue(entity, _Var2);
@@ -1772,21 +1790,21 @@ public:
 		}
 		return true;
 	}
-private:
-	CAIVariableParser::TVariable	_Var1;
-	CAIVariableParser::TOperator	_Op;
-	CAIVariableParser::TVariable	_Var2;
-};
 
+private:
+	CAIVariableParser::TVariable _Var1;
+	CAIVariableParser::TOperator _Op;
+	CAIVariableParser::TVariable _Var2;
+};
 
 //-------------------------------------------------------------------------------------------
 class CAILogicActionEmot : public IAILogicAction
 {
 public:
-	CAILogicActionEmot (const std::vector<std::string> &args, 
-									const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-									const CAIAliasDescriptionNode *eventNode, 
-									CStateMachine *container)
+	CAILogicActionEmot(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode,
+	    CStateMachine *container)
 	{
 		uint32 emot = std::numeric_limits<uint32>::max();
 
@@ -1814,10 +1832,10 @@ public:
 		}
 		_R2 = false;
 		// parse the bots filter (if any)
-		for (uint i=1; i<args.size(); ++i)
+		for (uint i = 1; i < args.size(); ++i)
 		{
 			const string &s = args[i];
-			if	(s.empty())
+			if (s.empty())
 				continue;
 
 			if (isdigit(s[0]))
@@ -1833,14 +1851,14 @@ public:
 				if (pos != string::npos)
 				{
 					const string groupName = str.substr(0, pos);
-					CGroup* grp = CAIGroupFinder::findGroup(groupName,container);
-					if(grp == NULL)
+					CGroup *grp = CAIGroupFinder::findGroup(groupName, container);
+					if (grp == NULL)
 					{
 						nlwarning("npc_say (%s) bad group name (%s) !", eventNode->fullName().c_str(), groupName.c_str());
 						return;
 					}
 					_Groups.push_back(grp);
-					str = str.substr(pos+1);
+					str = str.substr(pos + 1);
 					_BotNames.push_back(str);
 					_R2 = true;
 				}
@@ -1849,38 +1867,35 @@ public:
 					_BotNames.push_back(s);
 					_Groups.push_back(0);
 				}
-		
 			}
-
 		}
-		if	(	!_BotNames.empty()
-			&&	!_BotNumber.empty())
+		if (!_BotNames.empty()
+		    && !_BotNumber.empty())
 		{
 			nlwarning("emot (%) : mixing bot name and bot number is dangerous !", eventNode->fullName().c_str());
 		}
-
 	}
 
-	bool executeAction(CStateInstance* entity, IAIEvent const* event)
+	bool executeAction(CStateInstance *entity, IAIEvent const *event)
 	{
-		CGroup	*group = entity->getGroup();
-		if (_EmotNumber==MBEHAV::NUMBER_OF_BEHAVIOURS)
-			return	false;
+		CGroup *group = entity->getGroup();
+		if (_EmotNumber == MBEHAV::NUMBER_OF_BEHAVIOURS)
+			return false;
 
-		vector<CAIEntityPhysical *>	eps;
+		vector<CAIEntityPhysical *> eps;
 
-		if	(	TempSpeaker
-			&&	TempSpeaker->getEntityId().getType()==group->getRyzomType()
-			&&	safe_cast<CSpawnBot*>(TempSpeaker)->getPersistent().getOwner() == group)	// check that the tempSpeaker entitiy is in this group
+		if (TempSpeaker
+		    && TempSpeaker->getEntityId().getType() == group->getRyzomType()
+		    && safe_cast<CSpawnBot *>(TempSpeaker)->getPersistent().getOwner() == group) // check that the tempSpeaker entitiy is in this group
 		{
-			
+
 			// ok, this is a good 'speaker', it will play the emot
 			eps.push_back(TempSpeaker);
 
 			// turn it to face the first targeter
 			CAIEntityPhysical *targeter = TempSpeaker->firstTargeter();
 			if (targeter)
-				safe_cast<CSpawnBot*>(TempSpeaker)->setTheta(TempSpeaker->pos().angleTo(targeter->pos()));
+				safe_cast<CSpawnBot *>(TempSpeaker)->setTheta(TempSpeaker->pos().angleTo(targeter->pos()));
 		}
 		else
 		{
@@ -1891,21 +1906,21 @@ public:
 				uint first = 0, last = (uint)_Groups.size();
 				for (; first != last; ++first)
 				{
-					CGroup	*grp = _Groups[first];
-					if (grp == 0 ) { grp = group; }
-					CAliasCont<CBot> const& bots = grp->bots();
-					if(bots.size()!=0)
+					CGroup *grp = _Groups[first];
+					if (grp == 0) { grp = group; }
+					CAliasCont<CBot> const &bots = grp->bots();
+					if (bots.size() != 0)
 					{
-							
-						CBot* chld = bots.getChildByName(_BotNames[first]);
-						if (chld )
+
+						CBot *chld = bots.getChildByName(_BotNames[first]);
+						if (chld)
 						{
 							CAIEntityPhysical *const ep = chld->getSpawnObj();
 							if (ep)
 							{
 								eps.push_back(ep);
 							}
-						}					
+						}
 					}
 				}
 			}
@@ -1913,24 +1928,23 @@ public:
 			else
 			{
 
-				for (uint i=0; i<group->bots().size(); ++i)
+				for (uint i = 0; i < group->bots().size(); ++i)
 				{
-					const	CBot *const	bot = group->getBot(i);
-					if	(	!bot
-						||	!bot->isSpawned())
+					const CBot *const bot = group->getBot(i);
+					if (!bot
+					    || !bot->isSpawned())
 						continue;
 
-
-					CAIEntityPhysical *const	ep=bot->getSpawnObj();
+					CAIEntityPhysical *const ep = bot->getSpawnObj();
 
 					if (!_BotNames.empty())
 					{
 						const string *name;
 						if (group->getRyzomType() == RYZOMID::npc)
 						{
-							CGroupNpc *const grpNpc = safe_cast<CGroupNpc*>(group);
-							if	(	!grpNpc->botsAreNamed()
-								||	bot->getAliasTreeOwner() == NULL)
+							CGroupNpc *const grpNpc = safe_cast<CGroupNpc *>(group);
+							if (!grpNpc->botsAreNamed()
+							    || bot->getAliasTreeOwner() == NULL)
 							{
 								name = &grpNpc->aliasTreeOwner()->getName();
 							}
@@ -1938,7 +1952,6 @@ public:
 							{
 								name = &bot->getAliasTreeOwner()->getName();
 							}
-
 						}
 						else
 						{
@@ -1946,29 +1959,27 @@ public:
 						}
 
 						// if not found.
-						if (find(_BotNames.begin(), _BotNames.end(), *name)==_BotNames.end())
+						if (find(_BotNames.begin(), _BotNames.end(), *name) == _BotNames.end())
 							continue;
 					}
 
-					if	(	!_BotNumber.empty()
-						&&	find(_BotNumber.begin(), _BotNumber.end(), i)==_BotNumber.end())
+					if (!_BotNumber.empty()
+					    && find(_BotNumber.begin(), _BotNumber.end(), i) == _BotNumber.end())
 					{
 						continue;
 					}
 					eps.push_back(ep);
 				}
-
 			}
 		}
 
-					
 		// send message
 		if (!eps.empty())
 		{
-			for (uint i=0; i<eps.size(); ++i)
+			for (uint i = 0; i < eps.size(); ++i)
 			{
-				NLMISC::CEntityId	entityId=eps[i]->getEntityId();
-				
+				NLMISC::CEntityId entityId = eps[i]->getEntityId();
+
 				LOG("action emot : setting emot %u on bot %s", _EmotNumber, entityId.toString().c_str());
 				// the filter test passed, apply the emot
 				NLNET::CMessage msgout("SET_BEHAVIOUR");
@@ -1977,72 +1988,68 @@ public:
 				bh.Data = (uint16)(CTimeInterface::gameCycle());
 				msgout.serial(bh);
 
-				NLNET::CUnifiedNetwork::getInstance()->send( "EGS", msgout );
+				NLNET::CUnifiedNetwork::getInstance()->send("EGS", msgout);
 			}
-
 		}
 		else
 		{
-			if(group)
+			if (group)
 				nlwarning("action emote for GroupAlias %s Group name %s : no bots can play the emot ! ", group->getAliasString().c_str(), group->getFullName().c_str());
 			else
 				nlwarning("action emote: no bots can play the emot !");
 		}
-			
+
 		return true;
 	}
-private:
-	MBEHAV::EBehaviour	_EmotNumber;
-	// a list of bot names that will play the emot
-	vector<string>		_BotNames;
-	vector<CGroup*>     _Groups;
-	// a list of bot order number that will play the emot
-	vector<uint32>		_BotNumber;
-	bool				_R2;
-};
 
+private:
+	MBEHAV::EBehaviour _EmotNumber;
+	// a list of bot names that will play the emot
+	vector<string> _BotNames;
+	vector<CGroup *> _Groups;
+	// a list of bot order number that will play the emot
+	vector<uint32> _BotNumber;
+	bool _R2;
+};
 
 bool CAILogicDynamicIfHelper::_ConditionSuccess = false;
 
-void CAILogicActionSitDownHelper::sitDown(CGroup* group)
+void CAILogicActionSitDownHelper::sitDown(CGroup *group)
 {
-	// stand up each bots		
+	// stand up each bots
 
-	for (CCont<CBot>::iterator it=group->bots().begin(), itEnd=group->bots().end(); it!=itEnd; ++it)
+	for (CCont<CBot>::iterator it = group->bots().begin(), itEnd = group->bots().end(); it != itEnd; ++it)
 	{
 		CSpawnBot *const sb = it->getSpawnObj();
-		if	(	!sb
-			||	sb->getMode() == MBEHAV::SIT)
+		if (!sb
+		    || sb->getMode() == MBEHAV::SIT)
 			continue;
-		
+
 		sb->setMode(MBEHAV::SIT);
 	}
 }
 
-void CAILogicActionSitDownHelper::standUp(CGroup* group)
+void CAILogicActionSitDownHelper::standUp(CGroup *group)
 {
-			// stand up each bots		
-		for (CCont<CBot>::iterator it=group->bots().begin(), itEnd=group->bots().end(); it!=itEnd; ++it)
-		{
-			CSpawnBot *const sb = it->getSpawnObj();
-			if	(	!sb
-				||	sb->getMode() != MBEHAV::SIT)
-				continue;
+	// stand up each bots
+	for (CCont<CBot>::iterator it = group->bots().begin(), itEnd = group->bots().end(); it != itEnd; ++it)
+	{
+		CSpawnBot *const sb = it->getSpawnObj();
+		if (!sb
+		    || sb->getMode() != MBEHAV::SIT)
+			continue;
 
-			sb->setMode(MBEHAV::NORMAL);
-		}
+		sb->setMode(MBEHAV::NORMAL);
+	}
 }
-
-
-
 
 class CAILogicActionSitDown : public IAILogicAction
 {
 public:
-	CAILogicActionSitDown (const std::vector<std::string> &args, 
-									const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-									const CAIAliasDescriptionNode *eventNode, 
-									CStateMachine *container)
+	CAILogicActionSitDown(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode,
+	    CStateMachine *container)
 	{
 		if (!subActions.empty())
 		{
@@ -2054,10 +2061,10 @@ public:
 		}
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
-		CGroup	*const	group = entity->getGroup();
-		 CAILogicActionSitDownHelper::sitDown(group);
+		CGroup *const group = entity->getGroup();
+		CAILogicActionSitDownHelper::sitDown(group);
 		return true;
 	}
 };
@@ -2065,10 +2072,10 @@ public:
 class CAILogicActionStandUp : public IAILogicAction
 {
 public:
-	CAILogicActionStandUp (const std::vector<std::string> &args, 
-									const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-									const CAIAliasDescriptionNode *eventNode, 
-									CStateMachine *container)
+	CAILogicActionStandUp(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode,
+	    CStateMachine *container)
 	{
 		if (!subActions.empty())
 		{
@@ -2080,15 +2087,13 @@ public:
 		}
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
-		CGroup	*const	group = entity->getGroup();
+		CGroup *const group = entity->getGroup();
 		CAILogicActionSitDownHelper::standUp(group);
 		return true;
 	}
-
 };
-
 
 class CAILogicActionSetFaunaActivity : public IAILogicAction
 {
@@ -2101,12 +2106,13 @@ class CAILogicActionSetFaunaActivity : public IAILogicAction
 
 	//	dont seems to be ok, Boris, check this code.
 
-	TFaunaActivity	_Activity;
+	TFaunaActivity _Activity;
+
 public:
-	CAILogicActionSetFaunaActivity (const std::vector<std::string> &args, 
-									const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-									const CAIAliasDescriptionNode *eventNode, 
-									CStateMachine *container)
+	CAILogicActionSetFaunaActivity(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode,
+	    CStateMachine *container)
 	{
 		if (args.empty())
 		{
@@ -2115,28 +2121,28 @@ public:
 		}
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		if (_Activity == fa_invalid)
 			return false;
 
-		CGroup	*group = entity->getGroup();
+		CGroup *group = entity->getGroup();
 
-		if (group->getRyzomType()!=RYZOMID::creature)
+		if (group->getRyzomType() != RYZOMID::creature)
 		{
 			nlwarning("set_fauna_activity : the group '%s' is not a fauna group !",
-				group->getAliasFullName().c_str());
-			return	true;
+			    group->getAliasFullName().c_str());
+			return true;
 		}
 
-		CGrpFauna *grpFauna = safe_cast<CGrpFauna*>(group);
+		CGrpFauna *grpFauna = safe_cast<CGrpFauna *>(group);
 
 		CGrpFauna::TPlaces place;
 		place = (_Activity == fa_rest ? CGrpFauna::REST_PLACE : CGrpFauna::EAT_PLACE);
 		// change the state of the fauna group if needed
 		// lookup for the cycle we want
 		uint32 i;
-		for (i=0; i<CGrpFauna::nbCycle; ++i)
+		for (i = 0; i < CGrpFauna::nbCycle; ++i)
 		{
 			if (grpFauna->cycles[i]._Place == place)
 				break;
@@ -2145,8 +2151,8 @@ public:
 		if (i == CGrpFauna::nbCycle)
 		{
 			nlwarning("set_fauna_activity : Can't find fauna activity '%s' in fauna group '%s'",
-				place == CGrpFauna::REST_PLACE ? "REST_PLACE" : "EAT_PLACE",
-				grpFauna->getAliasFullName().c_str());
+			    place == CGrpFauna::REST_PLACE ? "REST_PLACE" : "EAT_PLACE",
+			    grpFauna->getAliasFullName().c_str());
 			return false;
 		}
 
@@ -2158,81 +2164,80 @@ public:
 class CAILogicActionOutpostGiverReady : public IAILogicAction
 {
 public:
-	CAILogicActionOutpostGiverReady (const std::vector<std::string> &args, 
-									const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-									const CAIAliasDescriptionNode *eventNode, 
-									CStateMachine *container)
-	{
-		if (!args.empty())
-		{
-			nlwarning("CAILogicActionOutpostGiverReady : should not have parameters");
-		}
-	}
+    CAILogicActionOutpostGiverReady (const std::vector<std::string> &args,
+                                    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+                                    const CAIAliasDescriptionNode *eventNode,
+                                    CStateMachine *container)
+    {
+        if (!args.empty())
+        {
+            nlwarning("CAILogicActionOutpostGiverReady : should not have parameters");
+        }
+    }
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
-	{
-		// just find the outpost name in the group name.
-		CGroup	*const	group = entity->getGroup();
-		CSpawnGroupNpc *const	spawnGroup = dynamic_cast<CSpawnGroupNpc *>(static_cast<CSpawnGroup*>(group->createSpawnGroup()));
+    bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+    {
+        // just find the outpost name in the group name.
+        CGroup	*const	group = entity->getGroup();
+        CSpawnGroupNpc *const	spawnGroup = dynamic_cast<CSpawnGroupNpc *>(static_cast<CSpawnGroup*>(group->createSpawnGroup()));
 
-		if (!spawnGroup)
-		{
-			nlwarning("CAILogicActionOutpostGiverReady : group '%s'%s is not an npc group",
-				group->getAliasFullName().c_str(),
-				group->getAliasString().c_str());
-			return false;
-		}
+        if (!spawnGroup)
+        {
+            nlwarning("CAILogicActionOutpostGiverReady : group '%s'%s is not an npc group",
+                group->getAliasFullName().c_str(),
+                group->getAliasString().c_str());
+            return false;
+        }
 
-		const std::string &groupName = group->getName();
+        const std::string &groupName = group->getName();
 
-		// the group name should be in the format "outpost_<continent>_<outpost_number>_<group_civ>_steward_<continent_short>1_group"
-		// and we must keep "outpost_<continent>_<number>" for the outpost name
+        // the group name should be in the format "outpost_<continent>_<outpost_number>_<group_civ>_steward_<continent_short>1_group"
+        // and we must keep "outpost_<continent>_<number>" for the outpost name
 
-		vector<string> parts;
-		explode(groupName, "_", parts, false);
-		if (parts.size() != 7)
-		{
-			nlwarning("CAILogicActionOutpostGiverReady: Invalid outpost mission giver '%s', need 'outpost_<continent>_<outpost_number>_<group_civ>_steward_<continent_short>1_group' for ", groupName.c_str());
-			nlwarning("CAILogicActionOutpostGiverReady: can't process action for group '%s'%s", 
-				group->getAliasFullName().c_str(), 
-				group->getAliasString().c_str());
-			return false;
-		}
+        vector<string> parts;
+        explode(groupName, "_", parts, false);
+        if (parts.size() != 7)
+        {
+            nlwarning("CAILogicActionOutpostGiverReady: Invalid outpost mission giver '%s', need 'outpost_<continent>_<outpost_number>_<group_civ>_steward_<continent_short>1_group' for ", groupName.c_str());
+            nlwarning("CAILogicActionOutpostGiverReady: can't process action for group '%s'%s",
+                group->getAliasFullName().c_str(),
+                group->getAliasString().c_str());
+            return false;
+        }
 
-		string outpostName = parts[0]+"_"+parts[1]+"_"+parts[2];
+        string outpostName = parts[0]+"_"+parts[1]+"_"+parts[2];
 
-		// retreive the outpost
-		COutpost *const	outpost = COutpost::getOutpostByName(outpostName);
-		if	(!outpost)
-		{
-			nlwarning("CAILogicActionOutpostGiverReady : can't find outpost '%s'", outpostName.c_str());
-			return false;
-		}
+        // retreive the outpost
+        COutpost *const	outpost = COutpost::getOutpostByName(outpostName);
+        if	(!outpost)
+        {
+            nlwarning("CAILogicActionOutpostGiverReady : can't find outpost '%s'", outpostName.c_str());
+            return false;
+        }
 
-		// just call new event, this will spawn the corect npc
-		outpost->newEvent();
+        // just call new event, this will spawn the corect npc
+        outpost->newEvent();
 
-		return true;
-	}
+        return true;
+    }
 };
 */
 //-------------------------------------------------------------------------------------------
-//a switch action. 
-//Parameters : a variable ([group_name:]v{0,1,2,3})
-//Optional a list of label '0', '1', '2', 'default'
+// a switch action.
+// Parameters : a variable ([group_name:]v{0,1,2,3})
+// Optional a list of label '0', '1', '2', 'default'
 
-//execute the subAction at the index equal to the variable value
+// execute the subAction at the index equal to the variable value
 
 class CAILogicActionSwitchActions : public IAILogicAction, public CAIVariableParser
 {
 public:
-	CAILogicActionSwitchActions (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	CAILogicActionSwitchActions(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
 		// this line treated first ... in case we bomb out in one of the if(...) { ... return; } cases
 
 		uint32 nbArgs = (uint32)args.size();
-		if (nbArgs==0)
+		if (nbArgs == 0)
 		{
 			nlwarning("switch_actions (%s) need an argument !", eventNode->fullName().c_str());
 			return;
@@ -2245,16 +2250,16 @@ public:
 		_SubActions = subActions;
 		// parse the argument string.
 
-		if (!parseVar(_Var, args[0],container))
+		if (!parseVar(_Var, args[0], container))
 		{
 			nlwarning("switch_actions (%s) error parsing var in action '%s'", args[0].c_str(), eventNode->fullName().c_str());
 			return;
 		}
 
 		// if size > 1 the other params are labels  eg '0' '1' '2' 'default'
-		if(nbArgs>1)
+		if (nbArgs > 1)
 		{
-			if (nbArgs<subActions.size()+1)
+			if (nbArgs < subActions.size() + 1)
 			{
 				nlwarning("CAILogicActionSwitchActions : error! not enough weights in parameters !");
 			}
@@ -2262,10 +2267,10 @@ public:
 			{
 				_Labels.resize(nbArgs);
 
-				for(uint32 i=0; i<nbArgs-1; ++i)
+				for (uint32 i = 0; i < nbArgs - 1; ++i)
 				{
-					std::string label = args[i+1];
-					if(label =="default")
+					std::string label = args[i + 1];
+					if (label == "default")
 					{
 						_DefaultAction = subActions[i];
 						_Labels[i] = -1; // the default case eg "default:" -> _Label[?] = -1
@@ -2274,22 +2279,22 @@ public:
 					{
 						sint32 value;
 						NLMISC::fromString(label, value);
-						_Labels[i] = value ; // the other case eg "case 4:" -> _Label[?] = 4;
+						_Labels[i] = value; // the other case eg "case 4:" -> _Label[?] = 4;
 					}
 				}
 			}
 		}
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		if (_SubActions.empty()) { return true; }
-			
-		uint32 val = static_cast<uint32>(retreiveValue(entity,_Var));
+
+		uint32 val = static_cast<uint32>(retreiveValue(entity, _Var));
 		IAILogicAction::TSmartPtr action;
-		if(_Labels.empty())
+		if (_Labels.empty())
 		{
-			if(val>=_SubActions.size())
+			if (val >= _SubActions.size())
 			{
 				return false;
 			}
@@ -2297,60 +2302,59 @@ public:
 		}
 		else
 		{
-			//look in the labels the action corresponding the Value 
+			// look in the labels the action corresponding the Value
 			action = 0;
-			for (uint i=0; i<_Labels.size() && !action ;++i)
+			for (uint i = 0; i < _Labels.size() && !action; ++i)
 			{
-				if (_Labels[i] != -1 && static_cast<uint32>(_Labels[i]) == val )
+				if (_Labels[i] != -1 && static_cast<uint32>(_Labels[i]) == val)
 				{
 					action = _SubActions[i];
 				}
 			}
-			
-			//not found so use the default value
+
+			// not found so use the default value
 			if (!action) { action = _DefaultAction; }
 		}
-		BOMB_IF(!action,"ERROR: Bad action pointer!",return false);
+		BOMB_IF(!action, "ERROR: Bad action pointer!", return false);
 
 		return action->executeAction(entity, event);
 	}
+
 protected:
-	CAIVariableParser::TVariable	_Var;
+	CAIVariableParser::TVariable _Var;
 	std::vector<IAILogicAction::TSmartPtr> _SubActions;
 	std::vector<sint32> _Labels;
 	IAILogicAction::TSmartPtr _DefaultAction;
 };
-class	CPropertyZone
-:public	CRefCount
+class CPropertyZone
+    : public CRefCount
 {
-public:	
-	typedef	NLMISC::CSmartPtr<CPropertyZone>	TSmartPtr;
-	CPropertyZone	()
-		:_Shape(true),
-		_Target(CTmpPropertyZone::All)
+public:
+	typedef NLMISC::CSmartPtr<CPropertyZone> TSmartPtr;
+	CPropertyZone()
+	    : _Shape(true)
+	    , _Target(CTmpPropertyZone::All)
 	{
 	}
-	virtual	~CPropertyZone	()
+	virtual ~CPropertyZone()
 	{
 	}
-	CShape	_Shape;
-	CPropertySet	_Properties;
+	CShape _Shape;
+	CPropertySet _Properties;
 	CTmpPropertyZone::TTarget _Target;
 };
 
-class	CZoneMarker
-:public	NLMISC::CVirtualRefCount
+class CZoneMarker
+    : public NLMISC::CVirtualRefCount
 {
-public:	
-	
-	CZoneMarker(CAIInstance	*aiInstance, 
-		        const	std::vector<CPropertyZone::TSmartPtr>	&zones,
-				CAliasCont<CGroupFamily> *substitutionGroupFamily,
-				size_t	substitutionId
-			   )
-		:_AiInstance(aiInstance)
-		,_Zones(zones)
-		,_SubstitutionId(substitutionId)
+public:
+	CZoneMarker(CAIInstance *aiInstance,
+	    const std::vector<CPropertyZone::TSmartPtr> &zones,
+	    CAliasCont<CGroupFamily> *substitutionGroupFamily,
+	    size_t substitutionId)
+	    : _AiInstance(aiInstance)
+	    , _Zones(zones)
+	    , _SubstitutionId(substitutionId)
 	{
 		//	add activities flags.
 #if !FINAL_VERSION
@@ -2361,7 +2365,7 @@ public:
 			_SubstitutionGroupFamilies = *substitutionGroupFamily;
 			if (!_SubstitutionGroupFamilies.isEmpty())
 			{
-				std::sort(_SubstitutionGroupFamilies.getInternalCont().begin(), _SubstitutionGroupFamilies.getInternalCont().end()/*, std::less<CSmartPtr<CGroupFamily> >*/);
+				std::sort(_SubstitutionGroupFamilies.getInternalCont().begin(), _SubstitutionGroupFamilies.getInternalCont().end() /*, std::less<CSmartPtr<CGroupFamily> >*/);
 				// must sort because we're gonna use set_union later
 				for (uint k = 0; k < _SubstitutionGroupFamilies.size(); ++k)
 				{
@@ -2371,36 +2375,31 @@ public:
 				}
 			}
 		}
-		parseCell	(true);
+		parseCell(true);
 	}
-	virtual		~CZoneMarker()
+	virtual ~CZoneMarker()
 	{
 		//	remove activities flags.
-		parseCell	(false);
-		_AiInstance=(CAIInstance*)NULL;
+		parseCell(false);
+		_AiInstance = (CAIInstance *)NULL;
 	}
-
 
 private:
-	void	parseCell	(bool setFlag);
-	
+	void parseCell(bool setFlag);
 
-	size_t	getId()	const
+	size_t getId() const
 	{
-		return	(size_t)this;
+		return (size_t)this;
 	}
-	
-	CDbgPtr<CAIInstance>	_AiInstance;
-	const	std::vector<CPropertyZone::TSmartPtr>	&_Zones;
-	CAliasCont<CGroupFamily>						_SubstitutionGroupFamilies;
-	size_t											_SubstitutionId;
 
+	CDbgPtr<CAIInstance> _AiInstance;
+	const std::vector<CPropertyZone::TSmartPtr> &_Zones;
+	CAliasCont<CGroupFamily> _SubstitutionGroupFamilies;
+	size_t _SubstitutionId;
 };
 
-
-
-void	CZoneMarker::parseCell	(bool setFlag)
-{		
+void CZoneMarker::parseCell(bool setFlag)
+{
 	for (uint k = 0; k < _SubstitutionGroupFamilies.size(); ++k)
 	{
 		nlassert(_SubstitutionGroupFamilies[k]);
@@ -2416,285 +2415,267 @@ void	CZoneMarker::parseCell	(bool setFlag)
 	std::vector<CBaseZone *> bz;
 	for (CCont<CContinent>::iterator itCont(_AiInstance->continents().begin()), itEndCont(_AiInstance->continents().end()); itCont != itEndCont; ++itCont)
 	{
-		for (CCont<CRegion>::iterator	itRegion=itCont->regions().begin(), itEndRegion=itCont->regions().end(); itRegion!=itEndRegion; ++itRegion)
+		for (CCont<CRegion>::iterator itRegion = itCont->regions().begin(), itEndRegion = itCont->regions().end(); itRegion != itEndRegion; ++itRegion)
 		{
-			for (CCont<CCellZone>::iterator	itCellZone=itRegion->cellZones().begin(), itEndCellZone=itRegion->cellZones().end(); itCellZone!=itEndCellZone; ++itCellZone)
+			for (CCont<CCellZone>::iterator itCellZone = itRegion->cellZones().begin(), itEndCellZone = itRegion->cellZones().end(); itCellZone != itEndCellZone; ++itCellZone)
 			{
-				for (CCont<CCell>::iterator	itCell=itCellZone->cells().begin(), itEndCell=itCellZone->cells().end(); itCell!=itEndCell; ++itCell)
+				for (CCont<CCell>::iterator itCell = itCellZone->cells().begin(), itEndCell = itCellZone->cells().end(); itCell != itEndCell; ++itCell)
 				{
 					bz.clear();
-					for (CCont<CFaunaZone>::iterator	itFaunaZone=itCell->faunaZones().begin(), itEndFaunaZone=itCell->faunaZones().end(); itFaunaZone!=itEndFaunaZone; ++itFaunaZone)
+					for (CCont<CFaunaZone>::iterator itFaunaZone = itCell->faunaZones().begin(), itEndFaunaZone = itCell->faunaZones().end(); itFaunaZone != itEndFaunaZone; ++itFaunaZone)
 					{
-						if	(!itFaunaZone->worldValidPos().isValid())
+						if (!itFaunaZone->worldValidPos().isValid())
 							continue;
 						bz.push_back(*itFaunaZone);
 					}
-					for(uint k = 0; k < itCell->npcZoneCount(); ++k)					
+					for (uint k = 0; k < itCell->npcZoneCount(); ++k)
 					{
-						if	(!itCell->npcZone(k)->worldValidPos().isValid())
+						if (!itCell->npcZone(k)->worldValidPos().isValid())
 							continue;
 						bz.push_back(itCell->npcZone(k));
 					}
-					for(std::vector<CBaseZone *>::iterator itBaseZone = bz.begin(); itBaseZone != bz.end(); ++ itBaseZone)
+					for (std::vector<CBaseZone *>::iterator itBaseZone = bz.begin(); itBaseZone != bz.end(); ++itBaseZone)
 					{
-						for (size_t zoneInd=0;zoneInd<_Zones.size();zoneInd++)
+						for (size_t zoneInd = 0; zoneInd < _Zones.size(); zoneInd++)
 						{
-							CPropertyZone::TSmartPtr	zone=_Zones[zoneInd];
-							
+							CPropertyZone::TSmartPtr zone = _Zones[zoneInd];
+
 							// see if zone type is ok
 							if (zone->_Target != CTmpPropertyZone::All)
 							{
 								if (zone->_Target != (*itBaseZone)->getZoneType()) continue;
 							}
 
-							if	(!zone->_Shape.contains	((*itBaseZone)->worldValidPos()))
+							if (!zone->_Shape.contains((*itBaseZone)->worldValidPos()))
 								continue;
-							
+
 							//	set or unset flags ..
-							if	(setFlag)
+							if (setFlag)
 							{
-								(*itBaseZone)->additionalActivities().merge(zone->_Properties,getId());
+								(*itBaseZone)->additionalActivities().merge(zone->_Properties, getId());
 								if (_SubstitutionId != 0)
-								{									
+								{
 									// merge with the familyGroup of the region
 									CAliasCont<CGroupFamily> &grf = itRegion->groupFamilies();
 									std::sort(grf.getInternalCont().begin(), grf.getInternalCont().end());
 									CAliasCont<CGroupFamily> result;
-									std::set_union(grf.getInternalCont().begin(), grf.getInternalCont().end(), 
-												   _SubstitutionGroupFamilies.getInternalCont().begin(), _SubstitutionGroupFamilies.getInternalCont().end(),
-												   std::back_inserter(result.getInternalCont()));
+									std::set_union(grf.getInternalCont().begin(), grf.getInternalCont().end(),
+									    _SubstitutionGroupFamilies.getInternalCont().begin(), _SubstitutionGroupFamilies.getInternalCont().end(),
+									    std::back_inserter(result.getInternalCont()));
 									grf.swap(result);
 									// mark fauna zone to accept this substitution group
 									(*itBaseZone)->addSubstitutionGroupFamilyId(_SubstitutionId);
 								}
 							}
 							else
-							{								
+							{
 								(*itBaseZone)->additionalActivities().removeProperties(getId());
 								if (_SubstitutionId != 0)
 								{
 									// mark fauna zone to reject this substitution group
 									(*itBaseZone)->removeSubstitutionGroupFamilyId(_SubstitutionId);
 								}
-							}							
+							}
 						}
-
 					}
-					
 				}
-				// rebuild cell zones energy levels if substitution groups where added 
+				// rebuild cell zones energy levels if substitution groups where added
 				// (in order to create missing family behaviour objects)
 				if (_SubstitutionId != 0 && setFlag)
 				{
 					itCellZone->rebuildEnergyLevels();
 				}
 			}
-			
 		}
-		
 	}
-		
 }
 
-
-class CAILogicActionSetFlagsOnDynZones: public IAILogicAction
+class CAILogicActionSetFlagsOnDynZones : public IAILogicAction
 {
 public:
-	CAILogicActionSetFlagsOnDynZones (const std::vector<std::string> &args, 
-		const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-		const CAIAliasDescriptionNode *eventNode, 
-		CStateMachine *container)		
+	CAILogicActionSetFlagsOnDynZones(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode,
+	    CStateMachine *container)
 	{
 
-		for (uint32 i=0;i<args.size();++i)
+		for (uint32 i = 0; i < args.size(); ++i)
 		{
-			_Activities.addProperty(CPropertyId::create(args[i]));	//	it->first));
+			_Activities.addProperty(CPropertyId::create(args[i])); //	it->first));
 		}
-
 	}
-	
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
-		if	(!entity)
-			return	true;
+		if (!entity)
+			return true;
 
-		const	CAIState	*state=entity->getActiveState();
-		if	(	!state
-			||	!state->isPositional())
-			return	true;
+		const CAIState *state = entity->getActiveState();
+		if (!state
+		    || !state->isPositional())
+			return true;
 
-		const CAIStatePositional	*positionalState=NLMISC::safe_cast<const CAIStatePositional*>(state);	//	good coz of previous check.
+		const CAIStatePositional *positionalState = NLMISC::safe_cast<const CAIStatePositional *>(state); //	good coz of previous check.
 
-//		if	(!positionalState->shape().hasPatat())	//	must have a pattat.
-//			return	true;
+		//		if	(!positionalState->shape().hasPatat())	//	must have a pattat.
+		//			return	true;
 
-		IManagerParent	*const	managerParent=entity->getGroup()->getOwner()->getOwner();
+		IManagerParent *const managerParent = entity->getGroup()->getOwner()->getOwner();
 
-		CAIInstance	*const	aiInstance=dynamic_cast<CAIInstance*>(managerParent);
-		if	(!aiInstance)
-			return	true;
+		CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
+		if (!aiInstance)
+			return true;
 
 		//	now, we have to add an objet that marks flag to zones at construction and remove them at destruction.
 		//	and let StateChange take care of removing it when necessary.
 
-		const	bool	haveAPattat=positionalState->shape().hasPatat();
-		if	(haveAPattat)	//	must have a pattat.
+		const bool haveAPattat = positionalState->shape().hasPatat();
+		if (haveAPattat) //	must have a pattat.
 		{
-			const	CPropertyZone::TSmartPtr	newZone=new CPropertyZone();
-			newZone->_Shape=positionalState->shape();
-			newZone->_Properties=_Activities;
+			const CPropertyZone::TSmartPtr newZone = new CPropertyZone();
+			newZone->_Shape = positionalState->shape();
+			newZone->_Properties = _Activities;
 			_Zones.push_back(newZone);
 		}
 		// retrieve substitution groups from parent
 		if (_GroupFamilies.isEmpty())
 		{
-			entity->addStatePersistentObj(state, new CZoneMarker(aiInstance, _Zones, NULL, 0 ));	//	remove for instance
+			entity->addStatePersistentObj(state, new CZoneMarker(aiInstance, _Zones, NULL, 0)); //	remove for instance
 		}
 		else
 		{
-			entity->addStatePersistentObj(state, new CZoneMarker(aiInstance, _Zones, &_GroupFamilies, (size_t) this) );	//	remove for instance
+			entity->addStatePersistentObj(state, new CZoneMarker(aiInstance, _Zones, &_GroupFamilies, (size_t)this)); //	remove for instance
 		}
-		
-		if	(haveAPattat)
+
+		if (haveAPattat)
 			_Zones.pop_back();
-		return	true;
+		return true;
 	}
 
-	void addPropertyZone	(CTmpPropertyZone::TSmartPtr	zone)
+	void addPropertyZone(CTmpPropertyZone::TSmartPtr zone)
 	{
-		CPropertyZone::TSmartPtr	newZone=new CPropertyZone();
+		CPropertyZone::TSmartPtr newZone = new CPropertyZone();
 		if (!newZone->_Shape.setPatat(zone->verticalPos, zone->points))
 		{
-			
 		}
-		newZone->_Properties=zone->properties;
+		newZone->_Properties = zone->properties;
 		newZone->_Target = zone->Target;
 		_Zones.push_back(newZone);
 	}
 
-	
 	virtual void addGroupFamily(CGroupFamily *grpFam) { _GroupFamilies.addChild(grpFam); }
-	
+
 private:
-	std::vector<CPropertyZone::TSmartPtr>	_Zones;
-	CPropertySet	  _Activities;	
+	std::vector<CPropertyZone::TSmartPtr> _Zones;
+	CPropertySet _Activities;
 	CAliasCont<CGroupFamily> _GroupFamilies;
 };
 
-
-class CAILogicActionSpawnDynGroup: public IAILogicAction
+class CAILogicActionSpawnDynGroup : public IAILogicAction
 {
 public:
-	CAILogicActionSpawnDynGroup (const std::vector<std::string> &args, 
-		const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-		const CAIAliasDescriptionNode *eventNode, 
-		CStateMachine *container)
+	CAILogicActionSpawnDynGroup(const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode,
+	    CStateMachine *container)
 	{
 		nlwarning("loadActionSpawnDynGroup");
-		_StateMachine=findParam	("state_machine",args);
-		_DynGroup=findParam	("dyn_group",args);
-		_Where=findParam	("where",args);
-		_Count=findParam	("count",args);
+		_StateMachine = findParam("state_machine", args);
+		_DynGroup = findParam("dyn_group", args);
+		_Where = findParam("where", args);
+		_Count = findParam("count", args);
 	}
 
-	std::string	findParam	(const std::string &str, const std::vector<std::string> &args)
+	std::string findParam(const std::string &str, const std::vector<std::string> &args)
 	{
-		for (uint32 i=0;i<args.size();++i)
+		for (uint32 i = 0; i < args.size(); ++i)
 		{
-			const string &argStr=args[i];
+			const string &argStr = args[i];
 
-			if (argStr.find(str)!=string::npos)
-			{				
-				size_t index=argStr.find_last_of(" ");
-				if	(	index==string::npos
-					||	(index+1)>=argStr.size())
+			if (argStr.find(str) != string::npos)
+			{
+				size_t index = argStr.find_last_of(" ");
+				if (index == string::npos
+				    || (index + 1) >= argStr.size())
 					continue;
 
 				index++;
-				return	argStr.substr(index, argStr.size()-index);
+				return argStr.substr(index, argStr.size() - index);
 			}
-
 		}
-		return	string();
+		return string();
 	}
-	
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
 		nlwarning("executeActionSpawnDynGroup");
-		if	(!entity)
-			return	true;
-				
-		IManagerParent	*const	managerParent=entity->getGroup()->getOwner()->getOwner();
-		
-		CAIInstance	*const	aiInstance=dynamic_cast<CAIInstance*>(managerParent);
-		if	(!aiInstance)
-			return	true;
+		if (!entity)
+			return true;
 
-		const	CGroupDesc<CGroupFamily>	*groupDesc=NULL;
-		
+		IManagerParent *const managerParent = entity->getGroup()->getOwner()->getOwner();
+
+		CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
+		if (!aiInstance)
+			return true;
+
+		const CGroupDesc<CGroupFamily> *groupDesc = NULL;
+
 		const CGroupFamily *groupFamily = NULL;
 
 		//	Find Group.
 
-		FOREACH (itCont, CCont<CContinent>, aiInstance->continents())
+		FOREACH(itCont, CCont<CContinent>, aiInstance->continents())
 		{
-			FOREACH (itRegion, CCont<CRegion>, itCont->regions())
+			FOREACH(itRegion, CCont<CRegion>, itCont->regions())
 			{
-				FOREACH (itFamily, CCont<CGroupFamily>, itRegion->groupFamilies())
+				FOREACH(itFamily, CCont<CGroupFamily>, itRegion->groupFamilies())
 				{
-					FOREACH (itGroupDesc, CCont<CGroupDesc<CGroupFamily> >, itFamily->groupDescs())
+					FOREACH(itGroupDesc, CCont<CGroupDesc<CGroupFamily>>, itFamily->groupDescs())
 					{
-						if	(itGroupDesc->getName()==_DynGroup)
+						if (itGroupDesc->getName() == _DynGroup)
 						{
 							groupFamily = &(**itFamily);
-							groupDesc=*itGroupDesc;
-							goto	groupFound;
+							groupDesc = *itGroupDesc;
+							goto groupFound;
 						}
-
 					}
-
 				}
-
 			}
-
 		}
-groupFound:
+	groupFound:
 
-		const	CStateMachine *stateMachine=NULL;
-		CManager	*manager;
+		const CStateMachine *stateMachine = NULL;
+		CManager *manager;
 		// Find State_Machine.
-		FOREACH(itCont,CCont<CManager>,aiInstance->managers())
+		FOREACH(itCont, CCont<CManager>, aiInstance->managers())
 		{
-			if	(itCont->getName()==_StateMachine)
+			if (itCont->getName() == _StateMachine)
 			{
-				manager=*itCont;
+				manager = *itCont;
 				break;
 			}
-
 		}
 		if (!manager)
-			return	true;
-		CMgrNpc	*const	npcManager=dynamic_cast<CMgrNpc*>(manager);
+			return true;
+		CMgrNpc *const npcManager = dynamic_cast<CMgrNpc *>(manager);
 		if (!npcManager)
-			return	true;
-			
-		stateMachine=manager->getStateMachine();
-		if	(stateMachine->cstStates().size()==0)
-			stateMachine=NULL;
+			return true;
 
-		std::vector<CCellZone*>	cellZones;
+		stateMachine = manager->getStateMachine();
+		if (stateMachine->cstStates().size() == 0)
+			stateMachine = NULL;
 
-		FOREACH (itCont, CCont<CContinent>, aiInstance->continents())
+		std::vector<CCellZone *> cellZones;
+
+		FOREACH(itCont, CCont<CContinent>, aiInstance->continents())
 		{
-			FOREACH (itRegion, CCont<CRegion>, itCont->regions())
+			FOREACH(itRegion, CCont<CRegion>, itCont->regions())
 			{
-				FOREACH (itCellZone, CCont<CCellZone>, itRegion->cellZones())
+				FOREACH(itCellZone, CCont<CCellZone>, itRegion->cellZones())
 				{
 					cellZones.push_back(*itCellZone);
 				}
-
 			}
-
 		}
 #ifndef NL_CPP17
 		std::random_shuffle(cellZones.begin(), cellZones.end());
@@ -2702,37 +2683,35 @@ groupFound:
 		std::shuffle(cellZones.begin(), cellZones.end(), CAIS::instance().RandomGenerator);
 #endif
 
-		const	CNpcZone	*spawnZone;
-		FOREACH(itCellZone, vector<CCellZone*>, cellZones)
+		const CNpcZone *spawnZone;
+		FOREACH(itCellZone, vector<CCellZone *>, cellZones)
 		{
-			spawnZone=(*itCellZone)->lookupNpcZone(AITYPES::CPropertySet(), groupFamily->getSubstitutionId());
-			if	(spawnZone)
+			spawnZone = (*itCellZone)->lookupNpcZone(AITYPES::CPropertySet(), groupFamily->getSubstitutionId());
+			if (spawnZone)
 				break;
 		}
-				
+
 		// set the npc of the group attackable
-//		groupDesc->setAttackable(true);
-		
-		CGroupNpc	*grp=groupDesc->createNpcGroup	(npcManager, spawnZone->midPos());
-		
-		if	(grp)
+		//		groupDesc->setAttackable(true);
+
+		CGroupNpc *grp = groupDesc->createNpcGroup(npcManager, spawnZone->midPos());
+
+		if (grp)
 		{
-			grp->initDynGrp		(groupDesc, NULL);
-			grp->setStartState	(stateMachine->cstStates()[0]);	//	sets the first state.
-			CSpawnGroupNpc	*const	spawnGrp=grp->getSpawnObj();
-//			spawnGrp->activityProfile().setAIProfile(new CGrpProfileDynHarvest(spawnGrp,this,spawnZone,spawnZone));
+			grp->initDynGrp(groupDesc, NULL);
+			grp->setStartState(stateMachine->cstStates()[0]); //	sets the first state.
+			CSpawnGroupNpc *const spawnGrp = grp->getSpawnObj();
+			//			spawnGrp->activityProfile().setAIProfile(new CGrpProfileDynHarvest(spawnGrp,this,spawnZone,spawnZone));
 		}
-		return	true;
+		return true;
 	}
-	
+
 private:
-	std::string	_StateMachine;
-	std::string	_DynGroup;
-	std::string	_Where;
-	std::string	_Count;	
+	std::string _StateMachine;
+	std::string _DynGroup;
+	std::string _Where;
+	std::string _Count;
 };
-
-
 
 //////////////////////////////////////////////////////////////////////////
 //	Special Code Action
@@ -2744,74 +2723,71 @@ class CAILogicActionCode : public IAILogicAction
 {
 public:
 	CAILogicActionCode(
-		const std::vector<std::string> &args,
-		const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-		const CAIAliasDescriptionNode *eventNode,
-		CStateMachine *container);	
+	    const std::vector<std::string> &args,
+	    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+	    const CAIAliasDescriptionNode *eventNode,
+	    CStateMachine *container);
 	bool executeAction(CStateInstance *entity, const IAIEvent *event);
 	NLMISC::CSmartPtr<const AIVM::CByteCode> _byteCode;
 };
 
-
-CAILogicActionCode::CAILogicActionCode (const std::vector<std::string> &args, 	const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-	const CAIAliasDescriptionNode *eventNode, 	CStateMachine *container)
+CAILogicActionCode::CAILogicActionCode(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions,
+    const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 {
 	nldebug("loadActionCode");
-	_byteCode=CCompiler::getInstance().compileCode	(args, eventNode ? eventNode->fullName() : "NULL");
-}
-	
-bool	CAILogicActionCode::executeAction(CStateInstance	*entity,const IAIEvent *event)
-{
-	entity->interpretCode(NULL,	_byteCode);
-	return	true;
+	_byteCode = CCompiler::getInstance().compileCode(args, eventNode ? eventNode->fullName() : "NULL");
 }
 
+bool CAILogicActionCode::executeAction(CStateInstance *entity, const IAIEvent *event)
+{
+	entity->interpretCode(NULL, _byteCode);
+	return true;
+}
 
 //
 //////////////////////////////////////////////////////////////////////////
 // Special outpost action
 
-//class CAIAliasDescriptionNode;
-//class CStateMachine;
+// class CAIAliasDescriptionNode;
+// class CStateMachine;
 
 class CAILogicActionOutpostSendSquadStatus
-: public IAILogicAction
+    : public IAILogicAction
 {
 public:
 	CAILogicActionOutpostSendSquadStatus(
-		std::vector<std::string> const& args,
-		std::vector<IAILogicAction::TSmartPtr> const& subActions,
-		CAIAliasDescriptionNode const* eventNode,
-		CStateMachine* container);	
-	bool executeAction(CStateInstance* entity, IAIEvent const* event);
+	    std::vector<std::string> const &args,
+	    std::vector<IAILogicAction::TSmartPtr> const &subActions,
+	    CAIAliasDescriptionNode const *eventNode,
+	    CStateMachine *container);
+	bool executeAction(CStateInstance *entity, IAIEvent const *event);
 };
 
-
 CAILogicActionOutpostSendSquadStatus::CAILogicActionOutpostSendSquadStatus(
-   std::vector<std::string> const& args,
-   std::vector<IAILogicAction::TSmartPtr> const& subActions,
-   CAIAliasDescriptionNode const* eventNode,
-   CStateMachine* container)
+    std::vector<std::string> const &args,
+    std::vector<IAILogicAction::TSmartPtr> const &subActions,
+    CAIAliasDescriptionNode const *eventNode,
+    CStateMachine *container)
 {
 }
 
-bool CAILogicActionOutpostSendSquadStatus::executeAction(CStateInstance* entity, IAIEvent const* event)
+bool CAILogicActionOutpostSendSquadStatus::executeAction(CStateInstance *entity, IAIEvent const *event)
 {
-	CGroup* group = entity->getGroup();
+	CGroup *group = entity->getGroup();
 	if (!group)
 	{
 		nlwarning("send_outpost_squad_status failed because state instance is not a group");
 		return false;
 	}
-	CGroupNpc* npcGrp = dynamic_cast<CGroupNpc*>(group);
+	CGroupNpc *npcGrp = dynamic_cast<CGroupNpc *>(group);
 	if (!npcGrp)
 	{
 		nlwarning("send_outpost_squad_status failed because group is not a NPC group");
 		return false;
 	}
-	CManager* manager = npcGrp->getOwner();
-	IManagerParent* managerParent = manager->getOwner();
-	COutpost* outpost = dynamic_cast<COutpost*>(managerParent);
+	CManager *manager = npcGrp->getOwner();
+	IManagerParent *managerParent = manager->getOwner();
+	COutpost *outpost = dynamic_cast<COutpost *>(managerParent);
 	if (!outpost)
 	{
 		nlwarning("send_outpost_squad_status failed because group manager parent is not an outpost");
@@ -2826,43 +2802,42 @@ bool CAILogicActionOutpostSendSquadStatus::executeAction(CStateInstance* entity,
 // Special outpost action
 
 class CAILogicActionOutpostReportSquadLeaderDeath
-: public IAILogicAction
+    : public IAILogicAction
 {
 public:
 	CAILogicActionOutpostReportSquadLeaderDeath(
-		std::vector<std::string> const& args,
-		std::vector<IAILogicAction::TSmartPtr> const& subActions,
-		CAIAliasDescriptionNode const* eventNode,
-		CStateMachine* container);	
-	bool executeAction(CStateInstance* entity, IAIEvent const* event);
+	    std::vector<std::string> const &args,
+	    std::vector<IAILogicAction::TSmartPtr> const &subActions,
+	    CAIAliasDescriptionNode const *eventNode,
+	    CStateMachine *container);
+	bool executeAction(CStateInstance *entity, IAIEvent const *event);
 };
 
-
 CAILogicActionOutpostReportSquadLeaderDeath::CAILogicActionOutpostReportSquadLeaderDeath(
-	std::vector<std::string> const& args,
-	std::vector<IAILogicAction::TSmartPtr> const& subActions,
-	CAIAliasDescriptionNode const* eventNode,
-	CStateMachine* container)
+    std::vector<std::string> const &args,
+    std::vector<IAILogicAction::TSmartPtr> const &subActions,
+    CAIAliasDescriptionNode const *eventNode,
+    CStateMachine *container)
 {
 }
 
-bool CAILogicActionOutpostReportSquadLeaderDeath::executeAction(CStateInstance* entity, IAIEvent const* event)
+bool CAILogicActionOutpostReportSquadLeaderDeath::executeAction(CStateInstance *entity, IAIEvent const *event)
 {
-	CGroup* group = entity->getGroup();
+	CGroup *group = entity->getGroup();
 	if (!group)
 	{
 		nlwarning("outpost_report_squad_leader_death failed because state instance is not a group");
 		return false;
 	}
-	CGroupNpc* npcGrp = dynamic_cast<CGroupNpc*>(group);
+	CGroupNpc *npcGrp = dynamic_cast<CGroupNpc *>(group);
 	if (!npcGrp)
 	{
 		nlwarning("outpost_report_squad_leader_death failed because group is not a NPC group");
 		return false;
 	}
-	CManager* manager = npcGrp->getOwner();
-	IManagerParent* managerParent = manager->getOwner();
-	COutpost* outpost = dynamic_cast<COutpost*>(managerParent);
+	CManager *manager = npcGrp->getOwner();
+	IManagerParent *managerParent = manager->getOwner();
+	COutpost *outpost = dynamic_cast<COutpost *>(managerParent);
 	if (!outpost)
 	{
 		nlwarning("outpost_report_squad_leader_death failed because group manager parent is not an outpost");
@@ -2872,49 +2847,47 @@ bool CAILogicActionOutpostReportSquadLeaderDeath::executeAction(CStateInstance* 
 	return true;
 }
 
-
 //
 //////////////////////////////////////////////////////////////////////////
 // Special outpost action
 
 class CAILogicActionOutpostReportSquadDeath
-: public IAILogicAction
+    : public IAILogicAction
 {
 public:
 	CAILogicActionOutpostReportSquadDeath(
-		std::vector<std::string> const& args,
-		std::vector<IAILogicAction::TSmartPtr> const& subActions,
-		CAIAliasDescriptionNode const* eventNode,
-		CStateMachine* container);	
-	bool executeAction(CStateInstance* entity, IAIEvent const* event);
+	    std::vector<std::string> const &args,
+	    std::vector<IAILogicAction::TSmartPtr> const &subActions,
+	    CAIAliasDescriptionNode const *eventNode,
+	    CStateMachine *container);
+	bool executeAction(CStateInstance *entity, IAIEvent const *event);
 };
 
-
 CAILogicActionOutpostReportSquadDeath::CAILogicActionOutpostReportSquadDeath(
-	std::vector<std::string> const& args,
-	std::vector<IAILogicAction::TSmartPtr> const& subActions,
-	CAIAliasDescriptionNode const* eventNode,
-	CStateMachine* container)
+    std::vector<std::string> const &args,
+    std::vector<IAILogicAction::TSmartPtr> const &subActions,
+    CAIAliasDescriptionNode const *eventNode,
+    CStateMachine *container)
 {
 }
 
-bool CAILogicActionOutpostReportSquadDeath::executeAction(CStateInstance* entity, IAIEvent const* event)
+bool CAILogicActionOutpostReportSquadDeath::executeAction(CStateInstance *entity, IAIEvent const *event)
 {
-	CGroup* group = entity->getGroup();
+	CGroup *group = entity->getGroup();
 	if (!group)
 	{
 		nlwarning("outpost_report_squad_death failed because state instance is not a group");
 		return false;
 	}
-	CGroupNpc* npcGrp = dynamic_cast<CGroupNpc*>(group);
+	CGroupNpc *npcGrp = dynamic_cast<CGroupNpc *>(group);
 	if (!npcGrp)
 	{
 		nlwarning("outpost_report_squad_death failed because group is not a NPC group");
 		return false;
 	}
-	CManager* manager = npcGrp->getOwner();
-	IManagerParent* managerParent = manager->getOwner();
-	COutpost* outpost = dynamic_cast<COutpost*>(managerParent);
+	CManager *manager = npcGrp->getOwner();
+	IManagerParent *managerParent = manager->getOwner();
+	COutpost *outpost = dynamic_cast<COutpost *>(managerParent);
 	if (!outpost)
 	{
 		nlwarning("outpost_report_squad_death failed because group manager parent is not an outpost");
@@ -2925,13 +2898,12 @@ bool CAILogicActionOutpostReportSquadDeath::executeAction(CStateInstance* entity
 }
 
 //------------------------------------------------------------------
-//A say action where it is possible to specify which npc is talking.
+// A say action where it is possible to specify which npc is talking.
 //------------------------------------------------------------------
 class CAILogicActionNpcSay : public IAILogicAction, public CAIVariableParser
 {
 public:
-	CAILogicActionNpcSay (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	CAILogicActionNpcSay(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
 		_Arg = false;
 		if (args.empty())
@@ -2939,228 +2911,224 @@ public:
 			nlwarning("CAILogicActionNpcSay need a sentence !");
 			return;
 		}
-		
-		
+
 		if (!subActions.empty())
 		{
 			nlwarning("npc_say (%s) should not have sub action", eventNode->fullName().c_str());
 			return;
 		}
 
-		//no npc specified, (use leader)
-		if(args.size()==1)
+		// no npc specified, (use leader)
+		if (args.size() == 1)
 		{
 			_Npc = "";
 			_Group = NULL;
 			_Sentence = args[0];
 		}
-		else 
-			//npc specified + string
-		if (args.size()>=2)
-		{
-			std::string str = args[0];
-
-			string::size_type pos = str.find(":");
-
-			if (pos == string::npos)
+		else
+			// npc specified + string
+			if (args.size() >= 2)
 			{
-				pos = str.find(".");
-			}
-			if (pos != string::npos)
-			{
-				const string groupName = str.substr(0, pos);
-				CGroup* grp = CAIGroupFinder::findGroup(groupName,container);
-				if(grp == NULL)
+				std::string str = args[0];
+
+				string::size_type pos = str.find(":");
+
+				if (pos == string::npos)
 				{
-					nlwarning("npc_say (%s) bad group name (%s) !", eventNode->fullName().c_str(),groupName.c_str());
-					return;
+					pos = str.find(".");
 				}
-				_Group = grp;
-				str = str.substr(pos+1);
-				_Npc = str;
+				if (pos != string::npos)
+				{
+					const string groupName = str.substr(0, pos);
+					CGroup *grp = CAIGroupFinder::findGroup(groupName, container);
+					if (grp == NULL)
+					{
+						nlwarning("npc_say (%s) bad group name (%s) !", eventNode->fullName().c_str(), groupName.c_str());
+						return;
+					}
+					_Group = grp;
+					str = str.substr(pos + 1);
+					_Npc = str;
+				}
+				else
+				{
+					_Group = NULL;
+					_Npc = args[0];
+				}
+				_Sentence = args[1];
 			}
+			/*
+			//string with variables
+			else if (args.size()>=3)
+			{
+			    uint32 i =2;
+			    CAIVariableParser::TVariable var;
+			    for(;i<args.size();++i)
+			    {
+			        if (!parseVar(var, args[i],container))
+			        {
+			            nlwarning("Error while parsing variable %s !",args[i].c_str());
+			            return;
+			        }
+			        nlinfo("npc_say use variable <%s> !",args[i].c_str());
+			        _Vars.push_back(var);
+			    }
+			    _Arg=true;
+			}*/
 			else
 			{
-				_Group = NULL;
-				_Npc=args[0];
+				nlwarning("<npc_say> error parameters count!");
 			}
-			_Sentence=args[1];
-		}
-		/*
-		//string with variables
-		else if (args.size()>=3)
-		{
-			uint32 i =2;
-			CAIVariableParser::TVariable var;
-			for(;i<args.size();++i)
-			{
-				if (!parseVar(var, args[i],container))
-				{
-					nlwarning("Error while parsing variable %s !",args[i].c_str());
-					return;
-				}
-				nlinfo("npc_say use variable <%s> !",args[i].c_str());
-				_Vars.push_back(var);
-			}
-			_Arg=true;
-		}*/
-		else
-		{
-			nlwarning("<npc_say> error parameters count!");
-		}
 
-		std::string cstring =NLMISC::CSString (_Sentence).left(4);
+		std::string cstring = NLMISC::CSString(_Sentence).left(4);
 
-		if(cstring=="DSS_")
+		if (cstring == "DSS_")
 		{
-			_Id=true;
-			NLMISC::CSString tmp = NLMISC::CSString (_Sentence).right((uint)_Sentence.length()-4);
-			NLMISC::CSString tmp2 = tmp.strtok(" ",false,false,false,false);
+			_Id = true;
+			NLMISC::CSString tmp = NLMISC::CSString(_Sentence).right((uint)_Sentence.length() - 4);
+			NLMISC::CSString tmp2 = tmp.strtok(" ", false, false, false, false);
 			_ScenarioId = tmp2.atoui();
 			_Sentence = tmp;
-			nlwarning("<npc_say> scenario id : %d string id : %s ",_ScenarioId,_Sentence.c_str());
+			nlwarning("<npc_say> scenario id : %d string id : %s ", _ScenarioId, _Sentence.c_str());
 		}
 		else
 		{
-			_Id=false;
+			_Id = false;
 		}
 	}
 
-	bool	executeAction(CStateInstance *entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
-		if(_Sentence == "")
+		if (_Sentence == "")
 		{
 			nlwarning("npc has nothing to say!");
 			return false;
 		}
 
-		const CAIAliasDescriptionNode	*const aliasDesc=entity->aliasTreeOwner()->getAliasNode();
+		const CAIAliasDescriptionNode *const aliasDesc = entity->aliasTreeOwner()->getAliasNode();
 
-		if	(	aliasDesc->getType() != AITypeGrp
-			||	!entity->getGroup()	)
+		if (aliasDesc->getType() != AITypeGrp
+		    || !entity->getGroup())
 		{
 			nlwarning("group can't have 'npc_say' action !");
-			return	true;
+			return true;
 		}
 
-		CGroup	*	grp ;
-		if(_Group==NULL)
-			grp= entity->getGroup();
+		CGroup *grp;
+		if (_Group == NULL)
+			grp = entity->getGroup();
 		else
 			grp = _Group;
-		CSpawnBot* bot=NULL;
-		if(!_Npc.empty())
+		CSpawnBot *bot = NULL;
+		if (!_Npc.empty())
 		{
-			CAliasCont<CBot> const& bots = grp->bots();
-			if(bots.size()==0)
+			CAliasCont<CBot> const &bots = grp->bots();
+			if (bots.size() == 0)
 			{
 				nlwarning("group empty! say nothing! ");
 				return true;
 			}
 
-			CBot* chld=bots.getChildByName(_Npc);
-			if(!chld)
+			CBot *chld = bots.getChildByName(_Npc);
+			if (!chld)
 			{
-				std::string tmp= "no npc named "+_Npc+"! say nothing!";
+				std::string tmp = "no npc named " + _Npc + "! say nothing!";
 				nlwarning(tmp.c_str());
 				return true;
 			}
-			bot= chld->getSpawnObj();
+			bot = chld->getSpawnObj();
 		}
 		else
 		{
 			CBot *b = grp->getSpawnObj()->getPersistent().getLeader();
 			if (b && b->isSpawned())
 			{
-				bot = b->getSpawnObj();				
+				bot = b->getSpawnObj();
 			}
 		}
-		
-		if (!bot  || !bot->isAlive())
-		{
-				return true;
-		}	
 
-		if(!_Id)
+		if (!bot || !bot->isAlive())
+		{
+			return true;
+		}
+
+		if (!_Id)
 		{
 			ucstring ucstr = _Sentence;
-			npcChatToChannelSentence(bot->dataSetRow(),CChatGroup::say, ucstr);
+			npcChatToChannelSentence(bot->dataSetRow(), CChatGroup::say, ucstr);
 		}
 		else
 		{
-			if(!_Arg)
+			if (!_Arg)
 			{
-				forwardToDss(bot->dataSetRow(),CChatGroup::say,_Sentence,_ScenarioId);
+				forwardToDss(bot->dataSetRow(), CChatGroup::say, _Sentence, _ScenarioId);
 			}
 			else
 			{
 				float val;
-				uint32 size=(uint32)_Vars.size(),i=0;
+				uint32 size = (uint32)_Vars.size(), i = 0;
 				std::vector<float> values;
-				for(;i<size;++i)
+				for (; i < size; ++i)
 				{
-					val = retreiveValue(entity,_Vars[i]);
+					val = retreiveValue(entity, _Vars[i]);
 					values.push_back(val);
 				}
-				forwardToDssArg(bot->dataSetRow(),CChatGroup::say,_Sentence,_ScenarioId,values);
+				forwardToDssArg(bot->dataSetRow(), CChatGroup::say, _Sentence, _ScenarioId, values);
 			}
 		}
 		return true;
 	}
-private:
 
+private:
 	std::string _Sentence;
 	uint32 _ScenarioId;
 	std::string _Npc;
-	CGroup* _Group;
+	CGroup *_Group;
 	bool _Id;
 	bool _Arg;
 	vector<CAIVariableParser::TVariable> _Vars;
 };
 class CAILogicActionNull : public IAILogicAction
 {
-	public:
-	CAILogicActionNull(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
-	{}
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
-	{return true;}
-	
+public:
+	CAILogicActionNull(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	{
+	}
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
+	{
+		return true;
+	}
 };
 //----------------------------------------------------------------------
 
 void CAILogicActionDssStartActHelper::dssStartAct(TSessionId sessionId, uint32 actId)
 {
-	NLNET::CMessage	msgout("DSS_START_ACT");		
+	NLNET::CMessage msgout("DSS_START_ACT");
 	msgout.serial(sessionId);
 	msgout.serial(actId);
-	NLNET::CUnifiedNetwork::getInstance()->send("DSS",msgout);
+	NLNET::CUnifiedNetwork::getInstance()->send("DSS", msgout);
 }
 
 //----------------------------------------------------------------------
 
-
-
 class CAILogicActionFacing : public IAILogicAction
 {
 public:
-	CAILogicActionFacing(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
-								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
+	CAILogicActionFacing(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> &subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
-		if (args.empty()||args.size()!=2)
+		if (args.empty() || args.size() != 2)
 		{
 			nlwarning("CAILogicActionFacing need two Npc name !");
 			return;
 		}
-		
-		
-		if (subActions.size()!=0)
+
+		if (subActions.size() != 0)
 		{
 			nlwarning("CAILogicActionFacing (%s) should not have any sub action !", eventNode->fullName().c_str());
 			return;
 		}
-	//	_facedName = args[1];
-		for(uint32 i=0;i<args.size();++i)
+		//	_facedName = args[1];
+		for (uint32 i = 0; i < args.size(); ++i)
 		{
 			std::string name = args[i];
 			std::string str = args[i];
@@ -3168,14 +3136,14 @@ public:
 			if (pos != string::npos)
 			{
 				const string groupName = str.substr(0, pos);
-				CGroup* grp = CAIGroupFinder::findGroup(groupName,container);
-				if(grp == NULL)
+				CGroup *grp = CAIGroupFinder::findGroup(groupName, container);
+				if (grp == NULL)
 				{
-					nlwarning("npc_say (%s) bad group name (%s) !", eventNode->fullName().c_str(),groupName.c_str());
+					nlwarning("npc_say (%s) bad group name (%s) !", eventNode->fullName().c_str(), groupName.c_str());
 					return;
 				}
 				_FacerGroups.push_back(grp);
-				str = str.substr(pos+1);
+				str = str.substr(pos + 1);
 				_FacerNames.push_back(str);
 			}
 			else
@@ -3185,45 +3153,41 @@ public:
 			}
 		}
 	}
-	
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool executeAction(CStateInstance *entity, const IAIEvent *event)
 	{
-		CGroup	*defaultGrp = entity->getGroup();
-		
-		CSpawnBot* botFacer=NULL;
-		CSpawnBot* botFaced=NULL;
+		CGroup *defaultGrp = entity->getGroup();
 
+		CSpawnBot *botFacer = NULL;
+		CSpawnBot *botFaced = NULL;
 
-		if (_FacerNames.size()  !=2 ) 
+		if (_FacerNames.size() != 2)
 		{
 			nlwarning("Warning CAILogicActionFacing: need two Npc name !");
 			return false;
 		}
 
-	
 		{
 
-			CGroup	*grp = _FacerGroups[0];
-			if (grp == 0 ) { grp = defaultGrp; }
-			
-			CAliasCont<CBot> const& bots = grp->bots();
-			if(bots.size()==0)
+			CGroup *grp = _FacerGroups[0];
+			if (grp == 0) { grp = defaultGrp; }
+
+			CAliasCont<CBot> const &bots = grp->bots();
+			if (bots.size() == 0)
 			{
 				nlwarning("Warning CAILogicActionFacing: group empty! unable to face !");
 				return false;
 			}
 
+			CBot *chld;
 
-			CBot* chld;
-
-			chld=bots.getChildByName(_FacerNames[0]);
-			if(!chld)
+			chld = bots.getChildByName(_FacerNames[0]);
+			if (!chld)
 			{
-				nlwarning("Warning CAILogicActionFacing: no npc named %s ! unable to face !",_FacerNames[0].c_str());
+				nlwarning("Warning CAILogicActionFacing: no npc named %s ! unable to face !", _FacerNames[0].c_str());
 				return false;
 			}
-			botFaced= chld->getSpawnObj();
+			botFaced = chld->getSpawnObj();
 			if (!botFaced)
 			{
 				return true;
@@ -3232,51 +3196,47 @@ public:
 
 		{
 
-			CGroup	*grp = _FacerGroups[1];
-			if (grp == 0 ) { grp = defaultGrp; }
-			
-			CAliasCont<CBot> const& bots = grp->bots();
-			if(bots.size()==0)
+			CGroup *grp = _FacerGroups[1];
+			if (grp == 0) { grp = defaultGrp; }
+
+			CAliasCont<CBot> const &bots = grp->bots();
+			if (bots.size() == 0)
 			{
 				nlwarning("Warning CAILogicActionFacing: group empty! unable to face !");
 				return false;
 			}
 
+			CBot *chld;
 
-			CBot* chld;
-
-			chld=bots.getChildByName(_FacerNames[1]);
-			if(!chld)
+			chld = bots.getChildByName(_FacerNames[1]);
+			if (!chld)
 			{
-				nlwarning("Warning CAILogicActionFacing: no npc named %s ! unable to face !",_FacerNames[1].c_str());
+				nlwarning("Warning CAILogicActionFacing: no npc named %s ! unable to face !", _FacerNames[1].c_str());
 				return false;
 			}
-			botFacer= chld->getSpawnObj();
+			botFacer = chld->getSpawnObj();
 			if (!botFaced)
-			{				
+			{
 				return true;
 			}
 		}
 
-
-		if(botFacer && botFaced)
+		if (botFacer && botFaced)
 		{
 
 			botFacer->setTheta(botFacer->pos().angleTo(botFaced->pos()));
-	
 		}
 		else
 		{
 			return false;
 		}
-			
-		
 
 		return true;
 	}
+
 private:
 	std::vector<std::string> _FacerNames;
-	std::vector<CGroup*> _FacerGroups;
+	std::vector<CGroup *> _FacerGroups;
 };
 
 //
@@ -3284,58 +3244,59 @@ private:
 //	Generic Actions
 //////////////////////////////////////////////////////////////////////////
 
-IAILogicAction	*CAIEventReaction::newAILogicAction(const char *name,
-													const std::vector<std::string> &args, 
-													const std::vector<IAILogicAction::TSmartPtr> &subActions, 
-													const CAIAliasDescriptionNode *eventNode, 
-													CStateMachine	*container)
+IAILogicAction *CAIEventReaction::newAILogicAction(const char *name,
+    const std::vector<std::string> &args,
+    const std::vector<IAILogicAction::TSmartPtr> &subActions,
+    const CAIAliasDescriptionNode *eventNode,
+    CStateMachine *container)
 {
-#define BUILD(theName,theClass) if (NLMISC::nlstricmp(theName,name)==0) return new theClass(args,subActions,eventNode,container);
-	BUILD(	"begin_state",			CAILogicActionBeginState		)
-	BUILD(	"random_select_state",	CAILogicActionRandomSelectState	)
-	BUILD(	"multi_actions",		CAILogicActionMultiAction		)
-	BUILD(	"punctual_state",		CAILogicActionPunctualState		)
-	BUILD(	"punctual_state_end",	CAILogicActionPunctualStateEnd	)
-	BUILD(	"random_select",		CAILogicActionRandomSelect		)
-	BUILD(	"set_state_timeout",	CAILogicActionSetStateTimeout	)
-	BUILD(	"set_punctual_state_timeout", CAILogicActionSetPunctualStateTimeout	)
-	BUILD(	"set_timer_t0",			CAILogicActionSetTimerT0		)
-	BUILD(	"set_timer_t1",			CAILogicActionSetTimerT1		)
-	BUILD(	"set_timer_t2",			CAILogicActionSetTimerT2		)
-	BUILD(	"set_timer_t3",			CAILogicActionSetTimerT3		)
-	BUILD(	"trigger_event_0",		CAILogicActionUserEvent0		)
-	BUILD(	"trigger_event_1",		CAILogicActionUserEvent1		)
-	BUILD(	"trigger_event_2",		CAILogicActionUserEvent2		)
-	BUILD(	"trigger_event_3",		CAILogicActionUserEvent3		)
-	BUILD(	"trigger_event_4",		CAILogicActionUserEvent4		)
-	BUILD(	"trigger_event_5",		CAILogicActionUserEvent5		)
-	BUILD(	"trigger_event_6",		CAILogicActionUserEvent6		)
-	BUILD(	"trigger_event_7",		CAILogicActionUserEvent7		)
-	BUILD(	"trigger_event_8",		CAILogicActionUserEvent8		)
-	BUILD(	"trigger_event_9",		CAILogicActionUserEvent9		)
-	BUILD(	"spawn",				CAILogicActionSpawn				)
-	BUILD(	"despawn",				CAILogicActionDespawn			)
-	BUILD(	"send_message",			CAILogicActionSendMessage		)
-	BUILD(	"say",					CAILogicActionSay				)
-	BUILD(  "npc_say",				CAILogicActionNpcSay			)
-	BUILD(  "facing",				CAILogicActionFacing			)
-	BUILD(	"dynamic_if",			CAILogicActionDynamicIf		)
-	BUILD(	"condition_if",			CAILogicActionConditionIf		)
-	BUILD(	"condition_if_else",	CAILogicActionConditionIfElse	)
-	BUILD(	"modify_variable",		CAILogicActionModifyVariable	)
-	BUILD(	"emot",					CAILogicActionEmot				)
-	BUILD(	"sit_down",				CAILogicActionSitDown			)
-	BUILD(	"stand_up",				CAILogicActionStandUp			)
-	BUILD(	"set_fauna_activity",	CAILogicActionSetFaunaActivity	)
-//	BUILD(	"outpost_giver_ready",	CAILogicActionOutpostGiverReady	)
-	BUILD(	"set_flags_on_dyn_zones",	CAILogicActionSetFlagsOnDynZones	)
-	BUILD(	"spawn_dyn_group",		CAILogicActionSpawnDynGroup		)
-	BUILD(	"code",					CAILogicActionCode				)
-	BUILD(	"outpost_send_squad_status",	CAILogicActionOutpostSendSquadStatus	)
-	BUILD(	"outpost_report_squad_leader_death",	CAILogicActionOutpostReportSquadLeaderDeath	)
-	BUILD(	"outpost_report_squad_death",	CAILogicActionOutpostReportSquadDeath	)
-	BUILD(	"switch_actions", CAILogicActionSwitchActions			)
-	BUILD(	"null_action", CAILogicActionNull						)
+#define BUILD(theName, theClass) \
+	if (NLMISC::nlstricmp(theName, name) == 0) return new theClass(args, subActions, eventNode, container);
+	BUILD("begin_state", CAILogicActionBeginState)
+	BUILD("random_select_state", CAILogicActionRandomSelectState)
+	BUILD("multi_actions", CAILogicActionMultiAction)
+	BUILD("punctual_state", CAILogicActionPunctualState)
+	BUILD("punctual_state_end", CAILogicActionPunctualStateEnd)
+	BUILD("random_select", CAILogicActionRandomSelect)
+	BUILD("set_state_timeout", CAILogicActionSetStateTimeout)
+	BUILD("set_punctual_state_timeout", CAILogicActionSetPunctualStateTimeout)
+	BUILD("set_timer_t0", CAILogicActionSetTimerT0)
+	BUILD("set_timer_t1", CAILogicActionSetTimerT1)
+	BUILD("set_timer_t2", CAILogicActionSetTimerT2)
+	BUILD("set_timer_t3", CAILogicActionSetTimerT3)
+	BUILD("trigger_event_0", CAILogicActionUserEvent0)
+	BUILD("trigger_event_1", CAILogicActionUserEvent1)
+	BUILD("trigger_event_2", CAILogicActionUserEvent2)
+	BUILD("trigger_event_3", CAILogicActionUserEvent3)
+	BUILD("trigger_event_4", CAILogicActionUserEvent4)
+	BUILD("trigger_event_5", CAILogicActionUserEvent5)
+	BUILD("trigger_event_6", CAILogicActionUserEvent6)
+	BUILD("trigger_event_7", CAILogicActionUserEvent7)
+	BUILD("trigger_event_8", CAILogicActionUserEvent8)
+	BUILD("trigger_event_9", CAILogicActionUserEvent9)
+	BUILD("spawn", CAILogicActionSpawn)
+	BUILD("despawn", CAILogicActionDespawn)
+	BUILD("send_message", CAILogicActionSendMessage)
+	BUILD("say", CAILogicActionSay)
+	BUILD("npc_say", CAILogicActionNpcSay)
+	BUILD("facing", CAILogicActionFacing)
+	BUILD("dynamic_if", CAILogicActionDynamicIf)
+	BUILD("condition_if", CAILogicActionConditionIf)
+	BUILD("condition_if_else", CAILogicActionConditionIfElse)
+	BUILD("modify_variable", CAILogicActionModifyVariable)
+	BUILD("emot", CAILogicActionEmot)
+	BUILD("sit_down", CAILogicActionSitDown)
+	BUILD("stand_up", CAILogicActionStandUp)
+	BUILD("set_fauna_activity", CAILogicActionSetFaunaActivity)
+	//	BUILD(	"outpost_giver_ready",	CAILogicActionOutpostGiverReady	)
+	BUILD("set_flags_on_dyn_zones", CAILogicActionSetFlagsOnDynZones)
+	BUILD("spawn_dyn_group", CAILogicActionSpawnDynGroup)
+	BUILD("code", CAILogicActionCode)
+	BUILD("outpost_send_squad_status", CAILogicActionOutpostSendSquadStatus)
+	BUILD("outpost_report_squad_leader_death", CAILogicActionOutpostReportSquadLeaderDeath)
+	BUILD("outpost_report_squad_death", CAILogicActionOutpostReportSquadDeath)
+	BUILD("switch_actions", CAILogicActionSwitchActions)
+	BUILD("null_action", CAILogicActionNull)
 
 #undef BUILD
 	return NULL;
@@ -3345,15 +3306,15 @@ IAILogicAction	*CAIEventReaction::newAILogicAction(const char *name,
 // Control over verbose nature of logging
 //---------------------------------------------------------------------------------------
 
-NLMISC_COMMAND(verboseLogicAction,"Turn on or off or check the state of verbose logic action logging","")
+NLMISC_COMMAND(verboseLogicAction, "Turn on or off or check the state of verbose logic action logging", "")
 {
-	if(args.size()>1)
+	if (args.size() > 1)
 		return false;
 
-	if(args.size()==1)
-		StrToBool	(VerboseLog, args[0]);
+	if (args.size() == 1)
+		StrToBool(VerboseLog, args[0]);
 
-	nlinfo("VerboseLogging is %s",VerboseLog?"ON":"OFF");
+	nlinfo("VerboseLogging is %s", VerboseLog ? "ON" : "OFF");
 	return true;
 }
 

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_S_LINK_EFFECT_H
 #define RY_S_LINK_EFFECT_H
 
@@ -30,45 +28,45 @@
 class CSLinkEffect : public CSEffect
 {
 public:
-	inline CSLinkEffect( 
-		const TDataSetRow & creatorRowId, 
-		const TDataSetRow & targetRowId,
-		EFFECT_FAMILIES::TEffectFamily family, 
-		sint32 cost,
-		SCORES::TScores energyCost,
-		SKILLS::ESkills skill,
-		uint32 maxDistance,
-		sint32 value,
-		uint32 power,
-		TReportAction& report )
-		:CSEffect(creatorRowId,targetRowId,family,false,value,power),
-		_CostPerUpdate(cost),
-		_EnergyCost(energyCost),
-		_MaxDistance(maxDistance),
-		_Report(report),
-		_NoLinkSurvivalTime(0),
-		_LinkExists(true),
-		_SpellPower(0),
-		_PhraseBookIndex(0)
+	inline CSLinkEffect(
+	    const TDataSetRow &creatorRowId,
+	    const TDataSetRow &targetRowId,
+	    EFFECT_FAMILIES::TEffectFamily family,
+	    sint32 cost,
+	    SCORES::TScores energyCost,
+	    SKILLS::ESkills skill,
+	    uint32 maxDistance,
+	    sint32 value,
+	    uint32 power,
+	    TReportAction &report)
+	    : CSEffect(creatorRowId, targetRowId, family, false, value, power)
+	    , _CostPerUpdate(cost)
+	    , _EnergyCost(energyCost)
+	    , _MaxDistance(maxDistance)
+	    , _Report(report)
+	    , _NoLinkSurvivalTime(0)
+	    , _LinkExists(true)
+	    , _SpellPower(0)
+	    , _PhraseBookIndex(0)
 	{
 		_MagicFxType = MAGICFX::toMagicFx(family);
 		_EndTimer.reset();
 		setSkill(skill);
 	}
 
-	virtual bool update(CTimerEvent * event, bool applyEffect);
-	
+	virtual bool update(CTimerEvent *event, bool applyEffect);
+
 	virtual void removed();
-	
+
 	/// method called when the link is broken
-	inline void breakLink(float factorOnSurvivalTime = 1.0f) 
-	{ 
+	inline void breakLink(float factorOnSurvivalTime = 1.0f)
+	{
 		if (factorOnSurvivalTime < 0.0f)
 			factorOnSurvivalTime = 0.0f;
-		
-		_LinkExists = false; 
-		const NLMISC::TGameCycle duration = NLMISC::TGameCycle( factorOnSurvivalTime * (_NoLinkSurvivalTime + CSLinkEffect::getNoLinkDurationTime(_Family)) );
-		_EndTimer.setRemaining( duration , new CEndEffectTimerEvent(this));
+
+		_LinkExists = false;
+		const NLMISC::TGameCycle duration = NLMISC::TGameCycle(factorOnSurvivalTime * (_NoLinkSurvivalTime + CSLinkEffect::getNoLinkDurationTime(_Family)));
+		_EndTimer.setRemaining(duration, new CEndEffectTimerEvent(this));
 	}
 
 	/// set _NoLinkSurvivalTime
@@ -86,67 +84,67 @@ public:
 	inline uint16 getPhraseBookIndex() const { return _PhraseBookIndex; }
 
 	/// get update period for given effect family
-	static NLMISC::TGameCycle getUpdatePeriod( EFFECT_FAMILIES::TEffectFamily family);
+	static NLMISC::TGameCycle getUpdatePeriod(EFFECT_FAMILIES::TEffectFamily family);
 
 	/// get cost per update
 	inline sint32 costPerUpdate() const { return _CostPerUpdate; }
 
 private:
-	static uint32 getNoLinkDurationTime( EFFECT_FAMILIES::TEffectFamily family);
-	
-protected:
-	sint32					_CostPerUpdate;
-	SCORES::TScores			_EnergyCost;
-	TReportAction			_Report;
-	// max link distance in mm
-	uint32					_MaxDistance;
-	/// duration of the effect once the link is broken
-	NLMISC::TGameCycle		_NoLinkSurvivalTime;
-	///
-	bool					_LinkExists;
-	/// associated magic fx type
-	MAGICFX::TMagicFx		_MagicFxType;
-	/// used magic focus if any
-	CMagicFocusItemFactor	_Focus;
-	/// original link spell power
-	uint16					_SpellPower;
-	///	index in client phrase book (0 = not in the phrase book)
-	uint16					_PhraseBookIndex;
-};
+	static uint32 getNoLinkDurationTime(EFFECT_FAMILIES::TEffectFamily family);
 
+protected:
+	sint32 _CostPerUpdate;
+	SCORES::TScores _EnergyCost;
+	TReportAction _Report;
+	// max link distance in mm
+	uint32 _MaxDistance;
+	/// duration of the effect once the link is broken
+	NLMISC::TGameCycle _NoLinkSurvivalTime;
+	///
+	bool _LinkExists;
+	/// associated magic fx type
+	MAGICFX::TMagicFx _MagicFxType;
+	/// used magic focus if any
+	CMagicFocusItemFactor _Focus;
+	/// original link spell power
+	uint16 _SpellPower;
+	///	index in client phrase book (0 = not in the phrase book)
+	uint16 _PhraseBookIndex;
+};
 
 typedef NLMISC::CSmartPtr<CSLinkEffect> CSLinkEffectPtr;
 
 class CSLinkEffectOffensive : public CSLinkEffect
 {
 public:
-	inline CSLinkEffectOffensive( const TDataSetRow & creatorRowId, 
-		const TDataSetRow & targetRowId,
-		EFFECT_FAMILIES::TEffectFamily family, 
-		sint32 cost,
-		SCORES::TScores energyCost,
-		SKILLS::ESkills skill,
-		uint32 maxDistance,
-		sint32 value,
-		uint8 power,
-		TReportAction& report )
-		:CSLinkEffect(creatorRowId,targetRowId,family,cost,energyCost,skill,maxDistance,value,power,report),_ResistFactor(0.0f)
+	inline CSLinkEffectOffensive(const TDataSetRow &creatorRowId,
+	    const TDataSetRow &targetRowId,
+	    EFFECT_FAMILIES::TEffectFamily family,
+	    sint32 cost,
+	    SCORES::TScores energyCost,
+	    SKILLS::ESkills skill,
+	    uint32 maxDistance,
+	    sint32 value,
+	    uint8 power,
+	    TReportAction &report)
+	    : CSLinkEffect(creatorRowId, targetRowId, family, cost, energyCost, skill, maxDistance, value, power, report)
+	    , _ResistFactor(0.0f)
 	{
 		_FirstResist = true;
 		_Report.ActionNature = ACTNATURE::OFFENSIVE_MAGIC;
 	}
-	
-	virtual bool update(CTimerEvent * event, bool)
+
+	virtual bool update(CTimerEvent *event, bool)
 	{
 		return updateOffensive(event, true);
 	}
-	
-	bool updateOffensive(CTimerEvent * event, bool sendReportForXP);
-	
+
+	bool updateOffensive(CTimerEvent *event, bool sendReportForXP);
+
 protected:
-	float	_ResistFactor;
+	float _ResistFactor;
 	/// first resist (the first time, do not test resist)
-	bool	_FirstResist;
+	bool _FirstResist;
 };
 
 #endif // RY_S_LINK_EFFECT_H

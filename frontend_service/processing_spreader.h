@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_PROCESSING_SPREADER_H
 #define NL_PROCESSING_SPREADER_H
 
@@ -24,7 +22,6 @@
 
 // Test with the least frequent period even at low load (define=yes/undef=no)
 #undef TEST_WORSE_EXECUTION_PERIOD
-
 
 /**
  * This class is aimed to spread an iterating process onto several game cycles,
@@ -42,18 +39,17 @@
 class CProcessingSpreader
 {
 public:
-
 	/// Constructor
 	CProcessingSpreader();
 
 	/// Initialization
-	void					init();
+	void init();
 
 	/// Execution period in game cycle
-	sint32					ExecutionPeriod;
+	sint32 ExecutionPeriod;
 
 	/// Return true if the process must be executed at the current cycle
-	bool					mustProcessNow()
+	bool mustProcessNow()
 	{
 #ifdef TEST_WORSE_EXECUTION_PERIOD
 		return (_Count == 0);
@@ -63,10 +59,10 @@ public:
 	}
 
 	/// Get the range (beginning iterator, index and outer bound) for the current processing
-	void					getProcessingBounds( THostMap::iterator& firstit, sint& firstindex, sint& outerboundindex );
+	void getProcessingBounds(THostMap::iterator &firstit, sint &firstindex, sint &outerboundindex);
 
 	/// Method to call at the end of a processing
-	void					endProcessing( THostMap::iterator icm )
+	void endProcessing(THostMap::iterator icm)
 	{
 		_ClientMapIterator = icm;
 #ifdef TEST_WORSE_EXECUTION_PERIOD
@@ -75,7 +71,7 @@ public:
 	}
 
 	/// Method to call every cycle, possibly after processing
-	void					incCycle()
+	void incCycle()
 	{
 #ifdef TEST_WORSE_EXECUTION_PERIOD
 		--_Count;
@@ -83,28 +79,26 @@ public:
 	}
 
 	/// Method to call after a new client is added into the clientmap (give it clientmap.end() before the addition!)
-	void					notifyClientAddition( THostMap::iterator endBeforeAddition );
+	void notifyClientAddition(THostMap::iterator endBeforeAddition);
 
 	/// Method to call when a client leaves
-	void					notifyClientRemoval( THostMap::iterator icm );
-	
-private:
+	void notifyClientRemoval(THostMap::iterator icm);
 
+private:
 #ifdef TEST_WORSE_EXECUTION_PERIOD
 	/// Execution counter
-	sint32					_Count;
+	sint32 _Count;
 #endif
 
 	/// Current map index
-	sint32					_ClientMapIndex;
+	sint32 _ClientMapIndex;
 
 	/// Current map iterator
-	THostMap::iterator		_ClientMapIterator;
+	THostMap::iterator _ClientMapIterator;
 
 	/// True if ClientMapIterator is invalid
-	bool					_Invalidated;
+	bool _Invalidated;
 };
-
 
 #endif // NL_PROCESSING_SPREADER_H
 

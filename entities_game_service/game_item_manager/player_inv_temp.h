@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef PLAYER_INV_TEMP_H
 #define PLAYER_INV_TEMP_H
 
@@ -35,7 +34,6 @@
 class CTempInventory : public CInventoryBase
 {
 public:
-
 	CTempInventory();
 
 	uint32 getMaxSlot() const;
@@ -51,11 +49,11 @@ public:
 
 	// Display functionnalities : these methods do not affect the inventory structure
 	// they just display things to the client throught the database
-	// before using verify that the temp inventory is empty (else it may have some problem 
+	// before using verify that the temp inventory is empty (else it may have some problem
 	// between displayed items and owned items)
 
 	void enableTakeDisp(bool b);
-	
+
 	void clearDisp(uint32 slot);
 
 	void setDispSheetId(uint32 slot, const NLMISC::CSheetId &sheet);
@@ -68,11 +66,9 @@ public:
 	uint16 getDispQuantity(uint32 slot);
 
 protected:
-
 	TEMP_INV_MODE::TInventoryMode _Mode;
 
 	CCharacter *_Char;
-
 };
 
 /**
@@ -85,7 +81,6 @@ protected:
 class CTempInvView : public CCharacterInvView
 {
 public:
-
 	void init();
 
 	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
@@ -95,7 +90,6 @@ public:
 	virtual void updateItemPrerequisit(uint32 slot) { /* TODO */ }
 
 protected:
-
 	virtual void updateClientSlot(uint32 clientSlot, const CGameItemPtr item);
 
 	std::vector<uint8> _LastInfoVersion;

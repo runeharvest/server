@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_CELL_H
 #define NL_CELL_H
 
@@ -34,25 +32,27 @@ class CCell
 {
 public:
 	/// default constructor
-	CCell() : _LastVisionUpdate(0) {}
+	CCell()
+	    : _LastVisionUpdate(0)
+	{
+	}
 
 	/// initialisation
-	void	init( sint32 cellId )
-	{ 
+	void init(sint32 cellId)
+	{
 		_LastVisionUpdate = 0;
 		_CellId = cellId;
 	}
 
 	/// initialisation
-	void	init( uint16 x, uint16 y )
+	void init(uint16 x, uint16 y)
 	{
 		nlassert(x <= 32767);
 		nlassert(y <= 32767);
 
 		_LastVisionUpdate = 0;
-		_CellId = (x<<16) + y;
+		_CellId = (x << 16) + y;
 	}
-
 
 	/// \name CCell content management
 	//@{
@@ -62,39 +62,38 @@ public:
 	 *
 	 * \param entity pointer to the entity to add
 	 */
-	void	add(CWorldEntity* entity);
+	void add(CWorldEntity *entity);
 
 	/**
 	 * Removes an entity from the cell
 	 *
 	 * \param entity pointer to the entity to remove
 	 */
-	void	remove(CWorldEntity* entity);
+	void remove(CWorldEntity *entity);
 
 	//@}
-
 
 	/**
 	 * Remove entity of cell
 	 *
 	 * \param pWorldEntity is pointer of entity's removed from cell
 	 */
-//	void	removeEntity( CWorldEntity* pWorldEntity );
+	//	void	removeEntity( CWorldEntity* pWorldEntity );
 
 	/**
 	 * Add an entity in the cell
 	 */
-//	void	addEntity(CWorldEntity* pWorldEntity);
+	//	void	addEntity(CWorldEntity* pWorldEntity);
 
 	/**
 	 * Add an object in the cell
 	 */
-//	void	addObject(CWorldEntity* pWorldEntity);
+	//	void	addObject(CWorldEntity* pWorldEntity);
 
 	/**
 	 * Add an object in the cell
 	 */
-//	void	removeObject(CWorldEntity* pWorldEntity);
+	//	void	removeObject(CWorldEntity* pWorldEntity);
 
 	/*
 	 * Update cell content
@@ -102,31 +101,28 @@ public:
 	 * \param pWorldEntity is updated entity
 	 * \param pWorldPositionManager is entity position manager in world
 	 */
-//	void updateCell( CWorldEntity* pWorldEntity );
-
-
+	//	void updateCell( CWorldEntity* pWorldEntity );
 
 	/// Get a pointer on the first entity in cell
-	CWorldEntity	*getEntitiesList() { return _EntitiesList.getHead(); }
+	CWorldEntity *getEntitiesList() { return _EntitiesList.getHead(); }
 
 	/// Get a pointer on the first object in cell
-	CWorldEntity	*getObjectsList() { return _ObjectsList.getHead(); }
+	CWorldEntity *getObjectsList() { return _ObjectsList.getHead(); }
 
 	/// Get a pointer to the first player in cell
-	CPlayerInfos	*getPlayersList() { return _PlayersList.getHead(); }
-
+	CPlayerInfos *getPlayersList() { return _PlayersList.getHead(); }
 
 	/// Gets at maximum MAX_SEEN_ENTITIES entities contained in the cell
-	CVisionEntry*	addEntities(CVisionEntry* fillPtr, CVisionEntry* endPtr, uint32 cellMask, uint32 distance, bool indoor, CWorldEntity *player)
+	CVisionEntry *addEntities(CVisionEntry *fillPtr, CVisionEntry *endPtr, uint32 cellMask, uint32 distance, bool indoor, CWorldEntity *player)
 	{
-		CWorldEntity	*ent = _EntitiesList.getHead();
+		CWorldEntity *ent = _EntitiesList.getHead();
 		while (ent != NULL && fillPtr < endPtr)
 		{
-			sint32	mask = cellMask & (sint32)(ent->WhoSeesMe);
-			if (mask && indoor && (float)(player->X()-ent->X())*(float)(player->X()-ent->X()) + (float)(player->Y()-ent->Y())*(float)(player->Y()-ent->Y()) > 15625000000)
+			sint32 mask = cellMask & (sint32)(ent->WhoSeesMe);
+			if (mask && indoor && (float)(player->X() - ent->X()) * (float)(player->X() - ent->X()) + (float)(player->Y() - ent->Y()) * (float)(player->Y() - ent->Y()) > 15625000000)
 				mask = 0;
-			
-			//if (!ent->IsInvisibleToPlayer && mask != 0)
+
+			// if (!ent->IsInvisibleToPlayer && mask != 0)
 			if (mask != 0)
 			{
 				fillPtr->Entity = ent;
@@ -139,16 +135,16 @@ public:
 		return fillPtr;
 	}
 	/// Gets at maximum MAX_SEEN_ENTITIES entities contained in the cell
-	CVisionEntry*	addObjects(CVisionEntry* fillPtr, CVisionEntry* endPtr, uint32 cellMask, uint32 distance, bool indoor, CWorldEntity *player)
+	CVisionEntry *addObjects(CVisionEntry *fillPtr, CVisionEntry *endPtr, uint32 cellMask, uint32 distance, bool indoor, CWorldEntity *player)
 	{
-		CWorldEntity	*ent = _ObjectsList.getHead();
+		CWorldEntity *ent = _ObjectsList.getHead();
 		while (ent != NULL && fillPtr < endPtr)
 		{
-			sint32	mask = cellMask & (sint32)(ent->WhoSeesMe);
-			if (mask && indoor && (float)(player->X()-ent->X())*(float)(player->X()-ent->X()) + (float)(player->Y()-ent->Y())*(float)(player->Y()-ent->Y()) > 15625000000)
+			sint32 mask = cellMask & (sint32)(ent->WhoSeesMe);
+			if (mask && indoor && (float)(player->X() - ent->X()) * (float)(player->X() - ent->X()) + (float)(player->Y() - ent->Y()) * (float)(player->Y() - ent->Y()) > 15625000000)
 				mask = 0;
 
-			//if (!ent->IsInvisibleToPlayer && mask != 0)
+			// if (!ent->IsInvisibleToPlayer && mask != 0)
 			if (mask != 0)
 			{
 				fillPtr->Entity = ent;
@@ -161,44 +157,42 @@ public:
 		return fillPtr;
 	}
 
-	void				setVisionUpdateCycle(NLMISC::TGameCycle gc) { _LastVisionUpdate = gc; }
-	NLMISC::TGameCycle	visionUpdateCycle() { return _LastVisionUpdate; }
+	void setVisionUpdateCycle(NLMISC::TGameCycle gc) { _LastVisionUpdate = gc; }
+	NLMISC::TGameCycle visionUpdateCycle() { return _LastVisionUpdate; }
 
-	inline uint16		x() const { return (uint16)(_CellId>>16); };
-	inline uint16		y() const { return (uint16)(_CellId&0xffff); };
-	inline sint32		id() const { return _CellId; }
-	inline bool			isIndoor() const { return _CellId < 0; }
+	inline uint16 x() const { return (uint16)(_CellId >> 16); };
+	inline uint16 y() const { return (uint16)(_CellId & 0xffff); };
+	inline sint32 id() const { return _CellId; }
+	inline bool isIndoor() const { return _CellId < 0; }
 
-	//static TVisionCellContainer	&getVisionCells() { return _VisionCells; }
+	// static TVisionCellContainer	&getVisionCells() { return _VisionCells; }
 
 private:
-	//friend void	CWorldEntity::removeFromCellAsEntity();
-	//friend void	CWorldEntity::removeFromCellAsObject();
+	// friend void	CWorldEntity::removeFromCellAsEntity();
+	// friend void	CWorldEntity::removeFromCellAsObject();
 	friend class CWorldPositionManager;
 
-	sint32							_CellId;
+	sint32 _CellId;
 
-	TEntityList						_EntitiesList;		// visible moving entities in cell
-	TEntityList						_ObjectsList;		// objects in cell
-	CObjectList<CPlayerInfos>		_PlayersList;		// players in cell
-//	TEntityList						_InvisiblesList;	// invisible entities in cell
+	TEntityList _EntitiesList; // visible moving entities in cell
+	TEntityList _ObjectsList; // objects in cell
+	CObjectList<CPlayerInfos> _PlayersList; // players in cell
+	//	TEntityList						_InvisiblesList;	// invisible entities in cell
 
 	/// last vision update tick for this cell
-	NLMISC::TGameCycle				_LastVisionUpdate;
+	NLMISC::TGameCycle _LastVisionUpdate;
 
 public:
 	/// Creates a new entity (new equivalent). This must be initialised later using init();
-	static CCell	*create()				{ return _CellAllocator.allocate(); }
+	static CCell *create() { return _CellAllocator.allocate(); }
 
 	/// Removes an entity (delete equivalent).
-	static void		remove(CCell *cell)		{ _CellAllocator.freeBlock(cell); }
+	static void remove(CCell *cell) { _CellAllocator.freeBlock(cell); }
 
 private:
-
 	/// Static cell allocator
-	static NLMISC::CBlockMemory<CCell>	_CellAllocator;
+	static NLMISC::CBlockMemory<CCell> _CellAllocator;
 };
-
 
 #endif // NL_CELL_H
 

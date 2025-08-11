@@ -14,24 +14,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef SESSION_BROWSER_SERVER_H
 #define SESSION_BROWSER_SERVER_H
 
 #include "nel/net/service.h"
 
-
 class CSessionBrowserServer : public NLNET::IService
 {
-	
+
 	void init();
-	
+
 	bool update();
-	
+
 	void release();
-	
 };
 
-
-#endif //SESSION_BROWSER_SERVER_H
-
+#endif // SESSION_BROWSER_SERVER_H

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef EGS_PHRASE_MANAGER_CALLBACKS_H
 #define EGS_PHRASE_MANAGER_CALLBACKS_H
 
@@ -28,7 +26,7 @@
 class CEGSExecuteMsgImp : public CEGSExecuteMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId sid);
+	virtual void callback(const std::string &name, NLNET::TServiceId sid);
 };
 
 /**
@@ -41,22 +39,22 @@ public:
 };
 
 /// register a service for event reports
-void cbRegisterService( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
+void cbRegisterService(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
 /// unregister a service for event reports
-void cbUnregisterService( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
+void cbUnregisterService(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
 /// register a service for AI event reports
-void cbRegisterServiceAI( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
+void cbRegisterServiceAI(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
 /// unregister a service for AI event reports
-void cbUnregisterServiceAI( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
+void cbUnregisterServiceAI(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
 /// receive a disengage notification for specified entity (from CMS typically)
-void cbDisengageNotification( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
+void cbDisengageNotification(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
 /// receive a Disengage command
-void cbDisengage( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
+void cbDisengage(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
 #endif // EGS_PHRASE_MANAGER_CALLBACKS_H
 

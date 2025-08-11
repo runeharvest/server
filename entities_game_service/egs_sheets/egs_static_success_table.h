@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_EGS_STATIC_SUCCESS_TABLE_H
 #define RY_EGS_STATIC_SUCCESS_TABLE_H
 
@@ -26,46 +24,43 @@
 #include "game_share/action_nature.h"
 
 // success table types
-namespace SUCCESS_TABLE_TYPE
+namespace SUCCESS_TABLE_TYPE {
+enum TSuccessTableType
 {
-	enum TSuccessTableType
-	{
-		FightPhrase = 0,
-		FightDefense,
-		FightDefenseAI,
-		ShieldUse,
-		OffensiveMagicCast,
-		CurativeMagicCast,
-		MagicResistDirect,
-		MagicResistLink,
-		Craft,
-		ForageExtract,
-		BreakCastResist,
-		
-		NB_TABLE_TYPES,
-		Unknown = NB_TABLE_TYPES,
-	};
-	
-	/// convert a type to a string
-	const std::string &toString(TSuccessTableType type);
-	
-	/// convert a string to a success table type
-	TSuccessTableType toSuccessTableType( const std::string &str);
+	FightPhrase = 0,
+	FightDefense,
+	FightDefenseAI,
+	ShieldUse,
+	OffensiveMagicCast,
+	CurativeMagicCast,
+	MagicResistDirect,
+	MagicResistLink,
+	Craft,
+	ForageExtract,
+	BreakCastResist,
 
-	/// convert action nature to success table type
-	TSuccessTableType actionNatureToTableType( ACTNATURE::TActionNature actionNature);
+	NB_TABLE_TYPES,
+	Unknown = NB_TABLE_TYPES,
 };
 
+/// convert a type to a string
+const std::string &toString(TSuccessTableType type);
 
+/// convert a string to a success table type
+TSuccessTableType toSuccessTableType(const std::string &str);
+
+/// convert action nature to success table type
+TSuccessTableType actionNatureToTableType(ACTNATURE::TActionNature actionNature);
+};
 
 // Success table for success probability computing and associated xp-gains
 struct CSuccessXpLine
 {
-	sint8	RelativeLevel;
-	uint8	SuccessProbability;
-	uint8	PartialSuccessMaxDraw;
-	float	XpGain;
-	
+	sint8 RelativeLevel;
+	uint8 SuccessProbability;
+	uint8 PartialSuccessMaxDraw;
+	float XpGain;
+
 	void serial(NLMISC::IStream &f)
 	{
 		f.serial(RelativeLevel);
@@ -76,55 +71,55 @@ struct CSuccessXpLine
 };
 
 /**
- * class for success tables 
+ * class for success tables
  * \author David Fleury
  * \author Nevrax France
  * \date 2003
  */
 class CStaticSuccessTable
 {
-public:	
+public:
 	/// Serialisation
 	virtual void serial(NLMISC::IStream &f);
-	
+
 	/// read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
-	
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+
 	// return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 9; } 
-	
+	inline static uint getVersion() { return 9; }
+
 	/// called when the sheet is removed
-	void removed() {}
+	void removed() { }
 
 	/// called to copy from another sheet (operator= + care ptrs)
 	void reloadSheet(const CStaticSuccessTable &o);
-	
-	/** 
+
+	/**
 	 * get success chances for relative level
 	 * \param relativeLevel the action relative level (actor_level - difficulty_level, the higher the easier)
 	 * \return success probabilities (0..99)
 	 */
-	inline uint8 getSuccessChance( sint32 relativeLevel ) const
+	inline uint8 getSuccessChance(sint32 relativeLevel) const
 	{
 		// clip delta level to min / max value
-		if( relativeLevel > MAX_DELTA_LVL ) relativeLevel = MAX_DELTA_LVL;
-		if( relativeLevel < MIN_DELTA_LVL ) relativeLevel = MIN_DELTA_LVL;
-		
-		return _SuccessXpTable[ MIDDLE_DELTA_LVL - relativeLevel ].SuccessProbability;
+		if (relativeLevel > MAX_DELTA_LVL) relativeLevel = MAX_DELTA_LVL;
+		if (relativeLevel < MIN_DELTA_LVL) relativeLevel = MIN_DELTA_LVL;
+
+		return _SuccessXpTable[MIDDLE_DELTA_LVL - relativeLevel].SuccessProbability;
 	}
-	
-	/** 
+
+	/**
 	 * get partial success chances for relative level
 	 * \param relativeLevel the action relative level (actor_level - difficulty_level, the higher the easier)
 	 * \return partial or full success probabilities (0..99)
 	 */
-	inline uint8 getPartialSuccessChance( sint32 relativeLevel ) const
+	inline uint8 getPartialSuccessChance(sint32 relativeLevel) const
 	{
 		// clip delta level to min / max value
-		if( relativeLevel > MAX_DELTA_LVL ) relativeLevel = MAX_DELTA_LVL;
-		if( relativeLevel < MIN_DELTA_LVL ) relativeLevel = MIN_DELTA_LVL;
-		
-		return _SuccessXpTable[ MIDDLE_DELTA_LVL - relativeLevel ].PartialSuccessMaxDraw;
+		if (relativeLevel > MAX_DELTA_LVL) relativeLevel = MAX_DELTA_LVL;
+		if (relativeLevel < MIN_DELTA_LVL) relativeLevel = MIN_DELTA_LVL;
+
+		return _SuccessXpTable[MIDDLE_DELTA_LVL - relativeLevel].PartialSuccessMaxDraw;
 	}
 
 	/**
@@ -134,20 +129,20 @@ public:
 	 * \param fadeClip if lower success value is min success factor (default = false) (used for craft)
 	 * \return success factor
 	 */
-	inline float getSuccessFactor( sint32 relativeLevel, uint8 tirage, bool fadeClip = false ) const;
+	inline float getSuccessFactor(sint32 relativeLevel, uint8 tirage, bool fadeClip = false) const;
 
 	/**
-	 * get XP Gain for given delta	
+	 * get XP Gain for given delta
 	 * \param deltaLevel the action delta level (actor_level - difficulty_level, the higher the easier)
-	 * \return the xp gain 
+	 * \return the xp gain
 	 */
 	inline float getXPGain(sint32 deltaLevel) const
 	{
 		// clip delta level to min / max value
-		if( deltaLevel > MAX_DELTA_LVL ) deltaLevel = MAX_DELTA_LVL;
-		if( deltaLevel < MIN_DELTA_LVL ) deltaLevel = MIN_DELTA_LVL;
-		
-		return _SuccessXpTable[ MIDDLE_DELTA_LVL - deltaLevel ].XpGain;
+		if (deltaLevel > MAX_DELTA_LVL) deltaLevel = MAX_DELTA_LVL;
+		if (deltaLevel < MIN_DELTA_LVL) deltaLevel = MIN_DELTA_LVL;
+
+		return _SuccessXpTable[MIDDLE_DELTA_LVL - deltaLevel].XpGain;
 	}
 
 	/// static method to init an array on succes tables, to get a table from it's type
@@ -170,21 +165,21 @@ public:
 	 * \param type the type of success table to use
 	 * \param relativeLevel the action relative level (actor_level - difficulty_level, the higher the easier)
 	 * \return success probabilities (0..99)
-	 */ 
+	 */
 	static uint8 getSuccessChance(SUCCESS_TABLE_TYPE::TSuccessTableType type, sint32 relativeLevel)
 	{
-		 const CStaticSuccessTable *table = getTableForType(type);
-		 if (table)
-		 {
-			 return table->getSuccessChance(relativeLevel);
-		 }
-		 else
-			 return 0;
+		const CStaticSuccessTable *table = getTableForType(type);
+		if (table)
+		{
+			return table->getSuccessChance(relativeLevel);
+		}
+		else
+			return 0;
 	}
 
 	/**
 	 * get success factor
-	 * \param type the type of success table to use	
+	 * \param type the type of success table to use
 	 * \param relativeLevel the action relative level (actor_level - difficulty_level, the higher the easier)
 	 * \param tirage result of the randomizer
 	 * \param fadeClip if lower success value is min success factor (default = false) (used for craft)
@@ -202,10 +197,10 @@ public:
 	}
 
 	/**
-	 * get XP Gain for given delta	
-	 * \param type the type of success table to use	
+	 * get XP Gain for given delta
+	 * \param type the type of success table to use
 	 * \param deltaLevel the action delta level (actor_level - difficulty_level, the higher the easier)
-	 * \return the xp gain 
+	 * \return the xp gain
 	 */
 	static float getXPGain(SUCCESS_TABLE_TYPE::TSuccessTableType type, sint32 deltaLevel)
 	{
@@ -223,87 +218,63 @@ public:
 
 public:
 	/// table lines
-	std::vector< CSuccessXpLine >	_SuccessXpTable;
+	std::vector<CSuccessXpLine> _SuccessXpTable;
 
 	/// max success value (>=1)
-	float	_MaxSuccessFactor;
+	float _MaxSuccessFactor;
 	/// max partial success value (<=_MaxSuccessFactor)
-	float	_MaxPartialSuccessFactor;
+	float _MaxPartialSuccessFactor;
 	/// min fade success value (<=_MaxPartialSuccessFactor)
-	float	_MinPartialSuccessFactor;
+	float _MinPartialSuccessFactor;
 	/// max normalized 'tirage' value before success factor starts to fade (if tirage < _FullSuccessRoll then factor = _MaxSuccess)
-	uint8	_FullSuccessRoll;
+	uint8 _FullSuccessRoll;
 	/// max normalized 'tirage' value, above this value successFactor = 0 (if tirage = _FadeRoll then factor = _FadeSuccess)
-	uint8	_MinSuccessRoll;
+	uint8 _MinSuccessRoll;
 
 	/// bool, set to true if tables array is init
-	static bool	_Init;
+	static bool _Init;
 
 	/// average dodge factor
 	static float _AverageDodgeFactor;
 
 	// the tables array
-	static const CStaticSuccessTable * _Tables[SUCCESS_TABLE_TYPE::NB_TABLE_TYPES];
+	static const CStaticSuccessTable *_Tables[SUCCESS_TABLE_TYPE::NB_TABLE_TYPES];
 };
 
-
-
 //--------------------------------------------------------------
-//					getSuccessFactor()  
+//					getSuccessFactor()
 // Return SF (Success Factor) > 1 if critical success
 // Return SF = 1 if success
 // Return  1 < SF < 0 if partial success
 // Return SF = 0 if Failure
 //--------------------------------------------------------------
-float CStaticSuccessTable::getSuccessFactor( sint32 relativeLevel, uint8 tirage, bool fadeClip ) const
-{	
+float CStaticSuccessTable::getSuccessFactor(sint32 relativeLevel, uint8 tirage, bool fadeClip) const
+{
 	// clip delta level to min / max value
-	if( relativeLevel > MAX_DELTA_LVL ) relativeLevel = MAX_DELTA_LVL;
-	if( relativeLevel < MIN_DELTA_LVL ) relativeLevel = MIN_DELTA_LVL;
-	
-	uint8 chances = _SuccessXpTable[ MIDDLE_DELTA_LVL - relativeLevel ].SuccessProbability;
-	uint8 maxPartialDraw = _SuccessXpTable[ MIDDLE_DELTA_LVL - relativeLevel ].PartialSuccessMaxDraw;
+	if (relativeLevel > MAX_DELTA_LVL) relativeLevel = MAX_DELTA_LVL;
+	if (relativeLevel < MIN_DELTA_LVL) relativeLevel = MIN_DELTA_LVL;
 
-	chances = std::min( (uint8)100, chances );
-	tirage = std::min( (uint8)100, tirage );
-	
-	if( fadeClip )
+	uint8 chances = _SuccessXpTable[MIDDLE_DELTA_LVL - relativeLevel].SuccessProbability;
+	uint8 maxPartialDraw = _SuccessXpTable[MIDDLE_DELTA_LVL - relativeLevel].PartialSuccessMaxDraw;
+
+	chances = std::min((uint8)100, chances);
+	tirage = std::min((uint8)100, tirage);
+
+	if (fadeClip)
 	{
-		tirage = std::min( tirage, (uint8)maxPartialDraw );
+		tirage = std::min(tirage, (uint8)maxPartialDraw);
 	}
 
-	if( tirage > maxPartialDraw ) 
+	if (tirage > maxPartialDraw)
 		return 0.0f;
-	
-	if( tirage <= chances) 
+
+	if (tirage <= chances)
 		return _MaxSuccessFactor;
 
 	// we cannot have scaledFadeRoll == scaledFullSuccess at this point of code (we would have exit just above in such a case, so no check needed)
-	return _MaxPartialSuccessFactor - ( _MaxPartialSuccessFactor - _MinPartialSuccessFactor ) * (tirage - chances) / (maxPartialDraw - chances);
+	return _MaxPartialSuccessFactor - (_MaxPartialSuccessFactor - _MinPartialSuccessFactor) * (tirage - chances) / (maxPartialDraw - chances);
 }
-
 
 #endif // RY_EGS_STATIC_SUCCESS_TABLE_H
 
 /* End of egs_static_success_table.h */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

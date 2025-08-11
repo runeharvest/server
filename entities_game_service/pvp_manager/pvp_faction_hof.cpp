@@ -25,7 +25,7 @@
 using namespace std;
 using namespace NLMISC;
 
-CPVPFactionHOF * CPVPFactionHOF::_Instance = NULL;
+CPVPFactionHOF *CPVPFactionHOF::_Instance = NULL;
 sint32 CPVPFactionHOF::lastDayOfMonthHOFDone = 0;
 
 const std::string CPVPFactionHOF::_dailyString("daily");
@@ -45,9 +45,9 @@ NL_INSTANCE_COUNTER_IMPL(CPVPFactionHOF);
 //----------------------------------------------------------------------------
 void CPVPFactionHOF::init()
 {
-	BOMB_IF( _Instance != 0, "CPVPFactionHOF already allocated", return );
+	BOMB_IF(_Instance != 0, "CPVPFactionHOF already allocated", return);
 	_Instance = new CPVPFactionHOF();
-	BOMB_IF( _Instance == 0, "Can't allocate CPVPFactionHOF singleton", nlstop );
+	BOMB_IF(_Instance == 0, "Can't allocate CPVPFactionHOF singleton", nlstop);
 
 	// create HOF database, if already exist this do nothing
 	// add static path for hall of fame database (faction part of path must be faction in war dependent, TODO later)
@@ -56,13 +56,13 @@ void CPVPFactionHOF::init()
 	_Instance->createMonthlyHOFDatabase();
 	_Instance->createGlobalHOFDatabase();
 	CStatDB::getInstance()->createValue("pvp_faction.LastDayOfMonthHOFDone", 0);
-	CStatDB::getInstance()->valueGet( "pvp_faction.LastDayOfMonthHOFDone", lastDayOfMonthHOFDone );
+	CStatDB::getInstance()->valueGet("pvp_faction.LastDayOfMonthHOFDone", lastDayOfMonthHOFDone);
 }
 
 //----------------------------------------------------------------------------
 void CPVPFactionHOF::release()
 {
-	if( _Instance != 0 )
+	if (_Instance != 0)
 	{
 		delete _Instance;
 		_Instance = 0;
@@ -70,9 +70,9 @@ void CPVPFactionHOF::release()
 }
 
 //----------------------------------------------------------------------------
-CPVPFactionHOF * CPVPFactionHOF::getInstance()
+CPVPFactionHOF *CPVPFactionHOF::getInstance()
 {
-	if(CPVPFactionHOF::_Instance == 0)
+	if (CPVPFactionHOF::_Instance == 0)
 	{
 		CPVPFactionHOF::init();
 	}
@@ -82,28 +82,28 @@ CPVPFactionHOF * CPVPFactionHOF::getInstance()
 //----------------------------------------------------------------------------
 void CPVPFactionHOF::tickUpdate()
 {
-	time_t currentTime = time( NULL );
-	struct tm *localTime = localtime( &currentTime );
+	time_t currentTime = time(NULL);
+	struct tm *localTime = localtime(&currentTime);
 
-	if( localTime->tm_mday != lastDayOfMonthHOFDone )
+	if (localTime->tm_mday != lastDayOfMonthHOFDone)
 	{
 		lastDayOfMonthHOFDone = localTime->tm_mday;
-		CStatDB::getInstance()->valueSet( "pvp_faction.LastDayOfMonthHOFDone", lastDayOfMonthHOFDone );
+		CStatDB::getInstance()->valueSet("pvp_faction.LastDayOfMonthHOFDone", lastDayOfMonthHOFDone);
 
 		clearDailyHOFDatabase();
 
-		if( localTime->tm_wday == 0 )
+		if (localTime->tm_wday == 0)
 			clearWeeklyHOFDatabase();
 
-		if( localTime->tm_mday == 1)
+		if (localTime->tm_mday == 1)
 			clearMonthlyHOFDatabase();
 	}
 }
 
 //----------------------------------------------------------------------------
-const std::string& CPVPFactionHOF::getPeriodStatString( TPeriodStat period ) const
+const std::string &CPVPFactionHOF::getPeriodStatString(TPeriodStat period) const
 {
-	switch( period )
+	switch (period)
 	{
 	case daily:
 		return _dailyString;
@@ -121,9 +121,9 @@ const std::string& CPVPFactionHOF::getPeriodStatString( TPeriodStat period ) con
 }
 
 //----------------------------------------------------------------------------
-const std::string& CPVPFactionHOF::getStatString( THOFStat stat ) const
+const std::string &CPVPFactionHOF::getStatString(THOFStat stat) const
 {
-	switch( stat )
+	switch (stat)
 	{
 	case faction_point:
 		return _FactionPointString;
@@ -145,49 +145,49 @@ const std::string& CPVPFactionHOF::getStatString( THOFStat stat ) const
 }
 
 //----------------------------------------------------------------------------
-void CPVPFactionHOF::writeStatInHOFDatabase( CCharacter * pc, PVP_CLAN::TPVPClan clan, CPVPFactionHOF::THOFStat stat, sint32 value ) const
+void CPVPFactionHOF::writeStatInHOFDatabase(CCharacter *pc, PVP_CLAN::TPVPClan clan, CPVPFactionHOF::THOFStat stat, sint32 value) const
 {
 	string sdbPvPPath = PVP_CLAN::toLowerString(clan) + "." + getStatString(stat);
 	string sdbPvPPathHeader = "pvp_faction.daily.";
-	setHallOfFame(sdbPvPPathHeader+sdbPvPPath, pc, value, stat);
-	if( stat == CPVPFactionHOF::kill || stat == CPVPFactionHOF::lost )
+	setHallOfFame(sdbPvPPathHeader + sdbPvPPath, pc, value, stat);
+	if (stat == CPVPFactionHOF::kill || stat == CPVPFactionHOF::lost)
 	{
-		setHallOfFameKillDeathRatio( sdbPvPPathHeader + PVP_CLAN::toLowerString(clan), pc );
+		setHallOfFameKillDeathRatio(sdbPvPPathHeader + PVP_CLAN::toLowerString(clan), pc);
 	}
 
 	sdbPvPPathHeader = "pvp_faction.weekly.";
-	setHallOfFame(sdbPvPPathHeader+sdbPvPPath, pc, value, stat);
-	if( stat == CPVPFactionHOF::kill || stat == CPVPFactionHOF::lost )
+	setHallOfFame(sdbPvPPathHeader + sdbPvPPath, pc, value, stat);
+	if (stat == CPVPFactionHOF::kill || stat == CPVPFactionHOF::lost)
 	{
-		setHallOfFameKillDeathRatio( sdbPvPPathHeader + PVP_CLAN::toLowerString(clan), pc );
+		setHallOfFameKillDeathRatio(sdbPvPPathHeader + PVP_CLAN::toLowerString(clan), pc);
 	}
 
 	sdbPvPPathHeader = "pvp_faction.monthly.";
-	setHallOfFame(sdbPvPPathHeader+sdbPvPPath, pc, value, stat);
-	if( stat == CPVPFactionHOF::kill || stat == CPVPFactionHOF::lost )
+	setHallOfFame(sdbPvPPathHeader + sdbPvPPath, pc, value, stat);
+	if (stat == CPVPFactionHOF::kill || stat == CPVPFactionHOF::lost)
 	{
-		setHallOfFameKillDeathRatio( sdbPvPPathHeader + PVP_CLAN::toLowerString(clan), pc );
+		setHallOfFameKillDeathRatio(sdbPvPPathHeader + PVP_CLAN::toLowerString(clan), pc);
 	}
 
 	sdbPvPPathHeader = "pvp_faction.global.";
-	setHallOfFame(sdbPvPPathHeader+sdbPvPPath, pc, value, stat);
-	if( stat == CPVPFactionHOF::kill || stat == CPVPFactionHOF::lost )
+	setHallOfFame(sdbPvPPathHeader + sdbPvPPath, pc, value, stat);
+	if (stat == CPVPFactionHOF::kill || stat == CPVPFactionHOF::lost)
 	{
-		setHallOfFameKillDeathRatio( sdbPvPPathHeader + PVP_CLAN::toLowerString(clan), pc );
+		setHallOfFameKillDeathRatio(sdbPvPPathHeader + PVP_CLAN::toLowerString(clan), pc);
 	}
 }
 
 //----------------------------------------------------------------------------
-void CPVPFactionHOF::setHallOfFame( string sdbPvPPath, CCharacter * pc, sint32 value, CPVPFactionHOF::THOFStat stat ) const
+void CPVPFactionHOF::setHallOfFame(string sdbPvPPath, CCharacter *pc, sint32 value, CPVPFactionHOF::THOFStat stat) const
 {
-	switch( stat )
+	switch (stat)
 	{
 	case CPVPFactionHOF::builded_spire:
 	case CPVPFactionHOF::destroyed_spire:
-		CStatDB::getInstance()->valueAdd( sdbPvPPath, value );
+		CStatDB::getInstance()->valueAdd(sdbPvPPath, value);
 		break;
 	default:
-		CStatDB::getInstance()->tablePlayerAdd( sdbPvPPath, pc->getId(), value );
+		CStatDB::getInstance()->tablePlayerAdd(sdbPvPPath, pc->getId(), value);
 		if (pc->getGuildId() != 0)
 		{
 			CStatDB::getInstance()->tableGuildAdd(sdbPvPPath, pc->getGuildId(), value);
@@ -197,24 +197,24 @@ void CPVPFactionHOF::setHallOfFame( string sdbPvPPath, CCharacter * pc, sint32 v
 }
 
 //----------------------------------------------------------------------------
-void CPVPFactionHOF::setHallOfFameKillDeathRatio( string sdbPvPPath, CCharacter * pc ) const
+void CPVPFactionHOF::setHallOfFameKillDeathRatio(string sdbPvPPath, CCharacter *pc) const
 {
 	sint32 killValue;
 	sint32 lostValue;
-	if (!CStatDB::getInstance()->tablePlayerGet( sdbPvPPath + ".kill", pc->getId(), killValue ))
+	if (!CStatDB::getInstance()->tablePlayerGet(sdbPvPPath + ".kill", pc->getId(), killValue))
 		killValue = 0;
-	if (!CStatDB::getInstance()->tablePlayerGet( sdbPvPPath + ".lost", pc->getId(), lostValue ))
+	if (!CStatDB::getInstance()->tablePlayerGet(sdbPvPPath + ".lost", pc->getId(), lostValue))
 		lostValue = 0;
 
-	CStatDB::getInstance()->tablePlayerSet( sdbPvPPath + ".kill_lost", pc->getId(), killValue * 100 / max(lostValue,sint32(1)) );
+	CStatDB::getInstance()->tablePlayerSet(sdbPvPPath + ".kill_lost", pc->getId(), killValue * 100 / max(lostValue, sint32(1)));
 	if (pc->getGuildId() != 0)
 	{
-		if (!CStatDB::getInstance()->tableGuildGet( sdbPvPPath + ".kill", pc->getGuildId(), killValue ))
+		if (!CStatDB::getInstance()->tableGuildGet(sdbPvPPath + ".kill", pc->getGuildId(), killValue))
 			killValue = 0;
-		if (!CStatDB::getInstance()->tableGuildGet( sdbPvPPath + ".lost", pc->getGuildId(), lostValue ))
+		if (!CStatDB::getInstance()->tableGuildGet(sdbPvPPath + ".lost", pc->getGuildId(), lostValue))
 			lostValue = 0;
 
-		CStatDB::getInstance()->tableGuildSet( sdbPvPPath + ".kill_lost", pc->getGuildId(), killValue * 100 / max(lostValue,sint32(1)) );
+		CStatDB::getInstance()->tableGuildSet(sdbPvPPath + ".kill_lost", pc->getGuildId(), killValue * 100 / max(lostValue, sint32(1)));
 	}
 }
 

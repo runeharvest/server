@@ -33,68 +33,68 @@ class CProfileParameters
 public:
 	struct TProfileParameter
 	{
-		std::string	Name;
-		std::string	ValueStr;
-		float		ValueFloat;
-		
+		std::string Name;
+		std::string ValueStr;
+		float ValueFloat;
+
 		TProfileParameter(std::string name, std::string valueStr, float valueFloat)
-		: Name(name)
-		, ValueStr(valueStr)
-		, ValueFloat(valueFloat)
+		    : Name(name)
+		    , ValueStr(valueStr)
+		    , ValueFloat(valueFloat)
 		{
 		}
 	};
-	
+
 	typedef std::vector<TProfileParameter> TProfileParameters;
-	
+
 private:
 	struct TFindParameter
 #ifndef NL_CPP17
-	: public std::unary_function<TProfileParameter, bool>
+	    : public std::unary_function<TProfileParameter, bool>
 #endif
 	{
 		std::string _Value;
-		TFindParameter(std::string const& value)
-		: _Value(value)
+		TFindParameter(std::string const &value)
+		    : _Value(value)
 		{
 		}
-		bool operator ()(TProfileParameter const& param) const
+		bool operator()(TProfileParameter const &param) const
 		{
-			return param.Name==_Value;
+			return param.Name == _Value;
 		}
 	};
-	
+
 public:
-	void setProfileParameters(std::vector<std::string> const& params);
-	
-	void setProfileParameters(TProfileParameters const& parameters) { _profileParameters = parameters; }
-	
-	TProfileParameters const& profileParameters() const { return _profileParameters; }
-	
-	/** Ask for a profile parameter. 
+	void setProfileParameters(std::vector<std::string> const &params);
+
+	void setProfileParameters(TProfileParameters const &parameters) { _profileParameters = parameters; }
+
+	TProfileParameters const &profileParameters() const { return _profileParameters; }
+
+	/** Ask for a profile parameter.
 	 *	Return true if the parameter is found and fill 'value' with parameter value.
 	 */
-	bool getProfileParameter(std::string const& paramName, std::string& value) const;
-	
-	/** Ask for a profile parameter. 
+	bool getProfileParameter(std::string const &paramName, std::string &value) const;
+
+	/** Ask for a profile parameter.
 	 *	Return true if the parameter is found and fill 'value' with parameter value.
 	 */
-	bool getProfileParameter(std::string const& paramName, float& value) const;
-	
-	/** Ask for a profile parameter. 
+	bool getProfileParameter(std::string const &paramName, float &value) const;
+
+	/** Ask for a profile parameter.
 	 *	Return true if the parameter is found.
 	 */
-	bool checkProfileParameter(std::string const& paramName) const;
-	
+	bool checkProfileParameter(std::string const &paramName) const;
+
 	void addProfileParameter(std::string name, std::string valueStr, float valueFloat);
-	
+
 	void removeProfileParameter(std::string name);
-	
+
 	void mergeProfileParameter(const TProfileParameter &parameter);
-	
+
 	void mergeProfileParameters(const TProfileParameters &parameters);
-	
-	void parseParameters(std::vector<std::string> const& params, TProfileParameters& parsed);
+
+	void parseParameters(std::vector<std::string> const &params, TProfileParameters &parsed);
 	TProfileParameters _profileParameters;
 };
 
@@ -103,24 +103,25 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 class CProfileInState
-: public CProfileParameters
+    : public CProfileParameters
 #ifdef NL_DEBUG
-, public NLMISC::IDbgPtrData
+    ,
+      public NLMISC::IDbgPtrData
 #endif
 {
 public:
 #ifdef NL_DEBUG
 	CProfileInState()
 	{
-		_MoveProfile.setData( this );
-		_ActivityProfile.setData( this );
+		_MoveProfile.setData(this);
+		_ActivityProfile.setData(this);
 	}
 #endif
-	void setMoveProfile(IAIProfileFactory* profile) { _MoveProfile = profile; }
-	IAIProfileFactory* moveProfile() const { return _MoveProfile; }
-	void setActivityProfile(IAIProfileFactory* profile) { _ActivityProfile = profile; }
-	IAIProfileFactory* activityProfile() const { return _ActivityProfile; }
-	
+	void setMoveProfile(IAIProfileFactory *profile) { _MoveProfile = profile; }
+	IAIProfileFactory *moveProfile() const { return _MoveProfile; }
+	void setActivityProfile(IAIProfileFactory *profile) { _ActivityProfile = profile; }
+	IAIProfileFactory *activityProfile() const { return _ActivityProfile; }
+
 private:
 	NLMISC::CDbgPtr<IAIProfileFactory> _MoveProfile;
 	NLMISC::CDbgPtr<IAIProfileFactory> _ActivityProfile;
@@ -134,14 +135,12 @@ private:
 // CProfileParameters                                                       //
 //////////////////////////////////////////////////////////////////////////////
 
-inline
-void CProfileParameters::setProfileParameters(std::vector<std::string> const& params)
+inline void CProfileParameters::setProfileParameters(std::vector<std::string> const &params)
 {
 	parseParameters(params, _profileParameters);
 }
 
-inline
-bool CProfileParameters::getProfileParameter(std::string const& paramName, std::string& value) const
+inline bool CProfileParameters::getProfileParameter(std::string const &paramName, std::string &value) const
 {
 	TProfileParameters::const_iterator it(std::find_if(_profileParameters.begin(), _profileParameters.end(), TFindParameter(paramName)));
 	if (it != _profileParameters.end())
@@ -153,39 +152,34 @@ bool CProfileParameters::getProfileParameter(std::string const& paramName, std::
 		return false;
 }
 
-inline
-bool CProfileParameters::getProfileParameter(std::string const& paramName, float& value) const
+inline bool CProfileParameters::getProfileParameter(std::string const &paramName, float &value) const
 {
 	TProfileParameters::const_iterator it(std::find_if(_profileParameters.begin(), _profileParameters.end(), TFindParameter(paramName)));
 	if (it == _profileParameters.end())
-		return	false;
-	
+		return false;
+
 	value = it->ValueFloat;
 	return true;
 }
 
-inline
-bool CProfileParameters::checkProfileParameter(std::string const& paramName) const
+inline bool CProfileParameters::checkProfileParameter(std::string const &paramName) const
 {
 	return std::find_if(_profileParameters.begin(), _profileParameters.end(), TFindParameter(paramName)) != _profileParameters.end();
 }
 
-inline
-void CProfileParameters::addProfileParameter(std::string name, std::string valueStr, float valueFloat)
+inline void CProfileParameters::addProfileParameter(std::string name, std::string valueStr, float valueFloat)
 {
 	mergeProfileParameter(TProfileParameter(name, valueStr, valueFloat));
 }
 
-inline
-void CProfileParameters::removeProfileParameter(std::string name)
+inline void CProfileParameters::removeProfileParameter(std::string name)
 {
 	TProfileParameters::iterator it(std::find_if(_profileParameters.begin(), _profileParameters.end(), TFindParameter(name)));
 	if (it != _profileParameters.end())
 		_profileParameters.erase(it);
 }
 
-inline
-void CProfileParameters::mergeProfileParameter(const TProfileParameter &parameter)
+inline void CProfileParameters::mergeProfileParameter(const TProfileParameter &parameter)
 {
 	// remove duplicate
 	TProfileParameters::iterator it = std::find_if(_profileParameters.begin(), _profileParameters.end(), TFindParameter(parameter.Name));
@@ -195,10 +189,9 @@ void CProfileParameters::mergeProfileParameter(const TProfileParameter &paramete
 	_profileParameters.push_back(parameter);
 }
 
-inline
-void CProfileParameters::mergeProfileParameters(const TProfileParameters &parameters)
+inline void CProfileParameters::mergeProfileParameters(const TProfileParameters &parameters)
 {
-	for (uint i=0; i<parameters.size(); ++i)
+	for (uint i = 0; i < parameters.size(); ++i)
 	{
 		// remove duplicate
 		_profileParameters.erase(std::remove_if(_profileParameters.begin(), _profileParameters.end(), TFindParameter(parameters[i].Name)), _profileParameters.end());
@@ -207,10 +200,9 @@ void CProfileParameters::mergeProfileParameters(const TProfileParameters &parame
 	_profileParameters.insert(_profileParameters.end(), parameters.begin(), parameters.end());
 }
 
-inline
-void CProfileParameters::parseParameters(std::vector<std::string> const& params, TProfileParameters& parsed)
+inline void CProfileParameters::parseParameters(std::vector<std::string> const &params, TProfileParameters &parsed)
 {
-	for (uint i=0; i<params.size(); ++i)
+	for (uint i = 0; i < params.size(); ++i)
 	{
 		std::string key, tail;
 		if (AI_SHARE::stringToKeywordAndTail(params[i], key, tail))
@@ -218,7 +210,7 @@ void CProfileParameters::parseParameters(std::vector<std::string> const& params,
 			parsed.push_back(TProfileParameter(key, tail, float(atof(tail.c_str()))));
 			continue;
 		}
-		
+
 		if (AI_SHARE::stringToWordAndTail(params[i], key, tail))
 		{
 			parsed.push_back(TProfileParameter(key, "", 0.0f));

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_TOXIC_CLOUD_H
 #define NL_TOXIC_CLOUD_H
 
@@ -34,14 +32,14 @@
 class CToxicCloud : public CEnvironmentalEffect
 {
 	NL_INSTANCE_COUNTER_DECL(CToxicCloud);
-public:
 
-	CToxicCloud() {}
+public:
+	CToxicCloud() { }
 
 	/// Init
-	inline void		init( const NLMISC::CVector& pos, float radius, sint32 dmgPerHit, NLMISC::TGameCycle updateFrequency, NLMISC::TGameCycle lifetime=ToxicCloudDefaultLifetime) 
-	{ 
-		CEnvironmentalEffect::init(pos, radius,lifetime);
+	inline void init(const NLMISC::CVector &pos, float radius, sint32 dmgPerHit, NLMISC::TGameCycle updateFrequency, NLMISC::TGameCycle lifetime = ToxicCloudDefaultLifetime)
+	{
+		CEnvironmentalEffect::init(pos, radius, lifetime);
 		_DmgPerHit = dmgPerHit;
 		_UpdateFrequency = updateFrequency;
 	}
@@ -50,43 +48,42 @@ public:
 	 * Spawn the toxic cloud as an entity in mirror. Return false in case of failure.
 	 * \param sheet sheet id of the effect (for visual FX)
 	 */
-	virtual bool		spawn( const NLMISC::CSheetId &sheet );
+	virtual bool spawn(const NLMISC::CSheetId &sheet);
 
 	/// Tick update. Return false if the source's life is ended.
-	virtual bool		update();
+	virtual bool update();
 
-	static NLMISC::TGameCycle	ToxicCloudDefaultLifetime;
+	static NLMISC::TGameCycle ToxicCloudDefaultLifetime;
 
 private:
 	/// test target validity, returns true if target is valid
 	inline bool isTargetValid(CEntityBase *entity)
-	{	
+	{
 #ifdef NL_DEBUG
 		nlassert(entity);
 #endif
 		uint8 entityType = entity->getId().getType();
-		switch(entityType) 
+		switch (entityType)
 		{
 		case RYZOMID::player:
 			return true;
 
 		case RYZOMID::creature:
-			if (entity->getRace() == EGSPD::CPeople::MektoubMount ||  entity->getRace() == EGSPD::CPeople::MektoubPacker)
+			if (entity->getRace() == EGSPD::CPeople::MektoubMount || entity->getRace() == EGSPD::CPeople::MektoubPacker)
 				return true;
 			return false;
-		
+
 		default:
 			return false;
 		}
 	}
 
 	/// Dmg per hit
-	sint32				_DmgPerHit;
+	sint32 _DmgPerHit;
 
 	/// update frequency
-	NLMISC::TGameCycle	_UpdateFrequency;
+	NLMISC::TGameCycle _UpdateFrequency;
 };
-
 
 #endif // NL_TOXIC_CLOUD_H
 

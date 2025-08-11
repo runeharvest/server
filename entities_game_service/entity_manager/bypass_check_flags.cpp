@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
-
 
 /////////////
 // INCLUDE //
@@ -27,37 +24,33 @@
 
 CBypassCheckFlags CBypassCheckFlags::NoFlags;
 
+namespace CHECK_FLAG_TYPE {
+NL_BEGIN_STRING_CONVERSION_TABLE(TCheckFlagType)
+NL_STRING_CONVERSION_TABLE_ENTRY(WhileSitting)
+NL_STRING_CONVERSION_TABLE_ENTRY(InWater)
+NL_STRING_CONVERSION_TABLE_ENTRY(OnMount)
+NL_STRING_CONVERSION_TABLE_ENTRY(Fear)
+NL_STRING_CONVERSION_TABLE_ENTRY(Sleep)
+NL_STRING_CONVERSION_TABLE_ENTRY(Invulnerability)
+NL_STRING_CONVERSION_TABLE_ENTRY(Stun)
+NL_END_STRING_CONVERSION_TABLE(TCheckFlagType, Conversion, Unknown)
 
-namespace CHECK_FLAG_TYPE
+const std::string &toString(TCheckFlagType type)
 {
-	NL_BEGIN_STRING_CONVERSION_TABLE (TCheckFlagType)
-		NL_STRING_CONVERSION_TABLE_ENTRY (WhileSitting)
-		NL_STRING_CONVERSION_TABLE_ENTRY (InWater)
-		NL_STRING_CONVERSION_TABLE_ENTRY (OnMount)
-		NL_STRING_CONVERSION_TABLE_ENTRY (Fear)
-		NL_STRING_CONVERSION_TABLE_ENTRY (Sleep)
-		NL_STRING_CONVERSION_TABLE_ENTRY (Invulnerability)
-		NL_STRING_CONVERSION_TABLE_ENTRY (Stun)
-	NL_END_STRING_CONVERSION_TABLE(TCheckFlagType, Conversion, Unknown)
-
-	const std::string& toString(TCheckFlagType type)
-	{
-		return Conversion.toString(type);
-	}
-
-	TCheckFlagType fromString(const std::string &str)
-	{
-		return Conversion.fromString(str);
-	}
+	return Conversion.toString(type);
 }
 
-
+TCheckFlagType fromString(const std::string &str)
+{
+	return Conversion.fromString(str);
+}
+}
 
 void CBypassCheckFlags::setFlag(CHECK_FLAG_TYPE::TCheckFlagType type, bool on)
 {
-	const uint16 val = (on?1:0);
+	const uint16 val = (on ? 1 : 0);
 
-	switch(type)
+	switch (type)
 	{
 	case CHECK_FLAG_TYPE::WhileSitting:
 		Flags.WhileSitting = val;

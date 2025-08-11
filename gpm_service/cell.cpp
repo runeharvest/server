@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "cell.h"
 
@@ -23,23 +21,19 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLPACS;
 
-
 /****************************************************************\
  ****************************************************************
-							CCell
+                            CCell
  ****************************************************************
 \****************************************************************/
 
 // Static cell allocator
-CBlockMemory<CCell>			CCell::_CellAllocator;
-
-
-
+CBlockMemory<CCell> CCell::_CellAllocator;
 
 /*
  * Adds an entity to the cell
  */
-void	CCell::add(CWorldEntity* entity)
+void CCell::add(CWorldEntity *entity)
 {
 	// check entity is not null
 	nlassert(entity != NULL);
@@ -69,12 +63,10 @@ void	CCell::add(CWorldEntity* entity)
 	entity->Cell = _CellId;
 }
 
-
-
 /*
  * Removes an entity from the cell
  */
-void	CCell::remove(CWorldEntity* entity)
+void CCell::remove(CWorldEntity *entity)
 {
 	// check entity is not null
 	nlassert(entity != NULL);
@@ -99,118 +91,111 @@ void	CCell::remove(CWorldEntity* entity)
 
 	// reset CellPtr and Cell id
 	entity->CellPtr = NULL;
-	//entity->Cell = 0;		// not set at this time, perhaps user somewhere else (CellId 0 might crash!)
+	// entity->Cell = 0;		// not set at this time, perhaps user somewhere else (CellId 0 might crash!)
 }
 
-
-
-
-
-
 /****************************************************************\
-						updateCell()
+                        updateCell()
 \****************************************************************/
 /*
 void CCell::updateCell( CWorldEntity* pWorldEntity )
 {
-	// updateCell should not be called for objects
-	nlassert(pWorldEntity != NULL && !pWorldEntity->IsStaticObject);
+    // updateCell should not be called for objects
+    nlassert(pWorldEntity != NULL && !pWorldEntity->IsStaticObject);
 
-	// if entity didn't changed cell, no update
-	if (pWorldEntity->CellPtr == this)
-		return;
+    // if entity didn't changed cell, no update
+    if (pWorldEntity->CellPtr == this)
+        return;
 
-	// if previously was in a cell, remove it
-	if( pWorldEntity->CellPtr != NULL )
-		pWorldEntity->CellPtr->removeEntity( pWorldEntity );
+    // if previously was in a cell, remove it
+    if( pWorldEntity->CellPtr != NULL )
+        pWorldEntity->CellPtr->removeEntity( pWorldEntity );
 
-	addEntity(pWorldEntity);
+    addEntity(pWorldEntity);
 }
 */
 
-
-
 /****************************************************************\
-						addEntity()
+                        addEntity()
 \****************************************************************/
 /*
 void CCell::addEntity( CWorldEntity* pWorldEntity )
 {
-	nlassert(pWorldEntity != NULL && pWorldEntity->CellPtr == NULL);
+    nlassert(pWorldEntity != NULL && pWorldEntity->CellPtr == NULL);
 
-	// if entity has vision, update vision stats of the cell
-	if (pWorldEntity->HasVision)
-	{
-		nlassert(pWorldEntity->PlayerInfos != NULL);
+    // if entity has vision, update vision stats of the cell
+    if (pWorldEntity->HasVision)
+    {
+        nlassert(pWorldEntity->PlayerInfos != NULL);
 
-		// add player to players list
-		_PlayersList.insertAtHead(pWorldEntity->PlayerInfos);
-	}
+        // add player to players list
+        _PlayersList.insertAtHead(pWorldEntity->PlayerInfos);
+    }
 
-	_EntitiesList.insertAtHead(pWorldEntity);
+    _EntitiesList.insertAtHead(pWorldEntity);
 
 //	if (pWorldEntity->IsInvisible)
 //		_InvisiblesList.insertAtHead(pWorldEntity);
 //	else
 //		_EntitiesList.insertAtHead(pWorldEntity);
 
-	pWorldEntity->CellPtr = this;
-	pWorldEntity->Cell = _CellId;
-	//CWorldPositionManager::cellUpdated( this );
+    pWorldEntity->CellPtr = this;
+    pWorldEntity->Cell = _CellId;
+    //CWorldPositionManager::cellUpdated( this );
 }
 */
 
 /****************************************************************\
-						addObject()
+                        addObject()
 \****************************************************************/
 /*
 void CCell::addObject( CWorldEntity* pWorldEntity )
 {
-	nlassert(pWorldEntity->CellPtr == NULL);
+    nlassert(pWorldEntity->CellPtr == NULL);
 
-	_ObjectsList.insertAtHead(pWorldEntity);
+    _ObjectsList.insertAtHead(pWorldEntity);
 
-	pWorldEntity->CellPtr = this;
-	pWorldEntity->Cell = _CellId;
-	//CWorldPositionManager::cellUpdated( this );
+    pWorldEntity->CellPtr = this;
+    pWorldEntity->Cell = _CellId;
+    //CWorldPositionManager::cellUpdated( this );
 }
 */
 
 /****************************************************************\
-						removeEntity()
+                        removeEntity()
 \****************************************************************/
 /*
 void CCell::removeEntity( CWorldEntity* pWorldEntity )
 {
-	nlassert(pWorldEntity != NULL && pWorldEntity->CellPtr == this);
+    nlassert(pWorldEntity != NULL && pWorldEntity->CellPtr == this);
 
-	// if entity has vision
-	if (pWorldEntity->HasVision)
-	{
-		nlassert(pWorldEntity->PlayerInfos != NULL);
+    // if entity has vision
+    if (pWorldEntity->HasVision)
+    {
+        nlassert(pWorldEntity->PlayerInfos != NULL);
 
-		// removes player from players list
-		_PlayersList.remove(pWorldEntity->PlayerInfos);
-	}
+        // removes player from players list
+        _PlayersList.remove(pWorldEntity->PlayerInfos);
+    }
 
-	// finds the entity in entities list, and remove it
-	pWorldEntity->removeFromCellAsEntity();
+    // finds the entity in entities list, and remove it
+    pWorldEntity->removeFromCellAsEntity();
 
-	//CWorldPositionManager::cellUpdated( this );
+    //CWorldPositionManager::cellUpdated( this );
 }
 */
 
 /****************************************************************\
-						removeObject()
+                        removeObject()
 \****************************************************************/
 /*
 void CCell::removeObject( CWorldEntity* pWorldEntity )
 {
-	nlassert(pWorldEntity != NULL && pWorldEntity->CellPtr == this);
+    nlassert(pWorldEntity != NULL && pWorldEntity->CellPtr == this);
 
-	// finds the entity in entities list, and remove it
-	pWorldEntity->removeFromCellAsObject();
+    // finds the entity in entities list, and remove it
+    pWorldEntity->removeFromCellAsObject();
 
-	//CWorldPositionManager::cellUpdated( this );
+    //CWorldPositionManager::cellUpdated( this );
 }
 */

@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "cdb_check_sum.h"
-
 
 /*
  * Constructor
@@ -26,17 +23,17 @@
 
 CCDBCheckSum::CCDBCheckSum()
 {
-	//arbitrary values
+	// arbitrary values
 	_Sum = 0;
 	_Factor = 55665;
 	_Const1 = 52845;
 	_Const2 = 22719;
 };
 
-///add an uint8 to the sum
+/// add an uint8 to the sum
 void CCDBCheckSum::add(uint8 el)
 {
 	uint32 cipher = (el ^ (_Factor >> 8));
 	_Factor = (cipher + _Factor) * _Const1 + _Const2;
-	_Sum += cipher;	
+	_Sum += cipher;
 }

@@ -19,5 +19,4 @@
 
 #include "nel/misc/types_nl.h"
 
-
-#endif //SHARD_UNIFIER_SERVICE_STDPCH_H
+#endif // SHARD_UNIFIER_SERVICE_STDPCH_H

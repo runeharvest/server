@@ -14,16 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef RY_EGS_STATIC_OUTPOST_H
 #define RY_EGS_STATIC_OUTPOST_H
 
 #include "nel/misc/types_nl.h"
-//Nel georges
+// Nel georges
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form_loader.h"
-
 
 const uint DRILLER_NB_LEVEL = 5; // 50, 100, 150, 200, 250
 
@@ -36,71 +34,69 @@ const uint DRILLER_NB_LEVEL = 5; // 50, 100, 150, 200, 250
 class CStaticOutpostBuilding
 {
 public:
-
 	enum TType
 	{
 		TypeEmpty,
 		TypeTownHall,
 		TypeDriller
 	};
-	static TType fromString( const std::string & str );
-	static std::string toString( TType type );
+	static TType fromString(const std::string &str);
+	static std::string toString(TType type);
 
 public:
-	
 	CStaticOutpostBuilding() { Type = TypeEmpty; }
 	/// Read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 	/// Serial
 	void serial(NLMISC::IStream &f);
 	/// Return the version of this class, increments this value when the content of this class has changed
-	static uint getVersion ();
-	
+	static uint getVersion();
+
 	/// Removed
-	void removed() {}
+	void removed() { }
 
 	/// Type of the building
-	TType				Type;
+	TType Type;
 
 	/// is the building can be destroyed ?
-	bool				CanBeDestroyedOrBuilt;
+	bool CanBeDestroyedOrBuilt;
 
 	/// name of the building (to be displayed in the client)
-	std::string			Name;
+	std::string Name;
 
 	/// name when constructing
-	std::string			NameWhenConstructing;
-	
+	std::string NameWhenConstructing;
+
 	/// .creature associated
-	NLMISC::CSheetId	Shape;
+	NLMISC::CSheetId Shape;
 
 	/// .creature used when the building is under construction
-	NLMISC::CSheetId	ShapeWhenConstructing;
+	NLMISC::CSheetId ShapeWhenConstructing;
 
 	/// dapper cost
-	uint32				CostDapper;
-	
+	uint32 CostDapper;
+
 	/// time cost in seconds
-	uint32				CostTime;
+	uint32 CostTime;
 
 	/// upgrades of this building
-	std::vector<NLMISC::CSheetId>	Upgrade;
+	std::vector<NLMISC::CSheetId> Upgrade;
 
-	/// Driller structure for managing mp production 
+	/// Driller structure for managing mp production
 	/// There is TotalMP = QualityFactor[i]*MPQuantities[j] mp of type MPs[j] produced by OutpostDrillerTimeUnit seconds
 	struct CDriller
 	{
-		float							QualityFactor[DRILLER_NB_LEVEL];
-		std::vector<NLMISC::CSheetId>	MPs;
-		std::vector<float>				MPQuantities;
-		float							TotalMP; ///< Total mp produced by the driller in 'OutpostDrillerTimeUnit' seconds
+		float QualityFactor[DRILLER_NB_LEVEL];
+		std::vector<NLMISC::CSheetId> MPs;
+		std::vector<float> MPQuantities;
+		float TotalMP; ///< Total mp produced by the driller in 'OutpostDrillerTimeUnit' seconds
 		/// Read georges sheet (driller subsection)
 		void readGeorges(const NLGEORGES::UFormElm *pElt);
 		/// Serialize
 		void serial(NLMISC::IStream &f);
 	};
 
-	CDriller	Driller;
+	CDriller Driller;
 };
 
 /**
@@ -112,29 +108,28 @@ public:
 class CStaticOutpost
 {
 public:
-
-	CStaticOutpost(){}
+	CStaticOutpost() { }
 	/// Read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 	/// Serial
 	void serial(NLMISC::IStream &f);
 	/// Return the version of this class, increments this value when the content of this class has changed
-	static uint getVersion ();
-	
+	static uint getVersion();
+
 	/// Removed
-	void removed() {}
+	void removed() { }
 
 	/// cost to challenge the outpost in dapper
-	uint32								ChallengeCost;
-	
+	uint32 ChallengeCost;
+
 	/// maximum number of standard squad spawned
-	uint16								MaxSpawnSquadCount;
+	uint16 MaxSpawnSquadCount;
 
 	/// level of the outpost
-	uint8								Level;
-	
-	uint8								MinimumTribeRoundLevel;
-	uint8								MinimumGuildRoundLevel;
+	uint8 Level;
+
+	uint8 MinimumTribeRoundLevel;
+	uint8 MinimumGuildRoundLevel;
 };
 
 /**
@@ -146,22 +141,20 @@ public:
 class CStaticOutpostSquad
 {
 public:
-
-	CStaticOutpostSquad(){}
+	CStaticOutpostSquad() { }
 	/// Read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 	/// Serial
 	void serial(NLMISC::IStream &f);
 	/// Return the version of this class, increments this value when the content of this class has changed
-	static uint getVersion ();
-	
+	static uint getVersion();
+
 	/// Removed
-	void removed() {}
+	void removed() { }
 
 	/// buy price of the squad
-	uint32	BuyPrice;
+	uint32 BuyPrice;
 };
-
 
 #endif // RY_EGS_STATIC_OUTPOST_H
 

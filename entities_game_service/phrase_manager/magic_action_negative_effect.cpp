@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
-
 #include "stdpch.h"
 #include "magic_action.h"
 #include "phrase_manager/magic_phrase.h"
@@ -35,151 +33,155 @@ using namespace NLNET;
 using namespace NLMISC;
 using namespace std;
 
-
 class CMagicActionNegativeEffect : public IMagicAction
 {
 public:
 	CMagicActionNegativeEffect()
-		:_EffectValue(0),_EffectFamily(EFFECT_FAMILIES::Unknown),_CostPerUpdate(0),_Power(0){}
+	    : _EffectValue(0)
+	    , _EffectFamily(EFFECT_FAMILIES::Unknown)
+	    , _CostPerUpdate(0)
+	    , _Power(0)
+	{
+	}
 
 protected:
 	struct CTargetInfos
 	{
-		TDataSetRow	RowId;
-		bool		MainTarget;
-		float		ResistFactor;
-		bool		Immune;
-		uint		FlagIndex;
+		TDataSetRow RowId;
+		bool MainTarget;
+		float ResistFactor;
+		bool Immune;
+		uint FlagIndex;
 	};
 
 protected:
-	virtual bool addBrick( const CStaticBrick & brick, CMagicPhrase * phrase, bool &effectEnd, CBuildParameters &buildParams )
+	virtual bool addBrick(const CStaticBrick &brick, CMagicPhrase *phrase, bool &effectEnd, CBuildParameters &buildParams)
 	{
 #ifdef NL_DEBUG
 		nlassert(phrase);
 #endif
-		for ( uint i=0 ; i<brick.Params.size() ; ++i)
+		for (uint i = 0; i < brick.Params.size(); ++i)
 		{
-			const TBrickParam::IId* param = brick.Params[i];
+			const TBrickParam::IId *param = brick.Params[i];
 
-			switch(param->id())
+			switch (param->id())
 			{
 			case TBrickParam::MA_END:
 				INFOLOG("MA_END Found: end of effect");
 				effectEnd = true;
 				return true;
 			case TBrickParam::MA_EFFECT:
-				INFOLOG("MA_EFFECT: %s",((CSBrickParamMagicEffect *)param)->Effect.c_str());
-				_EffectFamily = EFFECT_FAMILIES::toEffectFamily( ((CSBrickParamMagicEffect *)param)->Effect );
-				if ( _EffectFamily == EFFECT_FAMILIES::Unknown )
+				INFOLOG("MA_EFFECT: %s", ((CSBrickParamMagicEffect *)param)->Effect.c_str());
+				_EffectFamily = EFFECT_FAMILIES::toEffectFamily(((CSBrickParamMagicEffect *)param)->Effect);
+				if (_EffectFamily == EFFECT_FAMILIES::Unknown)
 				{
 					nlwarning("<CMagicActionNegativeEffect addBrick> invalid effect type %s", ((CSBrickParamMagicEffect *)param)->Effect.c_str());
 					return false;
 				}
 				// set main phrase effect id
-				phrase->setMagicFxType(MAGICFX::toMagicFx(_EffectFamily ), brick.SabrinaValue);
+				phrase->setMagicFxType(MAGICFX::toMagicFx(_EffectFamily), brick.SabrinaValue);
 				// set action sheetid
 				_ActionBrickSheetId = brick.SheetId;
 				break;
 			case TBrickParam::MA_EFFECT_MOD:
-				INFOLOG("MA_EFFECT_MOD: %u",((CSBrickParamMagicEffectMod *)param)->EffectMod);
+				INFOLOG("MA_EFFECT_MOD: %u", ((CSBrickParamMagicEffectMod *)param)->EffectMod);
 				_EffectValue = ((CSBrickParamMagicEffectMod *)param)->EffectMod;
 				break;
-				
+
 			case TBrickParam::MA_LINK_COST:
-				INFOLOG("MA_LINK_COST: %u",((CSBrickParamMagicLinkCost *)param)->Cost);
+				INFOLOG("MA_LINK_COST: %u", ((CSBrickParamMagicLinkCost *)param)->Cost);
 				_CostPerUpdate = ((CSBrickParamMagicLinkCost *)param)->Cost;
 				break;
 
 			case TBrickParam::MA_LINK_POWER:
-				INFOLOG("MA_LINK_POWER: %u",((CSBrickParamMagicLinkPower *)param)->Power);
-				_Power = (uint8) ( ((CSBrickParamMagicLinkPower *)param)->Power );
+				INFOLOG("MA_LINK_POWER: %u", ((CSBrickParamMagicLinkPower *)param)->Power);
+				_Power = (uint8)(((CSBrickParamMagicLinkPower *)param)->Power);
 				break;
-				
+
 			default:
 				// unused param, can be useful in the phrase
-				phrase->applyBrickParam( param, brick, buildParams );
+				phrase->applyBrickParam(param, brick, buildParams);
 				break;
 			}
 		}
 		///\todo nico: check if everything is set
 		return true;
 	}
-	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode)
+	virtual bool validate(CMagicPhrase *phrase, std::string &errorCode)
 	{
 #ifdef NL_DEBUG
 		nlassert(phrase);
 #endif
-		if ( !PHRASE_UTILITIES::validateSpellTarget(phrase->getActor(),phrase->getTargets()[0].getId(),ACTNATURE::OFFENSIVE_MAGIC, errorCode, true ) )
+		if (!PHRASE_UTILITIES::validateSpellTarget(phrase->getActor(), phrase->getTargets()[0].getId(), ACTNATURE::OFFENSIVE_MAGIC, errorCode, true))
 		{
-//			PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
+			//			PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
 			return false;
 		}
 		return true;
 	}
 
-	virtual void launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
+	virtual void launch(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+	    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+	    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport)
 	{
 		H_AUTO(CMagicActionNegativeEffect_launch);
 
-		if ( successFactor <= 0.0f )
+		if (successFactor <= 0.0f)
 			return;
 
-		CEntityBase* actor = CEntityBaseManager::getEntityBasePtr( phrase->getActor() );
+		CEntityBase *actor = CEntityBaseManager::getEntityBasePtr(phrase->getActor());
 		if (!actor)
 			return;
 		// if it is a "degradable" spell, i.e. a spell with a value, it is successful if successFactor > 0, otherwise, successFactor must be >=1)
-		
+
 		// apply success factor
-		_EffectValue = uint32( _EffectValue *  successFactor);
+		_EffectValue = uint32(_EffectValue * successFactor);
 
 		// apply used item power factor on cost per update
-		_CostPerUpdate = uint( _CostPerUpdate / (1.0 + phrase->getUsedItemStats().getPowerFactor(_Skill, phrase->getBrickMaxSabrinaCost())) );
-		
-		//const std::vector< TDataSetRow > & targets = phrase->getTargets();
-		const std::vector< CSpellTarget > & targets = phrase->getTargets();
+		_CostPerUpdate = uint(_CostPerUpdate / (1.0 + phrase->getUsedItemStats().getPowerFactor(_Skill, phrase->getBrickMaxSabrinaCost())));
+
+		// const std::vector< TDataSetRow > & targets = phrase->getTargets();
+		const std::vector<CSpellTarget> &targets = phrase->getTargets();
 
 		sint skillValue = 0;
-		if ( actor->getId().getType() == RYZOMID::player )
+		if (actor->getId().getType() == RYZOMID::player)
 		{
-			CCharacter * pC = (CCharacter *) actor;
-			skillValue = pC->getSkillValue( _Skill );
+			CCharacter *pC = (CCharacter *)actor;
+			skillValue = pC->getSkillValue(_Skill);
 		}
 		else
 		{
-			const CStaticCreatures * form = actor->getForm();
-			if ( !form )
+			const CStaticCreatures *form = actor->getForm();
+			if (!form)
 			{
-				nlwarning( "<MAGIC>invalid creature form %s in entity %s", actor->getType().toString().c_str(), actor->getId().toString().c_str() );
+				nlwarning("<MAGIC>invalid creature form %s in entity %s", actor->getType().toString().c_str(), actor->getId().toString().c_str());
 				return;
-			}	
+			}
 			skillValue = form->getAttackLevel();
 		}
-		
-		const CSEffect * debuff = actor->lookForActiveEffect( EFFECT_FAMILIES::DebuffSkillMagic );		
-		if ( debuff )
+
+		const CSEffect *debuff = actor->lookForActiveEffect(EFFECT_FAMILIES::DebuffSkillMagic);
+		if (debuff)
 			skillValue -= debuff->getParamValue();
 
-		const CSEffect * outPostBuff = actor->lookForActiveEffect( EFFECT_FAMILIES::OutpostMagic );
-		if ( outPostBuff )
+		const CSEffect *outPostBuff = actor->lookForActiveEffect(EFFECT_FAMILIES::OutpostMagic);
+		if (outPostBuff)
 			skillValue += outPostBuff->getParamValue();
 
 		// cap skill values with brick power and phrase multi target power factor
-		if ( skillValue > (sint32)_Power )
+		if (skillValue > (sint32)_Power)
 			skillValue = (sint32)_Power;
 
 		resists.clearAll();
-		for ( uint i = 0; i < targets.size(); i++ )
+		for (uint i = 0; i < targets.size(); i++)
 		{
 			// check target
-			CEntityBase* target = CEntityBaseManager::getEntityBasePtr( targets[i].getId() );
-			if ( !target)
+			CEntityBase *target = CEntityBaseManager::getEntityBasePtr(targets[i].getId());
+			if (!target)
 				continue;
 
 			string errorCode;
-			if ( !isMad && !PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(),target->getEntityRowId(),ACTNATURE::OFFENSIVE_MAGIC, errorCode, i==0)  )
+			if (!isMad && !PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(), target->getEntityRowId(), ACTNATURE::OFFENSIVE_MAGIC, errorCode, i == 0))
 			{
 				// dont warn because of multi target
 				// PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
@@ -190,26 +192,26 @@ protected:
 			// apply skill modifier accroding to target race
 			sint32 localSkillValue = skillValue + actor->getSkillModifierForRace(target->getRace());
 
-			if ( actor->getId().getType() == RYZOMID::player )
+			if (actor->getId().getType() == RYZOMID::player)
 			{
 				// boost magic skill for low level chars
 				sint32 sb = (sint32)MagicSkillStartValue.get();
-				localSkillValue = max( sb, localSkillValue );
+				localSkillValue = max(sb, localSkillValue);
 
 				// add magic boost from consumable
-				CCharacter * pC = dynamic_cast<CCharacter *>(actor);
-				if(pC)
+				CCharacter *pC = dynamic_cast<CCharacter *>(actor);
+				if (pC)
 					localSkillValue += pC->magicSuccessModifier();
 			}
 
 			CTargetInfos targetInfos;
-			targetInfos.RowId			= target->getEntityRowId();
-			targetInfos.MainTarget		= (i == 0);
-			targetInfos.Immune			= false;
-			targetInfos.ResistFactor	= 1.0f;
-			targetInfos.FlagIndex		= i;
+			targetInfos.RowId = target->getEntityRowId();
+			targetInfos.MainTarget = (i == 0);
+			targetInfos.Immune = false;
+			targetInfos.ResistFactor = 1.0f;
+			targetInfos.FlagIndex = i;
 
-			float & resistFactor = targetInfos.ResistFactor;
+			float &resistFactor = targetInfos.ResistFactor;
 
 			// test if target really affected
 			if (invulnerabilityAll[i] || invulnerabilityOffensive[i])
@@ -226,7 +228,7 @@ protected:
 			{
 				uint32 resistValue = target->getMagicResistance(_EffectFamily);
 
-				if (resistValue == CCreatureResists::ImmuneScore )
+				if (resistValue == CCreatureResists::ImmuneScore)
 				{
 					targetInfos.Immune = true;
 					resistFactor = 0.0f;
@@ -234,7 +236,7 @@ protected:
 				else
 				{
 					// get the chances
-					const uint8 roll = (uint8)RandomGenerator.rand( 99 );
+					const uint8 roll = (uint8)RandomGenerator.rand(99);
 					resistFactor = CStaticSuccessTable::getSuccessFactor(SUCCESS_TABLE_TYPE::MagicResistLink, localSkillValue - resistValue, roll);
 
 					// increase resists modifier for next resists test
@@ -252,23 +254,23 @@ protected:
 		}
 	}
 
-	virtual void apply( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-						const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport,
-						sint32 vamp, float vampRatio, bool reportXp )
+	virtual void apply(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+	    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+	    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport,
+	    sint32 vamp, float vampRatio, bool reportXp)
 	{
 		H_AUTO(CMagicActionNegativeEffect_apply);
 
-		CEntityBase* actor = CEntityBaseManager::getEntityBasePtr( phrase->getActor() );
+		CEntityBase *actor = CEntityBaseManager::getEntityBasePtr(phrase->getActor());
 		if (!actor)
 			return;
 
 		const uint nbTargets = (uint)_ApplyTargets.size();
-		for ( uint i = 0; i < nbTargets; i++ )
+		for (uint i = 0; i < nbTargets; i++)
 		{
 			// check target
-			CEntityBase* target = CEntityBaseManager::getEntityBasePtr( _ApplyTargets[i].RowId );
-			if ( !target)
+			CEntityBase *target = CEntityBaseManager::getEntityBasePtr(_ApplyTargets[i].RowId);
+			if (!target)
 				continue;
 
 			TReportAction reportAction = actionReport;
@@ -278,21 +280,21 @@ protected:
 			reportAction.Skill = _Skill;
 			if (!reportXp)
 			{
-				reportAction.Skill = SKILLS::unknown;						// no xp gain but damage must be registered
-				reportAction.SkillLevel = phrase->getBrickMaxSabrinaCost();	// use the real level of the enchantment
+				reportAction.Skill = SKILLS::unknown; // no xp gain but damage must be registered
+				reportAction.SkillLevel = phrase->getBrickMaxSabrinaCost(); // use the real level of the enchantment
 			}
 
-			if( target->getId().getType() != RYZOMID::player )
+			if (target->getId().getType() != RYZOMID::player)
 			{
-				const CStaticCreatures * creatureSheet = target->getForm();
-				if( creatureSheet != 0 )
+				const CStaticCreatures *creatureSheet = target->getForm();
+				if (creatureSheet != 0)
 				{
 					reportAction.DeltaLvl = skillLevel - creatureSheet->getXPLevel();
 				}
 			}
 
 			string errorCode;
-			if ( !PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(),target->getEntityRowId(),ACTNATURE::OFFENSIVE_MAGIC, errorCode, _ApplyTargets[i].MainTarget) )
+			if (!PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(), target->getEntityRowId(), ACTNATURE::OFFENSIVE_MAGIC, errorCode, _ApplyTargets[i].MainTarget))
 			{
 				// dont warn because of multi target
 				// PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
@@ -302,26 +304,26 @@ protected:
 			bool sendAggro = false;
 
 			// test if target really affected
-			const uint & fi = _ApplyTargets[i].FlagIndex;
+			const uint &fi = _ApplyTargets[i].FlagIndex;
 			if (invulnerabilityAll[fi] || invulnerabilityOffensive[fi])
 			{
-				PHRASE_UTILITIES::sendSpellResistMessages( actor->getEntityRowId(), target->getEntityRowId());
+				PHRASE_UTILITIES::sendSpellResistMessages(actor->getEntityRowId(), target->getEntityRowId());
 				sendAggro = true;
 			}
 			else
 			{
 				// check resistance
-				const float & resistFactor = _ApplyTargets[i].ResistFactor;
+				const float &resistFactor = _ApplyTargets[i].ResistFactor;
 
 				if (_ApplyTargets[i].Immune)
 				{
 					SM_STATIC_PARAMS_1(params, STRING_MANAGER::entity);
-					params[0].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()) );
+					params[0].setEIdAIAlias(target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()));
 					PHRASE_UTILITIES::sendDynamicSystemMessage(actor->getEntityRowId(), "MAGIC_TARGET_IMMUNE", params);
 				}
-				else if ( resistFactor <= 0.0f )
+				else if (resistFactor <= 0.0f)
 				{
-					PHRASE_UTILITIES::sendSpellResistMessages( actor->getEntityRowId(), target->getEntityRowId());
+					PHRASE_UTILITIES::sendSpellResistMessages(actor->getEntityRowId(), target->getEntityRowId());
 				}
 
 				if (resistFactor < 1.0f)
@@ -331,9 +333,9 @@ protected:
 
 				if (resistFactor > 0.0f)
 				{
-					CCreature * npc = dynamic_cast<CCreature*>(target);
-					CCharacter * c = dynamic_cast<CCharacter*>(actor);
-					if(npc && c && !PHRASE_UTILITIES::testRange(*actor, *target, (uint32)npc->getMaxHitRangeForPC()*1000) )
+					CCreature *npc = dynamic_cast<CCreature *>(target);
+					CCharacter *c = dynamic_cast<CCharacter *>(actor);
+					if (npc && c && !PHRASE_UTILITIES::testRange(*actor, *target, (uint32)npc->getMaxHitRangeForPC() * 1000))
 					{
 						c->sendDynamicSystemMessage(c->getId(), "UNEFFICENT_RANGE");
 						sendAggro = false;
@@ -341,24 +343,24 @@ protected:
 					}
 					else
 					{
-						CSLinkEffectOffensive* effect = new CSLinkEffectOffensive(
-							phrase->getActor(),
-							_ApplyTargets[i].RowId,
-							_EffectFamily,
-							_CostPerUpdate,
-							SCORES::sap,//linkEnergy,
-							_Skill,
-							phrase->getSpellRange(),
-							_EffectValue,
-							_Power,
-							reportAction);
+						CSLinkEffectOffensive *effect = new CSLinkEffectOffensive(
+						    phrase->getActor(),
+						    _ApplyTargets[i].RowId,
+						    _EffectFamily,
+						    _CostPerUpdate,
+						    SCORES::sap, // linkEnergy,
+						    _Skill,
+						    phrase->getSpellRange(),
+						    _EffectValue,
+						    _Power,
+						    reportAction);
 
 						if (!effect)
 						{
 							nlwarning("Failed to allocate new CSLinkEffectOffensive");
 							return;
 						}
-						
+
 						effect->setSpellPower(phrase->getBrickMaxSabrinaCost());
 						effect->setPhraseBookIndex(phrase->phraseBookIndex());
 
@@ -368,19 +370,19 @@ protected:
 							actor->CEntityBase::addLink(effect);
 							target->addSabrinaEffect(effect);
 							actor->CEntityBase::removeLink(effect, resistFactor);
-							PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport( reportAction );
+							PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport(reportAction);
 							PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->reportAction(reportAction);
 							sendAggro = true;
 						}
 						else
 						{
-							actor->addLink( effect );
-							target->addSabrinaEffect( effect );
+							actor->addLink(effect);
+							target->addSabrinaEffect(effect);
 
 							// if partial resist, break link
 							if (resistFactor < 1.0f)
 							{
-								PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport( reportAction );
+								PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport(reportAction);
 								PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->reportAction(reportAction);
 								actor->stopAllLinks(resistFactor);
 							}
@@ -402,18 +404,16 @@ protected:
 		}
 	}
 
-	EFFECT_FAMILIES::TEffectFamily	_EffectFamily;
-	sint32							_EffectValue;	
-	uint							_CostPerUpdate;
-	uint8							_Power;
+	EFFECT_FAMILIES::TEffectFamily _EffectFamily;
+	sint32 _EffectValue;
+	uint _CostPerUpdate;
+	uint8 _Power;
 
 	/// targets that need to be treated by apply()
-	std::vector<CTargetInfos>		_ApplyTargets;
+	std::vector<CTargetInfos> _ApplyTargets;
 };
 
 BEGIN_MAGIC_ACTION_FACTORY(CMagicActionNegativeEffect)
-	ADD_MAGIC_ACTION_TYPE( "mdal" )
-	ADD_MAGIC_ACTION_TYPE( "moal" )
+ADD_MAGIC_ACTION_TYPE("mdal")
+ADD_MAGIC_ACTION_TYPE("moal")
 END_MAGIC_ACTION_FACTORY(CMagicActionNegativeEffect)
-
-

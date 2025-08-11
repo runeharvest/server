@@ -22,19 +22,16 @@
 using namespace std;
 using namespace NLMISC;
 
-
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
 
-
-CVariable<double>	GlobalFactionPointPriceFactor("egs", "GlobalFactionPointPriceFactor", "this factor is applied to all faction point prices", 1.0, 0, true);
-
+CVariable<double> GlobalFactionPointPriceFactor("egs", "GlobalFactionPointPriceFactor", "this factor is applied to all faction point prices", 1.0, 0, true);
 
 NL_INSTANCE_COUNTER_IMPL(IItemTrade);
 NL_INSTANCE_COUNTER_IMPL(CTradeBase);
 
 //-----------------------------------------------------------------------------
 CItemForSale::CItemForSale()
-{ 
+{
 	_Available = false;
 	_ItemPtr = 0;
 }
@@ -43,7 +40,7 @@ CItemForSale::CItemForSale()
 CItemForSale::~CItemForSale()
 {
 
-	if( _ItemPtr != 0 )
+	if (_ItemPtr != 0)
 	{
 		_ItemPtr.deleteItem();
 		_ItemPtr = 0;
@@ -51,17 +48,17 @@ CItemForSale::~CItemForSale()
 }
 
 //-----------------------------------------------------------------------------
-void CItemForSale::itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr item, uint32 quantity, const NLMISC::CEntityId& id, CONTINENT::TContinent continent, uint32 identifier )
+void CItemForSale::itemForSale(uint32 price, uint32 retirePrice, CGameItemPtr item, uint32 quantity, const NLMISC::CEntityId &id, CONTINENT::TContinent continent, uint32 identifier)
 {
 #ifdef NL_DEBUG
-	nlassert( item != NULL );
-//	nlassert( item->parent() == NULL );
-	nlassert( item->getInventory() == NULL );
+	nlassert(item != NULL);
+	//	nlassert( item->parent() == NULL );
+	nlassert(item->getInventory() == NULL);
 #endif
-	if( item != NULL )
+	if (item != NULL)
 	{
 		// TODO : check if this 'detach' is needed
-//		item->detachFromParent(); 
+		//		item->detachFromParent();
 		RYMSG::TPriceInfo pi;
 		_PriceInfo.setCurrency(RYMSG::TTradeCurrency::tc_dappers);
 		_PriceInfo.setAmount(price);
@@ -73,27 +70,27 @@ void CItemForSale::itemForSale( uint32 price, uint32 retirePrice, CGameItemPtr i
 		_Owner = id;
 		_Continent = continent;
 		_Identifier = identifier;
-	}	
+	}
 }
 
 //-----------------------------------------------------------------------------
-void CItemForSale::setAvailable( bool a )
+void CItemForSale::setAvailable(bool a)
 {
-	if( a == true )
+	if (a == true)
 	{
 		_Available = true;
 	}
 	else
 	{
-		if( _Quantity > 0 )
+		if (_Quantity > 0)
 			--_Quantity;
-		if( _Quantity == 0 )
+		if (_Quantity == 0)
 			_Available = false;
 	}
 }
 
 //-----------------------------------------------------------------------------
-//void CItemForSale::serial(NLMISC::IStream &f)
+// void CItemForSale::serial(NLMISC::IStream &f)
 //{
 //	f.serial( _PriceInfo );
 //	f.serial( _RetirePrice );
@@ -102,7 +99,7 @@ void CItemForSale::setAvailable( bool a )
 //	f.serialEnum( _Continent );
 //	f.serial( _Quantity );
 //	f.serial( _Identifier );
-//	
+//
 //	if( f.isReading() )
 //	{
 //		_ItemPtr.newItem();
@@ -119,12 +116,12 @@ void CItemForSale::setAvailable( bool a )
 //}
 
 //-----------------------------------------------------------------------------
-void CItemForSale::copy( IItemTrade * itt )
+void CItemForSale::copy(IItemTrade *itt)
 {
 	_PriceInfo = itt->getPriceInfo();
 	_RetirePrice = itt->getRetirePrice();
 	_StartSaleCycle = itt->getStartSaleCycle();
-	if( itt->getItemPtr() != 0 )
+	if (itt->getItemPtr() != 0)
 	{
 		_ItemPtr = itt->getItemPtr()->getItemCopy();
 	}
@@ -142,13 +139,13 @@ CTradeBase::~CTradeBase()
 }
 
 //-----------------------------------------------------------------------------
-void CTradeBase::copy( IItemTrade * itt )
+void CTradeBase::copy(IItemTrade *itt)
 {
 	_PriceInfo = itt->getPriceInfo();
 	_Sheet = itt->getSheetId();
 	_Quality = itt->getQuality();
 	_Level = itt->getLevel();
-	if( itt->getItemPtr() != 0 )
+	if (itt->getItemPtr() != 0)
 	{
 		_ItemPtr = itt->getItemPtr()->getItemCopy();
 	}
@@ -158,11 +155,11 @@ void CTradeBase::copy( IItemTrade * itt )
 TGameCycle CItemForSale::getGameCycleLeft() const
 {
 	TGameCycle dt = CTickEventHandler::getGameCycle() - _StartSaleCycle;
-	return (TGameCycle) ( (sint32) std::max( (sint32)0, (sint32)( ((sint32) MaxGameCycleSaleStore) - (sint32)( dt + _ItemPtr->getTotalSaleCycle() ) ) ) );
+	return (TGameCycle)((sint32)std::max((sint32)0, (sint32)(((sint32)MaxGameCycleSaleStore) - (sint32)(dt + _ItemPtr->getTotalSaleCycle()))));
 }
 
 //-----------------------------------------------------------------------------
-//uint32 CTradeBase::getFactionPointPrice() const
+// uint32 CTradeBase::getFactionPointPrice() const
 //{
 //	return uint32(_FactionPointPrice * GlobalFactionPointPriceFactor.get() + 0.5);
 //}
@@ -173,20 +170,18 @@ TGameCycle CItemForSale::getGameCycleLeft() const
 
 #define PERSISTENT_CLASS CItemForSale
 
-#define PERSISTENT_DATA\
-	PROP2(_Price, uint32, _PriceInfo.getAmount(), _PriceInfo.setCurrency(RYMSG::TTradeCurrency::tc_dappers); _PriceInfo.setAmount(val))\
-	PROP(uint32,_RetirePrice)\
-	PROP_GAME_CYCLE_COMP(_StartSaleCycle)\
-	PROP(CEntityId,_Owner)\
-	PROP2(_Continent,string,CONTINENT::toString(_Continent),_Continent=CONTINENT::toContinent(val))\
-	PROP(uint32,_Quantity)\
-	PROP(uint32,_Identifier)\
-	STRUCT2(_ItemPtr,_ItemPtr->store(pdr),\
-		_ItemPtr.newItem();\
-		CGameItem::CPersistentApplyArg applyArgs;\
-		_ItemPtr->apply(pdr, applyArgs))\
+#define PERSISTENT_DATA                                                                                                                 \
+	PROP2(_Price, uint32, _PriceInfo.getAmount(), _PriceInfo.setCurrency(RYMSG::TTradeCurrency::tc_dappers); _PriceInfo.setAmount(val)) \
+	PROP(uint32, _RetirePrice)                                                                                                          \
+	PROP_GAME_CYCLE_COMP(_StartSaleCycle)                                                                                               \
+	PROP(CEntityId, _Owner)                                                                                                             \
+	PROP2(_Continent, string, CONTINENT::toString(_Continent), _Continent = CONTINENT::toContinent(val))                                \
+	PROP(uint32, _Quantity)                                                                                                             \
+	PROP(uint32, _Identifier)                                                                                                           \
+	STRUCT2(_ItemPtr, _ItemPtr->store(pdr),                                                                                             \
+	        _ItemPtr.newItem();                                                                                                         \
+	        CGameItem::CPersistentApplyArg applyArgs;                                                                                   \
+	        _ItemPtr->apply(pdr, applyArgs))
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
-
-

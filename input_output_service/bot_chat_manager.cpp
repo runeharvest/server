@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-/////////////////////////////////////////// DEPRECATED /////////////////////////////////////////// 
+/////////////////////////////////////////// DEPRECATED ///////////////////////////////////////////
 /*
 #include "nel/net/transport_class.h"
 
@@ -39,18 +37,18 @@ using namespace NLNET;
 
 static void cbStartChatBot(CMessage& msgin, const std::string &serviceName, uint16 serviceId )
 {
-	//sendChatBotInterface ("HELLO");
+    //sendChatBotInterface ("HELLO");
 }
 
 
 TUnifiedCallbackItem ChatBotCbArray[]=
 {
-	{ "START_CHAT_BOT", cbStartChatBot },
+    { "START_CHAT_BOT", cbStartChatBot },
 };
 
 void CBotChatManager::init()
 {
-	CUnifiedNetwork::getInstance()->addCallbackArray(ChatBotCbArray, sizeof(ChatBotCbArray) / sizeof(ChatBotCbArray[0]));
+    CUnifiedNetwork::getInstance()->addCallbackArray(ChatBotCbArray, sizeof(ChatBotCbArray) / sizeof(ChatBotCbArray[0]));
 
 }
 */

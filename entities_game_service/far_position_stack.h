@@ -22,7 +22,6 @@
 #include "game_share/persistent_data.h"
 #include <vector>
 
-
 /**
  * Stack of far positions
  * \author Olivier Cado
@@ -32,44 +31,41 @@
 class CFarPositionStack
 {
 public:
-
 	DECLARE_PERSISTENCE_METHODS
 
 	typedef CFarPosition T;
 
 	/// Constructor
-	CFarPositionStack() {}
+	CFarPositionStack() { }
 
 	/// Return true if the stack is empty
-	bool			empty() const { return _Vec.empty(); }
+	bool empty() const { return _Vec.empty(); }
 
 	/// Return the number of elements in the stack
-	uint			size() const { return (uint)_Vec.size(); }
+	uint size() const { return (uint)_Vec.size(); }
 
 	/// Return the latest pushed position (no bound check)
-	const T&		top() const { return _Vec.back(); }
-	
+	const T &top() const { return _Vec.back(); }
+
 	/// Push a position on top of the stack
-	void			push( const T& pos ) { _Vec.push_back( pos ); }
+	void push(const T &pos) { _Vec.push_back(pos); }
 
 	/// Pop (remove the top position) off the stack
-	void			pop() { _Vec.pop_back(); }
+	void pop() { _Vec.pop_back(); }
 
 	/// Return the latest push position (non const) (no bound check)
-	T&				topToModify() { return _Vec.back(); }
+	T &topToModify() { return _Vec.back(); }
 
 	/// Return the specified position in the stack (no bound check)
-	const T&		operator[](uint i) const { return _Vec[i]; }
+	const T &operator[](uint i) const { return _Vec[i]; }
 
 	/// Replace a position in the stack (no bound check) (debug only)
-	void			substFarPosition( uint index, const CFarPosition& newFarPos );
+	void substFarPosition(uint index, const CFarPosition &newFarPos);
 
 private:
-
 	// Not a real stack because of the persistence methods
-	std::vector<T>	_Vec;
+	std::vector<T> _Vec;
 };
-
 
 #endif // NL_FAR_POSITION_STACK_H
 

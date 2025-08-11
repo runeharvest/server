@@ -14,21 +14,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_ROLE_PERSISTANT_DATA_H
 #define RY_ROLE_PERSISTANT_DATA_H
 //
-//stdpch //#include "nel/misc/types_nl.h"
-//#include "nel/misc/stream.h"
+// stdpch //#include "nel/misc/types_nl.h"
+// #include "nel/misc/stream.h"
 //
 ////#include "game_share/jobs.h"
-//#include "game_share/skills.h"
+// #include "game_share/skills.h"
 //
 //
-//class CRolePersistantData
+// class CRolePersistantData
 //{
-//public:
+// public:
 //	/// Constructor
 //	CRolePersistantData();
 //
@@ -36,18 +34,18 @@
 //	{
 //		uint16 LevelReached;
 //		uint16 SkillCap;
-//		
+//
 //		SSkillsProgress() { LevelReached = SkillCap = 0; }
-//		
+//
 //		void serial(NLMISC::IStream &f)
 //		{
 //			f.serial( LevelReached );
 //			f.serial( SkillCap );
 //		}
 //	};
-//	
+//
 //	typedef std::map< std::string, SSkillsProgress > TSkillLevelReachedContainer;
-//	
+//
 //	struct SRole
 //	{
 //		JOBS::TJob			Job;
@@ -56,7 +54,7 @@
 //		NLMISC::TGameCycle	UnfreezeTime;
 //		uint16				JobLevel;
 //		NLMISC::CSheetId	RoleSheet;
-//		
+//
 //		void serial(NLMISC::IStream &f)
 //		{
 //			f.serialEnum( Job );
@@ -76,8 +74,8 @@
 //				f.serial( sheetName );
 //			}
 //		}
-//	};	
-//	
+//	};
+//
 //	// Serial
 //	void serial(NLMISC::IStream &f)
 //	{
@@ -87,9 +85,9 @@
 //
 //	//public attributes
 //	std::vector< SRole > _Roles;
-//	TSkillLevelReachedContainer _LevelReached; 
+//	TSkillLevelReachedContainer _LevelReached;
 //
-//}; //CRolePersistantData
+// }; //CRolePersistantData
 
 #endif // RY_ROLE_PERSISTANT_DATA_H
 /* role_persistant_data.h */

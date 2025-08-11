@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "magic_action.h"
 #include "phrase_manager/magic_phrase.h"
@@ -35,146 +33,153 @@ using namespace NLNET;
 using namespace NLMISC;
 using namespace std;
 
-
 class CMagicActionDot : public IMagicAction
 {
 public:
 	CMagicActionDot()
-		:_DmgHp(0),_DmgSap(0),_DmgSta(0),_DmgType(DMGTYPE::UNDEFINED),_CostPerUpdate(0),_Power(0),_Vampirise(0),_VampiriseRatio(1) {}
-
+	    : _DmgHp(0)
+	    , _DmgSap(0)
+	    , _DmgSta(0)
+	    , _DmgType(DMGTYPE::UNDEFINED)
+	    , _CostPerUpdate(0)
+	    , _Power(0)
+	    , _Vampirise(0)
+	    , _VampiriseRatio(1)
+	{
+	}
 
 	/// build from an ai action
-	bool initFromAiAction( const CStaticAiAction *aiAction, CMagicPhrase *phrase )
+	bool initFromAiAction(const CStaticAiAction *aiAction, CMagicPhrase *phrase)
 	{
 #ifdef NL_DEBUG
 		nlassert(phrase);
 		nlassert(aiAction);
-#endif		
-/*		if (aiAction->getType() != AI_ACTION::DoTSpell ) return false;
-		
-		switch(aiAction->getData().LinkSpell.AffectedScore)
-		{
-		case SCORES::sap:
-			_DmgSap = sint32(aiAction->getData().LinkSpell.SpellParamValue);
-			break;
-		case SCORES::stamina:
-			_DmgSta = sint32(aiAction->getData().LinkSpell.SpellParamValue);
-			break;
-		case SCORES::hit_points:
-			_DmgHp = sint32(aiAction->getData().LinkSpell.SpellParamValue);
-			break;
-		default:
-			return false;
-		};
+#endif
+		/*		if (aiAction->getType() != AI_ACTION::DoTSpell ) return false;
 
-		_DmgType = aiAction->getData().LinkSpell.DamageType;
-		
-		_CostPerUpdate = max(aiAction->getData().LinkSpell.SapCostRate, aiAction->getData().LinkSpell.HpCostRate);
-		_Power = (uint8) fabs(aiAction->getData().LinkSpell.SpellParamValue);
+		        switch(aiAction->getData().LinkSpell.AffectedScore)
+		        {
+		        case SCORES::sap:
+		            _DmgSap = sint32(aiAction->getData().LinkSpell.SpellParamValue);
+		            break;
+		        case SCORES::stamina:
+		            _DmgSta = sint32(aiAction->getData().LinkSpell.SpellParamValue);
+		            break;
+		        case SCORES::hit_points:
+		            _DmgHp = sint32(aiAction->getData().LinkSpell.SpellParamValue);
+		            break;
+		        default:
+		            return false;
+		        };
 
-		phrase->setMagicFxType( MAGICFX::toMagicFx( _DmgType ,true), 1 );
-*/
+		        _DmgType = aiAction->getData().LinkSpell.DamageType;
+
+		        _CostPerUpdate = max(aiAction->getData().LinkSpell.SapCostRate, aiAction->getData().LinkSpell.HpCostRate);
+		        _Power = (uint8) fabs(aiAction->getData().LinkSpell.SpellParamValue);
+
+		        phrase->setMagicFxType( MAGICFX::toMagicFx( _DmgType ,true), 1 );
+		*/
 		return true;
 	}
 
 protected:
 	struct CTargetInfos
 	{
-		TDataSetRow	RowId;
-		bool		MainTarget;
-		float		DmgFactor;
-		float		ResistFactor;
-		bool		Immune;
+		TDataSetRow RowId;
+		bool MainTarget;
+		float DmgFactor;
+		float ResistFactor;
+		bool Immune;
 	};
 
 protected:
 	/// add brick
-	virtual bool addBrick( const CStaticBrick & brick, CMagicPhrase * phrase, bool &effectEnd, CBuildParameters &buildParams )
+	virtual bool addBrick(const CStaticBrick &brick, CMagicPhrase *phrase, bool &effectEnd, CBuildParameters &buildParams)
 	{
-		for ( uint i=0 ; i<brick.Params.size() ; ++i)
+		for (uint i = 0; i < brick.Params.size(); ++i)
 		{
-			const TBrickParam::IId* param = brick.Params[i];
+			const TBrickParam::IId *param = brick.Params[i];
 
-			switch(param->id())
+			switch (param->id())
 			{
 			case TBrickParam::MA_END:
 				INFOLOG("MA_END Found: end of effect");
 				effectEnd = true;
 				return true;
 			case TBrickParam::MA_DMG_TYPE:
-				INFOLOG("MA_DMG_TYPE: %s",((CSBrickParamMagicDmgType *)param)->DmgType.c_str());
-				_DmgType = DMGTYPE::stringToDamageType( ((CSBrickParamMagicDmgType *)param)->DmgType );
-				if ( _DmgType == DMGTYPE::UNDEFINED )
+				INFOLOG("MA_DMG_TYPE: %s", ((CSBrickParamMagicDmgType *)param)->DmgType.c_str());
+				_DmgType = DMGTYPE::stringToDamageType(((CSBrickParamMagicDmgType *)param)->DmgType);
+				if (_DmgType == DMGTYPE::UNDEFINED)
 				{
 					nlwarning("<CMagicActionBasicDamage addBrick> invalid dmg type %s", ((CSBrickParamMagicDmgType *)param)->DmgType.c_str());
 					return false;
 				}
 				// set main phrase spellId
-				phrase->setMagicFxType( MAGICFX::toMagicFx( _DmgType ,true), brick.SabrinaValue );
+				phrase->setMagicFxType(MAGICFX::toMagicFx(_DmgType, true), brick.SabrinaValue);
 				// set action sheetid
 				_ActionBrickSheetId = brick.SheetId;
 				break;
 
 			case TBrickParam::MA_DMG:
-				INFOLOG("MA_DMG: %u %u %u",((CSBrickParamMagicDmg *)param)->Hp,((CSBrickParamMagicDmg *)param)->Sap,((CSBrickParamMagicDmg *)param)->Sta);
+				INFOLOG("MA_DMG: %u %u %u", ((CSBrickParamMagicDmg *)param)->Hp, ((CSBrickParamMagicDmg *)param)->Sap, ((CSBrickParamMagicDmg *)param)->Sta);
 				_DmgHp = ((CSBrickParamMagicDmg *)param)->Hp;
 				_DmgSap = ((CSBrickParamMagicDmg *)param)->Sap;
 				_DmgSta = ((CSBrickParamMagicDmg *)param)->Sta;
 				break;
 
 			case TBrickParam::MA_LINK_COST:
-				INFOLOG("MA_LINK_COST: %u",((CSBrickParamMagicLinkCost *)param)->Cost);
+				INFOLOG("MA_LINK_COST: %u", ((CSBrickParamMagicLinkCost *)param)->Cost);
 				_CostPerUpdate = ((CSBrickParamMagicLinkCost *)param)->Cost;
 				break;
 
 			case TBrickParam::MA_LINK_POWER:
-				INFOLOG("MA_LINK_POWER: %u",((CSBrickParamMagicLinkPower *)param)->Power);
-				_Power = (uint8) ( ((CSBrickParamMagicLinkPower *)param)->Power );
+				INFOLOG("MA_LINK_POWER: %u", ((CSBrickParamMagicLinkPower *)param)->Power);
+				_Power = (uint8)(((CSBrickParamMagicLinkPower *)param)->Power);
 				break;
 
 			case TBrickParam::MA_VAMPIRISE:
-				INFOLOG("MA_VAMPIRISE: %u",((CSBrickParamMagicVampirise *)param)->Vampirise );
+				INFOLOG("MA_VAMPIRISE: %u", ((CSBrickParamMagicVampirise *)param)->Vampirise);
 				_Vampirise = ((CSBrickParamMagicVampirise *)param)->Vampirise;
 				break;
-				
+
 			case TBrickParam::MA_VAMPIRISE_RATIO:
-				INFOLOG("MA_VAMPIRISE_RATIO: %f",((CSBrickParamMagicVampiriseRatio *)param)->VampiriseRatio );
+				INFOLOG("MA_VAMPIRISE_RATIO: %f", ((CSBrickParamMagicVampiriseRatio *)param)->VampiriseRatio);
 				_VampiriseRatio = ((CSBrickParamMagicVampiriseRatio *)param)->VampiriseRatio;
 				break;
 
 			default:
 				// unused param, can be useful in the phrase
-				phrase->applyBrickParam( param, brick, buildParams );
+				phrase->applyBrickParam(param, brick, buildParams);
 				break;
 			}
 		}
 		///\todo nico: check if everything is set
 		return true;
 	}
-	
-	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode)
+
+	virtual bool validate(CMagicPhrase *phrase, std::string &errorCode)
 	{
-		if ( !PHRASE_UTILITIES::validateSpellTarget(phrase->getActor(),phrase->getTargets()[0].getId(),ACTNATURE::OFFENSIVE_MAGIC,errorCode, true) )
+		if (!PHRASE_UTILITIES::validateSpellTarget(phrase->getActor(), phrase->getTargets()[0].getId(), ACTNATURE::OFFENSIVE_MAGIC, errorCode, true))
 		{
-//			PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
+			//			PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
 			return false;
 		}
 		return true;
 	}
 
-	virtual void launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
+	virtual void launch(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+	    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+	    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport)
 	{
 		H_AUTO(CMagicActionDot_launch);
 
-		//behav.Spell.Resist = 0;
-		//behav.Spell.KillingBlow = 0;
-		
-		CEntityBase* actor = CEntityBaseManager::getEntityBasePtr( phrase->getActor() );
+		// behav.Spell.Resist = 0;
+		// behav.Spell.KillingBlow = 0;
+
+		CEntityBase *actor = CEntityBaseManager::getEntityBasePtr(phrase->getActor());
 		if (!actor)
 			return;
-		
+
 		///\todo nico:
 		//		- location
 		//		- armor + shield
@@ -182,56 +187,56 @@ protected:
 		//		- behaviour + chat messages
 		//		- aggro
 
-		if ( successFactor <= 0.0f )
+		if (successFactor <= 0.0f)
 		{
-//			if ( actor->getId().getType() == RYZOMID::player )
-//				CCharacter::sendMessageToClient( actor->getId(),"MAGIC_TOTAL_MISS" );
+			//			if ( actor->getId().getType() == RYZOMID::player )
+			//				CCharacter::sendMessageToClient( actor->getId(),"MAGIC_TOTAL_MISS" );
 			return;
 		}
-		
-		const std::vector< CSpellTarget > & targets = phrase->getTargets();
-		
+
+		const std::vector<CSpellTarget> &targets = phrase->getTargets();
+
 		sint skillValue = 0;
-		if ( actor->getId().getType() == RYZOMID::player )
+		if (actor->getId().getType() == RYZOMID::player)
 		{
-			CCharacter * pC = (CCharacter *) actor;
-			skillValue = pC->getSkillValue( _Skill );
+			CCharacter *pC = (CCharacter *)actor;
+			skillValue = pC->getSkillValue(_Skill);
 		}
 		else
 		{
-			const CStaticCreatures * form = actor->getForm();
-			if ( !form )
+			const CStaticCreatures *form = actor->getForm();
+			if (!form)
 			{
-				nlwarning( "<MAGIC>invalid creature form %s in entity %s", actor->getType().toString().c_str(), actor->getId().toString().c_str() );
+				nlwarning("<MAGIC>invalid creature form %s in entity %s", actor->getType().toString().c_str(), actor->getId().toString().c_str());
 				return;
-			}	
+			}
 			skillValue = form->getAttackLevel();
 		}
 
 		// apply used item power factor on cost per update
-//		_CostPerUpdate = sint32( _CostPerUpdate / (1.0 + phrase->getUsedItemStats().getPowerFactor(_Skill, phrase->getBrickMaxSabrinaCost())) );
-		
-		const CSEffectPtr debuff = actor->lookForActiveEffect( EFFECT_FAMILIES::DebuffSkillMagic );		
-		if ( debuff )
+		//		_CostPerUpdate = sint32( _CostPerUpdate / (1.0 + phrase->getUsedItemStats().getPowerFactor(_Skill, phrase->getBrickMaxSabrinaCost())) );
+
+		const CSEffectPtr debuff = actor->lookForActiveEffect(EFFECT_FAMILIES::DebuffSkillMagic);
+		if (debuff)
 			skillValue -= debuff->getParamValue();
-		const CSEffect * outPostBuff = actor->lookForActiveEffect( EFFECT_FAMILIES::OutpostMagic );
-		if ( outPostBuff )
+		const CSEffect *outPostBuff = actor->lookForActiveEffect(EFFECT_FAMILIES::OutpostMagic);
+		if (outPostBuff)
 			skillValue += outPostBuff->getParamValue();
 
 		// cap skillValue with link power
-		if (skillValue > (sint32)_Power )
+		if (skillValue > (sint32)_Power)
 			skillValue = (sint32)_Power;
 
 		resists.clearAll();
-		for ( uint i = 0; i < targets.size(); i++ )
+		for (uint i = 0; i < targets.size(); i++)
 		{
 			// check target
-			CEntityBase* target = CEntityBaseManager::getEntityBasePtr( targets[i].getId() );
-			if ( !target)
+			CEntityBase *target = CEntityBaseManager::getEntityBasePtr(targets[i].getId());
+			if (!target)
 				continue;
-			
+
 			string errorCode;
-			if ( !isMad && !PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(),target->getEntityRowId(),ACTNATURE::OFFENSIVE_MAGIC, errorCode, i==0 ) )
+			if (!isMad && !PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(), target->getEntityRowId(), ACTNATURE::OFFENSIVE_MAGIC, errorCode, i == 0))
 			{
 				// dont warn because of multi target
 				// PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
@@ -242,26 +247,26 @@ protected:
 			// apply skill modifier accroding to target race
 			sint32 localSkillValue = skillValue + actor->getSkillModifierForRace(target->getRace());
 
-			if ( actor->getId().getType() == RYZOMID::player )
+			if (actor->getId().getType() == RYZOMID::player)
 			{
 				// boost magic skill for low level chars
 				sint32 sb = (sint32)MagicSkillStartValue.get();
-				localSkillValue = max( sb, localSkillValue );
+				localSkillValue = max(sb, localSkillValue);
 
 				// add magic boost from consumable
-				CCharacter * pC = dynamic_cast<CCharacter *>(actor);
-				if(pC)
+				CCharacter *pC = dynamic_cast<CCharacter *>(actor);
+				if (pC)
 					localSkillValue += pC->magicSuccessModifier();
 			}
 
 			CTargetInfos targetInfos;
-			targetInfos.RowId			= target->getEntityRowId();
-			targetInfos.MainTarget		= (i == 0);
-			targetInfos.Immune			= false;
-			targetInfos.ResistFactor	= 1.0f;
-			targetInfos.DmgFactor		= 0.0f;
+			targetInfos.RowId = target->getEntityRowId();
+			targetInfos.MainTarget = (i == 0);
+			targetInfos.Immune = false;
+			targetInfos.ResistFactor = 1.0f;
+			targetInfos.DmgFactor = 0.0f;
 
-			float & resistFactor = targetInfos.ResistFactor;
+			float &resistFactor = targetInfos.ResistFactor;
 
 			// test if target really affected
 			if (invulnerabilityAll[i] || invulnerabilityOffensive[i])
@@ -281,9 +286,9 @@ protected:
 				else
 				{
 					// get the chances
-					const uint8 roll = (uint8)RandomGenerator.rand( 99 );
+					const uint8 roll = (uint8)RandomGenerator.rand(99);
 					resistFactor = CStaticSuccessTable::getSuccessFactor(SUCCESS_TABLE_TYPE::MagicResistDirect, localSkillValue - resistValue, roll);
-					
+
 					// increase resists modifier for next resists test
 					if (targetInfos.ResistFactor > 1.0f)
 						target->incResistModifier(_DmgType, targetInfos.ResistFactor);
@@ -301,13 +306,13 @@ protected:
 			else
 			{
 				resists.clear(i);
-				if ( resistFactor > 1.0f )
+				if (resistFactor > 1.0f)
 					resistFactor = 1.0f;
 
-				targetInfos.DmgFactor = float(resistFactor * successFactor * CSLinkEffect::getUpdatePeriod(EFFECT_FAMILIES::Dot) * CTickEventHandler::getGameTimeStep() );
+				targetInfos.DmgFactor = float(resistFactor * successFactor * CSLinkEffect::getUpdatePeriod(EFFECT_FAMILIES::Dot) * CTickEventHandler::getGameTimeStep());
 
 				// if PVP, apply PVP magic damage factor
-				if( actor != target && actor->getId().getType() == RYZOMID::player && target->getId().getType() == RYZOMID::player)
+				if (actor != target && actor->getId().getType() == RYZOMID::player && target->getId().getType() == RYZOMID::player)
 				{
 					targetInfos.DmgFactor *= PVPMagicDamageFactor.get();
 				}
@@ -317,23 +322,23 @@ protected:
 		}
 	}
 
-	virtual void apply( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-						const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport,
-						sint32 vamp, float vampRatio, bool reportXp )
+	virtual void apply(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+	    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+	    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport,
+	    sint32 vamp, float vampRatio, bool reportXp)
 	{
 
 		H_AUTO(CMagicActionDot_apply);
 
-		CEntityBase* actor = CEntityBaseManager::getEntityBasePtr( phrase->getActor() );
+		CEntityBase *actor = CEntityBaseManager::getEntityBasePtr(phrase->getActor());
 		if (!actor)
 			return;
 
 		// apply used item power factor on cost per update
-//		_CostPerUpdate = sint32( _CostPerUpdate / (1.0 + phrase->getUsedItemStats().getPowerFactor(_Skill, phrase->getBrickMaxSabrinaCost())) );
-		
+		//		_CostPerUpdate = sint32( _CostPerUpdate / (1.0 + phrase->getUsedItemStats().getPowerFactor(_Skill, phrase->getBrickMaxSabrinaCost())) );
+
 		const uint nbTargets = (uint)_ApplyTargets.size();
-		for ( uint i = 0; i < nbTargets; i++ )
+		for (uint i = 0; i < nbTargets; i++)
 		{
 			TReportAction reportAction = actionReport;
 
@@ -342,26 +347,26 @@ protected:
 			reportAction.Skill = _Skill;
 			if (!reportXp)
 			{
-				reportAction.Skill = SKILLS::unknown;						// no xp gain but damage must be registered
-				reportAction.SkillLevel = phrase->getBrickMaxSabrinaCost();	// use the real level of the enchantment
+				reportAction.Skill = SKILLS::unknown; // no xp gain but damage must be registered
+				reportAction.SkillLevel = phrase->getBrickMaxSabrinaCost(); // use the real level of the enchantment
 			}
-				
+
 			// check target
-			CEntityBase* target = CEntityBaseManager::getEntityBasePtr( _ApplyTargets[i].RowId );
-			if ( !target)
+			CEntityBase *target = CEntityBaseManager::getEntityBasePtr(_ApplyTargets[i].RowId);
+			if (!target)
 				continue;
-			
-			if( target->getId().getType() != RYZOMID::player )
+
+			if (target->getId().getType() != RYZOMID::player)
 			{
-				const CStaticCreatures * creatureSheet = target->getForm();
-				if( creatureSheet != NULL )
+				const CStaticCreatures *creatureSheet = target->getForm();
+				if (creatureSheet != NULL)
 				{
 					reportAction.DeltaLvl = skillLevel - creatureSheet->getXPLevel();
 				}
 			}
-			
+
 			string errorCode;
-			if ( !PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(),target->getEntityRowId(),ACTNATURE::OFFENSIVE_MAGIC, errorCode, _ApplyTargets[i].MainTarget ) )
+			if (!PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(), target->getEntityRowId(), ACTNATURE::OFFENSIVE_MAGIC, errorCode, _ApplyTargets[i].MainTarget))
 			{
 				// dont warn because of multi target
 				// PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
@@ -374,12 +379,12 @@ protected:
 			if (_ApplyTargets[i].Immune)
 			{
 				SM_STATIC_PARAMS_1(params, STRING_MANAGER::entity);
-				params[0].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()) );
+				params[0].setEIdAIAlias(target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()));
 				PHRASE_UTILITIES::sendDynamicSystemMessage(actor->getEntityRowId(), "MAGIC_TARGET_IMMUNE", params);
 			}
 			else if (_ApplyTargets[i].ResistFactor <= 0.0f)
 			{
-				PHRASE_UTILITIES::sendSpellResistMessages( actor->getEntityRowId(), target->getEntityRowId());
+				PHRASE_UTILITIES::sendSpellResistMessages(actor->getEntityRowId(), target->getEntityRowId());
 			}
 
 			if (_ApplyTargets[i].ResistFactor < 1.0f)
@@ -389,9 +394,9 @@ protected:
 
 			if (_ApplyTargets[i].ResistFactor > 0.0f)
 			{
-				CCreature * npc = dynamic_cast<CCreature*>(target);
-				CCharacter * c = dynamic_cast<CCharacter*>(actor);
-				if(npc && c && !PHRASE_UTILITIES::testRange(*actor, *target, (uint32)npc->getMaxHitRangeForPC()*1000) )
+				CCreature *npc = dynamic_cast<CCreature *>(target);
+				CCharacter *c = dynamic_cast<CCharacter *>(actor);
+				if (npc && c && !PHRASE_UTILITIES::testRange(*actor, *target, (uint32)npc->getMaxHitRangeForPC() * 1000))
 				{
 					c->sendDynamicSystemMessage(c->getId(), "UNEFFICENT_RANGE");
 					sendAggro = false;
@@ -401,29 +406,29 @@ protected:
 				{
 					reportAction.ActionNature = ACTNATURE::OFFENSIVE_MAGIC;
 
-					const float & factor = _ApplyTargets[i].DmgFactor;
-					CSLinkEffectDot* dot = new CSLinkEffectDot(
-						phrase->getActor(),
-						_ApplyTargets[i].RowId,
-						_CostPerUpdate,
-						SCORES::sap,
-						_Skill,
-						phrase->getSpellRange(),
-						_DmgType,
-						_Power,
-						reportAction,
-						sint32(_DmgHp * factor),
-						sint32(_DmgSap * factor),
-						sint32(_DmgSta * factor),
-						_Vampirise,
-						_VampiriseRatio);
-					
+					const float &factor = _ApplyTargets[i].DmgFactor;
+					CSLinkEffectDot *dot = new CSLinkEffectDot(
+					    phrase->getActor(),
+					    _ApplyTargets[i].RowId,
+					    _CostPerUpdate,
+					    SCORES::sap,
+					    _Skill,
+					    phrase->getSpellRange(),
+					    _DmgType,
+					    _Power,
+					    reportAction,
+					    sint32(_DmgHp * factor),
+					    sint32(_DmgSap * factor),
+					    sint32(_DmgSta * factor),
+					    _Vampirise,
+					    _VampiriseRatio);
+
 					if (!dot)
 					{
 						nlwarning("Failed to allocate new CSLinkEffectDot");
 						return;
 					}
-					
+
 					dot->setPhraseBookIndex(phrase->phraseBookIndex());
 					dot->setSpellPower(phrase->getBrickMaxSabrinaCost());
 
@@ -432,20 +437,20 @@ protected:
 						// use CEntityBase methods not to cancel the current action
 						actor->CEntityBase::addLink(dot);
 						target->addSabrinaEffect(dot);
-						actor->CEntityBase::removeLink(dot,_ApplyTargets[i].ResistFactor);
-						PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport( reportAction );
+						actor->CEntityBase::removeLink(dot, _ApplyTargets[i].ResistFactor);
+						PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport(reportAction);
 						PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->reportAction(reportAction);
 						sendAggro = true;
 					}
 					else
 					{
-						actor->addLink( dot );
-						target->addSabrinaEffect( dot );
+						actor->addLink(dot);
+						target->addSabrinaEffect(dot);
 
 						// if partial resist, break link
 						if (_ApplyTargets[i].ResistFactor < 1.0f)
 						{
-							PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport( reportAction );
+							PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport(reportAction);
 							PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->reportAction(reportAction);
 							actor->stopAllLinks(_ApplyTargets[i].ResistFactor);
 						}
@@ -466,20 +471,19 @@ protected:
 		}
 	}
 
-	DMGTYPE::EDamageType		_DmgType;
-	sint32						_DmgHp;
-	sint32						_DmgSap;
-	sint32						_DmgSta;
-	sint32						_CostPerUpdate;
-	uint8						_Power;
-	sint32						_Vampirise;
-	float						_VampiriseRatio;
+	DMGTYPE::EDamageType _DmgType;
+	sint32 _DmgHp;
+	sint32 _DmgSap;
+	sint32 _DmgSta;
+	sint32 _CostPerUpdate;
+	uint8 _Power;
+	sint32 _Vampirise;
+	float _VampiriseRatio;
 
 	/// targets that need to be treated by apply()
-	std::vector<CTargetInfos>	_ApplyTargets;
+	std::vector<CTargetInfos> _ApplyTargets;
 };
 
 BEGIN_MAGIC_ACTION_FACTORY(CMagicActionDot)
-	ADD_MAGIC_ACTION_TYPE( "moel" )		
+ADD_MAGIC_ACTION_TYPE("moel")
 END_MAGIC_ACTION_FACTORY(CMagicActionDot)
-

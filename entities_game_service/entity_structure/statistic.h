@@ -14,25 +14,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_STATISTIC_H
 #define RY_STATISTIC_H
 
 #include "game_share/mirror_prop_value.h"
 
-
-namespace STAT_TYPES
+namespace STAT_TYPES {
+enum TStatType
 {
-	enum TStatType
-	{
-		Score,
-		Skill,
-		Speed,
-		Unknown,
-	};
-	const std::string & toString(TStatType type);
-	TStatType	toStatType(const std::string &str);
+	Score,
+	Skill,
+	Speed,
+	Unknown,
+};
+const std::string &toString(TStatType type);
+TStatType toStatType(const std::string &str);
 
 };
 
@@ -52,35 +48,35 @@ struct SCharacteristicsAndScores
 
 	DECLARE_PERSISTENCE_METHODS
 
-	enum TCharacteristicsAndScoreSubType 
-	{ 
-		base = 0, 
-		max, 
-		modifier, 
-		current, 
+	enum TCharacteristicsAndScoreSubType
+	{
+		base = 0,
+		max,
+		modifier,
+		current,
 		base_regenerate_repos,
 		base_regenerate_action,
 		regenerate_modifier,
 		current_regenerate,
 	};
 
-	sint32							Base;
-	CMirrorPropValueAlice<sint32>	Max;
-	sint32							OldMax;
-	sint32							Modifier;
-	CMirrorPropValueAlice<sint32>	Current;
-	sint32							OldCurrent;
+	sint32 Base;
+	CMirrorPropValueAlice<sint32> Max;
+	sint32 OldMax;
+	sint32 Modifier;
+	CMirrorPropValueAlice<sint32> Current;
+	sint32 OldCurrent;
 
-	float						BaseRegenerateRepos;
-	float						BaseRegenerateAction;
-	float						RegenerateModifier;
-	float						CurrentRegenerate;
-	NLMISC::TGameCycle			RegenerateTickUpdate;
-	float						KeepRegenerateDecimal;
-	
+	float BaseRegenerateRepos;
+	float BaseRegenerateAction;
+	float RegenerateModifier;
+	float CurrentRegenerate;
+	NLMISC::TGameCycle RegenerateTickUpdate;
+	float KeepRegenerateDecimal;
+
 	// Serial
 	void serial(NLMISC::IStream &f);
-	
+
 	// Constructor
 	SCharacteristicsAndScores();
 
@@ -90,7 +86,6 @@ struct SCharacteristicsAndScores
 	// Destructor
 	~SCharacteristicsAndScores();
 };
-
 
 /**
  * CPhysicalCharacteristics
@@ -108,7 +103,6 @@ struct CPhysicalCharacteristics
 
 	DECLARE_PERSISTENCE_METHODS
 
-
 	/**
 	 *	Constructor
 	 */
@@ -124,12 +118,10 @@ struct CPhysicalCharacteristics
 	/**
 	 * getCharacteristicStruct
 	 */
-	SCharacteristicsAndScores* getCharacteristicStruct( const std::string& characteristicName );
+	SCharacteristicsAndScores *getCharacteristicStruct(const std::string &characteristicName);
 
-
-	std::vector< SCharacteristicsAndScores > _PhysicalCharacteristics;
+	std::vector<SCharacteristicsAndScores> _PhysicalCharacteristics;
 };
-
 
 /**
  * CPhysicalScores, derivated of CPhysicalCharacteristics
@@ -148,12 +140,13 @@ struct CPhysicalScores
 	DECLARE_PERSISTENCE_METHODS
 
 	/// speed
-	sint32						SpeedVariationModifier;
-	
-	float						BaseWalkSpeed;
-	float						BaseRunSpeed;
-	CMirrorPropValueAlice< float, CPropLocationPacked<2> >	CurrentWalkSpeed;;
-	CMirrorPropValueAlice< float, CPropLocationPacked<2> >	CurrentRunSpeed;
+	sint32 SpeedVariationModifier;
+
+	float BaseWalkSpeed;
+	float BaseRunSpeed;
+	CMirrorPropValueAlice<float, CPropLocationPacked<2>> CurrentWalkSpeed;
+	;
+	CMirrorPropValueAlice<float, CPropLocationPacked<2>> CurrentRunSpeed;
 
 	/**
 	 *	Default constructor
@@ -167,9 +160,8 @@ struct CPhysicalScores
 	 */
 	void serial(NLMISC::IStream &f);
 
-	std::vector< SCharacteristicsAndScores > _PhysicalScores;
+	std::vector<SCharacteristicsAndScores> _PhysicalScores;
 };
-
 
 /**
  * SSkill properties and variables need for one skill
@@ -187,9 +179,9 @@ struct SSkill
 
 	DECLARE_PERSISTENCE_METHODS
 
-	enum ESkillSubType 
-	{ 
-		base = 0, 
+	enum ESkillSubType
+	{
+		base = 0,
 		modifier,
 		current,
 		maxLvlReached,
@@ -197,27 +189,27 @@ struct SSkill
 		xpNextLvl
 	};
 
-	sint32						Base;
-	sint32						Modifier;
-	sint32						OldCurrent;
-	sint32						Current;
+	sint32 Base;
+	sint32 Modifier;
+	sint32 OldCurrent;
+	sint32 Current;
 
-	sint32						MaxLvlReached;
-	double						Xp;
-	double						XpNextLvl;
-		
+	sint32 MaxLvlReached;
+	double Xp;
+	double XpNextLvl;
+
 	/**
 	 * Serial
 	 */
 	void serial(NLMISC::IStream &f)
 	{
-		f.serial( Base );
-		f.serial( Modifier );
-		f.serial( Current );
+		f.serial(Base);
+		f.serial(Modifier);
+		f.serial(Current);
 
-		f.serial( MaxLvlReached );
-		f.serial( Xp );
-		f.serial( XpNextLvl );
+		f.serial(MaxLvlReached);
+		f.serial(Xp);
+		f.serial(XpNextLvl);
 	}
 
 	void clear();
@@ -228,7 +220,6 @@ struct SSkill
 	// destructor
 	~SSkill();
 };
-
 
 /**
  * CSkills
@@ -259,25 +250,25 @@ struct CSkills
 	void clear();
 
 	// return SSkill for skill name
-	SSkill* getSkillStruct( const std::string& skillName );
+	SSkill *getSkillStruct(const std::string &skillName);
 
 	// return SSkill for skill name (const version)
-	const SSkill* getSkillStruct( const std::string& skillName ) const;
+	const SSkill *getSkillStruct(const std::string &skillName) const;
 
 	// return SSkill for skill enum
-	SSkill* getSkillStruct( SKILLS::ESkills skill );
-	
+	SSkill *getSkillStruct(SKILLS::ESkills skill);
+
 	// return SSkill for skill enum (const version)
-	const SSkill* getSkillStruct( SKILLS::ESkills skill ) const;
+	const SSkill *getSkillStruct(SKILLS::ESkills skill) const;
 
 	// return the max XP to gain in a skill to gain a level, param used to store the chosen skill
 	double getMaxXPToGain(SKILLS::ESkills &skill);
-	
+
 	// Skills
-	std::vector< SSkill > _Skills;
+	std::vector<SSkill> _Skills;
 
 	// Skill Points (needed for purchase new actions and increase characteristics
-	double					_Sp;
+	double _Sp;
 };
 
 #endif // RY_STATISTIC_H

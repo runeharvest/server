@@ -30,25 +30,26 @@
 class CGuildInvitationModule : public IModule
 {
 	NL_INSTANCE_COUNTER_DECL(CGuildInvitationModule);
-public:
 
+public:
 	/// ctor
-	CGuildInvitationModule( CGuildCharProxy& proxy, CGuildInvitation* invitation )
-		:IModule(&(proxy.getModuleParent()),invitation),_Invitation(invitation)
+	CGuildInvitationModule(CGuildCharProxy &proxy, CGuildInvitation *invitation)
+	    : IModule(&(proxy.getModuleParent()), invitation)
+	    , _Invitation(invitation)
 	{
-		nlassert( invitation );
+		nlassert(invitation);
 	}
 	/// user refuses an invitation
 	void refuse();
 	/// user accepts an invitation
 	void accept();
+
 private:
 	/// handler called on parent ( player destruction )
 	virtual void onParentDestructionHandler();
 	/// "real" invitation object
-	CGuildInvitation * _Invitation;
+	CGuildInvitation *_Invitation;
 };
-
 
 #endif // RY_GUILD_INVITATION_MODULE_H
 

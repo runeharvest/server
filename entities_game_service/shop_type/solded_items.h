@@ -34,45 +34,45 @@ class CCharacter;
 class CSoldedItems
 {
 	NL_INSTANCE_COUNTER_DECL(CSoldedItems);
-public:
 
+public:
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
 	// At time of writing it evaluated to:
 	//	void store(CPersistentDataRecord &pdr) const;
 	//	void apply(CPersistentDataRecord &pdr);
-	
-//	DECLARE_PERSISTENCE_METHODS
-		
+
+	//	DECLARE_PERSISTENCE_METHODS
+
 	struct TSoldedItem
 	{
 		DECLARE_PERSISTENCE_METHODS
-			
+
 		TItemTradePtr Item;
 		uint32 Quantity;
 	};
 
-	typedef std::vector< TSoldedItem > TMapElem;
-	typedef std::map< NLMISC::CEntityId, TMapElem > TItemSolded;
+	typedef std::vector<TSoldedItem> TMapElem;
+	typedef std::map<NLMISC::CEntityId, TMapElem> TItemSolded;
 
 	// get instance
-	static CSoldedItems * getInstance();
-	
+	static CSoldedItems *getInstance();
+
 	// an item are solded
-	void soldedItem( TItemTradePtr item, uint32 quantity, CCharacter * character );
+	void soldedItem(TItemTradePtr item, uint32 quantity, CCharacter *character);
 
 	// character log
-	void characterLogon( CCharacter * character );
+	void characterLogon(CCharacter *character);
 
 	// save
-	void save() {}
+	void save() { }
 
 private:
 	// constructor
-	CSoldedItems() {}
-	
-	static CSoldedItems *	_Instance;
-	TItemSolded				_SoldedItem;
+	CSoldedItems() { }
+
+	static CSoldedItems *_Instance;
+	TItemSolded _SoldedItem;
 };
 
 #endif // RYZOM_SOLDED_ITEMS_H

@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef PLAYER_INV_EQUIP_H
 #define PLAYER_INV_EQUIP_H
 
@@ -47,7 +46,6 @@ protected:
 	 *  If item is NULL, slot is updated as empty on the client.
 	 */
 	virtual void updateClientSlot(uint32 clientSlot, const CGameItemPtr item);
-
 };
 
 #endif

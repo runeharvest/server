@@ -14,14 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_EGS_STATIC_ROLEMASTER_PHRASE_H
 #define NL_EGS_STATIC_ROLEMASTER_PHRASE_H
 
-//Nel georges
+// Nel georges
 #include "nel/georges/u_form.h"
-
 
 /**
  * <Class description>
@@ -32,54 +29,52 @@
 class CStaticRolemasterPhrase
 {
 public:
-
 	/// Constructor
-	CStaticRolemasterPhrase() {}
+	CStaticRolemasterPhrase() { }
 
 	/// Read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 
 	/// Return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 4; }
+	inline static uint getVersion() { return 4; }
 
 	/// Serial
 	void serial(NLMISC::IStream &f)
 	{
-		f.serialCont( Bricks );
+		f.serialCont(Bricks);
 		std::vector<NLMISC::CSheetId>::const_iterator ib;
-		for ( ib=Bricks.begin(); ib!=Bricks.end(); ++ib )
+		for (ib = Bricks.begin(); ib != Bricks.end(); ++ib)
 		{
-			if ( *ib == NLMISC::CSheetId::Unknown )
-				nlwarning( "Serialized brick (in phrase) with unknown sheet id" );
+			if (*ib == NLMISC::CSheetId::Unknown)
+				nlwarning("Serialized brick (in phrase) with unknown sheet id");
 		}
-		f.serial( IsRolemasterPhrase );
-		f.serial( IsValidPhrase );
+		f.serial(IsRolemasterPhrase);
+		f.serial(IsValidPhrase);
 		computeMinFameValue();
 	}
 
 	/// Removed
-	void removed() {}
+	void removed() { }
 
 	/// called to copy from another sheet (operator= + care ptrs)
 	void reloadSheet(const CStaticRolemasterPhrase &o);
 
 public:
 	/// Bricks in the phrase
-	std::vector<NLMISC::CSheetId>	Bricks;
+	std::vector<NLMISC::CSheetId> Bricks;
 
 	/// True if it's a rolemaster phrase, false if it's a bot phrase
-	bool							IsRolemasterPhrase;
+	bool IsRolemasterPhrase;
 
 	/// true if the phrase is a real phrase (and so learnable), false if it's only a brick upgrade
-	bool							IsValidPhrase;
+	bool IsValidPhrase;
 
-	sint32							MinFameValue;
+	sint32 MinFameValue;
 
 private:
 	/// compute the minimum fame value needed to get the phrase
 	void computeMinFameValue();
 };
-
 
 #endif // NL_EGS_STATIC_ROLEMASTER_PHRASE_H
 

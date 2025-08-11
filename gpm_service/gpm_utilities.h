@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_GPM_UTILITIES_H
 #define RY_GPM_UTILITIES_H
 
@@ -42,7 +40,6 @@ class CWorldPositionManager;
 class ConstIteratorType;
 class CPlayerInfos;
 
-
 /*
  * Misc. data structures (essentially vision data)
  */
@@ -53,25 +50,26 @@ class CPlayerInfos;
 class CFrontEndData
 {
 public:
-	CFrontEndData() :	Message("",false),
-						MessageHeaderSize(0),
-						NumPlayers(0),
-						CurrentVisionsAtTick(0),
-						MaxVisionsPerTick(0),
-						VisionIn(0),
-						VisionOut(0),
-						VisionReplace(0)
+	CFrontEndData()
+	    : Message("", false)
+	    , MessageHeaderSize(0)
+	    , NumPlayers(0)
+	    , CurrentVisionsAtTick(0)
+	    , MaxVisionsPerTick(0)
+	    , VisionIn(0)
+	    , VisionOut(0)
+	    , VisionReplace(0)
 	{
 	}
 
-	NLNET::CMessage													Message;
-	sint32															MessageHeaderSize;
-	sint32															NumPlayers;
-	sint32															CurrentVisionsAtTick;
-	sint32															MaxVisionsPerTick;
-	sint32															VisionIn;
-	sint32															VisionOut;
-	sint32															VisionReplace;
+	NLNET::CMessage Message;
+	sint32 MessageHeaderSize;
+	sint32 NumPlayers;
+	sint32 CurrentVisionsAtTick;
+	sint32 MaxVisionsPerTick;
+	sint32 VisionIn;
+	sint32 VisionOut;
+	sint32 VisionReplace;
 };
 
 /**
@@ -79,16 +77,18 @@ public:
  */
 struct CServiceData
 {
-	CServiceData() : Message("",false) {} // always an output message
-	NLNET::CMessage													Message;
-	sint32															MessageHeaderSize;
+	CServiceData()
+	    : Message("", false)
+	{
+	} // always an output message
+	NLNET::CMessage Message;
+	sint32 MessageHeaderSize;
 };
 
-typedef std::map<NLNET::TServiceId, CFrontEndData>					TMapFrontEndData;
-typedef std::map<NLNET::TServiceId, CServiceData>					TMapServiceData;
+typedef std::map<NLNET::TServiceId, CFrontEndData> TMapFrontEndData;
+typedef std::map<NLNET::TServiceId, CServiceData> TMapServiceData;
 
-typedef std::list< CPlayerInfos* >									TPlayerList;
-
+typedef std::list<CPlayerInfos *> TPlayerList;
 
 /*
  * Utitility classes
@@ -99,16 +99,20 @@ typedef std::list< CPlayerInfos* >									TPlayerList;
  * \param T the type of item
  * \param TPtr a pointer to T to use in list (useful for smartpointer)
  */
-template<class T, class TPtr = T*>
+template <class T, class TPtr = T *>
 class CObjectList
 {
 public:
-	TPtr	Head;
-	TPtr	Tail;
+	TPtr Head;
+	TPtr Tail;
 
-	CObjectList() : Head(NULL), Tail(NULL) {}
+	CObjectList()
+	    : Head(NULL)
+	    , Tail(NULL)
+	{
+	}
 
-	void	insertAtHead(T *object)
+	void insertAtHead(T *object)
 	{
 		nlassert(object->Next == NULL);
 		nlassert(object->Previous == NULL);
@@ -119,7 +123,7 @@ public:
 		Head = object;
 	}
 
-	void	insertAtTail(T *object)
+	void insertAtTail(T *object)
 	{
 		nlassert(object->Next == NULL);
 		nlassert(object->Previous == NULL);
@@ -130,7 +134,7 @@ public:
 		Tail = object;
 	}
 
-	void	remove(T *object)
+	void remove(T *object)
 	{
 		// if object at head
 		if (object->Previous == NULL)
@@ -148,62 +152,78 @@ public:
 		object->Next = NULL;
 	}
 
-	T			*getHead() { return (T*)Head; }
-	T			*getTail() { return (T*)Tail; }
+	T *getHead() { return (T *)Head; }
+	T *getTail() { return (T *)Tail; }
 };
 
 /**
  * A little stack implementation, for really fast push_back/pop_back
  */
-template<class T, uint stackSize>
+template <class T, uint stackSize>
 class CUnsafeConstantSizeStack
 {
 private:
-	T			_Array[stackSize];
-	T			*_Top;
+	T _Array[stackSize];
+	T *_Top;
 
 public:
-	CUnsafeConstantSizeStack()				{ _Top = _Array; }
-	
-	void		push_back(const T &o = T())	{ *(_Top++) = o; }
-	void		pop_back()					{ nlassert(_Top > _Array); --_Top; }
-	//T			&front()					{ return _Array[0]; }
-	T			&back()						{ nlassert(_Top > _Array); return *(_Top-1); }
-	uint		size()						{ return (uint)(_Top-_Array); }
-	bool		empty()						{ return _Top == _Array; }
-	void		clear()						{ _Top = _Array; }
+	CUnsafeConstantSizeStack() { _Top = _Array; }
+
+	void push_back(const T &o = T()) { *(_Top++) = o; }
+	void pop_back()
+	{
+		nlassert(_Top > _Array);
+		--_Top;
+	}
+	// T			&front()					{ return _Array[0]; }
+	T &back()
+	{
+		nlassert(_Top > _Array);
+		return *(_Top - 1);
+	}
+	uint size() { return (uint)(_Top - _Array); }
+	bool empty() { return _Top == _Array; }
+	void clear() { _Top = _Array; }
 };
 
 /**
  * The same class, but uses stl vectors instead, and should be saffer
  */
-template<class T, uint stackSize>
+template <class T, uint stackSize>
 class CSafeConstantSizeStack : public std::vector<T>
 {
 public:
-	CSafeConstantSizeStack()			{ this->reserve(stackSize); }
+	CSafeConstantSizeStack() { this->reserve(stackSize); }
 };
-
-
-
 
 /**
  * Simple smart pointers, doesn't delete object when no reference
  * Instanciation class T must have a RefCounter attribute
  */
-template<class T>
+template <class T>
 class CSimpleSmartPointer
 {
 private:
-	T	*_Ptr;
+	T *_Ptr;
 
 public:
-	CSimpleSmartPointer() : _Ptr(NULL) {}
-	CSimpleSmartPointer(T* ptr) : _Ptr(NULL) { *this = ptr; }
-	CSimpleSmartPointer(const CSimpleSmartPointer &ptr) : _Ptr(NULL) { *this = ptr; }
+	CSimpleSmartPointer()
+	    : _Ptr(NULL)
+	{
+	}
+	CSimpleSmartPointer(T *ptr)
+	    : _Ptr(NULL)
+	{
+		*this = ptr;
+	}
+	CSimpleSmartPointer(const CSimpleSmartPointer &ptr)
+	    : _Ptr(NULL)
+	{
+		*this = ptr;
+	}
 	~CSimpleSmartPointer() { *this = NULL; }
 
-	T		* operator = (T *ptr)
+	T *operator=(T *ptr)
 	{
 		if (ptr != NULL)
 			++(ptr->RefCounter);
@@ -216,24 +236,22 @@ public:
 		return _Ptr;
 	}
 
-	T		* operator = (const CSimpleSmartPointer &ptr)
+	T *operator=(const CSimpleSmartPointer &ptr)
 	{
 		*this = ptr._Ptr;
 		return _Ptr;
 	}
 
-	T		& operator * ()										{ return *_Ptr; }
-	T		* operator -> ()									{ return _Ptr; }
-	const T	& operator * () const								{ return *_Ptr; }
-	const T	* operator -> () const								{ return _Ptr; }
-	bool	operator == (const T *ptr) const					{ return ptr == _Ptr; }
-	bool	operator != (const T *ptr) const					{ return ptr != _Ptr; }
-	bool	operator == (const CSimpleSmartPointer &ptr) const	{ return ptr._Ptr == _Ptr; }
-	bool	operator != (const CSimpleSmartPointer &ptr) const	{ return ptr._Ptr != _Ptr; }
-	operator T* () const										{ return _Ptr; }
+	T &operator*() { return *_Ptr; }
+	T *operator->() { return _Ptr; }
+	const T &operator*() const { return *_Ptr; }
+	const T *operator->() const { return _Ptr; }
+	bool operator==(const T *ptr) const { return ptr == _Ptr; }
+	bool operator!=(const T *ptr) const { return ptr != _Ptr; }
+	bool operator==(const CSimpleSmartPointer &ptr) const { return ptr._Ptr == _Ptr; }
+	bool operator!=(const CSimpleSmartPointer &ptr) const { return ptr._Ptr != _Ptr; }
+	operator T *() const { return _Ptr; }
 };
-
-
 
 #endif // RY_GPM_UTILITIES_H
 

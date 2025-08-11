@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_SPECIAL_POWER_SPEEDING_UP_H
 #define RYZOM_SPECIAL_POWER_SPEEDING_UP_H
 
 #include "special_power.h"
-
 
 /**
  * Specialized class for power "SpeedingUp"
@@ -32,21 +29,23 @@ class CSpecialPowerSpeedingUp : public CSpecialPower
 {
 public:
 	/// Default Constructor
-	CSpecialPowerSpeedingUp() : CSpecialPower()
-	{}
+	CSpecialPowerSpeedingUp()
+	    : CSpecialPower()
+	{
+	}
 
 	/// Constructor
-	CSpecialPowerSpeedingUp(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, uint8 speedMod, float durationInSeconds, float disableTimeInSeconds) 
-		: _SpeedMod(speedMod)
+	CSpecialPowerSpeedingUp(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, uint8 speedMod, float durationInSeconds, float disableTimeInSeconds)
+	    : _SpeedMod(speedMod)
 	{
 		_Phrase = phrase;
-		
+
 		_DisablePowerTime = NLMISC::TGameCycle(disableTimeInSeconds / CTickEventHandler::getGameTimeStep());
-		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());		
+		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());
 
 		_PowerType = POWERS::SpeedingUp;
-		
-		if(TheDataset.isAccessible(actorRowId))
+
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -57,13 +56,12 @@ public:
 	/// apply effects
 	virtual void apply();
 
-
 protected:
 	/// speed modifier in % (max 100%)
-	uint8				_SpeedMod;
+	uint8 _SpeedMod;
 
 	/// Duration in ticks
-	NLMISC::TGameCycle	_Duration;
+	NLMISC::TGameCycle _Duration;
 };
 
 #endif // RYZOM_SPECIAL_POWER_SPEEDING_UP_H

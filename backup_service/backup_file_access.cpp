@@ -28,41 +28,38 @@
 
 using namespace NLNET;
 
-
 /* These variables are deprecated. Now the BS only deals with paths relative to SaveShardRoot.
 NLMISC::CVariable<std::string>	BSFilePrefix("backup", "BSFilePrefix", "file read/write prefix", "", 0, true);
 NLMISC::CVariable<std::string>	BSFileSubst("backup", "BSFileSubst", "file read/write substitute part", "", 0, true);
 */
-NLMISC::CVariable<bool>	VerboseLog("backup", "VerboseLog", "Activate verbose logging of BS activity", false);
-NLMISC::CVariable<bool>	UseTempFile("backup", "UseTempFile", "Flag the use of temporary file for safe write or append operation", true, true);
+NLMISC::CVariable<bool> VerboseLog("backup", "VerboseLog", "Activate verbose logging of BS activity", false);
+NLMISC::CVariable<bool> UseTempFile("backup", "UseTempFile", "Flag the use of temporary file for safe write or append operation", true, true);
 
 extern NLMISC::CVariable<std::string> SaveShardRootGameShare;
 
-bool	bsstrincmp(const char* s1, const char* s2, int n)
+bool bsstrincmp(const char *s1, const char *s2, int n)
 {
-	int	nn;
-	for (nn = (int)n; nn>0 && *s1 != '\0' && *s2 != '\0' && tolower(*s1) == tolower(*s2); --nn, ++s1, ++s2)
-		;
+	int nn;
+	for (nn = (int)n; nn > 0 && *s1 != '\0' && *s2 != '\0' && tolower(*s1) == tolower(*s2); --nn, ++s1, ++s2);
 	return nn == 0 || (*s1 == *s2);
 }
 
-std::string	getBackupFileName(const std::string& filename)
+std::string getBackupFileName(const std::string &filename)
 {
 	return SaveShardRootGameShare.get() + filename;
 	/* // BSFilePrefix and BSFileSubst are deprecated
 	if (BSFilePrefix.get().empty())
-		return filename;
+	    return filename;
 
 	if (!BSFileSubst.get().empty() && bsstrincmp(BSFileSubst.get().c_str(), filename.c_str(), BSFileSubst.get().size()))
-		return BSFilePrefix.get() + filename.substr(BSFileSubst.get().size());
+	    return BSFilePrefix.get() + filename.substr(BSFileSubst.get().size());
 	else
-		return BSFilePrefix.get() + filename;
+	    return BSFilePrefix.get() + filename;
 	*/
 }
 
-
 // Init File manager
-void	CFileAccessManager::init()
+void CFileAccessManager::init()
 {
 	_Mode = Normal;
 	_StallAllowed = true;
@@ -70,20 +67,20 @@ void	CFileAccessManager::init()
 }
 
 // Add an access to perform to stack of accesses
-void	CFileAccessManager::stackFileAccess(IFileAccess* access)
+void CFileAccessManager::stackFileAccess(IFileAccess *access)
 {
 	_Accesses.push_back(access);
 }
 
 // Flushes file accesses
-void	CFileAccessManager::update()
+void CFileAccessManager::update()
 {
 	// while we are in normal mode, and there are still accesses to perform
 	while (_Mode == Normal && !_Accesses.empty())
 	{
 		// get next access
-		IFileAccess*				access = _Accesses.front();
-		IFileAccess::TReturnCode	rc = access->execute(*this);
+		IFileAccess *access = _Accesses.front();
+		IFileAccess::TReturnCode rc = access->execute(*this);
 
 		if (rc == IFileAccess::MajorFailure)
 		{
@@ -104,7 +101,7 @@ void	CFileAccessManager::update()
 }
 
 // Release File manager
-void	CFileAccessManager::release()
+void CFileAccessManager::release()
 {
 	if (!_Accesses.empty())
 		update();
@@ -116,10 +113,8 @@ void	CFileAccessManager::release()
 	}
 }
 
-
-
 // Force manager mode
-void	CFileAccessManager::setMode(TMode mode, const std::string& reason)
+void CFileAccessManager::setMode(TMode mode, const std::string &reason)
 {
 	if (mode == _Mode)
 		return;
@@ -127,9 +122,9 @@ void	CFileAccessManager::setMode(TMode mode, const std::string& reason)
 	_Mode = mode;
 	_Reason = reason;
 
-	NLNET::CMessage	msgout("STALL_MODE");
-	bool			stalled = (_Mode != Normal);
-	std::string		reasonstr = _Reason;
+	NLNET::CMessage msgout("STALL_MODE");
+	bool stalled = (_Mode != Normal);
+	std::string reasonstr = _Reason;
 
 	msgout.serial(stalled, reasonstr);
 	NLNET::CUnifiedNetwork::getInstance()->send("EGS", msgout);
@@ -138,43 +133,37 @@ void	CFileAccessManager::setMode(TMode mode, const std::string& reason)
 		IService::getInstance()->setCurrentStatus("Stalled");
 	else
 		IService::getInstance()->clearCurrentStatus("Stalled");
-
 }
 
-
-
 // Notify service connection
-void	CFileAccessManager::notifyServiceConnection(NLNET::TServiceId serviceId, const std::string& serviceName)
+void CFileAccessManager::notifyServiceConnection(NLNET::TServiceId serviceId, const std::string &serviceName)
 {
 	if (serviceName == "EGS" && _Mode == Stalled)
 	{
-		NLNET::CMessage	msgout("STALL_MODE");
-		bool			stalled = true;
-		std::string		reason = _Reason;
+		NLNET::CMessage msgout("STALL_MODE");
+		bool stalled = true;
+		std::string reason = _Reason;
 
 		msgout.serial(stalled, reason);
 		NLNET::CUnifiedNetwork::getInstance()->send(serviceId, msgout);
 	}
 }
 
-
-
 // display stacked accesses
-void	CFileAccessManager::displayFileAccesses(NLMISC::CLog& log)
+void CFileAccessManager::displayFileAccesses(NLMISC::CLog &log)
 {
-	uint	i;
-	for (i=0; i<_Accesses.size(); ++i)
+	uint i;
+	for (i = 0; i < _Accesses.size(); ++i)
 	{
 		log.displayRawNL("%2d %08p %s %s %s", i, _Accesses[i], _Accesses[i]->Requester.toString().c_str(), _Accesses[i]->Filename.c_str(), _Accesses[i]->FailureReason.c_str());
 	}
-
 }
 
 // Remove a file access
-void	CFileAccessManager::removeFileAccess(IFileAccess* access)
+void CFileAccessManager::removeFileAccess(IFileAccess *access)
 {
-	std::deque<IFileAccess*>::iterator	it;
-	for (it=_Accesses.begin(); it!=_Accesses.end(); ++it)
+	std::deque<IFileAccess *>::iterator it;
+	for (it = _Accesses.begin(); it != _Accesses.end(); ++it)
 	{
 		if ((*it) == access)
 		{
@@ -185,11 +174,9 @@ void	CFileAccessManager::removeFileAccess(IFileAccess* access)
 	}
 }
 
-
-
-IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
+IFileAccess::TReturnCode CLoadFile::execute(CFileAccessManager &manager)
 {
-	bool	fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
+	bool fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
 
 	if (!fileExists && checkFailureMode(MajorFailureIfFileNotExists))
 	{
@@ -200,9 +187,9 @@ IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
 	CBackupMsgReceiveFile outMsg;
 	outMsg.RequestId = RequestId;
 
-	NLMISC::CIFile	f;
-	bool			fileOpen = (fileExists && f.open(getBackupFileName(Filename)));
-	bool			fileRead = false;
+	NLMISC::CIFile f;
+	bool fileOpen = (fileExists && f.open(getBackupFileName(Filename)));
+	bool fileRead = false;
 
 	if (fileOpen)
 	{
@@ -214,13 +201,13 @@ IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
 		try
 		{
 			H_AUTO(LoadFileSerial);
-  			outMsg.Data.invert();
-			f.serialBuffer( outMsg.Data.bufferToFill(outMsg.FileDescription.FileSize), outMsg.FileDescription.FileSize);
+			outMsg.Data.invert();
+			f.serialBuffer(outMsg.Data.bufferToFill(outMsg.FileDescription.FileSize), outMsg.FileDescription.FileSize);
 			outMsg.Data.invert();
 			fileRead = true;
 			f.close();
 		}
-		catch(const NLMISC::Exception &)
+		catch (const NLMISC::Exception &)
 		{
 		}
 	}
@@ -231,41 +218,38 @@ IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
 		return MajorFailure;
 	}
 
-//	outMsg.send(Requester);
+	//	outMsg.send(Requester);
 	switch (Requester.RequesterType)
 	{
-	case TRequester::rt_service:
-		{
-			H_AUTO(CBackupMsgReceiveFile1);
-			NLNET::CMessage msgOut("bs_file");
-			outMsg.serial(msgOut);
-			NLNET::CUnifiedNetwork::getInstance()->send( Requester.ServiceId, msgOut );
-		}
-		break;
-	case TRequester::rt_layer3:
-		{
-			NLNET::CMessage msgOut("bs_file");
-			outMsg.serial(msgOut);
-			Requester.Netbase->send(msgOut, Requester.From);
-		}
-		break;
-	case TRequester::rt_module:
-		{
-			BS::CBackupServiceClientProxy bsc(Requester.ModuleProxy);
+	case TRequester::rt_service: {
+		H_AUTO(CBackupMsgReceiveFile1);
+		NLNET::CMessage msgOut("bs_file");
+		outMsg.serial(msgOut);
+		NLNET::CUnifiedNetwork::getInstance()->send(Requester.ServiceId, msgOut);
+	}
+	break;
+	case TRequester::rt_layer3: {
+		NLNET::CMessage msgOut("bs_file");
+		outMsg.serial(msgOut);
+		Requester.Netbase->send(msgOut, Requester.From);
+	}
+	break;
+	case TRequester::rt_module: {
+		BS::CBackupServiceClientProxy bsc(Requester.ModuleProxy);
 
-			bsc.loadFileResult(CBackupService::getInstance()->getBackupModule(), 
-				RequestId, 
-				outMsg.FileDescription.FileName, 
-				outMsg.FileDescription.FileTimeStamp, 
-				NLNET::TBinBuffer(outMsg.Data.buffer(), outMsg.Data.length()));
-		}
+		bsc.loadFileResult(CBackupService::getInstance()->getBackupModule(),
+		    RequestId,
+		    outMsg.FileDescription.FileName,
+		    outMsg.FileDescription.FileTimeStamp,
+		    NLNET::TBinBuffer(outMsg.Data.buffer(), outMsg.Data.length()));
+	}
 	}
 
 	// If the file read failed for any other reason than file not found then complain
 	if (!fileRead && fileExists)
 	{
-        FailureReason = NLMISC::toString("MINOR_FAILURE:LOAD: can't %s file '%s'", (!fileOpen ? "open" : "read"), Filename.c_str());
-        return MinorFailure;
+		FailureReason = NLMISC::toString("MINOR_FAILURE:LOAD: can't %s file '%s'", (!fileOpen ? "open" : "read"), Filename.c_str());
+		return MinorFailure;
 	}
 
 	if (VerboseLog)
@@ -284,23 +268,21 @@ IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
 	return Success;
 }
 
-
-
-CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester, uint32 requestid, NLMISC::CMemStream& data)
-	: IFileAccess(filename, requester, requestid)
+CWriteFile::CWriteFile(const std::string &filename, const TRequester &requester, uint32 requestid, NLMISC::CMemStream &data)
+    : IFileAccess(filename, requester, requestid)
 {
 	BackupFile = false;
 	Append = false;
 	CreateDir = true;
 	FailureMode = MajorFailureMode;
 	uint32 startPos = (uint32)data.getPos();
-	uint32 actualLen = data.length()-startPos;
+	uint32 actualLen = data.length() - startPos;
 	Data.resize(actualLen);
-	memcpy(&(Data[0]), data.buffer()+startPos, actualLen);
+	memcpy(&(Data[0]), data.buffer() + startPos, actualLen);
 }
 
-CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester, uint32 requestid, uint8* data, uint dataSize)
-	: IFileAccess(filename, requester, requestid)
+CWriteFile::CWriteFile(const std::string &filename, const TRequester &requester, uint32 requestid, uint8 *data, uint dataSize)
+    : IFileAccess(filename, requester, requestid)
 {
 	BackupFile = false;
 	Append = false;
@@ -310,9 +292,9 @@ CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester,
 	memcpy(&(Data[0]), data, dataSize);
 }
 
-IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
+IFileAccess::TReturnCode CWriteFile::execute(CFileAccessManager &manager)
 {
-	bool	fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
+	bool fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
 
 	if (!fileExists)
 	{
@@ -343,12 +325,11 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 
 	if (CreateDir)
 	{
-		std::string	dir = NLMISC::CFile::getPath(getBackupFileName(Filename));
+		std::string dir = NLMISC::CFile::getPath(getBackupFileName(Filename));
 
 		if (!NLMISC::CFile::isExists(dir))
 		{
-			if (!NLMISC::CFile::createDirectoryTree(dir) ||
-				!NLMISC::CFile::setRWAccess(dir))
+			if (!NLMISC::CFile::createDirectoryTree(dir) || !NLMISC::CFile::setRWAccess(dir))
 			{
 				if (checkFailureMode(MajorFailureIfFileUnwritable))
 				{
@@ -366,8 +347,8 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 
 	// if can't open file, file is unwritable, failure in all cases (and no backup)
 	// file is kept untouched
-	NLMISC::COFile	f;
-	bool	fileOpen = f.open(getBackupFileName(Filename), Append, false, UseTempFile);
+	NLMISC::COFile f;
+	bool fileOpen = f.open(getBackupFileName(Filename), Append, false, UseTempFile);
 	if (!fileOpen)
 	{
 		if (checkFailureMode(MajorFailureIfFileUnwritable))
@@ -379,7 +360,7 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 		return MinorFailure;
 	}
 
-	bool	fileSaved = false;
+	bool fileSaved = false;
 
 	try
 	{
@@ -389,7 +370,7 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 		if (VerboseLog)
 			nlinfo("%s %u octets to file '%s'", Append ? "Append" : "Save", Data.size(), Filename.c_str());
 	}
-	catch(const NLMISC::Exception &)
+	catch (const NLMISC::Exception &)
 	{
 	}
 
@@ -409,10 +390,10 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 	// if backup failed
 	//  -> if it is a major issue, don't write file
 	//  -> else write file anyway
-	bool	fileBackuped = true;
+	bool fileBackuped = true;
 	if (fileExists && BackupFile)
 	{
-		if (!NLMISC::CFile::copyFile( getBackupFileName(Filename)+".backup", getBackupFileName(Filename)))
+		if (!NLMISC::CFile::copyFile(getBackupFileName(Filename) + ".backup", getBackupFileName(Filename)))
 		{
 			fileBackuped = false;
 			if (checkFailureMode(MajorFailureIfFileUnbackupable))
@@ -432,21 +413,20 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 	}
 
 	NLMISC::COFile flog;
-	std::string str = getBackupFileName(Filename)+"\n";
-	if(str.find("characters")!=std::string::npos)
+	std::string str = getBackupFileName(Filename) + "\n";
+	if (str.find("characters") != std::string::npos)
 	{
 		flog.open(getBackupFileName("new_save.txt"), true);
-		flog.serialBuffer((uint8*)&(str[0]), str.size());
+		flog.serialBuffer((uint8 *)&(str[0]), str.size());
 		flog.close();
 	}
 
 	return Success;
 }
 
-
-IFileAccess::TReturnCode	CDeleteFile::execute(CFileAccessManager& manager)
+IFileAccess::TReturnCode CDeleteFile::execute(CFileAccessManager &manager)
 {
-	bool	fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
+	bool fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
 
 	if (!fileExists)
 	{
@@ -465,18 +445,17 @@ IFileAccess::TReturnCode	CDeleteFile::execute(CFileAccessManager& manager)
 
 	if (BackupFile)
 	{
-		bool	fileBackuped = false;
+		bool fileBackuped = false;
 		try
 		{
-			std::string	path = NLMISC::CFile::getPath(getBackupFileName(Filename));
-			std::string	file = NLMISC::CFile::getFilename(Filename);
-			std::string	backup;
-			uint	i = 0;
+			std::string path = NLMISC::CFile::getPath(getBackupFileName(Filename));
+			std::string file = NLMISC::CFile::getFilename(Filename);
+			std::string backup;
+			uint i = 0;
 			do
 			{
 				backup = NLMISC::toString("%sdelete.%04u.%s", path.c_str(), i++, file.c_str());
-			}
-			while (i <= 10000 && NLMISC::CFile::fileExists(backup));
+			} while (i <= 10000 && NLMISC::CFile::fileExists(backup));
 
 			fileBackuped = (i <= 10000 && NLMISC::CFile::moveFile(backup, getBackupFileName(Filename)));
 		}
@@ -514,5 +493,3 @@ IFileAccess::TReturnCode	CDeleteFile::execute(CFileAccessManager& manager)
 
 	return Success;
 }
-
-

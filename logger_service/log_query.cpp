@@ -14,34 +14,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "log_query.h"
 #include <time.h>
 
 using namespace std;
 using namespace NLMISC;
 
-
-bool ConversionTable[LGS::TSupportedParamType::nb_enum_items][LGS::TSupportedParamType::nb_enum_items] =
-{
-//	the type of the log param->	
-//						spt_uint32,	spt_uint64,	spt_sint32,	spt_float,	spt_string,	spt_entityId,	spt_sheetId,	spt_itemId,
+bool ConversionTable[LGS::TSupportedParamType::nb_enum_items][LGS::TSupportedParamType::nb_enum_items] = {
+	//	the type of the log param->
+	//						spt_uint32,	spt_uint64,	spt_sint32,	spt_float,	spt_string,	spt_entityId,	spt_sheetId,	spt_itemId,
 	/* v The type of the query param v*/
-	/*spt_uint32*/	{	true,		true,		true,		true,		true,		false,			true,			false	},
-	/*spt_uint64*/	{	true,		true,		true,		true,		true,		true,			false,			true	},
-	/*spt_sint32*/	{	true,		true,		true,		true,		true,		false,			false,			false	},
-	/*spt_float*/	{	true,		true,		true,		true,		true,		false,			false,			false	},
-	/*spt_string*/	{	true,		true,		true,		true,		true,		true,			true,			true	},
-	/*spt_entityId*/{	false,		false,		false,		false,		true,		true,			false,			false	},
-	/*spt_sheetId*/	{	false,		false,		false,		false,		true,		false,			true,			false	},
-	/*spt_itemId*/	{	false,		false,		false,		false,		true,		false,			false,				true	},
+	/*spt_uint32*/ { true, true, true, true, true, false, true, false },
+	/*spt_uint64*/ { true, true, true, true, true, true, false, true },
+	/*spt_sint32*/ { true, true, true, true, true, false, false, false },
+	/*spt_float*/ { true, true, true, true, true, false, false, false },
+	/*spt_string*/ { true, true, true, true, true, true, true, true },
+	/*spt_entityId*/ { false, false, false, false, true, true, false, false },
+	/*spt_sheetId*/ { false, false, false, false, true, false, true, false },
+	/*spt_itemId*/ { false, false, false, false, true, false, false, true },
 
 };
 
-
-
 CQueryParser::CQueryParser(const TLogDefinitions &logDefs)
-	:	_LogDefs(logDefs)
+    : _LogDefs(logDefs)
 {
 	// init the keywords table
 	_Keywords.insert(std::make_pair(std::string("or"), tt_or));
@@ -80,8 +75,6 @@ LGS::TSupportedParamType CQueryParser::parseParamType(const std::string &typeNam
 	else
 		return LGS::TSupportedParamType::invalid_val;
 }
-
-
 
 CQueryParser::TParserResult CQueryParser::parseQuery(const std::string &queryStr, bool parseOnlyOption)
 {
@@ -130,11 +123,10 @@ CQueryParser::TParserResult CQueryParser::parseQuery(const std::string &queryStr
 	// FLOAT	:	INT '.' INT;
 	// DATE		:	INT '-' INT '-' INT (INT ':' INT)?;
 	// TYPE		:	'{' ID '}'
-	
 
-	try 
+	try
 	{
-		TParserResult	pr;	
+		TParserResult pr;
 
 		iterator first = queryStr.begin();
 
@@ -163,7 +155,6 @@ CQueryParser::TParserResult CQueryParser::parseQuery(const std::string &queryStr
 
 		throw iq;
 	}
-
 }
 
 void CQueryParser::parseOptions(CQueryParser::TParserResult &parserResult, CQueryParser::iterator &it, CQueryParser::iterator end)
@@ -183,26 +174,24 @@ bool CQueryParser::parseOption(CQueryParser::TParserResult &parserResult, CQuery
 	case tt_full_context:
 		parserResult.FullContext = true;
 		return true;
-	case tt_output_prefix:
-		{
-			// read a output prefix
-			tok = getNextToken(it, end);
-			if (tok.TokenType != tt_EQUAL)
-				throw EInvalidQuery(tok.It, "Output prefix option must be followed by an equal sign '='");
+	case tt_output_prefix: {
+		// read a output prefix
+		tok = getNextToken(it, end);
+		if (tok.TokenType != tt_EQUAL)
+			throw EInvalidQuery(tok.It, "Output prefix option must be followed by an equal sign '='");
 
-			tok = getNextToken(it, end);
-			if (tok.TokenType != tt_ID && tok.TokenType != tt_STRING)
-				throw EInvalidQuery(tok.It, "Output prefix option must be followed by a the prefix value after the '=' sign");
+		tok = getNextToken(it, end);
+		if (tok.TokenType != tt_ID && tok.TokenType != tt_STRING)
+			throw EInvalidQuery(tok.It, "Output prefix option must be followed by a the prefix value after the '=' sign");
 
-			// ok, store the prefix
-			if (tok.TokenType == tt_STRING)
-				parserResult.OutputPrefix = tok.Text.substr(1, tok.Text.size()-1);
-			else
-				parserResult.OutputPrefix = tok.Text;
+		// ok, store the prefix
+		if (tok.TokenType == tt_STRING)
+			parserResult.OutputPrefix = tok.Text.substr(1, tok.Text.size() - 1);
+		else
+			parserResult.OutputPrefix = tok.Text;
 
-
-			return true;
-		}
+		return true;
+	}
 	}
 
 	// not an option
@@ -240,7 +229,6 @@ TQueryNode *CQueryParser::buildPredicate(const LGS::TParamValue &refVal, const T
 			break;
 		default:
 			throw EInvalidQuery(operatorType.It, "Invalid operator for predicate");
-			
 		}
 		if (!node->init())
 		{
@@ -278,7 +266,6 @@ TQueryNode *CQueryParser::buildPredicate(const LGS::TParamValue &refVal, const T
 			break;
 		default:
 			throw EInvalidQuery(operatorType.It, "Invalid operator for predicate");
-			
 		}
 		if (!node->init())
 		{
@@ -307,7 +294,6 @@ sint32 CQueryParser::parseSint(CQueryParser::iterator &it, CQueryParser::iterato
 
 	return val;
 }
-
 
 std::string CQueryParser::parseItemId(CQueryParser::iterator &it, CQueryParser::iterator end)
 {
@@ -350,7 +336,6 @@ std::string CQueryParser::parseItemId(CQueryParser::iterator &it, CQueryParser::
 	return string(start, it);
 }
 
-
 std::string CQueryParser::parseEntityId(CQueryParser::iterator &it, CQueryParser::iterator end)
 {
 	iterator rew = it;
@@ -373,7 +358,7 @@ std::string CQueryParser::parseEntityId(CQueryParser::iterator &it, CQueryParser
 	rew = it;
 	tok = getNextToken(it, end);
 	if (tok.TokenType != tt_INT && tok.TokenType != tt_NAKED_HEXA
-		&& !(tok.TokenType == tt_ID && isNakedHexa(tok.Text)))
+	    && !(tok.TokenType == tt_ID && isNakedHexa(tok.Text)))
 		throw EInvalidQuery(tok.It, "Invalid second element for entity id, must be an int or naked hexa value");
 
 	rew = it;
@@ -384,7 +369,7 @@ std::string CQueryParser::parseEntityId(CQueryParser::iterator &it, CQueryParser
 	rew = it;
 	tok = getNextToken(it, end);
 	if (tok.TokenType != tt_INT && tok.TokenType != tt_NAKED_HEXA
-		&& !(tok.TokenType == tt_ID && isNakedHexa(tok.Text)))
+	    && !(tok.TokenType == tt_ID && isNakedHexa(tok.Text)))
 		throw EInvalidQuery(tok.It, "Invalid third element for entity id, must be an int or naked hexa value");
 
 	rew = it;
@@ -395,7 +380,7 @@ std::string CQueryParser::parseEntityId(CQueryParser::iterator &it, CQueryParser
 	rew = it;
 	tok = getNextToken(it, end);
 	if (tok.TokenType != tt_INT && tok.TokenType != tt_NAKED_HEXA
-		&& !(tok.TokenType == tt_ID && isNakedHexa(tok.Text)))
+	    && !(tok.TokenType == tt_ID && isNakedHexa(tok.Text)))
 		throw EInvalidQuery(tok.It, "Invalid fourth element for entity id, must be an int or naked hexa value");
 
 	rew = it;
@@ -408,13 +393,12 @@ std::string CQueryParser::parseEntityId(CQueryParser::iterator &it, CQueryParser
 
 bool CQueryParser::isNakedHexa(const std::string &text)
 {
-	for (uint i=0; i<text.size(); ++i)
+	for (uint i = 0; i < text.size(); ++i)
 	{
 		char c = text[i];
 		if (!((c >= '0' && c <= '9')
-				|| (c >= 'a' && c <= 'f')
-				|| (c >= 'A' && c <= 'F')
-			))
+		        || (c >= 'a' && c <= 'f')
+		        || (c >= 'A' && c <= 'F')))
 			return false;
 	}
 
@@ -428,101 +412,94 @@ LGS::TParamValue CQueryParser::parseConstant(CQueryParser::iterator &it, CQueryP
 
 	switch (constantTok.TokenType)
 	{
-	case tt_INT:
+	case tt_INT: {
+		uint32 num;
+		NLMISC::fromString(constantTok.Text, num);
+		rew = it;
+		TToken dateTag = getNextToken(it, end);
+		switch (dateTag.TokenType)
 		{
-			uint32 num;
-			NLMISC::fromString(constantTok.Text, num);
-			rew = it;
-			TToken dateTag = getNextToken(it, end);
-			switch (dateTag.TokenType)
-			{
-			case tt_secs:
-				num = CTime::getSecondsSince1970()-num;
-				break;
-			case tt_mins:
-				num = CTime::getSecondsSince1970()-num*60;
-				break;
-			case tt_hours:
-				num = CTime::getSecondsSince1970()-num*(60*60);
-				break;
-			case tt_days:
-				num = CTime::getSecondsSince1970()-num*(60*60*24);
-				break;
-			case tt_weeks:
-				num = CTime::getSecondsSince1970()-num*(60*60*24*7);
-				break;
-			case tt_months:
-				num = CTime::getSecondsSince1970()-num*(60*60*24*30);
-				break;
-			case tt_years:
-				num = CTime::getSecondsSince1970()-num*(60*60*24*365);
-				break;
-			default:
-				// rewind the last token
-				it = rew;
-			}
-
-			return LGS::TParamValue(num);
+		case tt_secs:
+			num = CTime::getSecondsSince1970() - num;
+			break;
+		case tt_mins:
+			num = CTime::getSecondsSince1970() - num * 60;
+			break;
+		case tt_hours:
+			num = CTime::getSecondsSince1970() - num * (60 * 60);
+			break;
+		case tt_days:
+			num = CTime::getSecondsSince1970() - num * (60 * 60 * 24);
+			break;
+		case tt_weeks:
+			num = CTime::getSecondsSince1970() - num * (60 * 60 * 24 * 7);
+			break;
+		case tt_months:
+			num = CTime::getSecondsSince1970() - num * (60 * 60 * 24 * 30);
+			break;
+		case tt_years:
+			num = CTime::getSecondsSince1970() - num * (60 * 60 * 24 * 365);
+			break;
+		default:
+			// rewind the last token
+			it = rew;
 		}
+
+		return LGS::TParamValue(num);
+	}
 	case tt_STRING:
-		return LGS::TParamValue(constantTok.Text.substr(1, constantTok.Text.size()-1));
+		return LGS::TParamValue(constantTok.Text.substr(1, constantTok.Text.size() - 1));
 	case tt_FLOAT:
 		return LGS::TParamValue(float(atof(constantTok.Text.c_str())));
 	case tt_LONG:
 		return LGS::TParamValue(uint64(atol(constantTok.Text.c_str())));
-	case tt_DATE:
-		{
-			struct tm date;
-			memset(&date, 0, sizeof(date));
-			int nbParam = sscanf(constantTok.Text.c_str(), "%i-%i-%i %i:%i:%i", 
-				&date.tm_year, 
-				&date.tm_mon,
-				&date.tm_mday,
-				&date.tm_hour,
-				&date.tm_min,
-				&date.tm_sec);
+	case tt_DATE: {
+		struct tm date;
+		memset(&date, 0, sizeof(date));
+		int nbParam = sscanf(constantTok.Text.c_str(), "%i-%i-%i %i:%i:%i",
+		    &date.tm_year,
+		    &date.tm_mon,
+		    &date.tm_mday,
+		    &date.tm_hour,
+		    &date.tm_min,
+		    &date.tm_sec);
 
-			// adjust the year offset
-			date.tm_year -= 1900;
-			// adjust month
-			date.tm_mon -= 1;
-			// let the CRunt time compute the daylight saving offset
-			date.tm_isdst  = -1;
+		// adjust the year offset
+		date.tm_year -= 1900;
+		// adjust month
+		date.tm_mon -= 1;
+		// let the CRunt time compute the daylight saving offset
+		date.tm_isdst = -1;
 
-			time_t t = mktime(&date);
+		time_t t = mktime(&date);
 
-			return LGS::TParamValue(uint32(t));
-		}
-	case tt_OPEN_PAR:
-		{
-			it = rew;
-			std::string eids = parseEntityId(it, end);
-			CEntityId eid(eids);
-			return LGS::TParamValue(eid);
-		}
-	case tt_OPEN_BRACKET:
-		{
-			it = rew;
-			std::string itemIdStr = parseItemId(it, end);
-			INVENTORIES::TItemId itemId(itemIdStr);
-			return LGS::TParamValue(itemId);
-		}
-	case tt_DASH:
-		{
-			it = rew;
-			sint32 i = parseSint(it, end);
-			return LGS::TParamValue(i);
-		}
-	case tt_ID:
-		{
-			return LGS::TParamValue(CSheetId(constantTok.Text));
-		}
-	case tt_yesterday:
-		{
-			uint32 now = CTime::getSecondsSince1970();
-			// return date of yesterday
-			return LGS::TParamValue(now - 60*60*24);
-		}
+		return LGS::TParamValue(uint32(t));
+	}
+	case tt_OPEN_PAR: {
+		it = rew;
+		std::string eids = parseEntityId(it, end);
+		CEntityId eid(eids);
+		return LGS::TParamValue(eid);
+	}
+	case tt_OPEN_BRACKET: {
+		it = rew;
+		std::string itemIdStr = parseItemId(it, end);
+		INVENTORIES::TItemId itemId(itemIdStr);
+		return LGS::TParamValue(itemId);
+	}
+	case tt_DASH: {
+		it = rew;
+		sint32 i = parseSint(it, end);
+		return LGS::TParamValue(i);
+	}
+	case tt_ID: {
+		return LGS::TParamValue(CSheetId(constantTok.Text));
+	}
+	case tt_yesterday: {
+		uint32 now = CTime::getSecondsSince1970();
+		// return date of yesterday
+		return LGS::TParamValue(now - 60 * 60 * 24);
+	}
 	default:
 		throw EInvalidQuery(constantTok.It, "Invalid constant value on right of operator for predicate");
 	}
@@ -530,14 +507,14 @@ LGS::TParamValue CQueryParser::parseConstant(CQueryParser::iterator &it, CQueryP
 	return LGS::TParamValue();
 }
 
-TQueryNode* CQueryParser::parsePredicate(CQueryParser::iterator &it, CQueryParser::iterator end)
+TQueryNode *CQueryParser::parsePredicate(CQueryParser::iterator &it, CQueryParser::iterator end)
 {
 	iterator rew = it;
 	TToken idTok = getNextToken(it, end);
 
 	if (idTok.TokenType == tt_OPEN_BRACE)
 	{
-		// try to read a type 
+		// try to read a type
 		idTok = getNextToken(it, end);
 		if (idTok.TokenType != tt_ID)
 			throw EInvalidQuery(idTok.It, "Param type predicate must follow the form '{type}', invalid type identifier");
@@ -561,11 +538,10 @@ TQueryNode* CQueryParser::parsePredicate(CQueryParser::iterator &it, CQueryParse
 	case tt_GREATER_EQUAL:
 	case tt_EQUAL:
 	case tt_NOT_EQUAL:
-	case tt_like:
-		{
-			LGS::TParamValue refVal = parseConstant(it, end);
-			return buildPredicate(refVal, opTok, idTok, it, end);
-		}
+	case tt_like: {
+		LGS::TParamValue refVal = parseConstant(it, end);
+		return buildPredicate(refVal, opTok, idTok, it, end);
+	}
 	default:
 		throw EInvalidQuery(opTok.It, "Invalid operator for predicate");
 	}
@@ -573,7 +549,7 @@ TQueryNode* CQueryParser::parsePredicate(CQueryParser::iterator &it, CQueryParse
 	return NULL;
 }
 
-TQueryNode* CQueryParser::parseAtom(CQueryParser::iterator &it, CQueryParser::iterator end)
+TQueryNode *CQueryParser::parseAtom(CQueryParser::iterator &it, CQueryParser::iterator end)
 {
 	iterator rew = it;
 	TQueryNode *node = NULL;
@@ -591,13 +567,12 @@ TQueryNode* CQueryParser::parseAtom(CQueryParser::iterator &it, CQueryParser::it
 	else
 	{
 		it = rew;
-		node =  parsePredicate(it, end);
+		node = parsePredicate(it, end);
 	}
 
 	return node;
 }
 
-	
 TQueryNode *CQueryParser::parseAndExpr(CQueryParser::iterator &it, CQueryParser::iterator end)
 {
 	TQueryNode *node = parseAtom(it, end);
@@ -634,7 +609,6 @@ TQueryNode *CQueryParser::parseAndExpr(CQueryParser::iterator &it, CQueryParser:
 	return node;
 }
 
-
 TQueryNode *CQueryParser::parseExpr(CQueryParser::iterator &it, CQueryParser::iterator end)
 {
 	TQueryNode *node = parseAndExpr(it, end);
@@ -669,29 +643,25 @@ TQueryNode *CQueryParser::parseExpr(CQueryParser::iterator &it, CQueryParser::it
 	}
 
 	return node;
-
 }
-
-
-
 
 // parse an ID
 bool CQueryParser::parseID(CQueryParser::iterator &it, CQueryParser::iterator end)
 {
 	iterator rew = it;
-	if (it != end 
-		&& (*it>='a' && *it<='z' 
-		|| *it>='A' && *it<='Z' 
-		|| *it == '_'))
+	if (it != end
+	    && (*it >= 'a' && *it <= 'z'
+	        || *it >= 'A' && *it <= 'Z'
+	        || *it == '_'))
 	{
 		++it;
 
-		while (it != end 
-			&& (*it>='a' && *it<='z' 
-			|| *it>='A' && *it<='Z' 
-			|| *it == '_'
-			|| *it>='0' && *it<='9'
-			|| *it == '.'))
+		while (it != end
+		    && (*it >= 'a' && *it <= 'z'
+		        || *it >= 'A' && *it <= 'Z'
+		        || *it == '_'
+		        || *it >= '0' && *it <= '9'
+		        || *it == '.'))
 			++it;
 		return true;
 	}
@@ -730,8 +700,8 @@ bool CQueryParser::parseDATE(CQueryParser::iterator &it, CQueryParser::iterator 
 	iterator rew = it;
 
 	// year is already parsed
-//	if (!parseINT(it, end))
-//		goto failed;
+	//	if (!parseINT(it, end))
+	//		goto failed;
 	if (getNextToken(it, end).TokenType != tt_DASH)
 		goto failed;
 	// month
@@ -761,14 +731,13 @@ bool CQueryParser::parseDATE(CQueryParser::iterator &it, CQueryParser::iterator 
 	}
 	else
 	{
-noHour:
+	noHour:
 		// no hour, rewind
 		it = rew;
 	}
 
 	// ok, the date if correctly parsed
 	return true;
-
 
 failed:
 	it = rew;
@@ -806,7 +775,7 @@ bool CQueryParser::parseLONG_INT(CQueryParser::iterator &it, CQueryParser::itera
 	return true;
 
 failed:
-	it= rew;
+	it = rew;
 	return false;
 }
 
@@ -832,7 +801,7 @@ bool CQueryParser::parseNAKED_HEXA(iterator &it, iterator end)
 	return true;
 
 failed:
-	it= rew;
+	it = rew;
 	return false;
 }
 
@@ -841,7 +810,7 @@ bool CQueryParser::parseINT(CQueryParser::iterator &it, CQueryParser::iterator e
 {
 	iterator rew = it;
 
-	if (it != end && *it >='0' && *it <='9')
+	if (it != end && *it >= '0' && *it <= '9')
 	{
 		++it;
 		// check for 'hex' constant
@@ -849,26 +818,26 @@ bool CQueryParser::parseINT(CQueryParser::iterator &it, CQueryParser::iterator e
 		{
 			++it;
 
-			if (it == end 
-				|| !(*it >= '0' && *it<='9' 
-					|| *it >= 'a' && *it<='f'
-					|| *it >= 'A' && *it<='F'))
+			if (it == end
+			    || !(*it >= '0' && *it <= '9'
+			        || *it >= 'a' && *it <= 'f'
+			        || *it >= 'A' && *it <= 'F'))
 			{
 				// need at least one hexdigit after the 0x prefix
 				it = rew;
 				return false;
 			}
 			// read the hex digit
-			while (it != end 
-				&& (	(*it >='0' && *it <= '9') 
-						|| (*it >='a' && *it <= 'f') 
-						|| (*it >='A' && *it <= 'F')))
+			while (it != end
+			    && ((*it >= '0' && *it <= '9')
+			        || (*it >= 'a' && *it <= 'f')
+			        || (*it >= 'A' && *it <= 'F')))
 				++it;
 		}
 		else
 		{
 			// read decimal digits
-			while (it != end && *it >='0' && *it <= '9')
+			while (it != end && *it >= '0' && *it <= '9')
 				++it;
 		}
 
@@ -878,7 +847,6 @@ bool CQueryParser::parseINT(CQueryParser::iterator &it, CQueryParser::iterator e
 	it = rew;
 	return false;
 }
-
 
 // The lexer
 CQueryParser::TToken CQueryParser::getNextToken(CQueryParser::iterator &it, CQueryParser::iterator end)
@@ -898,9 +866,9 @@ CQueryParser::TToken CQueryParser::getNextToken(CQueryParser::iterator &it, CQue
 
 	iterator first = it;
 	char c = *it;
-	if (c>='a' && c<='z' 
-		|| c>='A' && c<='Z' 
-		|| c == '_')
+	if (c >= 'a' && c <= 'z'
+	    || c >= 'A' && c <= 'Z'
+	    || c == '_')
 	{
 		// try to read an ID
 		if (parseID(it, end))
@@ -915,7 +883,7 @@ CQueryParser::TToken CQueryParser::getNextToken(CQueryParser::iterator &it, CQue
 		if (parseSTRING(it, end))
 		{
 			ret.TokenType = tt_STRING;
-			ret.Text = std::string(first, it-1);
+			ret.Text = std::string(first, it - 1);
 		}
 	}
 	else if (c >= '0' && c <= '9')
@@ -940,7 +908,7 @@ CQueryParser::TToken CQueryParser::getNextToken(CQueryParser::iterator &it, CQue
 				ret.TokenType = tt_FLOAT;
 				ret.Text = std::string(first, it);
 			}
-			// try to read a naked hexa 
+			// try to read a naked hexa
 			else if (parseNAKED_HEXA(it, end))
 			{
 				ret.TokenType = tt_NAKED_HEXA;
@@ -1114,7 +1082,7 @@ CQueryParser::iterator CQueryParser::skipWS(CQueryParser::iterator it, CQueryPar
 	return it;
 }
 
-CQueryParser	*createQueryParser(const TLogDefinitions &logDefs)
+CQueryParser *createQueryParser(const TLogDefinitions &logDefs)
 {
 	return new CQueryParser(logDefs);
 }

@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef PLAYER_INV_HAND_H
 #define PLAYER_INV_HAND_H
 
@@ -33,11 +32,10 @@ public:
 	float getWearMalus();
 
 	/// Update database of item representation
-//	virtual void onItemChanged(uint32 slot);
+	//	virtual void onItemChanged(uint32 slot);
 	/// Update database of inventory representation
-//	virtual void onInventoryChanged();
+	//	virtual void onInventoryChanged();
 	//@}
-
 };
 
 /** View for the handling inventory */

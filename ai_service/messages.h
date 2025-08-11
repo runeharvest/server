@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYAI_MESSAGES_H
 #define RYAI_MESSAGES_H
 
@@ -31,9 +29,9 @@ public:
 	static void release();
 
 	/// notify a bot despawn to a service (if requested before)
-	static void notifyBotDespawn(NLNET::TServiceId serviceId, uint32 botAlias, const NLMISC::CEntityId& botId);
-	static void notifyBotDeath(NLNET::TServiceId serviceId, uint32 botAlias, const NLMISC::CEntityId& botId);	
-	static void notifyBotStopNpcControl(NLNET::TServiceId serviceId, uint32 botAlias, const NLMISC::CEntityId& botId);
+	static void notifyBotDespawn(NLNET::TServiceId serviceId, uint32 botAlias, const NLMISC::CEntityId &botId);
+	static void notifyBotDeath(NLNET::TServiceId serviceId, uint32 botAlias, const NLMISC::CEntityId &botId);
+	static void notifyBotStopNpcControl(NLNET::TServiceId serviceId, uint32 botAlias, const NLMISC::CEntityId &botId);
 };
 
 #endif

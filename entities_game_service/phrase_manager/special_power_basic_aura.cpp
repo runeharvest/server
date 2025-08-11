@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -37,9 +34,8 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CSpecialPowerBasicAura::apply()
 {
@@ -64,7 +60,7 @@ void CSpecialPowerBasicAura::apply()
 	// create effect and apply it on target
 	CAuraRootEffect *effect = new CAuraRootEffect(_ActorRowId, endDate, _RootEffectFamily, _CreatedEffectFamily, _PowerType, _ParamValue, _AffectGuild);
 	if (!effect)
-	{		
+	{
 		nlwarning("<CSpecialPowerBasicAura::apply> Failed to allocate new CShieldingEffect");
 		return;
 	}
@@ -77,11 +73,11 @@ void CSpecialPowerBasicAura::apply()
 	actor->addSabrinaEffect(effect);
 
 	// add aura FX on the actor
-	CMirrorPropValue<TYPE_VISUAL_FX> visualFx( TheDataset, _ActorRowId, DSPropertyVISUAL_FX );
+	CMirrorPropValue<TYPE_VISUAL_FX> visualFx(TheDataset, _ActorRowId, DSPropertyVISUAL_FX);
 	CVisualFX fx;
 	fx.unpack(visualFx.getValue());
-	
-	switch(_PowerType)
+
+	switch (_PowerType)
 	{
 	case POWERS::LifeAura:
 		fx.Aura = MAGICFX::AuraHp;
@@ -119,7 +115,7 @@ void CSpecialPowerBasicAura::apply()
 	default:
 		return;
 	};
-	
+
 	sint64 prop;
 	fx.pack(prop);
 	visualFx = (sint16)prop;

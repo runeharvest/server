@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "stat_db.h"
 
@@ -37,7 +36,7 @@ using namespace NLNET;
 
 CStatDB *CStatDB::_Instance = NULL;
 
-CVariable<uint32> StatDBSavePeriod("egs", "StatDBSavePeriod","stat database save period in ticks", 6, 0, true);
+CVariable<uint32> StatDBSavePeriod("egs", "StatDBSavePeriod", "stat database save period in ticks", 6, 0, true);
 
 extern CVariable<bool> EGSLight;
 
@@ -46,16 +45,16 @@ extern CVariable<bool> EGSLight;
 // ****************************************************************************
 
 // ****************************************************************************
-static bool getPlayerName(CEntityId playerId, string & playerName)
+static bool getPlayerName(CEntityId playerId, string &playerName)
 {
 	playerName = CEntityIdTranslator::getInstance()->getByEntity(playerId).toUtf8();
 	return !playerName.empty();
 }
 
 // ****************************************************************************
-static bool getGuildName(EGSPD::TGuildId guildId, string & guildName)
+static bool getGuildName(EGSPD::TGuildId guildId, string &guildName)
 {
-	CGuild * guild = CGuildManager::getInstance()->getGuildFromId(guildId);
+	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(guildId);
 	if (guild == NULL)
 		return false;
 
@@ -64,13 +63,13 @@ static bool getGuildName(EGSPD::TGuildId guildId, string & guildName)
 }
 
 // ****************************************************************************
-static void getNamesFromTable(const CStatDBTableLeafMsg & tableLeafMsg, CStatDBNamesMsg & namesMsg)
+static void getNamesFromTable(const CStatDBTableLeafMsg &tableLeafMsg, CStatDBNamesMsg &namesMsg)
 {
-	for (	map<NLMISC::CEntityId,sint32>::const_iterator it = tableLeafMsg.PlayerValues.begin();
-			it != tableLeafMsg.PlayerValues.end();
-			++it)
+	for (map<NLMISC::CEntityId, sint32>::const_iterator it = tableLeafMsg.PlayerValues.begin();
+	     it != tableLeafMsg.PlayerValues.end();
+	     ++it)
 	{
-		const CEntityId & playerId = (*it).first;
+		const CEntityId &playerId = (*it).first;
 
 		string playerName;
 		if (!getPlayerName(playerId, playerName))
@@ -84,11 +83,11 @@ static void getNamesFromTable(const CStatDBTableLeafMsg & tableLeafMsg, CStatDBN
 		namesMsg.PlayerNames[playerId] = playerName;
 	}
 
-	for (	map<EGSPD::TGuildId,sint32>::const_iterator it = tableLeafMsg.GuildValues.begin();
-			it != tableLeafMsg.GuildValues.end();
-			++it)
+	for (map<EGSPD::TGuildId, sint32>::const_iterator it = tableLeafMsg.GuildValues.begin();
+	     it != tableLeafMsg.GuildValues.end();
+	     ++it)
 	{
-		const EGSPD::TGuildId & guildId = (*it).first;
+		const EGSPD::TGuildId &guildId = (*it).first;
 
 		string guildName;
 		if (!getGuildName(guildId, guildName))
@@ -118,7 +117,7 @@ void CStatDBBackupLeafCollector::loadLeaves(IStatDBNodePtr root)
 }
 
 // ****************************************************************************
-bool CStatDBBackupLeafCollector::popTableLeafPD(CStatDBTableLeafPD & tableLeafPD)
+bool CStatDBBackupLeafCollector::popTableLeafPD(CStatDBTableLeafPD &tableLeafPD)
 {
 	if (_Root == NULL)
 		return false;
@@ -128,7 +127,7 @@ bool CStatDBBackupLeafCollector::popTableLeafPD(CStatDBTableLeafPD & tableLeafPD
 		string path = _TableLeafPaths.back();
 		_TableLeafPaths.pop_back();
 
-		CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
+		CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
 		if (tableLeaf != NULL)
 		{
 			tableLeafPD.Path = path;
@@ -142,7 +141,7 @@ bool CStatDBBackupLeafCollector::popTableLeafPD(CStatDBTableLeafPD & tableLeafPD
 }
 
 // ****************************************************************************
-void CStatDBBackupLeafCollector::visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path)
+void CStatDBBackupLeafCollector::visitValueLeaf(CStatDBValueLeaf *valueLeaf, const std::string &path)
 {
 	CStatDBValueLeafPD valueLeafPD;
 	valueLeafPD.Path = path;
@@ -152,7 +151,7 @@ void CStatDBBackupLeafCollector::visitValueLeaf(CStatDBValueLeaf * valueLeaf, co
 }
 
 // ****************************************************************************
-void CStatDBBackupLeafCollector::visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path)
+void CStatDBBackupLeafCollector::visitTableLeaf(CStatDBTableLeaf *tableLeaf, const std::string &path)
 {
 	_TableLeafPaths.push_back(path);
 }
@@ -162,7 +161,7 @@ void CStatDBBackupLeafCollector::visitTableLeaf(CStatDBTableLeaf * tableLeaf, co
 // ****************************************************************************
 
 // ****************************************************************************
-void CStatDBMFSInitLeafCollector::loadLeaves(IStatDBNodePtr root, CStatDBAllLeavesMsg & allLeavesMsg)
+void CStatDBMFSInitLeafCollector::loadLeaves(IStatDBNodePtr root, CStatDBAllLeavesMsg &allLeavesMsg)
 {
 	nlassert(root != NULL);
 
@@ -176,7 +175,7 @@ void CStatDBMFSInitLeafCollector::loadLeaves(IStatDBNodePtr root, CStatDBAllLeav
 }
 
 // ****************************************************************************
-void CStatDBMFSInitLeafCollector::visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path)
+void CStatDBMFSInitLeafCollector::visitValueLeaf(CStatDBValueLeaf *valueLeaf, const std::string &path)
 {
 	CStatDBValueLeafMsg valueLeafMsg;
 	valueLeafMsg.Path = path;
@@ -186,7 +185,7 @@ void CStatDBMFSInitLeafCollector::visitValueLeaf(CStatDBValueLeaf * valueLeaf, c
 }
 
 // ****************************************************************************
-void CStatDBMFSInitLeafCollector::visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path)
+void CStatDBMFSInitLeafCollector::visitTableLeaf(CStatDBTableLeaf *tableLeaf, const std::string &path)
 {
 	CStatDBTableLeafMsg tableLeafMsg;
 	tableLeafMsg.Path = path;
@@ -203,7 +202,7 @@ void CStatDBMFSInitLeafCollector::visitTableLeaf(CStatDBTableLeaf * tableLeaf, c
 // ****************************************************************************
 
 // ****************************************************************************
-void CStatDBNodeDisplayer::displayNode(IStatDBNodePtr node, const std::string & currentPath, NLMISC::CLog & log)
+void CStatDBNodeDisplayer::displayNode(IStatDBNodePtr node, const std::string &currentPath, NLMISC::CLog &log)
 {
 	_Log = &log;
 
@@ -215,8 +214,8 @@ void CStatDBNodeDisplayer::displayNode(IStatDBNodePtr node, const std::string & 
 	{
 		displayOneNode(node, currentPath);
 
-		// if the node is a branch 
-		CStatDBBranch * branch = dynamic_cast<CStatDBBranch *>(node.getPtr());
+		// if the node is a branch
+		CStatDBBranch *branch = dynamic_cast<CStatDBBranch *>(node.getPtr());
 		if (branch != NULL)
 		{
 			vector<IStatDBNode::CMatchingNode> children;
@@ -231,25 +230,25 @@ void CStatDBNodeDisplayer::displayNode(IStatDBNodePtr node, const std::string & 
 }
 
 // ****************************************************************************
-void CStatDBNodeDisplayer::displayOneNode(IStatDBNodePtr node, const std::string & currentPath)
+void CStatDBNodeDisplayer::displayOneNode(IStatDBNodePtr node, const std::string &currentPath)
 {
 	BOMB_IF(node == NULL, "node is NULL!", return);
 
-	CStatDBBranch * branch = dynamic_cast<CStatDBBranch *>(node.getPtr());
+	CStatDBBranch *branch = dynamic_cast<CStatDBBranch *>(node.getPtr());
 	if (branch != NULL)
 	{
 		visitBranch(branch, currentPath);
 		return;
 	}
 
-	CStatDBValueLeaf * valueLeaf = dynamic_cast<CStatDBValueLeaf *>(node.getPtr());
+	CStatDBValueLeaf *valueLeaf = dynamic_cast<CStatDBValueLeaf *>(node.getPtr());
 	if (valueLeaf != NULL)
 	{
 		visitValueLeaf(valueLeaf, currentPath);
 		return;
 	}
 
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(node.getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(node.getPtr());
 	if (tableLeaf != NULL)
 	{
 		visitTableLeaf(tableLeaf, currentPath);
@@ -258,7 +257,7 @@ void CStatDBNodeDisplayer::displayOneNode(IStatDBNodePtr node, const std::string
 }
 
 // ****************************************************************************
-void CStatDBNodeDisplayer::visitBranch(CStatDBBranch * branch, const std::string & path)
+void CStatDBNodeDisplayer::visitBranch(CStatDBBranch *branch, const std::string &path)
 {
 	if (_Settings.DisplayBranch)
 	{
@@ -267,7 +266,7 @@ void CStatDBNodeDisplayer::visitBranch(CStatDBBranch * branch, const std::string
 }
 
 // ****************************************************************************
-void CStatDBNodeDisplayer::visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path)
+void CStatDBNodeDisplayer::visitValueLeaf(CStatDBValueLeaf *valueLeaf, const std::string &path)
 {
 	if (_Settings.DisplayValueLeaf)
 	{
@@ -279,36 +278,36 @@ void CStatDBNodeDisplayer::visitValueLeaf(CStatDBValueLeaf * valueLeaf, const st
 }
 
 // ****************************************************************************
-void CStatDBNodeDisplayer::visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path)
+void CStatDBNodeDisplayer::visitTableLeaf(CStatDBTableLeaf *tableLeaf, const std::string &path)
 {
 	if (_Settings.DisplayTableLeaf)
 	{
 		_Log->displayNL("(T) %s", path.c_str());
 		if (_Settings.DisplayTableLeafContent)
 		{
-			for (	map<NLMISC::CEntityId,sint32>::const_iterator it = tableLeaf->getPlayerValues().begin();
-					it != tableLeaf->getPlayerValues().end();
-					++it)
+			for (map<NLMISC::CEntityId, sint32>::const_iterator it = tableLeaf->getPlayerValues().begin();
+			     it != tableLeaf->getPlayerValues().end();
+			     ++it)
 			{
 				string playerName;
 				if (!getPlayerName((*it).first, playerName))
 				{
 					playerName = "[not found] " + (*it).first.toString();
 				}
-				
+
 				_Log->displayNL("\tplayer '%s' = %d", playerName.c_str(), (*it).second);
 			}
 
-			for (	map<EGSPD::TGuildId,sint32>::const_iterator it = tableLeaf->getGuildValues().begin();
-					it != tableLeaf->getGuildValues().end();
-					++it)
+			for (map<EGSPD::TGuildId, sint32>::const_iterator it = tableLeaf->getGuildValues().begin();
+			     it != tableLeaf->getGuildValues().end();
+			     ++it)
 			{
 				string guildName;
 				if (!getGuildName((*it).first, guildName))
 				{
 					guildName = toString("[not found] %u", (*it).first);
 				}
-				
+
 				_Log->displayNL("\tguild '%s' = %d", guildName.c_str(), (*it).second);
 			}
 		}
@@ -330,7 +329,7 @@ CStatDB::CStatDB()
 }
 
 // ****************************************************************************
-bool CStatDB::createValue(const std::string & path, sint32 val)
+bool CStatDB::createValue(const std::string &path, sint32 val)
 {
 	nlassert(_SDBIsLoaded);
 
@@ -357,11 +356,11 @@ bool CStatDB::createValue(const std::string & path, sint32 val)
 }
 
 // ****************************************************************************
-bool CStatDB::valueSet(const std::string & path, sint32 val)
+bool CStatDB::valueSet(const std::string &path, sint32 val)
 {
 	nlassert(_SDBIsLoaded);
 
-	CStatDBValueLeaf * valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBValueLeaf *valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_Root->getNode(path).getPtr());
 	if (valueLeaf == NULL)
 		return false;
 
@@ -382,11 +381,11 @@ bool CStatDB::valueSet(const std::string & path, sint32 val)
 }
 
 // ****************************************************************************
-bool CStatDB::valueAdd(const std::string & path, sint32 val)
+bool CStatDB::valueAdd(const std::string &path, sint32 val)
 {
 	nlassert(_SDBIsLoaded);
 
-	CStatDBValueLeaf * valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBValueLeaf *valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_Root->getNode(path).getPtr());
 	if (valueLeaf == NULL)
 		return false;
 
@@ -407,11 +406,11 @@ bool CStatDB::valueAdd(const std::string & path, sint32 val)
 }
 
 // ****************************************************************************
-bool CStatDB::valueGet(const std::string & path, sint32 & val)
+bool CStatDB::valueGet(const std::string &path, sint32 &val)
 {
 	nlassert(_SDBIsLoaded);
 
-	CStatDBValueLeaf * valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBValueLeaf *valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_Root->getNode(path).getPtr());
 	if (valueLeaf == NULL)
 		return false;
 
@@ -420,7 +419,7 @@ bool CStatDB::valueGet(const std::string & path, sint32 & val)
 }
 
 // ****************************************************************************
-bool CStatDB::createTable(const std::string & path)
+bool CStatDB::createTable(const std::string &path)
 {
 	nlassert(_SDBIsLoaded);
 
@@ -428,14 +427,13 @@ bool CStatDB::createTable(const std::string & path)
 	if (node != NULL)
 		return false;
 
-	return createTable(path, map<NLMISC::CEntityId,sint32>(), map<EGSPD::TGuildId,sint32>());
+	return createTable(path, map<NLMISC::CEntityId, sint32>(), map<EGSPD::TGuildId, sint32>());
 }
 
 // ****************************************************************************
-bool CStatDB::createTable(const std::string & path,
-						  const std::map<NLMISC::CEntityId,sint32> & playerValues,
-						  const std::map<EGSPD::TGuildId,sint32> & guildValues
-						  )
+bool CStatDB::createTable(const std::string &path,
+    const std::map<NLMISC::CEntityId, sint32> &playerValues,
+    const std::map<EGSPD::TGuildId, sint32> &guildValues)
 {
 	nlassert(_SDBIsLoaded);
 
@@ -467,11 +465,11 @@ bool CStatDB::createTable(const std::string & path,
 }
 
 // ****************************************************************************
-bool CStatDB::tablePlayerAdd(const std::string & path, NLMISC::CEntityId playerId, sint32 val)
+bool CStatDB::tablePlayerAdd(const std::string &path, NLMISC::CEntityId playerId, sint32 val)
 {
 	nlassert(_SDBIsLoaded);
 
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
 	if (tableLeaf == NULL)
 		return false;
 
@@ -496,11 +494,11 @@ bool CStatDB::tablePlayerAdd(const std::string & path, NLMISC::CEntityId playerI
 }
 
 // ****************************************************************************
-bool CStatDB::tablePlayerSet(const std::string & path, NLMISC::CEntityId playerId, sint32 val)
+bool CStatDB::tablePlayerSet(const std::string &path, NLMISC::CEntityId playerId, sint32 val)
 {
 	nlassert(_SDBIsLoaded);
 
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
 	if (tableLeaf == NULL)
 		return false;
 
@@ -525,11 +523,11 @@ bool CStatDB::tablePlayerSet(const std::string & path, NLMISC::CEntityId playerI
 }
 
 // ****************************************************************************
-bool CStatDB::tablePlayerGet(const std::string & path, NLMISC::CEntityId playerId, sint32& val)
+bool CStatDB::tablePlayerGet(const std::string &path, NLMISC::CEntityId playerId, sint32 &val)
 {
 	nlassert(_SDBIsLoaded);
 
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
 	if (tableLeaf == NULL)
 		return false;
 
@@ -537,11 +535,11 @@ bool CStatDB::tablePlayerGet(const std::string & path, NLMISC::CEntityId playerI
 }
 
 // ****************************************************************************
-bool CStatDB::tableGuildAdd(const std::string & path, EGSPD::TGuildId guildId, sint32 val)
+bool CStatDB::tableGuildAdd(const std::string &path, EGSPD::TGuildId guildId, sint32 val)
 {
 	nlassert(_SDBIsLoaded);
 
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
 	if (tableLeaf == NULL)
 		return false;
 
@@ -566,11 +564,11 @@ bool CStatDB::tableGuildAdd(const std::string & path, EGSPD::TGuildId guildId, s
 }
 
 // ****************************************************************************
-bool CStatDB::tableGuildSet(const std::string & path, EGSPD::TGuildId guildId, sint32 val)
+bool CStatDB::tableGuildSet(const std::string &path, EGSPD::TGuildId guildId, sint32 val)
 {
 	nlassert(_SDBIsLoaded);
 
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
 	if (tableLeaf == NULL)
 		return false;
 
@@ -595,11 +593,11 @@ bool CStatDB::tableGuildSet(const std::string & path, EGSPD::TGuildId guildId, s
 }
 
 // ****************************************************************************
-bool CStatDB::tableGuildGet(const std::string & path, EGSPD::TGuildId guildId, sint32& val)
+bool CStatDB::tableGuildGet(const std::string &path, EGSPD::TGuildId guildId, sint32 &val)
 {
 	nlassert(_SDBIsLoaded);
 
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
 	if (tableLeaf == NULL)
 		return false;
 
@@ -610,7 +608,7 @@ bool CStatDB::tableGuildGet(const std::string & path, EGSPD::TGuildId guildId, s
 class CStatDBBackupFileCleaner : private CStatDBNodeVisitor
 {
 public:
-	void submitRemovedNode(IStatDBNodePtr removedNode, const std::string & removedNodePath, bool keepBackupOfFiles)
+	void submitRemovedNode(IStatDBNodePtr removedNode, const std::string &removedNodePath, bool keepBackupOfFiles)
 	{
 		_KeepBackupOfFiles = keepBackupOfFiles;
 		if (removedNode != NULL)
@@ -618,9 +616,9 @@ public:
 	}
 
 private:
-	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path)
+	void visitTableLeaf(CStatDBTableLeaf *tableLeaf, const std::string &path)
 	{
-		string sFilePath = toString("sdb/table_leaf_%s_pdr.%s", path.c_str(), (XMLSave?"xml":"bin"));
+		string sFilePath = toString("sdb/table_leaf_%s_pdr.%s", path.c_str(), (XMLSave ? "xml" : "bin"));
 		Bsi.deleteFile(sFilePath, _KeepBackupOfFiles);
 	}
 
@@ -628,7 +626,7 @@ private:
 	bool _KeepBackupOfFiles;
 };
 
-bool CStatDB::removeNode(const std::string & path, bool keepBackupOfFiles)
+bool CStatDB::removeNode(const std::string &path, bool keepBackupOfFiles)
 {
 	nlassert(_SDBIsLoaded);
 
@@ -689,7 +687,7 @@ void CStatDB::removeGuild(EGSPD::TGuildId guildId)
 }
 
 // ****************************************************************************
-bool CStatDB::displayNodes(const std::string & pathPattern, NLMISC::CLog & log, const CStatDBNodeDisplayer::CSettings & settings)
+bool CStatDB::displayNodes(const std::string &pathPattern, NLMISC::CLog &log, const CStatDBNodeDisplayer::CSettings &settings)
 {
 	vector<IStatDBNode::CMatchingNode> nodes;
 	_Root->getNodes(pathPattern, nodes, "");
@@ -708,33 +706,32 @@ bool CStatDB::displayNodes(const std::string & pathPattern, NLMISC::CLog & log, 
 	return true;
 }
 
-
 uint32 nTotalLoaded = 0;
 
 struct TValueLeaveFileCallback : public IBackupFileReceiveCallback
 {
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream)
 	{
 		CStatDB::getInstance()->valueLeaveFileCallback(fileDescription, dataStream);
 	}
 };
 
-void  CStatDB::valueLeaveFileCallback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+void CStatDB::valueLeaveFileCallback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream)
 {
 	if (!fileDescription.FileName.empty())
 	{
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
 		CStatDBValueLeavesPD valueLeavesPD;
 
 		pdr.fromBuffer(dataStream);
-//		pdr.readFromFile(sFilePath);
+		//		pdr.readFromFile(sFilePath);
 		valueLeavesPD.apply(pdr);
 		nTotalLoaded += fileDescription.FileSize;
 
 		for (uint32 i = 0; i < valueLeavesPD.ValueLeavesPD.size(); ++i)
 		{
-			const CStatDBValueLeafPD & valueLeafPD = valueLeavesPD.ValueLeavesPD[i];
+			const CStatDBValueLeafPD &valueLeafPD = valueLeavesPD.ValueLeavesPD[i];
 
 			IStatDBNodePtr node = _Root->getNode(valueLeafPD.Path);
 			if (node == NULL)
@@ -755,43 +752,42 @@ void  CStatDB::valueLeaveFileCallback(const CFileDescription& fileDescription, N
 	}
 }
 
-vector<string>	fileNames;
+vector<string> fileNames;
 
 struct TFileClassCallback : public IBackupFileClassReceiveCallback
 {
-	virtual void callback(const CFileDescriptionContainer& fileList)
+	virtual void callback(const CFileDescriptionContainer &fileList)
 	{
-		for (uint i=0; i<fileList.size(); ++i)
+		for (uint i = 0; i < fileList.size(); ++i)
 		{
 			fileNames.push_back(fileList[i].FileName);
 		}
 	}
-
 };
 
 struct TTableLeaveFileCallback : public IBackupFileReceiveCallback
 {
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream)
 	{
 		CStatDB::getInstance()->tableLeaveFileCallback(fileDescription, dataStream);
 	}
 };
 
-void  CStatDB::tableLeaveFileCallback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+void CStatDB::tableLeaveFileCallback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream)
 {
-	const string & fileName = CFile::getFilename(fileDescription.FileName);
+	const string &fileName = CFile::getFilename(fileDescription.FileName);
 
-	if (	CFile::getFilename(fileName).substr(0, 11) == "table_leaf_"
-		&&	CFile::getExtension(fileName) == (XMLSave?"xml":"bin"))
+	if (CFile::getFilename(fileName).substr(0, 11) == "table_leaf_"
+	    && CFile::getExtension(fileName) == (XMLSave ? "xml" : "bin"))
 	{
 		H_AUTO(CStatDB_load_2);
 
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
 		CStatDBTableLeafPD tableLeafPD;
 
 		pdr.fromBuffer(dataStream);
-//		pdr.readFromFile(fileName);
+		//		pdr.readFromFile(fileName);
 		tableLeafPD.apply(pdr);
 		nTotalLoaded += CFile::getFileSize(fileName);
 
@@ -813,7 +809,6 @@ void  CStatDB::tableLeaveFileCallback(const CFileDescription& fileDescription, N
 	}
 }
 
-
 // ****************************************************************************
 void CStatDB::load()
 {
@@ -830,60 +825,59 @@ void CStatDB::load()
 
 	nTotalLoaded = 0;
 
-//	// create SDB path
-//	{
-//		string sPath = Bsi.getLocalPath() + "sdb";
-//		if (!CFile::isExists(sPath))
-//			CFile::createDirectory(sPath);
-//	}
-	
+	//	// create SDB path
+	//	{
+	//		string sPath = Bsi.getLocalPath() + "sdb";
+	//		if (!CFile::isExists(sPath))
+	//			CFile::createDirectory(sPath);
+	//	}
+
 	// load value leaves
 	{
 		H_AUTO(CStatDB_load_1);
 
-//		string sFilePath = Bsi.getLocalPath();
-		string sFilePath = toString("sdb/value_leaves_pdr.%s", (XMLSave?"xml":"bin"));
+		//		string sFilePath = Bsi.getLocalPath();
+		string sFilePath = toString("sdb/value_leaves_pdr.%s", (XMLSave ? "xml" : "bin"));
 
 		TValueLeaveFileCallback *cb = new TValueLeaveFileCallback;
-		
+
 		Bsi.syncLoadFile(sFilePath, cb);
 
-//		if (CFile::isExists(sFilePath))
-//		{
-//			static CPersistentDataRecord	pdr;
-//			pdr.clear();
-//			CStatDBValueLeavesPD valueLeavesPD;
-//
-//			pdr.readFromFile(sFilePath);
-//			valueLeavesPD.apply(pdr);
-//			nTotalLoaded += CFile::getFileSize(sFilePath);
-//
-//			for (uint32 i = 0; i < valueLeavesPD.ValueLeavesPD.size(); ++i)
-//			{
-//				const CStatDBValueLeafPD & valueLeafPD = valueLeavesPD.ValueLeavesPD[i];
-//
-//				IStatDBNodePtr node = _Root->getNode(valueLeafPD.Path);
-//				if (node == NULL)
-//				{
-//					bool res = _Root->setNode(valueLeafPD.Path, new CStatDBValueLeaf(valueLeafPD.Value));
-//					if (!res)
-//					{
-//						nlwarning("value leaf '%s' cannot be created!", valueLeafPD.Path.c_str());
-//						DEBUG_STOP;
-//					}
-//				}
-//				else
-//				{
-//					nlwarning("leaf '%s' already exists!", valueLeafPD.Path.c_str());
-//					DEBUG_STOP;
-//				}
-//			}
-//		}
+		//		if (CFile::isExists(sFilePath))
+		//		{
+		//			static CPersistentDataRecord	pdr;
+		//			pdr.clear();
+		//			CStatDBValueLeavesPD valueLeavesPD;
+		//
+		//			pdr.readFromFile(sFilePath);
+		//			valueLeavesPD.apply(pdr);
+		//			nTotalLoaded += CFile::getFileSize(sFilePath);
+		//
+		//			for (uint32 i = 0; i < valueLeavesPD.ValueLeavesPD.size(); ++i)
+		//			{
+		//				const CStatDBValueLeafPD & valueLeafPD = valueLeavesPD.ValueLeavesPD[i];
+		//
+		//				IStatDBNodePtr node = _Root->getNode(valueLeafPD.Path);
+		//				if (node == NULL)
+		//				{
+		//					bool res = _Root->setNode(valueLeafPD.Path, new CStatDBValueLeaf(valueLeafPD.Value));
+		//					if (!res)
+		//					{
+		//						nlwarning("value leaf '%s' cannot be created!", valueLeafPD.Path.c_str());
+		//						DEBUG_STOP;
+		//					}
+		//				}
+		//				else
+		//				{
+		//					nlwarning("leaf '%s' already exists!", valueLeafPD.Path.c_str());
+		//					DEBUG_STOP;
+		//				}
+		//			}
+		//		}
 	}
-	
-	// load table leaves
-//	string sdbSavePath = Bsi.getLocalPath() + "sdb";
 
+	// load table leaves
+	//	string sdbSavePath = Bsi.getLocalPath() + "sdb";
 
 	// get the file list
 	vector<CBackupFileClass> fileClasses(1);
@@ -893,44 +887,44 @@ void CStatDB::load()
 
 	// load the files
 	TTableLeaveFileCallback *cb2 = new TTableLeaveFileCallback;
-	Bsi.syncLoadFiles(fileNames, cb2);	
+	Bsi.syncLoadFiles(fileNames, cb2);
 
-//	std::vector<std::string> files;
-//	CPath::getPathContent(sdbSavePath, false, false, true, files);
-//	for (uint i = 0; i < files.size(); i++)
-//	{
-//		const string & fileName = files[i];
-//
-//		if (	CFile::getFilename(fileName).substr(0, 11) == "table_leaf_"
-//			&&	CFile::getExtension(fileName) == (XMLSave?"xml":"bin"))
-//		{
-//			H_AUTO(CStatDB_load_2);
-//
-//			static CPersistentDataRecord	pdr;
-//			pdr.clear();
-//			CStatDBTableLeafPD tableLeafPD;
-//
-//			pdr.readFromFile(fileName);
-//			tableLeafPD.apply(pdr);
-//			nTotalLoaded += CFile::getFileSize(fileName);
-//
-//			IStatDBNodePtr node = _Root->getNode(tableLeafPD.Path);
-//			if (node == NULL)
-//			{
-//				bool res = _Root->setNode(tableLeafPD.Path, new CStatDBTableLeaf(tableLeafPD.PlayerValues, tableLeafPD.GuildValues));
-//				if (!res)
-//				{
-//					nlwarning("table leaf '%s' cannot be created!", tableLeafPD.Path.c_str());
-//					DEBUG_STOP;
-//				}
-//			}
-//			else
-//			{
-//				nlwarning("leaf '%s' already exists!", tableLeafPD.Path.c_str());
-//				DEBUG_STOP;
-//			}
-//		}
-//	}
+	//	std::vector<std::string> files;
+	//	CPath::getPathContent(sdbSavePath, false, false, true, files);
+	//	for (uint i = 0; i < files.size(); i++)
+	//	{
+	//		const string & fileName = files[i];
+	//
+	//		if (	CFile::getFilename(fileName).substr(0, 11) == "table_leaf_"
+	//			&&	CFile::getExtension(fileName) == (XMLSave?"xml":"bin"))
+	//		{
+	//			H_AUTO(CStatDB_load_2);
+	//
+	//			static CPersistentDataRecord	pdr;
+	//			pdr.clear();
+	//			CStatDBTableLeafPD tableLeafPD;
+	//
+	//			pdr.readFromFile(fileName);
+	//			tableLeafPD.apply(pdr);
+	//			nTotalLoaded += CFile::getFileSize(fileName);
+	//
+	//			IStatDBNodePtr node = _Root->getNode(tableLeafPD.Path);
+	//			if (node == NULL)
+	//			{
+	//				bool res = _Root->setNode(tableLeafPD.Path, new CStatDBTableLeaf(tableLeafPD.PlayerValues, tableLeafPD.GuildValues));
+	//				if (!res)
+	//				{
+	//					nlwarning("table leaf '%s' cannot be created!", tableLeafPD.Path.c_str());
+	//					DEBUG_STOP;
+	//				}
+	//			}
+	//			else
+	//			{
+	//				nlwarning("leaf '%s' already exists!", tableLeafPD.Path.c_str());
+	//				DEBUG_STOP;
+	//			}
+	//		}
+	//	}
 
 	nlinfo("SDB: loaded %u bytes", nTotalLoaded);
 
@@ -956,14 +950,14 @@ void CStatDB::initMFS()
 		return;
 
 	uint32 shardId = IService::getInstance()->getShardId();
-	if ( shardId == DEFAULT_SHARD_ID )
+	if (shardId == DEFAULT_SHARD_ID)
 	{
 #ifdef NL_OS_WINDOWS
 		nlwarning
 #else
 		nlerror
 #endif
-		( "SDB: Sending default shard id (%u) to MFS", DEFAULT_SHARD_ID );
+		    ("SDB: Sending default shard id (%u) to MFS", DEFAULT_SHARD_ID);
 	}
 	CStatDBAllLeavesMsg allLeavesMsg;
 	CStatDBMFSInitLeafCollector().loadLeaves(_Root, allLeavesMsg);
@@ -1006,7 +1000,7 @@ void CStatDB::cbGuildsLoaded()
 void CStatDB::tickUpdate()
 {
 	H_AUTO(CStatDB_tickUpdate);
-	
+
 	if (!_SDBIsLoaded)
 		return;
 
@@ -1057,59 +1051,59 @@ void CStatDB::saveAll()
 }
 
 // ****************************************************************************
-void CStatDB::saveValueLeaves(const CStatDBValueLeavesPD & valueLeavesPD)
+void CStatDB::saveValueLeaves(const CStatDBValueLeavesPD &valueLeavesPD)
 {
-	string sFilePath = toString("sdb/value_leaves_pdr.%s", (XMLSave?"xml":"bin"));
+	string sFilePath = toString("sdb/value_leaves_pdr.%s", (XMLSave ? "xml" : "bin"));
 
-	static CPersistentDataRecordRyzomStore	pdr;
+	static CPersistentDataRecordRyzomStore pdr;
 	pdr.clear();
 	valueLeavesPD.store(pdr);
 
-	CBackupMsgSaveFile msg( sFilePath, CBackupMsgSaveFile::SaveFile, Bsi );
+	CBackupMsgSaveFile msg(sFilePath, CBackupMsgSaveFile::SaveFile, Bsi);
 	if (XMLSave)
 	{
 		string s;
 		pdr.toString(s);
-		msg.DataMsg.serialBuffer((uint8*)&s[0], (uint)s.size());
+		msg.DataMsg.serialBuffer((uint8 *)&s[0], (uint)s.size());
 	}
 	else
 	{
 		uint size = pdr.totalDataSize();
 		vector<char> buffer(size);
 		pdr.toBuffer(&buffer[0], size);
-		msg.DataMsg.serialBuffer((uint8*)&buffer[0], size);
+		msg.DataMsg.serialBuffer((uint8 *)&buffer[0], size);
 	}
 
-//	nlinfo("saveValueLeaves send %u bytes to BS", msgout.length());
-	Bsi.sendFile( msg );
+	//	nlinfo("saveValueLeaves send %u bytes to BS", msgout.length());
+	Bsi.sendFile(msg);
 }
 
 // ****************************************************************************
-void CStatDB::saveTableLeaf(const CStatDBTableLeafPD & tableLeafPD)
+void CStatDB::saveTableLeaf(const CStatDBTableLeafPD &tableLeafPD)
 {
-	string sFilePath = toString("sdb/table_leaf_%s_pdr.%s", tableLeafPD.Path.c_str(), (XMLSave?"xml":"bin"));
+	string sFilePath = toString("sdb/table_leaf_%s_pdr.%s", tableLeafPD.Path.c_str(), (XMLSave ? "xml" : "bin"));
 
-	static CPersistentDataRecordRyzomStore	pdr;
+	static CPersistentDataRecordRyzomStore pdr;
 	pdr.clear();
 	tableLeafPD.store(pdr);
 
-	CBackupMsgSaveFile msg( sFilePath, CBackupMsgSaveFile::SaveFile, Bsi );
+	CBackupMsgSaveFile msg(sFilePath, CBackupMsgSaveFile::SaveFile, Bsi);
 	if (XMLSave)
 	{
 		string s;
 		pdr.toString(s);
-		msg.DataMsg.serialBuffer((uint8*)&s[0], (uint)s.size());
+		msg.DataMsg.serialBuffer((uint8 *)&s[0], (uint)s.size());
 	}
 	else
 	{
 		uint size = pdr.totalDataSize();
 		vector<char> buffer(size);
 		pdr.toBuffer(&buffer[0], size);
-		msg.DataMsg.serialBuffer((uint8*)&buffer[0], size);
+		msg.DataMsg.serialBuffer((uint8 *)&buffer[0], size);
 	}
-	
-//	nlinfo("saveTableLeaf(%s) send %u bytes to BS", tableLeafPD.Path.c_str(), msgout.length());
-	Bsi.sendFile( msg );
+
+	//	nlinfo("saveTableLeaf(%s) send %u bytes to BS", tableLeafPD.Path.c_str(), msgout.length());
+	Bsi.sendFile(msg);
 }
 
 // ****************************************************************************
@@ -1117,12 +1111,12 @@ void CStatDB::saveTableLeaf(const CStatDBTableLeafPD & tableLeafPD)
 // ****************************************************************************
 
 // ****************************************************************************
-NLMISC_COMMAND (sdbCreateValue, "create a value leaf in SDB", "<path> [<value>]")
+NLMISC_COMMAND(sdbCreateValue, "create a value leaf in SDB", "<path> [<value>]")
 {
 	if (args.size() < 1 || args.size() > 2)
 		return false;
 
-	const string & path = args[0];
+	const string &path = args[0];
 	sint32 val;
 	if (args.size() < 2)
 		val = 0;
@@ -1132,35 +1126,35 @@ NLMISC_COMMAND (sdbCreateValue, "create a value leaf in SDB", "<path> [<value>]"
 	if (!CStatDB::getInstance()->createValue(path, val))
 	{
 		log.displayNL("cannot create a value leaf at the path '%s' (invalid path or already existing node)",
-			path.c_str());
+		    path.c_str());
 	}
 
 	return true;
 }
 
 // ****************************************************************************
-NLMISC_COMMAND (sdbCreateTable, "create a table leaf in SDB", "<path>")
+NLMISC_COMMAND(sdbCreateTable, "create a table leaf in SDB", "<path>")
 {
 	if (args.size() != 1)
 		return false;
 
-	const string & path = args[0];
+	const string &path = args[0];
 	if (!CStatDB::getInstance()->createTable(path))
 	{
 		log.displayNL("cannot create a table leaf at the path '%s' (invalid path or already existing node)",
-			path.c_str());
+		    path.c_str());
 	}
 
 	return true;
 }
 
 // ****************************************************************************
-NLMISC_COMMAND (sdbRemoveNode, "remove a node from SDB", "<path>")
+NLMISC_COMMAND(sdbRemoveNode, "remove a node from SDB", "<path>")
 {
 	if (args.size() != 1)
 		return false;
 
-	const string & path = args[0];
+	const string &path = args[0];
 	if (!CStatDB::getInstance()->removeNode(path))
 	{
 		log.displayNL("path '%s' not found", path.c_str());
@@ -1170,12 +1164,12 @@ NLMISC_COMMAND (sdbRemoveNode, "remove a node from SDB", "<path>")
 }
 
 // ****************************************************************************
-NLMISC_COMMAND (sdbValueSet, "set a value leaf in SDB", "<path> <value>")
+NLMISC_COMMAND(sdbValueSet, "set a value leaf in SDB", "<path> <value>")
 {
 	if (args.size() != 2)
 		return false;
 
-	const string & path = args[0];
+	const string &path = args[0];
 	sint32 val;
 	NLMISC::fromString(args[1], val);
 
@@ -1188,12 +1182,12 @@ NLMISC_COMMAND (sdbValueSet, "set a value leaf in SDB", "<path> <value>")
 }
 
 // ****************************************************************************
-NLMISC_COMMAND (sdbValueAdd, "add a value to a value leaf in SDB", "<path> <value>")
+NLMISC_COMMAND(sdbValueAdd, "add a value to a value leaf in SDB", "<path> <value>")
 {
 	if (args.size() != 2)
 		return false;
 
-	const string & path = args[0];
+	const string &path = args[0];
 	sint32 val;
 	NLMISC::fromString(args[1], val);
 
@@ -1206,19 +1200,19 @@ NLMISC_COMMAND (sdbValueAdd, "add a value to a value leaf in SDB", "<path> <valu
 }
 
 // ****************************************************************************
-NLMISC_COMMAND (sdbTableAdd, "add a value to a table leaf in SDB", "<path> <value> <target=player|guild> <player_id|guild_name>")
+NLMISC_COMMAND(sdbTableAdd, "add a value to a table leaf in SDB", "<path> <value> <target=player|guild> <player_id|guild_name>")
 {
 	if (args.size() != 4)
 		return false;
 
-	const string & path = args[0];
+	const string &path = args[0];
 	sint32 val;
 	NLMISC::fromString(args[1], val);
-	const string & targetType = args[2];
+	const string &targetType = args[2];
 
 	if (targetType == "guild")
 	{
-		CGuild * guild = CGuildManager::getInstance()->getGuildByName(args[3]);
+		CGuild *guild = CGuildManager::getInstance()->getGuildByName(args[3]);
 		if (guild == NULL)
 		{
 			log.displayNL("unknown guild: '%s'", args[3].c_str());
@@ -1257,7 +1251,7 @@ NLMISC_COMMAND (sdbTableAdd, "add a value to a table leaf in SDB", "<path> <valu
 }
 
 // ****************************************************************************
-NLMISC_COMMAND (sdbRemovePlayer, "remove a player from the whole SDB", "<player_id>")
+NLMISC_COMMAND(sdbRemovePlayer, "remove a player from the whole SDB", "<player_id>")
 {
 	if (args.size() != 1)
 		return false;
@@ -1271,12 +1265,12 @@ NLMISC_COMMAND (sdbRemovePlayer, "remove a player from the whole SDB", "<player_
 }
 
 // ****************************************************************************
-NLMISC_COMMAND (sdbRemoveGuild, "remove a guild from the whole SDB", "<guild_name>")
+NLMISC_COMMAND(sdbRemoveGuild, "remove a guild from the whole SDB", "<guild_name>")
 {
 	if (args.size() != 1)
 		return false;
 
-	CGuild * guild = CGuildManager::getInstance()->getGuildByName(args[0]);
+	CGuild *guild = CGuildManager::getInstance()->getGuildByName(args[0]);
 	if (guild == NULL)
 	{
 		log.displayNL("unknown guild: '%s'", args[0].c_str());
@@ -1289,12 +1283,12 @@ NLMISC_COMMAND (sdbRemoveGuild, "remove a guild from the whole SDB", "<guild_nam
 }
 
 // ****************************************************************************
-NLMISC_COMMAND (sdbDisplayNodes, "display nodes of SDB", "<path> [<recursive>] [<display_values>] [<display_tables>]")
+NLMISC_COMMAND(sdbDisplayNodes, "display nodes of SDB", "<path> [<recursive>] [<display_values>] [<display_tables>]")
 {
 	if (args.size() < 1 || args.size() > 4)
 		return false;
 
-	const string & pathPattern = args[0];
+	const string &pathPattern = args[0];
 
 	CStatDBNodeDisplayer::CSettings settings;
 
@@ -1318,7 +1312,7 @@ NLMISC_COMMAND (sdbDisplayNodes, "display nodes of SDB", "<path> [<recursive>] [
 }
 
 // ****************************************************************************
-NLMISC_COMMAND (sdbSaveNow, "save the whole SDB now (WARNING: it may stall the shard and flood the Backup Service)", "")
+NLMISC_COMMAND(sdbSaveNow, "save the whole SDB now (WARNING: it may stall the shard and flood the Backup Service)", "")
 {
 	if (args.size() != 0)
 		return false;
@@ -1328,45 +1322,44 @@ NLMISC_COMMAND (sdbSaveNow, "save the whole SDB now (WARNING: it may stall the s
 	return true;
 }
 
-
 #if !FINAL_VERSION
 
 extern NLMISC::CRandom RandomGenerator;
 // ****************************************************************************
-NLMISC_COMMAND (sdbInitEpisode2, "(debug) init fake database for Episode2 tests", "")
+NLMISC_COMMAND(sdbInitEpisode2, "(debug) init fake database for Episode2 tests", "")
 {
 	// Episode II init
 	// Leaf simple pour le harvest
 	const char *peuple[] = { "fyros", "matis", "tryker", "zorai" };
-	uint peupleNB = sizeof(peuple)/sizeof(peuple[0]);
+	uint peupleNB = sizeof(peuple) / sizeof(peuple[0]);
 	const char *faction[] = { "kami", "karavan" };
-	uint factionNB = sizeof(faction)/sizeof(faction[0]);
-	const char *mp[] = { "carapace_a", "resine_a", "bois_a", "fibre_o","resine_o", "ecorce_o", 
-					"carapace_i", "resine_i", "boucle_i", "bois_i" };
-	uint mpNB = sizeof(mp)/sizeof(mp[0]);
+	uint factionNB = sizeof(faction) / sizeof(faction[0]);
+	const char *mp[] = { "carapace_a", "resine_a", "bois_a", "fibre_o", "resine_o", "ecorce_o",
+		"carapace_i", "resine_i", "boucle_i", "bois_i" };
+	uint mpNB = sizeof(mp) / sizeof(mp[0]);
 	const char *mpByFaction[] = { "seve", "amber" };
-	uint mpByFactionNB = sizeof(mpByFaction)/sizeof(mpByFaction[0]);
-	
+	uint mpByFactionNB = sizeof(mpByFaction) / sizeof(mpByFaction[0]);
+
 	for (uint i = 0; i < peupleNB; ++i)
-	for (uint j = 0; j < factionNB; ++j)
-	{
-		string sPath = "storyline.episode2.";
-		sPath += toString(peuple[i]) + ".";
-		sPath += toString(faction[j]) + ".";
-		for (uint k = 0; k < mpNB; ++k)
+		for (uint j = 0; j < factionNB; ++j)
 		{
-			string sTmpPath = sPath + mp[k];
-			CStatDB::getInstance()->createValue(sTmpPath+toString(".qtemin"), RandomGenerator.rand(500));
-			CStatDB::getInstance()->createValue(sTmpPath+toString(".qtemax"), RandomGenerator.rand(500));
+			string sPath = "storyline.episode2.";
+			sPath += toString(peuple[i]) + ".";
+			sPath += toString(faction[j]) + ".";
+			for (uint k = 0; k < mpNB; ++k)
+			{
+				string sTmpPath = sPath + mp[k];
+				CStatDB::getInstance()->createValue(sTmpPath + toString(".qtemin"), RandomGenerator.rand(500));
+				CStatDB::getInstance()->createValue(sTmpPath + toString(".qtemax"), RandomGenerator.rand(500));
+			}
+			CStatDB::getInstance()->createValue(sPath + mpByFaction[j] + toString(".qtemin"), RandomGenerator.rand(500));
+			CStatDB::getInstance()->createValue(sPath + mpByFaction[j] + toString(".qtemax"), RandomGenerator.rand(500));
 		}
-		CStatDB::getInstance()->createValue(sPath+mpByFaction[j]+toString(".qtemin"), RandomGenerator.rand(500));
-		CStatDB::getInstance()->createValue(sPath+mpByFaction[j]+toString(".qtemax"), RandomGenerator.rand(500));
-	}
 
 	// Leaf simple pour le craft
 	const char *craft[] = { "socle", "colonne", "comble", "muraille", "revetement", "ornement", "statue",
 		"colonne_justice", "racine", "tronc", "fibre", "ecorce", "feuille", "fleur", "symbole", "noyau" };
-	uint craftNB = sizeof(craft)/sizeof(craft[0]);
+	uint craftNB = sizeof(craft) / sizeof(craft[0]);
 	for (uint i = 0; i < peupleNB; ++i)
 	{
 		for (uint j = 0; j < craftNB; ++j)
@@ -1374,8 +1367,8 @@ NLMISC_COMMAND (sdbInitEpisode2, "(debug) init fake database for Episode2 tests"
 			string sPath = "storyline.episode2.";
 			sPath += toString(peuple[i]) + ".";
 			sPath += toString(craft[j]);
-			CStatDB::getInstance()->createValue(sPath+toString(".qtemin"), RandomGenerator.rand(500));
-			CStatDB::getInstance()->createValue(sPath+toString(".qtemax"), RandomGenerator.rand(500));
+			CStatDB::getInstance()->createValue(sPath + toString(".qtemin"), RandomGenerator.rand(500));
+			CStatDB::getInstance()->createValue(sPath + toString(".qtemax"), RandomGenerator.rand(500));
 		}
 	}
 
@@ -1383,7 +1376,7 @@ NLMISC_COMMAND (sdbInitEpisode2, "(debug) init fake database for Episode2 tests"
 	const char *max_values[] = { "socle_max", "colonne_max", "comble_max", "muraille_max", "revetement_max",
 		"ornement_max", "statue_max", "colonne_justice_max", "racine_max", "tronc_max", "fibre_max",
 		"ecorce_max", "feuille_max", "fleur_max", "symbole_max", "noyau_max" };
-	uint max_valuesNB = sizeof(max_values)/sizeof(max_values[0]);
+	uint max_valuesNB = sizeof(max_values) / sizeof(max_values[0]);
 	for (uint i = 0; i < peupleNB; ++i)
 	{
 		for (uint j = 0; j < max_valuesNB; ++j)
@@ -1397,42 +1390,41 @@ NLMISC_COMMAND (sdbInitEpisode2, "(debug) init fake database for Episode2 tests"
 
 	// Tableaux de joueurs
 	const char *action[] = { "craft", "harvest", "kill" };
-	uint actionNB = sizeof(action)/sizeof(action[0]);
+	uint actionNB = sizeof(action) / sizeof(action[0]);
 	const char *acte[] = { "acte1", "acte2", "acte3" };
-	uint acteNB = sizeof(acte)/sizeof(acte[0]);
+	uint acteNB = sizeof(acte) / sizeof(acte[0]);
 	for (uint i = 0; i < peupleNB; ++i)
-	for (uint j = 0; j < factionNB; ++j)
-	for (uint k = 0; k < actionNB; ++k)
-	for (uint m = 0; m < acteNB; ++m)
-	{
-		string sPath = "storyline.episode2.";
-		sPath += toString(peuple[i]) + ".";
-		sPath += toString(faction[j]) + ".";
-		sPath += toString(action[k]) + ".";
-		sPath += toString(acte[m]);
+		for (uint j = 0; j < factionNB; ++j)
+			for (uint k = 0; k < actionNB; ++k)
+				for (uint m = 0; m < acteNB; ++m)
+				{
+					string sPath = "storyline.episode2.";
+					sPath += toString(peuple[i]) + ".";
+					sPath += toString(faction[j]) + ".";
+					sPath += toString(action[k]) + ".";
+					sPath += toString(acte[m]);
 
-		CStatDB::getInstance()->createTable(sPath);
+					CStatDB::getInstance()->createTable(sPath);
 
-		uint nbjoueur = 100+RandomGenerator.rand(400);
-		for (uint n = 0; n < nbjoueur; ++n)
-		{
-			CEntityId playerId;
-			playerId.setShortId(RandomGenerator.rand(5000) << 4);
-			playerId.setType(RYZOMID::player);
-			CStatDB::getInstance()->tablePlayerAdd(sPath, playerId, 10 * RandomGenerator.rand(5000));
-		}
+					uint nbjoueur = 100 + RandomGenerator.rand(400);
+					for (uint n = 0; n < nbjoueur; ++n)
+					{
+						CEntityId playerId;
+						playerId.setShortId(RandomGenerator.rand(5000) << 4);
+						playerId.setType(RYZOMID::player);
+						CStatDB::getInstance()->tablePlayerAdd(sPath, playerId, 10 * RandomGenerator.rand(5000));
+					}
 
-		uint nbguild = 250+RandomGenerator.rand(250);
-		for (uint n = 0; n < nbguild; ++n)
-		{
+					uint nbguild = 250 + RandomGenerator.rand(250);
+					for (uint n = 0; n < nbguild; ++n)
+					{
 
-			EGSPD::TGuildId guildId = uint32(RandomGenerator.rand(20500));
-			CStatDB::getInstance()->tableGuildAdd(sPath, guildId, 100 * RandomGenerator.rand(10000));
-		}
-	}
+						EGSPD::TGuildId guildId = uint32(RandomGenerator.rand(20500));
+						CStatDB::getInstance()->tableGuildAdd(sPath, guildId, 100 * RandomGenerator.rand(10000));
+					}
+				}
 
 	return true;
 }
 
 #endif // !FINAL_VERSION
-

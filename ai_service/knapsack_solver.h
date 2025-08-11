@@ -50,29 +50,32 @@ public:
 		SingleReplace,
 		FastSingleReplace,
 		VeryFastSingleReplace,
-	//- /!\ Algorithms below don't respect constraints
+		//- /!\ Algorithms below don't respect constraints
 		TakeAll
 	};
 	static std::string toString(Algorithm a);
-	static CKnapsackSolver::Algorithm fromString(std::string const& a);
+	static CKnapsackSolver::Algorithm fromString(std::string const &a);
+
 private:
-	IKnapsackContext* _Context;
-	bool* _Take;
+	IKnapsackContext *_Context;
+	bool *_Take;
 	bool _AllocatedTake;
 	float _WBest;
 	float _VBest;
 	float _WMax;
+
 public:
-	explicit CKnapsackSolver(IKnapsackContext* context, bool* take = NULL);
+	explicit CKnapsackSolver(IKnapsackContext *context, bool *take = NULL);
 	virtual ~CKnapsackSolver();
 	bool take(size_t i);
 	float totalWeight();
 	float totalValue();
 	float totalFreeWeight();
-	
+
 	/// @param wMax Max weight that can be taken
 	/// @note Not thread safe
 	void optimize(float wMax, Algorithm algorithm = Optimal);
+
 private:
 	float weight(size_t i);
 	float value(size_t i);
@@ -91,7 +94,7 @@ private:
 	//@}
 	/// @name Algorithms helper functions
 	//@{
-	void optimizeOptimalRec(int i, float w, float v, bool* take);
+	void optimizeOptimalRec(int i, float w, float v, bool *take);
 	//@}
 };
 
@@ -100,13 +103,14 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CKnapsackContext
-: public IKnapsackContext
+    : public IKnapsackContext
 {
 	size_t _Size;
-	float* _Weights;
-	float* _Values;
+	float *_Weights;
+	float *_Values;
+
 public:
-	CKnapsackContext(size_t size, float* weights, float* values);
+	CKnapsackContext(size_t size, float *weights, float *values);
 	virtual float weight(size_t i);
 	virtual float value(size_t i);
 	virtual size_t size();

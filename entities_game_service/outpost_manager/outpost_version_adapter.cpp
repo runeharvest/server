@@ -28,14 +28,12 @@
 using namespace std;
 using namespace NLMISC;
 
-
 //-----------------------------------------------------------------------------
 // static members COutpostVersionAdapter
 //-----------------------------------------------------------------------------
 
 NL_INSTANCE_COUNTER_IMPL(COutpostVersionAdapter);
-COutpostVersionAdapter * COutpostVersionAdapter::_Instance = NULL;
-
+COutpostVersionAdapter *COutpostVersionAdapter::_Instance = NULL;
 
 //-----------------------------------------------------------------------------
 // methods COutpostVersionAdapter
@@ -52,16 +50,16 @@ uint32 COutpostVersionAdapter::currentVersionNumber() const
 }
 
 //-----------------------------------------------------------------------------
-void COutpostVersionAdapter::adaptOutpostFromVersion(COutpost & outpost, uint32 version) const
+void COutpostVersionAdapter::adaptOutpostFromVersion(COutpost &outpost, uint32 version) const
 {
 	// Do NOT break between case labels
-	//switch (version)
+	// switch (version)
 	//{
-	//case 0: adaptToVersion1(outpost);
+	// case 0: adaptToVersion1(outpost);
 	//}
 }
 
 //-----------------------------------------------------------------------------
-//void COutpostVersionAdapter::adaptToVersion1(COutpost & outpost) const
+// void COutpostVersionAdapter::adaptToVersion1(COutpost & outpost) const
 //{
 //}

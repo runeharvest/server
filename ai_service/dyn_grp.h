@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef DYN_GRP_H
 #define DYN_GRP_H
 
@@ -30,33 +28,33 @@ class CDynGrpBase
 public:
 	CDynGrpBase();
 	virtual ~CDynGrpBase();
-	
-	void initDynGrp(IGroupDesc const* const gd, CFamilyBehavior const* const familyBehavior);
-	
+
+	void initDynGrp(IGroupDesc const *const gd, CFamilyBehavior const *const familyBehavior);
+
 	void setDiscardable(bool discardable) const;
 	bool getDiscardable() const;
-	
-	NLMISC::CSmartPtr<IGroupDesc const> const& getGroupDesc() const;
-	
-	NLMISC::CDbgPtr<CFamilyBehavior> const& getFamilyBehavior() const;
-	
+
+	NLMISC::CSmartPtr<IGroupDesc const> const &getGroupDesc() const;
+
+	NLMISC::CDbgPtr<CFamilyBehavior> const &getFamilyBehavior() const;
+
 	float getEnergyCoef() const;
-	
+
 	bool getCountMultiplierFlag() const;
-		
-protected:	
+
+protected:
 	/** Flag for group discardability.
 	 *	If this flag is set, then the group can be despawn when
 	 *	the family spawned energy is to high.
 	 *	When cleared, the group cannot be despawned automaticaly
 	 *	either for enegy reason nor for unadequate energy level.
-	*/
-	mutable	bool							_Discardable;
+	 */
+	mutable bool _Discardable;
 	/// The dynamic group model
-	NLMISC::CSmartPtr<IGroupDesc const>		_GroupDesc;
+	NLMISC::CSmartPtr<IGroupDesc const> _GroupDesc;
 
 	/// The family this group belong to
-	NLMISC::CDbgPtr<CFamilyBehavior>		_FamilyBehavior;
+	NLMISC::CDbgPtr<CFamilyBehavior> _FamilyBehavior;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -66,45 +64,48 @@ protected:
 class CDynBot
 {
 public:
-	CDynBot()	: _BotEnergyValue(0)
-	{}
-	virtual	~CDynBot()
-	{}
+	CDynBot()
+	    : _BotEnergyValue(0)
+	{
+	}
+	virtual ~CDynBot()
+	{
+	}
 	/// The energy value of this bot.
 
-	const	uint32	&botEnergyValue	()	const
+	const uint32 &botEnergyValue() const
 	{
-		return	_BotEnergyValue;
+		return _BotEnergyValue;
 	}
 
-	void	setBotEnergyValue	(const	uint32	&energyValue)
+	void setBotEnergyValue(const uint32 &energyValue)
 	{
-		_BotEnergyValue=energyValue;
+		_BotEnergyValue = energyValue;
 	}
 
-	virtual	void	addEnergy()		const	=	0;
-	virtual	void	removeEnergy()	const	=	0;
+	virtual void addEnergy() const = 0;
+	virtual void removeEnergy() const = 0;
 
 private:
-	uint32	_BotEnergyValue;
+	uint32 _BotEnergyValue;
 };
 
 class CDynSpawnBot
 {
 public:
-	CDynSpawnBot(const	CDynBot	&dynBot)	:	_DynBot(dynBot)
+	CDynSpawnBot(const CDynBot &dynBot)
+	    : _DynBot(dynBot)
 	{
 		_DynBot.addEnergy();
 	}
 
-	virtual	~CDynSpawnBot()
+	virtual ~CDynSpawnBot()
 	{
 		_DynBot.removeEnergy();
 	}
 
 private:
-	const	CDynBot	&_DynBot;
+	const CDynBot &_DynBot;
 };
-
 
 #endif

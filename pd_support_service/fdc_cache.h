@@ -14,10 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef FDC_CACHE_H
 #define FDC_CACHE_H
-
 
 //-------------------------------------------------------------------------------------------------
 // includes
@@ -26,23 +24,21 @@
 #include "nel/misc/singleton.h"
 #include "game_share/file_description_container.h"
 
-
 //-------------------------------------------------------------------------------------------------
 // class CFdcCache
 //-------------------------------------------------------------------------------------------------
 
-class CFdcCache: public NLMISC::CSingleton<CFdcCache>
+class CFdcCache : public NLMISC::CSingleton<CFdcCache>
 {
 public:
-	const CFileDescriptionContainer& getFdc() const;
-	void addFileSpec(const NLMISC::CSString& fspec,bool recurse);
-	void addFile(const NLMISC::CSString& fileName);
+	const CFileDescriptionContainer &getFdc() const;
+	void addFileSpec(const NLMISC::CSString &fspec, bool recurse);
+	void addFile(const NLMISC::CSString &fileName);
 	void clear();
 
 private:
 	CFileDescriptionContainer _Fdc;
 };
-
 
 //-------------------------------------------------------------------------------------------------
 

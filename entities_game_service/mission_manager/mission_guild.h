@@ -28,38 +28,41 @@
 class CMissionGuild : public EGSPD::CMissionGuildPD
 {
 	NL_INSTANCE_COUNTER_DECL(CMissionGuild);
+
 public:
+	CMissionGuild()
+	    : _Chained(false)
+	{
+	}
 
-	CMissionGuild() : _Chained(false) { }
-
-	inline void setGuild( uint32 guildId );
+	inline void setGuild(uint32 guildId);
 	/// override
 	void updateUsersJournalEntry();
 	/// override
 	void clearUsersJournalEntry();
 	/// override
-	void setupEscort(const std::vector<TAIAlias> & aliases);
+	void setupEscort(const std::vector<TAIAlias> &aliases);
 	/// override
-	void getEntities(std::vector<TDataSetRow>& entities);
+	void getEntities(std::vector<TDataSetRow> &entities);
 	/// override
 	void stopChildren();
 	/// override
-	void onFailure(bool ignoreJumps,bool sendMessage = true);
+	void onFailure(bool ignoreJumps, bool sendMessage = true);
 	/// force mission success
 	void forceSuccess();
 	/// return the mission main character ( user, group leader,...)
-	CCharacter* getMainEntity();
+	CCharacter *getMainEntity();
 	/// during the execution of the mission does the compiler encounter a 'chain_mission' ?
 	bool isChained() { return _Chained; }
 	/// when executing a 'chain_mission' set this flag to let know that we have chained
-	void setChained(bool b=true) { _Chained = b; }
+	void setChained(bool b = true) { _Chained = b; }
 
 private:
 	uint32 _GuildId;
 	bool _Chained;
 };
 
-void CMissionGuild::setGuild( uint32 guildId )
+void CMissionGuild::setGuild(uint32 guildId)
 {
 	_GuildId = guildId;
 }

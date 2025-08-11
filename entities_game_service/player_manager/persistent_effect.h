@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef PERSISTENT_EFFECT_H
 #define PERSISTENT_EFFECT_H
 
@@ -51,9 +50,9 @@ class CPersistentEffect
 {
 public:
 	DECLARE_VIRTUAL_PERSISTENCE_METHODS
-	
+
 	// default ctor
-	CPersistentEffect(CCharacter* theCharacter);
+	CPersistentEffect(CCharacter *theCharacter);
 
 	// dtor
 	~CPersistentEffect();
@@ -68,14 +67,13 @@ public:
 	void activate();
 
 	// read/write specific method for store and apply persistent data
-	void writePdr(CSTimedEffect * effect, CPersistentDataRecord& pdr) const;
-	void readPdr(CPersistentDataRecord& pdr);
+	void writePdr(CSTimedEffect *effect, CPersistentDataRecord &pdr) const;
+	void readPdr(CPersistentDataRecord &pdr);
 
 private:
-	CCharacter *	_TheCharacter;
+	CCharacter *_TheCharacter;
 	// vector of effects must be persistent
-	std::vector< NLMISC::CSmartPtr<CSTimedEffect> >	_PersistentEffects;
+	std::vector<NLMISC::CSmartPtr<CSTimedEffect>> _PersistentEffects;
 };
-
 
 #endif // PERSISTENT_EFFECT_H

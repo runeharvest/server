@@ -24,7 +24,7 @@
 
 #include "pds_table.h"
 #include "pds_database.h"
-//#include "db_file_stream.h"
+// #include "db_file_stream.h"
 #include "../pd_lib/db_delta_file.h"
 #include "../pd_lib/db_description_parser.h"
 
@@ -32,15 +32,14 @@ using namespace std;
 using namespace NLMISC;
 
 /// Aligne a value on a boundary (if boundary is not a power of 2, rounded to next power of 2 boundary)
-inline uint32		alignOnBoundary(uint32 value, uint32 boundary)
+inline uint32 alignOnBoundary(uint32 value, uint32 boundary)
 {
 	// round to power of 2 boundary
 	boundary = raiseToNextPowerOf2(boundary);
 
 	// align
-	return (value+boundary-1)&(~(boundary-1));
+	return (value + boundary - 1) & (~(boundary - 1));
 }
-
 
 /*
  * Constructor
@@ -55,17 +54,17 @@ CTable::CTable()
  */
 CTable::~CTable()
 {
-	//PDS_DEBUG("delete()");
+	// PDS_DEBUG("delete()");
 	clear();
 }
 
 /*
  * Clear table
  */
-void	CTable::clear()
+void CTable::clear()
 {
 	_Init = false;
-	uint	i;
+	uint i;
 
 	// clear table buffer
 	_TableBuffer.clear();
@@ -74,7 +73,7 @@ void	CTable::clear()
 	_Columns.clear();
 
 	// delete attributes
-	for (i=0; i<_Attributes.size(); ++i)
+	for (i = 0; i < _Attributes.size(); ++i)
 	{
 		delete _Attributes[i];
 		_Attributes[i] = NULL;
@@ -90,13 +89,10 @@ void	CTable::clear()
 	_EmptyRow.clear();
 }
 
-
-
-
 /*
  * Init table
  */
-bool	CTable::init(CDatabase *database, const CTableNode& table)
+bool CTable::init(CDatabase *database, const CTableNode &table)
 {
 	// first a good clean up
 	clear();
@@ -113,11 +109,11 @@ bool	CTable::init(CDatabase *database, const CTableNode& table)
 	_Mapped = (table.Mapped != -1);
 	_Key = table.Key;
 
-	uint	i;
+	uint i;
 
-	for (i=0; i<table.Attributes.size(); ++i)
+	for (i = 0; i < table.Attributes.size(); ++i)
 	{
-		CAttribute*		attribute = new CAttribute();
+		CAttribute *attribute = new CAttribute();
 
 		if (!attribute->init(database, this, table.Attributes[i]) || attribute->getId() != i)
 			return false;
@@ -128,26 +124,25 @@ bool	CTable::init(CDatabase *database, const CTableNode& table)
 	return true;
 }
 
-
 /*
  * Build columns
  */
-bool	CTable::buildColumns()
+bool CTable::buildColumns()
 {
 	// do not compute twice
 	if (!_Columns.empty())
 		return true;
 
-	uint	i;
+	uint i;
 
 	// build columns from attributes
-	for (i=0; i<_Attributes.size(); ++i)
+	for (i = 0; i < _Attributes.size(); ++i)
 		if (!_Attributes[i]->buildColumns())
 			return false;
 
-	uint32	columnStart = 0;
+	uint32 columnStart = 0;
 
-	for (i=0; i<_Columns.size(); ++i)
+	for (i = 0; i < _Columns.size(); ++i)
 	{
 		_Columns[i].setByteOffset(columnStart);
 		columnStart += _Columns[i].getByteSize();
@@ -160,14 +155,14 @@ bool	CTable::buildColumns()
 	_EmptyRow.clear();
 	_EmptyRow.resize(_RowSize, 0);
 
-	for (i=0; i<_Columns.size(); ++i)
+	for (i = 0; i < _Columns.size(); ++i)
 	{
-		TDataType	type = _Columns[i].getDataType();
-		void*		data = &_EmptyRow[_Columns[i].getByteOffset()];
+		TDataType type = _Columns[i].getDataType();
+		void *data = &_EmptyRow[_Columns[i].getByteOffset()];
 
 		if (type == PDS_Index)
 		{
-			*(RY_PDS::CObjectIndex*)data = RY_PDS::CObjectIndex::null();
+			*(RY_PDS::CObjectIndex *)data = RY_PDS::CObjectIndex::null();
 		}
 		else if (type == PDS_List)
 		{
@@ -183,30 +178,25 @@ bool	CTable::buildColumns()
 /*
  * Post Init, called once all tables have been initialised
  */
-bool	CTable::postInit()
+bool CTable::postInit()
 {
-	CTable*		root = getRootTable();
+	CTable *root = getRootTable();
 
 	if (root != this)
 		_TableBuffer.linkRowMapper(&(root->_TableBuffer));
 
-	uint	i;
-	for (i=0; i<_Attributes.size(); ++i)
+	uint i;
+	for (i = 0; i < _Attributes.size(); ++i)
 		if (!_Attributes[i]->computeBackRefKey())
 			return false;
 
 	return true;
 }
 
-
-
-
-
-
 /*
  * Display table
  */
-void	CTable::display(NLMISC::CLog* log, bool expanded, bool displayHeader) const
+void CTable::display(NLMISC::CLog *log, bool expanded, bool displayHeader) const
 {
 	if (!initialised())
 	{
@@ -220,16 +210,16 @@ void	CTable::display(NLMISC::CLog* log, bool expanded, bool displayHeader) const
 		log->displayNL("%-10s %-3s %-32s | %-3s | %-3s | %-4s | %-8s %-8s %8s |", "", "Id", "Name", "Inh", "Att", "Cols", "Allocs", "Loaded", "LoadedSz");
 	}
 
-	log->displayNL("%-10s %-3d %-32s | %-3d | %-3d | %-4d | %-8d %-8d %6dkb |", "Table", _Id, _Name.c_str(), _Inheritance, _Attributes.size(), _Columns.size(), _TableBuffer.numAllocated(), _TableBuffer.getLoadedRows(), (_TableBuffer.getMemoryLoad()+1023)/1024);
+	log->displayNL("%-10s %-3d %-32s | %-3d | %-3d | %-4d | %-8d %-8d %6dkb |", "Table", _Id, _Name.c_str(), _Inheritance, _Attributes.size(), _Columns.size(), _TableBuffer.numAllocated(), _TableBuffer.getLoadedRows(), (_TableBuffer.getMemoryLoad() + 1023) / 1024);
 
-	uint	i;
+	uint i;
 	if (expanded)
 	{
 		log->displayNL("--------------------------------------------------------------------------------");
 		log->displayNL("%-10s %-3s %-32s | %-10s | %-4s %-4s |", "", "Id", "Name", "MetaType", "From", "NCol");
-		for (i=0; i<_Attributes.size(); ++i)
+		for (i = 0; i < _Attributes.size(); ++i)
 		{
-			const CAttribute*	attrib = _Attributes[i];
+			const CAttribute *attrib = _Attributes[i];
 			if (attrib == NULL || !attrib->initialised())
 				log->displayNL("** Attribute %d not initialised", i);
 			else
@@ -238,9 +228,9 @@ void	CTable::display(NLMISC::CLog* log, bool expanded, bool displayHeader) const
 
 		log->displayNL("--------------------------------------------------------------------------------");
 		log->displayNL("%-10s %-3s %-64s | %-10s %-10s | %-10s", "", "Id", "Name", "MetaType", "DataType", "RowSz/Offs");
-		for (i=0; i<_Columns.size(); ++i)
+		for (i = 0; i < _Columns.size(); ++i)
 		{
-			const CColumn&	column = _Columns[i];
+			const CColumn &column = _Columns[i];
 			if (!column.initialised())
 				log->displayNL("** Column %d not initialised", i);
 			else
@@ -249,11 +239,10 @@ void	CTable::display(NLMISC::CLog* log, bool expanded, bool displayHeader) const
 	}
 }
 
-
 /*
  * Display row
  */
-void	CTable::displayRow(RY_PDS::TRowIndex row, NLMISC::CLog* log, bool displayHeader)
+void CTable::displayRow(RY_PDS::TRowIndex row, NLMISC::CLog *log, bool displayHeader)
 {
 	if (!initialised())
 	{
@@ -261,12 +250,12 @@ void	CTable::displayRow(RY_PDS::TRowIndex row, NLMISC::CLog* log, bool displayHe
 		return;
 	}
 
-	CTableBuffer::CAccessor	rowaccess = _TableBuffer.getRow(row);
+	CTableBuffer::CAccessor rowaccess = _TableBuffer.getRow(row);
 
-	string	flagstr = toString("%s%s%s", 
-		(rowaccess.allocated() ? "allocated" : "free"), 
-		(rowaccess.mapped() ? ", mapped" : ""),
-		(rowaccess.dirty() ? ", dirty" : ""));
+	string flagstr = toString("%s%s%s",
+	    (rowaccess.allocated() ? "allocated" : "free"),
+	    (rowaccess.mapped() ? ", mapped" : ""),
+	    (rowaccess.dirty() ? ", dirty" : ""));
 
 	log->displayNL("row %d: %d bytes, flags=[%s] (map=%016" NL_I64 "X, dirtstamp=%08X)", row, _RowSize, flagstr.c_str(), (rowaccess.mapped() ? rowaccess.key() : (uint64)0), rowaccess.dirtyStamp());
 
@@ -275,8 +264,8 @@ void	CTable::displayRow(RY_PDS::TRowIndex row, NLMISC::CLog* log, bool displayHe
 		log->displayNL("%-10s %-3s %-64s | %-10s %-10s | %-9s | %-32s", "", "Id", "Name", "MetaType", "DataType", "Sz/Offs", "Value");
 	}
 
-	uint	i;
-	for (i=0; i<_Columns.size(); ++i)
+	uint i;
+	for (i = 0; i < _Columns.size(); ++i)
 	{
 		if (!_Columns[i].initialised())
 		{
@@ -284,20 +273,20 @@ void	CTable::displayRow(RY_PDS::TRowIndex row, NLMISC::CLog* log, bool displayHe
 			continue;
 		}
 
-		string			value;
-		CDataAccessor	accessor(this, rowaccess, i);
-		const CColumn	&col = _Columns[i];
+		string value;
+		CDataAccessor accessor(this, rowaccess, i);
+		const CColumn &col = _Columns[i];
 
 		if (!accessor.isValid())
 			value = "unaccessible value";
 		else
 			value = accessor.valueAsString();
 
-		log->displayNL("%-10s %-3d %-64s | %-10s %-10s | %1db at %-3d | %-32s", 
-			"Column", col.getId(), col.getName().c_str(),
-			getNameFromMetaType(col.getMetaType()).c_str(), getNameFromDataType(col.getDataType()).c_str(),
-			col.getByteSize(), col.getByteOffset(),
-			value.c_str());
+		log->displayNL("%-10s %-3d %-64s | %-10s %-10s | %1db at %-3d | %-32s",
+		    "Column", col.getId(), col.getName().c_str(),
+		    getNameFromMetaType(col.getMetaType()).c_str(), getNameFromDataType(col.getDataType()).c_str(),
+		    col.getByteSize(), col.getByteOffset(),
+		    value.c_str());
 	}
 
 	_TableBuffer.releaseRow(rowaccess);
@@ -306,7 +295,7 @@ void	CTable::displayRow(RY_PDS::TRowIndex row, NLMISC::CLog* log, bool displayHe
 /*
  * Dump Delta file content
  */
-void	CTable::dumpDeltaFileContent(const std::string& filename, NLMISC::CLog* log) const
+void CTable::dumpDeltaFileContent(const std::string &filename, NLMISC::CLog *log) const
 {
 #ifdef DEBUG_DATA_ACCESSOR
 	if (!initialised())
@@ -315,15 +304,15 @@ void	CTable::dumpDeltaFileContent(const std::string& filename, NLMISC::CLog* log
 		return;
 	}
 
-	CDBDeltaFile	delta;
+	CDBDeltaFile delta;
 
 	if (!_TableBuffer.setupDebugDeltaFile(filename, delta))
 	{
 		return;
 	}
 
-	uint8*	data;
-	uint32	row;
+	uint8 *data;
+	uint32 row;
 
 	log->displayNL("%-10s %-3s %-64s | %-10s %-10s | %-9s | %-32s", "", "Id", "Name", "MetaType", "DataType", "Sz/Offs", "Value");
 
@@ -331,11 +320,11 @@ void	CTable::dumpDeltaFileContent(const std::string& filename, NLMISC::CLog* log
 	{
 		log->displayNL("row %d", row);
 
-		CTable*	table = const_cast<CTable*>(this);
-		CDataAccessor	accessor(table, data, 0);
+		CTable *table = const_cast<CTable *>(this);
+		CDataAccessor accessor(table, data, 0);
 
-		uint	i;
-		for (i=0; i<_Columns.size(); ++i)
+		uint i;
+		for (i = 0; i < _Columns.size(); ++i)
 		{
 			if (!_Columns[i].initialised())
 			{
@@ -343,31 +332,29 @@ void	CTable::dumpDeltaFileContent(const std::string& filename, NLMISC::CLog* log
 				continue;
 			}
 
-			string			value;
-			CDataAccessor	accessor(accessor, i);
-			const CColumn	&col = _Columns[i];
+			string value;
+			CDataAccessor accessor(accessor, i);
+			const CColumn &col = _Columns[i];
 
 			if (!accessor.isValid())
 				value = "unaccessible value";
 			else
 				value = accessor.valueAsString();
 
-			log->displayNL("%-10s %-3d %-64s | %-10s %-10s | %1db at %-3d | %-32s", 
-				"Column", col.getId(), col.getName().c_str(),
-				CType::getNameFromMetaType(col.getMetaType()).c_str(), CType::getNameFromDataType(col.getDataType()).c_str(),
-				col.getByteSize(), col.getByteOffset(),
-				value.c_str());
+			log->displayNL("%-10s %-3d %-64s | %-10s %-10s | %1db at %-3d | %-32s",
+			    "Column", col.getId(), col.getName().c_str(),
+			    CType::getNameFromMetaType(col.getMetaType()).c_str(), CType::getNameFromDataType(col.getDataType()).c_str(),
+			    col.getByteSize(), col.getByteOffset(),
+			    value.c_str());
 		}
 	}
 #endif
 }
 
-
-
 /*
  * Rebuild forwardrefs from backrefs
  */
-bool	CTable::rebuildForwardRefs()
+bool CTable::rebuildForwardRefs()
 {
 	if (!initialised())
 	{
@@ -396,7 +383,7 @@ bool	CTable::rebuildForwardRefs()
 /*
  * Reset forwardrefs
  */
-bool	CTable::resetForwardRefs()
+bool CTable::resetForwardRefs()
 {
 	if (!initialised())
 	{
@@ -410,7 +397,7 @@ bool	CTable::resetForwardRefs()
 /*
  * Reset table map
  */
-bool	CTable::resetTableMap()
+bool CTable::resetTableMap()
 {
 	if (!initialised())
 	{
@@ -424,7 +411,7 @@ bool	CTable::resetTableMap()
 /*
  * Rebuild table map
  */
-bool	CTable::rebuildTableMap()
+bool CTable::rebuildTableMap()
 {
 	if (!initialised())
 	{
@@ -438,21 +425,20 @@ bool	CTable::rebuildTableMap()
 	return true;
 }
 
-
 /*
  * Allocate a row in a table
  * \param row is the row to allocate
  * Return true if succeded
  */
-bool	CTable::allocate(RY_PDS::TRowIndex row, bool acquireRow)
+bool CTable::allocate(RY_PDS::TRowIndex row, bool acquireRow)
 {
-	CTableBuffer::CAccessor	accessor;
+	CTableBuffer::CAccessor accessor;
 
 	if (!_TableBuffer.allocate(row, accessor))
 		return false;
 
 	if (!accessor.allocated())
-		return false;			// should not happen
+		return false; // should not happen
 
 	resetRow(accessor.data());
 
@@ -468,7 +454,7 @@ bool	CTable::allocate(RY_PDS::TRowIndex row, bool acquireRow)
  * \param row is the row to deallocate
  * Return true if succeded
  */
-bool	CTable::deallocate(RY_PDS::TRowIndex row)
+bool CTable::deallocate(RY_PDS::TRowIndex row)
 {
 	return _TableBuffer.deallocate(row);
 }
@@ -479,7 +465,7 @@ bool	CTable::deallocate(RY_PDS::TRowIndex row)
  * \param key is the 64 bits row key
  * Return true if succeded
  */
-bool	CTable::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
+bool CTable::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 {
 	if (!initialised())
 	{
@@ -510,7 +496,7 @@ bool	CTable::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
  * \param key is the 64 bits row key
  * Return true if succeded
  */
-bool	CTable::unmapRow(uint64 key)
+bool CTable::unmapRow(uint64 key)
 {
 	if (!initialised())
 	{
@@ -525,7 +511,7 @@ bool	CTable::unmapRow(uint64 key)
 	}
 
 	// get index
-	RY_PDS::CObjectIndex	index = _TableBuffer.getMappedRow(key);
+	RY_PDS::CObjectIndex index = _TableBuffer.getMappedRow(key);
 
 	if (index.isNull())
 	{
@@ -549,7 +535,7 @@ bool	CTable::unmapRow(uint64 key)
  * \param key is the 64 bits row key
  * Return a valid TRowIndex if success
  */
-RY_PDS::CObjectIndex	CTable::getMappedRow(uint64 key) const
+RY_PDS::CObjectIndex CTable::getMappedRow(uint64 key) const
 {
 	if (!initialised())
 	{
@@ -566,7 +552,7 @@ RY_PDS::CObjectIndex	CTable::getMappedRow(uint64 key) const
  * \param timestamp is the current timestamp
  * Return true if succeded
  */
-bool	CTable::release(RY_PDS::TRowIndex row)
+bool CTable::release(RY_PDS::TRowIndex row)
 {
 	if (!initialised())
 	{
@@ -580,25 +566,20 @@ bool	CTable::release(RY_PDS::TRowIndex row)
 /*
  * Release all rows in table
  */
-bool	CTable::releaseAll()
+bool CTable::releaseAll()
 {
 	return _TableBuffer.releaseAll();
 }
 
-
-
-
-
-
 /*
  * Set value
  */
-bool	CTable::set(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void* dataptr)
+bool CTable::set(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void *dataptr)
 {
-	RY_PDS::CObjectIndex	object((RY_PDS::TTableIndex)_Id, row);
+	RY_PDS::CObjectIndex object((RY_PDS::TTableIndex)_Id, row);
 
 	// get an accessor on data
-	CDataAccessor	accessor(_Parent, object, column);
+	CDataAccessor accessor(_Parent, object, column);
 
 	if (!accessor.isValid())
 	{
@@ -614,43 +595,42 @@ bool	CTable::set(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasi
 		return accessor.setValue(dataptr, datasize);
 		break;
 
-	case PDS_BackRef:
+	case PDS_BackRef: {
+		// first unlink previous parent
+		if (!unlink(accessor, object))
 		{
-			// first unlink previous parent
-			if (!unlink(accessor, object))
-			{
-				PDS_WARNING("set(): unable to unlink previous parent at '%s'", accessor.getColumnIndex().toString().c_str());
-			}
-
-			// then link new parent
-			if (datasize != getStandardByteSize(PDS_Index))
-			{
-				PDS_WARNING("set(): unable to link new at '%s', provided bytesize is not standard", accessor.getColumnIndex().toString().c_str());
-				return false;
-			}
-
-			// get parent index
-			RY_PDS::CObjectIndex	parent = *(RY_PDS::CObjectIndex*)dataptr;
-
-			// check checksum is valid
-			if (!parent.isChecksumValid())
-			{
-				PDS_WARNING("set(): unable to link new parent '%s' at '%s', parent checksum is invalid", parent.toString().c_str(), accessor.getColumnIndex().toString().c_str());
-				return false;
-			}
-
-			// if parent is invalid, then no need to link
-			if (!parent.isValid())
-				return true;
-
-			// and link!
-			if (!link(accessor, parent, object))
-			{
-				PDS_WARNING("set(): unable to link new parent '%s' at '%s'", parent.toString().c_str(), accessor.getColumnIndex().toString().c_str());
-				return false;
-			}
+			PDS_WARNING("set(): unable to unlink previous parent at '%s'", accessor.getColumnIndex().toString().c_str());
 		}
-		break;
+
+		// then link new parent
+		if (datasize != getStandardByteSize(PDS_Index))
+		{
+			PDS_WARNING("set(): unable to link new at '%s', provided bytesize is not standard", accessor.getColumnIndex().toString().c_str());
+			return false;
+		}
+
+		// get parent index
+		RY_PDS::CObjectIndex parent = *(RY_PDS::CObjectIndex *)dataptr;
+
+		// check checksum is valid
+		if (!parent.isChecksumValid())
+		{
+			PDS_WARNING("set(): unable to link new parent '%s' at '%s', parent checksum is invalid", parent.toString().c_str(), accessor.getColumnIndex().toString().c_str());
+			return false;
+		}
+
+		// if parent is invalid, then no need to link
+		if (!parent.isValid())
+			return true;
+
+		// and link!
+		if (!link(accessor, parent, object))
+		{
+			PDS_WARNING("set(): unable to link new parent '%s' at '%s'", parent.toString().c_str(), accessor.getColumnIndex().toString().c_str());
+			return false;
+		}
+	}
+	break;
 
 	// other types MUST not be directly set
 	default:
@@ -665,12 +645,12 @@ bool	CTable::set(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasi
 /**
  * Set Parent
  */
-bool	CTable::setParent(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const RY_PDS::CObjectIndex& parent)
+bool CTable::setParent(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const RY_PDS::CObjectIndex &parent)
 {
-	RY_PDS::CObjectIndex	object((RY_PDS::TTableIndex)_Id, row);
+	RY_PDS::CObjectIndex object((RY_PDS::TTableIndex)_Id, row);
 
 	// get an accessor on data
-	CDataAccessor	accessor(_Parent, object, column);
+	CDataAccessor accessor(_Parent, object, column);
 
 	if (!accessor.isValid())
 	{
@@ -681,33 +661,32 @@ bool	CTable::setParent(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const
 	switch (accessor.column()->getMetaType())
 	{
 
-	case PDS_BackRef:
+	case PDS_BackRef: {
+		// first unlink previous parent
+		if (!unlink(accessor, object))
 		{
-			// first unlink previous parent
-			if (!unlink(accessor, object))
-			{
-				PDS_WARNING("set(): unable to unlink previous parent at '%s'", accessor.getColumnIndex().toString().c_str());
-			}
-
-			// check checksum is valid
-			if (!parent.isChecksumValid())
-			{
-				PDS_WARNING("set(): unable to link new parent '%s' at '%s', parent checksum is invalid", parent.toString().c_str(), accessor.getColumnIndex().toString().c_str());
-				return false;
-			}
-
-			// if parent is invalid, then no need to link
-			if (!parent.isValid())
-				return true;
-
-			// and link!
-			if (!link(accessor, parent, object))
-			{
-				PDS_WARNING("set(): unable to link new parent '%s' at '%s'", parent.toString().c_str(), accessor.getColumnIndex().toString().c_str());
-				return false;
-			}
+			PDS_WARNING("set(): unable to unlink previous parent at '%s'", accessor.getColumnIndex().toString().c_str());
 		}
-		break;
+
+		// check checksum is valid
+		if (!parent.isChecksumValid())
+		{
+			PDS_WARNING("set(): unable to link new parent '%s' at '%s', parent checksum is invalid", parent.toString().c_str(), accessor.getColumnIndex().toString().c_str());
+			return false;
+		}
+
+		// if parent is invalid, then no need to link
+		if (!parent.isValid())
+			return true;
+
+		// and link!
+		if (!link(accessor, parent, object))
+		{
+			PDS_WARNING("set(): unable to link new parent '%s' at '%s'", parent.toString().c_str(), accessor.getColumnIndex().toString().c_str());
+			return false;
+		}
+	}
+	break;
 
 	// other types MUST not be directly set
 	default:
@@ -719,14 +698,13 @@ bool	CTable::setParent(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const
 	return true;
 }
 
-
 /**
  * link a BackRef to a parent
  * This method will perfom a full linking of child and new parent
  * \param backref is an accessor on the BackRef
  * \param parent is an index on the parent to link
  */
-bool	CTable::link(CDataAccessor &backref, const RY_PDS::CObjectIndex &parent, const RY_PDS::CObjectIndex &child)
+bool CTable::link(CDataAccessor &backref, const RY_PDS::CObjectIndex &parent, const RY_PDS::CObjectIndex &child)
 {
 	// check ref is valid
 	if (!backref.isValid())
@@ -749,8 +727,8 @@ bool	CTable::link(CDataAccessor &backref, const RY_PDS::CObjectIndex &parent, co
 	}
 
 	// link parent to child
-	uint32			forwardrefid = backref.attribute()->getReferencedAttribute();
-	CDataAccessor	parentref(_Parent, parent, forwardrefid, 0);
+	uint32 forwardrefid = backref.attribute()->getReferencedAttribute();
+	CDataAccessor parentref(_Parent, parent, forwardrefid, 0);
 
 	if (!parentref.isValid())
 	{
@@ -760,8 +738,7 @@ bool	CTable::link(CDataAccessor &backref, const RY_PDS::CObjectIndex &parent, co
 
 	// check parent and child can really be linked
 	// that is cross references match
-	if (parentref.attribute()->getReferencedAttribute() != backref.attribute()->getId() ||
-		backref.attribute()->getReferencedAttribute() != parentref.attribute()->getId())
+	if (parentref.attribute()->getReferencedAttribute() != backref.attribute()->getId() || backref.attribute()->getReferencedAttribute() != parentref.attribute()->getId())
 	{
 		PDS_WARNING("link(): failed, child '%s' and parent '%s' are not bound to be linked", backref.toString().c_str(), parentref.toString().c_str());
 		return false;
@@ -773,15 +750,13 @@ bool	CTable::link(CDataAccessor &backref, const RY_PDS::CObjectIndex &parent, co
 	return backref.setIndex(parent);
 }
 
-
-
 /*
  * link a ForwardRef to a child
  * This method will only link parent to child
  * \param forwardref is an accessor on the BackRef
  * \param child is an index on the child to link
  */
-bool	CTable::forwardLink(CDataAccessor &backref, CDataAccessor &forwardref, const RY_PDS::CObjectIndex &child)
+bool CTable::forwardLink(CDataAccessor &backref, CDataAccessor &forwardref, const RY_PDS::CObjectIndex &child)
 {
 	if (!backref.isValid() || !forwardref.isValid())
 	{
@@ -807,52 +782,50 @@ bool	CTable::forwardLink(CDataAccessor &backref, CDataAccessor &forwardref, cons
 			return false;
 		}
 
-	case PDS_ForwardRef:
+	case PDS_ForwardRef: {
+		RY_PDS::CObjectIndex prevChild;
+
+		// check no previous child
+		if (!forwardref.getIndex(prevChild))
 		{
-			RY_PDS::CObjectIndex	prevChild;
-
-			// check no previous child
-			if (!forwardref.getIndex(prevChild))
-			{
-				PDS_WARNING("forwardLink(): unable to access previous child of '%s'", forwardref.toString().c_str());
-			}
-			else if (prevChild.isValid())
-			{
-				PDS_WARNING("forwardLink(): '%s' has a previous child '%s'", forwardref.toString().c_str(), prevChild.toString().c_str());
-			}
-
-			// set child
-			return forwardref.setIndex(child);
+			PDS_WARNING("forwardLink(): unable to access previous child of '%s'", forwardref.toString().c_str());
 		}
-		break;
-
-	case PDS_Set:
+		else if (prevChild.isValid())
 		{
-			if (!forwardref.checkType(child))
-			{
-				PDS_WARNING("forwardLink(): failed, '%s' is not of attribute '%s' type", child.toString().c_str(), forwardref.attribute()->getName().c_str());
-				return false;
-			}
-
-			RY_PDS::CSetMap::CAccessor	setaccess = forwardref.getSet();
-
-			if (!setaccess.isValid())
-			{
-				PDS_WARNING("forwardLink(): failed, parent '%s' set access is invalid", forwardref.toString().c_str());
-				return false;
-			}
-
-			setaccess.add(child);
-			// CHECK
-			if (!setaccess.belongsTo(child))
-			{
-				PDS_WARNING("forwardLink(): failed, child '%s' doesn't belong to parent '%s' though it just had been added", child.toString().c_str(), forwardref.toString().c_str());
-				return false;
-			}
-			// CHECK
-			return true;
+			PDS_WARNING("forwardLink(): '%s' has a previous child '%s'", forwardref.toString().c_str(), prevChild.toString().c_str());
 		}
-		break;
+
+		// set child
+		return forwardref.setIndex(child);
+	}
+	break;
+
+	case PDS_Set: {
+		if (!forwardref.checkType(child))
+		{
+			PDS_WARNING("forwardLink(): failed, '%s' is not of attribute '%s' type", child.toString().c_str(), forwardref.attribute()->getName().c_str());
+			return false;
+		}
+
+		RY_PDS::CSetMap::CAccessor setaccess = forwardref.getSet();
+
+		if (!setaccess.isValid())
+		{
+			PDS_WARNING("forwardLink(): failed, parent '%s' set access is invalid", forwardref.toString().c_str());
+			return false;
+		}
+
+		setaccess.add(child);
+		// CHECK
+		if (!setaccess.belongsTo(child))
+		{
+			PDS_WARNING("forwardLink(): failed, child '%s' doesn't belong to parent '%s' though it just had been added", child.toString().c_str(), forwardref.toString().c_str());
+			return false;
+		}
+		// CHECK
+		return true;
+	}
+	break;
 
 	default:
 		PDS_WARNING("forwardLink(): failed, can't link '%s'", getNameFromMetaType(forwardref.attribute()->getMetaType()).c_str());
@@ -862,14 +835,12 @@ bool	CTable::forwardLink(CDataAccessor &backref, CDataAccessor &forwardref, cons
 	return false;
 }
 
-
-
 /*
  * Unlink a BackRef
  * \param ref is an accessor on the BackRef
  * \param child is a remember of the child index
  */
-bool	CTable::unlink(CDataAccessor &backref, const RY_PDS::CObjectIndex &child)
+bool CTable::unlink(CDataAccessor &backref, const RY_PDS::CObjectIndex &child)
 {
 	// check ref is valid
 	if (!backref.isValid())
@@ -885,7 +856,7 @@ bool	CTable::unlink(CDataAccessor &backref, const RY_PDS::CObjectIndex &child)
 		return false;
 	}
 
-	RY_PDS::CObjectIndex	parent;
+	RY_PDS::CObjectIndex parent;
 
 	// unlink parent
 	if (!backref.getIndex(parent))
@@ -901,8 +872,8 @@ bool	CTable::unlink(CDataAccessor &backref, const RY_PDS::CObjectIndex &child)
 		// only unlink if parent exists
 		// because link will perform unlink before, and child may have no parent yet
 
-		uint32			forwardrefid = backref.attribute()->getReferencedAttribute();
-		CDataAccessor	parentref(_Parent, parent, forwardrefid, 0);
+		uint32 forwardrefid = backref.attribute()->getReferencedAttribute();
+		CDataAccessor parentref(_Parent, parent, forwardrefid, 0);
 
 		forwardUnlink(backref, parentref, child);
 	}
@@ -911,15 +882,13 @@ bool	CTable::unlink(CDataAccessor &backref, const RY_PDS::CObjectIndex &child)
 	return backref.setIndex(RY_PDS::CObjectIndex::null());
 }
 
-
-
 /*
  * unlink a ForwardRef to a child
  * This method will only unlink parent to child
  * \param forwardref is an accessor on the BackRef
  * \param child is an index on the child to unlink
  */
-bool	CTable::forwardUnlink(CDataAccessor &backref, CDataAccessor &forwardref, const RY_PDS::CObjectIndex &child)
+bool CTable::forwardUnlink(CDataAccessor &backref, CDataAccessor &forwardref, const RY_PDS::CObjectIndex &child)
 {
 	if (!forwardref.isValid())
 	{
@@ -945,54 +914,52 @@ bool	CTable::forwardUnlink(CDataAccessor &backref, CDataAccessor &forwardref, co
 			return false;
 		}
 
-	case PDS_ForwardRef:
+	case PDS_ForwardRef: {
+		RY_PDS::CObjectIndex prevChild;
+
+		// check child is the one we want to unlink
+		if (!forwardref.getIndex(prevChild))
 		{
-			RY_PDS::CObjectIndex	prevChild;
-
-			// check child is the one we want to unlink
-			if (!forwardref.getIndex(prevChild))
-			{
-				PDS_WARNING("forwardUnlink(): unable to access previous child of '%s'", forwardref.toString().c_str());
-			}
-			else if (!prevChild.isValid())
-			{
-				PDS_WARNING("forwardUnlink(): '%s' has no previous child '%s'", prevChild.toString().c_str(), forwardref.toString().c_str());
-			}
-			else if (prevChild != child)
-			{
-				PDS_WARNING("forwardUnlink(): failed, '%s' was not linked to '%s' but to '%s'", forwardref.toString().c_str(), child.toString().c_str(), prevChild.toString().c_str());
-				return false;
-			}
-
-			// set child
-			return forwardref.setIndex(RY_PDS::CObjectIndex::null());
+			PDS_WARNING("forwardUnlink(): unable to access previous child of '%s'", forwardref.toString().c_str());
 		}
-		break;
-
-	case PDS_Set:
+		else if (!prevChild.isValid())
 		{
-			RY_PDS::CSetMap::CAccessor	setaccess = forwardref.getSet();
-
-			if (!setaccess.isValid())
-			{
-				PDS_WARNING("forwardUnlink(): failed, parent '%s' set access is invalid", forwardref.toString().c_str());
-				return false;
-			}
-
-			if (!setaccess.belongsTo(child))
-			{
-				PDS_WARNING("forwardUnlink(): failed, child '%s' doesn't belong to parent '%s'", child.toString().c_str(), forwardref.toString().c_str());
-				return false;
-			}
-			setaccess.erase(child);
-			if (setaccess.belongsTo(child))
-			{
-				PDS_WARNING("forwardUnlink(): failed, child '%s' still belongs to parent '%s' though it had been deleted", child.toString().c_str(), forwardref.toString().c_str());
-				return false;
-			}
-			return true;
+			PDS_WARNING("forwardUnlink(): '%s' has no previous child '%s'", prevChild.toString().c_str(), forwardref.toString().c_str());
 		}
-		break;
+		else if (prevChild != child)
+		{
+			PDS_WARNING("forwardUnlink(): failed, '%s' was not linked to '%s' but to '%s'", forwardref.toString().c_str(), child.toString().c_str(), prevChild.toString().c_str());
+			return false;
+		}
+
+		// set child
+		return forwardref.setIndex(RY_PDS::CObjectIndex::null());
+	}
+	break;
+
+	case PDS_Set: {
+		RY_PDS::CSetMap::CAccessor setaccess = forwardref.getSet();
+
+		if (!setaccess.isValid())
+		{
+			PDS_WARNING("forwardUnlink(): failed, parent '%s' set access is invalid", forwardref.toString().c_str());
+			return false;
+		}
+
+		if (!setaccess.belongsTo(child))
+		{
+			PDS_WARNING("forwardUnlink(): failed, child '%s' doesn't belong to parent '%s'", child.toString().c_str(), forwardref.toString().c_str());
+			return false;
+		}
+		setaccess.erase(child);
+		if (setaccess.belongsTo(child))
+		{
+			PDS_WARNING("forwardUnlink(): failed, child '%s' still belongs to parent '%s' though it had been deleted", child.toString().c_str(), forwardref.toString().c_str());
+			return false;
+		}
+		return true;
+	}
+	break;
 
 	default:
 		PDS_WARNING("forwardUnlink(): failed, can't unlink '%s'", getNameFromMetaType(forwardref.attribute()->getMetaType()).c_str());
@@ -1002,17 +969,15 @@ bool	CTable::forwardUnlink(CDataAccessor &backref, CDataAccessor &forwardref, co
 	return false;
 }
 
-
-
 /*
  * Set value
  */
-bool	CTable::get(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint& datasize, void* dataptr, TDataType& type)
+bool CTable::get(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint &datasize, void *dataptr, TDataType &type)
 {
-	RY_PDS::CObjectIndex	object((RY_PDS::TTableIndex)_Id, row);
+	RY_PDS::CObjectIndex object((RY_PDS::TTableIndex)_Id, row);
 
 	// get an accessor on data
-	CDataAccessor	accessor(_Parent, object, column);
+	CDataAccessor accessor(_Parent, object, column);
 
 	if (!accessor.isValid())
 	{
@@ -1032,24 +997,22 @@ bool	CTable::get(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint& datas
 		break;
 
 	case PDS_BackRef:
-	case PDS_ForwardRef:
+	case PDS_ForwardRef: {
+		if (getStandardByteSize(type) > datasize)
 		{
-			if (getStandardByteSize(type) > datasize)
-			{
-				PDS_WARNING("get(): databuffer too narrow to store column '%d' Index", column);
-				return false;
-			}
-			datasize = sizeof(RY_PDS::CObjectIndex);
-			return accessor.getIndex(*(RY_PDS::CObjectIndex*)dataptr);
-		}
-		break;
-
-	case PDS_Set:
-		{
-			PDS_WARNING("get(): not supported for sets");
+			PDS_WARNING("get(): databuffer too narrow to store column '%d' Index", column);
 			return false;
 		}
-		break;
+		datasize = sizeof(RY_PDS::CObjectIndex);
+		return accessor.getIndex(*(RY_PDS::CObjectIndex *)dataptr);
+	}
+	break;
+
+	case PDS_Set: {
+		PDS_WARNING("get(): not supported for sets");
+		return false;
+	}
+	break;
 
 	// other types MUST not be directly set
 	default:
@@ -1061,14 +1024,10 @@ bool	CTable::get(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint& datas
 	return true;
 }
 
-
-
-
-
 /*
  * Perform column integrity check
  */
-bool	CTable::CDataAccessor::check() const
+bool CTable::CDataAccessor::check() const
 {
 	if (!isValid())
 		return false;
@@ -1077,7 +1036,6 @@ bool	CTable::CDataAccessor::check() const
 	if (_IsDebug)
 		return true;
 #endif
-
 
 	switch (_Column->getMetaType())
 	{
@@ -1091,7 +1049,8 @@ bool	CTable::CDataAccessor::check() const
 
 		if (_Attribute->getMetaType() != PDS_BackRef)
 		{
-			PDS_WARNING_IN(_Table)("CDataAccessor::check(): column '%s' MetaType incoherent with attribute's definition", _Column->getName().c_str());
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor::check(): column '%s' MetaType incoherent with attribute's definition", _Column->getName().c_str());
 			return false;
 		}
 
@@ -1101,10 +1060,10 @@ bool	CTable::CDataAccessor::check() const
 
 	case PDS_ForwardRef:
 
-		if (_Attribute->getMetaType() != PDS_ForwardRef &&
-			_Attribute->getMetaType() != PDS_ArrayRef)
+		if (_Attribute->getMetaType() != PDS_ForwardRef && _Attribute->getMetaType() != PDS_ArrayRef)
 		{
-			PDS_WARNING_IN(_Table)("CDataAccessor::check(): column '%s' MetaType incoherent with attribute's definition", _Column->getName().c_str());
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor::check(): column '%s' MetaType incoherent with attribute's definition", _Column->getName().c_str());
 			return false;
 		}
 
@@ -1122,54 +1081,56 @@ bool	CTable::CDataAccessor::check() const
 	return false;
 }
 
-
 /*
  * Check an accessor as a PDS_Type accessor
  */
-bool	CTable::CDataAccessor::checkAsTypeAccessor() const
+bool CTable::CDataAccessor::checkAsTypeAccessor() const
 {
 	// check attribute
-	if (_Attribute->getMetaType() != PDS_Type &&
-		_Attribute->getMetaType() != PDS_Class &&
-		_Attribute->getMetaType() != PDS_ArrayType &&
-		_Attribute->getMetaType() != PDS_ArrayClass)
+	if (_Attribute->getMetaType() != PDS_Type && _Attribute->getMetaType() != PDS_Class && _Attribute->getMetaType() != PDS_ArrayType && _Attribute->getMetaType() != PDS_ArrayClass)
 	{
-		PDS_WARNING_IN(_Table)("CDataAccessor::checkAsTypeAccessor(): column '%s' MetaType incoherent with attribute's definition", _Column->getName().c_str());
+		PDS_WARNING_IN(_Table)
+		("CDataAccessor::checkAsTypeAccessor(): column '%s' MetaType incoherent with attribute's definition", _Column->getName().c_str());
 		return false;
 	}
 
 	if (!checkStrictDataType(_Column->getDataType()))
 	{
-		PDS_WARNING_IN(_Table)("CDataAccessor::checkAsTypeAccessor(): column '%s' has not a strict valid datatype ('%s')", _Column->getName().c_str(), getNameFromDataType(_Column->getDataType()).c_str());
+		PDS_WARNING_IN(_Table)
+		("CDataAccessor::checkAsTypeAccessor(): column '%s' has not a strict valid datatype ('%s')", _Column->getName().c_str(), getNameFromDataType(_Column->getDataType()).c_str());
 		return false;
 	}
 
 	if (_Column->getDataType() == PDS_enum || _Column->getDataType() == PDS_dimension)
 	{
-		const CType*	index = _Table->getParent()->getType(_Column->getTypeId());
+		const CType *index = _Table->getParent()->getType(_Column->getTypeId());
 		if (index == NULL)
 		{
-			PDS_WARNING_IN(_Table)("CDataAccessor::checkAsTypeAccessor(): couldn't find column '%s' original type in database", _Column->getName().c_str());
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor::checkAsTypeAccessor(): couldn't find column '%s' original type in database", _Column->getName().c_str());
 			return false;
 		}
 
 		if (!index->isIndex())
 		{
-			PDS_WARNING_IN(_Table)("CDataAccessor::checkAsTypeAccessor(): column '%s' original type is not an enum, whereas column says so", _Column->getName().c_str());
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor::checkAsTypeAccessor(): column '%s' original type is not an enum, whereas column says so", _Column->getName().c_str());
 			return false;
 		}
 
-		uint32	value;
+		uint32 value;
 
 		if (!getAsIndexType(value))
 		{
-			PDS_WARNING_IN(_Table)("CDataAccessor::checkAsTypeAccessor(): couldn't getAsIndexValue() column '%s'", _Column->getName().c_str());
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor::checkAsTypeAccessor(): couldn't getAsIndexValue() column '%s'", _Column->getName().c_str());
 			return false;
 		}
 
 		if (value >= index->getIndexSize())
 		{
-			PDS_WARNING_IN(_Table)("CDataAccessor::checkAsTypeAccessor(): column '%s' is out of enum '%s' range", _Column->getName().c_str(), index->getName().c_str());
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor::checkAsTypeAccessor(): column '%s' is out of enum '%s' range", _Column->getName().c_str(), index->getName().c_str());
 			return false;
 		}
 	}
@@ -1180,30 +1141,34 @@ bool	CTable::CDataAccessor::checkAsTypeAccessor() const
 /*
  * Check an accessor as a PDS_BackRef or PDS_ForwardRef accessor
  */
-bool	CTable::CDataAccessor::checkAsRefAccessor() const
+bool CTable::CDataAccessor::checkAsRefAccessor() const
 {
 	if (_Column->getDataType() != PDS_Index)
 	{
-		PDS_WARNING_IN(_Table)("CDataAccessor::checkAsRefAccessor(): column '%s' DataType must be Index, found '%s'", _Column->getName().c_str(), getNameFromDataType(_Column->getDataType()).c_str());
+		PDS_WARNING_IN(_Table)
+		("CDataAccessor::checkAsRefAccessor(): column '%s' DataType must be Index, found '%s'", _Column->getName().c_str(), getNameFromDataType(_Column->getDataType()).c_str());
 		return false;
 	}
 
-	RY_PDS::CObjectIndex	ref;
+	RY_PDS::CObjectIndex ref;
 	if (!getIndex(ref))
 	{
-		PDS_WARNING_IN(_Table)("CDataAccessor::checkAsRefAccessor(): can't get column '%s' Index", _Column->getName().c_str());
+		PDS_WARNING_IN(_Table)
+		("CDataAccessor::checkAsRefAccessor(): can't get column '%s' Index", _Column->getName().c_str());
 		return false;
 	}
 
 	if (!checkType(ref))
 	{
-		PDS_WARNING_IN(_Table)("CDataAccessor::checkAsRefAccessor(): column '%s' contains object '%s' of invalid type", _Column->getName().c_str(), ref.toString().c_str());
+		PDS_WARNING_IN(_Table)
+		("CDataAccessor::checkAsRefAccessor(): column '%s' contains object '%s' of invalid type", _Column->getName().c_str(), ref.toString().c_str());
 		return false;
 	}
 
 	if (!ref.isNull() && !_Table->getParent()->isAllocated(ref))
 	{
-		PDS_WARNING_IN(_Table)("CDataAccessor::checkAsRefAccessor(): column '%s' points to '%s' which is not allocated", _Column->getName().c_str(), ref.toString().c_str());
+		PDS_WARNING_IN(_Table)
+		("CDataAccessor::checkAsRefAccessor(): column '%s' points to '%s' which is not allocated", _Column->getName().c_str(), ref.toString().c_str());
 		return false;
 	}
 
@@ -1213,47 +1178,52 @@ bool	CTable::CDataAccessor::checkAsRefAccessor() const
 /*
  * Check an accessor as a PDS_Set accessor
  */
-bool	CTable::CDataAccessor::checkAsSetAccessor() const
+bool CTable::CDataAccessor::checkAsSetAccessor() const
 {
 	if (_Column->getDataType() != PDS_List)
 	{
-		PDS_WARNING_IN(_Table)("CDataAccessor::checkAsSetAccessor(): column '%s' DataType must be List, found '%s'", _Column->getName().c_str(), getNameFromDataType(_Column->getDataType()).c_str());
+		PDS_WARNING_IN(_Table)
+		("CDataAccessor::checkAsSetAccessor(): column '%s' DataType must be List, found '%s'", _Column->getName().c_str(), getNameFromDataType(_Column->getDataType()).c_str());
 		return false;
 	}
 
-	RY_PDS::CSetMap::CAccessor	setaccess = getSet();
+	RY_PDS::CSetMap::CAccessor setaccess = getSet();
 
 	if (!setaccess.isValid())
 	{
-		PDS_WARNING_IN(_Table)("CDataAccessor::checkAsSetAccessor(): set accessor to '%s' is invalid", toString().c_str());
+		PDS_WARNING_IN(_Table)
+		("CDataAccessor::checkAsSetAccessor(): set accessor to '%s' is invalid", toString().c_str());
 		return false;
 	}
 
-	const RY_PDS::TIndexList&	list = setaccess.get();
-	bool						success = true;
+	const RY_PDS::TIndexList &list = setaccess.get();
+	bool success = true;
 
-	uint	i;
-	for (i=0; i<list.size(); ++i)
+	uint i;
+	for (i = 0; i < list.size(); ++i)
 	{
-		RY_PDS::CObjectIndex	index = list[i];
+		RY_PDS::CObjectIndex index = list[i];
 
 		if (!index.isValid())
 		{
-			PDS_WARNING_IN(_Table)("CDataAccessor::checkAsSetAccessor(): column '%s' points to invalid object '%s'", _Column->getName().c_str(), index.toString().c_str());
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor::checkAsSetAccessor(): column '%s' points to invalid object '%s'", _Column->getName().c_str(), index.toString().c_str());
 			success = false;
 			continue;
 		}
 
 		if (!_Table->getParent()->isAllocated(index))
 		{
-			PDS_WARNING_IN(_Table)("CDataAccessor::checkAsSetAccessor(): column '%s' points to unallocated object '%s'", _Column->getName().c_str(), index.toString().c_str());
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor::checkAsSetAccessor(): column '%s' points to unallocated object '%s'", _Column->getName().c_str(), index.toString().c_str());
 			success = false;
 			continue;
 		}
 
 		if (!checkType(index))
 		{
-			PDS_WARNING_IN(_Table)("CDataAccessor::checkAsSetAccessor(): column '%s' points to object '%s' which is not of expected type", _Column->getName().c_str(), index.toString().c_str());
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor::checkAsSetAccessor(): column '%s' points to object '%s' which is not of expected type", _Column->getName().c_str(), index.toString().c_str());
 			success = false;
 			continue;
 		}
@@ -1262,31 +1232,27 @@ bool	CTable::CDataAccessor::checkAsSetAccessor() const
 	return success;
 }
 
-
-
-
-
 /*
  * Fetch a row into stream
  * Fetch the whole object arborescence (i.e. children linked to this object)
  * \param row is the row to fetch
  * \param data is the stream store data into
  */
-bool	CTable::fetch(RY_PDS::TRowIndex row, RY_PDS::CPData &data, bool fetchIndex)
+bool CTable::fetch(RY_PDS::TRowIndex row, RY_PDS::CPData &data, bool fetchIndex)
 {
-	uint	i;
+	uint i;
 
-	RY_PDS::TTableIndex		table = (RY_PDS::TTableIndex)_Id;
-	RY_PDS::CObjectIndex	index(table, row);
+	RY_PDS::TTableIndex table = (RY_PDS::TTableIndex)_Id;
+	RY_PDS::CObjectIndex index(table, row);
 
 	if (fetchIndex)
 	{
 		data.serial(table, row);
 	}
 
-	CDataAccessor	rowaccessor(_Parent, index, 0);
+	CDataAccessor rowaccessor(_Parent, index, 0);
 
-	for (i=0; i<_Columns.size(); ++i)
+	for (i = 0; i < _Columns.size(); ++i)
 	{
 		if (!_Columns[i].initialised())
 		{
@@ -1300,7 +1266,7 @@ bool	CTable::fetch(RY_PDS::TRowIndex row, RY_PDS::CPData &data, bool fetchIndex)
 			continue;
 		}
 
-		CDataAccessor	accessor(rowaccessor, i);
+		CDataAccessor accessor(rowaccessor, i);
 
 		if (!accessor.isValid())
 		{
@@ -1310,7 +1276,6 @@ bool	CTable::fetch(RY_PDS::TRowIndex row, RY_PDS::CPData &data, bool fetchIndex)
 
 		if (!accessor.fetch(data))
 			return false;
-
 	}
 
 	// lock row
@@ -1319,17 +1284,15 @@ bool	CTable::fetch(RY_PDS::TRowIndex row, RY_PDS::CPData &data, bool fetchIndex)
 	return true;
 }
 
-
-
-
 /**
  * Fetch column data into stream
  */
-bool	CTable::CDataAccessor::fetch(RY_PDS::CPData &data)
+bool CTable::CDataAccessor::fetch(RY_PDS::CPData &data)
 {
 	if (!isValid())
 	{
-		PDS_WARNING_IN(_Table)("CDataAccessor:fetch(): failed, fetch invalid accessor '%s'", toString().c_str());
+		PDS_WARNING_IN(_Table)
+		("CDataAccessor:fetch(): failed, fetch invalid accessor '%s'", toString().c_str());
 		return false;
 	}
 
@@ -1339,13 +1302,13 @@ bool	CTable::CDataAccessor::fetch(RY_PDS::CPData &data)
 	case PDS_sint8:
 	case PDS_uint8:
 	case PDS_char:
-		data.serial(*(uint8*)_Data);
+		data.serial(*(uint8 *)_Data);
 		break;
 
 	case PDS_ucchar:
 	case PDS_uint16:
 	case PDS_sint16:
-		data.serial(*(uint16*)_Data);
+		data.serial(*(uint16 *)_Data);
 		break;
 
 	case PDS_uint32:
@@ -1354,103 +1317,104 @@ bool	CTable::CDataAccessor::fetch(RY_PDS::CPData &data)
 	case PDS_CSheetId:
 	case PDS_CNodeId:
 	case PDS_enum:
-		data.serial(*(uint32*)_Data);
+		data.serial(*(uint32 *)_Data);
 		break;
 
 	case PDS_uint64:
 	case PDS_sint64:
 	case PDS_double:
 	case PDS_CEntityId:
-		data.serial(*(uint64*)_Data);
+		data.serial(*(uint64 *)_Data);
 		break;
 
-	case PDS_Index:
+	case PDS_Index: {
+		// check this is a forward ref
+		// only forward ref are sent, backref are implicitely deduced
+		if (_Column->getMetaType() == PDS_BackRef)
 		{
-			// check this is a forward ref
-			// only forward ref are sent, backref are implicitely deduced
-			if (_Column->getMetaType() == PDS_BackRef)
-			{
-				PDS_WARNING_IN(_Table)("CDataAccessor:fetch(): failed, try to serialize '%s' as backref", toString().c_str());
-				return false;
-			}
-
-			RY_PDS::CObjectIndex	child = *(RY_PDS::CObjectIndex*)_Data;
-
-			if (!child.isChecksumValid())
-			{
-				PDS_WARNING_IN(_Table)("CDataAccessor:fetch(): failed, '%s' points to invalid object '%s'", toString().c_str(), child.toString().c_str());
-				return false;
-			}
-
-			if (child.isNull())
-			{
-				// send object id
-				RY_PDS::TTableIndex		tid = RY_PDS::INVALID_TABLE_INDEX;
-				RY_PDS::TRowIndex		rid = RY_PDS::INVALID_ROW_INDEX;
-				data.serial(tid, rid);
-
-				return true;
-			}
-
-			// send object and hierarchy
-			return _Table->getParent()->fetch(child, data);
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor:fetch(): failed, try to serialize '%s' as backref", toString().c_str());
+			return false;
 		}
-		break;
 
-	case PDS_List:
+		RY_PDS::CObjectIndex child = *(RY_PDS::CObjectIndex *)_Data;
+
+		if (!child.isChecksumValid())
 		{
-			RY_PDS::CSetMap::CAccessor	setaccess = getSet();
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor:fetch(): failed, '%s' points to invalid object '%s'", toString().c_str(), child.toString().c_str());
+			return false;
+		}
 
-			if (!setaccess.isValid())
-			{
-				PDS_WARNING_IN(_Table)("CDataAccessor:fetch(): failed, object '%s' set access is invalid", toString().c_str());
-				return false;
-			}
-
-			const RY_PDS::TIndexList&	list = setaccess.get();
-
-			uint	i;
-			for (i=0; i<list.size(); ++i)
-			{
-				RY_PDS::CObjectIndex	child = list[i];
-
-				// fetch object index
-				RY_PDS::TTableIndex		tid = child.table();
-				RY_PDS::TRowIndex		rid = child.row();
-				data.serial(tid, rid);
-
-				// fetch object key, for inset creation
-				CDataAccessor			keyaccess(_Table->getParent(), child, _Attribute->getBackRefKey(), 0);
-				if (!keyaccess.isValid())
-				{
-					PDS_WARNING_IN(_Table)("CDataAccessor:fetch(): failed, '%s' points to invalid object '%s'", toString().c_str(), child.toString().c_str());
-					return false;
-				}
-				keyaccess.fetch(data);
-
-				// force table not to fetch index, because we already done it
-				_Table->getParent()->fetch(child, data, false);
-			}
-
-			RY_PDS::TTableIndex		tid = RY_PDS::INVALID_TABLE_INDEX;
-			RY_PDS::TRowIndex		rid = RY_PDS::INVALID_ROW_INDEX;
+		if (child.isNull())
+		{
+			// send object id
+			RY_PDS::TTableIndex tid = RY_PDS::INVALID_TABLE_INDEX;
+			RY_PDS::TRowIndex rid = RY_PDS::INVALID_ROW_INDEX;
 			data.serial(tid, rid);
 
+			return true;
 		}
-		break;
+
+		// send object and hierarchy
+		return _Table->getParent()->fetch(child, data);
+	}
+	break;
+
+	case PDS_List: {
+		RY_PDS::CSetMap::CAccessor setaccess = getSet();
+
+		if (!setaccess.isValid())
+		{
+			PDS_WARNING_IN(_Table)
+			("CDataAccessor:fetch(): failed, object '%s' set access is invalid", toString().c_str());
+			return false;
+		}
+
+		const RY_PDS::TIndexList &list = setaccess.get();
+
+		uint i;
+		for (i = 0; i < list.size(); ++i)
+		{
+			RY_PDS::CObjectIndex child = list[i];
+
+			// fetch object index
+			RY_PDS::TTableIndex tid = child.table();
+			RY_PDS::TRowIndex rid = child.row();
+			data.serial(tid, rid);
+
+			// fetch object key, for inset creation
+			CDataAccessor keyaccess(_Table->getParent(), child, _Attribute->getBackRefKey(), 0);
+			if (!keyaccess.isValid())
+			{
+				PDS_WARNING_IN(_Table)
+				("CDataAccessor:fetch(): failed, '%s' points to invalid object '%s'", toString().c_str(), child.toString().c_str());
+				return false;
+			}
+			keyaccess.fetch(data);
+
+			// force table not to fetch index, because we already done it
+			_Table->getParent()->fetch(child, data, false);
+		}
+
+		RY_PDS::TTableIndex tid = RY_PDS::INVALID_TABLE_INDEX;
+		RY_PDS::TRowIndex rid = RY_PDS::INVALID_ROW_INDEX;
+		data.serial(tid, rid);
+	}
+	break;
 
 	case PDS_dimension:
 		if (_Column->getByteSize() == 1)
 		{
-			data.serial(*(uint8*)_Data);
+			data.serial(*(uint8 *)_Data);
 		}
 		else if (_Column->getByteSize() == 2)
 		{
-			data.serial(*(uint16*)_Data);
+			data.serial(*(uint16 *)_Data);
 		}
 		else
 		{
-			data.serial(*(uint32*)_Data);
+			data.serial(*(uint32 *)_Data);
 		}
 		break;
 	}
@@ -1458,171 +1422,164 @@ bool	CTable::CDataAccessor::fetch(RY_PDS::CPData &data)
 	return true;
 }
 
-
-
 /*
  * Get value as string
  */
-string	CTable::CDataAccessor::valueAsString(bool expandSet) const
+string CTable::CDataAccessor::valueAsString(bool expandSet) const
 {
 	if (!isValid())
 		return string("");
 
-	std::string		value;
+	std::string value;
 
 	switch (_Column->getDataType())
 	{
 	case PDS_bool:
-		value = dataTypeAsString(*(bool*)_Data);
+		value = dataTypeAsString(*(bool *)_Data);
 		break;
 
 	case PDS_char:
-		value = dataTypeAsString(*(char*)_Data);
+		value = dataTypeAsString(*(char *)_Data);
 		break;
 
 	case PDS_uint8:
-		value = dataTypeAsString(*(uint8*)_Data);
+		value = dataTypeAsString(*(uint8 *)_Data);
 		break;
 
 	case PDS_ucchar:
 	case PDS_uint16:
-		value = dataTypeAsString(*(uint16*)_Data);
+		value = dataTypeAsString(*(uint16 *)_Data);
 		break;
 
 	case PDS_CSheetId:
 	case PDS_CNodeId:
 	case PDS_uint32:
-		value = dataTypeAsString(*(uint32*)_Data);
+		value = dataTypeAsString(*(uint32 *)_Data);
 		break;
 
 	case PDS_uint64:
-		value = dataTypeAsString(*(uint64*)_Data);
+		value = dataTypeAsString(*(uint64 *)_Data);
 		break;
 
 	case PDS_sint8:
-		value = dataTypeAsString(*(sint8*)_Data);
+		value = dataTypeAsString(*(sint8 *)_Data);
 		break;
 
 	case PDS_sint16:
-		value = dataTypeAsString(*(sint16*)_Data);
+		value = dataTypeAsString(*(sint16 *)_Data);
 		break;
 
 	case PDS_sint32:
-		value = dataTypeAsString(*(sint32*)_Data);
+		value = dataTypeAsString(*(sint32 *)_Data);
 		break;
 
 	case PDS_sint64:
-		value = dataTypeAsString(*(sint64*)_Data);
+		value = dataTypeAsString(*(sint64 *)_Data);
 		break;
 
 	case PDS_float:
-		value = dataTypeAsString(*(float*)_Data);
+		value = dataTypeAsString(*(float *)_Data);
 		break;
 
 	case PDS_double:
-		value = dataTypeAsString(*(double*)_Data);
+		value = dataTypeAsString(*(double *)_Data);
 		break;
 
 	case PDS_CEntityId:
-		value = dataTypeAsString(*(CEntityId*)_Data);
+		value = dataTypeAsString(*(CEntityId *)_Data);
 		break;
 
-	case PDS_enum:
+	case PDS_enum: {
+		value = "'" + NLMISC::toString(*(uint32 *)_Data) + "'";
+		const CType *type = _Table->getParent()->getType(_Column->getTypeId());
+		if (type == NULL)
 		{
-			value = "'"+NLMISC::toString(*(uint32*)_Data)+"'";
-			const CType*	type = _Table->getParent()->getType(_Column->getTypeId());
-			if (type == NULL)
-			{
-				value += " <undisplayable type>";
-			}
-			else
-			{
-				value += " "+type->getName();
-				if (type->isEnum())
-				{
-					value += " "+type->getIndexName(*(uint32*)_Data);
-				}
-				else
-				{
-					value += " not enum";
-				}
-			}
-
+			value += " <undisplayable type>";
 		}
-		break;
-
-	case PDS_dimension:
+		else
 		{
-			if (_Column->getByteSize() == 1)
-				value = "'"+NLMISC::toString(*(uint8*)_Data)+"'";
-			else if (_Column->getByteSize() == 2)
-				value = "'"+NLMISC::toString(*(uint16*)_Data)+"'";
-			else if (_Column->getByteSize() == 4)
-				value = "'"+NLMISC::toString(*(uint32*)_Data)+"'";
-			else
-				value = "<undisplayable>";
-
-			const CType*	type = _Table->getParent()->getType(_Column->getTypeId());
-			if (type == NULL)
+			value += " " + type->getName();
+			if (type->isEnum())
 			{
-				value += " <undisplayable type>";
+				value += " " + type->getIndexName(*(uint32 *)_Data);
 			}
 			else
 			{
-				value += " "+type->getName();
-				if (type->isDimension())
-				{
-					value += " "+type->getIndexName(*(uint32*)_Data);
-				}
-				else
-				{
-					value += " not dimension";
-				}
+				value += " not enum";
 			}
-
 		}
-		break;
+	}
+	break;
 
-	case PDS_List:
+	case PDS_dimension: {
+		if (_Column->getByteSize() == 1)
+			value = "'" + NLMISC::toString(*(uint8 *)_Data) + "'";
+		else if (_Column->getByteSize() == 2)
+			value = "'" + NLMISC::toString(*(uint16 *)_Data) + "'";
+		else if (_Column->getByteSize() == 4)
+			value = "'" + NLMISC::toString(*(uint32 *)_Data) + "'";
+		else
+			value = "<undisplayable>";
+
+		const CType *type = _Table->getParent()->getType(_Column->getTypeId());
+		if (type == NULL)
 		{
+			value += " <undisplayable type>";
+		}
+		else
+		{
+			value += " " + type->getName();
+			if (type->isDimension())
+			{
+				value += " " + type->getIndexName(*(uint32 *)_Data);
+			}
+			else
+			{
+				value += " not dimension";
+			}
+		}
+	}
+	break;
+
+	case PDS_List: {
 #ifdef DEBUG_DATA_ACCESSOR
-			if (_IsDebug)
-				value = "undisplayable set";
-			else
-			{
-				const RY_PDS::TIndexList&	list = getSet().get();
-				if (list.empty())
-				{
-					value = "Empty list";
-				}
-				else if (expandSet)
-				{
-					uint	i;
-					value = "";
-					for (i=0; i<list.size(); ++i)
-						value += (list[i].toString()+" ");
-				}
-				else
-				{
-					value = NLMISC::toString(list.size())+" object(s)";
-				}
-			}
-#else
-			const RY_PDS::TIndexList&	list = getSet().get();
+		if (_IsDebug)
+			value = "undisplayable set";
+		else
+		{
+			const RY_PDS::TIndexList &list = getSet().get();
 			if (list.empty())
 			{
 				value = "Empty list";
 			}
+			else if (expandSet)
+			{
+				uint i;
+				value = "";
+				for (i = 0; i < list.size(); ++i)
+					value += (list[i].toString() + " ");
+			}
 			else
 			{
-				value = NLMISC::toString(list.size())+" object(s)";
+				value = NLMISC::toString(list.size()) + " object(s)";
 			}
-#endif
 		}
-		break;
+#else
+		const RY_PDS::TIndexList &list = getSet().get();
+		if (list.empty())
+		{
+			value = "Empty list";
+		}
+		else
+		{
+			value = NLMISC::toString(list.size()) + " object(s)";
+		}
+#endif
+	}
+	break;
 
 	case PDS_Index:
-		value = "'"+((RY_PDS::CObjectIndex*)_Data)->toString()+"'";
+		value = "'" + ((RY_PDS::CObjectIndex *)_Data)->toString() + "'";
 		break;
 
 	default:
@@ -1632,17 +1589,15 @@ string	CTable::CDataAccessor::valueAsString(bool expandSet) const
 	return value;
 }
 
-
-
 /*
  * Build the index allocator for this table
  */
-bool	CTable::buildIndexAllocator(RY_PDS::CIndexAllocator& allocat)
+bool CTable::buildIndexAllocator(RY_PDS::CIndexAllocator &allocat)
 {
 	allocat.clear();
 
-	uint	row;
-	for (row=0; row<_TableBuffer.maxRowIndex(); ++row)
+	uint row;
+	for (row = 0; row < _TableBuffer.maxRowIndex(); ++row)
 	{
 		if (isAllocated(row))
 		{
@@ -1653,12 +1608,10 @@ bool	CTable::buildIndexAllocator(RY_PDS::CIndexAllocator& allocat)
 	return true;
 }
 
-
-
 /*
  * Clear dirty list
  */
-bool	CTable::clearDirtyList()
+bool CTable::clearDirtyList()
 {
 	if (!initialised())
 	{
@@ -1671,14 +1624,12 @@ bool	CTable::clearDirtyList()
 	return true;
 }
 
-
-
 /*
  * Reset dirty tags
  * Reset all rows so no one is marked as being dirty.
  * This method fixes broken list issues
  */
-bool	CTable::resetDirtyTags()
+bool CTable::resetDirtyTags()
 {
 	/// \todo fill here
 	nlstop;
@@ -1692,27 +1643,21 @@ bool	CTable::resetDirtyTags()
 	return true;
 }
 
-
 /*
  * Preload reference files
  */
-bool	CTable::preloadRefFiles()
+bool CTable::preloadRefFiles()
 {
 	if (!_TableBuffer.openAllRefFilesRead())
 		return false;
 
-
-
 	return true;
 }
-
-
-
 
 /*
  * Notify new Reference, do necessary job...
  */
-bool	CTable::notifyNewReference(CRefIndex& newref)
+bool CTable::notifyNewReference(CRefIndex &newref)
 {
 	if (!initialised())
 		return false;
@@ -1722,13 +1667,10 @@ bool	CTable::notifyNewReference(CRefIndex& newref)
 	return true;
 }
 
-
-
-
 /*
  * Apply delta changes from a file
  */
-bool	CTable::applyDeltaChanges(const string& filename)
+bool CTable::applyDeltaChanges(const string &filename)
 {
 	if (!initialised())
 	{
@@ -1739,11 +1681,10 @@ bool	CTable::applyDeltaChanges(const string& filename)
 	return _TableBuffer.applyDeltaChanges(filename);
 }
 
-
 /*
  * Reset row to initial value
  */
-bool	CTable::resetRow(uint8* rowData)
+bool CTable::resetRow(uint8 *rowData)
 {
 	// copy row pattern
 	memcpy(rowData, &(_EmptyRow[0]), _RowSize);
@@ -1751,12 +1692,10 @@ bool	CTable::resetRow(uint8* rowData)
 	return true;
 }
 
-
-
 /*
  * Build the delta file and purge all dirty rows in this table
  */
-bool	CTable::buildDelta(const CTimestamp& starttime, const CTimestamp& endtime)
+bool CTable::buildDelta(const CTimestamp &starttime, const CTimestamp &endtime)
 {
 	H_AUTO(PDS_Table_buildDelta);
 
@@ -1772,7 +1711,7 @@ bool	CTable::buildDelta(const CTimestamp& starttime, const CTimestamp& endtime)
 /*
  * Flush table from released rows
  */
-bool	CTable::flushReleased()
+bool CTable::flushReleased()
 {
 	if (!initialised())
 	{
@@ -1784,12 +1723,10 @@ bool	CTable::flushReleased()
 	return true;
 }
 
-
-
 /*
  * Build RowMapper
  */
-bool	CTable::buildRowMapper()
+bool CTable::buildRowMapper()
 {
 	if (!initialised())
 	{
@@ -1803,7 +1740,7 @@ bool	CTable::buildRowMapper()
 /*
  * The process row callback, fix forwardrefs from backrefs
  */
-bool	CTable::processRow(RY_PDS::TTableIndex table, CTableBuffer::CAccessor& accessor)
+bool CTable::processRow(RY_PDS::TTableIndex table, CTableBuffer::CAccessor &accessor)
 {
 	if (table != _Id)
 	{
@@ -1811,15 +1748,15 @@ bool	CTable::processRow(RY_PDS::TTableIndex table, CTableBuffer::CAccessor& acce
 		return false;
 	}
 
-	RY_PDS::CObjectIndex	child = RY_PDS::CObjectIndex(table, accessor.row());
+	RY_PDS::CObjectIndex child = RY_PDS::CObjectIndex(table, accessor.row());
 
-	uint	i;
-	for (i=0; i<BackRefInfo.size(); ++i)
+	uint i;
+	for (i = 0; i < BackRefInfo.size(); ++i)
 	{
 		// get backref accessor
-		CBackRefFiller&			bref = BackRefInfo[i];
-		CDataAccessor			backref(this, accessor, (RY_PDS::TColumnIndex)bref.Column->getId());
-		RY_PDS::CObjectIndex	parent;
+		CBackRefFiller &bref = BackRefInfo[i];
+		CDataAccessor backref(this, accessor, (RY_PDS::TColumnIndex)bref.Column->getId());
+		RY_PDS::CObjectIndex parent;
 
 		if (!backref.isValid() || !backref.getIndex(parent))
 		{
@@ -1834,7 +1771,7 @@ bool	CTable::processRow(RY_PDS::TTableIndex table, CTableBuffer::CAccessor& acce
 		}
 
 		// get forwardref accessor
-		CDataAccessor			forwardref(_Parent, parent, bref.Referenced->getId(), 0);
+		CDataAccessor forwardref(_Parent, parent, bref.Referenced->getId(), 0);
 
 		switch (bref.Referenced->getMetaType())
 		{
@@ -1863,12 +1800,12 @@ bool	CTable::processRow(RY_PDS::TTableIndex table, CTableBuffer::CAccessor& acce
 		}
 	}
 
-	for (i=0; i<ForwardRefInfo.size(); ++i)
+	for (i = 0; i < ForwardRefInfo.size(); ++i)
 	{
-		CAutoForwardRefFiller&	fref = ForwardRefInfo[i];
+		CAutoForwardRefFiller &fref = ForwardRefInfo[i];
 
-		CDataAccessor			fwdref(this, accessor, (RY_PDS::TColumnIndex)fref.Column->getId());
-		RY_PDS::CObjectIndex	child;
+		CDataAccessor fwdref(this, accessor, (RY_PDS::TColumnIndex)fref.Column->getId());
+		RY_PDS::CObjectIndex child;
 
 		if (!fwdref.isValid() || !fwdref.getIndex(child))
 		{
@@ -1892,7 +1829,7 @@ bool	CTable::processRow(RY_PDS::TTableIndex table, CTableBuffer::CAccessor& acce
 /*
  * Process Back Reference to a set
  */
-bool	CTable::processBackRefToSet(CDataAccessor& parent, RY_PDS::CObjectIndex child)
+bool CTable::processBackRefToSet(CDataAccessor &parent, RY_PDS::CObjectIndex child)
 {
 	parent.getSet().add(child);
 	return true;
@@ -1901,9 +1838,9 @@ bool	CTable::processBackRefToSet(CDataAccessor& parent, RY_PDS::CObjectIndex chi
 /*
  * Process Back Reference to a forward ref
  */
-bool	CTable::processBackRefToForwardRef(CDataAccessor& parent, RY_PDS::CObjectIndex child)
+bool CTable::processBackRefToForwardRef(CDataAccessor &parent, RY_PDS::CObjectIndex child)
 {
-	RY_PDS::CObjectIndex	checkchild;
+	RY_PDS::CObjectIndex checkchild;
 	if (!parent.getIndex(checkchild))
 	{
 		PDS_WARNING("processBackRefToForwardRef(): failed to access to parent '%s'", parent.toString().c_str());
@@ -1916,31 +1853,30 @@ bool	CTable::processBackRefToForwardRef(CDataAccessor& parent, RY_PDS::CObjectIn
 	return true;
 }
 
-
 /*
  * Fill up Backward and Forward References information
  */
-bool	CTable::fillRefInfo()
+bool CTable::fillRefInfo()
 {
-	uint	i;
-	for (i=0; i<_Columns.size(); ++i)
+	uint i;
+	for (i = 0; i < _Columns.size(); ++i)
 	{
-		CColumn&	column = _Columns[i];
+		CColumn &column = _Columns[i];
 
 		// generate summary of backward reference
 		if (column.getMetaType() == PDS_BackRef)
 		{
-			CTable*	parent = _Parent->getNonConstTable((RY_PDS::TTableIndex)(column.getTypeId()));
+			CTable *parent = _Parent->getNonConstTable((RY_PDS::TTableIndex)(column.getTypeId()));
 
 			if (parent == NULL)
 				return false;
 
-			const CAttribute*	referenced = parent->getAttribute(column.getParent()->getReferencedAttribute());
+			const CAttribute *referenced = parent->getAttribute(column.getParent()->getReferencedAttribute());
 
 			if (referenced == NULL)
 				return false;
 
-			CBackRefFiller		bref;
+			CBackRefFiller bref;
 
 			bref.Column = &column;
 			bref.Referenced = referenced;
@@ -1951,13 +1887,12 @@ bool	CTable::fillRefInfo()
 		// generate summary of forward reference
 		else if (column.getMetaType() == PDS_ForwardRef)
 		{
-			const CAttribute*	parent = column.getParent();
+			const CAttribute *parent = column.getParent();
 
 			// check column in array of ref that are allowed to contain null
-			if (parent->getMetaType() == PDS_ArrayRef &&
-				!parent->allowNull())
+			if (parent->getMetaType() == PDS_ArrayRef && !parent->allowNull())
 			{
-				CAutoForwardRefFiller	fref;
+				CAutoForwardRefFiller fref;
 
 				fref.Column = &column;
 				ForwardRefInfo.push_back(fref);
@@ -1968,19 +1903,18 @@ bool	CTable::fillRefInfo()
 	return true;
 }
 
-
 /*
  * Fix broken forward refs
  */
-bool	CTable::fixForwardRefs()
+bool CTable::fixForwardRefs()
 {
 	if (BrokenForwardRefs.empty())
 		return true;
 
-	uint	i;
-	for (i=0; i<BrokenForwardRefs.size(); ++i)
+	uint i;
+	for (i = 0; i < BrokenForwardRefs.size(); ++i)
 	{
-		RY_PDS::TRowIndex		row = BrokenForwardRefs[i];
+		RY_PDS::TRowIndex row = BrokenForwardRefs[i];
 
 		if (!fixRowForwardRefs(row))
 		{
@@ -1997,18 +1931,18 @@ bool	CTable::fixForwardRefs()
 /*
  * Fix row broken forward refs
  */
-bool	CTable::fixRowForwardRefs(RY_PDS::TRowIndex row)
+bool CTable::fixRowForwardRefs(RY_PDS::TRowIndex row)
 {
 	// get row and examine all forward refs
-	CTableBuffer::CAccessor	accessor = _TableBuffer.getRow(row);
+	CTableBuffer::CAccessor accessor = _TableBuffer.getRow(row);
 
-	uint	j;
-	for (j=0; j<ForwardRefInfo.size(); ++j)
+	uint j;
+	for (j = 0; j < ForwardRefInfo.size(); ++j)
 	{
-		CAutoForwardRefFiller	&colInfo = ForwardRefInfo[j];
-		CDataAccessor			forwardref(this, accessor, (RY_PDS::TColumnIndex)colInfo.Column->getId());
+		CAutoForwardRefFiller &colInfo = ForwardRefInfo[j];
+		CDataAccessor forwardref(this, accessor, (RY_PDS::TColumnIndex)colInfo.Column->getId());
 
-		RY_PDS::CObjectIndex	index;
+		RY_PDS::CObjectIndex index;
 
 		if (!forwardref.isValid() || !forwardref.getIndex(index))
 		{
@@ -2021,14 +1955,14 @@ bool	CTable::fixRowForwardRefs(RY_PDS::TRowIndex row)
 			continue;
 
 		// allocate new row
-		CTable	*childTable = _Parent->getNonConstTable((RY_PDS::TTableIndex)(colInfo.Column->getTypeId()));
+		CTable *childTable = _Parent->getNonConstTable((RY_PDS::TTableIndex)(colInfo.Column->getTypeId()));
 		if (childTable == NULL || !childTable->initialised())
 		{
 			PDS_WARNING("fixRowForwardRefs(): failed to get child table '%d'", colInfo.Column->getTypeId());
 			continue;
 		}
 
-		RY_PDS::TRowIndex	alloc = childTable->nextUnallocatedRow();
+		RY_PDS::TRowIndex alloc = childTable->nextUnallocatedRow();
 		if (!childTable->allocate(alloc))
 		{
 			PDS_WARNING("fixRowForwardRefs(): failed to get allocate free row in table '%s'", childTable->getName().c_str());
@@ -2036,8 +1970,8 @@ bool	CTable::fixRowForwardRefs(RY_PDS::TRowIndex row)
 		}
 
 		// get an accessor on row key
-		CTableBuffer::CAccessor	allocAccess = childTable->_TableBuffer.getRow(alloc);
-		CDataAccessor			keyAccess(childTable, allocAccess, (RY_PDS::TColumnIndex)(childTable->getAttribute(childTable->getKey())->getOffset()));
+		CTableBuffer::CAccessor allocAccess = childTable->_TableBuffer.getRow(alloc);
+		CDataAccessor keyAccess(childTable, allocAccess, (RY_PDS::TColumnIndex)(childTable->getAttribute(childTable->getKey())->getOffset()));
 
 		if (!keyAccess.isValid())
 		{
@@ -2047,7 +1981,7 @@ bool	CTable::fixRowForwardRefs(RY_PDS::TRowIndex row)
 		}
 
 		// compute key
-		TEnumValue				keyValue = forwardref.column()->getId()-forwardref.attribute()->getOffset();
+		TEnumValue keyValue = forwardref.column()->getId() - forwardref.attribute()->getOffset();
 
 		// set new row key
 		if (!keyAccess.setAsIndexType(keyValue))
@@ -2057,7 +1991,7 @@ bool	CTable::fixRowForwardRefs(RY_PDS::TRowIndex row)
 			continue;
 		}
 
-		CDataAccessor			backref(keyAccess, (RY_PDS::TColumnIndex)(childTable->getAttribute(forwardref.attribute()->getReferencedAttribute())->getOffset()));
+		CDataAccessor backref(keyAccess, (RY_PDS::TColumnIndex)(childTable->getAttribute(forwardref.attribute()->getReferencedAttribute())->getOffset()));
 
 		// set back&forward links
 		forwardref.setIndex(backref.getObjectIndex());
@@ -2079,14 +2013,10 @@ bool	CTable::fixRowForwardRefs(RY_PDS::TRowIndex row)
 	return true;
 }
 
-
-
-
-
 /*
  * Dump accessor content and info to xml
  */
-void	CTable::CDataAccessor::dumpToXml(NLMISC::IStream& xml, sint expandDepth)
+void CTable::CDataAccessor::dumpToXml(NLMISC::IStream &xml, sint expandDepth)
 {
 	if (xml.isReading())
 		return;
@@ -2094,162 +2024,155 @@ void	CTable::CDataAccessor::dumpToXml(NLMISC::IStream& xml, sint expandDepth)
 	xml.xmlPushBegin("value");
 
 	xml.xmlSetAttrib("valid");
-	bool	valid = isValid();
+	bool valid = isValid();
 	xml.serial(valid);
 
-	bool	closeTag = true;
+	bool closeTag = true;
 
 	if (valid)
 	{
 		xml.xmlSetAttrib("name");
-		std::string		columnName = _Column->getName();
+		std::string columnName = _Column->getName();
 		xml.serial(columnName);
 
 		xml.xmlSetAttrib("type");
-		std::string		typeName = getNameFromDataType(_Column->getDataType());
+		std::string typeName = getNameFromDataType(_Column->getDataType());
 		xml.serial(typeName);
 
-		std::string		value;
+		std::string value;
 
 		xml.xmlSetAttrib("value");
 
 		switch (_Column->getDataType())
 		{
 		case PDS_bool:
-			xml.serial(*(bool*)_Data);
+			xml.serial(*(bool *)_Data);
 			break;
 
 		case PDS_char:
-			xml.serial(*(char*)_Data);
+			xml.serial(*(char *)_Data);
 			break;
 
 		case PDS_uint8:
-			xml.serial(*(uint8*)_Data);
+			xml.serial(*(uint8 *)_Data);
 			break;
 
 		case PDS_ucchar:
 		case PDS_uint16:
-			xml.serial(*(uint16*)_Data);
+			xml.serial(*(uint16 *)_Data);
 			break;
 
 		case PDS_CSheetId:
 		case PDS_CNodeId:
 		case PDS_uint32:
-			xml.serial(*(uint32*)_Data);
+			xml.serial(*(uint32 *)_Data);
 			break;
 
 		case PDS_uint64:
-			xml.serial(*(uint64*)_Data);
+			xml.serial(*(uint64 *)_Data);
 			break;
 
 		case PDS_sint8:
-			xml.serial(*(sint8*)_Data);
+			xml.serial(*(sint8 *)_Data);
 			break;
 
 		case PDS_sint16:
-			xml.serial(*(sint16*)_Data);
+			xml.serial(*(sint16 *)_Data);
 			break;
 
 		case PDS_sint32:
-			xml.serial(*(sint32*)_Data);
+			xml.serial(*(sint32 *)_Data);
 			break;
 
 		case PDS_sint64:
-			xml.serial(*(sint64*)_Data);
+			xml.serial(*(sint64 *)_Data);
 			break;
 
 		case PDS_float:
-			xml.serial(*(float*)_Data);
+			xml.serial(*(float *)_Data);
 			break;
 
 		case PDS_double:
-			xml.serial(*(double*)_Data);
+			xml.serial(*(double *)_Data);
 			break;
 
-		case PDS_CEntityId:
+		case PDS_CEntityId: {
+			std::string id = ((CEntityId *)_Data)->toString();
+			xml.serial(id);
+		}
+		break;
+
+		case PDS_enum: {
+			std::string value;
+			const CType *type = _Table->getParent()->getType(_Column->getTypeId());
+			if (type == NULL || !type->isEnum())
 			{
-				std::string	id = ((CEntityId*)_Data)->toString();
-				xml.serial(id);
+				xml.serial(*(uint32 *)_Data);
 			}
-			break;
-
-		case PDS_enum:
+			else
 			{
-				std::string		value;
-				const CType*	type = _Table->getParent()->getType(_Column->getTypeId());
-				if (type == NULL || !type->isEnum())
-				{
-					xml.serial(*(uint32*)_Data);
-				}
-				else
-				{
-					std::string	name = type->getIndexName(*(uint32*)_Data);
-					xml.serial(name);
-				}
-
+				std::string name = type->getIndexName(*(uint32 *)_Data);
+				xml.serial(name);
 			}
-			break;
+		}
+		break;
 
-		case PDS_dimension:
+		case PDS_dimension: {
+			if (_Column->getByteSize() == 1)
 			{
-				if (_Column->getByteSize() == 1)
-				{
-					xml.serial(*(uint8*)_Data);
-				}
-				else if (_Column->getByteSize() == 2)
-				{
-					xml.serial(*(uint16*)_Data);
-				}
-				else if (_Column->getByteSize() == 4)
-				{
-					xml.serial(*(uint32*)_Data);
-				}
-				else
-				{
-					std::string	unknown = "non displayable";
-					xml.serial(unknown);
-				}
+				xml.serial(*(uint8 *)_Data);
 			}
-			break;
-
-		case PDS_List:
+			else if (_Column->getByteSize() == 2)
 			{
-				std::string	value = "list";
-				xml.serial(value);
-				xml.xmlPushEnd();
-				closeTag = false;
-
-				if (expandDepth != 0)
-				{
-					const RY_PDS::TIndexList&	list = getSet().get();
-					if (!list.empty())
-					{
-						uint	i;
-						for (i=0; i<list.size(); ++i)
-							_Table->_Parent->dumpToXml(list[i], xml, expandDepth-1);
-					}
-				}
+				xml.serial(*(uint16 *)_Data);
 			}
-			break;
-
-		case PDS_Index:
+			else if (_Column->getByteSize() == 4)
 			{
-				std::string	value = ((RY_PDS::CObjectIndex*)_Data)->toString(_Table->getParent());
-				xml.serial(value);
-				xml.xmlPushEnd();
-				closeTag = false;
-
-				if (expandDepth != 0 && _Attribute->getMetaType() != PDS_BackRef)
-					_Table->_Parent->dumpToXml(*(RY_PDS::CObjectIndex*)_Data, xml, expandDepth-1);
+				xml.serial(*(uint32 *)_Data);
 			}
-			break;
-
-		default:
+			else
 			{
-				std::string	unknown = "non displayable";
+				std::string unknown = "non displayable";
 				xml.serial(unknown);
 			}
-			break;
+		}
+		break;
+
+		case PDS_List: {
+			std::string value = "list";
+			xml.serial(value);
+			xml.xmlPushEnd();
+			closeTag = false;
+
+			if (expandDepth != 0)
+			{
+				const RY_PDS::TIndexList &list = getSet().get();
+				if (!list.empty())
+				{
+					uint i;
+					for (i = 0; i < list.size(); ++i)
+						_Table->_Parent->dumpToXml(list[i], xml, expandDepth - 1);
+				}
+			}
+		}
+		break;
+
+		case PDS_Index: {
+			std::string value = ((RY_PDS::CObjectIndex *)_Data)->toString(_Table->getParent());
+			xml.serial(value);
+			xml.xmlPushEnd();
+			closeTag = false;
+
+			if (expandDepth != 0 && _Attribute->getMetaType() != PDS_BackRef)
+				_Table->_Parent->dumpToXml(*(RY_PDS::CObjectIndex *)_Data, xml, expandDepth - 1);
+		}
+		break;
+
+		default: {
+			std::string unknown = "non displayable";
+			xml.serial(unknown);
+		}
+		break;
 		}
 	}
 
@@ -2259,11 +2182,10 @@ void	CTable::CDataAccessor::dumpToXml(NLMISC::IStream& xml, sint expandDepth)
 	xml.xmlPop();
 }
 
-
 /*
  * Dump accessor content and info to xml
  */
-void	CTable::dumpToXml(RY_PDS::TRowIndex row, NLMISC::IStream& xml, sint expandDepth)
+void CTable::dumpToXml(RY_PDS::TRowIndex row, NLMISC::IStream &xml, sint expandDepth)
 {
 	if (xml.isReading())
 		return;
@@ -2271,7 +2193,7 @@ void	CTable::dumpToXml(RY_PDS::TRowIndex row, NLMISC::IStream& xml, sint expandD
 	xml.xmlPushBegin("object");
 
 	xml.xmlSetAttrib("valid");
-	bool	valid = initialised();
+	bool valid = initialised();
 	xml.serial(valid);
 
 	if (initialised())
@@ -2280,13 +2202,13 @@ void	CTable::dumpToXml(RY_PDS::TRowIndex row, NLMISC::IStream& xml, sint expandD
 		xml.serial(_Name);
 
 		xml.xmlSetAttrib("index");
-		RY_PDS::CObjectIndex	index((RY_PDS::TTableIndex)_Id, (RY_PDS::TRowIndex)row);
-		std::string				indexName = index.toString(_Parent);
+		RY_PDS::CObjectIndex index((RY_PDS::TTableIndex)_Id, (RY_PDS::TRowIndex)row);
+		std::string indexName = index.toString(_Parent);
 		xml.serial(indexName);
 
-		CTableBuffer::CAccessor	rowaccess = _TableBuffer.getRow(row);
+		CTableBuffer::CAccessor rowaccess = _TableBuffer.getRow(row);
 
-		bool	rowAllocated = rowaccess.allocated();
+		bool rowAllocated = rowaccess.allocated();
 		xml.xmlSetAttrib("allocated");
 		xml.serial(rowAllocated);
 
@@ -2294,11 +2216,11 @@ void	CTable::dumpToXml(RY_PDS::TRowIndex row, NLMISC::IStream& xml, sint expandD
 
 		if (rowAllocated)
 		{
-			uint	i;
-			for (i=0; i<_Columns.size(); ++i)
+			uint i;
+			for (i = 0; i < _Columns.size(); ++i)
 			{
-				CDataAccessor	accessor(this, rowaccess, i);
-				const CColumn	&col = _Columns[i];
+				CDataAccessor accessor(this, rowaccess, i);
+				const CColumn &col = _Columns[i];
 
 				accessor.dumpToXml(xml, expandDepth);
 			}
@@ -2313,6 +2235,3 @@ void	CTable::dumpToXml(RY_PDS::TRowIndex row, NLMISC::IStream& xml, sint expandD
 
 	xml.xmlPop();
 }
-
-
-

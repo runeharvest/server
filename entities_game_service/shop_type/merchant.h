@@ -21,14 +21,14 @@
 #include "game_share/rm_family.h"
 
 #include "egs_sheets/egs_static_game_sheet.h"
-//#include "shop_type/character_shopping_list.h"
+// #include "shop_type/character_shopping_list.h"
 #include "shop_unit.h"
 #include "creature_manager/creature.h"
 
 #include <vector>
 #include <string>
 
-//class CCharacterShoppingList;
+// class CCharacterShoppingList;
 class CCreature;
 
 /**
@@ -41,31 +41,35 @@ class CCreature;
 class CMerchant : public NLMISC::CRefCount
 {
 	NL_INSTANCE_COUNTER_DECL(CMerchant);
-public:
 
+public:
 	// constructor
-	CMerchant( CCreature& creature ) { _Creature = &creature; _PriceFactor = 1.0f; }
+	CMerchant(CCreature &creature)
+	{
+		_Creature = &creature;
+		_PriceFactor = 1.0f;
+	}
 
 	// destructor
 	virtual ~CMerchant();
 
 	// add explicite trade list
-	void addExpliciteSellingItem( NLMISC::CSmartPtr< IItemTrade>& item );
+	void addExpliciteSellingItem(NLMISC::CSmartPtr<IItemTrade> &item);
 
 	// clear explicit trade list
-	void clearExplicitTradeList() { _ExpliciteShopContent.releaseShopUnit();}
+	void clearExplicitTradeList() { _ExpliciteShopContent.releaseShopUnit(); }
 
 	// add shop unit in merchant trade list
-	void addShopUnit( const IShopUnit * );
+	void addShopUnit(const IShopUnit *);
 
 	// clear trade list
 	void clearMerchantTradeList();
 
 	// get merchant trade list
-	const std::vector< const IShopUnit * >& getMerchantTradeList();
+	const std::vector<const IShopUnit *> &getMerchantTradeList();
 
 	// add a CCharacterShoopingList consulting trade list
-//	void addCharacterShowingTradeList( CCharacterShoppingList& characterShoppingList ) { _CharacterShowingTradeList.push_back( &characterShoppingList ); }
+	//	void addCharacterShowingTradeList( CCharacterShoppingList& characterShoppingList ) { _CharacterShowingTradeList.push_back( &characterShoppingList ); }
 
 	// return true if merchant sell player item
 	bool sellPlayerItem();
@@ -74,27 +78,26 @@ public:
 	float getPriceFactor() const { return _PriceFactor; }
 
 	// set price factor
-	void setPriceFactor( float f ) { _PriceFactor = f; }
+	void setPriceFactor(float f) { _PriceFactor = f; }
 
 	// clear creature ptr
 	void clearCreaturePtr() { _Creature = NULL; }
 
 	/// wrapper to CCreature
-	inline const CStaticCreatures* getForm() const { return _Creature ? _Creature->getForm() : NULL; };
-	inline PVP_CLAN::TPVPClan getAltarClanRestriction() { return _Creature ? _Creature->getAltarClanRestriction() : PVP_CLAN::None ; }
+	inline const CStaticCreatures *getForm() const { return _Creature ? _Creature->getForm() : NULL; };
+	inline PVP_CLAN::TPVPClan getAltarClanRestriction() { return _Creature ? _Creature->getAltarClanRestriction() : PVP_CLAN::None; }
 	inline bool getAltarForNeutral() { return _Creature ? _Creature->getAltarForNeutral() : false; }
 	sint32 getAltarFameRestriction() { return _Creature ? _Creature->getAltarFameRestriction() : CStaticFames::INVALID_FACTION_INDEX; }
 	inline sint32 getAltarFameValueRestriction() { return _Creature ? _Creature->getAltarFameValueRestriction() : 0; }
 
 private:
-	CCreature *													_Creature;
-	std::vector< const IShopUnit * >							_MerchantTradeList;
-	CShopUnitStatic												_ExpliciteShopContent;
-	float														_PriceFactor;
-//	std::vector< NLMISC::CRefPtr< CCharacterShoppingList > >	_CharacterShowingTradeList;
+	CCreature *_Creature;
+	std::vector<const IShopUnit *> _MerchantTradeList;
+	CShopUnitStatic _ExpliciteShopContent;
+	float _PriceFactor;
+	//	std::vector< NLMISC::CRefPtr< CCharacterShoppingList > >	_CharacterShowingTradeList;
 };
 
 #endif // RYZOM_MERCHANT_H
 
 /* merchant.h */
-

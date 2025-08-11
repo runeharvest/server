@@ -22,7 +22,7 @@
 #include "game_share/outpost.h"
 
 /**
- * All classes in this file : 
+ * All classes in this file :
  * \author Nicolas Brigand
  * \author Olivier Cado
  * \author Sebastien Guignot
@@ -39,12 +39,12 @@ class COutpostSpawnZone
 {
 public:
 	COutpostSpawnZone();
-	COutpostSpawnZone(TAIAlias alias, const NLMISC::CVector & center, float radius);
+	COutpostSpawnZone(TAIAlias alias, const NLMISC::CVector &center, float radius);
 
 	/// get the alias of the spawn zone
 	TAIAlias alias() const { return _Alias; }
 	/// get the center of the spawn zone
-	const NLMISC::CVector & getCenter() const { return _Center; }
+	const NLMISC::CVector &getCenter() const { return _Center; }
 	/// get the radius of the spawn zone (in meters)
 	const float getRadius() const { return _Radius; }
 
@@ -53,11 +53,11 @@ public:
 
 private:
 	/// alias of the spawn zone
-	TAIAlias					_Alias;
+	TAIAlias _Alias;
 	/// center of the spawn zone
-	NLMISC::CVector				_Center;
+	NLMISC::CVector _Center;
 	/// radius of the spawn zone
-	float						_Radius;
+	float _Radius;
 };
 
 /// a template of squad of NPC that can defend the outpost
@@ -65,16 +65,16 @@ class COutpostSquadDescriptor
 {
 public:
 	DECLARE_PERSISTENCE_METHODS
-	
-	COutpostSquadDescriptor();
-	COutpostSquadDescriptor(NLMISC::CSheetId sheet, TAIAlias alias, const std::string& name);
 
-	void init(NLMISC::CSheetId sheet, TAIAlias alias, const std::string& name);
+	COutpostSquadDescriptor();
+	COutpostSquadDescriptor(NLMISC::CSheetId sheet, TAIAlias alias, const std::string &name);
+
+	void init(NLMISC::CSheetId sheet, TAIAlias alias, const std::string &name);
 	TAIAlias alias() const { return _Alias; }
 	NLMISC::CSheetId sheet() const { return _Sheet; }
 
 	/// get static form
-	const CStaticOutpostSquad * getStaticForm() const { return _Form; }
+	const CStaticOutpostSquad *getStaticForm() const { return _Form; }
 
 	/// get a one line description string (for debug)
 	std::string toString() const;
@@ -87,22 +87,22 @@ private:
 
 private:
 	/// sheet id describing the squad
-	NLMISC::CSheetId			_Sheet;
+	NLMISC::CSheetId _Sheet;
 	/// alias of the npc group
-	TAIAlias					_Alias;
+	TAIAlias _Alias;
 	/// static form
-	const CStaticOutpostSquad *	_Form;
+	const CStaticOutpostSquad *_Form;
 };
 
 /// a squad of NPC that can defend the outpost
 class COutpostSquad
-: public NLMISC::CRefCount
+    : public NLMISC::CRefCount
 {
 public:
 	/// @name Constructors and destructor
 	//@{
 	COutpostSquad();
-	explicit COutpostSquad(TAIAlias outpost, const COutpostSquadDescriptor & desc, TAIAlias spawnZone, OUTPOSTENUMS::TPVPSide side);
+	explicit COutpostSquad(TAIAlias outpost, const COutpostSquadDescriptor &desc, TAIAlias spawnZone, OUTPOSTENUMS::TPVPSide side);
 	virtual ~COutpostSquad();
 	//@}
 
@@ -114,6 +114,7 @@ public:
 public:
 	void spawn(TAIAlias outpost);
 	void despawn();
+
 private:
 	void create();
 	void destroy();
@@ -121,14 +122,13 @@ private:
 	void recreate();
 	//@}
 public:
-	
 	/// @name Transitions notifications
 	//@{
 	void created(uint32 createOrder, uint32 groupId);
 	void spawned();
 	void despawned();
 	//@}
-	
+
 	/// @name AIS callbacks
 	//@{
 	void died();
@@ -136,7 +136,7 @@ public:
 	void AISDown();
 	void AISUp();
 	//@}
-	
+
 	/// @name Accessors
 	//@{
 	bool isSpawned();
@@ -148,7 +148,7 @@ public:
 	uint32 getGroupId() { return _GroupId; }
 	/// get the squad state
 	OUTPOSTENUMS::TSquadState getSquadState() const { return _State; }
-	
+
 	/// set the zone where the squad will be spawned
 	/// WARNING: if necessary it recreates the group in the AIS to update spawn zone
 	/// \param spawnZone: must be a valid spawn zone of the outpost
@@ -160,7 +160,7 @@ public:
 	/// set the outpost alias (not saved but set back after loading)
 	void setOutpostAlias(TAIAlias alias) { _OwnerOutpostAlias = alias; }
 	//@}
-	
+
 	/** update the squad state depending on the elapsing time
 	 * \param currentTime : seconds since 1970
 	 * \return false if the squad must be removed, otherwise true
@@ -177,38 +177,38 @@ private:
 	/// last AIS squad create order
 	static uint32 _LastCreateOrder;
 	/// AIS squad create orders
-	static std::map<uint32, NLMISC::CRefPtr<COutpostSquad> > _CreateOrders;
+	static std::map<uint32, NLMISC::CRefPtr<COutpostSquad>> _CreateOrders;
 
 private:
 	/// outpost alias to send messages to AIS
-	TAIAlias					_OwnerOutpostAlias;
+	TAIAlias _OwnerOutpostAlias;
 	/// structure describing the squad
-	COutpostSquadDescriptor		_Desc;
+	COutpostSquadDescriptor _Desc;
 	/// index of the spawn zone where the squad must be spawned
-	TAIAlias					_SpawnZone;
-	/// 
-	OUTPOSTENUMS::TSquadState	_State;
+	TAIAlias _SpawnZone;
+	///
+	OUTPOSTENUMS::TSquadState _State;
 	/// pending spawn order, 0 if none
-	uint32						_CreateOrder;
-	uint32						_GroupId;
-	
+	uint32 _CreateOrder;
+	uint32 _GroupId;
+
 	/// true if the squad is being recreated in AIS
-	bool						_Recreate;
+	bool _Recreate;
 	/// false=belong to outpost owner, true=belong to outpost attacker
-	OUTPOSTENUMS::TPVPSide		_Side;
+	OUTPOSTENUMS::TPVPSide _Side;
 };
 typedef NLMISC::CSmartPtr<COutpostSquad> COutpostSquadPtr;
 
 /// everything that is necessary to describe a squad before creating it
 /// this is used to configure the squads that will be created in next fight round
 class COutpostSquadData
-: public NLMISC::CRefCount
+    : public NLMISC::CRefCount
 {
 public:
 	DECLARE_PERSISTENCE_METHODS
-	
+
 	COutpostSquadData();
-	explicit COutpostSquadData(TAIAlias outpost, const COutpostSquadDescriptor & desc, TAIAlias spawnZone);
+	explicit COutpostSquadData(TAIAlias outpost, const COutpostSquadDescriptor &desc, TAIAlias spawnZone);
 
 	/// set the outpost alias (not saved but set back after loading)
 	void setOutpostAlias(TAIAlias alias) { _OwnerOutpostAlias = alias; }
@@ -221,23 +221,22 @@ public:
 	TAIAlias getSpawnZone() const { return _SpawnZone; }
 
 	/// set the squad descriptor
-	void setSquadDescriptor(COutpostSquadDescriptor & desc) { _Desc = desc; }
+	void setSquadDescriptor(COutpostSquadDescriptor &desc) { _Desc = desc; }
 	/// get the squad descriptor
-	const COutpostSquadDescriptor & getSquadDescriptor() const { return _Desc; }
+	const COutpostSquadDescriptor &getSquadDescriptor() const { return _Desc; }
 
 	/// get a one line description string (for debug)
 	std::string toString() const;
 
 private:
 	/// outpost alias to send messages to AIS
-	TAIAlias				_OwnerOutpostAlias;
+	TAIAlias _OwnerOutpostAlias;
 	/// structure describing the squad
-	COutpostSquadDescriptor	_Desc;
+	COutpostSquadDescriptor _Desc;
 	/// index of the spawn zone where the squad must be spawned
-	TAIAlias				_SpawnZone;
+	TAIAlias _SpawnZone;
 };
 typedef NLMISC::CSmartPtr<COutpostSquadData> COutpostSquadDataPtr;
-
 
 #endif // RY_OUTPOST_SQUAD_H
 

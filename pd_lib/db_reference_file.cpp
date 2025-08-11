@@ -41,11 +41,10 @@ CDBReferenceFile::~CDBReferenceFile()
 	clear();
 }
 
-
 /*
  * Clear initial setup
  */
-void	CDBReferenceFile::clear()
+void CDBReferenceFile::clear()
 {
 	_Init = false;
 
@@ -69,11 +68,12 @@ void	CDBReferenceFile::clear()
 /*
  * close file
  */
-void	CDBReferenceFile::close()
+void CDBReferenceFile::close()
 {
 	if (_File != NULL)
 	{
-		PDS_LOG_DEBUG(1)("CDBReferenceFile::clear(): closing file '%s%s' in %s mode", _Path.c_str(), _Name.c_str(), (_Mode == Read ? "Read" : "Update"));
+		PDS_LOG_DEBUG(1)
+		("CDBReferenceFile::clear(): closing file '%s%s' in %s mode", _Path.c_str(), _Name.c_str(), (_Mode == Read ? "Read" : "Update"));
 
 		// in update mode, postwrite to validate file
 		if (_Mode == Update)
@@ -85,16 +85,15 @@ void	CDBReferenceFile::close()
 	CMixedStreamFile::close();
 }
 
-
 /*
  * Setup file name and path
  */
-void	CDBReferenceFile::setup(const string& name, const string& path, uint32 baseIndex, uint32 overIndex, uint32 rowSize)
+void CDBReferenceFile::setup(const string &name, const string &path, uint32 baseIndex, uint32 overIndex, uint32 rowSize)
 {
 	clear();
 
-	uint32	tableId;
-	uint32	refFile;
+	uint32 tableId;
+	uint32 refFile;
 	nlassert(isRefFile(name, tableId, refFile));
 
 	_Name = name;
@@ -105,19 +104,17 @@ void	CDBReferenceFile::setup(const string& name, const string& path, uint32 base
 	_Header.OverIndex = overIndex;
 	_Header.RowSize = rowSize;
 	_Header.FullRowSize = rowSize + getRowHeaderSize();
-	_Header.Timestamp = CTableBuffer::getCommonStamp(); //CStampHandler::getStamp();
+	_Header.Timestamp = CTableBuffer::getCommonStamp(); // CStampHandler::getStamp();
 
 	_Init = true;
 }
 
-
-
 /*
  * Builds an empty file
  */
-bool	CDBReferenceFile::buildEmptyRef()
+bool CDBReferenceFile::buildEmptyRef()
 {
-	string	filepath = _Path+_Name;
+	string filepath = _Path + _Name;
 
 	if (_File != NULL)
 	{
@@ -144,19 +141,17 @@ bool	CDBReferenceFile::buildEmptyRef()
 	return true;
 }
 
-
-
 /*
  * Prewrite reference file.
  * At least, read file header to known the base and index index in file
  */
-bool	CDBReferenceFile::prewrite(bool failIfNotExist)
+bool CDBReferenceFile::prewrite(bool failIfNotExist)
 {
 	// check file already open
 	if (_File != NULL)
 		return true;
 
-	string	filepath = _Path+_Name;
+	string filepath = _Path + _Name;
 
 	// not?
 	// check file exists
@@ -206,7 +201,7 @@ bool	CDBReferenceFile::prewrite(bool failIfNotExist)
 			return false;
 		}
 	}
-	catch (const Exception& e)
+	catch (const Exception &e)
 	{
 		nlwarning("CDBReferenceFile::prewrite(): failed, cannot read file '%s' header, exception '%s'", filepath.c_str(), e.what());
 		return false;
@@ -218,7 +213,8 @@ bool	CDBReferenceFile::prewrite(bool failIfNotExist)
 	_Mode = Update;
 
 	//
-	PDS_LOG_DEBUG(1)("CDBReferenceFile::prewrite(): opened file '%s' in Update mode", filepath.c_str());
+	PDS_LOG_DEBUG(1)
+	("CDBReferenceFile::prewrite(): opened file '%s' in Update mode", filepath.c_str());
 
 	return true;
 }
@@ -227,12 +223,12 @@ bool	CDBReferenceFile::prewrite(bool failIfNotExist)
  * Postwrite reference file
  * Mark file as valid, close file, flush anything still alive...
  */
-bool	CDBReferenceFile::postwrite()
+bool CDBReferenceFile::postwrite()
 {
 	if (_File == NULL)
 		return true;
 
-	string	filepath = _Path+_Name;
+	string filepath = _Path + _Name;
 
 	if (fseek(_File, 0, SEEK_SET) != 0)
 	{
@@ -249,7 +245,7 @@ bool	CDBReferenceFile::postwrite()
 			return false;
 		}
 	}
-	catch (const Exception& e)
+	catch (const Exception &e)
 	{
 		nlwarning("CDBReferenceFile::postwrite(): failed, cannot read file '%s' header, exception '%s'", filepath.c_str(), e.what());
 		return false;
@@ -258,11 +254,10 @@ bool	CDBReferenceFile::postwrite()
 	return true;
 }
 
-
 /*
  * Update Start/End Delta Ids
  */
-bool	CDBReferenceFile::updateDeltaIds(uint32 startId, uint32 endId)
+bool CDBReferenceFile::updateDeltaIds(uint32 startId, uint32 endId)
 {
 	if (_Header.StartDeltaId == 0 && _Header.EndDeltaId == 0)
 	{
@@ -271,9 +266,9 @@ bool	CDBReferenceFile::updateDeltaIds(uint32 startId, uint32 endId)
 		return true;
 	}
 
-	if (_Header.EndDeltaId != startId && _Header.EndDeltaId != startId-1)
+	if (_Header.EndDeltaId != startId && _Header.EndDeltaId != startId - 1)
 	{
-		string	filepath = _Path+_Name;
+		string filepath = _Path + _Name;
 		nlwarning("CDBReferenceFile::updateDeltaIds(): non consecutive delta ids, file '%s' end=%d, update start=%d", filepath.c_str(), _Header.EndDeltaId, startId);
 		return false;
 	}
@@ -282,25 +277,23 @@ bool	CDBReferenceFile::updateDeltaIds(uint32 startId, uint32 endId)
 	return true;
 }
 
-
 /*
  * Get Start/End Delta Ids
  */
-void	CDBReferenceFile::getUpdateDeltaIds(uint32& startId, uint32& endId)
+void CDBReferenceFile::getUpdateDeltaIds(uint32 &startId, uint32 &endId)
 {
 	startId = _Header.StartDeltaId;
 	endId = _Header.EndDeltaId;
 }
-
 
 /*
  * Update a row in the reference file
  * \param index is the absolute row index to update, not relative to file base index
  * \param data is the data buffer to store in file
  */
-bool	CDBReferenceFile::update(uint32 index, const uint8* rowdata)
+bool CDBReferenceFile::update(uint32 index, const uint8 *rowdata)
 {
-	string	filepath = _Path+_Name;
+	string filepath = _Path + _Name;
 
 	if (!prewrite())
 	{
@@ -335,14 +328,14 @@ bool	CDBReferenceFile::update(uint32 index, const uint8* rowdata)
 		}
 
 		// allocate blank buffer
-		uint8*	tempRowBuffer = new uint8[_Header.FullRowSize];
+		uint8 *tempRowBuffer = new uint8[_Header.FullRowSize];
 		memset(tempRowBuffer, 0, _Header.FullRowSize);
 
 		// dump empty rows till we get to end index
 		while (_Header.EndIndex <= index)
 		{
 			// setup row index
-			*(uint32*)tempRowBuffer = index;
+			*(uint32 *)tempRowBuffer = index;
 			if (!writeBuffer(tempRowBuffer, _Header.FullRowSize))
 			{
 				nlwarning("CDBReferenceFile::update(): failed, can't increase file '%s' size", filepath.c_str());
@@ -357,7 +350,7 @@ bool	CDBReferenceFile::update(uint32 index, const uint8* rowdata)
 	}
 
 	// seek to row in file
-	if (fseek(_File, getSeekPos(index)+getRowHeaderSize(), SEEK_SET) != 0)
+	if (fseek(_File, getSeekPos(index) + getRowHeaderSize(), SEEK_SET) != 0)
 	{
 		nlwarning("CDBReferenceFile::update(): failed, can't seek to index '%d' data in file '%s'", index, filepath.c_str());
 		return false;
@@ -373,12 +366,11 @@ bool	CDBReferenceFile::update(uint32 index, const uint8* rowdata)
 	return true;
 }
 
-
 /*
  * Preload reference file.
  * At least, read file header to known the base and index index in file
  */
-bool	CDBReferenceFile::preload()
+bool CDBReferenceFile::preload()
 {
 	// check file already open
 	if (_File != NULL)
@@ -387,7 +379,7 @@ bool	CDBReferenceFile::preload()
 	// force read mode
 	_Mode = Read;
 
-	string	filepath = _Path+_Name;
+	string filepath = _Path + _Name;
 
 	// file doesn't exist, do nothing
 	if (!CFile::fileExists(filepath))
@@ -401,7 +393,8 @@ bool	CDBReferenceFile::preload()
 	}
 
 	//
-	PDS_LOG_DEBUG(1)("CDBReferenceFile::preload(): opened file '%s' in Read mode", filepath.c_str());
+	PDS_LOG_DEBUG(1)
+	("CDBReferenceFile::preload(): opened file '%s' in Read mode", filepath.c_str());
 
 	setInOut(true);
 
@@ -414,7 +407,7 @@ bool	CDBReferenceFile::preload()
 			return false;
 		}
 	}
-	catch (const Exception& e)
+	catch (const Exception &e)
 	{
 		nlwarning("CDBReferenceFile::preload(): failed, cannot read file '%s' header, exception '%s'", filepath.c_str(), e.what());
 		return false;
@@ -428,9 +421,9 @@ bool	CDBReferenceFile::preload()
  * \param index is the absolute row index to read, not relative to file base index
  * \param data is the data buffer to store data read from file
  */
-bool	CDBReferenceFile::read(uint32 index, uint8* rowdata)
+bool CDBReferenceFile::read(uint32 index, uint8 *rowdata)
 {
-	string	filepath = _Path+_Name;
+	string filepath = _Path + _Name;
 
 	// preload will fail only if file exists and cannot be read
 	// preload returns true when everything ok or file doesn't exist
@@ -457,13 +450,14 @@ bool	CDBReferenceFile::read(uint32 index, uint8* rowdata)
 	// check file opened or row is not beyond file end
 	if (_File == NULL || index >= _Header.EndIndex)
 	{
-		PDS_LOG_DEBUG(1)("CDBReferenceFile::read(): row '%d' is beyond file '%s' end '%d', row is empty", index, filepath.c_str(), _Header.EndIndex);
+		PDS_LOG_DEBUG(1)
+		("CDBReferenceFile::read(): row '%d' is beyond file '%s' end '%d', row is empty", index, filepath.c_str(), _Header.EndIndex);
 		memset(rowdata, 0, _Header.RowSize);
 		return true;
 	}
 
 	// seek to row in file
-	if (fseek(_File, getSeekPos(index)+getRowHeaderSize(), SEEK_SET) != 0)
+	if (fseek(_File, getSeekPos(index) + getRowHeaderSize(), SEEK_SET) != 0)
 	{
 		nlwarning("CDBReferenceFile::read(): failed, can't seek to index '%d' data in file '%s'", index, filepath.c_str());
 		return false;
@@ -479,22 +473,18 @@ bool	CDBReferenceFile::read(uint32 index, uint8* rowdata)
 	return true;
 }
 
-
-
-
-
 /*
  * Serial file header
  */
-bool	CDBReferenceFile::serialHeader()
+bool CDBReferenceFile::serialHeader()
 {
 	serialCheck(NELID("DbRf"));
-	uint	version = serialVersion(0);
+	uint version = serialVersion(0);
 
 	if (isReading())
 	{
 		// on reading, read header in a temp buffer
-		CRefHeader	hdr;
+		CRefHeader hdr;
 		serial(hdr);
 
 		// check header complies
@@ -516,11 +506,11 @@ bool	CDBReferenceFile::serialHeader()
 	if (isReading())
 	{
 		// get file size to compute real EndIndex
-		uint32	filesize = CFile::getFileSize(_File);
+		uint32 filesize = CFile::getFileSize(_File);
 
-		uint32	numRows = (filesize-_DataStart) / _Header.FullRowSize;
+		uint32 numRows = (filesize - _DataStart) / _Header.FullRowSize;
 		// check exact number of rows in file...
-		if ((filesize-_DataStart) % _Header.FullRowSize != 0)
+		if ((filesize - _DataStart) % _Header.FullRowSize != 0)
 		{
 			nlwarning("CDBReferenceFile::serialHeader(): failed, file doesn't contain an exact number of rows");
 			return false;

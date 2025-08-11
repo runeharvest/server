@@ -14,16 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_DAMAGE_SHIELD_EFFECT_H
 #define RY_DAMAGE_SHIELD_EFFECT_H
 
 //
 #include "phrase_manager/s_effect.h"
 #include "entity_manager/entity_base.h"
-
-
 
 /**
  * class for damage shields
@@ -37,21 +33,20 @@ public:
 	NLMISC_DECLARE_CLASS(CDamageShieldEffect)
 
 	///\ctor
-	CDamageShieldEffect( const TDataSetRow & creatorRowId, 
-						const TDataSetRow & targetRowId, 
-						EFFECT_FAMILIES::TEffectFamily family, 
-						sint32 damagePerHit, 
-						NLMISC::TGameCycle endDate,
-						float drainFactor
-						)
-		:	CSTimedEffect(creatorRowId, targetRowId, family, true, damagePerHit, damagePerHit, endDate),
-			_DrainFactor(drainFactor)
+	CDamageShieldEffect(const TDataSetRow &creatorRowId,
+	    const TDataSetRow &targetRowId,
+	    EFFECT_FAMILIES::TEffectFamily family,
+	    sint32 damagePerHit,
+	    NLMISC::TGameCycle endDate,
+	    float drainFactor)
+	    : CSTimedEffect(creatorRowId, targetRowId, family, true, damagePerHit, damagePerHit, endDate)
+	    , _DrainFactor(drainFactor)
 	{
 	}
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect) { return false; }
+	virtual bool update(CTimerEvent *event, bool applyEffect) { return false; }
 
 	/// callback called when the effect is actually removed
 	virtual void removed();
@@ -64,11 +59,10 @@ public:
 
 private:
 	/// factor of inflicted damage recovered by the effect creator
-	float					_DrainFactor;
+	float _DrainFactor;
 
-	CDamageShieldEffect() {}
+	CDamageShieldEffect() { }
 };
-
 
 #endif // RY_DAMAGE_SHIELD_EFFECT_H
 

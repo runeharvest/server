@@ -21,14 +21,13 @@
 #include "nel/net/module.h"
 #include "nel/net/module_builder_parts.h"
 
-
 #include "game_share/utils.h"
 #include "server_share/mail_forum_itf.h"
 #include "server_share/entity_locator_itf.h"
 #include "game_share/character_sync_itf.h"
 #include "game_share/msg_client_server.h"
 
-//#include "pd_lib/pd_string_manager.h"
+// #include "pd_lib/pd_string_manager.h"
 
 #include "shard_unifier_client.h"
 #include "player_manager/player_manager_interface.h"
@@ -39,7 +38,7 @@
 #include "modules/guild_unifier.h"
 
 // Send to client if name is valide (true for valide)
-void sendIfNameIsValide( uint32 userId, bool nameValide );
+void sendIfNameIsValide(uint32 userId, bool nameValide);
 
 // second part of the character creation process
 void cbCreateChar_part2(uint32 userId, const CCreateCharMsg &createCharMsg, bool ok);
@@ -51,78 +50,73 @@ using namespace CHARSYNC;
 using namespace MFS;
 using namespace ENTITYLOC;
 
-
 extern NLMISC::CVariable<uint32> FixedSessionId;
 
 extern CVariable<bool> DontUseSU;
-CVariable<bool> SimulateCharacterHasEditSession( "su", "SimulateCharacterHasEditSession", "If 1 simulate that character have alreay an edition sessiion", 0, 0, 1 ); 
+CVariable<bool> SimulateCharacterHasEditSession("su", "SimulateCharacterHasEditSession", "If 1 simulate that character have alreay an edition sessiion", 0, 0, 1);
 
-
-class CShardUnifierClient : public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav <CModuleBase> > >,
-	public IShardUnifierEvent,
-	public CMailForumNotifierSkel,
-	public CNameUnifierClientSkel,
-	public CEntityLocatorClientSkel
+class CShardUnifierClient : public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase>>>,
+                            public IShardUnifierEvent,
+                            public CMailForumNotifierSkel,
+                            public CNameUnifierClientSkel,
+                            public CEntityLocatorClientSkel
 {
 public:
-	typedef uint32	TCharId;
+	typedef uint32 TCharId;
 	// one instance
-	static CShardUnifierClient	*_Instance;
+	static CShardUnifierClient *_Instance;
 
 	/// Init flag for the EID translator
-	bool					_EIdTranslatorInitialized;
+	bool _EIdTranslatorInitialized;
 
 	// The module to call for character synchronisation
-	TModuleProxyPtr			_CharacterSynch;
+	TModuleProxyPtr _CharacterSynch;
 
 	// The list of best combat level to send for a tick loop
-	map<CEntityId, sint32>	_BestCombatLevels;
+	map<CEntityId, sint32> _BestCombatLevels;
 
 	// The module to call for entity locator
-	TModuleProxyPtr			_EntityLocator;
-
+	TModuleProxyPtr _EntityLocator;
 
 	struct TCreatePendingInfo
 	{
-		uint32			UserId;
-		uint8			CharIndex;
-		CCreateCharMsg	CreateCharMsg;
+		uint32 UserId;
+		uint8 CharIndex;
+		CCreateCharMsg CreateCharMsg;
 	};
 
-	typedef map<TCharId, TCreatePendingInfo>	TCreateCharPending;
+	typedef map<TCharId, TCreatePendingInfo> TCreateCharPending;
 	// The character creation that wait Name unifier response
-	TCreateCharPending		_CreateCharPending;
-
+	TCreateCharPending _CreateCharPending;
 
 	struct TCharacterNameValidationInfo
 	{
-		uint32	UserId;
-		uint8	CharIndex;
-		string	Name;
-		uint32	HomeSessionId;
+		uint32 UserId;
+		uint8 CharIndex;
+		string Name;
+		uint32 HomeSessionId;
 	};
 
-	typedef map<TCharId, TCharacterNameValidationInfo>	TCharacterNameValidations;
+	typedef map<TCharId, TCharacterNameValidationInfo> TCharacterNameValidations;
 
-//	TCharacterNameValidations	_PendingNameToValidate;
+	//	TCharacterNameValidations	_PendingNameToValidate;
 	/// The pre-create char name validation pending
-	TCharacterNameValidations	_PendingNameToValidate;
+	TCharacterNameValidations _PendingNameToValidate;
 
-	typedef set<CEntityId>		TOnlineEntities;
+	typedef set<CEntityId> TOnlineEntities;
 	/// The list of character online (from the unified entity locator point of view)
-	TOnlineEntities				_OnlineEntities;
+	TOnlineEntities _OnlineEntities;
 
-	typedef map<string, set<CEntityId> >	TOnlineSpecialEntities;
+	typedef map<string, set<CEntityId>> TOnlineSpecialEntities;
 	/// The map of special user onlines (GM and likes)
-	TOnlineSpecialEntities		_OnlineSpecialEntities;
-
+	TOnlineSpecialEntities _OnlineSpecialEntities;
 
 	///////////////////////////////////////////////////////////////////////////
-	// methods 
+	// methods
 	///////////////////////////////////////////////////////////////////////////
 
 	CShardUnifierClient()
-		:	_EIdTranslatorInitialized(false)
+	    : _EIdTranslatorInitialized(false)
 	{
 		DROP_IF(_Instance != NULL, "IShardUnifierEvent already installed", return);
 
@@ -151,7 +145,7 @@ public:
 	std::string buildModuleManifest() const
 	{
 		// return the manifest of this module
-		return "locatorClient(shardId="+toString(IService::getInstance()->getShardId())+")";
+		return "locatorClient(shardId=" + toString(IService::getInstance()->getShardId()) + ")";
 	}
 
 	void onModuleUpdate()
@@ -164,9 +158,9 @@ public:
 			return;
 		}
 
-		vector<TCharBestLevelInfo>	charLevelInfos;
+		vector<TCharBestLevelInfo> charLevelInfos;
 		map<CEntityId, sint32>::iterator first(_BestCombatLevels.begin()), last(_BestCombatLevels.end());
-		for(; first != last; ++first)
+		for (; first != last; ++first)
 		{
 			TCharBestLevelInfo cbli;
 			cbli.setCharEId(first->first);
@@ -182,12 +176,11 @@ public:
 		}
 
 		CCharacterSyncProxy cs(_CharacterSynch);
-		
+
 		cs.updateCharsBestLevel(this, charLevelInfos);
 
 		// clear the container for next loop
 		_BestCombatLevels.clear();
-
 	}
 
 	void onModuleUp(IModuleProxy *module)
@@ -200,7 +193,6 @@ public:
 			// register us in the server
 			CNameUnifierProxy nu(module);
 			nu.registerNameUnifierClient(this);
-
 
 			if (IGuildManager::getInstance().guildLoaded())
 			{
@@ -217,8 +209,8 @@ public:
 			_EntityLocator = module;
 
 			// send the initial state
-			vector<uint32>				connectedPlayers;
-			vector<TConnectedCharInfo>	connectedChars;
+			vector<uint32> connectedPlayers;
+			vector<TConnectedCharInfo> connectedChars;
 
 			// fill the connected player list and connected char list
 			{
@@ -226,11 +218,11 @@ public:
 				IPlayerManager::TMapPlayers::const_iterator first(players.begin()), last(players.end());
 				for (; first != last; ++first)
 				{
-					
+
 					connectedPlayers.push_back(first->first);
 
 					ICharacter *activeChar = ICharacter::getInterface(IPlayerManager::getInstance().getActiveChar(first->first), true);
-					 
+
 					if (activeChar != NULL && activeChar->getEnterFlag())
 					{
 						// ok, we have a connected character to add
@@ -240,14 +232,13 @@ public:
 						connectedChars.push_back(cci);
 					}
 				}
-
 			}
 
 			nldebug("CShardUnifierClient::onModuleUp : send initial state with %u connecter player and %u connected chars to entity locator %s",
-				connectedPlayers.size(),
-				connectedChars.size(),
-				_EntityLocator->getModuleName().c_str());
-			
+			    connectedPlayers.size(),
+			    connectedChars.size(),
+			    _EntityLocator->getModuleName().c_str());
+
 			// send the message to the entity locator
 			CEntityLocatorProxy el(_EntityLocator);
 			el.initState(this, connectedPlayers, connectedChars);
@@ -265,7 +256,7 @@ public:
 			{
 				TCharacterNameValidationInfo &cnvi = _PendingNameToValidate.begin()->second;
 
-				sendIfNameIsValide( cnvi.UserId, false);
+				sendIfNameIsValide(cnvi.UserId, false);
 
 				_PendingNameToValidate.erase(_PendingNameToValidate.begin());
 			}
@@ -288,7 +279,7 @@ public:
 			// swap the container, so that _OnlineEntities is empty and we can still
 			// iterate over the entities that was online from the SU point of view
 			// This is needed because when the guild update the member online state
-			// if call 'isCharacterOnlineAbroad' that check in the _OnlineEntities 
+			// if call 'isCharacterOnlineAbroad' that check in the _OnlineEntities
 			// container.
 			TOnlineEntities temp;
 			temp.swap(_OnlineEntities);
@@ -314,7 +305,7 @@ public:
 		// if the character is not connected here, update the contact list of
 		// all characters
 		IPlayerManager &pm = IPlayerManager::getInstance();
-		if (pm.getActiveChar(uint32(charEid.getShortId()>>4)) == NULL)
+		if (pm.getActiveChar(uint32(charEid.getShortId() >> 4)) == NULL)
 		{
 			// character not online there, update the contact lists
 			const IPlayerManager::TMapPlayers &players = pm.getPlayers();
@@ -333,150 +324,148 @@ public:
 		}
 	}
 
-
-//	bool onProcessModuleMessage(IModuleProxy *sender, const CMessage &message)
-//	{
-//		if (CMailForumNotifierSkel::onDispatchMessage(sender, message))
-//			return true;
-//		else if (CNameUnifierClientSkel::onDispatchMessage(sender, message))
-//			return true;
-//		
-//		nlwarning("CShardUnifierClient : Unknown message '%s' received", message.getName().c_str());
-//
-//		return false;
-//	}
-
+	//	bool onProcessModuleMessage(IModuleProxy *sender, const CMessage &message)
+	//	{
+	//		if (CMailForumNotifierSkel::onDispatchMessage(sender, message))
+	//			return true;
+	//		else if (CNameUnifierClientSkel::onDispatchMessage(sender, message))
+	//			return true;
+	//
+	//		nlwarning("CShardUnifierClient : Unknown message '%s' received", message.getName().c_str());
+	//
+	//		return false;
+	//	}
 
 	// Coroutine task for name validation
-//	void nameValidationTask()
-//	{
-//		while (!getActiveModuleTask()->isTerminationRequested())
-//		{
-//			if (!_PendingNameToValidate.empty() && this->_CharacterSynch != NULL)
-//			{
-//				// validate a name
-//				TCharacterNameValidationInfo &charInfo = _PendingNameToValidate.front();
-//
-//				CNameUnifierProxy nu(_CharacterSynch);
-//
-//				try
-//				{
-//					CValidateNameResult res = nu.validateCharacterName(this, charInfo.UserId, charInfo.CharIndex, charInfo.Name, FixedSessionId);
-//					nlassert(res.getUserId() == charInfo.UserId);
-//					nlassert(res.getCharIndex() == charInfo.CharIndex);
-//
-//					// send the response to the client
-//					sendIfNameIsValide( charInfo.UserId, res.getResult() == TCharacterNameResult::cnr_ok );
-//				}
-//				catch(...)
-//				{
-//					// something wrong appended, consider name as unvalid
-//					sendIfNameIsValide( charInfo.UserId, false );
-//				}
-//
-//
-//				_PendingNameToValidate.pop_front();
-//			}
-//			else if (!_PendingNameToValidate.empty() && this->_CharacterSynch == NULL)
-//			{
-//				// no name unifier to validate the name, consider it as invalid
-//				TCharacterNameValidationInfo &charInfo = _PendingNameToValidate.front();
-//				sendIfNameIsValide( charInfo.UserId, false );
-//				_PendingNameToValidate.pop_front();
-//			}
-//
-////			if (!_LoadedNameToValidate.empty() && this->_CharacterSynch != NULL)
-////			{
-////				// validate a name
-////				TCharacterNameValidationInfo &charInfo = _LoadedNameToValidate.front();
-////
-////				CNameUnifierProxy nu(_CharacterSynch);
-////
-////				try
-////				{
-////					CValidateNameResult res = nu.validateCharacterName(this, charInfo.UserId, charInfo.CharIndex, charInfo.Name, FixedSessionId);
-////					nlassert(res.getUserId() == charInfo.UserId);
-////					nlassert(res.getCharIndex() == charInfo.CharIndex);
-////
-////					if (res.getResult() != TCharacterNameResult::cnr_ok)
-////					{
-////						// the name is bad, we need to rename the character
-////						nu.renameCharacter(this, (charInfo.UserId<<4)+charInfo.CharIndex);
-////						// the SU send back the response directly
-////					}
-////					else
-////					{
-////						// ok, nothing to do
-////					}
-////				}
-////				catch(...)
-////				{
-////					// something wrong appended, consider name as VALID, so do nothing
-////				}
-////
-////
-////				_LoadedNameToValidate.pop_front();
-////			}
-////			else if (!_LoadedNameToValidate.empty() && this->_CharacterSynch == NULL)
-////			{
-////				// no name unifier to validate the name, consider it as VALID, so validate now
-////				vector<TCharSyncResultEntry> charInfos(1);
-////				charInfos[0].setCharId((_LoadedNameToValidate.front().UserId << 4) + _LoadedNameToValidate.front().CharIndex);
-////				charInfos[0].setCharName(_LoadedNameToValidate.front().Name);
-////				charInfos[0].setHomeSessionId(FixedSessionId);
-////
-////				userCharUpdatedAndValidated(NULL, _LoadedNameToValidate.front().UserId, charInfos);
-////				_LoadedNameToValidate.pop_front();
-////			}
-//			
-//			if (!_CreateCharPending.empty() && this->_CharacterSynch != NULL)
-//			{
-//				// validate a character creation
-//
-//				TCreatePendingInfo &cpi = _CreateCharPending.front();
-//
-//				CNameUnifierProxy nu(_CharacterSynch);
-//
-//				uint32 charId = (cpi.UserId<<4) + cpi.CharIndex;
-//
-//				try
-//				{
-//					CValidateNameResult res = nu.assignNameToCharacter(this, charId, cpi.CreateCharMsg.Name.toUtf8(), cpi.CreateCharMsg.Mainland);
-//
-//					// update the character name with the full name returned by SU
-//					cpi.CreateCharMsg.Name = res.getFullName();
-//					// call the rest of the creation work
-//					cbCreateChar_part2(cpi.UserId, cpi.CreateCharMsg, res.getResult() == TCharacterNameResult::cnr_ok);
-//				}
-//				catch(...)
-//				{
-//					// something as failed, consider the name as bad
-//					cbCreateChar_part2(cpi.UserId, cpi.CreateCharMsg, false);
-//				}
-//
-//				_CreateCharPending.pop_front();
-//			}
-//			else if (!_CreateCharPending.empty() && this->_CharacterSynch == NULL)
-//			{
-//				// no name unifier to validate creation, considere it as invalid
-//				TCreatePendingInfo &cpi = _CreateCharPending.front();
-//				cbCreateChar_part2(cpi.UserId, cpi.CreateCharMsg, false);
-//				_CreateCharPending.pop_front();
-//			}
-//
-//			// wait next loop to work
-//			getActiveModuleTask()->yield();
-//
-//			// flush the message queue
-//			getActiveModuleTask()->processPendingMessage(this);
-//		}
-//	}
-//
+	//	void nameValidationTask()
+	//	{
+	//		while (!getActiveModuleTask()->isTerminationRequested())
+	//		{
+	//			if (!_PendingNameToValidate.empty() && this->_CharacterSynch != NULL)
+	//			{
+	//				// validate a name
+	//				TCharacterNameValidationInfo &charInfo = _PendingNameToValidate.front();
+	//
+	//				CNameUnifierProxy nu(_CharacterSynch);
+	//
+	//				try
+	//				{
+	//					CValidateNameResult res = nu.validateCharacterName(this, charInfo.UserId, charInfo.CharIndex, charInfo.Name, FixedSessionId);
+	//					nlassert(res.getUserId() == charInfo.UserId);
+	//					nlassert(res.getCharIndex() == charInfo.CharIndex);
+	//
+	//					// send the response to the client
+	//					sendIfNameIsValide( charInfo.UserId, res.getResult() == TCharacterNameResult::cnr_ok );
+	//				}
+	//				catch(...)
+	//				{
+	//					// something wrong appended, consider name as unvalid
+	//					sendIfNameIsValide( charInfo.UserId, false );
+	//				}
+	//
+	//
+	//				_PendingNameToValidate.pop_front();
+	//			}
+	//			else if (!_PendingNameToValidate.empty() && this->_CharacterSynch == NULL)
+	//			{
+	//				// no name unifier to validate the name, consider it as invalid
+	//				TCharacterNameValidationInfo &charInfo = _PendingNameToValidate.front();
+	//				sendIfNameIsValide( charInfo.UserId, false );
+	//				_PendingNameToValidate.pop_front();
+	//			}
+	//
+	////			if (!_LoadedNameToValidate.empty() && this->_CharacterSynch != NULL)
+	////			{
+	////				// validate a name
+	////				TCharacterNameValidationInfo &charInfo = _LoadedNameToValidate.front();
+	////
+	////				CNameUnifierProxy nu(_CharacterSynch);
+	////
+	////				try
+	////				{
+	////					CValidateNameResult res = nu.validateCharacterName(this, charInfo.UserId, charInfo.CharIndex, charInfo.Name, FixedSessionId);
+	////					nlassert(res.getUserId() == charInfo.UserId);
+	////					nlassert(res.getCharIndex() == charInfo.CharIndex);
+	////
+	////					if (res.getResult() != TCharacterNameResult::cnr_ok)
+	////					{
+	////						// the name is bad, we need to rename the character
+	////						nu.renameCharacter(this, (charInfo.UserId<<4)+charInfo.CharIndex);
+	////						// the SU send back the response directly
+	////					}
+	////					else
+	////					{
+	////						// ok, nothing to do
+	////					}
+	////				}
+	////				catch(...)
+	////				{
+	////					// something wrong appended, consider name as VALID, so do nothing
+	////				}
+	////
+	////
+	////				_LoadedNameToValidate.pop_front();
+	////			}
+	////			else if (!_LoadedNameToValidate.empty() && this->_CharacterSynch == NULL)
+	////			{
+	////				// no name unifier to validate the name, consider it as VALID, so validate now
+	////				vector<TCharSyncResultEntry> charInfos(1);
+	////				charInfos[0].setCharId((_LoadedNameToValidate.front().UserId << 4) + _LoadedNameToValidate.front().CharIndex);
+	////				charInfos[0].setCharName(_LoadedNameToValidate.front().Name);
+	////				charInfos[0].setHomeSessionId(FixedSessionId);
+	////
+	////				userCharUpdatedAndValidated(NULL, _LoadedNameToValidate.front().UserId, charInfos);
+	////				_LoadedNameToValidate.pop_front();
+	////			}
+	//
+	//			if (!_CreateCharPending.empty() && this->_CharacterSynch != NULL)
+	//			{
+	//				// validate a character creation
+	//
+	//				TCreatePendingInfo &cpi = _CreateCharPending.front();
+	//
+	//				CNameUnifierProxy nu(_CharacterSynch);
+	//
+	//				uint32 charId = (cpi.UserId<<4) + cpi.CharIndex;
+	//
+	//				try
+	//				{
+	//					CValidateNameResult res = nu.assignNameToCharacter(this, charId, cpi.CreateCharMsg.Name.toUtf8(), cpi.CreateCharMsg.Mainland);
+	//
+	//					// update the character name with the full name returned by SU
+	//					cpi.CreateCharMsg.Name = res.getFullName();
+	//					// call the rest of the creation work
+	//					cbCreateChar_part2(cpi.UserId, cpi.CreateCharMsg, res.getResult() == TCharacterNameResult::cnr_ok);
+	//				}
+	//				catch(...)
+	//				{
+	//					// something as failed, consider the name as bad
+	//					cbCreateChar_part2(cpi.UserId, cpi.CreateCharMsg, false);
+	//				}
+	//
+	//				_CreateCharPending.pop_front();
+	//			}
+	//			else if (!_CreateCharPending.empty() && this->_CharacterSynch == NULL)
+	//			{
+	//				// no name unifier to validate creation, considere it as invalid
+	//				TCreatePendingInfo &cpi = _CreateCharPending.front();
+	//				cbCreateChar_part2(cpi.UserId, cpi.CreateCharMsg, false);
+	//				_CreateCharPending.pop_front();
+	//			}
+	//
+	//			// wait next loop to work
+	//			getActiveModuleTask()->yield();
+	//
+	//			// flush the message queue
+	//			getActiveModuleTask()->processPendingMessage(this);
+	//		}
+	//	}
+	//
 	bool initModule(const TParsedCommandLine &initInfo)
 	{
 		bool ret = CModuleBase::initModule(initInfo);
 		// start the name unifier coroutine
-//		NLNET_START_MODULE_TASK(CShardUnifierClient, nameValidationTask);
+		//		NLNET_START_MODULE_TASK(CShardUnifierClient, nameValidationTask);
 
 		return ret;
 	}
@@ -490,14 +479,13 @@ public:
 		return _EIdTranslatorInitialized;
 	}
 
-
-	virtual void onNewChar(const CHARSYNC::TCharInfo &charInfo) 
+	virtual void onNewChar(const CHARSYNC::TCharInfo &charInfo)
 	{
 		if (_CharacterSynch == NULL)
 			return;
 
 		CCharacterSyncProxy cs(_CharacterSynch);
-		
+
 		cs.addCharacter(this, charInfo);
 	}
 
@@ -507,19 +495,19 @@ public:
 			return;
 
 		CCharacterSyncProxy cs(_CharacterSynch);
-		
+
 		cs.deleteCharacter(this, charId);
 	}
 
-//	virtual void onUpdateCharName(const CEntityId &eid, const std::string &name)
-//	{
-//		if (_CharacterSynch == NULL)
-//			return;
-//
-//		CCharacterSyncProxy cs(_CharacterSynch);
-//
-//		cs.updateCharName(this, eid, name);
-//	}
+	//	virtual void onUpdateCharName(const CEntityId &eid, const std::string &name)
+	//	{
+	//		if (_CharacterSynch == NULL)
+	//			return;
+	//
+	//		CCharacterSyncProxy cs(_CharacterSynch);
+	//
+	//		cs.updateCharName(this, eid, name);
+	//	}
 
 	virtual void onUpdateCharGuild(const NLMISC::CEntityId &eid, uint32 guildId)
 	{
@@ -529,10 +517,9 @@ public:
 		CCharacterSyncProxy cs(_CharacterSynch);
 
 		cs.updateCharGuild(this, eid, guildId);
-
 	}
 
-	virtual void onUpdateCharNewbieFlag	(const NLMISC::CEntityId &eid, bool newbie)
+	virtual void onUpdateCharNewbieFlag(const NLMISC::CEntityId &eid, bool newbie)
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -559,7 +546,6 @@ public:
 		cs.updateCharAllegiance(this, eid, charSyncAll.second, charSyncAll.first);
 	}
 
-
 	virtual void onUpdateCharHomeMainland(const CEntityId &eid, TSessionId homeMainland)
 	{
 		if (_CharacterSynch == NULL)
@@ -580,7 +566,6 @@ public:
 		cs.updateCharRespawnPoints(this, eid, respawnPoints);
 	}
 
-
 	virtual void onUpdateCharacters(uint32 userId, const std::vector<CHARSYNC::TCharInfo> &charInfos)
 	{
 		if (_CharacterSynch == NULL)
@@ -589,11 +574,11 @@ public:
 			// no name unifier to validate the name, consider it as VALID, so validate now
 			vector<TCharSyncResultEntry> retCharInfos(charInfos.size());
 
-			for (uint i=0; i<charInfos.size(); ++i)
+			for (uint i = 0; i < charInfos.size(); ++i)
 			{
 				retCharInfos[i].setCharId(uint32(charInfos[i].getCharEId().getShortId()));
 				retCharInfos[i].setCharName(charInfos[i].getCharName());
-				retCharInfos[i].setHomeSessionId(charInfos[i].getHomeSessionId());	
+				retCharInfos[i].setHomeSessionId(charInfos[i].getHomeSessionId());
 				retCharInfos[i].setIsOwnerOfActiveAnimSession(0);
 				retCharInfos[i].setEditionSessionId(SimulateCharacterHasEditSession.get());
 			}
@@ -629,7 +614,6 @@ public:
 		CNameUnifierProxy nu(_CharacterSynch);
 
 		nu.validateGuildName(this, guildId, guildName);
-
 	}
 
 	virtual void registerLoadedGuildNames(const std::vector<CHARSYNC::CGuildInfo> &guildInfos)
@@ -642,7 +626,7 @@ public:
 		nu.registerLoadedGuildNames(this, IService::getInstance()->getShardId(), guildInfos);
 	}
 
-	virtual void addGuild						(uint32 guildId, const ucstring &guildName)
+	virtual void addGuild(uint32 guildId, const ucstring &guildName)
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -651,7 +635,7 @@ public:
 		nu.addGuild(this, IService::getInstance()->getShardId(), guildId, guildName);
 	}
 
-	virtual void removeGuild					(uint32 guildId)
+	virtual void removeGuild(uint32 guildId)
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -665,7 +649,7 @@ public:
 		if (DontUseSU.get() == 1)
 		{
 			// send the response to the client
-			sendIfNameIsValide( userId, true );
+			sendIfNameIsValide(userId, true);
 		}
 		else
 		{
@@ -673,7 +657,7 @@ public:
 			if (_CharacterSynch == NULL)
 			{
 				// oups, no character sync to validate the name, always fail
-				sendIfNameIsValide( userId, false );
+				sendIfNameIsValide(userId, false);
 				nlinfo("VALID_NAME::SU::validateCharacterNameBeforeCreate name %s rejected because we have no character sync to validate the name with using SU", name.toString().c_str());
 				return;
 			}
@@ -682,24 +666,24 @@ public:
 			nu.validateCharacterName(this, userId, charIndex, name.toUtf8(), homeSessionId);
 
 			// push a name validation list, waiting for name unifier response
-//			_PendingNameToValidate.push_back();
+			//			_PendingNameToValidate.push_back();
 			TCharacterNameValidationInfo charInfo; // = _PendingNameToValidate.back();
 			charInfo.UserId = userId;
 			charInfo.CharIndex = charIndex;
 			charInfo.Name = name.toUtf8();
 			charInfo.HomeSessionId = homeSessionId;
-			_PendingNameToValidate.insert(make_pair((userId<<4)+charIndex, charInfo));
+			_PendingNameToValidate.insert(make_pair((userId << 4) + charIndex, charInfo));
 		}
 	}
 
-	virtual bool validateCharacterCreation	(uint32 userId, uint8 charIndex, const CCreateCharMsg &createCharMsg)
+	virtual bool validateCharacterCreation(uint32 userId, uint8 charIndex, const CCreateCharMsg &createCharMsg)
 	{
 		if (DontUseSU.get() == 1)
 		{
 			cbCreateChar_part2(userId, createCharMsg, true);
 			return true;
 		}
-		
+
 		// send a name assignment to SU name unifier
 		if ((_CharacterSynch == NULL) && (DontUseSU.get() == 0))
 		{
@@ -710,20 +694,19 @@ public:
 		if (_CharacterSynch != NULL)
 		{
 			CNameUnifierProxy nu(_CharacterSynch);
-			nu.assignNameToCharacter(this, (userId << 4)+charIndex, createCharMsg.Name.toUtf8(), createCharMsg.Mainland.asInt());
+			nu.assignNameToCharacter(this, (userId << 4) + charIndex, createCharMsg.Name.toUtf8(), createCharMsg.Mainland.asInt());
 		}
-		
+
 		// store the pending assignement
 		TCreatePendingInfo cpi;
 		cpi.UserId = userId;
 		cpi.CharIndex = charIndex;
 		cpi.CreateCharMsg = createCharMsg;
 
-		_CreateCharPending.insert(make_pair((userId<<4)+charIndex, cpi));
+		_CreateCharPending.insert(make_pair((userId << 4) + charIndex, cpi));
 
 		return true;
 	}
-
 
 	void playerConnected(uint32 playerId)
 	{
@@ -774,7 +757,7 @@ public:
 
 	const set<CEntityId> &getSpecialEntityOnlineAbroad(const std::string &privilege) const
 	{
-		static set<CEntityId>	emptySet;
+		static set<CEntityId> emptySet;
 
 		TOnlineSpecialEntities::const_iterator it(_OnlineSpecialEntities.find(privilege));
 		if (it == _OnlineSpecialEntities.end())
@@ -782,7 +765,6 @@ public:
 		else
 			return it->second;
 	}
-
 
 	///////////////////////////////////////////////////////////////
 	///////// 	Mail forum notifier interface implementation
@@ -800,12 +782,11 @@ public:
 			// send impulse to client...
 			IPlayerManager::getInstance().sendImpulseToClient(ch->getCharId(), "CONNECTION:MAIL_AVAILABLE");
 		}
-
 	}
 
 	// A new message have been posted in a guild forum
 	// the notifier client send a notification for each member character
-	void notifyForumMessage(NLNET::IModuleProxy *sender, uint32 charId, uint32 guildId, uint32 threadId) 
+	void notifyForumMessage(NLNET::IModuleProxy *sender, uint32 charId, uint32 guildId, uint32 threadId)
 	{
 		uint32 userId = charId >> 4;
 		uint32 charIndex = charId & 0xf;
@@ -826,7 +807,7 @@ public:
 	// The name unifier send the initial content for the Eid translator.
 	// EGS need to wait until it receive this message before continuing
 	// it's startup sequence in order to have coherent name in guild.
-	virtual void initEIdTranslator(NLNET::IModuleProxy *sender, bool firstPacket, bool lastPacket, const std::vector < TNameEntry > &nameEntries)
+	virtual void initEIdTranslator(NLNET::IModuleProxy *sender, bool firstPacket, bool lastPacket, const std::vector<TNameEntry> &nameEntries)
 	{
 		H_AUTO(initEidTranslator);
 
@@ -841,16 +822,15 @@ public:
 			IService::getInstance()->addStatusTag("InitEId");
 		}
 
-		std::vector < uint32 > releasedNames;
+		std::vector<uint32> releasedNames;
 		updateEIdTranslator(sender, releasedNames, nameEntries);
-
 
 		if (lastPacket)
 		{
 			nldebug("EID : end init of EID translator, running post init process...");
 
 			_EIdTranslatorInitialized = true;
-			
+
 			// ask the guild manager to check all guild member lists
 			IGuildManager::getInstance().checkGuildMemberLists();
 			// ask the player manager to check contact list of online players
@@ -863,14 +843,14 @@ public:
 	// The name unifier send an update for the EID translator.
 	// releasedNames contains a list of charId whose names have been released
 	// changedNames contains a list of add or update entries
-	virtual void updateEIdTranslator(NLNET::IModuleProxy *sender, const std::vector < uint32 > &releasedNames, const std::vector < TNameEntry > &changedNames)
+	virtual void updateEIdTranslator(NLNET::IModuleProxy *sender, const std::vector<uint32> &releasedNames, const std::vector<TNameEntry> &changedNames)
 	{
 		CEntityIdTranslator *eidt = CEntityIdTranslator::getInstance();
 
 		// first, read the released names
-		for (uint i=0; i<releasedNames.size(); ++i)
+		for (uint i = 0; i < releasedNames.size(); ++i)
 		{
-			CEntityId eid(RYZOMID::player, uint64(releasedNames[i]), 0,0);
+			CEntityId eid(RYZOMID::player, uint64(releasedNames[i]), 0, 0);
 			if (eidt->isEntityRegistered(eid))
 			{
 				eidt->unregisterEntity(eid);
@@ -884,15 +864,15 @@ public:
 		}
 
 		// second, read the changed/add names
-		for (uint i=0; i<changedNames.size(); ++i)
+		for (uint i = 0; i < changedNames.size(); ++i)
 		{
 			const TNameEntry &ne = changedNames[i];
 
-			CEntityId eid(RYZOMID::player, uint64((ne.getUserId()<<4)+ne.getCharIndex()), 0,0);
+			CEntityId eid(RYZOMID::player, uint64((ne.getUserId() << 4) + ne.getCharIndex()), 0, 0);
 
-			eidt->updateEntity(eid, capitalize( ne.getName()), ne.getCharIndex(), ne.getUserId(), ne.getUserName(), ne.getShardId());
+			eidt->updateEntity(eid, capitalize(ne.getName()), ne.getCharIndex(), ne.getUserId(), ne.getUserName(), ne.getShardId());
 			// restore the online state if needed
-			if (IPlayerManager::getInstance().getChar(uint32(eid.getShortId()>>4), uint32(eid.getShortId()&0xf)))
+			if (IPlayerManager::getInstance().getChar(uint32(eid.getShortId() >> 4), uint32(eid.getShortId() & 0xf)))
 				eidt->setEntityOnline(eid, true);
 			ICharNameMapperClient::getInstance()->mapCharacterName(eid, ne.getName());
 		}
@@ -903,15 +883,15 @@ public:
 	virtual void validateCharacterNameResult(NLNET::IModuleProxy *sender, const CValidateNameResult &nameResult)
 	{
 		// retrieve the name in the validation queue
-		TCharId charId = (nameResult.getUserId()<<4)+nameResult.getCharIndex();
+		TCharId charId = (nameResult.getUserId() << 4) + nameResult.getCharIndex();
 		TCharacterNameValidations::iterator it(_PendingNameToValidate.find(charId));
 
-		BOMB_IF(it == _PendingNameToValidate.end(), "validateCharacterNameResult : received name validation for char "<<charId<<" but not in pending table !", return);
+		BOMB_IF(it == _PendingNameToValidate.end(), "validateCharacterNameResult : received name validation for char " << charId << " but not in pending table !", return);
 
 		TCharacterNameValidationInfo &cnvi = it->second;
 
 		// send the result to the client
-		sendIfNameIsValide( cnvi.UserId, nameResult.getResult() == TCharacterNameResult::cnr_ok);
+		sendIfNameIsValide(cnvi.UserId, nameResult.getResult() == TCharacterNameResult::cnr_ok);
 
 		// cleanup the validation request
 		_PendingNameToValidate.erase(it);
@@ -921,10 +901,10 @@ public:
 	// of a new character name during creation.
 	virtual void assignCharacterNameResult(NLNET::IModuleProxy *sender, const CValidateNameResult &nameResult)
 	{
-		TCharId charId = (nameResult.getUserId()<<4)+nameResult.getCharIndex();
+		TCharId charId = (nameResult.getUserId() << 4) + nameResult.getCharIndex();
 		TCreateCharPending::iterator it(_CreateCharPending.find(charId));
-		
-		BOMB_IF(it == _CreateCharPending.end(), "assignCharacterNameResult : received a create char validation for char "<<charId<<" but not in the pending creation char table", return);
+
+		BOMB_IF(it == _CreateCharPending.end(), "assignCharacterNameResult : received a create char validation for char " << charId << " but not in the pending creation char table", return);
 
 		TCreatePendingInfo &cpi = it->second;
 
@@ -972,10 +952,10 @@ public:
 			// update the character with data from the SU
 			uint32 bitfieldOwnerOfActiveAnimSession = 0;
 			uint32 bitfieldOwnerOfEditSession = 0;
-			for (uint i=0; i<charInfos.size(); ++i)
+			for (uint i = 0; i < charInfos.size(); ++i)
 			{
 				const TCharSyncResultEntry &charInfo = charInfos[i];
-				ICharacter *character = ICharacter::getInterface(IPlayerManager::getInstance().getChar(userId, charInfo.getCharId()&0xf), false);
+				ICharacter *character = ICharacter::getInterface(IPlayerManager::getInstance().getChar(userId, charInfo.getCharId() & 0xf), false);
 				if (character == NULL)
 					continue;
 
@@ -986,7 +966,7 @@ public:
 				bitfieldOwnerOfEditSession |= (((uint32)charInfo.getEditionSessionId() != 0) << i);
 			}
 			// ok, we can send the character summary
-			sendCharactersSummary( scp.Player, false, bitfieldOwnerOfActiveAnimSession, bitfieldOwnerOfEditSession );
+			sendCharactersSummary(scp.Player, false, bitfieldOwnerOfActiveAnimSession, bitfieldOwnerOfEditSession);
 		}
 	}
 
@@ -1002,11 +982,9 @@ public:
 		{
 			const IPlayerManager::SCPlayer &scp = it->second;
 			// we just validate the character, because SU has failed somewhere
-			sendCharactersSummary( scp.Player);
+			sendCharactersSummary(scp.Player);
 		}
-		
 	}
-
 
 	// The name unifier has renamed a guild to resolve a name conflict
 	virtual void guildRenamed(NLNET::IModuleProxy *sender, uint32 guildId, const ucstring &newName)
@@ -1021,8 +999,7 @@ public:
 		if (IGuildUnifier::getInstance() != NULL)
 			IGuildUnifier::getInstance()->broadcastGuildUpdate(guild);
 
-//		IGuildManager::getInstance().addGuildsAwaitingString(newName, guild->getIdWrap());
-
+		//		IGuildManager::getInstance().addGuildsAwaitingString(newName, guild->getIdWrap());
 	}
 
 	// The name unifier respond to EGS about guild name validation request
@@ -1043,7 +1020,7 @@ public:
 		if (guild == NULL)
 		{
 			nlwarning("CShardUnifierClient:removeCharFromGuild : can't find guild %u to remove char %u",
-				guildId, charId);
+			    guildId, charId);
 			return;
 		}
 
@@ -1052,38 +1029,35 @@ public:
 		if (ig->isProxyWrap())
 		{
 			nlwarning("CShardUnifierClient:removeCharFromGuild : can't remove char %u from guild %u because its a proxy",
-				charId, guildId);
+			    charId, guildId);
 			return;
 		}
 
 		// remove the member
-		ig->removeMember(CEntityId(RYZOMID::player, charId, 0,0));
+		ig->removeMember(CEntityId(RYZOMID::player, charId, 0, 0));
 	}
-
-
 
 	// The name unifier respond to EGS after a char sync
 	// The result message contains the list of all characters
 	// with there unified name and home session id from the
 	// ring database
-	virtual void characterSyncResult(NLNET::IModule *sender, const std::vector < TCharSyncResultEntry > &charInfos)
+	virtual void characterSyncResult(NLNET::IModule *sender, const std::vector<TCharSyncResultEntry> &charInfos)
 	{
 	}
-
 
 	/////////////////////////////////////////////////////////////////
 	// CEntityLocatorClient implementation
 	/////////////////////////////////////////////////////////////////
 
 	// The entity locator send a list of connection event to EGS
-	virtual void connectionEvents(NLNET::IModuleProxy *sender, const std::vector < TCharConnectionEvent > &events)
+	virtual void connectionEvents(NLNET::IModuleProxy *sender, const std::vector<TCharConnectionEvent> &events)
 	{
 		nldebug("Uni : connectionEvents: receive %u connection event", events.size());
 		// update the list of 'foreign online' character
-		for (uint i=0; i<events.size(); ++i)
+		for (uint i = 0; i < events.size(); ++i)
 		{
 			const TCharConnectionEvent &cci = events[i];
-			
+
 			CEntityId charEid(RYZOMID::player, cci.getCharId(), 0, 0);
 			if (cci.getConnection() == true)
 			{
@@ -1098,17 +1072,16 @@ public:
 				}
 
 				// Update LastPlayedDate
-				ICharacter *character = ICharacter::getInterface(IPlayerManager::getInstance().getActiveChar(uint32(charEid.getShortId()>>4)), true);
+				ICharacter *character = ICharacter::getInterface(IPlayerManager::getInstance().getActiveChar(uint32(charEid.getShortId() >> 4)), true);
 				if (character)
 					character->setLastConnectionDate(cci.getlastConnectionDate());
-
 			}
 			else
 			{
 				nldebug("  Char %s has disconnected", charEid.toString().c_str());
 
 				// Update LastPlayedDate
-				ICharacter *character = ICharacter::getInterface(IPlayerManager::getInstance().getActiveChar(uint32(charEid.getShortId()>>4)), true);
+				ICharacter *character = ICharacter::getInterface(IPlayerManager::getInstance().getActiveChar(uint32(charEid.getShortId() >> 4)), true);
 				if (character)
 					character->setLastConnectionDate(0);
 
@@ -1124,28 +1097,28 @@ public:
 			}
 
 			updateContactListAndGuilMembers(charEid, cci.getConnection());
-//
-//			// if the character is not connected here, update the contact list of
-//			// all characters
-//			IPlayerManager &pm = IPlayerManager::getInstance();
-//			if (pm.getActiveChar(cci.getCharId()>>4) == NULL)
-//			{
-//				// character not online there, update the contact lists
-//				const IPlayerManager::TMapPlayers &players = pm.getPlayers();
-//				IPlayerManager::TMapPlayers::const_iterator first(players.begin()), last(players.end());
-//				for (; first != last; ++first)
-//				{
-//					IPlayerManager::TUserId userId = first->first;
-//					ICharacter *character = ICharacter::getInterface(pm.getActiveChar(userId), true);
-//					if (character != NULL)
-//					{
-//						character->setContactOnlineStatus(charEid, cci.getConnection());
-//					}
-//				}
-//			}
-//
-//			// update the guild member list
-//			IGuildManager::getInstance().characterConnectionEvent(charEid, cci.getConnection());
+			//
+			//			// if the character is not connected here, update the contact list of
+			//			// all characters
+			//			IPlayerManager &pm = IPlayerManager::getInstance();
+			//			if (pm.getActiveChar(cci.getCharId()>>4) == NULL)
+			//			{
+			//				// character not online there, update the contact lists
+			//				const IPlayerManager::TMapPlayers &players = pm.getPlayers();
+			//				IPlayerManager::TMapPlayers::const_iterator first(players.begin()), last(players.end());
+			//				for (; first != last; ++first)
+			//				{
+			//					IPlayerManager::TUserId userId = first->first;
+			//					ICharacter *character = ICharacter::getInterface(pm.getActiveChar(userId), true);
+			//					if (character != NULL)
+			//					{
+			//						character->setContactOnlineStatus(charEid, cci.getConnection());
+			//					}
+			//				}
+			//			}
+			//
+			//			// update the guild member list
+			//			IGuildManager::getInstance().characterConnectionEvent(charEid, cci.getConnection());
 		}
 	}
 
@@ -1153,7 +1126,7 @@ public:
 	/* Commands handler														 */
 	/*************************************************************************/
 	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CShardUnifierClient, CModuleBase)
-		NLMISC_COMMAND_HANDLER_ADD(CShardUnifierClient, dump, "Dump the module internal state", "[verbose]");
+	NLMISC_COMMAND_HANDLER_ADD(CShardUnifierClient, dump, "Dump the module internal state", "[verbose]");
 	NLMISC_COMMAND_HANDLER_TABLE_END
 
 	NLMISC_CLASS_COMMAND_DECL(dump)
@@ -1166,7 +1139,7 @@ public:
 
 		log.displayNL("There are %u online entities in the domain", _OnlineEntities.size());
 
-		if (args.size() >0 && args[0] == "verbose")
+		if (args.size() > 0 && args[0] == "verbose")
 		{
 			// dump the complete list
 			TOnlineEntities::iterator first(_OnlineEntities.begin()), last(_OnlineEntities.end());
@@ -1175,14 +1148,13 @@ public:
 				const CEntityId &eid = *first;
 				log.displayNL("  Entity %s '%s'", eid.toString().c_str(), NLMISC::CEntityIdTranslator::getInstance()->getByEntity(eid).toUtf8().c_str());
 			}
-
 		}
-		
+
 		log.displayNL("There are %u privileges list of online entities", _OnlineSpecialEntities.size());
-		if (args.size() >0 && args[0] == "verbose")
+		if (args.size() > 0 && args[0] == "verbose")
 		{
 			TOnlineSpecialEntities::iterator first(_OnlineSpecialEntities.begin()), last(_OnlineSpecialEntities.end());
-			for( ; first != last; ++first)
+			for (; first != last; ++first)
 			{
 				log.displayNL(" There are %u entities with privileges '%s'", first->second.size(), first->first.c_str());
 
@@ -1196,12 +1168,9 @@ public:
 
 		return true;
 	}
-
-
 };
 
 NLNET_REGISTER_MODULE_FACTORY(CShardUnifierClient, "ShardUnifierClient");
-
 
 CShardUnifierClient *CShardUnifierClient::_Instance = NULL;
 
@@ -1215,19 +1184,18 @@ pair<CHARSYNC::TCult, CHARSYNC::TCivilisation> IShardUnifierEvent::convertAllegi
 	std::pair<CHARSYNC::TCult, CHARSYNC::TCivilisation> ret;
 	switch (allegiance.first)
 	{
-	case PVP_CLAN::Kami:		ret.first = CHARSYNC::TCult::c_kami;	break;
-	case PVP_CLAN::Karavan:		ret.first = CHARSYNC::TCult::c_karavan;	break;
-	default:					ret.first = CHARSYNC::TCult::c_neutral;
+	case PVP_CLAN::Kami: ret.first = CHARSYNC::TCult::c_kami; break;
+	case PVP_CLAN::Karavan: ret.first = CHARSYNC::TCult::c_karavan; break;
+	default: ret.first = CHARSYNC::TCult::c_neutral;
 	}
 	switch (allegiance.second)
 	{
-	case PVP_CLAN::Fyros:		ret.second = CHARSYNC::TCivilisation::c_fyros;	break;
-	case PVP_CLAN::Matis:		ret.second = CHARSYNC::TCivilisation::c_matis;	break;
-	case PVP_CLAN::Tryker:		ret.second = CHARSYNC::TCivilisation::c_tryker;	break;
-	case PVP_CLAN::Zorai:		ret.second = CHARSYNC::TCivilisation::c_zorai;	break;
-	default:					ret.second = CHARSYNC::TCivilisation::c_neutral;
+	case PVP_CLAN::Fyros: ret.second = CHARSYNC::TCivilisation::c_fyros; break;
+	case PVP_CLAN::Matis: ret.second = CHARSYNC::TCivilisation::c_matis; break;
+	case PVP_CLAN::Tryker: ret.second = CHARSYNC::TCivilisation::c_tryker; break;
+	case PVP_CLAN::Zorai: ret.second = CHARSYNC::TCivilisation::c_zorai; break;
+	default: ret.second = CHARSYNC::TCivilisation::c_neutral;
 	}
 
 	return ret;
 }
-

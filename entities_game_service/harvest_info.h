@@ -14,37 +14,40 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_HARVEST_INFO_H
 #define RY_HARVEST_INFO_H
 
-
-namespace HARVEST_INFOS
-{
+namespace HARVEST_INFOS {
 
 struct CHarvestInfos
 {
 	NLMISC::TGameCycle EndCherchingTime;
 	NLMISC::CSheetId Sheet;
-	uint32	DepositIndex;
-	uint32	DepositIndexContent;
-	uint16	Quantity;
-	uint16	MinQuality;
-	uint16	MaxQuality;
+	uint32 DepositIndex;
+	uint32 DepositIndexContent;
+	uint16 Quantity;
+	uint16 MinQuality;
+	uint16 MaxQuality;
 
-	CHarvestInfos() : EndCherchingTime(0xffffffff), DepositIndex(0xffffffff), DepositIndexContent(0), Quantity(0),MinQuality(0),MaxQuality(0)
-	{}
+	CHarvestInfos()
+	    : EndCherchingTime(0xffffffff)
+	    , DepositIndex(0xffffffff)
+	    , DepositIndexContent(0)
+	    , Quantity(0)
+	    , MinQuality(0)
+	    , MaxQuality(0)
+	{
+	}
 
 	void serial(NLMISC::IStream &f)
 	{
-		f.serial( EndCherchingTime );
-		f.serial( Sheet );
-		f.serial( DepositIndex );
-		f.serial( DepositIndexContent );
-		f.serial( Quantity );
-		f.serial( MinQuality );
-		f.serial( MaxQuality );
+		f.serial(EndCherchingTime);
+		f.serial(Sheet);
+		f.serial(DepositIndex);
+		f.serial(DepositIndexContent);
+		f.serial(Quantity);
+		f.serial(MinQuality);
+		f.serial(MaxQuality);
 	}
 };
 

@@ -14,12 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_COMMON_SHARD_CALLBACKS_H
 #define RY_COMMON_SHARD_CALLBACKS_H
-
-
 
 /**
  * class used to manage net callbacks that are not linked to a particular game manager
@@ -30,11 +26,9 @@
 class CCommonShardCallbacks
 {
 public:
-
 	static void init();
 	static void release();
 };
-
 
 #endif // RY_COMMON_SHARD_CALLBACKS_H
 

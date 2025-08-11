@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 //////////////
 //	INCLUDE	//
 //////////////
@@ -47,13 +45,12 @@ using namespace NLNET;
 //////////////
 //	EXTERN	//
 //////////////
-extern CRandom			RandomGenerator;
-extern CPlayerManager	PlayerManager;
-extern CCreatureManager	CreatureManager;
-
+extern CRandom RandomGenerator;
+extern CPlayerManager PlayerManager;
+extern CCreatureManager CreatureManager;
 
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 bool CSpecialPowerTaunt::validate(std::string &errorCode)
 {
@@ -68,10 +65,10 @@ bool CSpecialPowerTaunt::validate(std::string &errorCode)
 	TGameCycle endDate;
 	if (!actor->canUsePower(_PowerType, std::numeric_limits<uint16>::max(), endDate))
 	{
-		uint16 seconds = uint16( (endDate - CTickEventHandler::getGameCycle())*CTickEventHandler::getGameTimeStep() );
-		uint8 minutes = uint8(seconds/60);
-		seconds = seconds%60;
-		
+		uint16 seconds = uint16((endDate - CTickEventHandler::getGameCycle()) * CTickEventHandler::getGameTimeStep());
+		uint8 minutes = uint8(seconds / 60);
+		seconds = seconds % 60;
+
 		SM_STATIC_PARAMS_3(params, STRING_MANAGER::power_type, STRING_MANAGER::integer, STRING_MANAGER::integer);
 		params[0].Enum = POWERS::Taunt;
 		params[1].Int = minutes;
@@ -81,13 +78,13 @@ bool CSpecialPowerTaunt::validate(std::string &errorCode)
 		DEBUGLOG("<CSpecialPowerTaunt::validate> Cannot use Taunt yet, still disabled");
 		return false;
 	}
-	
+
 	// get targets
 	const std::vector<TDataSetRow> &targets = _Phrase->getTargets();
 
 	if (targets.empty())
 	{
-		PHRASE_UTILITIES::sendSimpleMessage( _ActorRowId, "INVALID_TARGET" );
+		PHRASE_UTILITIES::sendSimpleMessage(_ActorRowId, "INVALID_TARGET");
 		nldebug("<CSpecialPowerTaunt::validate> No target");
 		return false;
 	}
@@ -96,7 +93,7 @@ bool CSpecialPowerTaunt::validate(std::string &errorCode)
 	if (!entity)
 	{
 		// TODO : send message
-		//nlwarning("<CSpecialPowerTaunt::validate> Cannot find targeted entity");
+		// nlwarning("<CSpecialPowerTaunt::validate> Cannot find targeted entity");
 		return false;
 	}
 
@@ -110,11 +107,11 @@ bool CSpecialPowerTaunt::validate(std::string &errorCode)
 
 	// check distance
 	const double distance = PHRASE_UTILITIES::getDistance(_ActorRowId, targets[0]);
-	if ( distance > (double)_Range)
+	if (distance > (double)_Range)
 	{
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::entity);
-		params[0].setEIdAIAlias( entity->getId(), CAIAliasTranslator::getInstance()->getAIAlias(entity->getId()) );
-		
+		params[0].setEIdAIAlias(entity->getId(), CAIAliasTranslator::getInstance()->getAIAlias(entity->getId()));
+
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "POWER_TAUNT_TARGET_TOO_FAR", params);
 
 		DEBUGLOG("<CSpecialPowerTaunt::validate> Target out of range");
@@ -131,11 +128,11 @@ bool CSpecialPowerTaunt::validate(std::string &errorCode)
 	}
 	if (!entity->getContextualProperty().directAccessForStructMembers().attackable())
 	{
-		CCreature * creature = CreatureManager.getCreature( entity->getId() );
-		if ( ! creature->checkFactionAttackable(actor->getId()))
+		CCreature *creature = CreatureManager.getCreature(entity->getId());
+		if (!creature->checkFactionAttackable(actor->getId()))
 		{
 			PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "POWER_TAUNT_TARGET_NOT_ATTACKABLE");
-		
+
 			DEBUGLOG("<CSpecialPowerTaunt::validate> Target not attackable");
 			return false;
 		}
@@ -145,7 +142,7 @@ bool CSpecialPowerTaunt::validate(std::string &errorCode)
 } // validate //
 
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CSpecialPowerTaunt::apply()
 {
@@ -164,13 +161,13 @@ void CSpecialPowerTaunt::apply()
 
 	// get targets
 	const std::vector<TDataSetRow> &targets = _Phrase->getTargets();
-	
-	// only apply on main target 
+
+	// only apply on main target
 	if (targets.empty())
 	{
 		return;
 	}
-	
+
 	CEntityBase *target = CEntityBaseManager::getEntityBasePtr(targets[0]);
 	if (!target)
 		return;
@@ -178,41 +175,41 @@ void CSpecialPowerTaunt::apply()
 	// test taunt success
 	if (testTauntSuccessOnEntity(target))
 	{
-		CAITauntMsg	tauntMessage;
+		CAITauntMsg tauntMessage;
 		tauntMessage.PlayerRowId = _ActorRowId;
 		tauntMessage.TargetRowId = targets[0];
 		CWorldInstances::instance().msgToAIInstance(target->getInstanceNumber(), tauntMessage);
-//		tauntMessage.send("AIS");	
-		
+		//		tauntMessage.send("AIS");
+
 		// send messages
-//		TVectorParamCheck params;
+		//		TVectorParamCheck params;
 		// for actor
 		if (actor->getId().getType() == RYZOMID::player)
 		{
 			SM_STATIC_PARAMS_2(params, STRING_MANAGER::entity, STRING_MANAGER::power_type);
-			params[0].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()) );
+			params[0].setEIdAIAlias(target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()));
 			params[1].Enum = POWERS::Taunt;
 			PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "POWER_USE_ON_TARGET", params);
 		}
-		
+
 		// for target : cannot taunt  a player, so nothing to send
-		
+
 		// for spectators
-//		if (actor->getId().getType() == RYZOMID::player || actor->getId().getType() == RYZOMID::npc)
-//		{
-//			vector<CEntityId> excluded;
-//			excluded.push_back(actor->getId());
-//			excluded.push_back(target->getId());
-//			
-//			params.resize(3);
-//			params[0].Type = STRING_MANAGER::entity;
-//			params[0].EId = actor->getId();
-//			params[1].Type = STRING_MANAGER::entity;
-//			params[1].EId = target->getId();
-//			params[2].Type = STRING_MANAGER::power_type;
-//			params[2].Enum = POWERS::Taunt;
-//			PHRASE_UTILITIES::sendDynamicGroupSystemMessage(actor->getEntityRowId(), excluded, "POWER_USE_ON_TARGET_SPECTATORS", params);
-//		}
+		//		if (actor->getId().getType() == RYZOMID::player || actor->getId().getType() == RYZOMID::npc)
+		//		{
+		//			vector<CEntityId> excluded;
+		//			excluded.push_back(actor->getId());
+		//			excluded.push_back(target->getId());
+		//
+		//			params.resize(3);
+		//			params[0].Type = STRING_MANAGER::entity;
+		//			params[0].EId = actor->getId();
+		//			params[1].Type = STRING_MANAGER::entity;
+		//			params[1].EId = target->getId();
+		//			params[2].Type = STRING_MANAGER::power_type;
+		//			params[2].Enum = POWERS::Taunt;
+		//			PHRASE_UTILITIES::sendDynamicGroupSystemMessage(actor->getEntityRowId(), excluded, "POWER_USE_ON_TARGET_SPECTATORS", params);
+		//		}
 	}
 	else
 	{
@@ -221,18 +218,16 @@ void CSpecialPowerTaunt::apply()
 		if (actor->getId().getType() == RYZOMID::player)
 		{
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::entity);
-		//	TVectorParamCheck params;
-			params[0].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()) );
+			//	TVectorParamCheck params;
+			params[0].setEIdAIAlias(target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()));
 			PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "POWER_TAUNT_FAILED", params);
 		}
 	}
 
-	
 } // apply //
 
-
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 bool CSpecialPowerTaunt::testTauntSuccessOnEntity(const CEntityBase *entity)
 {
@@ -242,13 +237,13 @@ bool CSpecialPowerTaunt::testTauntSuccessOnEntity(const CEntityBase *entity)
 	}
 
 	// check target "level"
-	const CStaticCreatures* creatureForm = entity->getForm();
+	const CStaticCreatures *creatureForm = entity->getForm();
 	if (!creatureForm)
 	{
 		DEBUGLOG("<CSpecialPowerTaunt::validate> Cannot find target static creature form");
 		return false;
 	}
-	
+
 	if (creatureForm->getTauntLevel() <= _TauntPower)
 	{
 		return true;
@@ -257,19 +252,19 @@ bool CSpecialPowerTaunt::testTauntSuccessOnEntity(const CEntityBase *entity)
 	{
 		sint32 deltaLevel = sint32(_TauntPower) - sint32(creatureForm->getTauntLevel());
 		// use a standard success test
-		//uint8 chances = PHRASE_UTILITIES::getSuccessChance( deltaLevel );
-		//float result = PHRASE_UTILITIES::getSucessFactor(chances, (uint8)RandomGenerator.rand(99) );
-		uint8 chances = CStaticSuccessTable::getSuccessChance( SUCCESS_TABLE_TYPE::FightPhrase, deltaLevel);
-		float result = CStaticSuccessTable::getSuccessFactor( SUCCESS_TABLE_TYPE::FightPhrase, deltaLevel, (uint8)RandomGenerator.rand(99) );
-#ifdef NL_DEBUG		
-		nldebug("Taunt : power = %u, creature '%s', level %u, chances = %u, result = %f", 
-			_TauntPower, 
-			entity->_SheetId.toString().c_str(), 
-			creatureForm->getTauntLevel(), 
-			chances, 
-			result);
+		// uint8 chances = PHRASE_UTILITIES::getSuccessChance( deltaLevel );
+		// float result = PHRASE_UTILITIES::getSucessFactor(chances, (uint8)RandomGenerator.rand(99) );
+		uint8 chances = CStaticSuccessTable::getSuccessChance(SUCCESS_TABLE_TYPE::FightPhrase, deltaLevel);
+		float result = CStaticSuccessTable::getSuccessFactor(SUCCESS_TABLE_TYPE::FightPhrase, deltaLevel, (uint8)RandomGenerator.rand(99));
+#ifdef NL_DEBUG
+		nldebug("Taunt : power = %u, creature '%s', level %u, chances = %u, result = %f",
+		    _TauntPower,
+		    entity->_SheetId.toString().c_str(),
+		    creatureForm->getTauntLevel(),
+		    chances,
+		    result);
 #endif
-		if (result>=1.0f)
+		if (result >= 1.0f)
 		{
 			return true;
 		}
@@ -278,6 +273,5 @@ bool CSpecialPowerTaunt::testTauntSuccessOnEntity(const CEntityBase *entity)
 			return false;
 		}
 	}
-	
-} // testTauntSuccessOnEntity //
 
+} // testTauntSuccessOnEntity //

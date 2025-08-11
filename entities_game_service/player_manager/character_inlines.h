@@ -17,115 +17,113 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef CHARACTER_INLINES_H
 #define CHARACTER_INLINES_H
-
 
 //------------------------------------------------------------------------------
 
 inline uint16 CCharacter::getCurrentVersion()
 {
-	return 69; 
+	return 69;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint16 CCharacter::getSavedVersion()
 {
-	return _SavedVersion; 
+	return _SavedVersion;
 }
 
 //------------------------------------------------------------------------------
 
-inline const NLMISC::CEntityId& CCharacter::getCharId() const
+inline const NLMISC::CEntityId &CCharacter::getCharId() const
 {
-	return CEntityBase::getId(); 
+	return CEntityBase::getId();
 }
 
 //------------------------------------------------------------------------------
 
-inline const NLMISC::CEntityId& CCharacter::getId() const
+inline const NLMISC::CEntityId &CCharacter::getId() const
 {
-	return CEntityBase::getId(); 
+	return CEntityBase::getId();
 }
 
 //------------------------------------------------------------------------------
 
-inline uint32 CCharacter::getStartupInstance()				
+inline uint32 CCharacter::getStartupInstance()
 {
-	return _StartupInstance; 
+	return _StartupInstance;
 }
 
 //------------------------------------------------------------------------------
 
 inline CHARACTER_TITLE::ECharacterTitle CCharacter::getTitle() const
 {
-	return _Title; 
+	return _Title;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getScorePermanentModifiers(SCORES::TScores score) const
 {
-	return _ScorePermanentModifiers[score]; 
+	return _ScorePermanentModifiers[score];
 }
 
 inline void CCharacter::setScorePermanentModifiers(SCORES::TScores score, uint32 value)
 {
-	_ScorePermanentModifiers[score] = value; 
+	_ScorePermanentModifiers[score] = value;
 }
 
 inline bool CCharacter::getEnterFlag() const
 {
-	return _Enter; 
+	return _Enter;
 }
 
 //------------------------------------------------------------------------------
 
-//inline CEntityState& CCharacter::getState()
+// inline CEntityState& CCharacter::getState()
 //{
-//	return CEntityBase::getState(); 
-//}
+//	return CEntityBase::getState();
+// }
 //
-//inline const CEntityState& CCharacter::getState() const
+// inline const CEntityState& CCharacter::getState() const
 //{
-//	return CEntityBase::getState(); 
-//}
+//	return CEntityBase::getState();
+// }
 
 //------------------------------------------------------------------------------
 
 inline bool CCharacter::isDead() const
 {
 	return CEntityBase::isDead();
-}	
+}
 
 //------------------------------------------------------------------------------
 
 inline const std::set<NLMISC::CSheetId> &CCharacter::getKnownBricks() const
 {
-	return _KnownBricks; 
+	return _KnownBricks;
 }
 
 //------------------------------------------------------------------------------
 
-inline CMirrorPropValueAlice< SPropVisualA, CPropLocationPacked<2> >& CCharacter::getVisualPropertyA()
+inline CMirrorPropValueAlice<SPropVisualA, CPropLocationPacked<2>> &CCharacter::getVisualPropertyA()
 {
-	return _VisualPropertyA; 
+	return _VisualPropertyA;
 }
 
 //------------------------------------------------------------------------------
 
-inline CMirrorPropValueAlice< SPropVisualB, CPropLocationPacked<2> >& CCharacter::getVisualPropertyB()
+inline CMirrorPropValueAlice<SPropVisualB, CPropLocationPacked<2>> &CCharacter::getVisualPropertyB()
 {
-	return _VisualPropertyB; 
+	return _VisualPropertyB;
 }
 
 //------------------------------------------------------------------------------
 
-inline CMirrorPropValueAlice< SPropVisualC, CPropLocationPacked<2> >& CCharacter::getVisualPropertyC()
+inline CMirrorPropValueAlice<SPropVisualC, CPropLocationPacked<2>> &CCharacter::getVisualPropertyC()
 {
-	return _VisualPropertyC; 
+	return _VisualPropertyC;
 }
 
 //------------------------------------------------------------------------------
@@ -137,77 +135,77 @@ inline uint16 CCharacter::getTeamId() const
 
 //------------------------------------------------------------------------------
 
-inline const NLMISC::CEntityId & CCharacter::getTeamInvitor() const
+inline const NLMISC::CEntityId &CCharacter::getTeamInvitor() const
 {
-	return _TeamInvitor; 
+	return _TeamInvitor;
 }
 
 //------------------------------------------------------------------------------
 
-inline const NLMISC::CEntityId & CCharacter::getLeagueInvitor() const
+inline const NLMISC::CEntityId &CCharacter::getLeagueInvitor() const
 {
-	return _LeagueInvitor; 
+	return _LeagueInvitor;
 }
 
 //------------------------------------------------------------------------------
 
 inline const NLMISC::CEntityId &CCharacter::harvestedEntity() const
 {
-	return _MpSourceId; 
+	return _MpSourceId;
 }
 
 //------------------------------------------------------------------------------
 
 inline const NLMISC::CSheetId &CCharacter::harvestedEntitySheetId() const
 {
-	return _MpSourceSheetId; 
+	return _MpSourceSheetId;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint8 CCharacter::harvestedMpIndex() const
 {
-	return _MpIndex; 
+	return _MpIndex;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint16 CCharacter::harvestedMpQuantity() const
 {
-	return _HarvestedQuantity; 
+	return _HarvestedQuantity;
 }
 
 //------------------------------------------------------------------------------
 
-inline HARVEST_INFOS::CHarvestInfos& CCharacter::getHarvestInfos()
+inline HARVEST_INFOS::CHarvestInfos &CCharacter::getHarvestInfos()
 {
-	return  _DepositHarvestInformation;
+	return _DepositHarvestInformation;
 }
 
 //------------------------------------------------------------------------------
 
 inline CForageProgress *CCharacter::forageProgress()
-{ 
+{
 	return _ForageProgress;
 }
 
 //------------------------------------------------------------------------------
 
 inline CSEffectPtr CCharacter::getProspectionLocateDepositEffect() const
-{ 
+{
 	return _ProspectionLocateDepositEffect;
 }
 
 //------------------------------------------------------------------------------
 
-inline NLMISC::TGameCycle	CCharacter::forageBonusExtractionTime() const 
-{ 
+inline NLMISC::TGameCycle CCharacter::forageBonusExtractionTime() const
+{
 	return _ForageBonusExtractionTime;
 }
 
 //------------------------------------------------------------------------------
 
-inline NLMISC::TGameTime& CCharacter::getTimeOfDeath()
+inline NLMISC::TGameTime &CCharacter::getTimeOfDeath()
 {
 	return _TimeDeath;
 }
@@ -216,28 +214,28 @@ inline NLMISC::TGameTime& CCharacter::getTimeOfDeath()
 
 inline bool CCharacter::isNearPetTpIsAllowed() const
 {
-	return NearPetTpAllowed; 
+	return NearPetTpAllowed;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint8 CCharacter::getNbPact()
 {
-	return (uint8)_Pact.size(); 
+	return (uint8)_Pact.size();
 }
 
 //------------------------------------------------------------------------------
 
 inline bool CCharacter::isExchanging() const
 {
-	return (_ExchangeView != NULL); 
+	return (_ExchangeView != NULL);
 }
 
 //------------------------------------------------------------------------------
 
-inline uint8 CCharacter::getBotChatType()const
+inline uint8 CCharacter::getBotChatType() const
 {
-	return _CurrentBotChatType; 
+	return _CurrentBotChatType;
 }
 
 //------------------------------------------------------------------------------
@@ -245,41 +243,41 @@ inline uint8 CCharacter::getBotChatType()const
 inline uint8 CCharacter::getCurrentBotChatListPage()
 {
 	return _CurrentBotChatListPage;
-} 
-
-//------------------------------------------------------------------------------
-
-inline const SGameCoordinate& CCharacter::getTpCoordinate() const
-{
-	return _TpCoordinate; 
 }
 
 //------------------------------------------------------------------------------
 
-inline const uint64 & CCharacter::getMoney()
+inline const SGameCoordinate &CCharacter::getTpCoordinate() const
 {
-	return _Money; 
+	return _TpCoordinate;
 }
 
 //------------------------------------------------------------------------------
 
-inline const NLMISC::CEntityId & CCharacter::getCurrentInterlocutor()
+inline const uint64 &CCharacter::getMoney()
 {
-	return _CurrentInterlocutor; 
+	return _Money;
 }
 
 //------------------------------------------------------------------------------
 
-inline CExchangeView * CCharacter::getExchangeView()
+inline const NLMISC::CEntityId &CCharacter::getCurrentInterlocutor()
 {
-	return _ExchangeView; 
+	return _CurrentInterlocutor;
 }
 
 //------------------------------------------------------------------------------
 
-inline const uint64 & CCharacter::getExchangeMoney() const
+inline CExchangeView *CCharacter::getExchangeView()
 {
-	return _ExchangeMoney; 
+	return _ExchangeView;
+}
+
+//------------------------------------------------------------------------------
+
+inline const uint64 &CCharacter::getExchangeMoney() const
+{
+	return _ExchangeMoney;
 }
 
 //------------------------------------------------------------------------------
@@ -294,90 +292,90 @@ inline CInventoryPtr CCharacter::getLootContainer()
 inline bool CCharacter::staticActionInProgress() const
 {
 	return _StaticActionInProgress;
-}	
+}
 
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getSaveDate()
 {
-	return _SaveDate; 
+	return _SaveDate;
 }
 
 //------------------------------------------------------------------------------
 
-inline const std::map< TAIAlias, TMissionHistory >& CCharacter::getMissionHistories()
+inline const std::map<TAIAlias, TMissionHistory> &CCharacter::getMissionHistories()
 {
-	return _MissionHistories; 
+	return _MissionHistories;
 }
 
 //------------------------------------------------------------------------------
 
-inline const std::vector<SBotChatMission> & CCharacter::getCurrentMissionList()
+inline const std::vector<SBotChatMission> &CCharacter::getCurrentMissionList()
 {
-	return _CurrentMissionList; 
+	return _CurrentMissionList;
 }
 
 //------------------------------------------------------------------------------
 
-inline std::vector<CTradePhrase> & CCharacter::currentPhrasesTradeList()
+inline std::vector<CTradePhrase> &CCharacter::currentPhrasesTradeList()
 {
-	return _CurrentPhrasesTradeList; 
+	return _CurrentPhrasesTradeList;
 }
 
 //------------------------------------------------------------------------------
 
 inline RM_FABER_TYPE::TRMFType CCharacter::getRawMaterialItemPartFilter() const
 {
-	return _RawMaterialItemPartFilter; 
+	return _RawMaterialItemPartFilter;
 }
 
 //------------------------------------------------------------------------------
 
 inline ITEM_TYPE::TItemType CCharacter::getItemTypeFilter() const
 {
-	return _ItemTypeFilter; 
+	return _ItemTypeFilter;
 }
 
 //------------------------------------------------------------------------------
 
 inline RM_CLASS_TYPE::TRMClassType CCharacter::getMinClassItemFilter() const
 {
-	return _MinClass; 
+	return _MinClass;
 }
 
 //------------------------------------------------------------------------------
 
 inline RM_CLASS_TYPE::TRMClassType CCharacter::getMaxClassItemFilter() const
 {
-	return _MaxClass; 
+	return _MaxClass;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getMinQualityFilter() const
 {
-	return _MinQualityFilter; 
+	return _MinQualityFilter;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getMaxQualityFilter() const
 {
-	return _MaxQualityFilter; 
+	return _MaxQualityFilter;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getMinPriceFilter() const
 {
-	return _MinPriceFilter; 
+	return _MinPriceFilter;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getMaxPriceFilter() const
 {
-	return _MaxPriceFilter; 
+	return _MaxPriceFilter;
 }
 
 //------------------------------------------------------------------------------
@@ -391,142 +389,141 @@ inline uint16 CCharacter::getCurrentTradeSession() const
 
 inline uint8 CCharacter::trainMaxSize() const
 {
-	return _TrainMaxSize; 
+	return _TrainMaxSize;
 }
 
 //------------------------------------------------------------------------------
 
 inline const std::vector<TDataSetRow> &CCharacter::beastTrain() const
 {
-	return _BeastTrain; 
+	return _BeastTrain;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint8 CCharacter::actionCounter() const
 {
-	return _ActionCounter; 
+	return _ActionCounter;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint8 CCharacter::interfaceCounter() const
 {
-	return _InterfaceCounter; 
+	return _InterfaceCounter;
 }
 
 //------------------------------------------------------------------------------
 
 inline CONTINENT::TContinent CCharacter::getCurrentContinent()
 {
-	return _CurrentContinent; 
+	return _CurrentContinent;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint16 CCharacter::getCurrentRegion()
 {
-	return _CurrentRegion; 
+	return _CurrentRegion;
 }
 
 //------------------------------------------------------------------------------
 
-inline const std::vector<uint16> & CCharacter::getPlaces()
-{ 
-	return _Places; 
+inline const std::vector<uint16> &CCharacter::getPlaces()
+{
+	return _Places;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint16 CCharacter::getCurrentStable()
 {
-	return _CurrentStable; 
+	return _CurrentStable;
 }
 
 //------------------------------------------------------------------------------
 
 inline bool CCharacter::meleeCombatIsValid() const
 {
-	return _MeleeCombatIsValid; 
+	return _MeleeCombatIsValid;
 }
 
 //------------------------------------------------------------------------------
 
 inline const std::vector<CFaberMsgItem> &CCharacter::getFaberRms()
 {
-	return _RmSelectedForFaber; 
+	return _RmSelectedForFaber;
 }
 
 //------------------------------------------------------------------------------
 
 inline const std::vector<CFaberMsgItem> &CCharacter::getFaberRmsFormula()
 {
-	return _RmFormulaSelectedForFaber; 
+	return _RmFormulaSelectedForFaber;
 }
 
 //------------------------------------------------------------------------------
 
 inline NLMISC::CSheetId CCharacter::getCraftPlan() const
 {
-	return _CraftPlan; 
+	return _CraftPlan;
 }
 
 //------------------------------------------------------------------------------
 
 inline std::vector<CFaberMsgItem> &CCharacter::getFaberRmsNoConst()
 {
-	return _RmSelectedForFaber; 
+	return _RmSelectedForFaber;
 }
 
 //------------------------------------------------------------------------------
 
 inline std::vector<CFaberMsgItem> &CCharacter::getFaberRmsFormulaNoConst()
 {
-	return _RmFormulaSelectedForFaber; 
+	return _RmFormulaSelectedForFaber;
 }
 
 //------------------------------------------------------------------------------
 
-inline const std::vector<CKnownPhrase>& CCharacter::getKnownPhrases()
+inline const std::vector<CKnownPhrase> &CCharacter::getKnownPhrases()
 {
-	return _KnownPhrases; 
+	return _KnownPhrases;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint8 CCharacter::cycleCounter() const
 {
-	return _CycleCounter; 
+	return _CycleCounter;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint8 CCharacter::nextCounter() const
 {
-	return _NextCounter; 
+	return _NextCounter;
 }
 
 //------------------------------------------------------------------------------
 
 inline bool CCharacter::dodgeAsDefense() const
 {
-	return _DodgeAsDefense; 
+	return _DodgeAsDefense;
 }
 
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::parrySuccessModifier() const
-{ 
+{
 	return _ParrySuccessModifier;
 }
 
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::dodgeSuccessModifier() const
-{ 
+{
 	return _DodgeSuccessModifier;
 }
-
 
 //------------------------------------------------------------------------------
 
@@ -535,14 +532,12 @@ inline sint32 CCharacter::craftSuccessModifier() const
 	return _CraftSuccessModifier;
 }
 
-
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::meleeSuccessModifier() const
 {
 	return _MeleeSuccessModifier;
 }
-
 
 //------------------------------------------------------------------------------
 
@@ -551,7 +546,6 @@ inline sint32 CCharacter::rangeSuccessModifier() const
 	return _RangeSuccessModifier;
 }
 
-
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::magicSuccessModifier() const
@@ -559,14 +553,13 @@ inline sint32 CCharacter::magicSuccessModifier() const
 	return _MagicSuccessModifier;
 }
 
-
 //------------------------------------------------------------------------------
 
-inline sint32 CCharacter::forageSuccessModifier( ECOSYSTEM::EECosystem eco) const
+inline sint32 CCharacter::forageSuccessModifier(ECOSYSTEM::EECosystem eco) const
 {
-	if ( eco != ECOSYSTEM::unknown )
+	if (eco != ECOSYSTEM::unknown)
 	{
-		if( _ForageSuccessModifiers[(uint8)eco] == 0 )
+		if (_ForageSuccessModifiers[(uint8)eco] == 0)
 		{
 			return _ForageSuccessModifiers[(uint8)ECOSYSTEM::common_ecosystem];
 		}
@@ -582,47 +575,47 @@ inline sint32 CCharacter::forageSuccessModifier( ECOSYSTEM::EECosystem eco) cons
 
 inline SLOT_EQUIPMENT::TSlotEquipment CCharacter::protectedSlot() const
 {
-	return _ProtectedSlot; 
+	return _ProtectedSlot;
 }
 
 //------------------------------------------------------------------------------
 
 inline NLMISC::TGameCycle CCharacter::dateOfNextAllowedAction()
 {
-	return _DateOfNextAllowedAction; 
+	return _DateOfNextAllowedAction;
 }
 
 //------------------------------------------------------------------------------
 
-inline NLMISC::TGameCycle CCharacter::getForbidAuraUseEndDate() const  
-{ 
-	return _ForbidAuraUseEndDate; 
+inline NLMISC::TGameCycle CCharacter::getForbidAuraUseEndDate() const
+{
+	return _ForbidAuraUseEndDate;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint8 CCharacter::nbAuras() const
 {
-	return _NbAuras; 
+	return _NbAuras;
 }
 
 //------------------------------------------------------------------------------
 
-//inline uint32 CCharacter::getCombatEventFlags() const
+// inline uint32 CCharacter::getCombatEventFlags() const
 //{
 //	return _ActiveCombatEventFlags;
-//}
+// }
 
 //------------------------------------------------------------------------------
 inline bool CCharacter::isCombatEventFlagActive(BRICK_FLAGS::TBrickFlag flag) const
 {
-	if( flag < 32 )
+	if (flag < 32)
 	{
 		return (_CombatEventFlagTicks[flag].EndTick != 0);
 	}
 	else
 	{
-		nlwarning("<CCharacter::isCombatEventFlagActive> flag %d is not a combat event, it should be <32",flag);
+		nlwarning("<CCharacter::isCombatEventFlagActive> flag %d is not a combat event, it should be <32", flag);
 		return false;
 	}
 }
@@ -631,147 +624,147 @@ inline bool CCharacter::isCombatEventFlagActive(BRICK_FLAGS::TBrickFlag flag) co
 
 inline float CCharacter::wearMalus()
 {
-	return _WearEquipmentMalus; 
+	return _WearEquipmentMalus;
 }
 
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::adversaryDodgeModifier()
 {
-	return _AdversaryDodgeModifier; 
+	return _AdversaryDodgeModifier;
 }
 
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::adversaryParryModifier()
 {
-	return _AdversaryParryModifier; 
+	return _AdversaryParryModifier;
 }
 
 //------------------------------------------------------------------------------
 
-inline const std::vector< CPetAnimal >& CCharacter::getPlayerPets()
+inline const std::vector<CPetAnimal> &CCharacter::getPlayerPets()
 {
-	return _PlayerPets; 
+	return _PlayerPets;
 }
 
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::getLastPosXInDB() const
 {
-	return _LastPosXInDB; 
+	return _LastPosXInDB;
 }
 
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::getLastPosYInDB() const
 {
-	return _LastPosYInDB; 
+	return _LastPosYInDB;
 }
 
 //------------------------------------------------------------------------------
 
-inline CSkills& CCharacter::getSkills()
+inline CSkills &CCharacter::getSkills()
 {
-	return _Skills; 
+	return _Skills;
 }
 
 //------------------------------------------------------------------------------
 
 inline SKILLS::ESkills CCharacter::getBestSkill() const
 {
-	return _BestSkill; 
+	return _BestSkill;
 }
 
 //------------------------------------------------------------------------------
 
 inline SKILLS::ESkills CCharacter::getSkillUsedForDodge() const
 {
-	return _SkillUsedForDodge; 
+	return _SkillUsedForDodge;
 }
 
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::getCurrentDodgeLevel() const
 {
-	return _CurrentDodgeLevel; 
+	return _CurrentDodgeLevel;
 }
 
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::getCurrentParryLevel() const
 {
-	return _CurrentParryLevel; 
+	return _CurrentParryLevel;
 }
 
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::getBaseDodgeLevel() const
 {
-	return _BaseDodgeLevel; 
+	return _BaseDodgeLevel;
 }
 
 //------------------------------------------------------------------------------
 
 inline sint32 CCharacter::getBaseParryLevel() const
 {
-	return _BaseParryLevel; 
+	return _BaseParryLevel;
 }
 
 //------------------------------------------------------------------------------
 
 inline NLMISC::TGameCycle CCharacter::getIntangibleEndDate() const
 {
-	return _IntangibleEndDate; 
+	return _IntangibleEndDate;
 }
 
 //------------------------------------------------------------------------------
 
 inline const uint64 &CCharacter::whoSeesMeBeforeTP() const
 {
-	return _WhoSeesMeBeforeTP; 
+	return _WhoSeesMeBeforeTP;
 }
 
 //------------------------------------------------------------------------------
 
-inline const TDataSetRow& CCharacter::getMonitoringCSR()
+inline const TDataSetRow &CCharacter::getMonitoringCSR()
 {
-	return _MonitoringCSR; 
+	return _MonitoringCSR;
 }
 
 //------------------------------------------------------------------------------
 
 inline float CCharacter::nextDeathPenaltyFactor() const
 {
-	return _NextDeathPenaltyFactor; 
+	return _NextDeathPenaltyFactor;
 }
 
 //------------------------------------------------------------------------------
 
-inline std::vector<NLMISC::CSheetId> & CCharacter::getPersistentItemServices()
+inline std::vector<NLMISC::CSheetId> &CCharacter::getPersistentItemServices()
 {
-	return _PersistentItemServices; 
+	return _PersistentItemServices;
 }
 
 //------------------------------------------------------------------------------
 
 inline EGSPD::CFameContainerPD &CCharacter::getPlayerFamesContainer()
 {
-	return *_Fames; 
+	return *_Fames;
 }
 
 //------------------------------------------------------------------------------
 
 inline bool CCharacter::logXpGain() const
 {
-	return _LogXpGain; 
+	return _LogXpGain;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint8 CCharacter::getAggroCount()
 {
-	return _AggroCount; 
+	return _AggroCount;
 }
 
 //------------------------------------------------------------------------------
@@ -785,7 +778,7 @@ inline uint32 CCharacter::getGuildId() const
 
 inline uint32 CCharacter::getTpTicketSlot() const
 {
-	return _TpTicketSlot; 
+	return _TpTicketSlot;
 }
 
 //------------------------------------------------------------------------------
@@ -799,124 +792,124 @@ inline uint16 CCharacter::getBuildingExitZone() const
 
 inline bool CCharacter::getHairCutDiscount() const
 {
-	return _HairCuteDiscount; 
+	return _HairCuteDiscount;
 }
 
 //------------------------------------------------------------------------------
 
 inline const std::vector<uint32> &CCharacter::getMissionQueues() const
 {
-	return _MissionsQueues; 
+	return _MissionsQueues;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getEnterCriticalZoneProposalQueueId() const
 {
-	return _EnterCriticalZoneProposalQueueId; 
+	return _EnterCriticalZoneProposalQueueId;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint8 CCharacter::getNbNonNullClassificationTypesSkillMod() const
 {
-	return _NbNonNullClassificationTypesSkillMod; 
+	return _NbNonNullClassificationTypesSkillMod;
 }
 
 //------------------------------------------------------------------------------
 
 inline CPVPInterface &CCharacter::getPVPInterface()
 {
-	return *_PVPInterface; 
+	return *_PVPInterface;
 }
 
 //------------------------------------------------------------------------------
 
-inline const CPVPInterface & CCharacter::getPVPInterface() const
+inline const CPVPInterface &CCharacter::getPVPInterface() const
 {
-	return *_PVPInterface; 
+	return *_PVPInterface;
 }
 
 //------------------------------------------------------------------------------
 
 inline bool CCharacter::priviledgePVP()
 {
-	return _PriviledgePvp; 
+	return _PriviledgePvp;
 }
 
 //------------------------------------------------------------------------------
 
 inline TAIAlias CCharacter::getCurrentPVPZone() const
 {
-	return _CurrentPVPZone; 
+	return _CurrentPVPZone;
 }
 
 //------------------------------------------------------------------------------
 
 inline TAIAlias CCharacter::getCurrentOutpostZone() const
 {
-	return _CurrentOutpostZone; 
+	return _CurrentOutpostZone;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint16 CCharacter::getKilledPvPRegion()
 {
-	return _RegionKilledInPvp; 
+	return _RegionKilledInPvp;
 }
 
 //------------------------------------------------------------------------------
 
 inline bool CCharacter::getSafeInPvPSafeZone() const
 {
-	return _PvPSafeZoneActive; 
+	return _PvPSafeZoneActive;
 }
 
 //------------------------------------------------------------------------------
 
-inline CCharacter * CCharacter::getDuelOpponent() const
+inline CCharacter *CCharacter::getDuelOpponent() const
 {
-	return _DuelOpponent; 
+	return _DuelOpponent;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getFirstConnectedTime() const
 {
-	return _FirstConnectedTime; 
+	return _FirstConnectedTime;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getLastConnectedTime() const
 {
-	return _LastConnectedTime; 
+	return _LastConnectedTime;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getLastConnectedDate() const
 {
-	return _LastConnectedDate; 
+	return _LastConnectedDate;
 }
 
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getPlayedTime() const
 {
-	return _PlayedTime; 
+	return _PlayedTime;
 }
 
 #ifdef RYZOM_FORGE
 //------------------------------------------------------------------------------
-inline const std::string& CCharacter::getLangChannel() const
+inline const std::string &CCharacter::getLangChannel() const
 
 {
-	return _LangChannel; 
+	return _LangChannel;
 }
 
 //------------------------------------------------------------------------------
-inline const std::string& CCharacter::getNewTitle() const
+inline const std::string &CCharacter::getNewTitle() const
 
 {
 	return _NewTitle;
@@ -942,7 +935,6 @@ inline std::string CCharacter::getTagB() const
 	return _TagB;
 }
 
-
 //------------------------------------------------------------------------------
 inline std::string CCharacter::getTagPvPA() const
 
@@ -967,7 +959,7 @@ inline std::string CCharacter::getTagPvPB() const
 inline std::string CCharacter::getFullTitle() const
 {
 	if (!_TagA.empty() || !_TagB.empty() || !_TagPvPA.empty() || !_TagPvPB.empty())
-		return _NewTitle+"#"+getTagPvPA()+"#"+getTagPvPB()+"#"+getTagA()+"#"+getTagB();
+		return _NewTitle + "#" + getTagPvPA() + "#" + getTagPvPB() + "#" + getTagA() + "#" + getTagB();
 	else
 		return _NewTitle;
 }
@@ -978,28 +970,27 @@ inline std::string CCharacter::getFullTitle() const
 
 inline uint32 CCharacter::getOrganization() const
 {
-	return _Organization; 
+	return _Organization;
 }
-
 
 inline uint32 CCharacter::getOrganizationStatus() const
 {
-	return _OrganizationStatus; 
+	return _OrganizationStatus;
 }
 #endif
 
 //------------------------------------------------------------------------------
 
-inline const std::list<TCharacterLogTime>& CCharacter::getLastLogStats() const
+inline const std::list<TCharacterLogTime> &CCharacter::getLastLogStats() const
 {
-	return _LastLogStats; 
+	return _LastLogStats;
 }
 
 //------------------------------------------------------------------------------
 
 inline bool CCharacter::isChannelAdded() const
 {
-	return _ChannelAdded; 
+	return _ChannelAdded;
 }
 
 //------------------------------------------------------------------------------
@@ -1015,37 +1006,37 @@ inline bool CCharacter::showFactionChannelsMode(TChanID channel) const
 
 //------------------------------------------------------------------------------
 
-inline CFarPositionStack& CCharacter::getPositionStack()
+inline CFarPositionStack &CCharacter::getPositionStack()
 {
-	return PositionStack; 
+	return PositionStack;
 }
 
 //------------------------------------------------------------------------------
 
-inline const CFarPositionStack& CCharacter::getPositionStack() const
+inline const CFarPositionStack &CCharacter::getPositionStack() const
 {
-	return PositionStack; 
+	return PositionStack;
 }
 
 //------------------------------------------------------------------------------
 
 inline R2::TUserRole CCharacter::sessionUserRole() const
 {
-	return _SessionUserRole; 
+	return _SessionUserRole;
 }
 
 //------------------------------------------------------------------------------
 
 inline TSessionId CCharacter::sessionId() const
 {
-	return _SessionId; 
+	return _SessionId;
 }
 
 //------------------------------------------------------------------------------
 
 inline TSessionId CCharacter::currentSessionId() const
 {
-	return _CurrentSessionId; 
+	return _CurrentSessionId;
 }
 
 // Store the current active animation session returned by SU after char synchronisation.
@@ -1063,21 +1054,21 @@ inline TSessionId CCharacter::getActiveAnimSessionId()
 
 inline TAIAlias CCharacter::getSelectedOutpost() const
 {
-	return _SelectedOutpost; 
+	return _SelectedOutpost;
 }
 
 // return true if character has moved
 inline bool CCharacter::hasMoved()
 {
-	return ( _EntityState.X() != _SavedPosX || _EntityState.Y() != _SavedPosY );
+	return (_EntityState.X() != _SavedPosX || _EntityState.Y() != _SavedPosY);
 }
 
 //------------------------------------------------------------------------------
 
-//inline CCharacter::CCharacterDbReminder* CCharacter::getDataIndexReminder()
+// inline CCharacter::CCharacterDbReminder* CCharacter::getDataIndexReminder()
 //{
-//	return _DataIndexReminder; 
-//}
+//	return _DataIndexReminder;
+// }
 
 //------------------------------------------------------------------------------
 

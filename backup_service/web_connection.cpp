@@ -25,95 +25,80 @@
 #include <nel/misc/path.h>
 
 #include <nel/net/service.h>
-//#include <nel/net/buf_server.h>
+// #include <nel/net/buf_server.h>
 
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
 /// Callback type for web connection
-typedef void	(*WebCallback)(CMemStream &msgin, TSockId host);
+typedef void (*WebCallback)(CMemStream &msgin, TSockId host);
 
-CBufServer*		WebServer = NULL;
+CBufServer *WebServer = NULL;
 
-
-
-void	initWebConnection()
+void initWebConnection()
 {
 	nlassert(WebServer == NULL);
 
-	uint16 port = (uint16) IService::getInstance ()->ConfigFile.getVar ("WebPort").asInt();
+	uint16 port = (uint16)IService::getInstance()->ConfigFile.getVar("WebPort").asInt();
 
 	// if the WebPort is set to 0 then we don't initialise the web server
-	if (port==0)
+	if (port == 0)
 		return;
 
 	nlinfo("Initialise Web socket on port %d", port);
 
-	WebServer = new CBufServer ();
+	WebServer = new CBufServer();
 	nlassert(WebServer != NULL);
-	WebServer->init (port);
+	WebServer->init(port);
 }
 
-
-void	cbExecute(CMemStream &msgin, TSockId host)
+void cbExecute(CMemStream &msgin, TSockId host)
 {
-	std::string	str;
+	std::string str;
 	msgin.serial(str);
 	ICommand::execute(str, *NLMISC::InfoLog);
 }
 
+void cbGetSaveList(CMemStream &msgin, TSockId host);
+void cbRestoreSave(CMemStream &msgin, TSockId host);
+void cbCopyOverSave(CMemStream &msgin, TSockId host);
 
-
-void	cbGetSaveList(CMemStream &msgin, TSockId host);
-void	cbRestoreSave(CMemStream &msgin, TSockId host);
-void	cbCopyOverSave(CMemStream &msgin, TSockId host);
-
-
-
-
-
-
-
-
-WebCallback WebCallbackArray[] =
-{
+WebCallback WebCallbackArray[] = {
 	cbExecute,
 	cbGetSaveList,
 	cbRestoreSave,
 	cbCopyOverSave,
 };
 
-
-void	updateWebConnection()
+void updateWebConnection()
 {
 
 	nlassert(WebServer != NULL);
 
 	try
 	{
-		WebServer->update ();
+		WebServer->update();
 
-		while (WebServer->dataAvailable ())
+		while (WebServer->dataAvailable())
 		{
 			// create a string mem stream to easily communicate with web server
-			NLMISC::CMemStream msgin (true);
-			TSockId		host;
-			bool		success = false;
-			std::string	reason;
+			NLMISC::CMemStream msgin(true);
+			TSockId host;
+			bool success = false;
+			std::string reason;
 
 			try
 			{
-				WebServer->receive (msgin, &host);
+				WebServer->receive(msgin, &host);
 
-				uint32	fake = 0;
+				uint32 fake = 0;
 				msgin.serial(fake);
 
-				uint8	messageType = 0xff;
-				msgin.serial (messageType);
+				uint8 messageType = 0xff;
+				msgin.serial(messageType);
 
-				if (messageType < sizeof(WebCallbackArray)/sizeof(WebCallbackArray[0]))
+				if (messageType < sizeof(WebCallbackArray) / sizeof(WebCallbackArray[0]))
 				{
 					WebCallbackArray[messageType](msgin, host);
 					success = true;
@@ -121,43 +106,39 @@ void	updateWebConnection()
 			}
 			catch (const Exception &e)
 			{
-				nlwarning ("Error during receiving: '%s'", e.what ());
+				nlwarning("Error during receiving: '%s'", e.what());
 				reason = e.what();
 			}
 
-			if(!success)
+			if (!success)
 			{
-				nlwarning ("Failed to decode Web command");
+				nlwarning("Failed to decode Web command");
 
-				CMemStream	msgout;
-				uint32		fake = 0;
+				CMemStream msgout;
+				uint32 fake = 0;
 				msgout.serial(fake);
 
-				std::string	result = "0:Failed to decode command";
+				std::string result = "0:Failed to decode command";
 				if (!reason.empty())
-					result += " ("+reason+")";
-				msgout.serial (result);
-				WebServer->send (msgout, host);
+					result += " (" + reason + ")";
+				msgout.serial(result);
+				WebServer->send(msgout, host);
 			}
 		}
 	}
 	catch (const Exception &e)
 	{
-		nlwarning ("Error during update: '%s'", e.what ());
+		nlwarning("Error during update: '%s'", e.what());
 	}
 }
 
-void	releaseWebConnection()
+void releaseWebConnection()
 {
 	nlassert(WebServer != NULL);
 
 	delete WebServer;
 	WebServer = 0;
 }
-
-
-
-
 
 /*
  *
@@ -166,26 +147,25 @@ void	releaseWebConnection()
  */
 
 // Automatic SaveShardRoot path standardization
-void cbOnSaveShardRootModified( NLMISC::IVariable& var )
+void cbOnSaveShardRootModified(NLMISC::IVariable &var)
 {
-	var.fromString( CPath::standardizePath( var.toString() ) );
+	var.fromString(CPath::standardizePath(var.toString()));
 }
 
-CVariable<string>	IncrementalBackupDirectory("backup", "IncrementalBackupDirectory", "Directory to find incremental backuped archives", "", 0, true);
-//CVariable<string>	SaveShardRootBackupService("backup", "SaveShardRoot", "Root directory of all saved data by BS", "/home/nevrax/save_shard", 0, true, cbOnSaveShardRootModified); // (SaveShardRoot from game_share/backup_service_interface.cpp is not instanciated because the nothing is used from that file)
-extern CVariable<string>	SaveShardRootGameShare;
-CVariable<string>	SaveTemplatePath("backup", "SaveTemplatePath", "Directory to find saves (with shard and account replacement strings)", "$shard/characters/account_$userid_$charid$ext", 0, true);
-CVariable<string>	SaveExtList("backup", "SaveExtList", "List of possible extensions for save files (space separated)", "_pdr.bin _pdr.xml .bin", 0, true);
+CVariable<string> IncrementalBackupDirectory("backup", "IncrementalBackupDirectory", "Directory to find incremental backuped archives", "", 0, true);
+// CVariable<string>	SaveShardRootBackupService("backup", "SaveShardRoot", "Root directory of all saved data by BS", "/home/nevrax/save_shard", 0, true, cbOnSaveShardRootModified); // (SaveShardRoot from game_share/backup_service_interface.cpp is not instanciated because the nothing is used from that file)
+extern CVariable<string> SaveShardRootGameShare;
+CVariable<string> SaveTemplatePath("backup", "SaveTemplatePath", "Directory to find saves (with shard and account replacement strings)", "$shard/characters/account_$userid_$charid$ext", 0, true);
+CVariable<string> SaveExtList("backup", "SaveExtList", "List of possible extensions for save files (space separated)", "_pdr.bin _pdr.xml .bin", 0, true);
 
-
-string	checkFile(const string& templatePath, const string& shard, const string& userid, const string& charid, const vector<string>& extensions)
+string checkFile(const string &templatePath, const string &shard, const string &userid, const string &charid, const vector<string> &extensions)
 {
-	string	result;
+	string result;
 
-	uint	i;
-	for (i=0; i<extensions.size(); ++i)
+	uint i;
+	for (i = 0; i < extensions.size(); ++i)
 	{
-		string	file = templatePath;
+		string file = templatePath;
 
 		strFindReplace(file, string("$shard"), shard);
 		strFindReplace(file, string("$userid"), userid);
@@ -194,44 +174,42 @@ string	checkFile(const string& templatePath, const string& shard, const string& 
 
 		if (CFile::fileExists(file))
 		{
-			result +=	file + ":" +
-						toString(CFile::getFileModificationDate(file)) + ":" +
-						toString(CFile::getFileSize(file)) + "\n";
+			result += file + ":" + toString(CFile::getFileModificationDate(file)) + ":" + toString(CFile::getFileSize(file)) + "\n";
 		}
 	}
 
 	return result;
 }
 
-void	cbGetSaveList(CMemStream &msgin, TSockId host)
+void cbGetSaveList(CMemStream &msgin, TSockId host)
 {
-	string	str;
+	string str;
 	msgin.serial(str);
 
-	vector<string>	params;
+	vector<string> params;
 
 	explode(str, string("%%"), params, true);
 
-	string	incrementalDir = IncrementalBackupDirectory.get();
-	string	saveShardRoot = SaveShardRootGameShare.get();
-	string	templatePath = SaveTemplatePath.get();
-	string	extList = SaveExtList.get();
+	string incrementalDir = IncrementalBackupDirectory.get();
+	string saveShardRoot = SaveShardRootGameShare.get();
+	string templatePath = SaveTemplatePath.get();
+	string extList = SaveExtList.get();
 
-	string	shard;
-	string	userid;
-	string	charid;
+	string shard;
+	string userid;
+	string charid;
 
-	uint	i;
-	for (i=0; i<params.size(); ++i)
+	uint i;
+	for (i = 0; i < params.size(); ++i)
 	{
-		vector<string>	param;
+		vector<string> param;
 		explode(params[i], string("="), param, false);
 
 		if (param.empty())
 			continue;
 
-		string	var = param[0];
-		string	val;
+		string var = param[0];
+		string val;
 		if (param.size() > 1)
 			val = param[1];
 
@@ -254,21 +232,21 @@ void	cbGetSaveList(CMemStream &msgin, TSockId host)
 	incrementalDir = CPath::standardizePath(incrementalDir);
 	saveShardRoot = CPath::standardizePath(saveShardRoot);
 
-	vector<string>	extensions;
+	vector<string> extensions;
 	explode(extList, string(" "), extensions, false);
 
-	string	result = checkFile(saveShardRoot+templatePath, shard, userid, charid, extensions);
+	string result = checkFile(saveShardRoot + templatePath, shard, userid, charid, extensions);
 
-	vector<string>	incrementalDirectories;
+	vector<string> incrementalDirectories;
 	CPath::getPathContent(incrementalDir, false, true, false, incrementalDirectories);
 
 	if (!incrementalDirectories.empty())
 	{
 		std::sort(incrementalDirectories.begin(), incrementalDirectories.end());
 
-		for (i=(uint)incrementalDirectories.size()-1; (sint)i>=0; --i)
+		for (i = (uint)incrementalDirectories.size() - 1; (sint)i >= 0; --i)
 		{
-			string	p = CPath::standardizePath(incrementalDirectories[i], true);
+			string p = CPath::standardizePath(incrementalDirectories[i], true);
 			// avoid double / inside path
 			p += (templatePath[0] == '/' ? templatePath.substr(1) : templatePath);
 
@@ -276,45 +254,44 @@ void	cbGetSaveList(CMemStream &msgin, TSockId host)
 		}
 	}
 
-	CMemStream	msgout;
-	uint32		fake	= 0;
+	CMemStream msgout;
+	uint32 fake = 0;
 	msgout.serial(fake);
 
-	result = "1:"+result;
+	result = "1:" + result;
 
-	msgout.serial (result);
-	WebServer->send (msgout, host);
+	msgout.serial(result);
+	WebServer->send(msgout, host);
 }
 
-
-void	cbRestoreSave(CMemStream &msgin, TSockId host)
+void cbRestoreSave(CMemStream &msgin, TSockId host)
 {
-	string	str;
+	string str;
 	msgin.serial(str);
 
-	vector<string>	params;
+	vector<string> params;
 
 	explode(str, string("%%"), params, true);
 
-	string	saveShardRoot = SaveShardRootGameShare.get();
-	string	templatePath = SaveTemplatePath.get();
+	string saveShardRoot = SaveShardRootGameShare.get();
+	string templatePath = SaveTemplatePath.get();
 
-	string	shard;
-	string	userid;
-	string	charid;
-	string	file;
+	string shard;
+	string userid;
+	string charid;
+	string file;
 
-	uint	i;
-	for (i=0; i<params.size(); ++i)
+	uint i;
+	for (i = 0; i < params.size(); ++i)
 	{
-		vector<string>	param;
+		vector<string> param;
 		explode(params[i], string("="), param, false);
 
 		if (param.empty())
 			continue;
 
-		string	var = param[0];
-		string	val;
+		string var = param[0];
+		string val;
 		if (param.size() > 1)
 			val = param[1];
 
@@ -334,63 +311,63 @@ void	cbRestoreSave(CMemStream &msgin, TSockId host)
 
 	saveShardRoot = CPath::standardizePath(saveShardRoot);
 
-	string	outputfile = CPath::standardizePath(CFile::getPath(saveShardRoot+templatePath))+CFile::getFilename(file);
+	string outputfile = CPath::standardizePath(CFile::getPath(saveShardRoot + templatePath)) + CFile::getFilename(file);
 
 	strFindReplace(outputfile, string("$shard"), shard);
-	strFindReplace(outputfile, string("$userid"), userid);	// just in case...
-	strFindReplace(outputfile, string("$charid"), charid);	//
+	strFindReplace(outputfile, string("$userid"), userid); // just in case...
+	strFindReplace(outputfile, string("$charid"), charid); //
 
-	bool	success;
+	bool success;
 
 	success = CFile::copyFile(outputfile, file, false);
 
-	CMemStream	msgout;
-	uint32		fake	= 0;
+	CMemStream msgout;
+	uint32 fake = 0;
 	msgout.serial(fake);
 
-	string	result;
+	string result;
 
 	if (success)
 	{
-		result = "1:Restore "+outputfile+" succeded.";
+		result = "1:Restore " + outputfile + " succeded.";
 	}
 	else
 	{
-		result = "0:Failed to restore "+outputfile+", copy failed.";
+		result = "0:Failed to restore " + outputfile + ", copy failed.";
 	}
-	msgout.serial (result);
-	WebServer->send (msgout, host);
+	msgout.serial(result);
+	WebServer->send(msgout, host);
 }
 
-void	cbCopyOverSave(CMemStream &msgin, TSockId host)
+void cbCopyOverSave(CMemStream &msgin, TSockId host)
 {
-	string	str;
+	string str;
 	msgin.serial(str);
 
-	vector<string>	params;
+	vector<string> params;
 
 	explode(str, string("%%"), params, true);
 
-	string	saveShardRoot = SaveShardRootGameShare.get();
-	string	templatePath = SaveTemplatePath.get();
-	string	extList = SaveExtList.get();
+	string saveShardRoot = SaveShardRootGameShare.get();
+	string templatePath = SaveTemplatePath.get();
+	string extList = SaveExtList.get();
 
-	string	shard;
-	string	userid;
-	string	charid;
-	string	file;
+	string shard;
+	string userid;
+	string charid;
+	string file;
 
-	uint	i;
-	for (i=0; i<params.size(); ++i)
+	uint i;
+	for (i = 0; i < params.size(); ++i)
 	{
-		vector<string>	param;
+		vector<string> param;
 		explode(params[i], string("="), param, false);
 
 		if (param.empty())
 			continue;
 
-		string	var = param[0];
-		string	val;
+		string var = param[0];
+		string val;
 		if (param.size() > 1)
 			val = param[1];
 
@@ -412,23 +389,23 @@ void	cbCopyOverSave(CMemStream &msgin, TSockId host)
 
 	saveShardRoot = CPath::standardizePath(saveShardRoot);
 
-	vector<string>	extensions;
+	vector<string> extensions;
 	explode(extList, string(" "), extensions, false);
 
-	for (i=0; i<extensions.size(); ++i)
+	for (i = 0; i < extensions.size(); ++i)
 	{
-		if (file.size() >= extensions[i].size() && file.substr(file.size()-extensions[i].size()) == extensions[i])
+		if (file.size() >= extensions[i].size() && file.substr(file.size() - extensions[i].size()) == extensions[i])
 		{
 			break;
 		}
 	}
 
-	bool	success = false;
-	string	result;
+	bool success = false;
+	string result;
 
 	if (i < extensions.size())
 	{
-		string	outputfile = CPath::standardizePath(saveShardRoot)+templatePath;
+		string outputfile = CPath::standardizePath(saveShardRoot) + templatePath;
 
 		strFindReplace(outputfile, string("$shard"), shard);
 		strFindReplace(outputfile, string("$userid"), userid);
@@ -438,19 +415,19 @@ void	cbCopyOverSave(CMemStream &msgin, TSockId host)
 		success = CFile::copyFile(outputfile, file, false);
 
 		if (!success)
-			result = "Failed to copy "+file+" over "+outputfile+".";
+			result = "Failed to copy " + file + " over " + outputfile + ".";
 	}
 	else
 	{
 		result = "failed to match valid extension";
 	}
 
-	result = string(success ? "1:" : "0:")+result;
+	result = string(success ? "1:" : "0:") + result;
 
-	CMemStream	msgout;
-	uint32		fake	= 0;
+	CMemStream msgout;
+	uint32 fake = 0;
 	msgout.serial(fake);
 
-	msgout.serial (result);
-	WebServer->send (msgout, host);
+	msgout.serial(result);
+	WebServer->send(msgout, host);
 }

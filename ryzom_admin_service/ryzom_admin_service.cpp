@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 //-----------------------------------------------------------------------------
 // includes
 //-----------------------------------------------------------------------------
@@ -25,17 +24,15 @@
 #include "nel/net/service.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
 
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
-
-
 
 //-----------------------------------------------------------------------------
 // class CServiceClass
@@ -43,7 +40,7 @@ using namespace NLNET;
 
 class CServiceClass : public NLNET::IService
 {
-public :
+public:
 	void init()
 	{
 	}
@@ -58,43 +55,39 @@ public :
 	}
 };
 
-
-
-
 //-----------------------------------------------
 //	NLNET_SERVICE_MAIN
 //-----------------------------------------------
 
-static const char* getCompleteServiceName(const IService* theService)
+static const char *getCompleteServiceName(const IService *theService)
 {
 	static std::string s;
-	s= "ryzom_admin_service";
+	s = "ryzom_admin_service";
 
 	if (theService->haveLongArg("adminname"))
 	{
-		s+= "_"+theService->getLongArg("adminname");
+		s += "_" + theService->getLongArg("adminname");
 	}
 
 	if (theService->haveLongArg("fulladminname"))
 	{
-		s= theService->getLongArg("fulladminname");
+		s = theService->getLongArg("fulladminname");
 	}
 
 	return s.c_str();
 }
 
-static const char* getShortServiceName(const IService* theService)
+static const char *getShortServiceName(const IService *theService)
 {
 	static std::string s;
-	s= "RAS";
+	s = "RAS";
 
 	if (theService->haveLongArg("shortadminname"))
 	{
-		s= theService->getLongArg("shortadminname");
+		s = theService->getLongArg("shortadminname");
 	}
 
 	return s.c_str();
 }
 
-NLNET_SERVICE_MAIN( CServiceClass, getShortServiceName(scn), getCompleteServiceName(scn), 0, EmptyCallbackArray, "", "" );
-
+NLNET_SERVICE_MAIN(CServiceClass, getShortServiceName(scn), getCompleteServiceName(scn), 0, EmptyCallbackArray, "", "");

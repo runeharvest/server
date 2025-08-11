@@ -33,12 +33,12 @@ public:
 	struct TLogParamId
 	{
 		/// Name of the parameter
-		std::string					ParamName;
+		std::string ParamName;
 		/// Type of the parameter
-		LGS::TSupportedParamType	ParamType;
-		
+		LGS::TSupportedParamType ParamType;
+
 		/// Strict ordering to be used as map key
-		bool operator < (const TLogParamId &other) const
+		bool operator<(const TLogParamId &other) const
 		{
 			if (ParamName < other.ParamName)
 				return true;
@@ -54,23 +54,23 @@ public:
 		}
 	};
 
-	typedef std::vector<uint32>	TParamIndex;
+	typedef std::vector<uint32> TParamIndex;
 
 	/// The log entries with parameter stored as table index
 	struct TDiskLogEntry
 	{
 		/// Index in the log definition vector
-		uint32			LogType;
+		uint32 LogType;
 		/// The date of the log
-		uint32			LogDate;
+		uint32 LogDate;
 		/// The size of the context stack
-		uint32			ContextStack;	
+		uint32 ContextStack;
 		/// The shard id that sent this log
-		uint32			ShardId;	
+		uint32 ShardId;
 		/// Vector of index in each parameter table
-		TParamIndex					ParamIndex;
+		TParamIndex ParamIndex;
 		/// Vector of vector of index in each parameter table for list param
-		std::vector<TParamIndex>	ListParamIndex;
+		std::vector<TParamIndex> ListParamIndex;
 
 		void serial(NLMISC::IStream &s)
 		{
@@ -82,43 +82,41 @@ public:
 			uint32 nbList = (uint32)ListParamIndex.size();
 			s.serial(nbList);
 			ListParamIndex.resize(nbList);
-			for (uint i=0; i<ListParamIndex.size(); ++i)
+			for (uint i = 0; i < ListParamIndex.size(); ++i)
 				s.serialCont(ListParamIndex[i]);
 		}
 	};
 
 	/// The list of log to store on disk
-	std::vector<TDiskLogEntry>	_DiskLogEntries;
-	
+	std::vector<TDiskLogEntry> _DiskLogEntries;
 
-	typedef std::vector<LGS::TParamValue>		TParamsTable;
-	typedef std::map<TLogParamId, TParamsTable >	TParamsTables;
+	typedef std::vector<LGS::TParamValue> TParamsTable;
+	typedef std::map<TLogParamId, TParamsTable> TParamsTables;
 
 	/// The tables of all log params
-	TParamsTables	_ParamTables;
-
+	TParamsTables _ParamTables;
 
 	/// The log definition
-	TLogDefinitions			_LogDefs;
+	TLogDefinitions _LogDefs;
 
-	typedef std::map<std::string, size_t>	TLogDefLindex;
+	typedef std::map<std::string, size_t> TLogDefLindex;
 	// the log def index
-	TLogDefLindex			_LogDefIndex;
+	TLogDefLindex _LogDefIndex;
 
 	/// The current size of the context stack
-	uint32					_ContextStack;
-
+	uint32 _ContextStack;
 
 	struct EInvalidLogName
-	{};
+	{
+	};
 
 	/// Constructor used to store log file
 	CLogStorage(const TLogDefinitions &logDefs)
-		:	_LogDefs(logDefs),
-			_ContextStack(0)
+	    : _LogDefs(logDefs)
+	    , _ContextStack(0)
 	{
 		// fill the log definition
-		for (uint i=0; i<logDefs.size(); ++i)
+		for (uint i = 0; i < logDefs.size(); ++i)
 		{
 			_LogDefIndex.insert(std::make_pair(logDefs[i].getLogName(), i));
 		}
@@ -126,13 +124,13 @@ public:
 
 	// Constructor used for loading log file
 	CLogStorage()
-		:	_ContextStack(0)
+	    : _ContextStack(0)
 	{
 	}
 
 	static std::string getLogRoot()
 	{
-		return NLNET::IService::getInstance()->SaveFilesDirectory.toString()+"/logs";
+		return NLNET::IService::getInstance()->SaveFilesDirectory.toString() + "/logs";
 	}
 
 	const LGS::TLogDefinition &getLogDef(const std::string &logName)
@@ -140,7 +138,7 @@ public:
 		TLogDefLindex::iterator logDefIt = _LogDefIndex.find(logName);
 		if (logDefIt == _LogDefIndex.end())
 			throw EInvalidLogName();
-		
+
 		nlassert(logDefIt->second < _LogDefs.size());
 		return _LogDefs[logDefIt->second];
 	}
@@ -161,17 +159,15 @@ public:
 	{
 		uint32 now = NLMISC::CTime::getSecondsSince1970();
 
-		// A flag to skip saving if only context open/close are selected 
-		// (because they have date 0 or ~0 that do not match correctlry the 
+		// A flag to skip saving if only context open/close are selected
+		// (because they have date 0 or ~0 that do not match correctlry the
 		// time test).
-		bool atLeastOneSelected = false;;
+		bool atLeastOneSelected = false;
+		;
 
 		// go back to up to 1 minute ago
 		TLogInfos::const_reverse_iterator it = logInfos.rbegin();
-		while (it != logInfos.rend() && 
-			(it->LogInfo.getTimeStamp() == 0
-			|| it->LogInfo.getTimeStamp() == ~0
-			|| it->LogInfo.getTimeStamp() > now-60))
+		while (it != logInfos.rend() && (it->LogInfo.getTimeStamp() == 0 || it->LogInfo.getTimeStamp() == ~0 || it->LogInfo.getTimeStamp() > now - 60))
 		{
 			if (it->LogInfo.getTimeStamp() != 0 && it->LogInfo.getTimeStamp() != ~0)
 				atLeastOneSelected = true;
@@ -197,13 +193,13 @@ public:
 	{
 		uint32 now = NLMISC::CTime::getSecondsSince1970();
 
-//		// go back to up to 1 minute ago
-//		TLogInfos::const_reverse_iterator it = logInfos.rbegin();
-//		while (it != logInfos.rend() && 
-//			(it->LogInfo.getTimeStamp() == 0
-//			|| it->LogInfo.getTimeStamp() == ~0
-//			|| it->LogInfo.getTimeStamp() > now-60*60))
-//			++it;
+		//		// go back to up to 1 minute ago
+		//		TLogInfos::const_reverse_iterator it = logInfos.rbegin();
+		//		while (it != logInfos.rend() &&
+		//			(it->LogInfo.getTimeStamp() == 0
+		//			|| it->LogInfo.getTimeStamp() == ~0
+		//			|| it->LogInfo.getTimeStamp() > now-60*60))
+		//			++it;
 
 		TLogInfos::const_iterator first(logInfos.begin()), last(logInfos.end());
 		// prepare the logs to save
@@ -225,30 +221,29 @@ public:
 		NLMISC::CSString fileName;
 
 		// set the save directory and create it if needed
-		fileName << getLogRoot() <<"/";
+		fileName << getLogRoot() << "/";
 		NLMISC::CFile::createDirectoryTree(fileName);
 
 		// build the file name from the current date
 		char dateStr[1024];
 		time_t now = time(NULL);
-		struct tm *_tm = localtime(&now); 
+		struct tm *_tm = localtime(&now);
 
 		strftime(dateStr, 1024, "%Y-%m-%d_%H-%M-%S", _tm);
-		
-		fileName << prefix << dateStr <<".binlog";
+
+		fileName << prefix << dateStr << ".binlog";
 
 		nldebug("Storing %u logs in file %s", _DiskLogEntries.size(), fileName.c_str());
 
 		// open the output file
 		{
-			NLMISC::COFile of(fileName+".tmp");
+			NLMISC::COFile of(fileName + ".tmp");
 			// and serial the logs
 			of.serial(*this);
 		}
 		// rename the 'tmp" into finale output file
-		NLMISC::CFile::moveFile(fileName, fileName+".tmp");
+		NLMISC::CFile::moveFile(fileName, fileName + ".tmp");
 	}
-
 
 	void storeLog(const TLogEntry &logEntry)
 	{
@@ -278,7 +273,7 @@ public:
 			++_ContextStack;
 
 		// store each parameter
-		for (uint i=0; i<logEntry.LogInfo.getParams().size(); ++i)
+		for (uint i = 0; i < logEntry.LogInfo.getParams().size(); ++i)
 		{
 			TLogParamId lpi;
 			const LGS::TParamValue &pv = logEntry.LogInfo.getParams()[i];
@@ -295,17 +290,17 @@ public:
 
 		// store each variable parameter
 		dle.ListParamIndex.resize(ld.getListParams().size());
-		for (uint i=0; i<logEntry.LogInfo.getListParams().size(); ++i)
+		for (uint i = 0; i < logEntry.LogInfo.getListParams().size(); ++i)
 		{
 			TLogParamId lpi;
 			const LGS::TListParamValues &lpv = logEntry.LogInfo.getListParams()[i];
 			lpi.ParamName = ld.getListParams()[i].getName();
 			lpi.ParamType = ld.getListParams()[i].getType();
-			
+
 			// get the parameter table for the type of parameter
 			TParamsTable &pt = _ParamTables[lpi];
 
-			std::list < LGS::TParamValue >::const_iterator first(lpv.getParams().begin()), last(lpv.getParams().end());
+			std::list<LGS::TParamValue>::const_iterator first(lpv.getParams().begin()), last(lpv.getParams().end());
 			for (; first != last; ++first)
 			{
 				uint32 index = (uint32)pt.size();
@@ -315,7 +310,6 @@ public:
 				dle.ListParamIndex[i].push_back(index);
 			}
 		}
-
 
 		// store the entry in the container
 		_DiskLogEntries.push_back(dle);
@@ -332,7 +326,7 @@ public:
 		if (s.isReading())
 		{
 			s.serial(nbTable);
-			for (uint i=0; i<nbTable; ++i)
+			for (uint i = 0; i < nbTable; ++i)
 			{
 				// read the table header
 				TLogParamId lpi;
@@ -359,7 +353,7 @@ public:
 
 	void dumpLogs(NLMISC::CLog &log)
 	{
-		for (uint i=0; i<_DiskLogEntries.size(); ++i)
+		for (uint i = 0; i < _DiskLogEntries.size(); ++i)
 		{
 			const TDiskLogEntry &dle = _DiskLogEntries[i];
 
@@ -377,7 +371,7 @@ public:
 			else
 				log.display("%s : %s : %s ", formatDate(dle.LogDate).c_str(), ld.getLogName().c_str(), ld.getLogText().c_str());
 
-			for (uint j=0; j<ld.getParams().size(); ++j)
+			for (uint j = 0; j < ld.getParams().size(); ++j)
 			{
 				const LGS::TParamDesc &pd = ld.getParams()[j];
 
@@ -395,4 +389,4 @@ public:
 	}
 };
 
-#endif //LOG_STORAGE_H
+#endif // LOG_STORAGE_H

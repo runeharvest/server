@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef TRADE_H
 #define TRADE_H
 
@@ -25,11 +23,9 @@
 #include "game_item_manager/game_item.h"
 #include "game_share/constants.h"
 
-namespace RYZOM_TRADE
-{
+namespace RYZOM_TRADE {
 
-
-//type of a trade
+// type of a trade
 enum TTradeType
 {
 	unknown = 0,
@@ -41,21 +37,25 @@ enum TTradeType
 	plan,
 };
 
-
 // Specialized part of trading struct for item
 struct SItemTrade
 {
 	NL_INSTANCE_COUNTER_DECL(SItemTrade);
+
 public:
-
 	// constructor
-	SItemTrade() { ItemPtr = 0; Quality = 0; Level = 0; }
+	SItemTrade()
+	{
+		ItemPtr = 0;
+		Quality = 0;
+		Level = 0;
+	}
 
-	uint16			Quality;
-	uint16			Level;
-	CGameItemPtr	ItemPtr;
-	
-	void copy( SItemTrade * i )
+	uint16 Quality;
+	uint16 Level;
+	CGameItemPtr ItemPtr;
+
+	void copy(SItemTrade *i)
 	{
 		if (!i)
 			return;
@@ -66,24 +66,28 @@ public:
 	}
 };
 
-
 ///////////////////////////////////////////////////////
 // User interface : Common interface for trading struct
 ///////////////////////////////////////////////////////
 class CTradeBase
 {
 public:
-	uint32				Price;
-	uint8				Type;
-	NLMISC::CSheetId	Sheet;
-	void*				Specialized;
+	uint32 Price;
+	uint8 Type;
+	NLMISC::CSheetId Sheet;
+	void *Specialized;
 
-	CTradeBase() { Type = unknown; Specialized = 0; Price = 0; }
+	CTradeBase()
+	{
+		Type = unknown;
+		Specialized = 0;
+		Price = 0;
+	}
 
-	CTradeBase( TTradeType type )
-	{	
-		Type = type; 
-		if ( Type == item || Type == plan )
+	CTradeBase(TTradeType type)
+	{
+		Type = type;
+		if (Type == item || Type == plan)
 		{
 			Specialized = new SItemTrade();
 		}
@@ -94,65 +98,66 @@ public:
 	// destructor
 	virtual ~CTradeBase()
 	{
-		if( (Specialized && Type == item || Type == plan ) && Specialized != 0 )
+		if ((Specialized && Type == item || Type == plan) && Specialized != 0)
 		{
-			delete ( (SItemTrade *) Specialized);
+			delete ((SItemTrade *)Specialized);
 		}
 	}
-	
+
 	// Copy constructor
-	CTradeBase( const CTradeBase& t )
+	CTradeBase(const CTradeBase &t)
 	{
 		Price = t.Price;
 		Type = t.Type;
 		Sheet = t.Sheet;
-		if ( (Type == item || Type == plan ) && t.Specialized != 0)
+		if ((Type == item || Type == plan) && t.Specialized != 0)
 		{
 			Specialized = new SItemTrade();
-			( (SItemTrade *) Specialized)->copy( (SItemTrade *) t.Specialized );
+			((SItemTrade *)Specialized)->copy((SItemTrade *)t.Specialized);
 		}
 		else
 			Specialized = 0;
 	}
-	
+
 	// = operator
-	const CTradeBase &operator = (const CTradeBase &a)
+	const CTradeBase &operator=(const CTradeBase &a)
 	{
 		Price = a.Price;
 		Type = a.Type;
 		Sheet = a.Sheet;
-		if ( ( Type == item || Type == plan ) && a.Specialized != 0 )
+		if ((Type == item || Type == plan) && a.Specialized != 0)
 		{
 			if (Specialized)
-				delete  (SItemTrade *) Specialized ;
+				delete (SItemTrade *)Specialized;
 
 			Specialized = new SItemTrade();
-			( (SItemTrade *) Specialized)->copy( (SItemTrade *) a.Specialized );
+			((SItemTrade *)Specialized)->copy((SItemTrade *)a.Specialized);
 		}
 		return *this;
 	}
+
 private:
 	// Common part of CTrade for serial management
 	struct CTradeUnserial
 	{
-		uint32	Price;
-		uint8	Type;
+		uint32 Price;
+		uint8 Type;
 		NLMISC::CSheetId Sheet;
 	};
 
-	void init( CTradeUnserial& s )
+	void init(CTradeUnserial &s)
 	{
 		Price = s.Price;
 		Type = s.Type;
 		Sheet = s.Sheet;
-		if ( Type == item || Type == plan )
+		if (Type == item || Type == plan)
 		{
 			Specialized = new SItemTrade();
 		}
 	}
 };
 
-typedef std::vector< RYZOM_TRADE::CTradeBase * > TTradeList;
+typedef std::vector<RYZOM_TRADE::CTradeBase *> TTradeList;
 
 }
 

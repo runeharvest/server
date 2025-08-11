@@ -14,16 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_DAMAGE_AURA_EFFECT_H
 #define RY_DAMAGE_AURA_EFFECT_H
 
 //
 #include "phrase_manager/s_effect.h"
 #include "entity_manager/entity_base.h"
-
-
 
 /**
  * class for damage auras effects (like Stench)
@@ -37,7 +33,8 @@ public:
 	NLMISC_DECLARE_CLASS(CDamageAuraEffect)
 
 	///\ctor
-	CDamageAuraEffect() : CSTimedEffect()
+	CDamageAuraEffect()
+	    : CSTimedEffect()
 	{
 		_AffectAttackableEntities = false;
 		_AffectPlayers = true;
@@ -45,18 +42,17 @@ public:
 	}
 
 	///\ctor
-	CDamageAuraEffect( const TDataSetRow & creatorRowId, 
-						const TDataSetRow & targetRowId, 
-						EFFECT_FAMILIES::TEffectFamily family, 
-						sint32 effectValue, 
-						NLMISC::TGameCycle endDate,
-						NLMISC::TGameCycle cycleLenght,
-						uint16 cycleDamage,
-						float radius = 5.0f
-						)
-		:	CSTimedEffect(creatorRowId, targetRowId, family, true, effectValue,(uint8)cycleDamage, endDate),
-			_CycleLength(cycleLenght),
-			_CycleDamage(cycleDamage)
+	CDamageAuraEffect(const TDataSetRow &creatorRowId,
+	    const TDataSetRow &targetRowId,
+	    EFFECT_FAMILIES::TEffectFamily family,
+	    sint32 effectValue,
+	    NLMISC::TGameCycle endDate,
+	    NLMISC::TGameCycle cycleLenght,
+	    uint16 cycleDamage,
+	    float radius = 5.0f)
+	    : CSTimedEffect(creatorRowId, targetRowId, family, true, effectValue, (uint8)cycleDamage, endDate)
+	    , _CycleLength(cycleLenght)
+	    , _CycleDamage(cycleDamage)
 	{
 		_AffectAttackableEntities = false;
 		_AffectPlayers = true;
@@ -66,12 +62,12 @@ public:
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent *event, bool applyEffect);
 
 	/// callback called when the effect is actually removed
 	virtual void removed();
 	/// set radius
-	inline void setRadius(float radius) { _AuraRadius = radius; }	
+	inline void setRadius(float radius) { _AuraRadius = radius; }
 
 	/// accessors on _AffectAttackableEntities
 	void affectAttackableEntities(bool b) { _AffectAttackableEntities = b; }
@@ -86,23 +82,22 @@ private:
 
 private:
 	/// cycle lenght in ticks
-	NLMISC::TGameCycle		_CycleLength;
+	NLMISC::TGameCycle _CycleLength;
 
 	/// number of hp lost by surrounding entities each cycle
-	uint16					_CycleDamage;
+	uint16 _CycleDamage;
 
 	/// aura radius in meters
-	float					_AuraRadius;
+	float _AuraRadius;
 
 	/// affect players ?
-	bool					_AffectPlayers;
+	bool _AffectPlayers;
 	/// affect attackable entities
-	bool					_AffectAttackableEntities;
+	bool _AffectAttackableEntities;
 
 	/// affected entity
-	mutable CEntityBaseRefPtr	_AffectedEntity;
+	mutable CEntityBaseRefPtr _AffectedEntity;
 };
-
 
 #endif // RY_DAMAGE_AURA_EFFECT_H
 

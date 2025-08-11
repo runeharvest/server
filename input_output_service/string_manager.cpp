@@ -37,75 +37,71 @@
 //---------------------------------------------------------------------------------------
 // Stuff used for management of log messages
 
-//static bool VerboseLog=false;
+// static bool VerboseLog=false;
 
+// bool DebugReplacementParameter = false;
+// NLMISC_VARIABLE(bool, DebugReplacementParameter, "Debug missing replacement parameter.");
+NLMISC::CVariable<bool> DebugReplacementParameter("ios", "DebugReplacementParameter", "Insert error debugging information in generated text", false, 0, true);
+NLMISC::CVariable<bool> VerboseStringManager("ios", "VerboseStringManager", "Turn on or off or check the state of verbose string manager logging", false, 0, true);
+NLMISC::CVariable<bool> VerboseStringManagerParser("ios", "VerboseStringManagerParser", "Turn on or off or check the state of verbose string manager logging when parsing files", false, 0, true);
+NLMISC::CVariable<std::string> StringManagerCacheDirectory("ios", "StringManagerCacheDirectory", "Directory to read/write string cache file (default (empty) is service SaveFilesDirectory)", "", 0, true);
 
-//bool DebugReplacementParameter = false;
-//NLMISC_VARIABLE(bool, DebugReplacementParameter, "Debug missing replacement parameter.");
-NLMISC::CVariable<bool> DebugReplacementParameter("ios","DebugReplacementParameter", "Insert error debugging information in generated text", false, 0, true);
-NLMISC::CVariable<bool> VerboseStringManager("ios","VerboseStringManager", "Turn on or off or check the state of verbose string manager logging", false, 0, true);
-NLMISC::CVariable<bool> VerboseStringManagerParser("ios","VerboseStringManagerParser", "Turn on or off or check the state of verbose string manager logging when parsing files", false, 0, true);
-NLMISC::CVariable<std::string>	StringManagerCacheDirectory("ios","StringManagerCacheDirectory", "Directory to read/write string cache file (default (empty) is service SaveFilesDirectory)", "", 0, true);
-
-#define LOG if (!VerboseStringManager) {} else nlinfo
-#define LOGPARSE if (!VerboseStringManagerParser) {} else nlinfo
-
+#define LOG                        \
+	if (!VerboseStringManager) { } \
+	else nlinfo
+#define LOGPARSE                         \
+	if (!VerboseStringManagerParser) { } \
+	else nlinfo
 
 // Instantiate the string manager.
 CStringManager Instance;
 CStringManager *SM = &Instance;
-CIosLocalSender	IosLocalSender;
+CIosLocalSender IosLocalSender;
 
 using namespace STRING_MANAGER;
 using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
-const ucstring		nl("\r\n");
+const ucstring nl("\r\n");
 
-
-std::string CStringManager::_LanguageCode[NB_LANGUAGES] = 
-{
-	"wk",		// Work
-	"en",		// english
+std::string CStringManager::_LanguageCode[NB_LANGUAGES] = {
+	"wk", // Work
+	"en", // english
 	"de",
 	"fr",
 	"ru",
 	"es",
 
-/* ace: currently, we only want english, i remove other language to remove warning during IOS launch
-	"fr",		// french
-	"zh",		// traditionnal chinese
-	"zh-CN"		// simplified chinese
-*/
+	/* ace: currently, we only want english, i remove other language to remove warning during IOS launch
+	    "fr",		// french
+	    "zh",		// traditionnal chinese
+	    "zh-CN"		// simplified chinese
+	*/
 };
 
 /*
 ucstring	CStringManager::getEntityDisplayName(const NLMISC::CEntityId &eid)
 {
-	ucstring ret;
-	NLMISC::CSheetId sid = SM->getSheetId(eid);
-	if (sid != NLMISC::CSheetId::Unknown)
-	{
+    ucstring ret;
+    NLMISC::CSheetId sid = SM->getSheetId(eid);
+    if (sid != NLMISC::CSheetId::Unknown)
+    {
 //		TSheetInfoContainer::iterator it(_SheetInfo.find(sid));
 
-		if (it != _SheetInfo.end())
-			ret =  it->second.DisplayName;
-	}
+        if (it != _SheetInfo.end())
+            ret =  it->second.DisplayName;
+    }
 
-	// not found.
-	if (ret.empty())
-		ret = ucstring(eid.toString());
+    // not found.
+    if (ret.empty())
+        ret = ucstring(eid.toString());
 
-	return ret;
+    return ret;
 }
 */
 
-
-
-
-
-uint32	CStringManager::CEntityWords::getStringId(const std::string &rowName, const std::string columnName) const
+uint32 CStringManager::CEntityWords::getStringId(const std::string &rowName, const std::string columnName) const
 {
 	std::map<std::string, uint32>::const_iterator colIt(_ColumnInfo.find(columnName));
 	if (colIt != _ColumnInfo.end())
@@ -113,12 +109,12 @@ uint32	CStringManager::CEntityWords::getStringId(const std::string &rowName, con
 		std::map<std::string, uint32>::const_iterator rowIt(_RowInfo.find(rowName));
 		if (rowIt != _RowInfo.end())
 		{
-			return _Data[rowIt->second*_NbColums + colIt->second];
+			return _Data[rowIt->second * _NbColums + colIt->second];
 		}
 	}
 	// not found, return rowName.columnName.
 	if (DebugReplacementParameter)
-		return SM->storeString(ucstring(std::string("<")+rowName+"."+columnName+">"));
+		return SM->storeString(ucstring(std::string("<") + rowName + "." + columnName + ">"));
 	else
 	{
 		ucstring s;
@@ -127,8 +123,6 @@ uint32	CStringManager::CEntityWords::getStringId(const std::string &rowName, con
 	}
 }
 
-
-
 CStringManager::CStringManager()
 {
 	_TestOnly = false;
@@ -136,9 +130,8 @@ CStringManager::CStringManager()
 	_Mapper = NLMISC::CStringMapper::createLocalMapper();
 	_DefaultSetPhraseLanguage = NB_LANGUAGES;
 	// init the game share string manager pointer.
-//	GameShareSM = this;
+	//	GameShareSM = this;
 }
-
 
 void CStringManager::loadCache()
 {
@@ -149,11 +142,11 @@ void CStringManager::loadCache()
 	nlassert(_StringIdx.empty());
 	nlassert(_StringBase.empty());
 
-//	std::string filename("data_shard/ios.string_cache");
-//	_CacheFilename = NLMISC::CPath::lookup(filename, false, false);
-//	if (!_CacheFilename.empty())
+	//	std::string filename("data_shard/ios.string_cache");
+	//	_CacheFilename = NLMISC::CPath::lookup(filename, false, false);
+	//	if (!_CacheFilename.empty())
 
-	std::string	cacheDirectory = ((StringManagerCacheDirectory.get() == "") ? Bsi.getLocalPath() : StringManagerCacheDirectory.get());
+	std::string cacheDirectory = ((StringManagerCacheDirectory.get() == "") ? Bsi.getLocalPath() : StringManagerCacheDirectory.get());
 	_CacheFilename = CPath::standardizePath(cacheDirectory) + "ios.string_cache";
 	if (CFile::fileExists(_CacheFilename))
 	{
@@ -173,11 +166,11 @@ void CStringManager::loadCache()
 			file.serial(id);
 			file.serial(str);
 
-//			nldebug("Loaded from cache [%u][%s]", id, str.toString().c_str());
+			//			nldebug("Loaded from cache [%u][%s]", id, str.toString().c_str());
 			// create a new entry
 			std::pair<TMappedUStringContainer::iterator, bool> ret;
 			ret = _StringIdx.insert(std::make_pair(str, id));
-//			nlassert(ret.second);
+			//			nlassert(ret.second);
 			if (!ret.second)
 			{
 				TMappedUStringContainer::iterator it = _StringIdx.find(str);
@@ -188,12 +181,12 @@ void CStringManager::loadCache()
 					nlwarning(" !!! ID diff : string cache invalide.");
 				}
 			}
-//			if (_StringBase.size() <= id)
-//			{
-//				_StringBase.reserve(_StringBase.size()*2);
-//			}
-//			_StringBase.resize(id+1);
-//			_StringBase[id] = str;
+			//			if (_StringBase.size() <= id)
+			//			{
+			//				_StringBase.reserve(_StringBase.size()*2);
+			//			}
+			//			_StringBase.resize(id+1);
+			//			_StringBase[id] = str;
 			while (_StringBase.size() <= id)
 				_StringBase.push_back(string());
 			_StringBase[id] = str;
@@ -203,7 +196,7 @@ void CStringManager::loadCache()
 			if ((now - t1) > 10)
 			{
 				// more than 10 s... log where we are
-				double progress = 100*(file.getPos()/double(file.getFileSize()));
+				double progress = 100 * (file.getPos() / double(file.getFileSize()));
 
 				nlinfo(" %6.2f%% read", progress);
 
@@ -211,7 +204,7 @@ void CStringManager::loadCache()
 			}
 		}
 		uint32 now = CTime::getSecondsSince1970();
-		nlinfo("Done, %u strings read in %u seconds.", _StringBase.size(), now-start);
+		nlinfo("Done, %u strings read in %u seconds.", _StringBase.size(), now - start);
 	}
 	else
 	{
@@ -246,17 +239,13 @@ void CStringManager::clearCache(NLMISC::CLog *log)
 	// warn all the client that they must dropout there cache file
 }
 
-
-
-
 const CStringManager::CEntityWords &CStringManager::getEntityWords(TLanguages lang, STRING_MANAGER::TParamType type) const
 {
 	nlassert(lang < NB_LANGUAGES);
-	nlassert(type < STRING_MANAGER::NB_PARAM_TYPES ||type == STRING_MANAGER::self);
+	nlassert(type < STRING_MANAGER::NB_PARAM_TYPES || type == STRING_MANAGER::self);
 
 	return _AllEntityWords[lang][type];
 }
-
 
 bool CStringManager::CClause::eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CPhrase *phrase)
 {
@@ -266,18 +255,18 @@ bool CStringManager::CClause::eval(CStringManager::TLanguages lang, const CChara
 	if (Conditions.empty())
 		return true;
 
-	for (uint i=0; !ret && i<Conditions.size(); ++i)
+	for (uint i = 0; !ret && i < Conditions.size(); ++i)
 	{
-		
+
 		std::vector<TCondition> &andedCond = Conditions[i];
 		bool temp = true;
 
-		for (uint j=0; temp && j<andedCond.size(); ++j)
+		for (uint j = 0; temp && j < andedCond.size(); ++j)
 		{
 			const CParameterTraits *param = phrase->Params[andedCond[j].ParamIndex];
-			temp &= param->eval(lang,charInfo ,andedCond[j]);
+			temp &= param->eval(lang, charInfo, andedCond[j]);
 		}
-		
+
 		ret |= temp;
 	}
 
@@ -286,65 +275,62 @@ bool CStringManager::CClause::eval(CStringManager::TLanguages lang, const CChara
 
 NLMISC::CSheetId CStringManager::getSheetId(const NLMISC::CEntityId &entityId)
 {
-	TDataSetRow entityIndex = TheDataset.getDataSetRow( entityId );
-	
+	TDataSetRow entityIndex = TheDataset.getDataSetRow(entityId);
+
 	if (!entityIndex.isValid())
 		return NLMISC::CSheetId::Unknown;
 
-	CMirrorPropValueBase<TYPE_SHEET> sheetId( TheDataset, entityIndex, DSPropertySHEET ); 
-	return NLMISC::CSheetId( sheetId );
+	CMirrorPropValueBase<TYPE_SHEET> sheetId(TheDataset, entityIndex, DSPropertySHEET);
+	return NLMISC::CSheetId(sheetId);
 }
 
 NLMISC::CSheetId CStringManager::getSheetServerId(const NLMISC::CEntityId &entityId)
 {
-	TDataSetRow entityIndex = TheDataset.getDataSetRow( entityId );
+	TDataSetRow entityIndex = TheDataset.getDataSetRow(entityId);
 
 	if (!entityIndex.isValid())
 		return NLMISC::CSheetId::Unknown;
 
-	CMirrorPropValueBase<uint32> sheetServerId( TheDataset, entityIndex, DSPropertySHEET_SERVER ); 
-	return NLMISC::CSheetId( sheetServerId );
+	CMirrorPropValueBase<uint32> sheetServerId(TheDataset, entityIndex, DSPropertySHEET_SERVER);
+	return NLMISC::CSheetId(sheetServerId);
 }
-
 
 const CStringManager::TSheetInfo &CStringManager::getSheetInfo(const NLMISC::CSheetId &sheetId)
 {
-	TSheetInfoContainer::iterator	it(_SheetInfo.find(sheetId));
+	TSheetInfoContainer::iterator it(_SheetInfo.find(sheetId));
 	if (it != _SheetInfo.end())
 		return it->second;
 
 	static TSheetInfo unknown;
-//	nlwarning("Unknown sheetId : %s", sheetId.toString().c_str());
+	//	nlwarning("Unknown sheetId : %s", sheetId.toString().c_str());
 	return unknown;
 }
 
-
-
-void CStringManager::buildMissingPhraseStream(CCharacterInfos * charInfo, uint32 seqNum, NLMISC::CBitMemStream & bmsOut, const std::string &phraseName)
+void CStringManager::buildMissingPhraseStream(CCharacterInfos *charInfo, uint32 seqNum, NLMISC::CBitMemStream &bmsOut, const std::string &phraseName)
 {
 	// store a string for this error message.
-	uint32 id = storeString(ucstring("<missing:")+phraseName+">");
+	uint32 id = storeString(ucstring("<missing:") + phraseName + ">");
 	// now, build the message for the client.
-	GenericXmlMsgHeaderMngr.pushNameToStream( "STRING_MANAGER:PHRASE_SEND", bmsOut);
+	GenericXmlMsgHeaderMngr.pushNameToStream("STRING_MANAGER:PHRASE_SEND", bmsOut);
 	bmsOut.serial(seqNum);
 	bmsOut.serial(id);
-	
+
 	LOG("Sending phrase [%s] content", phraseName.c_str());
 }
 
-bool CStringManager::buildPhraseStream( CCharacterInfos * charInfo, uint32 seqNum, NLNET::CMessage & message, bool debug, CStringManager::TLanguages lang, NLMISC::CBitMemStream & bmsOut)
+bool CStringManager::buildPhraseStream(CCharacterInfos *charInfo, uint32 seqNum, NLNET::CMessage &message, bool debug, CStringManager::TLanguages lang, NLMISC::CBitMemStream &bmsOut)
 {
-//	uint32		seqNum;
+	//	uint32		seqNum;
 	std::string phraseName;
 	message.serial(phraseName);
-	LOG("Receiving phrase %u as '%s'", seqNum, phraseName.c_str() );
+	LOG("Receiving phrase %u as '%s'", seqNum, phraseName.c_str());
 
 	if (phraseName.empty())
 	{
 		nlwarning("buildPhraseStream: phrase name is empty !");
 		return false;
 	}
-	
+
 	// ok, try to find this phrase
 	bool found = false;
 	TPhrasesContainer::iterator it(_AllPhrases[lang].find(phraseName));
@@ -379,54 +365,53 @@ bool CStringManager::buildPhraseStream( CCharacterInfos * charInfo, uint32 seqNu
 		buildMissingPhraseStream(charInfo, seqNum, bmsOut, phraseName);
 		return true;
 	}
-	
+
 	// ok, we have the phrase, we can parse the parameter from the message
 	CPhrase &phrase = it->second;
 	//	std::vector<TStringParam>	params;
 	//	params.resize(phrase.Params.size());
 	uint i;
-	
+
 	try
 	{
 		bool result = true;
-		for (i=1; i<phrase.Params.size(); ++i)
+		for (i = 1; i < phrase.Params.size(); ++i)
 		{
 			result &= phrase.Params[i]->extractFromMessage(message, debug);
 		}
 
 		if (!result)
-			nlwarning("Format error extracting parameters in phrase %s, result string could be erroneous !",phrase.Name.c_str() );
+			nlwarning("Format error extracting parameters in phrase %s, result string could be erroneous !", phrase.Name.c_str());
 	}
-	catch(...)
+	catch (...)
 	{
-		nlwarning("Exception while extracting parameters in phrase %s, result string could be erroneous !",phrase.Name.c_str() );
-		
+		nlwarning("Exception while extracting parameters in phrase %s, result string could be erroneous !", phrase.Name.c_str());
+
 		// init the rest with default values
-		for (; i<phrase.Params.size(); ++i)
+		for (; i < phrase.Params.size(); ++i)
 		{
 			phrase.Params[i]->setDefaultValue();
 		}
 		//		return;
 	}
-	
+
 	// update the self parameter with dest eid.
-	if ( charInfo )
+	if (charInfo)
 		phrase.Params[0]->EId = charInfo->EntityId;
 	else
 		phrase.Params[0]->EId = CEntityId::Unknown;
-	
-	
+
 	// ok, we have the phrase and a list of typed param, we can search for the good clause.
 	found = false;
-	for (i=0; i<phrase.Clauses.size(); ++i)
+	for (i = 0; i < phrase.Clauses.size(); ++i)
 	{
 		// if the first clause as no condition, consider it as a fallback clause.
-		if (i==0 && phrase.Clauses[i].Conditions.empty())
+		if (i == 0 && phrase.Clauses[i].Conditions.empty())
 		{
 			// skip it, it will be used only for fallback when no clause match
 			continue;
 		}
-		if (phrase.Clauses[i].eval(lang,charInfo, &phrase))
+		if (phrase.Clauses[i].eval(lang, charInfo, &phrase))
 		{
 			found = true;
 			break;
@@ -435,30 +420,29 @@ bool CStringManager::buildPhraseStream( CCharacterInfos * charInfo, uint32 seqNu
 	if (!found)
 	{
 		// force the use of the first clause.
-		// NB : this is a 'best effort' fallback. Either the first clause has 
+		// NB : this is a 'best effort' fallback. Either the first clause has
 		// no condition, so it is designed to be the fallback one, or
 		// the first clause has some condition not valid, but we use it.
-		i=0;
+		i = 0;
 	}
-	
+
 	CClause &clause = phrase.Clauses[i];
-	
+
 	// now, build the message for the client.
-	GenericXmlMsgHeaderMngr.pushNameToStream( "STRING_MANAGER:PHRASE_SEND", bmsOut);
+	GenericXmlMsgHeaderMngr.pushNameToStream("STRING_MANAGER:PHRASE_SEND", bmsOut);
 	bmsOut.serial(seqNum);
 	bmsOut.serial(clause.ClientStringId);
-	
+
 	// for each replacement parameter in order...
-	for (i=0; i<clause.Replacements.size(); ++i)
+	for (i = 0; i < clause.Replacements.size(); ++i)
 	{
 		TReplacement &rep = clause.Replacements[i];
 		CParameterTraits *param = phrase.Params[clause.Replacements[i].ParamIndex];
-		
-		param->fillBitMemStream(charInfo,lang, rep, bmsOut);
+
+		param->fillBitMemStream(charInfo, lang, rep, bmsOut);
 	}
 	LOG("Sending phrase [%s] content", phraseName.c_str());
 	return true;
-
 }
 
 void CStringManager::receiveUserPhrase(NLNET::CMessage &message, bool debug)
@@ -466,13 +450,13 @@ void CStringManager::receiveUserPhrase(NLNET::CMessage &message, bool debug)
 	// extract the parameters
 	uint32 userId;
 	uint32 seqNum;
-	message.serial( userId );
+	message.serial(userId);
 	message.serial(seqNum);
 	LOG("Receiving a phrase for user id %d", userId);
 
 	// get the user language
-	TUserLanguagesContainer::const_iterator itUser = _UsersLanguages.find( userId );
-	if ( itUser == _UsersLanguages.end() )
+	TUserLanguagesContainer::const_iterator itUser = _UsersLanguages.find(userId);
+	if (itUser == _UsersLanguages.end())
 	{
 		// just extract the phrase name for more info in the warning
 		std::string phraseName;
@@ -483,37 +467,37 @@ void CStringManager::receiveUserPhrase(NLNET::CMessage &message, bool debug)
 	}
 	// built the stream to be sent to the client
 	NLMISC::CBitMemStream bmsOut;
-	if ( buildPhraseStream( NULL, seqNum, message, debug, (*itUser).second.Language, bmsOut ) )
+	if (buildPhraseStream(NULL, seqNum, message, debug, (*itUser).second.Language, bmsOut))
 	{
-		CMessage msgout( "IMPULSION_UID" );
-		msgout.serial( userId );
-		msgout.serialBufferWithSize((uint8*)bmsOut.buffer(), bmsOut.length());
-		NLNET::CUnifiedNetwork::getInstance()->send( (*itUser).second.FrontEndId, msgout );
-		nldebug( "IOSSM: Sent IMPULSION_UID to %hu (PHRASE_SEND)", (*itUser).second.FrontEndId.get() );
+		CMessage msgout("IMPULSION_UID");
+		msgout.serial(userId);
+		msgout.serialBufferWithSize((uint8 *)bmsOut.buffer(), bmsOut.length());
+		NLNET::CUnifiedNetwork::getInstance()->send((*itUser).second.FrontEndId, msgout);
+		nldebug("IOSSM: Sent IMPULSION_UID to %hu (PHRASE_SEND)", (*itUser).second.FrontEndId.get());
 	}
 }
 
 void CStringManager::receivePhrase(NLNET::CMessage &message, bool debug, const std::string &serviceName)
 {
 	// extract the parameters
-//	NLMISC::CEntityId	dest;
-	TDataSetRow		dest;
-	uint32			seqNum;
-	message.serial( dest );
-	LOG("Receiving a phrase for char %s:%x", 
-		TheDataset.getEntityId(dest).toString().c_str(),
-		dest.getIndex() );
+	//	NLMISC::CEntityId	dest;
+	TDataSetRow dest;
+	uint32 seqNum;
+	message.serial(dest);
+	LOG("Receiving a phrase for char %s:%x",
+	    TheDataset.getEntityId(dest).toString().c_str(),
+	    dest.getIndex());
 
 	message.serial(seqNum);
 
-	CEntityId	destId = TheDataset.getEntityId(dest);
+	CEntityId destId = TheDataset.getEntityId(dest);
 	// retrieve the dest player infos.
 	CCharacterInfos *charInfo = IOS->getCharInfos(destId);
 	if (charInfo == 0)
 	{
-		nlwarning("CStringManager::receivePhrase unknown eid %s:%x", 
-			TheDataset.getEntityId(dest).toString().c_str(),
-			dest.getIndex());
+		nlwarning("CStringManager::receivePhrase unknown eid %s:%x",
+		    TheDataset.getEntityId(dest).toString().c_str(),
+		    dest.getIndex());
 		return;
 	}
 
@@ -524,23 +508,22 @@ void CStringManager::receivePhrase(NLNET::CMessage &message, bool debug, const s
 		message.serial(phraseName);
 
 		nlwarning("Service '%s' is trying to send phrase '%s' to a AIS entity !",
-			serviceName.c_str(),
-			phraseName.c_str());
+		    serviceName.c_str(),
+		    phraseName.c_str());
 		return;
-
 	}
-	
+
 	// built the stream to be sent to the client
 	NLMISC::CBitMemStream bmsOut;
-	if ( buildPhraseStream( charInfo, seqNum, message, debug, charInfo->Language, bmsOut ) )
+	if (buildPhraseStream(charInfo, seqNum, message, debug, charInfo->Language, bmsOut))
 	{
-		NLNET::CMessage msgout( "IMPULS_CH_ID" );
+		NLNET::CMessage msgout("IMPULS_CH_ID");
 		NLMISC::CEntityId destId = charInfo->EntityId;
 		uint8 channel = 1;
-		msgout.serial( destId );
-		msgout.serial( channel );
-		
-		msgout.serialBufferWithSize((uint8*)bmsOut.buffer(), bmsOut.length());
+		msgout.serial(destId);
+		msgout.serial(channel);
+
+		msgout.serialBufferWithSize((uint8 *)bmsOut.buffer(), bmsOut.length());
 		NLNET::CUnifiedNetwork::getInstance()->send(TServiceId(charInfo->EntityId.getDynamicId()), msgout);
 	}
 }
@@ -549,7 +532,7 @@ void CStringManager::broadcastSystemMessage(NLNET::CMessage &message, bool debug
 {
 	TDataSetRow client;
 	vector<CEntityId> temp;
-	set<CEntityId>	excluded;
+	set<CEntityId> excluded;
 	CChatGroup::TGroupType audience = CChatGroup::nbChatMode;
 	uint32 seqNum;
 
@@ -561,9 +544,9 @@ void CStringManager::broadcastSystemMessage(NLNET::CMessage &message, bool debug
 
 	if (!IOS->getChatManager().checkClient(client))
 	{
-		nlwarning("broadcastSystemMessage : can't find client %s:%x in chat client", 
-			TheDataset.getEntityId(client).toString().c_str(),
-			client.getIndex());
+		nlwarning("broadcastSystemMessage : can't find client %s:%x in chat client",
+		    TheDataset.getEntityId(client).toString().c_str(),
+		    client.getIndex());
 		return;
 	}
 
@@ -572,7 +555,7 @@ void CStringManager::broadcastSystemMessage(NLNET::CMessage &message, bool debug
 		// can thow CChatManager::EChatClient exception
 		CChatClient &chatClient = IOS->getChatManager().getClient(client);
 
-		TGroupId	groupId;
+		TGroupId groupId;
 
 		switch (audience)
 		{
@@ -626,48 +609,47 @@ void CStringManager::broadcastSystemMessage(NLNET::CMessage &message, bool debug
 				msg.assignFromSubMessage(message);
 				// built the stream to be sent to the client
 				NLMISC::CBitMemStream bmsOut;
-				if ( buildPhraseStream( charInfo, seqNum, msg, debug, charInfo->Language, bmsOut ) )
+				if (buildPhraseStream(charInfo, seqNum, msg, debug, charInfo->Language, bmsOut))
 				{
-					NLNET::CMessage msgout( "IMPULS_CH_ID" );
+					NLNET::CMessage msgout("IMPULS_CH_ID");
 					NLMISC::CEntityId destId = charInfo->EntityId;
 					uint8 channel = 1;
-					msgout.serial( destId );
-					msgout.serial( channel );
-					
-					msgout.serialBufferWithSize((uint8*)bmsOut.buffer(), bmsOut.length());
-					NLNET::CUnifiedNetwork::getInstance()->send(TServiceId(charInfo->EntityId.getDynamicId()), msgout);
+					msgout.serial(destId);
+					msgout.serial(channel);
 
+					msgout.serialBufferWithSize((uint8 *)bmsOut.buffer(), bmsOut.length());
+					NLNET::CUnifiedNetwork::getInstance()->send(TServiceId(charInfo->EntityId.getDynamicId()), msgout);
 
 					// inform the client to display the dyn string in system info
 					{
-						CMessage msgout( "IMPULSION_ID" );
-						msgout.serial( const_cast<CEntityId&> (eid) );
+						CMessage msgout("IMPULSION_ID");
+						msgout.serial(const_cast<CEntityId &>(eid));
 						CBitMemStream bms;
-						if ( ! GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:DYN_STRING", bms) )
+						if (!GenericXmlMsgHeaderMngr.pushNameToStream("STRING:DYN_STRING", bms))
 						{
 							nlwarning("<sendDynamicSystemMessage> Msg name CHAT:DYN_STRING not found");
 						}
 						else
 						{
-							bms.serial( seqNum );
-							msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
-							CUnifiedNetwork::getInstance()->send( TServiceId(eid.getDynamicId()), msgout );
+							bms.serial(seqNum);
+							msgout.serialBufferWithSize((uint8 *)bms.buffer(), bms.length());
+							CUnifiedNetwork::getInstance()->send(TServiceId(eid.getDynamicId()), msgout);
 						}
 					}
 				}
 			}
 		}
 	}
-	catch(const CChatManager::EChatClient &e)
+	catch (const CChatManager::EChatClient &e)
 	{
 		nlwarning("%s", e.what());
 	}
-	catch(...)
+	catch (...)
 	{
 	}
 }
 
-//void CStringManager::requestString(const NLMISC::CEntityId &client, uint32 stringId)
+// void CStringManager::requestString(const NLMISC::CEntityId &client, uint32 stringId)
 //{
 //	ucstring str = getString(stringId);
 //
@@ -676,10 +658,10 @@ void CStringManager::broadcastSystemMessage(NLNET::CMessage &message, bool debug
 //	{
 //		if (IsRingShard.get())
 //		{
-//			// In ring shard, it is possible that the client autologin and 
-//			// autochoose the character rapidly, and if a string need to be resolved 
-//			// to display the char summary, it is possible client receive the 
-//			// dynamic string from IOS after the EGS has passed the frontend in 
+//			// In ring shard, it is possible that the client autologin and
+//			// autochoose the character rapidly, and if a string need to be resolved
+//			// to display the char summary, it is possible client receive the
+//			// dynamic string from IOS after the EGS has passed the frontend in
 //			// entityId mode.
 //			// So, the IOS receive a stringId request with a Eid not registered yet.
 //			// Look in the user table, if we have the user, use the UID version
@@ -691,7 +673,7 @@ void CStringManager::broadcastSystemMessage(NLNET::CMessage &message, bool debug
 //				return;
 //			}
 //		}
-//		nlwarning("requestString : Client with eid %s is unknown (requesting string %u as [%s])", 
+//		nlwarning("requestString : Client with eid %s is unknown (requesting string %u as [%s])",
 //			client.toString().c_str(),
 //			stringId,
 //			str.toString().c_str());
@@ -708,7 +690,7 @@ void CStringManager::broadcastSystemMessage(NLNET::CMessage &message, bool debug
 //	// Send in utf8 format to save bandwith
 //	string	strUtf8= str.toUtf8();
 //	bmsOut.serial(strUtf8);
-//	
+//
 //	// send the message to Front End
 //	NLNET::CMessage msgout( "IMPULS_CH_ID" );
 //	NLMISC::CEntityId destId = client;
@@ -718,24 +700,24 @@ void CStringManager::broadcastSystemMessage(NLNET::CMessage &message, bool debug
 //
 //	msgout.serialBufferWithSize((uint8*)bmsOut.buffer(), bmsOut.length());
 //	NLNET::CUnifiedNetwork::getInstance()->send(TServiceId(charInfo->EntityId.getDynamicId()), msgout);
-//}
+// }
 
 void CStringManager::requestString(uint32 userId, uint32 stringId)
 {
 	TServiceId frontendId;
-	TUserLanguagesContainer::const_iterator itUser = _UsersLanguages.find( userId );
-	if ( itUser == _UsersLanguages.end() )
+	TUserLanguagesContainer::const_iterator itUser = _UsersLanguages.find(userId);
+	if (itUser == _UsersLanguages.end())
 	{
 		// no user language, try to find a character
 		breakable
 		{
 			const CInputOutputService::TIdToInfos &chars = IOS->getCharInfosCont();
-			CInputOutputService::TIdToInfos::const_iterator it(chars.lower_bound(CEntityId(RYZOMID::player, userId<<4)));
+			CInputOutputService::TIdToInfos::const_iterator it(chars.lower_bound(CEntityId(RYZOMID::player, userId << 4)));
 			if (it != chars.end())
 			{
 				CEntityId eid = it->first;
-				
-				if (eid.getShortId()>>4 == userId)
+
+				if (eid.getShortId() >> 4 == userId)
 				{
 					// we found a character for this user, use it
 					frontendId = TServiceId(eid.getDynamicId());
@@ -745,7 +727,7 @@ void CStringManager::requestString(uint32 userId, uint32 stringId)
 			}
 
 			// if we are here, we did not found a character for this user
-			nlwarning("<CStringManager requestString> Invalid user id %u",userId);
+			nlwarning("<CStringManager requestString> Invalid user id %u", userId);
 			return;
 		}
 	}
@@ -759,34 +741,33 @@ void CStringManager::requestString(uint32 userId, uint32 stringId)
 	LOG("Sending string %u as [%s] to user %u", stringId, str.toString().c_str(), userId);
 	// build the response message
 	NLMISC::CBitMemStream bmsOut;
-	GenericXmlMsgHeaderMngr.pushNameToStream( "STRING_MANAGER:STRING_RESP", bmsOut);
+	GenericXmlMsgHeaderMngr.pushNameToStream("STRING_MANAGER:STRING_RESP", bmsOut);
 	bmsOut.serial(stringId);
 	// Send in utf8 format to save bandwidth
-	string	strUtf8= str.toUtf8();
+	string strUtf8 = str.toUtf8();
 	bmsOut.serial(strUtf8);
-	
+
 	// send the message to Front End
-	CMessage msgout( "IMPULSION_UID" );
-	msgout.serial( userId );
-	msgout.serialBufferWithSize((uint8*)bmsOut.buffer(), bmsOut.length());
-	NLNET::CUnifiedNetwork::getInstance()->send( frontendId, msgout );
-	nldebug( "IOSSM: Sent IMPULSION_UID to %hu (STRING_RESP)", frontendId.get() );
+	CMessage msgout("IMPULSION_UID");
+	msgout.serial(userId);
+	msgout.serialBufferWithSize((uint8 *)bmsOut.buffer(), bmsOut.length());
+	NLNET::CUnifiedNetwork::getInstance()->send(frontendId, msgout);
+	nldebug("IOSSM: Sent IMPULSION_UID to %hu (STRING_RESP)", frontendId.get());
 
 	// TODO: if (strUtf8.empty() && stringId) ban user
 }
 
-
 void CStringManager::reload(NLMISC::CLog *log)
 {
 	uint i;
-	for(i=0; i<NB_LANGUAGES; ++i)
+	for (i = 0; i < NB_LANGUAGES; ++i)
 	{
 		uint j;
 
 		// need to manualy delete param object.
 		while (!_AllPhrases[i].empty())
 		{
-			CPhrase &phrase = _AllPhrases[i]. begin()->second;
+			CPhrase &phrase = _AllPhrases[i].begin()->second;
 
 			while (!phrase.Params.empty())
 			{
@@ -798,26 +779,23 @@ void CStringManager::reload(NLMISC::CLog *log)
 		}
 		_AllPhrases[i].clear();
 
-		for (j=0; j<STRING_MANAGER::NB_PARAM_TYPES; ++j)
+		for (j = 0; j < STRING_MANAGER::NB_PARAM_TYPES; ++j)
 		{
-			CEntityWords	&ew = _AllEntityWords[i][j];
+			CEntityWords &ew = _AllEntityWords[i][j];
 
 			ew._ColumnInfo.clear();
 			ew._NbColums = 0;
 			ew._RowInfo.clear();
-			delete [] ew._Data;
+			delete[] ew._Data;
 		}
 	}
 
 	init(log);
 }
 
-
-
-
-CStringManager::TLanguages		CStringManager::checkLanguageCode(const std::string &languageCode)
+CStringManager::TLanguages CStringManager::checkLanguageCode(const std::string &languageCode)
 {
-	for (uint i=0; i<NB_LANGUAGES; ++i)
+	for (uint i = 0; i < NB_LANGUAGES; ++i)
 	{
 		if (_LanguageCode[i] == languageCode)
 			return TLanguages(i);
@@ -828,22 +806,20 @@ CStringManager::TLanguages		CStringManager::checkLanguageCode(const std::string 
 	return english;
 }
 
-const std::string		&CStringManager::getLanguageCodeString(TLanguages language)
+const std::string &CStringManager::getLanguageCodeString(TLanguages language)
 {
 	if (language < NB_LANGUAGES)
 		return _LanguageCode[language];
 
 	nlwarning("Language number %u is out of range, returning english", language);
-	nlctassert(english < NB_LANGUAGES);	// just to avoid oopsie
+	nlctassert(english < NB_LANGUAGES); // just to avoid oopsie
 	return _LanguageCode[english];
 }
 
-
-
-uint32	CStringManager::storeString(const ucstring &str)
+uint32 CStringManager::storeString(const ucstring &str)
 {
-//	TMappedUStringContainer				_StringIdx;
-//	TUStringContainer					_StringBase;
+	//	TMappedUStringContainer				_StringIdx;
+	//	TUStringContainer					_StringBase;
 
 	TMappedUStringContainer::iterator it(_StringIdx.find(str));
 	if (it != _StringIdx.end())
@@ -853,7 +829,7 @@ uint32	CStringManager::storeString(const ucstring &str)
 	}
 	else
 	{
-		// occasionally create a blank entry, 
+		// occasionally create a blank entry,
 		// this lets us find out if someone is scanning the string cache
 		if ((rand() & 7) == 0)
 			_StringBase.push_back(ucstring());
@@ -886,9 +862,7 @@ const ucstring &CStringManager::getString(uint32 stringId)
 		return _StringBase.front();
 }
 
-
-
-uint32	CStringManager::translateShortName(uint32 shortNameIndex)
+uint32 CStringManager::translateShortName(uint32 shortNameIndex)
 {
 	// No bot name translation on ring shards
 	if (IsRingShard)
@@ -912,13 +886,13 @@ uint32	CStringManager::translateShortName(uint32 shortNameIndex)
 	return 0;
 }
 
-uint32	CStringManager::translateShortName(const ucstring &shortName)
+uint32 CStringManager::translateShortName(const ucstring &shortName)
 {
 	//
 	return translateShortName(storeString(shortName));
 }
 
-uint32	CStringManager::translateTitle(const std::string  &title, TLanguages language)
+uint32 CStringManager::translateTitle(const std::string &title, TLanguages language)
 {
 	const std::string colName("name");
 	const CStringManager::CEntityWords &ew = getEntityWords(language, STRING_MANAGER::title);
@@ -929,7 +903,7 @@ uint32	CStringManager::translateTitle(const std::string  &title, TLanguages lang
 	return stringId;
 }
 
-uint32	CStringManager::translateEventFaction(uint32 eventFactionId)
+uint32 CStringManager::translateEventFaction(uint32 eventFactionId)
 {
 	if (VerboseStringManager)
 		nlinfo("Event faction translation asked for : '%s' (%u)", getString(eventFactionId).toString().c_str(), eventFactionId);
@@ -949,7 +923,7 @@ uint32	CStringManager::translateEventFaction(uint32 eventFactionId)
 	return 0;
 }
 
-uint32	CStringManager::translateEventFaction(const ucstring &eventFaction)
+uint32 CStringManager::translateEventFaction(const ucstring &eventFaction)
 {
 	if (eventFaction.empty())
 		return 0;
@@ -960,52 +934,51 @@ uint32	CStringManager::translateEventFaction(const ucstring &eventFaction)
 /*
  * Send the requested string
  */
-void	CStringManager::sendString( uint32 nameIndex, TServiceId serviceId )
+void CStringManager::sendString(uint32 nameIndex, TServiceId serviceId)
 {
-	CMessage msgout( "RECV_STRING" );
-	msgout.serial( nameIndex );
-	const ucstring& ucs = getString( nameIndex );
-	msgout.serial( const_cast<ucstring&>(ucs) );
-	CUnifiedNetwork::getInstance()->send( serviceId, msgout ); // reply => not via mirror
+	CMessage msgout("RECV_STRING");
+	msgout.serial(nameIndex);
+	const ucstring &ucs = getString(nameIndex);
+	msgout.serial(const_cast<ucstring &>(ucs));
+	CUnifiedNetwork::getInstance()->send(serviceId, msgout); // reply => not via mirror
 }
-
 
 /*
  * Send the names of all online entities
  */
-void	CStringManager::retrieveEntityNames( TServiceId serviceId )
+void CStringManager::retrieveEntityNames(TServiceId serviceId)
 {
-	vector< pair<TDataSetRow,string> > names;
+	vector<pair<TDataSetRow, string>> names;
 	TEntityIdToEntityIndexMap::const_iterator itEntityIndex;
-	for( itEntityIndex = TheDataset.entityBegin(); itEntityIndex != TheDataset.entityEnd(); ++itEntityIndex )
+	for (itEntityIndex = TheDataset.entityBegin(); itEntityIndex != TheDataset.entityEnd(); ++itEntityIndex)
 	{
-		TDataSetRow entityIndex = TheDataset.getCurrentDataSetRow( GET_ENTITY_INDEX(itEntityIndex) );
-		if ( entityIndex.isValid() )
+		TDataSetRow entityIndex = TheDataset.getCurrentDataSetRow(GET_ENTITY_INDEX(itEntityIndex));
+		if (entityIndex.isValid())
 		{
-			CMirrorPropValueRO<TYPE_NAME_STRING_ID> nameIndex( TheDataset, entityIndex, DSPropertyNAME_STRING_ID );
-			if ( nameIndex() != 0 )
+			CMirrorPropValueRO<TYPE_NAME_STRING_ID> nameIndex(TheDataset, entityIndex, DSPropertyNAME_STRING_ID);
+			if (nameIndex() != 0)
 			{
-				names.push_back( make_pair( entityIndex, getString(nameIndex).toString() ) );
+				names.push_back(make_pair(entityIndex, getString(nameIndex).toString()));
 			}
 		}
 	}
-	NLNET::CMessage msgout( "ENTITY_NAMES" );
+	NLNET::CMessage msgout("ENTITY_NAMES");
 	uint32 len = (uint32)names.size();
-	msgout.serial( len );
-	vector< pair<TDataSetRow,string> >::const_iterator itn;
-	for ( itn=names.begin(); itn!=names.end(); ++itn )
+	msgout.serial(len);
+	vector<pair<TDataSetRow, string>>::const_iterator itn;
+	for (itn = names.begin(); itn != names.end(); ++itn)
 	{
-		msgout.serial( const_cast<TDataSetRow&>((*itn).first) );
-		msgout.serial( const_cast<string&>((*itn).second) );
+		msgout.serial(const_cast<TDataSetRow &>((*itn).first));
+		msgout.serial(const_cast<string &>((*itn).second));
 	}
-	NLNET::CUnifiedNetwork::getInstance()->send( serviceId, msgout );
-	nldebug( "IOSSM: Sent %u names to service %hu", names.size(), serviceId.get() );
+	NLNET::CUnifiedNetwork::getInstance()->send(serviceId, msgout);
+	nldebug("IOSSM: Sent %u names to service %hu", names.size(), serviceId.get());
 }
 
-void CStringManager::updateUserLanguage( uint32 userId, TServiceId frontEndId, const std::string & lang )
-{ 
-	CStringManager::TLanguages language = checkLanguageCode( lang );
-	SUserLanguageEntry entry( frontEndId, language );
+void CStringManager::updateUserLanguage(uint32 userId, TServiceId frontEndId, const std::string &lang)
+{
+	CStringManager::TLanguages language = checkLanguageCode(lang);
+	SUserLanguageEntry entry(frontEndId, language);
 	TUserLanguagesContainer::iterator it = _UsersLanguages.find(userId);
 	if (it == _UsersLanguages.end())
 	{
@@ -1018,34 +991,34 @@ void CStringManager::updateUserLanguage( uint32 userId, TServiceId frontEndId, c
 	}
 
 	// TODO : send cache time stamp to client.
-	nldebug ("IOSSM: updateUserLanguage : set userId %u to front end %u using language code '%s'", 
-		userId, 
-		frontEndId.get(), 
-		SM->getLanguageCodeString(language).c_str());
+	nldebug("IOSSM: updateUserLanguage : set userId %u to front end %u using language code '%s'",
+	    userId,
+	    frontEndId.get(),
+	    SM->getLanguageCodeString(language).c_str());
 
 	// send back the cache time stamp info
 	uint32 timestamp = SM->getCacheTimestamp();
 
 	// now, build the message for the client.
 	NLMISC::CBitMemStream bmsOut;
-	GenericXmlMsgHeaderMngr.pushNameToStream( "STRING_MANAGER:RELOAD_CACHE", bmsOut);
+	GenericXmlMsgHeaderMngr.pushNameToStream("STRING_MANAGER:RELOAD_CACHE", bmsOut);
 	bmsOut.serial(timestamp);
-	
-	uint32	shardId = IService::getInstance()->getShardId();
+
+	uint32 shardId = IService::getInstance()->getShardId();
 	bmsOut.serial(shardId);
 
 	// send the message to Front End
-	NLNET::CMessage msgout( "IMPULSION_UID" );
+	NLNET::CMessage msgout("IMPULSION_UID");
 	msgout.serial(userId);
 
-	msgout.serialBufferWithSize((uint8*)bmsOut.buffer(), bmsOut.length());
+	msgout.serialBufferWithSize((uint8 *)bmsOut.buffer(), bmsOut.length());
 	try
 	{
-		CUnifiedNetwork::getInstance()->send( frontEndId, msgout);
+		CUnifiedNetwork::getInstance()->send(frontEndId, msgout);
 	}
-	catch(const Exception& e)
+	catch (const Exception &e)
 	{
-		nlwarning( "CStringManager::updateUserLanguage : Error : %s", e.what() );
+		nlwarning("CStringManager::updateUserLanguage : Error : %s", e.what());
 	}
 }
 
@@ -1061,9 +1034,9 @@ void CStringManager::setPhrase(NLNET::CMessage &message)
 		message.serial(phraseName);
 		message.serial(phraseContent);
 	}
-	catch(const Exception& e)
+	catch (const Exception &e)
 	{
-		nlwarning("<setPhrase> %s",e.what());
+		nlwarning("<setPhrase> %s", e.what());
 		return;
 	}
 	setPhrase(phraseName, phraseContent);
@@ -1083,9 +1056,9 @@ void CStringManager::setPhraseLang(NLNET::CMessage &message)
 		message.serial(phraseContent);
 		message.serial(langString);
 	}
-	catch( Exception& e )
+	catch (Exception &e)
 	{
-		nlwarning("<setPhrase> %s",e.what());
+		nlwarning("<setPhrase> %s", e.what());
 		return;
 	}
 
@@ -1096,18 +1069,17 @@ void CStringManager::setPhraseLang(NLNET::CMessage &message)
 /*
  * Replace a phrase in default language(s)
  */
-void CStringManager::setPhrase(std::string const& phraseName, ucstring const& phraseContent)
+void CStringManager::setPhrase(std::string const &phraseName, ucstring const &phraseContent)
 {
-	if (_DefaultSetPhraseLanguage==NB_LANGUAGES)
-		for (int i=0; i<NB_LANGUAGES; ++i)
+	if (_DefaultSetPhraseLanguage == NB_LANGUAGES)
+		for (int i = 0; i < NB_LANGUAGES; ++i)
 			setPhrase(phraseName, phraseContent, (TLanguages)i);
 	else
 		setPhrase(phraseName, phraseContent, _DefaultSetPhraseLanguage);
 }
 
-
 /// Store a set of user named item associated with an AIInstance
-void CStringManager::storeItemNamesForAIInstance(uint32 aiInstance, const std::vector < R2::TCharMappedInfo > &itemInfos)
+void CStringManager::storeItemNamesForAIInstance(uint32 aiInstance, const std::vector<R2::TCharMappedInfo> &itemInfos)
 {
 	// first, parse all the container to remove any previously user item with this aiInstance
 	TRingUserItemInfos::iterator first(_RingUserItemInfos.begin()), last(_RingUserItemInfos.end());
@@ -1116,7 +1088,7 @@ void CStringManager::storeItemNamesForAIInstance(uint32 aiInstance, const std::v
 	{
 		std::vector<TRingUserItemInfo> &items = first->second;
 		// for each translation of this item...
-		for (uint i=0; i<items.size(); ++i)
+		for (uint i = 0; i < items.size(); ++i)
 		{
 			if (items[i].AIInstance == aiInstance)
 			{
@@ -1128,11 +1100,10 @@ void CStringManager::storeItemNamesForAIInstance(uint32 aiInstance, const std::v
 				// the set of user item in the ring is closed and limited.
 			}
 		}
-
 	}
 
 	// insert the new items definition
-	for (uint i=0; i<itemInfos.size(); ++i)
+	for (uint i = 0; i < itemInfos.size(); ++i)
 	{
 		const R2::TCharMappedInfo &itemInfo = itemInfos[i];
 
@@ -1143,36 +1114,35 @@ void CStringManager::storeItemNamesForAIInstance(uint32 aiInstance, const std::v
 	}
 }
 
-
 /*
 NLMISC_COMMAND(verboseStringManager,"Turn on or off or check the state of verbose string manager logging","")
 {
-	if(args.size()>1)
-		return false;
+    if(args.size()>1)
+        return false;
 
-	if(args.size()==1)
-	{
-		if(args[0]==string("on")||args[0]==string("ON")||args[0]==string("true")||args[0]==string("TRUE")||args[0]==string("1"))
-			VerboseLog=true;
+    if(args.size()==1)
+    {
+        if(args[0]==string("on")||args[0]==string("ON")||args[0]==string("true")||args[0]==string("TRUE")||args[0]==string("1"))
+            VerboseLog=true;
 
-		if(args[0]==string("off")||args[0]==string("OFF")||args[0]==string("false")||args[0]==string("FALSE")||args[0]==string("0"))
-			VerboseLog=false;
-	}
+        if(args[0]==string("off")||args[0]==string("OFF")||args[0]==string("false")||args[0]==string("FALSE")||args[0]==string("0"))
+            VerboseLog=false;
+    }
 
-	nlinfo("VerboseLogging is %s",VerboseLog?"ON":"OFF");
-	return true;
+    nlinfo("VerboseLogging is %s",VerboseLog?"ON":"OFF");
+    return true;
 }
 */
 
-NLMISC_CATEGORISED_COMMAND(stringmanager, loadPhraseFile, "Merge a phrase file into string manager","<language code> <directory>[/file]")
+NLMISC_CATEGORISED_COMMAND(stringmanager, loadPhraseFile, "Merge a phrase file into string manager", "<language code> <directory>[/file]")
 {
 	if (args.size() != 2)
 		return false;
 
-	std::string	lang = args[0];
-	std::string	file = args[1];
+	std::string lang = args[0];
+	std::string file = args[1];
 
-	CStringManager::TLanguages	language = SM->checkLanguageCode(lang);
+	CStringManager::TLanguages language = SM->checkLanguageCode(lang);
 
 	if (SM->getLanguageCodeString(language) != lang)
 	{
@@ -1188,7 +1158,7 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, loadPhraseFile, "Merge a phrase file i
 			return false;
 		}
 
-		file = CPath::standardizePath(file)+"phrase_"+lang+".txt";
+		file = CPath::standardizePath(file) + "phrase_" + lang + ".txt";
 
 		if (!CFile::fileExists(file))
 		{
@@ -1202,17 +1172,17 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, loadPhraseFile, "Merge a phrase file i
 	return true;
 }
 
-NLMISC_CATEGORISED_COMMAND(stringmanager, mergeWordFile, "Merge a word file into string manager","<language code> <word type> <directory>[/file]")
+NLMISC_CATEGORISED_COMMAND(stringmanager, mergeWordFile, "Merge a word file into string manager", "<language code> <word type> <directory>[/file]")
 {
 	if (args.size() != 3)
 		return false;
 
-	std::string	lang = args[0];
-	std::string	word = toLowerAscii(args[1]);
-	std::string	file = args[2];
+	std::string lang = args[0];
+	std::string word = toLowerAscii(args[1]);
+	std::string file = args[2];
 
 	// get language
-	CStringManager::TLanguages	language = SM->checkLanguageCode(lang);
+	CStringManager::TLanguages language = SM->checkLanguageCode(lang);
 	if (SM->getLanguageCodeString(language) != lang)
 	{
 		log.displayNL("Failed, language '%s' is not a valid language", lang.c_str());
@@ -1220,10 +1190,10 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, mergeWordFile, "Merge a word file into
 	}
 
 	// get word type
-	CStringManager::TParameterTraitList	typeNames = CStringManager::CParameterTraits::getParameterTraitsNames();
-	STRING_MANAGER::TParamType	wordType;
-	uint	i;
-	for (i=0; i<typeNames.size(); ++i)
+	CStringManager::TParameterTraitList typeNames = CStringManager::CParameterTraits::getParameterTraitsNames();
+	STRING_MANAGER::TParamType wordType;
+	uint i;
+	for (i = 0; i < typeNames.size(); ++i)
 	{
 		if (toLowerAscii(typeNames[i].second) == word)
 		{
@@ -1246,7 +1216,7 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, mergeWordFile, "Merge a word file into
 			return false;
 		}
 
-		file = CPath::standardizePath(file)+word+"_words_"+lang+".txt";
+		file = CPath::standardizePath(file) + word + "_words_" + lang + ".txt";
 
 		if (!CFile::fileExists(file))
 		{
@@ -1264,20 +1234,20 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, mergeWordFile, "Merge a word file into
 	return true;
 }
 
-NLMISC_CATEGORISED_COMMAND(stringmanager, displayEntityWords, "display entity words for a language and type","<language code> <word type> [wordwildcard]")
+NLMISC_CATEGORISED_COMMAND(stringmanager, displayEntityWords, "display entity words for a language and type", "<language code> <word type> [wordwildcard]")
 {
 	if (args.size() < 2 || args.size() > 3)
 		return false;
 
-	std::string	lang = args[0];
-	std::string	word = toLowerAscii(args[1]);
-	std::string	wc;
+	std::string lang = args[0];
+	std::string word = toLowerAscii(args[1]);
+	std::string wc;
 
 	if (args.size() == 3)
 		wc = args[2];
 
 	// get language
-	CStringManager::TLanguages	language = SM->checkLanguageCode(lang);
+	CStringManager::TLanguages language = SM->checkLanguageCode(lang);
 	if (SM->getLanguageCodeString(language) != lang)
 	{
 		log.displayNL("Failed, language '%s' is not a valid language", lang.c_str());
@@ -1285,10 +1255,10 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, displayEntityWords, "display entity wo
 	}
 
 	// get word type
-	CStringManager::TParameterTraitList	typeNames = CStringManager::CParameterTraits::getParameterTraitsNames();
-	STRING_MANAGER::TParamType	wordType;
-	uint	i;
-	for (i=0; i<typeNames.size(); ++i)
+	CStringManager::TParameterTraitList typeNames = CStringManager::CParameterTraits::getParameterTraitsNames();
+	STRING_MANAGER::TParamType wordType;
+	uint i;
+	for (i = 0; i < typeNames.size(); ++i)
 	{
 		if (toLowerAscii(typeNames[i].second) == word)
 		{
@@ -1306,32 +1276,31 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, displayEntityWords, "display entity wo
 	return true;
 }
 
-NLMISC_CATEGORISED_COMMAND(stringmanager, setEntityWord, "set a word value","<language code>.<word type>.<word>.<determinant> <value>")
+NLMISC_CATEGORISED_COMMAND(stringmanager, setEntityWord, "set a word value", "<language code>.<word type>.<word>.<determinant> <value>")
 {
 	if (args.size() < 2 || args.size() > 5)
 		return false;
 
-	std::string	path = args[0];
-	uint	wi = 1;
+	std::string path = args[0];
+	uint wi = 1;
 
-	while (wi < args.size()-1)
-		path += "."+args[wi++];
+	while (wi < args.size() - 1)
+		path += "." + args[wi++];
 
-	ucstring	word(args[wi]);
+	ucstring word(args[wi]);
 
 	// get language
 	SM->setEntityWord(path, word);
 	return true;
 }
 
-
-NLMISC_CATEGORISED_COMMAND(stringmanager, loadBotNames, "load a bot names file","[bot names file] [reset bot names (0|1)]")
+NLMISC_CATEGORISED_COMMAND(stringmanager, loadBotNames, "load a bot names file", "[bot names file] [reset bot names (0|1)]")
 {
 	if (args.size() > 2)
 		return false;
 
-	std::string	filename = "bot_names.txt";
-	bool		resetBotnames = false;
+	std::string filename = "bot_names.txt";
+	bool resetBotnames = false;
 
 	if (args.size() > 0)
 		filename = args[0];
@@ -1343,12 +1312,12 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, loadBotNames, "load a bot names file",
 	return true;
 }
 
-NLMISC_CATEGORISED_COMMAND(stringmanager, setBotName, "set a bot name","<bot name (utf8)> <translation (utf8)>")
+NLMISC_CATEGORISED_COMMAND(stringmanager, setBotName, "set a bot name", "<bot name (utf8)> <translation (utf8)>")
 {
 	if (args.size() != 2)
 		return false;
 
-	ucstring	botname, translation;
+	ucstring botname, translation;
 
 	botname.fromUtf8(args[0]);
 	translation.fromUtf8(args[1]);
@@ -1357,18 +1326,18 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, setBotName, "set a bot name","<bot nam
 	return true;
 }
 
-NLMISC_CATEGORISED_COMMAND(stringmanager, readStringManagerRepository, "parse a whole repository with phrases and words (language is optional, none will load rep for all languages)","<directory> [language code]")
+NLMISC_CATEGORISED_COMMAND(stringmanager, readStringManagerRepository, "parse a whole repository with phrases and words (language is optional, none will load rep for all languages)", "<directory> [language code]")
 {
 	if (args.size() < 1 || args.size() > 2)
 		return false;
 
-	string	path = args[0];
+	string path = args[0];
 
 	if (args.size() == 2)
 	{
-		string	lang = args[1];
+		string lang = args[1];
 
-		CStringManager::TLanguages	language = SM->checkLanguageCode(lang);
+		CStringManager::TLanguages language = SM->checkLanguageCode(lang);
 		if (SM->getLanguageCodeString(language) != lang)
 		{
 			log.displayNL("Failed, language '%s' is not a valid language", lang.c_str());
@@ -1376,16 +1345,16 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, readStringManagerRepository, "parse a 
 		}
 
 		log.displayNL("Reading text repository '%s' for language '%s'",
-			path.c_str(),
-			lang.c_str());
+		    path.c_str(),
+		    lang.c_str());
 		SM->readRepository(path, language, &log);
 	}
 	else
 	{
 		log.displayNL("Reading text repository '%s' for all language",
-			path.c_str());
-		uint	i;
-		for (i=1; i<CStringManager::NB_LANGUAGES; ++i)
+		    path.c_str());
+		uint i;
+		for (i = 1; i < CStringManager::NB_LANGUAGES; ++i)
 		{
 			SM->readRepository(path, (CStringManager::TLanguages)i, &log);
 		}
@@ -1394,16 +1363,15 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, readStringManagerRepository, "parse a 
 	return true;
 }
 
-
-NLMISC_CATEGORISED_COMMAND(stringmanager, defaultSetPhraseLanguage, "Selects the language overriden by AIS messages","<language code>")
+NLMISC_CATEGORISED_COMMAND(stringmanager, defaultSetPhraseLanguage, "Selects the language overriden by AIS messages", "<language code>")
 {
 	if (args.size() < 0 || args.size() > 1)
 		return false;
 
-	if (args.size()!=0)
+	if (args.size() != 0)
 	{
 		CStringManager::TLanguages language = CStringManager::english;
-		if (args[0]=="all")
+		if (args[0] == "all")
 		{
 			language = CStringManager::NB_LANGUAGES;
 		}
@@ -1414,13 +1382,11 @@ NLMISC_CATEGORISED_COMMAND(stringmanager, defaultSetPhraseLanguage, "Selects the
 		SM->setDefaultSetPhraseLanguage(language);
 	}
 	CStringManager::TLanguages language = SM->getDefaultSetPhraseLanguage();
-	std::string	languageCode;
-	if (language==CStringManager::NB_LANGUAGES)
+	std::string languageCode;
+	if (language == CStringManager::NB_LANGUAGES)
 		languageCode = "all";
 	else
-		languageCode = 	SM->getLanguageCodeString(language);
+		languageCode = SM->getLanguageCodeString(language);
 	log.displayNL("Language overriden by AIS messages is %s", languageCode.c_str());
 	return true;
 }
-
-

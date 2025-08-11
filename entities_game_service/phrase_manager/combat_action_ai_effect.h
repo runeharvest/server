@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_COMBAT_ACTION_AI_EFFECT_H
 #define RY_COMBAT_ACTION_AI_EFFECT_H
 
@@ -32,30 +30,32 @@ public:
 	}
 
 	/// build from an ai action
-	virtual bool initFromAiAction( const CStaticAiAction *aiAction, CCombatPhrase *phrase );
+	virtual bool initFromAiAction(const CStaticAiAction *aiAction, CCombatPhrase *phrase);
 
 	// validate
-	virtual bool validate(CCombatPhrase * phrase, std::string &errorCode) 
-	{ return true; }
+	virtual bool validate(CCombatPhrase *phrase, std::string &errorCode)
+	{
+		return true;
+	}
 
 	// apply
 	virtual void apply(CCombatPhrase *phrase);
 
 	/// apply on entity
-	virtual void applyOnEntity( CEntityBase *entity, float successFactor );
-protected:	
+	virtual void applyOnEntity(CEntityBase *entity, float successFactor);
+
+protected:
 	/// apply combat action effects on target
-	void applyOnTarget( uint8 targetIndex, CCombatPhrase *phrase);
+	void applyOnTarget(uint8 targetIndex, CCombatPhrase *phrase);
 
 protected:
 	/// effect duration
-	NLMISC::TGameCycle	_EffectDuration;
+	NLMISC::TGameCycle _EffectDuration;
 	/// effect family
 	EFFECT_FAMILIES::TEffectFamily _EffectFamily;
 	/// effect param value
-	sint32				_ParamValue;
+	sint32 _ParamValue;
 };
-
 
 #endif // RY_COMBAT_ACTION_AI_EFFECT_H
 

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 //////////////
 //	INCLUDE	//
 //////////////
@@ -34,7 +32,6 @@
 #include "phrase_manager/area_effect.h"
 #include "aura_effect.h"
 
-
 //////////////
 //	USING	//
 //////////////
@@ -45,13 +42,12 @@ using namespace NLNET;
 NL_INSTANCE_COUNTER_IMPL(CAuraBaseEffect);
 NL_INSTANCE_COUNTER_IMPL(IAuraEffectFactory);
 
-vector< pair< POWERS::TPowerType , IAuraEffectFactory* > >* IAuraEffectFactory::Factories = NULL;
-
+vector<pair<POWERS::TPowerType, IAuraEffectFactory *>> *IAuraEffectFactory::Factories = NULL;
 
 //--------------------------------------------------------------
 //		CAuraRootEffect::update()
 //--------------------------------------------------------------
-bool CAuraRootEffect::update(CTimerEvent * event, bool )
+bool CAuraRootEffect::update(CTimerEvent *event, bool)
 {
 	// get creator
 	CEntityBase *creator = CEntityBaseManager::getEntityBasePtr(_CreatorRowId);
@@ -60,7 +56,7 @@ bool CAuraRootEffect::update(CTimerEvent * event, bool )
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
 	}
-	
+
 	// get entities in surrouding area
 	const sint32 posX = creator->getX();
 	const sint32 posY = creator->getY();
@@ -69,14 +65,14 @@ bool CAuraRootEffect::update(CTimerEvent * event, bool )
 		// entity isn't teleporting
 		CAuraEntitySelector entitiesSelector;
 		// no offensive aura right now, need to check last bool is this changes
-		entitiesSelector.buildTargetList( creator, posX, posY, _AuraRadius, false, true );
+		entitiesSelector.buildTargetList(creator, posX, posY, _AuraRadius, false, true);
 
 		// create or update effect on entities returned
-		const vector<CEntityBase*> &entities = entitiesSelector.getEntities();
+		const vector<CEntityBase *> &entities = entitiesSelector.getEntities();
 		const uint size = (uint)entities.size();
-		for (uint i = 0; i < size ; ++i)
+		for (uint i = 0; i < size; ++i)
 		{
-			if (entities[i] && isEntityValidTarget(entities[i], creator) )
+			if (entities[i] && isEntityValidTarget(entities[i], creator))
 				createEffectOnEntity(entities[i], creator);
 		}
 	}
@@ -100,7 +96,7 @@ void CAuraRootEffect::removed()
 	if (TheDataset.isAccessible(_CreatorRowId))
 	{
 		// remove fx on the actor
-		CMirrorPropValue<TYPE_VISUAL_FX> visualFx( TheDataset, _CreatorRowId, DSPropertyVISUAL_FX );
+		CMirrorPropValue<TYPE_VISUAL_FX> visualFx(TheDataset, _CreatorRowId, DSPropertyVISUAL_FX);
 		CVisualFX fx;
 		fx.unpack(visualFx.getValue());
 		fx.Aura = MAGICFX::NoAura;
@@ -119,18 +115,18 @@ void CAuraRootEffect::createEffectOnEntity(CEntityBase *entity, CEntityBase *cre
 	if (entity->getId().getType() != RYZOMID::player)
 		return;
 
-	CCharacter *character = dynamic_cast<CCharacter*> (entity);
+	CCharacter *character = dynamic_cast<CCharacter *>(entity);
 	if (!character)
 		return;
 
 	// get effects on entity and search for createdEffectFamily
-	const std::vector<CSEffectPtr>& effects = entity->getSEffects();
-	for (uint i = 0 ; i < effects.size() ; ++i)
+	const std::vector<CSEffectPtr> &effects = entity->getSEffects();
+	for (uint i = 0; i < effects.size(); ++i)
 	{
 		if (effects[i] && effects[i]->getFamily() == _CreatedEffectFamily)
 		{
 			// find an effect created by this root effect, refesh it's lifetime
-			CAuraBaseEffect *auraEffect = dynamic_cast<CAuraBaseEffect *> (static_cast<CSEffect*>(effects[i]));
+			CAuraBaseEffect *auraEffect = dynamic_cast<CAuraBaseEffect *>(static_cast<CSEffect *>(effects[i]));
 			if (!auraEffect)
 			{
 				nlwarning("<CAuraRootEffect::createEffectOnEntity> Found an effect of family %s, but cannot dynamic cast it in CAuraBaseEffect class", EFFECT_FAMILIES::toString(_CreatedEffectFamily).c_str());
@@ -152,30 +148,29 @@ void CAuraRootEffect::createEffectOnEntity(CEntityBase *entity, CEntityBase *cre
 
 	// no effect found, create one if the entity can receive this effect
 	static NLMISC::TGameCycle endDate;
-	if (character->isAuraEffective(_PowerType, endDate, creator->getId()) || _IsFromConsumable )
+	if (character->isAuraEffective(_PowerType, endDate, creator->getId()) || _IsFromConsumable)
 	{
 		CAuraBaseEffect *effect = IAuraEffectFactory::buildEffectFromPowerType(_PowerType, *this, entity->getEntityRowId());
 		if (effect)
 		{
 			effect->setIsFromConsumable(_IsFromConsumable);
-			effect->setEffectDisabledEndDate( CTickEventHandler::getGameCycle() + _TargetDisableTime );
+			effect->setEffectDisabledEndDate(CTickEventHandler::getGameCycle() + _TargetDisableTime);
 			entity->addSabrinaEffect(effect);
 			character->useAura(_PowerType, CTickEventHandler::getGameCycle(), CTickEventHandler::getGameCycle() + _TargetDisableTime, creator->getId());
 
-			//send message to newly affected entity
+			// send message to newly affected entity
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::power_type);
 			params[0].Enum = _PowerType;
 			PHRASE_UTILITIES::sendDynamicSystemMessage(entity->getEntityRowId(), "AURA_EFFECT_BEGIN", params);
 
 			// set visual fx on the entity (not for the acting entity)
-			if (entity->getEntityRowId() !=  _CreatorRowId)
+			if (entity->getEntityRowId() != _CreatorRowId)
 			{
 				character->incNbAura();
 			}
 		}
 	}
 } // createEffectOnEntity //
-
 
 //--------------------------------------------------------------
 //		CAuraRootEffect::isEntityValidTarget()
@@ -190,16 +185,16 @@ bool CAuraRootEffect::isEntityValidTarget(CEntityBase *entity, CEntityBase *crea
 	if (entity == creator)
 		return true;
 
-	CCharacter *userPlayer = dynamic_cast<CCharacter*> (creator);
+	CCharacter *userPlayer = dynamic_cast<CCharacter *>(creator);
 	if (!userPlayer)
-		return false;	
+		return false;
 
-	CCharacter *targetPlayer = dynamic_cast<CCharacter*> (entity);
+	CCharacter *targetPlayer = dynamic_cast<CCharacter *>(entity);
 	if (!targetPlayer)
 		return false;
 
 	// TODO: kxu: why this???
-	//userPlayer->getPVPInterface().canHelp( targetPlayer );
+	// userPlayer->getPVPInterface().canHelp( targetPlayer );
 
 	// test team
 	const uint16 teamId = userPlayer->getTeamId();
@@ -215,26 +210,26 @@ bool CAuraRootEffect::isEntityValidTarget(CEntityBase *entity, CEntityBase *crea
 			return true;
 	}
 
-	CCreature * creature = CreatureManager.getCreature( entity->getId() );
+	CCreature *creature = CreatureManager.getCreature(entity->getId());
 	if (creature && creator)
 	{
-		if (creature->checkFactionAttackable( creator->getId() ))
+		if (creature->checkFactionAttackable(creator->getId()))
 		{
 			return true;
 		}
 	}
 
 	return false;
-}// isEntityValidTarget //
+} // isEntityValidTarget //
 
-CAuraBaseEffect::CAuraBaseEffect( const CAuraRootEffect &rootEffect, TDataSetRow targetRowId) :
-		CSTimedEffect(	rootEffect.getCreatorRowId(), 
-						targetRowId, rootEffect.createdEffectFamily(), 
-						false, 
-						rootEffect.getParamValue(), 
-						0, 
-						CTickEventHandler::getGameCycle() + (NLMISC::TGameCycle)AurasUpdateFrequency.get() + 10)
-{		
+CAuraBaseEffect::CAuraBaseEffect(const CAuraRootEffect &rootEffect, TDataSetRow targetRowId)
+    : CSTimedEffect(rootEffect.getCreatorRowId(),
+          targetRowId, rootEffect.createdEffectFamily(),
+          false,
+          rootEffect.getParamValue(),
+          0,
+          CTickEventHandler::getGameCycle() + (NLMISC::TGameCycle)AurasUpdateFrequency.get() + 10)
+{
 	_PowerType = rootEffect.powerType();
 	_IsFromConsumable = false;
 }
@@ -256,28 +251,27 @@ void CAuraBaseEffect::removed()
 {
 	if (!TheDataset.isAccessible(_TargetRowId))
 		return;
-	
+
 	// send message
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::power_type);
 	params[0].Enum = _PowerType;
 	PHRASE_UTILITIES::sendDynamicSystemMessage(_TargetRowId, "AURA_EFFECT_END", params);
-	
-	//remove visual fx
+
+	// remove visual fx
 	CCharacter *player = PlayerManager.getChar(_TargetRowId);
 	if (!player)
 		return;
-	
+
 	player->decNbAura();
-	
+
 	if (_EffectIndexInDB >= 0)
 	{
 		if (_IsFromConsumable)
 			player->removeEffectInDB((uint8)_EffectIndexInDB, true);
 		else
-			player->disableEffectInDB( (uint8)_EffectIndexInDB,true, _DisabledEndDate);
+			player->disableEffectInDB((uint8)_EffectIndexInDB, true, _DisabledEndDate);
 	}
 } // removed //
-
 
 CAuraEffectTFactory<CAuraBaseEffect> *CMeleeProtectionEffectFactoryInstance = new CAuraEffectTFactory<CAuraBaseEffect>(POWERS::MeleeProtection);
 CAuraEffectTFactory<CAuraBaseEffect> *CRangeProtectionEffectFactoryInstance = new CAuraEffectTFactory<CAuraBaseEffect>(POWERS::Umbrella);

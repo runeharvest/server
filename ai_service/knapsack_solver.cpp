@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "knapsack_solver.h"
 
@@ -30,30 +28,30 @@ std::string CKnapsackSolver::toString(Algorithm a)
 {
 	switch (a)
 	{
-	case Optimal:				return "Optimal";
-	case FullAddCheck:			return "FullAddCheck";
-	case AddCheck:				return "AddCheck";
-	case FastAddCheck:			return "FastAddCheck";
-	case FullSingleReplace:		return "FullSingleReplace";
-	case SingleReplace:			return "SingleReplace";
-	case FastSingleReplace:		return "FastSingleReplace";
-	case VeryFastSingleReplace:	return "VeryFastSingleReplace";
-	case TakeAll:				return "TakeAll";
-	default:					return "undefined";
+	case Optimal: return "Optimal";
+	case FullAddCheck: return "FullAddCheck";
+	case AddCheck: return "AddCheck";
+	case FastAddCheck: return "FastAddCheck";
+	case FullSingleReplace: return "FullSingleReplace";
+	case SingleReplace: return "SingleReplace";
+	case FastSingleReplace: return "FastSingleReplace";
+	case VeryFastSingleReplace: return "VeryFastSingleReplace";
+	case TakeAll: return "TakeAll";
+	default: return "undefined";
 	}
 }
 
-CKnapsackSolver::Algorithm CKnapsackSolver::fromString(std::string const& a)
+CKnapsackSolver::Algorithm CKnapsackSolver::fromString(std::string const &a)
 {
-	if (a=="Optimal")				return Optimal;
-	if (a=="FullAddCheck")			return FullAddCheck;
-	if (a=="AddCheck")				return AddCheck;
-	if (a=="FastAddCheck")			return FastAddCheck;
-	if (a=="FullSingleReplace")		return FullSingleReplace;
-	if (a=="SingleReplace")			return SingleReplace;
-	if (a=="FastSingleReplace")		return FastSingleReplace;
-	if (a=="VeryFastSingleReplace")	return VeryFastSingleReplace;
-	if (a=="TakeAll")				return TakeAll;
+	if (a == "Optimal") return Optimal;
+	if (a == "FullAddCheck") return FullAddCheck;
+	if (a == "AddCheck") return AddCheck;
+	if (a == "FastAddCheck") return FastAddCheck;
+	if (a == "FullSingleReplace") return FullSingleReplace;
+	if (a == "SingleReplace") return SingleReplace;
+	if (a == "FastSingleReplace") return FastSingleReplace;
+	if (a == "VeryFastSingleReplace") return VeryFastSingleReplace;
+	if (a == "TakeAll") return TakeAll;
 	return UndefinedAlgorithm;
 }
 
@@ -66,16 +64,16 @@ void CKnapsackSolver::optimize(float wMax, Algorithm algorithm)
 	// Solve the problem
 	switch (algorithm)
 	{
-	case FullAddCheck:			optimizeFullAddCheck();				break;
-	case AddCheck:				optimizeAddCheck();					break;
-	case FastAddCheck:			optimizeFastAddCheck();				break;
-	case FullSingleReplace:		optimizeFullSingleReplace();		break;
-	case SingleReplace:			optimizeSingleReplace();			break;
+	case FullAddCheck: optimizeFullAddCheck(); break;
+	case AddCheck: optimizeAddCheck(); break;
+	case FastAddCheck: optimizeFastAddCheck(); break;
+	case FullSingleReplace: optimizeFullSingleReplace(); break;
+	case SingleReplace: optimizeSingleReplace(); break;
 	default:
-	case FastSingleReplace:		optimizeFastSingleReplace();		break;
-	case VeryFastSingleReplace:	optimizeVeryFastSingleReplace();	break;
-	case Optimal:				optimizeOptimal();					break;
-	case TakeAll:				optimizeTakeAll();					break;
+	case FastSingleReplace: optimizeFastSingleReplace(); break;
+	case VeryFastSingleReplace: optimizeVeryFastSingleReplace(); break;
+	case Optimal: optimizeOptimal(); break;
+	case TakeAll: optimizeTakeAll(); break;
 	}
 }
 
@@ -86,35 +84,35 @@ void CKnapsackSolver::optimizeOptimal()
 	H_AUTO(CKnapsackSolver_optimizeOptimal);
 	// :FIXME: Not thread safe
 	// Allocate temporary solution
-	bool* take = new bool[size()];
-	for (size_t i=0; i<size(); ++i)
+	bool *take = new bool[size()];
+	for (size_t i = 0; i < size(); ++i)
 		take[i] = false;
 	// Run the optimization recursion
-	optimizeOptimalRec((int)size()-1, _WMax, 0, take);
+	optimizeOptimalRec((int)size() - 1, _WMax, 0, take);
 	// Delete temporary solution
-	delete [] take;
+	delete[] take;
 }
 
 /// @param i take[j] for j>i are already determined by the recursion
 /// @param w Free weight to fill
 /// @param v Sum of the taken values (ie all value(j) where take[j] is true and j > i)
 /// @param take Current examined partial solution
-void CKnapsackSolver::optimizeOptimalRec(int i, float w, float v, bool* take)
+void CKnapsackSolver::optimizeOptimalRec(int i, float w, float v, bool *take)
 {
-	nlassert(i>=-1);
-	if (i==-1)
+	nlassert(i >= -1);
+	if (i == -1)
 	{
 		if (v > _VBest)
 		{
 			_WBest = _WMax - w;
 			_VBest = v;
-			std::copy(take, take+size(), _Take);
+			std::copy(take, take + size(), _Take);
 		}
 	}
 	else
 	{
 		take[i] = false;
-		optimizeOptimalRec(i-1, w, v, take);
+		optimizeOptimalRec(i - 1, w, v, take);
 		if (weight(i) <= w)
 		{
 			take[i] = true;
@@ -132,9 +130,9 @@ void CKnapsackSolver::optimizeOptimalRec(int i, float w, float v, bool* take)
 void CKnapsackSolver::optimizeAddCheck()
 {
 	H_AUTO(CKnapsackSolver_optimizeAddCheck);
-	int i = (int)size()-1;
+	int i = (int)size() - 1;
 	float w = _WMax - _WBest;
-	while (i>=0)
+	while (i >= 0)
 	{
 		if (!_Take[i] && weight(i) <= w)
 		{
@@ -152,9 +150,9 @@ void CKnapsackSolver::optimizeAddCheck()
 void CKnapsackSolver::optimizeFullAddCheck()
 {
 	H_AUTO(CKnapsackSolver_optimizeFullAddCheck);
-	int i = (int)size()-1;
+	int i = (int)size() - 1;
 	float w = _WMax - _WBest;
-	while (i>=0)
+	while (i >= 0)
 	{
 		if (!_Take[i] && weight(i) <= w)
 		{
@@ -171,9 +169,9 @@ void CKnapsackSolver::optimizeFullAddCheck()
 void CKnapsackSolver::optimizeFastAddCheck()
 {
 	H_AUTO(CKnapsackSolver_optimizeFastAddCheck);
-	int i = (int)size()-1;
+	int i = (int)size() - 1;
 	float w = _WMax - _WBest;
-	while (i>=0)
+	while (i >= 0)
 	{
 		if (!_Take[i])
 		{
@@ -195,8 +193,8 @@ void CKnapsackSolver::optimizeFullSingleReplace()
 {
 	optimizeFullAddCheck();
 	H_AUTO(CKnapsackSolver_optimizeFullSingleReplace);
-	int i = (int)size()-1;
-	while (i>=0)
+	int i = (int)size() - 1;
+	while (i >= 0)
 	{
 		// For each not taken ith element
 		if (!_Take[i])
@@ -205,10 +203,10 @@ void CKnapsackSolver::optimizeFullSingleReplace()
 			float v = value(i);
 			int worst = i;
 			// Find the worst element that ith element can replace
-			int j = (int)size()-1;
-			while (j>=0)
+			int j = (int)size() - 1;
+			while (j >= 0)
 			{
-				if (i!=j && _Take[j] && w<=weight(j) && v>value(j))
+				if (i != j && _Take[j] && w <= weight(j) && v > value(j))
 				{
 					worst = j;
 					w = weight(j);
@@ -217,7 +215,7 @@ void CKnapsackSolver::optimizeFullSingleReplace()
 				--j;
 			}
 			// If we find one untake it and take ith.
-			if (worst!=i)
+			if (worst != i)
 			{
 				_Take[worst] = false;
 				_WBest -= weight(worst);
@@ -242,8 +240,8 @@ void CKnapsackSolver::optimizeSingleReplace()
 	if (_VBest > vBest)
 		return;
 	H_AUTO(CKnapsackSolver_optimizeSingleReplace);
-	int i = (int)size()-1;
-	while (i>=0)
+	int i = (int)size() - 1;
+	while (i >= 0)
 	{
 		// For each not taken ith element
 		if (!_Take[i])
@@ -252,10 +250,10 @@ void CKnapsackSolver::optimizeSingleReplace()
 			float v = value(i);
 			int worst = i;
 			// Find the worst element that ith element can replace
-			int j = (int)size()-1;
-			while (j>=0)
+			int j = (int)size() - 1;
+			while (j >= 0)
 			{
-				if (i!=j && _Take[j] && w<=weight(j) && v>value(j))
+				if (i != j && _Take[j] && w <= weight(j) && v > value(j))
 				{
 					worst = j;
 					w = weight(j);
@@ -264,7 +262,7 @@ void CKnapsackSolver::optimizeSingleReplace()
 				--j;
 			}
 			// If we find one untake it and take ith.
-			if (worst!=i)
+			if (worst != i)
 			{
 				_Take[worst] = false;
 				_WBest -= weight(worst);
@@ -289,8 +287,8 @@ void CKnapsackSolver::optimizeFastSingleReplace()
 	if (_VBest > vBest)
 		return;
 	H_AUTO(CKnapsackSolver_optimizeFastSingleReplace);
-	int i = (int)size()-1;
-	while (i>=0)
+	int i = (int)size() - 1;
+	while (i >= 0)
 	{
 		// For each not taken ith element
 		if (!_Take[i])
@@ -299,10 +297,10 @@ void CKnapsackSolver::optimizeFastSingleReplace()
 			float v = value(i);
 			int worst = i;
 			// Find the worst element that ith element can replace
-			int j = (int)size()-1;
-			while (j>=0)
+			int j = (int)size() - 1;
+			while (j >= 0)
 			{
-				if (i!=j && _Take[j] && w<=weight(j) && v>value(j))
+				if (i != j && _Take[j] && w <= weight(j) && v > value(j))
 				{
 					worst = j;
 					w = weight(j);
@@ -311,7 +309,7 @@ void CKnapsackSolver::optimizeFastSingleReplace()
 				--j;
 			}
 			// If we find one untake it and take ith.
-			if (worst!=i)
+			if (worst != i)
 			{
 				_Take[worst] = false;
 				_WBest -= weight(worst);
@@ -337,8 +335,8 @@ void CKnapsackSolver::optimizeVeryFastSingleReplace()
 	if (_VBest > vBest)
 		return;
 	H_AUTO(CKnapsackSolver_optimizeVeryFastSingleReplace);
-	int i = (int)size()-1;
-	while (i>=0)
+	int i = (int)size() - 1;
+	while (i >= 0)
 	{
 		// For each not taken ith element
 		if (!_Take[i])
@@ -347,10 +345,10 @@ void CKnapsackSolver::optimizeVeryFastSingleReplace()
 			float v = value(i);
 			int worst = i;
 			// Find the worst element that ith element can replace
-			int j = (int)size()-1;
-			while (j>=0)
+			int j = (int)size() - 1;
+			while (j >= 0)
 			{
-				if (i!=j && _Take[j] && w<=weight(j) && v>value(j))
+				if (i != j && _Take[j] && w <= weight(j) && v > value(j))
 				{
 					worst = j;
 					w = weight(j);
@@ -360,7 +358,7 @@ void CKnapsackSolver::optimizeVeryFastSingleReplace()
 				--j;
 			}
 			// If we find one untake it and take ith.
-			if (worst!=i)
+			if (worst != i)
 			{
 				_Take[worst] = false;
 				_WBest -= weight(worst);
@@ -380,8 +378,8 @@ void CKnapsackSolver::optimizeTakeAll()
 	H_AUTO(CKnapsackSolver_optimizeTakeAll);
 	_WBest = 0;
 	_VBest = 0;
-	int i = (int)size()-1;
-	while (i>=0)
+	int i = (int)size() - 1;
+	while (i >= 0)
 	{
 		_Take[i] = true;
 		_WBest += weight(i);
@@ -390,15 +388,15 @@ void CKnapsackSolver::optimizeTakeAll()
 	}
 }
 
-CKnapsackSolver::CKnapsackSolver(IKnapsackContext* context, bool* _take)
-: _Context(context)
-, _Take(_take)
-, _AllocatedTake(_take==NULL)
-, _WBest(0.f)
-, _VBest(0.f)
-, _WMax(0.f)
+CKnapsackSolver::CKnapsackSolver(IKnapsackContext *context, bool *_take)
+    : _Context(context)
+    , _Take(_take)
+    , _AllocatedTake(_take == NULL)
+    , _WBest(0.f)
+    , _VBest(0.f)
+    , _WMax(0.f)
 {
-	if (_take==NULL && size()!=0)
+	if (_take == NULL && size() != 0)
 	{
 		size_t sz = size();
 		_Take = new bool[sz];
@@ -407,7 +405,7 @@ CKnapsackSolver::CKnapsackSolver(IKnapsackContext* context, bool* _take)
 	}
 	else
 	{
-		for (size_t i=0; i<size(); ++i)
+		for (size_t i = 0; i < size(); ++i)
 		{
 			if (take(i))
 			{
@@ -422,12 +420,12 @@ CKnapsackSolver::CKnapsackSolver(IKnapsackContext* context, bool* _take)
 CKnapsackSolver::~CKnapsackSolver()
 {
 	if (_AllocatedTake)
-		delete [] _Take;
+		delete[] _Take;
 }
 
 float CKnapsackSolver::weight(size_t i)
 {
-	if (_Context!=0)
+	if (_Context != 0)
 		return _Context->weight(i);
 	else
 		return 0.f;
@@ -435,7 +433,7 @@ float CKnapsackSolver::weight(size_t i)
 
 float CKnapsackSolver::value(size_t i)
 {
-	if (_Context!=0)
+	if (_Context != 0)
 		return _Context->value(i);
 	else
 		return 0.f;
@@ -443,7 +441,7 @@ float CKnapsackSolver::value(size_t i)
 
 size_t CKnapsackSolver::size()
 {
-	if (_Context!=0)
+	if (_Context != 0)
 		return _Context->size();
 	else
 		return 0;
@@ -451,7 +449,7 @@ size_t CKnapsackSolver::size()
 
 bool CKnapsackSolver::take(size_t i)
 {
-	if (_Take!=0 && i>=0 && i<size())
+	if (_Take != 0 && i >= 0 && i < size())
 		return _Take[i];
 	else
 		return false;
@@ -476,16 +474,16 @@ float CKnapsackSolver::totalFreeWeight()
 // CKnapsackContext                                                         //
 //////////////////////////////////////////////////////////////////////////////
 
-CKnapsackContext::CKnapsackContext(size_t size, float* weights, float* values)
-: _Size(size)
-, _Weights(weights)
-, _Values(values)
+CKnapsackContext::CKnapsackContext(size_t size, float *weights, float *values)
+    : _Size(size)
+    , _Weights(weights)
+    , _Values(values)
 {
 }
 
 float CKnapsackContext::weight(size_t i)
 {
-	if (i>=0 && i<_Size)
+	if (i >= 0 && i < _Size)
 		return _Weights[i];
 	else
 		return 0.f;
@@ -493,7 +491,7 @@ float CKnapsackContext::weight(size_t i)
 
 float CKnapsackContext::value(size_t i)
 {
-	if (i>=0 && i<_Size)
+	if (i >= 0 && i < _Size)
 		return _Values[i];
 	else
 		return 0.f;

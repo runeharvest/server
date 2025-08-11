@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_CRAFT_PARAMETERS
 #define RY_CRAFT_PARAMETERS
-
 
 // misc
 #include "nel/misc/variable.h"
@@ -35,8 +32,8 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// Common factors
 	//////////////////////////////////////////////////////////////////////////
-	//Durability
-	// melee weapons
+	// Durability
+	//  melee weapons
 	static NLMISC::CVariable<float> DaggerDurability;
 	static NLMISC::CVariable<float> SwordDurability;
 	static NLMISC::CVariable<float> MaceDurability;
@@ -48,7 +45,7 @@ public:
 	static NLMISC::CVariable<float> TwoHandAxeDurability;
 	static NLMISC::CVariable<float> PikeDurability;
 	static NLMISC::CVariable<float> TwoHandMaceDurability;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchDurability;
 	static NLMISC::CVariable<float> BowrifleDurability;
@@ -56,7 +53,7 @@ public:
 	static NLMISC::CVariable<float> PistolDurability;
 	static NLMISC::CVariable<float> BowpistolDurability;
 	static NLMISC::CVariable<float> RifleDurability;
-	
+
 	// ammo
 	static NLMISC::CVariable<float> AutolaunchAmmoDurability;
 	static NLMISC::CVariable<float> BowrifleAmmoDurability;
@@ -64,7 +61,7 @@ public:
 	static NLMISC::CVariable<float> PistolAmmoDurability;
 	static NLMISC::CVariable<float> BowpistolAmmoDurability;
 	static NLMISC::CVariable<float> RifleAmmoDurability;
-		
+
 	// armor and shield
 	static NLMISC::CVariable<float> ShieldDurability;
 	static NLMISC::CVariable<float> BucklerDurability;
@@ -84,7 +81,7 @@ public:
 	static NLMISC::CVariable<float> HeavySleevesDurability;
 	static NLMISC::CVariable<float> HeavyVestDurability;
 	static NLMISC::CVariable<float> HeavyHelmetDurability;
-	
+
 	// jewel
 	static NLMISC::CVariable<float> AnkletDurability;
 	static NLMISC::CVariable<float> BraceletDurability;
@@ -101,10 +98,9 @@ public:
 	static NLMISC::CVariable<float> RangeWeaponCraftingToolDurability;
 	static NLMISC::CVariable<float> MeleeWeaponCraftingToolDurability;
 	static NLMISC::CVariable<float> ToolCraftingToolDurability;
-		
-		
-	//Weight
-	// melee weapons
+
+	// Weight
+	//  melee weapons
 	static NLMISC::CVariable<float> DaggerWeight;
 	static NLMISC::CVariable<float> SwordWeight;
 	static NLMISC::CVariable<float> MaceWeight;
@@ -116,7 +112,7 @@ public:
 	static NLMISC::CVariable<float> TwoHandAxeWeight;
 	static NLMISC::CVariable<float> PikeWeight;
 	static NLMISC::CVariable<float> TwoHandMaceWeight;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchWeight;
 	static NLMISC::CVariable<float> BowrifleWeight;
@@ -124,7 +120,7 @@ public:
 	static NLMISC::CVariable<float> PistolWeight;
 	static NLMISC::CVariable<float> BowpistolWeight;
 	static NLMISC::CVariable<float> RifleWeight;
-	
+
 	// ammo
 	static NLMISC::CVariable<float> AutolaunchAmmoWeight;
 	static NLMISC::CVariable<float> BowrifleAmmoWeight;
@@ -132,7 +128,7 @@ public:
 	static NLMISC::CVariable<float> PistolAmmoWeight;
 	static NLMISC::CVariable<float> BowpistolAmmoWeight;
 	static NLMISC::CVariable<float> RifleAmmoWeight;
-	
+
 	// armor and shield
 	static NLMISC::CVariable<float> ShieldWeight;
 	static NLMISC::CVariable<float> BucklerWeight;
@@ -152,7 +148,7 @@ public:
 	static NLMISC::CVariable<float> HeavySleevesWeight;
 	static NLMISC::CVariable<float> HeavyVestWeight;
 	static NLMISC::CVariable<float> HeavyHelmetWeight;
-	
+
 	// jewel
 	static NLMISC::CVariable<float> AnkletWeight;
 	static NLMISC::CVariable<float> BraceletWeight;
@@ -160,9 +156,9 @@ public:
 	static NLMISC::CVariable<float> EaringWeight;
 	static NLMISC::CVariable<float> PendantWeight;
 	static NLMISC::CVariable<float> RingWeight;
-	
-	//SapLoad Min
-	// melee weapons
+
+	// SapLoad Min
+	//  melee weapons
 	static NLMISC::CVariable<float> DaggerSapLoad;
 	static NLMISC::CVariable<float> SwordSapLoad;
 	static NLMISC::CVariable<float> MaceSapLoad;
@@ -174,7 +170,7 @@ public:
 	static NLMISC::CVariable<float> TwoHandAxeSapLoad;
 	static NLMISC::CVariable<float> PikeSapLoad;
 	static NLMISC::CVariable<float> TwoHandMaceSapLoad;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchSapLoad;
 	static NLMISC::CVariable<float> BowrifleSapLoad;
@@ -182,7 +178,7 @@ public:
 	static NLMISC::CVariable<float> PistolSapLoad;
 	static NLMISC::CVariable<float> BowpistolSapLoad;
 	static NLMISC::CVariable<float> RifleSapLoad;
-	
+
 	// ammo
 	static NLMISC::CVariable<float> AutolaunchAmmoSapLoad;
 	static NLMISC::CVariable<float> BowrifleAmmoSapLoad;
@@ -190,7 +186,7 @@ public:
 	static NLMISC::CVariable<float> PistolAmmoSapLoad;
 	static NLMISC::CVariable<float> BowpistolAmmoSapLoad;
 	static NLMISC::CVariable<float> RifleAmmoSapLoad;
-	
+
 	// armor and shield
 	static NLMISC::CVariable<float> ShieldSapLoad;
 	static NLMISC::CVariable<float> BucklerSapLoad;
@@ -210,7 +206,7 @@ public:
 	static NLMISC::CVariable<float> HeavySleevesSapLoad;
 	static NLMISC::CVariable<float> HeavyVestSapLoad;
 	static NLMISC::CVariable<float> HeavyHelmetSapLoad;
-	
+
 	// jewel
 	static NLMISC::CVariable<float> AnkletSapLoad;
 	static NLMISC::CVariable<float> BraceletSapLoad;
@@ -219,8 +215,8 @@ public:
 	static NLMISC::CVariable<float> PendantSapLoad;
 	static NLMISC::CVariable<float> RingSapLoad;
 
-	//SapLoad Max
-	// melee weapons
+	// SapLoad Max
+	//  melee weapons
 	static NLMISC::CVariable<float> DaggerSapLoadMax;
 	static NLMISC::CVariable<float> SwordSapLoadMax;
 	static NLMISC::CVariable<float> MaceSapLoadMax;
@@ -232,7 +228,7 @@ public:
 	static NLMISC::CVariable<float> TwoHandAxeSapLoadMax;
 	static NLMISC::CVariable<float> PikeSapLoadMax;
 	static NLMISC::CVariable<float> TwoHandMaceSapLoadMax;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchSapLoadMax;
 	static NLMISC::CVariable<float> BowrifleSapLoadMax;
@@ -240,7 +236,7 @@ public:
 	static NLMISC::CVariable<float> PistolSapLoadMax;
 	static NLMISC::CVariable<float> BowpistolSapLoadMax;
 	static NLMISC::CVariable<float> RifleSapLoadMax;
-	
+
 	// ammo
 	static NLMISC::CVariable<float> AutolaunchAmmoSapLoadMax;
 	static NLMISC::CVariable<float> BowrifleAmmoSapLoadMax;
@@ -248,7 +244,7 @@ public:
 	static NLMISC::CVariable<float> PistolAmmoSapLoadMax;
 	static NLMISC::CVariable<float> BowpistolAmmoSapLoadMax;
 	static NLMISC::CVariable<float> RifleAmmoSapLoadMax;
-	
+
 	// armor and shield
 	static NLMISC::CVariable<float> ShieldSapLoadMax;
 	static NLMISC::CVariable<float> BucklerSapLoadMax;
@@ -268,7 +264,7 @@ public:
 	static NLMISC::CVariable<float> HeavySleevesSapLoadMax;
 	static NLMISC::CVariable<float> HeavyVestSapLoadMax;
 	static NLMISC::CVariable<float> HeavyHelmetSapLoadMax;
-	
+
 	// jewel
 	static NLMISC::CVariable<float> AnkletSapLoadMax;
 	static NLMISC::CVariable<float> BraceletSapLoadMax;
@@ -276,12 +272,12 @@ public:
 	static NLMISC::CVariable<float> EaringSapLoadMax;
 	static NLMISC::CVariable<float> PendantSapLoadMax;
 	static NLMISC::CVariable<float> RingSapLoadMax;
-	
+
 	//////////////////////////////////////////////////////////////////////////
 	// Weapons factors
 	//////////////////////////////////////////////////////////////////////////
-	//Dmg Min for melee weapon, range weapon (modifier), ammo
-	// melee weapons
+	// Dmg Min for melee weapon, range weapon (modifier), ammo
+	//  melee weapons
 	static NLMISC::CVariable<float> DaggerDmg;
 	static NLMISC::CVariable<float> SwordDmg;
 	static NLMISC::CVariable<float> MaceDmg;
@@ -293,7 +289,7 @@ public:
 	static NLMISC::CVariable<float> TwoHandAxeDmg;
 	static NLMISC::CVariable<float> PikeDmg;
 	static NLMISC::CVariable<float> TwoHandMaceDmg;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchDmg;
 	static NLMISC::CVariable<float> BowrifleDmg;
@@ -301,7 +297,7 @@ public:
 	static NLMISC::CVariable<float> PistolDmg;
 	static NLMISC::CVariable<float> BowpistolDmg;
 	static NLMISC::CVariable<float> RifleDmg;
-	
+
 	// ammo
 	static NLMISC::CVariable<float> AutolaunchAmmoDmg;
 	static NLMISC::CVariable<float> BowrifleAmmoDmg;
@@ -310,8 +306,8 @@ public:
 	static NLMISC::CVariable<float> BowpistolAmmoDmg;
 	static NLMISC::CVariable<float> RifleAmmoDmg;
 
-	//Dmg Max for melee weapon, range weapon (modifier), ammo
-	// melee weapons
+	// Dmg Max for melee weapon, range weapon (modifier), ammo
+	//  melee weapons
 	static NLMISC::CVariable<float> DaggerDmgMax;
 	static NLMISC::CVariable<float> SwordDmgMax;
 	static NLMISC::CVariable<float> MaceDmgMax;
@@ -323,7 +319,7 @@ public:
 	static NLMISC::CVariable<float> TwoHandAxeDmgMax;
 	static NLMISC::CVariable<float> PikeDmgMax;
 	static NLMISC::CVariable<float> TwoHandMaceDmgMax;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchDmgMax;
 	static NLMISC::CVariable<float> BowrifleDmgMax;
@@ -331,7 +327,7 @@ public:
 	static NLMISC::CVariable<float> PistolDmgMax;
 	static NLMISC::CVariable<float> BowpistolDmgMax;
 	static NLMISC::CVariable<float> RifleDmgMax;
-	
+
 	// ammo
 	static NLMISC::CVariable<float> AutolaunchAmmoDmgMax;
 	static NLMISC::CVariable<float> BowrifleAmmoDmgMax;
@@ -339,10 +335,9 @@ public:
 	static NLMISC::CVariable<float> PistolAmmoDmgMax;
 	static NLMISC::CVariable<float> BowpistolAmmoDmgMax;
 	static NLMISC::CVariable<float> RifleAmmoDmgMax;
-	
-	
-	//HitRate min for ammos (modifier), melee weapon, range weapon
-	// melee weapons
+
+	// HitRate min for ammos (modifier), melee weapon, range weapon
+	//  melee weapons
 	static NLMISC::CVariable<float> DaggerHitRate;
 	static NLMISC::CVariable<float> SwordHitRate;
 	static NLMISC::CVariable<float> MaceHitRate;
@@ -354,7 +349,7 @@ public:
 	static NLMISC::CVariable<float> TwoHandAxeHitRate;
 	static NLMISC::CVariable<float> PikeHitRate;
 	static NLMISC::CVariable<float> TwoHandMaceHitRate;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchHitRate;
 	static NLMISC::CVariable<float> BowrifleHitRate;
@@ -362,7 +357,7 @@ public:
 	static NLMISC::CVariable<float> PistolHitRate;
 	static NLMISC::CVariable<float> BowpistolHitRate;
 	static NLMISC::CVariable<float> RifleHitRate;
-	
+
 	// ammo
 	static NLMISC::CVariable<float> AutolaunchAmmoHitRate;
 	static NLMISC::CVariable<float> BowrifleAmmoHitRate;
@@ -371,8 +366,8 @@ public:
 	static NLMISC::CVariable<float> BowpistolAmmoHitRate;
 	static NLMISC::CVariable<float> RifleAmmoHitRate;
 
-	//HitRate max for ammos (modifier), melee weapon, range weapon
-	// melee weapons
+	// HitRate max for ammos (modifier), melee weapon, range weapon
+	//  melee weapons
 	static NLMISC::CVariable<float> DaggerHitRateMax;
 	static NLMISC::CVariable<float> SwordHitRateMax;
 	static NLMISC::CVariable<float> MaceHitRateMax;
@@ -384,7 +379,7 @@ public:
 	static NLMISC::CVariable<float> TwoHandAxeHitRateMax;
 	static NLMISC::CVariable<float> PikeHitRateMax;
 	static NLMISC::CVariable<float> TwoHandMaceHitRateMax;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchHitRateMax;
 	static NLMISC::CVariable<float> BowrifleHitRateMax;
@@ -392,7 +387,7 @@ public:
 	static NLMISC::CVariable<float> PistolHitRateMax;
 	static NLMISC::CVariable<float> BowpistolHitRateMax;
 	static NLMISC::CVariable<float> RifleHitRateMax;
-	
+
 	// ammo
 	static NLMISC::CVariable<float> AutolaunchAmmoHitRateMax;
 	static NLMISC::CVariable<float> BowrifleAmmoHitRateMax;
@@ -400,17 +395,16 @@ public:
 	static NLMISC::CVariable<float> PistolAmmoHitRateMax;
 	static NLMISC::CVariable<float> BowpistolAmmoHitRateMax;
 	static NLMISC::CVariable<float> RifleAmmoHitRateMax;
-	
-	
-	//Range	for ammo, range weapon (modifier)
-	// range weapon
+
+	// Range	for ammo, range weapon (modifier)
+	//  range weapon
 	static NLMISC::CVariable<float> AutolauchRange;
 	static NLMISC::CVariable<float> BowrifleRange;
 	static NLMISC::CVariable<float> LauncherRange;
 	static NLMISC::CVariable<float> PistolRange;
 	static NLMISC::CVariable<float> BowpistolRange;
 	static NLMISC::CVariable<float> RifleRange;
-	
+
 	// ammo
 	static NLMISC::CVariable<float> AutolaunchAmmoRange;
 	static NLMISC::CVariable<float> BowrifleAmmoRange;
@@ -418,10 +412,9 @@ public:
 	static NLMISC::CVariable<float> PistolAmmoRange;
 	static NLMISC::CVariable<float> BowpistolAmmoRange;
 	static NLMISC::CVariable<float> RifleAmmoRange;
-	
-	
-	//DodgeModifier not for ammo and jewel, but for armor too
-	// melee weapons & armor
+
+	// DodgeModifier not for ammo and jewel, but for armor too
+	//  melee weapons & armor
 	static NLMISC::CVariable<float> DaggerDodgeMinModifier;
 	static NLMISC::CVariable<float> DaggerDodgeMaxModifier;
 	static NLMISC::CVariable<float> SwordDodgeMinModifier;
@@ -444,7 +437,7 @@ public:
 	static NLMISC::CVariable<float> PikeDodgeMaxModifier;
 	static NLMISC::CVariable<float> TwoHandMaceDodgeMinModifier;
 	static NLMISC::CVariable<float> TwoHandMaceDodgeMaxModifier;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchDodgeMinModifier;
 	static NLMISC::CVariable<float> AutolauchDodgeMaxModifier;
@@ -458,7 +451,7 @@ public:
 	static NLMISC::CVariable<float> BowpistolDodgeMaxModifier;
 	static NLMISC::CVariable<float> RifleDodgeMinModifier;
 	static NLMISC::CVariable<float> RifleDodgeMaxModifier;
-	
+
 	// armor and shield
 	static NLMISC::CVariable<float> ShieldDodgeMinModifier;
 	static NLMISC::CVariable<float> ShieldDodgeMaxModifier;
@@ -496,10 +489,9 @@ public:
 	static NLMISC::CVariable<float> HeavyVestDodgeMaxModifier;
 	static NLMISC::CVariable<float> HeavyHelmetDodgeMinModifier;
 	static NLMISC::CVariable<float> HeavyHelmetDodgeMaxModifier;
-	
-	
-	//ParryModifier	not for ammo and jewel, but for armor too
-	// melee weapons
+
+	// ParryModifier	not for ammo and jewel, but for armor too
+	//  melee weapons
 	static NLMISC::CVariable<float> DaggerParryMinModifier;
 	static NLMISC::CVariable<float> DaggerParryMaxModifier;
 	static NLMISC::CVariable<float> SwordParryMinModifier;
@@ -522,7 +514,7 @@ public:
 	static NLMISC::CVariable<float> PikeParryMaxModifier;
 	static NLMISC::CVariable<float> TwoHandMaceParryMinModifier;
 	static NLMISC::CVariable<float> TwoHandMaceParryMaxModifier;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchParryMinModifier;
 	static NLMISC::CVariable<float> AutolauchParryMaxModifier;
@@ -536,7 +528,7 @@ public:
 	static NLMISC::CVariable<float> BowpistolParryMaxModifier;
 	static NLMISC::CVariable<float> RifleParryMinModifier;
 	static NLMISC::CVariable<float> RifleParryMaxModifier;
-	
+
 	// armor and shield
 	static NLMISC::CVariable<float> ShieldParryMinModifier;
 	static NLMISC::CVariable<float> ShieldParryMaxModifier;
@@ -574,10 +566,9 @@ public:
 	static NLMISC::CVariable<float> HeavyVestParryMaxModifier;
 	static NLMISC::CVariable<float> HeavyHelmetParryMinModifier;
 	static NLMISC::CVariable<float> HeavyHelmetParryMaxModifier;
-	
-	
-	//AdversaryDodgeModifier not for ammo, jewel and armor
-	// melee weapons
+
+	// AdversaryDodgeModifier not for ammo, jewel and armor
+	//  melee weapons
 	static NLMISC::CVariable<float> DaggerAdversaryDodgeMinModifier;
 	static NLMISC::CVariable<float> DaggerAdversaryDodgeMaxModifier;
 	static NLMISC::CVariable<float> SwordAdversaryDodgeMinModifier;
@@ -600,7 +591,7 @@ public:
 	static NLMISC::CVariable<float> PikeAdversaryDodgeMaxModifier;
 	static NLMISC::CVariable<float> TwoHandMaceAdversaryDodgeMinModifier;
 	static NLMISC::CVariable<float> TwoHandMaceAdversaryDodgeMaxModifier;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchAdversaryDodgeMinModifier;
 	static NLMISC::CVariable<float> AutolauchAdversaryDodgeMaxModifier;
@@ -614,10 +605,9 @@ public:
 	static NLMISC::CVariable<float> BowpistolAdversaryDodgeMaxModifier;
 	static NLMISC::CVariable<float> RifleAdversaryDodgeMinModifier;
 	static NLMISC::CVariable<float> RifleAdversaryDodgeMaxModifier;
-	
-	
-	//AdversaryParryModifier not for ammo, jewel and armor
-	// melee weapons
+
+	// AdversaryParryModifier not for ammo, jewel and armor
+	//  melee weapons
 	static NLMISC::CVariable<float> DaggerAdversaryParryMinModifier;
 	static NLMISC::CVariable<float> DaggerAdversaryParryMaxModifier;
 	static NLMISC::CVariable<float> SwordAdversaryParryMinModifier;
@@ -640,7 +630,7 @@ public:
 	static NLMISC::CVariable<float> PikeAdversaryParryMaxModifier;
 	static NLMISC::CVariable<float> TwoHandMaceAdversaryParryMinModifier;
 	static NLMISC::CVariable<float> TwoHandMaceAdversaryParryMaxModifier;
-	
+
 	// range weapon
 	static NLMISC::CVariable<float> AutolauchAdversaryParryMinModifier;
 	static NLMISC::CVariable<float> AutolauchAdversaryParryMaxModifier;
@@ -655,8 +645,8 @@ public:
 	static NLMISC::CVariable<float> RifleAdversaryParryMinModifier;
 	static NLMISC::CVariable<float> RifleAdversaryParryMaxModifier;
 
-	//Elemental casting time factor (melee weapon only)
-	// Min
+	// Elemental casting time factor (melee weapon only)
+	//  Min
 	static NLMISC::CVariable<float> DaggerElementalCastingTimeFactor;
 	static NLMISC::CVariable<float> SwordElementalCastingTimeFactor;
 	static NLMISC::CVariable<float> AxeElementalCastingTimeFactor;
@@ -681,8 +671,8 @@ public:
 	static NLMISC::CVariable<float> PikeElementalCastingTimeFactorMax;
 	static NLMISC::CVariable<float> TwoHandMaceElementalCastingTimeFactorMax;
 
-	//Elemental power factor (melee weapon only)
-	// Min
+	// Elemental power factor (melee weapon only)
+	//  Min
 	static NLMISC::CVariable<float> DaggerElementalPowerFactor;
 	static NLMISC::CVariable<float> SwordElementalPowerFactor;
 	static NLMISC::CVariable<float> AxeElementalPowerFactor;
@@ -707,8 +697,8 @@ public:
 	static NLMISC::CVariable<float> PikeElementalPowerFactorMax;
 	static NLMISC::CVariable<float> TwoHandMaceElementalPowerFactorMax;
 
-	//OffensiveAffliction casting time factor (melee weapon only)
-	// Min
+	// OffensiveAffliction casting time factor (melee weapon only)
+	//  Min
 	static NLMISC::CVariable<float> DaggerOffensiveAfflictionCastingTimeFactor;
 	static NLMISC::CVariable<float> SwordOffensiveAfflictionCastingTimeFactor;
 	static NLMISC::CVariable<float> AxeOffensiveAfflictionCastingTimeFactor;
@@ -732,9 +722,9 @@ public:
 	static NLMISC::CVariable<float> TwoHandSwordOffensiveAfflictionCastingTimeFactorMax;
 	static NLMISC::CVariable<float> PikeOffensiveAfflictionCastingTimeFactorMax;
 	static NLMISC::CVariable<float> TwoHandMaceOffensiveAfflictionCastingTimeFactorMax;
-	
-	//OffensiveAffliction power factor (melee weapon only)
-	// Min
+
+	// OffensiveAffliction power factor (melee weapon only)
+	//  Min
 	static NLMISC::CVariable<float> DaggerOffensiveAfflictionPowerFactor;
 	static NLMISC::CVariable<float> SwordOffensiveAfflictionPowerFactor;
 	static NLMISC::CVariable<float> AxeOffensiveAfflictionPowerFactor;
@@ -759,8 +749,8 @@ public:
 	static NLMISC::CVariable<float> PikeOffensiveAfflictionPowerFactorMax;
 	static NLMISC::CVariable<float> TwoHandMaceOffensiveAfflictionPowerFactorMax;
 
-	//Heal casting time factor (melee weapon only)
-	// Min
+	// Heal casting time factor (melee weapon only)
+	//  Min
 	static NLMISC::CVariable<float> DaggerHealCastingTimeFactor;
 	static NLMISC::CVariable<float> SwordHealCastingTimeFactor;
 	static NLMISC::CVariable<float> AxeHealCastingTimeFactor;
@@ -784,9 +774,9 @@ public:
 	static NLMISC::CVariable<float> TwoHandSwordHealCastingTimeFactorMax;
 	static NLMISC::CVariable<float> PikeHealCastingTimeFactorMax;
 	static NLMISC::CVariable<float> TwoHandMaceHealCastingTimeFactorMax;
-	
-	//Heal power factor (melee weapon only)
-	// Min
+
+	// Heal power factor (melee weapon only)
+	//  Min
 	static NLMISC::CVariable<float> DaggerHealPowerFactor;
 	static NLMISC::CVariable<float> SwordHealPowerFactor;
 	static NLMISC::CVariable<float> AxeHealPowerFactor;
@@ -811,8 +801,8 @@ public:
 	static NLMISC::CVariable<float> PikeHealPowerFactorMax;
 	static NLMISC::CVariable<float> TwoHandMaceHealPowerFactorMax;
 
-	//DefensiveAffliction casting time factor (melee weapon only)
-	// Min
+	// DefensiveAffliction casting time factor (melee weapon only)
+	//  Min
 	static NLMISC::CVariable<float> DaggerDefensiveAfflictionCastingTimeFactor;
 	static NLMISC::CVariable<float> SwordDefensiveAfflictionCastingTimeFactor;
 	static NLMISC::CVariable<float> AxeDefensiveAfflictionCastingTimeFactor;
@@ -836,9 +826,9 @@ public:
 	static NLMISC::CVariable<float> TwoHandSwordDefensiveAfflictionCastingTimeFactorMax;
 	static NLMISC::CVariable<float> PikeDefensiveAfflictionCastingTimeFactorMax;
 	static NLMISC::CVariable<float> TwoHandMaceDefensiveAfflictionCastingTimeFactorMax;
-	
-	//DefensiveAffliction power factor (melee weapon only)
-	// Min
+
+	// DefensiveAffliction power factor (melee weapon only)
+	//  Min
 	static NLMISC::CVariable<float> DaggerDefensiveAfflictionPowerFactor;
 	static NLMISC::CVariable<float> SwordDefensiveAfflictionPowerFactor;
 	static NLMISC::CVariable<float> AxeDefensiveAfflictionPowerFactor;
@@ -906,7 +896,7 @@ public:
 	static NLMISC::CVariable<float> HeavySleevesProtectionFactorMax;
 	static NLMISC::CVariable<float> HeavyVestProtectionFactorMax;
 	static NLMISC::CVariable<float> HeavyHelmetProtectionFactorMax;
-	
+
 	// MaxSlashingProtection
 	// armor and shield
 	static NLMISC::CVariable<float> ShieldMaxSlashingProtection;
@@ -927,7 +917,7 @@ public:
 	static NLMISC::CVariable<float> HeavySleevesMaxSlashingProtection;
 	static NLMISC::CVariable<float> HeavyVestMaxSlashingProtection;
 	static NLMISC::CVariable<float> HeavyHelmetMaxSlashingProtection;
-	
+
 	// MaxBluntProtection
 	// armor and shield
 	static NLMISC::CVariable<float> ShieldMaxBluntProtection;
@@ -948,7 +938,7 @@ public:
 	static NLMISC::CVariable<float> HeavySleevesMaxBluntProtection;
 	static NLMISC::CVariable<float> HeavyVestMaxBluntProtection;
 	static NLMISC::CVariable<float> HeavyHelmetMaxBluntProtection;
-	
+
 	// MaxPiercingProtection
 	// armor and shield
 	static NLMISC::CVariable<float> ShieldMaxPiercingProtection;
@@ -990,6 +980,3 @@ public:
 #endif // RY_CRAFT_PARAMETERS
 
 /* End of weapon_craft_parameters.h */
-
-
-

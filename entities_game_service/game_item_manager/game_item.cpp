@@ -58,9 +58,8 @@ uint32 CGameItem::_BugTestCounter;
 #endif
 
 #if defined(ITEM_DEBUG) || defined(SAFE_ITEMS)
-	sint32 CGameItem::_NextAllocatorDataValue;
+sint32 CGameItem::_NextAllocatorDataValue;
 #endif
-
 
 // ****************************************************************************
 // CCraftParameters
@@ -74,7 +73,7 @@ CCraftParameters::CCraftParameters()
 	nbWeight = 0;
 	StatEnergy = 0.0f;
 	nbStatEnergy = 0;
-	
+
 	Dmg = 0.0f;
 	nbDmg = 0;
 	Speed = 0.0f;
@@ -91,7 +90,7 @@ CCraftParameters::CCraftParameters()
 	nbAdversaryDodgeModifier = 0;
 	AdversaryParryModifier = 0.0f;
 	nbAdversaryParryModifier = 0;
-	
+
 	ProtectionFactor = 0.0f;
 	nbProtectionFactor = 0;
 	MaxSlashingProtection = 0.0f;
@@ -100,8 +99,8 @@ CCraftParameters::CCraftParameters()
 	nbMaxBluntProtection = 0;
 	MaxPiercingProtection = 0.0f;
 	nbMaxPiercingProtection = 0;
-	Color.resize(8, 0); //need replace 8 by an enumerate type of color
-	
+	Color.resize(8, 0); // need replace 8 by an enumerate type of color
+
 	AcidProtectionFactor = 0.0f;
 	nbAcidProtectionFactor = 0;
 	ColdProtectionFactor = 0.0f;
@@ -122,7 +121,7 @@ CCraftParameters::CCraftParameters()
 	ForestResistanceFactor = 0.0f;
 	nbForestResistanceFactor = 0;
 	LacustreResistanceFactor = 0.0f;
-	nbLacustreResistanceFactor =0;
+	nbLacustreResistanceFactor = 0;
 	JungleResistanceFactor = 0.0f;
 	nbJungleResistanceFactor = 0;
 	PrimaryRootResistanceFactor = 0.0f;
@@ -144,7 +143,7 @@ CCraftParameters::CCraftParameters()
 	nbDefensiveAfflictionCastingTimeFactor = 0;
 	DefensiveAfflictionPowerFactor = 0.0f;
 	nbDefensiveAfflictionPowerFactor = 0;
-	
+
 	HpBuff = 0;
 	SapBuff = 0;
 	StaBuff = 0;
@@ -165,7 +164,7 @@ void CItemCraftParameters::clear()
 	Durability = 0.0f;
 	Weight = 0.0f;
 	StatEnergy = 0.0f;
-	
+
 	Dmg = 0.0f;
 	Speed = 0.0f;
 	SapLoad = 0.0f;
@@ -174,13 +173,13 @@ void CItemCraftParameters::clear()
 	ParryModifier = 0.0f;
 	AdversaryDodgeModifier = 0.0f;
 	AdversaryParryModifier = 0.0f;
-	
+
 	ProtectionFactor = 0.0f;
 	MaxSlashingProtection = 0.0f;
 	MaxBluntProtection = 0.0f;
 	MaxPiercingProtection = 0.0f;
 	Color = 1;
-	
+
 	Protection = BACK_COMPAT::OLD_PROTECTION_TYPE::None;
 	Protection1 = PROTECTION_TYPE::None;
 	Protection1Factor = 0.0f;
@@ -188,13 +187,13 @@ void CItemCraftParameters::clear()
 	Protection2Factor = 0.0f;
 	Protection3 = PROTECTION_TYPE::None;
 	Protection3Factor = 0.0f;
-	
+
 	DesertResistanceFactor = 0.0f;
 	ForestResistanceFactor = 0.0f;
 	LacustreResistanceFactor = 0.0f;
 	JungleResistanceFactor = 0.0f;
 	PrimaryRootResistanceFactor = 0.0f;
-	
+
 	ElementalCastingTimeFactor = 0.0f;
 	ElementalPowerFactor = 0.0f;
 	OffensiveAfflictionCastingTimeFactor = 0.0f;
@@ -203,99 +202,99 @@ void CItemCraftParameters::clear()
 	HealPowerFactor = 0.0f;
 	DefensiveAfflictionCastingTimeFactor = 0.0f;
 	DefensiveAfflictionPowerFactor = 0.0f;
-	
+
 	HpBuff = 0;
 	SapBuff = 0;
 	StaBuff = 0;
 	FocusBuff = 0;
 }
 
-float CItemCraftParameters::getCraftParameterValue( RM_FABER_STAT_TYPE::TRMStatType statType ) const
+float CItemCraftParameters::getCraftParameterValue(RM_FABER_STAT_TYPE::TRMStatType statType) const
 {
-	switch( statType )
+	switch (statType)
 	{
-		case RM_FABER_STAT_TYPE::Durability:
-			return Durability;
-		case RM_FABER_STAT_TYPE::Weight:
-			return Weight;
-		case RM_FABER_STAT_TYPE::SapLoad:
-			return SapLoad;
-		case RM_FABER_STAT_TYPE::DMG:
-			return Dmg;
-		case RM_FABER_STAT_TYPE::Speed:
-			return Speed;
-		case RM_FABER_STAT_TYPE::Range:
-			return Range;
-		case RM_FABER_STAT_TYPE::DodgeModifier:
-			return DodgeModifier;
-		case RM_FABER_STAT_TYPE::ParryModifier:
-			return ParryModifier;
-		case RM_FABER_STAT_TYPE::AdversaryDodgeModifier:
-			return AdversaryDodgeModifier;
-		case RM_FABER_STAT_TYPE::AdversaryParryModifier:
-			return AdversaryParryModifier;
-		case RM_FABER_STAT_TYPE::ProtectionFactor:
-			return ProtectionFactor;
-		case RM_FABER_STAT_TYPE::MaxSlashingProtection:
-			return MaxSlashingProtection;
-		case RM_FABER_STAT_TYPE::MaxBluntProtection:
-			return MaxBluntProtection;
-		case RM_FABER_STAT_TYPE::MaxPiercingProtection:
-			return MaxPiercingProtection;
-		case RM_FABER_STAT_TYPE::AcidProtection:
-		case RM_FABER_STAT_TYPE::ColdProtection:
-		case RM_FABER_STAT_TYPE::FireProtection:
-		case RM_FABER_STAT_TYPE::RotProtection:
-		case RM_FABER_STAT_TYPE::ShockWaveProtection:
-		case RM_FABER_STAT_TYPE::PoisonProtection:
-		case RM_FABER_STAT_TYPE::ElectricityProtection:
-			if (Protection1 == (PROTECTION_TYPE::TProtectionType)statType)
-				return Protection1Factor;
-			else if (Protection2 == (PROTECTION_TYPE::TProtectionType)statType)
-				return Protection2Factor;
-			else if (Protection3 == (PROTECTION_TYPE::TProtectionType)statType)
-				return Protection3Factor;
-			else return 0.0f;
-		case RM_FABER_STAT_TYPE::DesertResistance:
-			return DesertResistanceFactor;
-		case RM_FABER_STAT_TYPE::ForestResistance:
-			return ForestResistanceFactor;
-		case RM_FABER_STAT_TYPE::LacustreResistance:
-			return LacustreResistanceFactor;
-		case RM_FABER_STAT_TYPE::JungleResistance:
-			return JungleResistanceFactor;
-		case RM_FABER_STAT_TYPE::PrimaryRootResistance:
-			return PrimaryRootResistanceFactor;
-		case RM_FABER_STAT_TYPE::ElementalCastingTimeFactor:
-			return ElementalCastingTimeFactor;
-		case RM_FABER_STAT_TYPE::ElementalPowerFactor:
-			return ElementalPowerFactor;
-		case RM_FABER_STAT_TYPE::OffensiveAfflictionCastingTimeFactor:
-			return OffensiveAfflictionCastingTimeFactor;
-		case RM_FABER_STAT_TYPE::OffensiveAfflictionPowerFactor:
-			return OffensiveAfflictionPowerFactor;
-		case RM_FABER_STAT_TYPE::DefensiveAfflictionCastingTimeFactor:
-			return DefensiveAfflictionCastingTimeFactor;
-		case RM_FABER_STAT_TYPE::DefensiveAfflictionPowerFactor:
-			return DefensiveAfflictionPowerFactor;
-		case RM_FABER_STAT_TYPE::HealCastingTimeFactor:
-			return HealCastingTimeFactor;
-		case RM_FABER_STAT_TYPE::HealPowerFactor:
-			return HealPowerFactor;
-		default:
-			return 0.0f;
+	case RM_FABER_STAT_TYPE::Durability:
+		return Durability;
+	case RM_FABER_STAT_TYPE::Weight:
+		return Weight;
+	case RM_FABER_STAT_TYPE::SapLoad:
+		return SapLoad;
+	case RM_FABER_STAT_TYPE::DMG:
+		return Dmg;
+	case RM_FABER_STAT_TYPE::Speed:
+		return Speed;
+	case RM_FABER_STAT_TYPE::Range:
+		return Range;
+	case RM_FABER_STAT_TYPE::DodgeModifier:
+		return DodgeModifier;
+	case RM_FABER_STAT_TYPE::ParryModifier:
+		return ParryModifier;
+	case RM_FABER_STAT_TYPE::AdversaryDodgeModifier:
+		return AdversaryDodgeModifier;
+	case RM_FABER_STAT_TYPE::AdversaryParryModifier:
+		return AdversaryParryModifier;
+	case RM_FABER_STAT_TYPE::ProtectionFactor:
+		return ProtectionFactor;
+	case RM_FABER_STAT_TYPE::MaxSlashingProtection:
+		return MaxSlashingProtection;
+	case RM_FABER_STAT_TYPE::MaxBluntProtection:
+		return MaxBluntProtection;
+	case RM_FABER_STAT_TYPE::MaxPiercingProtection:
+		return MaxPiercingProtection;
+	case RM_FABER_STAT_TYPE::AcidProtection:
+	case RM_FABER_STAT_TYPE::ColdProtection:
+	case RM_FABER_STAT_TYPE::FireProtection:
+	case RM_FABER_STAT_TYPE::RotProtection:
+	case RM_FABER_STAT_TYPE::ShockWaveProtection:
+	case RM_FABER_STAT_TYPE::PoisonProtection:
+	case RM_FABER_STAT_TYPE::ElectricityProtection:
+		if (Protection1 == (PROTECTION_TYPE::TProtectionType)statType)
+			return Protection1Factor;
+		else if (Protection2 == (PROTECTION_TYPE::TProtectionType)statType)
+			return Protection2Factor;
+		else if (Protection3 == (PROTECTION_TYPE::TProtectionType)statType)
+			return Protection3Factor;
+		else return 0.0f;
+	case RM_FABER_STAT_TYPE::DesertResistance:
+		return DesertResistanceFactor;
+	case RM_FABER_STAT_TYPE::ForestResistance:
+		return ForestResistanceFactor;
+	case RM_FABER_STAT_TYPE::LacustreResistance:
+		return LacustreResistanceFactor;
+	case RM_FABER_STAT_TYPE::JungleResistance:
+		return JungleResistanceFactor;
+	case RM_FABER_STAT_TYPE::PrimaryRootResistance:
+		return PrimaryRootResistanceFactor;
+	case RM_FABER_STAT_TYPE::ElementalCastingTimeFactor:
+		return ElementalCastingTimeFactor;
+	case RM_FABER_STAT_TYPE::ElementalPowerFactor:
+		return ElementalPowerFactor;
+	case RM_FABER_STAT_TYPE::OffensiveAfflictionCastingTimeFactor:
+		return OffensiveAfflictionCastingTimeFactor;
+	case RM_FABER_STAT_TYPE::OffensiveAfflictionPowerFactor:
+		return OffensiveAfflictionPowerFactor;
+	case RM_FABER_STAT_TYPE::DefensiveAfflictionCastingTimeFactor:
+		return DefensiveAfflictionCastingTimeFactor;
+	case RM_FABER_STAT_TYPE::DefensiveAfflictionPowerFactor:
+		return DefensiveAfflictionPowerFactor;
+	case RM_FABER_STAT_TYPE::HealCastingTimeFactor:
+		return HealCastingTimeFactor;
+	case RM_FABER_STAT_TYPE::HealPowerFactor:
+		return HealPowerFactor;
+	default:
+		return 0.0f;
 	}
 }
 
 RM_FABER_STAT_TYPE::TRMStatType CItemCraftParameters::getBestItemStat() const
 {
-	float bestStatValue =-1.0f;
+	float bestStatValue = -1.0f;
 	RM_FABER_STAT_TYPE::TRMStatType bestStat = RM_FABER_STAT_TYPE::NumRMStatType;
 
-	for( uint32 i = 0; i < RM_FABER_STAT_TYPE::NumRMStatType; ++i )
+	for (uint32 i = 0; i < RM_FABER_STAT_TYPE::NumRMStatType; ++i)
 	{
-		float value = getCraftParameterValue( (RM_FABER_STAT_TYPE::TRMStatType)i );
-		if( value > bestStatValue )
+		float value = getCraftParameterValue((RM_FABER_STAT_TYPE::TRMStatType)i);
+		if (value > bestStatValue)
 		{
 			bestStatValue = value;
 			bestStat = (RM_FABER_STAT_TYPE::TRMStatType)i;
@@ -304,158 +303,158 @@ RM_FABER_STAT_TYPE::TRMStatType CItemCraftParameters::getBestItemStat() const
 	return bestStat;
 }
 
-	/// serial validated point for a character
+/// serial validated point for a character
 void CItemCraftParameters::serial(NLMISC::IStream &f)
 {
 	uint32 version = CItemCraftParameters::getCurrentVersion();
-	f.serial( version );
+	f.serial(version);
 
-	f.serial( Durability );
-	f.serial( Weight );
+	f.serial(Durability);
+	f.serial(Weight);
 	if (version >= 3)
 	{
-		f.serial( StatEnergy );
+		f.serial(StatEnergy);
 	}
 
-	f.serial( Dmg );
-	f.serial( Speed );
-	f.serial( SapLoad );
-	f.serial( Range );
-	f.serial( DodgeModifier );
-	f.serial( ParryModifier );
-	f.serial( AdversaryDodgeModifier );
-	f.serial( AdversaryParryModifier );
-	
-	f.serial( ProtectionFactor );
-	f.serial( MaxSlashingProtection );
-	f.serial( MaxBluntProtection );
-	f.serial( MaxPiercingProtection );
-	f.serial( Color );
-	
-	f.serialEnum( Protection );
+	f.serial(Dmg);
+	f.serial(Speed);
+	f.serial(SapLoad);
+	f.serial(Range);
+	f.serial(DodgeModifier);
+	f.serial(ParryModifier);
+	f.serial(AdversaryDodgeModifier);
+	f.serial(AdversaryParryModifier);
+
+	f.serial(ProtectionFactor);
+	f.serial(MaxSlashingProtection);
+	f.serial(MaxBluntProtection);
+	f.serial(MaxPiercingProtection);
+	f.serial(Color);
+
+	f.serialEnum(Protection);
 	if (version >= 4)
 	{
-		f.serialEnum( Protection1 );
-		f.serial( Protection1Factor );
-		f.serialEnum( Protection2 );
-		f.serial( Protection2Factor );
-		f.serialEnum( Protection3 );
-		f.serial( Protection3Factor );
+		f.serialEnum(Protection1);
+		f.serial(Protection1Factor);
+		f.serialEnum(Protection2);
+		f.serial(Protection2Factor);
+		f.serialEnum(Protection3);
+		f.serial(Protection3Factor);
 	}
-	
-	if( version >= 5)
+
+	if (version >= 5)
 	{
-		f.serial( DesertResistanceFactor );
-		f.serial( ForestResistanceFactor );
-		f.serial( LacustreResistanceFactor );
-		f.serial( JungleResistanceFactor );
-		f.serial( PrimaryRootResistanceFactor );
+		f.serial(DesertResistanceFactor);
+		f.serial(ForestResistanceFactor);
+		f.serial(LacustreResistanceFactor);
+		f.serial(JungleResistanceFactor);
+		f.serial(PrimaryRootResistanceFactor);
 	}
 
 	if (version >= 2)
 	{
-		f.serial( ElementalCastingTimeFactor );
-		f.serial( ElementalPowerFactor );
-		f.serial( OffensiveAfflictionCastingTimeFactor );
-		f.serial( OffensiveAfflictionPowerFactor );
-		f.serial( HealCastingTimeFactor );
-		f.serial( HealPowerFactor );
-		f.serial( DefensiveAfflictionCastingTimeFactor );
-		f.serial( DefensiveAfflictionPowerFactor );
+		f.serial(ElementalCastingTimeFactor);
+		f.serial(ElementalPowerFactor);
+		f.serial(OffensiveAfflictionCastingTimeFactor);
+		f.serial(OffensiveAfflictionPowerFactor);
+		f.serial(HealCastingTimeFactor);
+		f.serial(HealPowerFactor);
+		f.serial(DefensiveAfflictionCastingTimeFactor);
+		f.serial(DefensiveAfflictionPowerFactor);
 	}
-	
-	f.serial( HpBuff );
-	f.serial( SapBuff );
-	f.serial( StaBuff );
-	f.serial( FocusBuff );
+
+	f.serial(HpBuff);
+	f.serial(SapBuff);
+	f.serial(StaBuff);
+	f.serial(FocusBuff);
 }
 
 // operator !=
 bool CItemCraftParameters::operator!=(const CItemCraftParameters &p) const
 {
-	return !(*this==p);
+	return !(*this == p);
 }
 
 // operator ==
 bool CItemCraftParameters::operator==(const CItemCraftParameters &p) const
 {
-	if ( Durability != p.Durability )
+	if (Durability != p.Durability)
 		return false;
-	if ( Weight != p.Weight )
+	if (Weight != p.Weight)
 		return false;
-	if ( SapLoad != p.SapLoad )
+	if (SapLoad != p.SapLoad)
 		return false;
-	if ( Dmg != p.Dmg )
+	if (Dmg != p.Dmg)
 		return false;
-	if ( Speed != p.Speed )
+	if (Speed != p.Speed)
 		return false;
-	if ( Range != p.Range )
+	if (Range != p.Range)
 		return false;
-	if ( DodgeModifier != p.DodgeModifier )
+	if (DodgeModifier != p.DodgeModifier)
 		return false;
-	if ( ParryModifier != p.ParryModifier )
+	if (ParryModifier != p.ParryModifier)
 		return false;
-	if ( AdversaryDodgeModifier != p.AdversaryDodgeModifier )
+	if (AdversaryDodgeModifier != p.AdversaryDodgeModifier)
 		return false;
-	if ( AdversaryParryModifier != p.AdversaryParryModifier )
+	if (AdversaryParryModifier != p.AdversaryParryModifier)
 		return false;
-	if ( ProtectionFactor != p.ProtectionFactor )
+	if (ProtectionFactor != p.ProtectionFactor)
 		return false;
-	if ( MaxSlashingProtection != p.MaxSlashingProtection )
+	if (MaxSlashingProtection != p.MaxSlashingProtection)
 		return false;
-	if ( MaxBluntProtection != p.MaxBluntProtection )
+	if (MaxBluntProtection != p.MaxBluntProtection)
 		return false;
-	if ( MaxPiercingProtection != p.MaxPiercingProtection )
+	if (MaxPiercingProtection != p.MaxPiercingProtection)
 		return false;
-	if ( Protection != p.Protection )
+	if (Protection != p.Protection)
 		return false;
-	if( !checkProtectionEgality( p ) )
+	if (!checkProtectionEgality(p))
 		return false;
-	if( DesertResistanceFactor != p.DesertResistanceFactor )
+	if (DesertResistanceFactor != p.DesertResistanceFactor)
 		return false;
-	if( ForestResistanceFactor != p.ForestResistanceFactor )
+	if (ForestResistanceFactor != p.ForestResistanceFactor)
 		return false;
-	if( LacustreResistanceFactor != p.LacustreResistanceFactor )
+	if (LacustreResistanceFactor != p.LacustreResistanceFactor)
 		return false;
-	if( JungleResistanceFactor != p.JungleResistanceFactor )
+	if (JungleResistanceFactor != p.JungleResistanceFactor)
 		return false;
-	if( PrimaryRootResistanceFactor != p.PrimaryRootResistanceFactor )
+	if (PrimaryRootResistanceFactor != p.PrimaryRootResistanceFactor)
 		return false;
-	if ( Color != p.Color )
+	if (Color != p.Color)
 		return false;
-	if ( ElementalCastingTimeFactor != p.ElementalCastingTimeFactor )
+	if (ElementalCastingTimeFactor != p.ElementalCastingTimeFactor)
 		return false;
-	if ( ElementalPowerFactor != p.ElementalPowerFactor )
+	if (ElementalPowerFactor != p.ElementalPowerFactor)
 		return false;
-	if ( OffensiveAfflictionCastingTimeFactor != p.OffensiveAfflictionCastingTimeFactor )
+	if (OffensiveAfflictionCastingTimeFactor != p.OffensiveAfflictionCastingTimeFactor)
 		return false;
-	if ( OffensiveAfflictionPowerFactor != p.OffensiveAfflictionPowerFactor )
+	if (OffensiveAfflictionPowerFactor != p.OffensiveAfflictionPowerFactor)
 		return false;
-	if ( HealCastingTimeFactor != p.HealCastingTimeFactor )
+	if (HealCastingTimeFactor != p.HealCastingTimeFactor)
 		return false;
-	if ( HealPowerFactor != p.HealPowerFactor )
+	if (HealPowerFactor != p.HealPowerFactor)
 		return false;
-	if ( DefensiveAfflictionCastingTimeFactor != p.DefensiveAfflictionCastingTimeFactor )
+	if (DefensiveAfflictionCastingTimeFactor != p.DefensiveAfflictionCastingTimeFactor)
 		return false;
-	if ( DefensiveAfflictionPowerFactor != p.DefensiveAfflictionPowerFactor )
+	if (DefensiveAfflictionPowerFactor != p.DefensiveAfflictionPowerFactor)
 		return false;
-	if ( HpBuff != p.HpBuff )
+	if (HpBuff != p.HpBuff)
 		return false;
-	if ( SapBuff != p.SapBuff )
+	if (SapBuff != p.SapBuff)
 		return false;
-	if ( StaBuff != p.StaBuff )
+	if (StaBuff != p.StaBuff)
 		return false;
-	if ( FocusBuff != p.FocusBuff )
+	if (FocusBuff != p.FocusBuff)
 		return false;
 
 	return true;
 }
 // operator =
-const CItemCraftParameters& CItemCraftParameters::operator = ( const CCraftParameters& p )
+const CItemCraftParameters &CItemCraftParameters::operator=(const CCraftParameters &p)
 {
 	Durability = p.Durability;
 	Weight = p.Weight;
-	
+
 	Dmg = p.Dmg;
 	Speed = p.Speed;
 	SapLoad = p.SapLoad;
@@ -465,37 +464,37 @@ const CItemCraftParameters& CItemCraftParameters::operator = ( const CCraftParam
 	ParryModifier = p.ParryModifier;
 	AdversaryDodgeModifier = p.AdversaryDodgeModifier;
 	AdversaryParryModifier = p.AdversaryParryModifier;
-	
+
 	ProtectionFactor = p.ProtectionFactor;
 	MaxSlashingProtection = p.MaxSlashingProtection;
 	MaxBluntProtection = p.MaxBluntProtection;
 	MaxPiercingProtection = p.MaxPiercingProtection;
 
-	keepTheThreeBestProtection( p );
+	keepTheThreeBestProtection(p);
 
-	keepTheThreeBestResistance( p );
+	keepTheThreeBestResistance(p);
 
-	ElementalCastingTimeFactor	= p.ElementalCastingTimeFactor;
-	ElementalPowerFactor		= p.ElementalPowerFactor;
-	OffensiveAfflictionCastingTimeFactor= p.OffensiveAfflictionCastingTimeFactor;
-	OffensiveAfflictionPowerFactor		= p.OffensiveAfflictionPowerFactor;
-	HealCastingTimeFactor		= p.HealCastingTimeFactor;
-	HealPowerFactor				= p.HealPowerFactor;
-	DefensiveAfflictionCastingTimeFactor= p.DefensiveAfflictionCastingTimeFactor;
-	DefensiveAfflictionPowerFactor		= p.DefensiveAfflictionPowerFactor;
+	ElementalCastingTimeFactor = p.ElementalCastingTimeFactor;
+	ElementalPowerFactor = p.ElementalPowerFactor;
+	OffensiveAfflictionCastingTimeFactor = p.OffensiveAfflictionCastingTimeFactor;
+	OffensiveAfflictionPowerFactor = p.OffensiveAfflictionPowerFactor;
+	HealCastingTimeFactor = p.HealCastingTimeFactor;
+	HealPowerFactor = p.HealPowerFactor;
+	DefensiveAfflictionCastingTimeFactor = p.DefensiveAfflictionCastingTimeFactor;
+	DefensiveAfflictionPowerFactor = p.DefensiveAfflictionPowerFactor;
 
 	uint32 MaxNumColor = 0;
 	uint8 DominanteColor = (uint8)1;
-	for( uint32 i = 0; i < p.Color.size(); ++i )
+	for (uint32 i = 0; i < p.Color.size(); ++i)
 	{
-		if( p.Color[i] > MaxNumColor )
+		if (p.Color[i] > MaxNumColor)
 		{
 			MaxNumColor = p.Color[i];
 			DominanteColor = (uint8)i;
 		}
 	}
 	Color = DominanteColor;
-	
+
 	HpBuff = p.HpBuff;
 	SapBuff = p.SapBuff;
 	StaBuff = p.StaBuff;
@@ -504,16 +503,16 @@ const CItemCraftParameters& CItemCraftParameters::operator = ( const CCraftParam
 	return *this;
 }
 
-void CItemCraftParameters::keepTheThreeBestProtection( const CCraftParameters& p )
+void CItemCraftParameters::keepTheThreeBestProtection(const CCraftParameters &p)
 {
-	for( uint i = 0; i < PROTECTION_TYPE::NB_PROTECTION_TYPE; ++i )
+	for (uint i = 0; i < PROTECTION_TYPE::NB_PROTECTION_TYPE; ++i)
 	{
 		PROTECTION_TYPE::TProtectionType protection;
 		float protectionFactor;
 
-		protection = (PROTECTION_TYPE::TProtectionType) i;
-		
-		switch( (PROTECTION_TYPE::TProtectionType) i )
+		protection = (PROTECTION_TYPE::TProtectionType)i;
+
+		switch ((PROTECTION_TYPE::TProtectionType)i)
 		{
 		case PROTECTION_TYPE::Acid:
 			protectionFactor = p.AcidProtectionFactor;
@@ -594,7 +593,7 @@ bool CItemCraftParameters::checkProtectionEgality(const CItemCraftParameters &p)
 	return result;
 }
 
-void CItemCraftParameters::keepTheThreeBestResistance( const CCraftParameters& p )
+void CItemCraftParameters::keepTheThreeBestResistance(const CCraftParameters &p)
 {
 	class CBestResistance
 	{
@@ -604,7 +603,7 @@ void CItemCraftParameters::keepTheThreeBestResistance( const CCraftParameters& p
 		struct TBestResistance
 		{
 			RESISTANCE_TYPE::TResistanceType BestResistance;
-			float	BestResistanceValue;
+			float BestResistanceValue;
 
 			TBestResistance()
 			{
@@ -613,37 +612,37 @@ void CItemCraftParameters::keepTheThreeBestResistance( const CCraftParameters& p
 			}
 		};
 
-		CBestResistance() {}
+		CBestResistance() { }
 
-		void keepResistanceIfBest( float value, RESISTANCE_TYPE::TResistanceType resistanceType )
+		void keepResistanceIfBest(float value, RESISTANCE_TYPE::TResistanceType resistanceType)
 		{
-			for( uint i = 0; i < NbResistanceKeeped; ++i )
+			for (uint i = 0; i < NbResistanceKeeped; ++i)
 			{
-				if( value > _BestResistance[ i ].BestResistanceValue )
+				if (value > _BestResistance[i].BestResistanceValue)
 				{
-					if( NbResistanceKeeped > 1 )
+					if (NbResistanceKeeped > 1)
 					{
-						for( sint j = NbResistanceKeeped - 2; j >= (sint32)i; --j )
+						for (sint j = NbResistanceKeeped - 2; j >= (sint32)i; --j)
 						{
-							_BestResistance[ j + 1 ] = _BestResistance[ j ];
+							_BestResistance[j + 1] = _BestResistance[j];
 						}
 					}
 
-					_BestResistance[ i ].BestResistanceValue = value;
-					_BestResistance[ i ].BestResistance = resistanceType;
+					_BestResistance[i].BestResistanceValue = value;
+					_BestResistance[i].BestResistance = resistanceType;
 
 					break;
 				}
 			}
 		}
 
-		float getResistanceValueIfBest( RESISTANCE_TYPE::TResistanceType resistanceType ) const
+		float getResistanceValueIfBest(RESISTANCE_TYPE::TResistanceType resistanceType) const
 		{
-			for( uint i = 0; i < NbResistanceKeeped; ++i )
+			for (uint i = 0; i < NbResistanceKeeped; ++i)
 			{
-				if( _BestResistance[ i ].BestResistance == resistanceType )
+				if (_BestResistance[i].BestResistance == resistanceType)
 				{
-					return _BestResistance[ i ].BestResistanceValue;
+					return _BestResistance[i].BestResistanceValue;
 				}
 			}
 			return 0.0f;
@@ -655,12 +654,12 @@ void CItemCraftParameters::keepTheThreeBestResistance( const CCraftParameters& p
 
 	CBestResistance bestResistance;
 
-	bestResistance.keepResistanceIfBest( p.DesertResistanceFactor, RESISTANCE_TYPE::Desert );
-	bestResistance.keepResistanceIfBest( p.ForestResistanceFactor, RESISTANCE_TYPE::Forest );
-	bestResistance.keepResistanceIfBest( p.LacustreResistanceFactor, RESISTANCE_TYPE::Lacustre );
-	bestResistance.keepResistanceIfBest( p.JungleResistanceFactor, RESISTANCE_TYPE::Jungle );
-	bestResistance.keepResistanceIfBest( p.PrimaryRootResistanceFactor, RESISTANCE_TYPE::PrimaryRoot );
-	
+	bestResistance.keepResistanceIfBest(p.DesertResistanceFactor, RESISTANCE_TYPE::Desert);
+	bestResistance.keepResistanceIfBest(p.ForestResistanceFactor, RESISTANCE_TYPE::Forest);
+	bestResistance.keepResistanceIfBest(p.LacustreResistanceFactor, RESISTANCE_TYPE::Lacustre);
+	bestResistance.keepResistanceIfBest(p.JungleResistanceFactor, RESISTANCE_TYPE::Jungle);
+	bestResistance.keepResistanceIfBest(p.PrimaryRootResistanceFactor, RESISTANCE_TYPE::PrimaryRoot);
+
 	DesertResistanceFactor = bestResistance.getResistanceValueIfBest(RESISTANCE_TYPE::Desert);
 	ForestResistanceFactor = bestResistance.getResistanceValueIfBest(RESISTANCE_TYPE::Forest);
 	LacustreResistanceFactor = bestResistance.getResistanceValueIfBest(RESISTANCE_TYPE::Lacustre);
@@ -679,33 +678,32 @@ bool CGameItem::areStackable(const CGameItemPtr item1, const CGameItemPtr item2)
 {
 	if (item1 == NULL || item2 == NULL)
 		return false;
-	
+
 	// test sheet
 	if (item1->_SheetId != item2->_SheetId)
 		return false;
-	
+
 	// test quality/recommanded level
 	if (item1->_Recommended != item2->_Recommended)
 		return false;
-	
+
 	// for craftable items test craft params
 	if (item1->_Form != NULL && item1->_Form->CraftPlan != NLMISC::CSheetId::Unknown)
 	{
-		if( item1->_CraftParameters != 0 )
+		if (item1->_CraftParameters != 0)
 		{
-			if( item2->_CraftParameters != 0 )
+			if (item2->_CraftParameters != 0)
 			{
-				if ( *item1->_CraftParameters != *item2->_CraftParameters )
+				if (*item1->_CraftParameters != *item2->_CraftParameters)
 					return false;
 			}
-			else 
+			else
 				return false;
 		}
-		else
-			if( item2->_CraftParameters != 0 )
-				return false;
+		else if (item2->_CraftParameters != 0)
+			return false;
 	}
-	
+
 	return true;
 }
 
@@ -764,7 +762,6 @@ void CGameItemPtr::deleteItem()
 //
 //-----------------------------------------------
 
-
 //-----------------------------------------------
 // ctor :
 //
@@ -781,42 +778,42 @@ void CGameItem::ctor()
 // ctor :
 //
 //-----------------------------------------------
-//void CGameItem::ctor( const CEntityId& id, const CSheetId& sheetId, uint32 recommended, sint16 slotCount, bool destroyable, bool dropable )
-void CGameItem::ctor( const CSheetId& sheetId, uint32 recommended, bool destroyable, bool dropable )
+// void CGameItem::ctor( const CEntityId& id, const CSheetId& sheetId, uint32 recommended, sint16 slotCount, bool destroyable, bool dropable )
+void CGameItem::ctor(const CSheetId &sheetId, uint32 recommended, bool destroyable, bool dropable)
 {
 	ctor();
 
-//	_ItemId = id;
+	//	_ItemId = id;
 	_SheetId = sheetId;
 	_Destroyable = destroyable;
 	_Dropable = dropable;
-//	SlotCount = slotCount;
+	//	SlotCount = slotCount;
 	_Recommended = recommended;
 	_TotalSaleCycle = 0;
 	_PetIndex = ~0;
 
-	_Form = CSheets::getForm( sheetId );
+	_Form = CSheets::getForm(sheetId);
 	if (_Form)
 	{
-//		if( SlotCount > 0 )
-//		{
-//			_Children.reserve( SlotCount );
-//			if( _Form->Family == ITEMFAMILY::BAG )
-//			{
-//				_Children.resize( SlotCount, NULL);
-//			}
-//			else if( _Form->Family == ITEMFAMILY::STACK )
-//			{
-//				_Children.resize( 0 );
-//			}
-//		}
-//		else
-//		{
-//			if( _Form->Family == ITEMFAMILY::CRAFTING_TOOL || _Form->Family == ITEMFAMILY::HARVEST_TOOL )
-			{
-				_HP = maxDurability();
-			}
-//		}
+		//		if( SlotCount > 0 )
+		//		{
+		//			_Children.reserve( SlotCount );
+		//			if( _Form->Family == ITEMFAMILY::BAG )
+		//			{
+		//				_Children.resize( SlotCount, NULL);
+		//			}
+		//			else if( _Form->Family == ITEMFAMILY::STACK )
+		//			{
+		//				_Children.resize( 0 );
+		//			}
+		//		}
+		//		else
+		//		{
+		//			if( _Form->Family == ITEMFAMILY::CRAFTING_TOOL || _Form->Family == ITEMFAMILY::HARVEST_TOOL )
+		{
+			_HP = maxDurability();
+		}
+		//		}
 
 		// compute default requirement from _Form
 		computeRequirementFromForm();
@@ -831,45 +828,45 @@ void CGameItem::ctor( const CSheetId& sheetId, uint32 recommended, bool destroya
 //-----------------------------------------------
 void CGameItem::computeRequiredLevel()
 {
-	if( _Form )
+	if (_Form)
 	{
 		// new system? compute from from
-		if(_UseNewSystemRequirement)
+		if (_UseNewSystemRequirement)
 		{
 			sint32 value = 0;
-			value = (sint32) _Form->RequiredSkillQualityFactor * _Recommended + _Form->RequiredSkillQualityOffset;
-			if( value < (sint32)_Form->MinRequiredSkillLevel || value < 0 )
+			value = (sint32)_Form->RequiredSkillQualityFactor * _Recommended + _Form->RequiredSkillQualityOffset;
+			if (value < (sint32)_Form->MinRequiredSkillLevel || value < 0)
 			{
 				value = _Form->MinRequiredSkillLevel;
 			}
-			_RequiredSkillLevel = (uint16) value;
-			
-			value = (sint32) (_Form->RequiredSkillQualityFactor2 * _Recommended + _Form->RequiredSkillQualityOffset2);
-			if( value < (sint32)_Form->MinRequiredSkillLevel2 || value < 0 )
+			_RequiredSkillLevel = (uint16)value;
+
+			value = (sint32)(_Form->RequiredSkillQualityFactor2 * _Recommended + _Form->RequiredSkillQualityOffset2);
+			if (value < (sint32)_Form->MinRequiredSkillLevel2 || value < 0)
 			{
 				value = _Form->MinRequiredSkillLevel2;
 			}
-			_RequiredSkillLevel2 = (uint16) value;
-			
-			value = (sint32) (_Form->RequiredCharacQualityFactor * _Recommended + _Form->RequiredCharacQualityOffset);
-			if( value < (sint32)_Form->MinRequiredCharacLevel || value < 0 )
+			_RequiredSkillLevel2 = (uint16)value;
+
+			value = (sint32)(_Form->RequiredCharacQualityFactor * _Recommended + _Form->RequiredCharacQualityOffset);
+			if (value < (sint32)_Form->MinRequiredCharacLevel || value < 0)
 			{
 				value = _Form->MinRequiredCharacLevel;
 			}
-			_RequiredCharacLevel = (uint16) value;
+			_RequiredCharacLevel = (uint16)value;
 		}
 		else
 		{
-		// Old System: it used only Charac query, according to item type
-			_RequiredSkillLevel= 0;
-			_RequiredSkillLevel2= 0;
+			// Old System: it used only Charac query, according to item type
+			_RequiredSkillLevel = 0;
+			_RequiredSkillLevel2 = 0;
 			_RequiredCharacLevel = 0;
-			switch( _Form->Family )
+			switch (_Form->Family)
 			{
 			// **** ARMORS / BUCKLERS
 			case ITEMFAMILY::ARMOR:
 			case ITEMFAMILY::SHIELD:
-				switch( _Form->Type )
+				switch (_Form->Type)
 				{
 				case ITEM_TYPE::MEDIUM_BOOTS:
 				case ITEM_TYPE::MEDIUM_GLOVES:
@@ -888,60 +885,58 @@ void CGameItem::computeRequiredLevel()
 				case ITEM_TYPE::HEAVY_HELMET:
 				case ITEM_TYPE::SHIELD:
 					// Constitution requirement
-					_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended-10)));
+					_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended - 10)));
 					break;
 				default:
 					// No carac requirement
 					break;
 				}
 				break;
-				
+
 			// **** MELEE_WEAPONS
 			case ITEMFAMILY::MELEE_WEAPON:
-				switch( _Form->Type )
+				switch (_Form->Type)
 				{
 				case ITEM_TYPE::MAGICIAN_STAFF:
 					// Intelligence requirement
-					_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended-10)));
+					_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended - 10)));
 					break;
 				default:
 					// Strength requirement
-					_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended-10)));
+					_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended - 10)));
 					break;
 				}
 				break;
-				
+
 			// **** RANGE_WEAPON
 			case ITEMFAMILY::RANGE_WEAPON:
-				_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended-10)));
+				_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended - 10)));
 				break;
-				
+
 				// No carac requirement
 			default:
 				break;
 			};
 		}
-	}		
+	}
 
 	computeHasPrerequisit();
 }
-
 
 //-----------------------------------------------
 // Compute whether item has a skill/charac prerequisit
 //-----------------------------------------------
 void CGameItem::computeHasPrerequisit()
 {
-	_HasPrerequisit = _RequiredSkillLevel>0 || _RequiredSkillLevel2>0 || _RequiredCharacLevel>0;
+	_HasPrerequisit = _RequiredSkillLevel > 0 || _RequiredSkillLevel2 > 0 || _RequiredCharacLevel > 0;
 }
-
 
 //-----------------------------------------------
 // computeRequirementFromForm :
 //-----------------------------------------------
 void CGameItem::computeRequirementFromForm()
 {
-	if(_Form)
+	if (_Form)
 	{
 		_UseNewSystemRequirement = true;
 		_RequiredSkill = _Form->RequiredSkill;
@@ -956,7 +951,7 @@ void CGameItem::computeRequirementFromForm()
 //-----------------------------------------------
 void CGameItem::computeRequirementFromOldSystem()
 {
-	if(_Form)
+	if (_Form)
 	{
 		// NB: this item CAN'T BE muted to the new system (because of setRecommended and computeRequiredLevel())
 		_UseNewSystemRequirement = false;
@@ -968,12 +963,12 @@ void CGameItem::computeRequirementFromOldSystem()
 		_RequiredCharacLevel = 0;
 
 		// Old System: it used only Charac query, according to item type
-		switch( _Form->Family )
+		switch (_Form->Family)
 		{
 		// **** ARMORS / BUCKLERS
 		case ITEMFAMILY::ARMOR:
 		case ITEMFAMILY::SHIELD:
-			switch( _Form->Type )
+			switch (_Form->Type)
 			{
 			case ITEM_TYPE::MEDIUM_BOOTS:
 			case ITEM_TYPE::MEDIUM_GLOVES:
@@ -994,35 +989,35 @@ void CGameItem::computeRequirementFromOldSystem()
 			case ITEM_TYPE::SHIELD:
 				// Constitution requirement
 				_RequiredCharac = CHARACTERISTICS::constitution;
-				_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended-10)));
+				_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended - 10)));
 				break;
 			default:
 				// No carac requirement
 				break;
 			}
 			break;
-			
+
 		// **** MELEE_WEAPONS
 		case ITEMFAMILY::MELEE_WEAPON:
-			switch( _Form->Type )
+			switch (_Form->Type)
 			{
 			case ITEM_TYPE::MAGICIAN_STAFF:
 				// Intelligence requirement
 				_RequiredCharac = CHARACTERISTICS::intelligence;
-				_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended-10)));
+				_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended - 10)));
 				break;
 			default:
 				// Strength requirement
 				_RequiredCharac = CHARACTERISTICS::strength;
-				_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended-10)));
+				_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended - 10)));
 				break;
 			}
 			break;
-				
+
 		// **** RANGE_WEAPON
 		case ITEMFAMILY::RANGE_WEAPON:
 			_RequiredCharac = CHARACTERISTICS::well_balanced;
-			_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended-10)));
+			_RequiredCharacLevel = (uint16)(max(0, ((sint)_Recommended - 10)));
 			break;
 
 		// No carac requirement
@@ -1038,9 +1033,9 @@ void CGameItem::computeRequirementFromOldSystem()
 //-----------------------------------------------
 // reloadSapLoad :
 //-----------------------------------------------
-void CGameItem::reloadSapLoad( uint32 sapAdded )
+void CGameItem::reloadSapLoad(uint32 sapAdded)
 {
-	_SapLoad = std::min( maxSapLoad(), _SapLoad + sapAdded );
+	_SapLoad = std::min(maxSapLoad(), _SapLoad + sapAdded);
 
 	if (getInventory() != NULL)
 		getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_enchant));
@@ -1049,9 +1044,9 @@ void CGameItem::reloadSapLoad( uint32 sapAdded )
 //-----------------------------------------------
 // consumeSapLoad :
 //-----------------------------------------------
-void CGameItem::consumeSapLoad( uint32 sapConsumed )
+void CGameItem::consumeSapLoad(uint32 sapConsumed)
 {
-	_SapLoad = (uint32) ( (sint32) ( std::max( (sint32)0, ((sint32)(_SapLoad)) - ((sint32)sapConsumed) ) ) ); 
+	_SapLoad = (uint32)((sint32)(std::max((sint32)0, ((sint32)(_SapLoad)) - ((sint32)sapConsumed))));
 
 	if (getInventory() != NULL)
 		getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_enchant));
@@ -1060,20 +1055,20 @@ void CGameItem::consumeSapLoad( uint32 sapConsumed )
 //-----------------------------------------------
 // setSapLoad :
 //-----------------------------------------------
-void CGameItem::setSapLoad( uint32 sap )
+void CGameItem::setSapLoad(uint32 sap)
 {
 	if ((_SheetId == NLMISC::CSheetId("item_sap_recharge.sitem")) || (_SheetId == NLMISC::CSheetId("light_sap_recharge.sitem")))
 	{
 		_SapLoad = sap;
-	} 
+	}
 }
 
 //-----------------------------------------------
 // applyEnchantment :
 //-----------------------------------------------
-void CGameItem::applyEnchantment( const vector< CSheetId >& action ) 
-{ 
-	_Enchantment = action; 
+void CGameItem::applyEnchantment(const vector<CSheetId> &action)
+{
+	_Enchantment = action;
 
 	if (getInventory() != NULL)
 		getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_enchant));
@@ -1086,7 +1081,7 @@ void CGameItem::resetEnchantment()
 {
 	_SapLoad = 0;
 	_Enchantment.clear();
-	contReset( _Enchantment );
+	contReset(_Enchantment);
 	_LatencyEndDate = 0;
 
 	if (getInventory() != NULL)
@@ -1099,28 +1094,28 @@ void CGameItem::resetEnchantment()
 void CGameItem::computeItemWornState()
 {
 	const uint32 maxHp = maxDurability();
-	
+
 	// Do not evaluate the worn state if the item max durability is zero (mp case)
 	if (maxHp == 0)
 		return;
-	
-	if (_HP > 1 && _HP > uint32(WornState1*maxHp) )
+
+	if (_HP > 1 && _HP > uint32(WornState1 * maxHp))
 	{
 		_CurrentWornState = ITEM_WORN_STATE::Unspoiled;
 	}
-	else if ( _HP > 1 && _HP > uint32(WornState2*maxHp) )
+	else if (_HP > 1 && _HP > uint32(WornState2 * maxHp))
 	{
 		_CurrentWornState = ITEM_WORN_STATE::WornState1;
 	}
-	else if ( _HP > 1 && _HP > uint32(WornState3*maxHp) )
+	else if (_HP > 1 && _HP > uint32(WornState3 * maxHp))
 	{
 		_CurrentWornState = ITEM_WORN_STATE::WornState2;
 	}
-	else if (_HP > 1 && _HP > uint32(WornState4*maxHp) )
+	else if (_HP > 1 && _HP > uint32(WornState4 * maxHp))
 	{
 		_CurrentWornState = ITEM_WORN_STATE::WornState3;
 	}
-	else if (_HP > 1 )
+	else if (_HP > 1)
 	{
 		_CurrentWornState = ITEM_WORN_STATE::WornState4;
 	}
@@ -1132,16 +1127,15 @@ void CGameItem::computeItemWornState()
 	}
 }
 
-void CGameItem::setLockCount(uint32 lockCount) 
-{ 
+void CGameItem::setLockCount(uint32 lockCount)
+{
 	nlassert(lockCount <= _StackSize);
 	_LockCount = lockCount;
 
 	callItemChanged(INVENTORIES::TItemChangeFlags(INVENTORIES::itc_lock_state));
 }
 
-
-uint32	CGameItem::getNonLockedStackSize()
+uint32 CGameItem::getNonLockedStackSize()
 {
 	if (_LockCount >= _StackSize)
 		return 0;
@@ -1159,7 +1153,7 @@ void CGameItem::setLockedByOwner(bool value)
 }
 
 void CGameItem::setAccessGrade(EGSPD::CGuildGrade::TGuildGrade value)
-{ 
+{
 	if (value != _AccessGrade)
 	{
 		_AccessGrade = value;
@@ -1181,7 +1175,7 @@ void CGameItem::setPhraseId(const std::string &str, bool literal)
 //-----------------------------------------------
 CGameItemPtr CGameItem::getItemCopy()
 {
-	// used for 
+	// used for
 	// - NPC item sales
 	// - stack splitting
 	// - creating named items
@@ -1234,7 +1228,7 @@ CGameItemPtr CGameItem::getItemCopy()
 //-----------------------------------------------
 // sendNameId :
 //-----------------------------------------------
-uint32 CGameItem::sendNameId(CCharacter * user)
+uint32 CGameItem::sendNameId(CCharacter *user)
 {
 	nlassert(_Form != 0);
 	if (_Form->Family != ITEMFAMILY::SCROLL_R2)
@@ -1256,13 +1250,13 @@ uint32 CGameItem::sendNameId(CCharacter * user)
 	else
 	{
 		// sessionId() don't works with edition session
-		TSessionId scenarioId = ICharacterControl::getInstance()->getSessionId( user->currentSessionId());
-		const R2::TMissionItem * itemDesc = CR2MissionItem::getInstance().getR2ItemDefinition( scenarioId, _SheetId );
-		if( itemDesc != 0 )
+		TSessionId scenarioId = ICharacterControl::getInstance()->getSessionId(user->currentSessionId());
+		const R2::TMissionItem *itemDesc = CR2MissionItem::getInstance().getR2ItemDefinition(scenarioId, _SheetId);
+		if (itemDesc != 0)
 		{
-			SM_STATIC_PARAMS_1(params,STRING_MANAGER::literal);
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
 			params[0].Literal = itemDesc->Name;
-			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),"LITERAL", params );
+			return STRING_MANAGER::sendStringToClient(user->getEntityRowId(), "LITERAL", params);
 		}
 	}
 	return 0;
@@ -1305,7 +1299,7 @@ void CGameItem::clear()
 	_RequiredSkillLevel2 = 0;
 	_RequiredCharac = CHARACTERISTICS::Unknown;
 	_RequiredCharacLevel = 0;
-	_HasPrerequisit= false;
+	_HasPrerequisit = false;
 
 	_LockedByOwner = false;
 	_Movable = false;
@@ -1321,7 +1315,7 @@ void CGameItem::clear()
 
 void CGameItem::setStackSize(uint32 size)
 {
-	nlassert(size!= 0);
+	nlassert(size != 0);
 #ifdef NL_DEBUG
 	if (_Form != NULL)
 		nlassert(size <= getMaxStackSize());
@@ -1330,12 +1324,11 @@ void CGameItem::setStackSize(uint32 size)
 	if (_StackSize == size)
 		return;
 
-
 	uint32 prevSize = _StackSize;
 	_StackSize = size;
 
 	log_Item_UpdateQuantity(_ItemId, _StackSize, prevSize);
-	
+
 	if (_LockCount > _StackSize)
 		_LockCount = _StackSize;
 
@@ -1350,7 +1343,7 @@ void CGameItem::setStackSize(uint32 size)
 uint32 CGameItem::fillStack(uint32 addQt)
 {
 	uint32 maxStack = getMaxStackSize();
-	uint32 allowedQt = min(getStackSize()+addQt, maxStack);
+	uint32 allowedQt = min(getStackSize() + addQt, maxStack);
 	uint32 ret = addQt - (allowedQt - getStackSize());
 
 	nlassert(ret <= addQt);
@@ -1366,12 +1359,11 @@ uint32 CGameItem::getMaxStackSize() const
 	return _Form->getMaxStackSize();
 }
 
-
 //-----------------------------------------------
 // getFreeSlotCount :
 //
 //-----------------------------------------------
-//sint16 CGameItem::getFreeSlotCount() const
+// sint16 CGameItem::getFreeSlotCount() const
 //{
 //	if( SlotCount == 0 )
 //	{
@@ -1395,7 +1387,7 @@ uint32 CGameItem::getMaxStackSize() const
 // getUsedSlotCount :
 //
 //-----------------------------------------------
-//sint16 CGameItem::getUsedSlotCount() const
+// sint16 CGameItem::getUsedSlotCount() const
 //{
 //	sint16 usedSlots = 0;
 //	vector<CGameItemPtr >::const_iterator it;
@@ -1414,7 +1406,7 @@ uint32 CGameItem::getMaxStackSize() const
 // addChildItem :
 //
 //-----------------------------------------------
-//bool CGameItem::addChild( CGameItemPtr  item, sint16 slot)
+// bool CGameItem::addChild( CGameItemPtr  item, sint16 slot)
 //{
 //	// check item is valid
 //	if (item == NULL)
@@ -1470,20 +1462,18 @@ uint32 CGameItem::getMaxStackSize() const
 //		//(*item).Loc.Slot = (uint8)slot;
 //		//(*item).attachTo( this, (uint8)slot );
 //	}
-//	
+//
 //	item->_Parent = this;
 //	item->Loc.Slot = (uint8) slot;
 //	item->Owner = getId();
 //	return true;
 //} // addChild //
 
-
-
 //-----------------------------------------------
 // detachChild :
 //
 //-----------------------------------------------
-//CGameItemPtr  CGameItem::detachChild( sint16 slot )
+// CGameItemPtr  CGameItem::detachChild( sint16 slot )
 //{
 //	sint childrenSize = _Children.size();
 //	if( slot == -1 )
@@ -1496,7 +1486,7 @@ uint32 CGameItem::getMaxStackSize() const
 //		nlwarning("<CGameItem::detachChild> can't detach item in slot %d, only %d slots allocated",slot,childrenSize);
 //		return NULL;
 //	}
-//	
+//
 //	CGameItemPtr  detachedItem = _Children[slot];
 //	if ( detachedItem == NULL)
 //	{
@@ -1540,23 +1530,21 @@ uint32 CGameItem::getMaxStackSize() const
 //	return detachedItem;
 //} // detachChild //
 
-
-
 //-----------------------------------------------
 // detachChildren :
 // BUGGED !!
 //-----------------------------------------------
 /*void CGameItem::detachChildren()
 {
-	vector<CGameItemPtr >::iterator it;
-	for( it = _Children.begin(); it != _Children.end(); ++it )
-	{
-		if ( (*it) != NULL )
-		{
-			(**it).detachFromParent(); 
-			(*it) = NULL;
-		}
-	}
+    vector<CGameItemPtr >::iterator it;
+    for( it = _Children.begin(); it != _Children.end(); ++it )
+    {
+        if ( (*it) != NULL )
+        {
+            (**it).detachFromParent();
+            (*it) = NULL;
+        }
+    }
 } // detachChildren //
 */
 
@@ -1564,7 +1552,7 @@ uint32 CGameItem::getMaxStackSize() const
 // moveChild :
 //
 //-----------------------------------------------
-//void CGameItem::moveChild( uint8 from, uint8 to )
+// void CGameItem::moveChild( uint8 from, uint8 to )
 //{
 //	if( from >= _Children.size() )
 //	{
@@ -1588,12 +1576,11 @@ uint32 CGameItem::getMaxStackSize() const
 //
 //} // moveChild //
 
-
 //-----------------------------------------------
 // reorganizeChildren :
 //
 //-----------------------------------------------
-//void CGameItem::reorganizeChildren()
+// void CGameItem::reorganizeChildren()
 //{
 //	static CSheetId stackSheet("stack.sitem");
 //
@@ -1632,27 +1619,26 @@ uint32 CGameItem::getMaxStackSize() const
 //		_Children.resize( nbItems - nullItemsCount);
 //} // reorganizeChildren //
 
-
 //-----------------------------------------------
 // detachFromParent :
 //
 //-----------------------------------------------
-//void CGameItem::detachFromParent() 
+// void CGameItem::detachFromParent()
 //{
 //	if (_Parent == NULL) return;
 //
 //	nlassert( _Parent->getChildren()[Loc.Slot] == this);
 //
 //	(*_Parent)->detachChild(Loc.Slot);
-//	_Parent = NULL; 
-//	Loc.Slot = 0; 
+//	_Parent = NULL;
+//	Loc.Slot = 0;
 //}
 
 //-----------------------------------------------
 // attachTo :
 //
 //-----------------------------------------------
-//void CGameItem::attachTo(CGameItemPtr item, uint8 slot) 
+// void CGameItem::attachTo(CGameItemPtr item, uint8 slot)
 //{
 //	// if the item is still attached, detach it from its parent
 //	if ( _Parent != NULL )
@@ -1672,7 +1658,7 @@ uint32 CGameItem::getMaxStackSize() const
 // getSlotImage :
 //
 //-----------------------------------------------
-//bool CGameItem::getSlotImage(bool & inHand, uint16 & slot) const
+// bool CGameItem::getSlotImage(bool & inHand, uint16 & slot) const
 //{
 //	if ( _SlotImage == 0xFFFF )
 //		return false;
@@ -1691,7 +1677,7 @@ uint32 CGameItem::getMaxStackSize() const
 // setSlotImage :
 //
 //-----------------------------------------------
-//void CGameItem::setSlotImage(bool inHand, uint16 slot)
+// void CGameItem::setSlotImage(bool inHand, uint16 slot)
 //{
 //	if ( inHand )
 //		_SlotImage = slot;
@@ -1703,7 +1689,7 @@ uint32 CGameItem::getMaxStackSize() const
 // resetSlotImage :
 //
 //-----------------------------------------------
-//void CGameItem::resetSlotImage()
+// void CGameItem::resetSlotImage()
 //{
 //	_SlotImage = 0xFFFF;
 //}
@@ -1712,7 +1698,7 @@ uint32 CGameItem::getMaxStackSize() const
 // getLocSlot :
 //
 //-----------------------------------------------
-//uint8 CGameItem::getLocSlot()
+// uint8 CGameItem::getLocSlot()
 //{
 //	if (_Parent!=NULL)
 //	{
@@ -1724,24 +1710,23 @@ uint32 CGameItem::getMaxStackSize() const
 //	return Loc.Slot;
 //}
 
-
-//uint32 CGameItem::getInventorySlot()
+// uint32 CGameItem::getInventorySlot()
 //{
 //	if (_Inventory == NULL)
 //		return CInventory::INVALID_INVENTORY_SLOT;
 //
 //	return Loc.Slot;
-//}
+// }
 
 //-----------------------------------------------
 // getItem :
 //
 //-----------------------------------------------
-CGameItem * CGameItem::getItem(uint idx)
-{	
-	BOMB_IF( !idx, "Attempt to access a null item pointer", return &_Items[0] );
-	BOMB_IF( idx>=_Items.size(), "Attempt to access an item beyond end of item vector", return &_Items[0] );
-	BOMB_IF( _Items[idx].AllocatorNext > 0, NLMISC::toString("Attempt to access an item that is not allocated or has been freed (idx: %d)",idx), return &_Items[0] );
+CGameItem *CGameItem::getItem(uint idx)
+{
+	BOMB_IF(!idx, "Attempt to access a null item pointer", return &_Items[0]);
+	BOMB_IF(idx >= _Items.size(), "Attempt to access an item beyond end of item vector", return &_Items[0]);
+	BOMB_IF(_Items[idx].AllocatorNext > 0, NLMISC::toString("Attempt to access an item that is not allocated or has been freed (idx: %d)", idx), return &_Items[0]);
 	return &_Items[idx];
 }
 
@@ -1788,13 +1773,13 @@ CGameItem *CGameItem::newItem()
 //-----------------------------------------------
 void CGameItem::deleteItem(CGameItem *item)
 {
-	uint32 idx=_Items.getUniqueIndex(*item);
+	uint32 idx = _Items.getUniqueIndex(*item);
 
-	BOMB_IF( idx == 0, "Delete item failed because getIndex failed", return);
-	BOMB_IF( item->_Inventory != NULL, "Item still in an inventory while deleting", item->_Inventory->removeItem(item->getInventorySlot()););
-	BOMB_IF( item->_RefInventory != NULL, "Item still in a ref inventory while deleting", item->_RefInventory->removeItem(item->getRefInventorySlot()););
+	BOMB_IF(idx == 0, "Delete item failed because getIndex failed", return);
+	BOMB_IF(item->_Inventory != NULL, "Item still in an inventory while deleting", item->_Inventory->removeItem(item->getInventorySlot()););
+	BOMB_IF(item->_RefInventory != NULL, "Item still in a ref inventory while deleting", item->_RefInventory->removeItem(item->getRefInventorySlot()););
 
-	// this test would only have value if the implementation of std::vector<> doesn't guarantee a 
+	// this test would only have value if the implementation of std::vector<> doesn't guarantee a
 	// continuous memory address space for the vector's data
 	// It's not in the #IFDEF DEBUG because it may only be triggered in very obscure conditions
 	nlassert(&_Items[idx] == item);
@@ -1805,50 +1790,47 @@ void CGameItem::deleteItem(CGameItem *item)
 	_FirstFreeItem = idx;
 }
 
-
 //-----------------------------------------------
 // dumpGameItemStats :
 //
 //-----------------------------------------------
-void CGameItem::dumpGameItemStats( const string& fileName )
+void CGameItem::dumpGameItemStats(const string &fileName)
 {
-	if( !fileName.empty() )
+	if (!fileName.empty())
 	{
 		FILE *f = nlfopen(fileName, "w");
-		
-		if(f)
-		{
-//			fprintf(f,"ItemID   : %s\n", _ItemId.toString().c_str());
-			fprintf(f,"SheetId : %d\n", _SheetId.asInt());
-			fprintf(f,"Loc  : TODO\n");
-			fprintf(f,"Recommended  : %d\n", _Recommended);
-			fprintf(f,"Hp  : %d\n", _HP);
 
-			if( _CraftParameters )
+		if (f)
+		{
+			//			fprintf(f,"ItemID   : %s\n", _ItemId.toString().c_str());
+			fprintf(f, "SheetId : %d\n", _SheetId.asInt());
+			fprintf(f, "Loc  : TODO\n");
+			fprintf(f, "Recommended  : %d\n", _Recommended);
+			fprintf(f, "Hp  : %d\n", _HP);
+
+			if (_CraftParameters)
 			{
-				fprintf(f,"DamageFactor: %f", _CraftParameters->Dmg );
-				fprintf(f,"SpeedFactor: %f", _CraftParameters->Speed );
-				fprintf(f,"RangeFactor: %f", _CraftParameters->Range );
+				fprintf(f, "DamageFactor: %f", _CraftParameters->Dmg);
+				fprintf(f, "SpeedFactor: %f", _CraftParameters->Speed);
+				fprintf(f, "RangeFactor: %f", _CraftParameters->Range);
 			}
 
 			fclose(f);
 		}
 		else
 		{
-			nlwarning("(EGS)<CGameItem::dumpGameItemStats> Can't open the file %s",fileName.c_str());
+			nlwarning("(EGS)<CGameItem::dumpGameItemStats> Can't open the file %s", fileName.c_str());
 		}
 	}
 	else
 	{
-
-	}	
+	}
 } // dumpGameItemStats //
-
 
 //-----------------------------------------------
 // removeHp :
 //-----------------------------------------------
-uint32 CGameItem::removeHp( double hpLost ) 
+uint32 CGameItem::removeHp(double hpLost)
 {
 	if (_Form != NULL && _Form->Shield != NULL && _Form->Shield->Unbreakable)
 		return 0;
@@ -1864,54 +1846,54 @@ uint32 CGameItem::removeHp( double hpLost )
 	if (!hp)
 		return 0;
 
-	if( hp >= _HP)
+	if (hp >= _HP)
 	{
 		_HP = 1;
-	
-//		// if states differs send a message if owner is a player
-//		if (_CurrentWornState != ITEM_WORN_STATE::Worned)
-//		{
-//			_CurrentWornState = ITEM_WORN_STATE::Worned;
-//
-//			// only send message for non armor and non shield items
-//			if (_Form && !ITEMFAMILY::destroyedWhenWorned(_Form->Family) )
-//			{
-//				const CEntityId itemOwner = getOwnerPlayer();
-//				if (itemOwner != CEntityId::Unknown)
-//				{
-//					SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
-//					params[0].SheetId = _SheetId;
-//					PHRASE_UTILITIES::sendDynamicSystemMessage( TheDataset.getDataSetRow(itemOwner), ITEM_WORN_STATE::getMessageForState(ITEM_WORN_STATE::Worned), params);
-//				}
-//			}
-// 		}
+
+		//		// if states differs send a message if owner is a player
+		//		if (_CurrentWornState != ITEM_WORN_STATE::Worned)
+		//		{
+		//			_CurrentWornState = ITEM_WORN_STATE::Worned;
+		//
+		//			// only send message for non armor and non shield items
+		//			if (_Form && !ITEMFAMILY::destroyedWhenWorned(_Form->Family) )
+		//			{
+		//				const CEntityId itemOwner = getOwnerPlayer();
+		//				if (itemOwner != CEntityId::Unknown)
+		//				{
+		//					SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
+		//					params[0].SheetId = _SheetId;
+		//					PHRASE_UTILITIES::sendDynamicSystemMessage( TheDataset.getDataSetRow(itemOwner), ITEM_WORN_STATE::getMessageForState(ITEM_WORN_STATE::Worned), params);
+		//				}
+		//			}
+		// 		}
 
 		getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_hp));
 
-		return (hp-_HP);
+		return (hp - _HP);
 	}
 
 	_HP -= hp;
 
 	// get new worn state
-//	ITEM_WORN_STATE::TItemWornState wornState = _CurrentWornState;
-//	computeItemWornState();
+	//	ITEM_WORN_STATE::TItemWornState wornState = _CurrentWornState;
+	//	computeItemWornState();
 
-//	// if states differs send a message if owner is a player
-//	if (wornState != _CurrentWornState)
-//	{
-//		const CEntityId itemOwner = getOwnerPlayer();
-//		if (itemOwner != CEntityId::Unknown)
-//		{
-//			string msgName = ITEM_WORN_STATE::getMessageForState(_CurrentWornState);
-//			if ( !msgName.empty())
-//			{
-//				SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
-//				params[0].SheetId = _SheetId;
-//				PHRASE_UTILITIES::sendDynamicSystemMessage( TheDataset.getDataSetRow(itemOwner), msgName, params);
-//			}
-//		}
-//	}
+	//	// if states differs send a message if owner is a player
+	//	if (wornState != _CurrentWornState)
+	//	{
+	//		const CEntityId itemOwner = getOwnerPlayer();
+	//		if (itemOwner != CEntityId::Unknown)
+	//		{
+	//			string msgName = ITEM_WORN_STATE::getMessageForState(_CurrentWornState);
+	//			if ( !msgName.empty())
+	//			{
+	//				SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
+	//				params[0].SheetId = _SheetId;
+	//				PHRASE_UTILITIES::sendDynamicSystemMessage( TheDataset.getDataSetRow(itemOwner), msgName, params);
+	//			}
+	//		}
+	//	}
 
 	getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_hp));
 
@@ -1921,36 +1903,36 @@ uint32 CGameItem::removeHp( double hpLost )
 //-----------------------------------------------
 // add hp to item
 //-----------------------------------------------
-void CGameItem::addHp( double hpGain )
+void CGameItem::addHp(double hpGain)
 {
 	uint32 hp = (uint32)fabs(hpGain);
 	_LostHPremains -= (float)hpGain - float(hp);
 
 	_HP += hp;
 	const uint32 max = maxDurability();
-	if ( _HP >= max )
+	if (_HP >= max)
 		_HP = max;
 
 	// get new worn state
 	ITEM_WORN_STATE::TItemWornState wornState = _CurrentWornState;
 	computeItemWornState();
-	
-//	// if states differs send a message if owner is a player
-//	if (wornState != _CurrentWornState)
-//	{
-//		const CEntityId itemOwner = getOwnerPlayer();
-//		if (itemOwner != CEntityId::Unknown)
-//		{
-//			string msgName = ITEM_WORN_STATE::getMessageForState(_CurrentWornState);
-//			if ( !msgName.empty())
-//			{
-//				SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
-//				params[0].SheetId = _SheetId;
-//				PHRASE_UTILITIES::sendDynamicSystemMessage( TheDataset.getDataSetRow(itemOwner), msgName, params);
-//			}
-//		}
-//	}
-	
+
+	//	// if states differs send a message if owner is a player
+	//	if (wornState != _CurrentWornState)
+	//	{
+	//		const CEntityId itemOwner = getOwnerPlayer();
+	//		if (itemOwner != CEntityId::Unknown)
+	//		{
+	//			string msgName = ITEM_WORN_STATE::getMessageForState(_CurrentWornState);
+	//			if ( !msgName.empty())
+	//			{
+	//				SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
+	//				params[0].SheetId = _SheetId;
+	//				PHRASE_UTILITIES::sendDynamicSystemMessage( TheDataset.getDataSetRow(itemOwner), msgName, params);
+	//			}
+	//		}
+	//	}
+
 	getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_hp));
 
 } // addHp //
@@ -1962,17 +1944,17 @@ void CGameItem::setCustomText(const std::string &val)
 {
 	if (!_CustomText) _CustomText = new std::string();
 	*_CustomText = val;
-//	getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_custom_text));
+	//	getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_custom_text));
 }
 
 void CGameItem::setInventory(const CInventoryPtr &inv, uint32 slot)
 {
-	nlassert((_Inventory == NULL && inv != NULL) 
-			|| (_Inventory != NULL && inv == NULL));
-	nlassert((_InventorySlot == INVENTORIES::INVALID_INVENTORY_SLOT && _Inventory == NULL) 
-			||(_InventorySlot != INVENTORIES::INVALID_INVENTORY_SLOT && _Inventory != NULL));
-	nlassert((slot == INVENTORIES::INVALID_INVENTORY_SLOT && inv == NULL) 
-			||(slot != INVENTORIES::INVALID_INVENTORY_SLOT && inv != NULL));
+	nlassert((_Inventory == NULL && inv != NULL)
+	    || (_Inventory != NULL && inv == NULL));
+	nlassert((_InventorySlot == INVENTORIES::INVALID_INVENTORY_SLOT && _Inventory == NULL)
+	    || (_InventorySlot != INVENTORIES::INVALID_INVENTORY_SLOT && _Inventory != NULL));
+	nlassert((slot == INVENTORIES::INVALID_INVENTORY_SLOT && inv == NULL)
+	    || (slot != INVENTORIES::INVALID_INVENTORY_SLOT && inv != NULL));
 	nlassert(inv == NULL || (slot < inv->getSlotCount()));
 
 	_Inventory = inv;
@@ -1982,54 +1964,52 @@ void CGameItem::setInventory(const CInventoryPtr &inv, uint32 slot)
 /// set link information between item and reference inventory (used by CRefInventory)
 void CGameItem::setRefInventory(const CInventoryPtr &inv, uint32 slot)
 {
-	nlassert((_RefInventory == NULL && inv != NULL) 
-		|| (_RefInventory != NULL && inv == NULL));
-	nlassert((_RefInventorySlot == INVENTORIES::INVALID_INVENTORY_SLOT && _RefInventory == NULL) 
-		||(_RefInventorySlot != INVENTORIES::INVALID_INVENTORY_SLOT && _RefInventory != NULL));
-	nlassert((slot == INVENTORIES::INVALID_INVENTORY_SLOT && inv == NULL) 
-		||(slot != INVENTORIES::INVALID_INVENTORY_SLOT && inv != NULL));
+	nlassert((_RefInventory == NULL && inv != NULL)
+	    || (_RefInventory != NULL && inv == NULL));
+	nlassert((_RefInventorySlot == INVENTORIES::INVALID_INVENTORY_SLOT && _RefInventory == NULL)
+	    || (_RefInventorySlot != INVENTORIES::INVALID_INVENTORY_SLOT && _RefInventory != NULL));
+	nlassert((slot == INVENTORIES::INVALID_INVENTORY_SLOT && inv == NULL)
+	    || (slot != INVENTORIES::INVALID_INVENTORY_SLOT && inv != NULL));
 	nlassert(inv == NULL || (slot < inv->getSlotCount()));
-	
+
 	_RefInventory = inv;
 	_RefInventorySlot = slot;
 }
 
-
 //-----------------------------------------------
 // get stat energy of item
 //-----------------------------------------------
-float CGameItem::getStatEnergy() 
-{ 
+float CGameItem::getStatEnergy()
+{
 	if (_Form == NULL)
 		return 0.0f;
 
 	switch (_Form->Family)
 	{
-		case ITEMFAMILY::ARMOR:
-		case ITEMFAMILY::MELEE_WEAPON:
-		case ITEMFAMILY::RANGE_WEAPON:
-		case ITEMFAMILY::AMMO:
-		case ITEMFAMILY::SHIELD:
-		case ITEMFAMILY::JEWELRY:
-			break;
-		case ITEMFAMILY::RAW_MATERIAL:
-			return _Form->Mp->StatEnergy;
-		default:
-			return 0.0f;
+	case ITEMFAMILY::ARMOR:
+	case ITEMFAMILY::MELEE_WEAPON:
+	case ITEMFAMILY::RANGE_WEAPON:
+	case ITEMFAMILY::AMMO:
+	case ITEMFAMILY::SHIELD:
+	case ITEMFAMILY::JEWELRY:
+		break;
+	case ITEMFAMILY::RAW_MATERIAL:
+		return _Form->Mp->StatEnergy;
+	default:
+		return 0.0f;
 	}
-	if( _CraftParameters == 0 )
+	if (_CraftParameters == 0)
 	{
 		return 0.0f;
 	}
 	else
 	{
-		if( _CraftParameters->StatEnergy == 0.0f ) 
-			return estimateStatEnergy(); 
-		else 
-			return _CraftParameters->StatEnergy; 
+		if (_CraftParameters->StatEnergy == 0.0f)
+			return estimateStatEnergy();
+		else
+			return _CraftParameters->StatEnergy;
 	}
 }
-
 
 //-----------------------------------------------
 // get class of item
@@ -2045,8 +2025,8 @@ RM_CLASS_TYPE::TRMClassType CGameItem::getItemClass()
 float CGameItem::estimateStatEnergy()
 {
 	float statEnergy = 0.0f;
-	
-	if( _CraftParameters )
+
+	if (_CraftParameters)
 	{
 		statEnergy += _CraftParameters->Durability;
 		statEnergy += _CraftParameters->Weight;
@@ -2070,11 +2050,10 @@ float CGameItem::estimateStatEnergy()
 		statEnergy += _CraftParameters->HealPowerFactor;
 		statEnergy += _CraftParameters->DefensiveAfflictionCastingTimeFactor;
 		statEnergy += _CraftParameters->DefensiveAfflictionPowerFactor;
-		return ( _CraftParameters->StatEnergy = statEnergy / 22.0f );
+		return (_CraftParameters->StatEnergy = statEnergy / 22.0f);
 	}
 	return 0.0f;
 }
-
 
 //-----------------------------------------------
 // return max durability (= max hp) of item
@@ -2085,109 +2064,107 @@ uint32 CGameItem::maxDurability() const
 		return 0;
 
 	// craftable items
-//	if (_CraftParameters != NULL)
+	//	if (_CraftParameters != NULL)
 	{
 		float d = 0.0f;
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
-			// melee weapons
-			case ITEM_TYPE::DAGGER:			d = CWeaponCraftParameters::DaggerDurability;		break;				
-			case ITEM_TYPE::SWORD:			d = CWeaponCraftParameters::SwordDurability;		break;
-			case ITEM_TYPE::MACE:			d = CWeaponCraftParameters::MaceDurability;			break;
-			case ITEM_TYPE::AXE:			d = CWeaponCraftParameters::AxeDurability;			break;
-			case ITEM_TYPE::SPEAR:			d = CWeaponCraftParameters::SpearDurability;		break;
-			case ITEM_TYPE::STAFF:			d = CWeaponCraftParameters::StaffDurability;		break;
-			case ITEM_TYPE::MAGICIAN_STAFF: d = CWeaponCraftParameters::MagicianStaffDurability;break;
-			case ITEM_TYPE::TWO_HAND_SWORD: d = CWeaponCraftParameters::TwoHandSwordDurability; break;
-			case ITEM_TYPE::TWO_HAND_AXE:	d = CWeaponCraftParameters::TwoHandAxeDurability;	break;
-			case ITEM_TYPE::PIKE:			d = CWeaponCraftParameters::PikeDurability;			break;
-			case ITEM_TYPE::TWO_HAND_MACE:	d = CWeaponCraftParameters::TwoHandMaceDurability;	break;
-		
-			// range weapon
-			case ITEM_TYPE::AUTOLAUCH:	d = CWeaponCraftParameters::AutolauchDurability;	break;
-			case ITEM_TYPE::BOWRIFLE:	d = CWeaponCraftParameters::BowrifleDurability;		break;
-			case ITEM_TYPE::LAUNCHER:	d = CWeaponCraftParameters::LauncherDurability;		break;
-			case ITEM_TYPE::PISTOL:		d = CWeaponCraftParameters::PistolDurability;		break;
-			case ITEM_TYPE::BOWPISTOL:	d = CWeaponCraftParameters::BowpistolDurability;	break;
-			case ITEM_TYPE::RIFLE:		d = CWeaponCraftParameters::RifleDurability;		break;
-		
-			// ammo
-			case ITEM_TYPE::AUTOLAUNCH_AMMO:d = CWeaponCraftParameters::AutolaunchAmmoDurability;	break;
-			case ITEM_TYPE::BOWRIFLE_AMMO:	d = CWeaponCraftParameters::BowrifleAmmoDurability;		break;
-			case ITEM_TYPE::LAUNCHER_AMMO:	d = CWeaponCraftParameters::LauncherAmmoDurability;		break;
-			case ITEM_TYPE::PISTOL_AMMO:	d = CWeaponCraftParameters::PistolAmmoDurability;		break;
-			case ITEM_TYPE::BOWPISTOL_AMMO: d = CWeaponCraftParameters::BowpistolAmmoDurability;	break;
-			case ITEM_TYPE::RIFLE_AMMO:		d = CWeaponCraftParameters::RifleAmmoDurability;		break;
-		
-			// armor and shield
-			case ITEM_TYPE::SHIELD:			d = CWeaponCraftParameters::ShieldDurability;		break;
-			case ITEM_TYPE::BUCKLER:		d = CWeaponCraftParameters::BucklerDurability;		break;
-			case ITEM_TYPE::LIGHT_BOOTS:	d = CWeaponCraftParameters::LightBootsDurability;	break;
-			case ITEM_TYPE::LIGHT_GLOVES:	d = CWeaponCraftParameters::LightGlovesDurability;	break;
-			case ITEM_TYPE::LIGHT_PANTS:	d = CWeaponCraftParameters::LightPantsDurability;	break;
-			case ITEM_TYPE::LIGHT_SLEEVES:	d = CWeaponCraftParameters::LightSleevesDurability; break;
-			case ITEM_TYPE::LIGHT_VEST:		d = CWeaponCraftParameters::LightVestDurability;	break;
-			case ITEM_TYPE::MEDIUM_BOOTS:	d = CWeaponCraftParameters::MediumBootsDurability;	break;
-			case ITEM_TYPE::MEDIUM_GLOVES:	d = CWeaponCraftParameters::MediumGlovesDurability; break;
-			case ITEM_TYPE::MEDIUM_PANTS:	d = CWeaponCraftParameters::MediumPantsDurability;	break;
-			case ITEM_TYPE::MEDIUM_SLEEVES:	d = CWeaponCraftParameters::MediumSleevesDurability;break;
-			case ITEM_TYPE::MEDIUM_VEST:	d = CWeaponCraftParameters::MediumVestDurability;	break;
-			case ITEM_TYPE::HEAVY_BOOTS:	d = CWeaponCraftParameters::HeavyBootsDurability;	break;
-			case ITEM_TYPE::HEAVY_GLOVES:	d = CWeaponCraftParameters::HeavyGlovesDurability;	break;
-			case ITEM_TYPE::HEAVY_PANTS:	d = CWeaponCraftParameters::HeavyPantsDurability;	break;
-			case ITEM_TYPE::HEAVY_SLEEVES:	d = CWeaponCraftParameters::HeavySleevesDurability; break;
-			case ITEM_TYPE::HEAVY_VEST:		d = CWeaponCraftParameters::HeavyVestDurability;	break;
-			case ITEM_TYPE::HEAVY_HELMET:	d = CWeaponCraftParameters::HeavyHelmetDurability;	break;
-		
-			// jewel
-			case ITEM_TYPE::ANKLET:		d = CWeaponCraftParameters::AnkletDurability;	break;
-			case ITEM_TYPE::BRACELET:	d = CWeaponCraftParameters::BraceletDurability; break;
-			case ITEM_TYPE::DIADEM:		d = CWeaponCraftParameters::DiademDurability;	break;
-			case ITEM_TYPE::EARING:		d = CWeaponCraftParameters::EaringDurability;	break;
-			case ITEM_TYPE::PENDANT:	d = CWeaponCraftParameters::PendantDurability;	break;
-			case ITEM_TYPE::RING:		d = CWeaponCraftParameters::RingDurability;		break;
+		// melee weapons
+		case ITEM_TYPE::DAGGER: d = CWeaponCraftParameters::DaggerDurability; break;
+		case ITEM_TYPE::SWORD: d = CWeaponCraftParameters::SwordDurability; break;
+		case ITEM_TYPE::MACE: d = CWeaponCraftParameters::MaceDurability; break;
+		case ITEM_TYPE::AXE: d = CWeaponCraftParameters::AxeDurability; break;
+		case ITEM_TYPE::SPEAR: d = CWeaponCraftParameters::SpearDurability; break;
+		case ITEM_TYPE::STAFF: d = CWeaponCraftParameters::StaffDurability; break;
+		case ITEM_TYPE::MAGICIAN_STAFF: d = CWeaponCraftParameters::MagicianStaffDurability; break;
+		case ITEM_TYPE::TWO_HAND_SWORD: d = CWeaponCraftParameters::TwoHandSwordDurability; break;
+		case ITEM_TYPE::TWO_HAND_AXE: d = CWeaponCraftParameters::TwoHandAxeDurability; break;
+		case ITEM_TYPE::PIKE: d = CWeaponCraftParameters::PikeDurability; break;
+		case ITEM_TYPE::TWO_HAND_MACE: d = CWeaponCraftParameters::TwoHandMaceDurability; break;
 
-			// tools
-			// SHEARS = pick for forage
-			case ITEM_TYPE::SHEARS:          d = CWeaponCraftParameters::ForageToolDurability;              break;
-			case ITEM_TYPE::AmmoTool:        d = CWeaponCraftParameters::AmmoCraftingToolDurability;        break;
-			case ITEM_TYPE::ArmorTool:       d = CWeaponCraftParameters::ArmorCraftingToolDurability;       break;
-			case ITEM_TYPE::JewelryTool:     d = CWeaponCraftParameters::JewelryCraftingToolDurability;     break;
-			case ITEM_TYPE::MeleeWeaponTool: d = CWeaponCraftParameters::MeleeWeaponCraftingToolDurability; break;
-			case ITEM_TYPE::RangeWeaponTool: d = CWeaponCraftParameters::RangeWeaponCraftingToolDurability; break;
-			case ITEM_TYPE::ToolMaker:       d = CWeaponCraftParameters::ToolCraftingToolDurability;        break;
+		// range weapon
+		case ITEM_TYPE::AUTOLAUCH: d = CWeaponCraftParameters::AutolauchDurability; break;
+		case ITEM_TYPE::BOWRIFLE: d = CWeaponCraftParameters::BowrifleDurability; break;
+		case ITEM_TYPE::LAUNCHER: d = CWeaponCraftParameters::LauncherDurability; break;
+		case ITEM_TYPE::PISTOL: d = CWeaponCraftParameters::PistolDurability; break;
+		case ITEM_TYPE::BOWPISTOL: d = CWeaponCraftParameters::BowpistolDurability; break;
+		case ITEM_TYPE::RIFLE: d = CWeaponCraftParameters::RifleDurability; break;
 
-			default:
-				return 0;
+		// ammo
+		case ITEM_TYPE::AUTOLAUNCH_AMMO: d = CWeaponCraftParameters::AutolaunchAmmoDurability; break;
+		case ITEM_TYPE::BOWRIFLE_AMMO: d = CWeaponCraftParameters::BowrifleAmmoDurability; break;
+		case ITEM_TYPE::LAUNCHER_AMMO: d = CWeaponCraftParameters::LauncherAmmoDurability; break;
+		case ITEM_TYPE::PISTOL_AMMO: d = CWeaponCraftParameters::PistolAmmoDurability; break;
+		case ITEM_TYPE::BOWPISTOL_AMMO: d = CWeaponCraftParameters::BowpistolAmmoDurability; break;
+		case ITEM_TYPE::RIFLE_AMMO: d = CWeaponCraftParameters::RifleAmmoDurability; break;
+
+		// armor and shield
+		case ITEM_TYPE::SHIELD: d = CWeaponCraftParameters::ShieldDurability; break;
+		case ITEM_TYPE::BUCKLER: d = CWeaponCraftParameters::BucklerDurability; break;
+		case ITEM_TYPE::LIGHT_BOOTS: d = CWeaponCraftParameters::LightBootsDurability; break;
+		case ITEM_TYPE::LIGHT_GLOVES: d = CWeaponCraftParameters::LightGlovesDurability; break;
+		case ITEM_TYPE::LIGHT_PANTS: d = CWeaponCraftParameters::LightPantsDurability; break;
+		case ITEM_TYPE::LIGHT_SLEEVES: d = CWeaponCraftParameters::LightSleevesDurability; break;
+		case ITEM_TYPE::LIGHT_VEST: d = CWeaponCraftParameters::LightVestDurability; break;
+		case ITEM_TYPE::MEDIUM_BOOTS: d = CWeaponCraftParameters::MediumBootsDurability; break;
+		case ITEM_TYPE::MEDIUM_GLOVES: d = CWeaponCraftParameters::MediumGlovesDurability; break;
+		case ITEM_TYPE::MEDIUM_PANTS: d = CWeaponCraftParameters::MediumPantsDurability; break;
+		case ITEM_TYPE::MEDIUM_SLEEVES: d = CWeaponCraftParameters::MediumSleevesDurability; break;
+		case ITEM_TYPE::MEDIUM_VEST: d = CWeaponCraftParameters::MediumVestDurability; break;
+		case ITEM_TYPE::HEAVY_BOOTS: d = CWeaponCraftParameters::HeavyBootsDurability; break;
+		case ITEM_TYPE::HEAVY_GLOVES: d = CWeaponCraftParameters::HeavyGlovesDurability; break;
+		case ITEM_TYPE::HEAVY_PANTS: d = CWeaponCraftParameters::HeavyPantsDurability; break;
+		case ITEM_TYPE::HEAVY_SLEEVES: d = CWeaponCraftParameters::HeavySleevesDurability; break;
+		case ITEM_TYPE::HEAVY_VEST: d = CWeaponCraftParameters::HeavyVestDurability; break;
+		case ITEM_TYPE::HEAVY_HELMET: d = CWeaponCraftParameters::HeavyHelmetDurability; break;
+
+		// jewel
+		case ITEM_TYPE::ANKLET: d = CWeaponCraftParameters::AnkletDurability; break;
+		case ITEM_TYPE::BRACELET: d = CWeaponCraftParameters::BraceletDurability; break;
+		case ITEM_TYPE::DIADEM: d = CWeaponCraftParameters::DiademDurability; break;
+		case ITEM_TYPE::EARING: d = CWeaponCraftParameters::EaringDurability; break;
+		case ITEM_TYPE::PENDANT: d = CWeaponCraftParameters::PendantDurability; break;
+		case ITEM_TYPE::RING: d = CWeaponCraftParameters::RingDurability; break;
+
+		// tools
+		// SHEARS = pick for forage
+		case ITEM_TYPE::SHEARS: d = CWeaponCraftParameters::ForageToolDurability; break;
+		case ITEM_TYPE::AmmoTool: d = CWeaponCraftParameters::AmmoCraftingToolDurability; break;
+		case ITEM_TYPE::ArmorTool: d = CWeaponCraftParameters::ArmorCraftingToolDurability; break;
+		case ITEM_TYPE::JewelryTool: d = CWeaponCraftParameters::JewelryCraftingToolDurability; break;
+		case ITEM_TYPE::MeleeWeaponTool: d = CWeaponCraftParameters::MeleeWeaponCraftingToolDurability; break;
+		case ITEM_TYPE::RangeWeaponTool: d = CWeaponCraftParameters::RangeWeaponCraftingToolDurability; break;
+		case ITEM_TYPE::ToolMaker: d = CWeaponCraftParameters::ToolCraftingToolDurability; break;
+
+		default:
+			return 0;
 		}
-		
-		if (_CraftParameters != NULL)
-			return (uint32) ( d + d * _CraftParameters->Durability );
-		else
-			return (uint32) d;
 
+		if (_CraftParameters != NULL)
+			return (uint32)(d + d * _CraftParameters->Durability);
+		else
+			return (uint32)d;
 	}
 	/*else // non craftable items -> tools
 	{
-		// tool
-		switch( _Form->Type )
-		{
-			// SHEARS = pick for forage
-			case ITEM_TYPE::SHEARS:			return (uint32)CWeaponCraftParameters::ForageToolDurability;
-			case ITEM_TYPE::AmmoTool:		return (uint32)CWeaponCraftParameters::AmmoCraftingToolDurability;
-			case ITEM_TYPE::ArmorTool:		return (uint32)CWeaponCraftParameters::ArmorCraftingToolDurability;
-			case ITEM_TYPE::JewelryTool:	return (uint32)CWeaponCraftParameters::JewelryCraftingToolDurability;
-			case ITEM_TYPE::MeleeWeaponTool:return (uint32)CWeaponCraftParameters::MeleeWeaponCraftingToolDurability;
-			case ITEM_TYPE::RangeWeaponTool:return (uint32)CWeaponCraftParameters::RangeWeaponCraftingToolDurability;
-			
-			default:
-				return 0;
-		}
+	    // tool
+	    switch( _Form->Type )
+	    {
+	        // SHEARS = pick for forage
+	        case ITEM_TYPE::SHEARS:			return (uint32)CWeaponCraftParameters::ForageToolDurability;
+	        case ITEM_TYPE::AmmoTool:		return (uint32)CWeaponCraftParameters::AmmoCraftingToolDurability;
+	        case ITEM_TYPE::ArmorTool:		return (uint32)CWeaponCraftParameters::ArmorCraftingToolDurability;
+	        case ITEM_TYPE::JewelryTool:	return (uint32)CWeaponCraftParameters::JewelryCraftingToolDurability;
+	        case ITEM_TYPE::MeleeWeaponTool:return (uint32)CWeaponCraftParameters::MeleeWeaponCraftingToolDurability;
+	        case ITEM_TYPE::RangeWeaponTool:return (uint32)CWeaponCraftParameters::RangeWeaponCraftingToolDurability;
+
+	        default:
+	            return 0;
+	    }
 	}
 	*/
-//	return 0;
+	//	return 0;
 }
-
 
 //-----------------------------------------------
 // return weight
@@ -2195,15 +2172,15 @@ uint32 CGameItem::maxDurability() const
 uint32 CGameItem::weight() const
 {
 	float weight = 0.0f;
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0;
 
-	if( _CraftParameters != NULL )
+	if (_CraftParameters != NULL)
 	{
-		if ( _Form->Family == ITEMFAMILY::MISSION_ITEM )
+		if (_Form->Family == ITEMFAMILY::MISSION_ITEM)
 		{
 			// Crafted missions items have no crafted weight but still a _CraftParameters struct
-			return  _Form->Weight;
+			return _Form->Weight;
 		}
 		else
 		{
@@ -2212,19 +2189,19 @@ uint32 CGameItem::weight() const
 			return uint32(max(0.f, weight * 1000.f));
 		}
 	}
-	else if( _Form != NULL )
+	else if (_Form != NULL)
 	{
-		switch( _Form->Family )
+		switch (_Form->Family)
 		{
-			case ITEMFAMILY::RAW_MATERIAL:
-			case ITEMFAMILY::CRAFTING_TOOL:
-			case ITEMFAMILY::HARVEST_TOOL:
-			case ITEMFAMILY::MISSION_ITEM:
-			case ITEMFAMILY::GENERIC_ITEM:
-			case ITEMFAMILY::ITEM_SAP_RECHARGE:
-				return _Form->Weight;
-			default:
-				return 0;
+		case ITEMFAMILY::RAW_MATERIAL:
+		case ITEMFAMILY::CRAFTING_TOOL:
+		case ITEMFAMILY::HARVEST_TOOL:
+		case ITEMFAMILY::MISSION_ITEM:
+		case ITEMFAMILY::GENERIC_ITEM:
+		case ITEMFAMILY::ITEM_SAP_RECHARGE:
+			return _Form->Weight;
+		default:
+			return 0;
 		}
 	}
 	else
@@ -2255,137 +2232,230 @@ uint32 CGameItem::getStackBulk(uint32 limitQuantity) const
 //-----------------------------------------------
 uint32 CGameItem::maxSapLoad() const
 {
-	if( _Form == 0)
+	if (_Form == 0)
 		return 0;
 
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
 		float s = 0.0f;
 		float m = 0.0f;
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
-		case ITEM_TYPE::DAGGER:		s = CWeaponCraftParameters::DaggerSapLoad;
-									m = CWeaponCraftParameters::DaggerSapLoadMax; break;
-		case ITEM_TYPE::SWORD:	s = CWeaponCraftParameters::SwordSapLoad;
-								m = CWeaponCraftParameters::SwordSapLoadMax; break;
-		case ITEM_TYPE::MACE:		s = CWeaponCraftParameters::MaceSapLoad;
-									m = CWeaponCraftParameters::MaceSapLoadMax; break;
-		case ITEM_TYPE::AXE:	s = CWeaponCraftParameters::AxeSapLoad;
-								m = CWeaponCraftParameters::AxeSapLoadMax; break;
-		case ITEM_TYPE::SPEAR:		s = CWeaponCraftParameters::SpearSapLoad;
-									m = CWeaponCraftParameters::SpearSapLoadMax; break;
-		case ITEM_TYPE::STAFF:	s = CWeaponCraftParameters::StaffSapLoad;
-								m = CWeaponCraftParameters::StaffSapLoadMax; break;
-		case ITEM_TYPE::MAGICIAN_STAFF: s = CWeaponCraftParameters::MagicianStaffSapLoad;
-										m = CWeaponCraftParameters::MagicianStaffSapLoadMax; break;
-		case ITEM_TYPE::TWO_HAND_SWORD:		s = CWeaponCraftParameters::TwoHandSwordSapLoad;
-											m = CWeaponCraftParameters::TwoHandSwordSapLoadMax; break;
-		case ITEM_TYPE::TWO_HAND_AXE:	s = CWeaponCraftParameters::TwoHandAxeSapLoad;
-										m = CWeaponCraftParameters::TwoHandAxeSapLoadMax; break;
-		case ITEM_TYPE::PIKE:	s = CWeaponCraftParameters::PikeSapLoad;
-								m = CWeaponCraftParameters::PikeSapLoadMax; break;
-		case ITEM_TYPE::TWO_HAND_MACE:	s = CWeaponCraftParameters::TwoHandMaceSapLoad;
-										m = CWeaponCraftParameters::TwoHandMaceSapLoadMax; break;
-		
+		case ITEM_TYPE::DAGGER:
+			s = CWeaponCraftParameters::DaggerSapLoad;
+			m = CWeaponCraftParameters::DaggerSapLoadMax;
+			break;
+		case ITEM_TYPE::SWORD:
+			s = CWeaponCraftParameters::SwordSapLoad;
+			m = CWeaponCraftParameters::SwordSapLoadMax;
+			break;
+		case ITEM_TYPE::MACE:
+			s = CWeaponCraftParameters::MaceSapLoad;
+			m = CWeaponCraftParameters::MaceSapLoadMax;
+			break;
+		case ITEM_TYPE::AXE:
+			s = CWeaponCraftParameters::AxeSapLoad;
+			m = CWeaponCraftParameters::AxeSapLoadMax;
+			break;
+		case ITEM_TYPE::SPEAR:
+			s = CWeaponCraftParameters::SpearSapLoad;
+			m = CWeaponCraftParameters::SpearSapLoadMax;
+			break;
+		case ITEM_TYPE::STAFF:
+			s = CWeaponCraftParameters::StaffSapLoad;
+			m = CWeaponCraftParameters::StaffSapLoadMax;
+			break;
+		case ITEM_TYPE::MAGICIAN_STAFF:
+			s = CWeaponCraftParameters::MagicianStaffSapLoad;
+			m = CWeaponCraftParameters::MagicianStaffSapLoadMax;
+			break;
+		case ITEM_TYPE::TWO_HAND_SWORD:
+			s = CWeaponCraftParameters::TwoHandSwordSapLoad;
+			m = CWeaponCraftParameters::TwoHandSwordSapLoadMax;
+			break;
+		case ITEM_TYPE::TWO_HAND_AXE:
+			s = CWeaponCraftParameters::TwoHandAxeSapLoad;
+			m = CWeaponCraftParameters::TwoHandAxeSapLoadMax;
+			break;
+		case ITEM_TYPE::PIKE:
+			s = CWeaponCraftParameters::PikeSapLoad;
+			m = CWeaponCraftParameters::PikeSapLoadMax;
+			break;
+		case ITEM_TYPE::TWO_HAND_MACE:
+			s = CWeaponCraftParameters::TwoHandMaceSapLoad;
+			m = CWeaponCraftParameters::TwoHandMaceSapLoadMax;
+			break;
+
 		// range weapon
-		case ITEM_TYPE::AUTOLAUCH:	s = CWeaponCraftParameters::AutolauchSapLoad;
-									m = CWeaponCraftParameters::AutolauchSapLoadMax; break;
-		case ITEM_TYPE::BOWRIFLE:		s = CWeaponCraftParameters::BowrifleSapLoad;
-										m = CWeaponCraftParameters::BowrifleSapLoadMax; break;
-		case ITEM_TYPE::LAUNCHER:	s = CWeaponCraftParameters::LauncherSapLoad;
-									m = CWeaponCraftParameters::LauncherSapLoadMax; break;
-		case ITEM_TYPE::PISTOL: s = CWeaponCraftParameters::PistolSapLoad;
-								m = CWeaponCraftParameters::PistolSapLoadMax; break;
-		case ITEM_TYPE::BOWPISTOL:	s = CWeaponCraftParameters::BowpistolSapLoad;
-									m = CWeaponCraftParameters::BowpistolSapLoadMax; break;
-		case ITEM_TYPE::RIFLE:	s = CWeaponCraftParameters::RifleSapLoad;
-								m = CWeaponCraftParameters::RifleSapLoadMax; break;
-		
+		case ITEM_TYPE::AUTOLAUCH:
+			s = CWeaponCraftParameters::AutolauchSapLoad;
+			m = CWeaponCraftParameters::AutolauchSapLoadMax;
+			break;
+		case ITEM_TYPE::BOWRIFLE:
+			s = CWeaponCraftParameters::BowrifleSapLoad;
+			m = CWeaponCraftParameters::BowrifleSapLoadMax;
+			break;
+		case ITEM_TYPE::LAUNCHER:
+			s = CWeaponCraftParameters::LauncherSapLoad;
+			m = CWeaponCraftParameters::LauncherSapLoadMax;
+			break;
+		case ITEM_TYPE::PISTOL:
+			s = CWeaponCraftParameters::PistolSapLoad;
+			m = CWeaponCraftParameters::PistolSapLoadMax;
+			break;
+		case ITEM_TYPE::BOWPISTOL:
+			s = CWeaponCraftParameters::BowpistolSapLoad;
+			m = CWeaponCraftParameters::BowpistolSapLoadMax;
+			break;
+		case ITEM_TYPE::RIFLE:
+			s = CWeaponCraftParameters::RifleSapLoad;
+			m = CWeaponCraftParameters::RifleSapLoadMax;
+			break;
+
 		// ammo
-		case ITEM_TYPE::AUTOLAUNCH_AMMO:	s = CWeaponCraftParameters::AutolaunchAmmoSapLoad;
-											m = CWeaponCraftParameters::AutolaunchAmmoSapLoadMax; break;
-		case ITEM_TYPE::BOWRIFLE_AMMO:	s = CWeaponCraftParameters::BowrifleAmmoSapLoad;
-										m = CWeaponCraftParameters::BowrifleAmmoSapLoadMax; break;
-		case ITEM_TYPE::LAUNCHER_AMMO:		s = CWeaponCraftParameters::LauncherAmmoSapLoad;
-											m = CWeaponCraftParameters::LauncherAmmoSapLoadMax; break;
-		case ITEM_TYPE::PISTOL_AMMO:	s = CWeaponCraftParameters::PistolAmmoSapLoad;
-										m = CWeaponCraftParameters::PistolAmmoSapLoadMax; break;
-		case ITEM_TYPE::BOWPISTOL_AMMO:		s = CWeaponCraftParameters::BowpistolAmmoSapLoad;
-											m = CWeaponCraftParameters::BowpistolAmmoSapLoadMax; break;
-		case ITEM_TYPE::RIFLE_AMMO:	s = CWeaponCraftParameters::RifleAmmoSapLoad;
-									m = CWeaponCraftParameters::RifleAmmoSapLoadMax; break;
-		
+		case ITEM_TYPE::AUTOLAUNCH_AMMO:
+			s = CWeaponCraftParameters::AutolaunchAmmoSapLoad;
+			m = CWeaponCraftParameters::AutolaunchAmmoSapLoadMax;
+			break;
+		case ITEM_TYPE::BOWRIFLE_AMMO:
+			s = CWeaponCraftParameters::BowrifleAmmoSapLoad;
+			m = CWeaponCraftParameters::BowrifleAmmoSapLoadMax;
+			break;
+		case ITEM_TYPE::LAUNCHER_AMMO:
+			s = CWeaponCraftParameters::LauncherAmmoSapLoad;
+			m = CWeaponCraftParameters::LauncherAmmoSapLoadMax;
+			break;
+		case ITEM_TYPE::PISTOL_AMMO:
+			s = CWeaponCraftParameters::PistolAmmoSapLoad;
+			m = CWeaponCraftParameters::PistolAmmoSapLoadMax;
+			break;
+		case ITEM_TYPE::BOWPISTOL_AMMO:
+			s = CWeaponCraftParameters::BowpistolAmmoSapLoad;
+			m = CWeaponCraftParameters::BowpistolAmmoSapLoadMax;
+			break;
+		case ITEM_TYPE::RIFLE_AMMO:
+			s = CWeaponCraftParameters::RifleAmmoSapLoad;
+			m = CWeaponCraftParameters::RifleAmmoSapLoadMax;
+			break;
+
 		// armor and shield
-		case ITEM_TYPE::SHIELD:	s = CWeaponCraftParameters::ShieldSapLoad;
-								m = CWeaponCraftParameters::ShieldSapLoadMax; break;
-		case ITEM_TYPE::BUCKLER:	s = CWeaponCraftParameters::BucklerSapLoad;
-									m = CWeaponCraftParameters::BucklerSapLoadMax; break;
-		case ITEM_TYPE::LIGHT_BOOTS:	s = CWeaponCraftParameters::LightBootsSapLoad;
-										m = CWeaponCraftParameters::LightBootsSapLoadMax; break;
-		case ITEM_TYPE::LIGHT_GLOVES:		s = CWeaponCraftParameters::LightGlovesSapLoad;
-											m = CWeaponCraftParameters::LightGlovesSapLoadMax; break;
-		case ITEM_TYPE::LIGHT_PANTS:	s = CWeaponCraftParameters::LightPantsSapLoad;
-										m = CWeaponCraftParameters::LightPantsSapLoadMax; break;
-		case ITEM_TYPE::LIGHT_SLEEVES:		s = CWeaponCraftParameters::LightSleevesSapLoad;
-											m = CWeaponCraftParameters::LightSleevesSapLoadMax; break;
-		case ITEM_TYPE::LIGHT_VEST:		s = CWeaponCraftParameters::LightVestSapLoad;
-										m = CWeaponCraftParameters::LightVestSapLoadMax; break;
-		case ITEM_TYPE::MEDIUM_BOOTS:		s = CWeaponCraftParameters::MediumBootsSapLoad;
-											m = CWeaponCraftParameters::MediumBootsSapLoadMax; break;
-		case ITEM_TYPE::MEDIUM_GLOVES:	s = CWeaponCraftParameters::MediumGlovesSapLoad;
-										m = CWeaponCraftParameters::MediumGlovesSapLoadMax; break;
-		case ITEM_TYPE::MEDIUM_PANTS:		s = CWeaponCraftParameters::MediumPantsSapLoad;
-											m = CWeaponCraftParameters::MediumPantsSapLoadMax; break;
-		case ITEM_TYPE::MEDIUM_SLEEVES: s = CWeaponCraftParameters::MediumSleevesSapLoad;
-										m = CWeaponCraftParameters::MediumSleevesSapLoadMax; break;
-		case ITEM_TYPE::MEDIUM_VEST:		s = CWeaponCraftParameters::MediumVestSapLoad;
-											m = CWeaponCraftParameters::MediumVestSapLoadMax; break;
-		case ITEM_TYPE::HEAVY_BOOTS:	s = CWeaponCraftParameters::HeavyBootsSapLoad;
-										m = CWeaponCraftParameters::HeavyBootsSapLoadMax; break;
-		case ITEM_TYPE::HEAVY_GLOVES:		s = CWeaponCraftParameters::HeavyGlovesSapLoad;
-											m = CWeaponCraftParameters::HeavyGlovesSapLoadMax; break;
-		case ITEM_TYPE::HEAVY_PANTS:	s = CWeaponCraftParameters::HeavyPantsSapLoad;
-										m = CWeaponCraftParameters::HeavyPantsSapLoadMax; break;
-		case ITEM_TYPE::HEAVY_SLEEVES:		s = CWeaponCraftParameters::HeavySleevesSapLoad;
-											m = CWeaponCraftParameters::HeavySleevesSapLoadMax; break;
-		case ITEM_TYPE::HEAVY_VEST:		s = CWeaponCraftParameters::HeavyVestSapLoad;
-										m = CWeaponCraftParameters::HeavyVestSapLoadMax; break;
-		case ITEM_TYPE::HEAVY_HELMET:		s = CWeaponCraftParameters::HeavyHelmetSapLoad;
-											m = CWeaponCraftParameters::HeavyHelmetSapLoadMax; break;
-		
+		case ITEM_TYPE::SHIELD:
+			s = CWeaponCraftParameters::ShieldSapLoad;
+			m = CWeaponCraftParameters::ShieldSapLoadMax;
+			break;
+		case ITEM_TYPE::BUCKLER:
+			s = CWeaponCraftParameters::BucklerSapLoad;
+			m = CWeaponCraftParameters::BucklerSapLoadMax;
+			break;
+		case ITEM_TYPE::LIGHT_BOOTS:
+			s = CWeaponCraftParameters::LightBootsSapLoad;
+			m = CWeaponCraftParameters::LightBootsSapLoadMax;
+			break;
+		case ITEM_TYPE::LIGHT_GLOVES:
+			s = CWeaponCraftParameters::LightGlovesSapLoad;
+			m = CWeaponCraftParameters::LightGlovesSapLoadMax;
+			break;
+		case ITEM_TYPE::LIGHT_PANTS:
+			s = CWeaponCraftParameters::LightPantsSapLoad;
+			m = CWeaponCraftParameters::LightPantsSapLoadMax;
+			break;
+		case ITEM_TYPE::LIGHT_SLEEVES:
+			s = CWeaponCraftParameters::LightSleevesSapLoad;
+			m = CWeaponCraftParameters::LightSleevesSapLoadMax;
+			break;
+		case ITEM_TYPE::LIGHT_VEST:
+			s = CWeaponCraftParameters::LightVestSapLoad;
+			m = CWeaponCraftParameters::LightVestSapLoadMax;
+			break;
+		case ITEM_TYPE::MEDIUM_BOOTS:
+			s = CWeaponCraftParameters::MediumBootsSapLoad;
+			m = CWeaponCraftParameters::MediumBootsSapLoadMax;
+			break;
+		case ITEM_TYPE::MEDIUM_GLOVES:
+			s = CWeaponCraftParameters::MediumGlovesSapLoad;
+			m = CWeaponCraftParameters::MediumGlovesSapLoadMax;
+			break;
+		case ITEM_TYPE::MEDIUM_PANTS:
+			s = CWeaponCraftParameters::MediumPantsSapLoad;
+			m = CWeaponCraftParameters::MediumPantsSapLoadMax;
+			break;
+		case ITEM_TYPE::MEDIUM_SLEEVES:
+			s = CWeaponCraftParameters::MediumSleevesSapLoad;
+			m = CWeaponCraftParameters::MediumSleevesSapLoadMax;
+			break;
+		case ITEM_TYPE::MEDIUM_VEST:
+			s = CWeaponCraftParameters::MediumVestSapLoad;
+			m = CWeaponCraftParameters::MediumVestSapLoadMax;
+			break;
+		case ITEM_TYPE::HEAVY_BOOTS:
+			s = CWeaponCraftParameters::HeavyBootsSapLoad;
+			m = CWeaponCraftParameters::HeavyBootsSapLoadMax;
+			break;
+		case ITEM_TYPE::HEAVY_GLOVES:
+			s = CWeaponCraftParameters::HeavyGlovesSapLoad;
+			m = CWeaponCraftParameters::HeavyGlovesSapLoadMax;
+			break;
+		case ITEM_TYPE::HEAVY_PANTS:
+			s = CWeaponCraftParameters::HeavyPantsSapLoad;
+			m = CWeaponCraftParameters::HeavyPantsSapLoadMax;
+			break;
+		case ITEM_TYPE::HEAVY_SLEEVES:
+			s = CWeaponCraftParameters::HeavySleevesSapLoad;
+			m = CWeaponCraftParameters::HeavySleevesSapLoadMax;
+			break;
+		case ITEM_TYPE::HEAVY_VEST:
+			s = CWeaponCraftParameters::HeavyVestSapLoad;
+			m = CWeaponCraftParameters::HeavyVestSapLoadMax;
+			break;
+		case ITEM_TYPE::HEAVY_HELMET:
+			s = CWeaponCraftParameters::HeavyHelmetSapLoad;
+			m = CWeaponCraftParameters::HeavyHelmetSapLoadMax;
+			break;
+
 		// jewel
-		case ITEM_TYPE::ANKLET:		s = CWeaponCraftParameters::AnkletSapLoad;
-									m = CWeaponCraftParameters::AnkletSapLoadMax; break;
-		case ITEM_TYPE::BRACELET:		s = CWeaponCraftParameters::BraceletSapLoad;
-										m = CWeaponCraftParameters::BraceletSapLoadMax; break;
-		case ITEM_TYPE::DIADEM:		s = CWeaponCraftParameters::DiademSapLoad;
-									m = CWeaponCraftParameters::DiademSapLoadMax; break;
-		case ITEM_TYPE::EARING: s = CWeaponCraftParameters::EaringSapLoad;
-								m = CWeaponCraftParameters::EaringSapLoadMax; break;
-		case ITEM_TYPE::PENDANT:	s = CWeaponCraftParameters::PendantSapLoad;
-									m = CWeaponCraftParameters::PendantSapLoadMax; break;
-		case ITEM_TYPE::RING:	s = CWeaponCraftParameters::RingSapLoad;
-								m = CWeaponCraftParameters::RingSapLoadMax; break;
-			default:
-				return 0;
+		case ITEM_TYPE::ANKLET:
+			s = CWeaponCraftParameters::AnkletSapLoad;
+			m = CWeaponCraftParameters::AnkletSapLoadMax;
+			break;
+		case ITEM_TYPE::BRACELET:
+			s = CWeaponCraftParameters::BraceletSapLoad;
+			m = CWeaponCraftParameters::BraceletSapLoadMax;
+			break;
+		case ITEM_TYPE::DIADEM:
+			s = CWeaponCraftParameters::DiademSapLoad;
+			m = CWeaponCraftParameters::DiademSapLoadMax;
+			break;
+		case ITEM_TYPE::EARING:
+			s = CWeaponCraftParameters::EaringSapLoad;
+			m = CWeaponCraftParameters::EaringSapLoadMax;
+			break;
+		case ITEM_TYPE::PENDANT:
+			s = CWeaponCraftParameters::PendantSapLoad;
+			m = CWeaponCraftParameters::PendantSapLoadMax;
+			break;
+		case ITEM_TYPE::RING:
+			s = CWeaponCraftParameters::RingSapLoad;
+			m = CWeaponCraftParameters::RingSapLoadMax;
+			break;
+		default:
+			return 0;
 		}
-		return (uint32) ( s + (m - s) * _CraftParameters->SapLoad );
+		return (uint32)(s + (m - s) * _CraftParameters->SapLoad);
 	}
 	return 0;
 }
-
 
 //-----------------------------------------------
 // return damage factor
 //-----------------------------------------------
 float CGameItem::damageFactor() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
@@ -2410,7 +2480,7 @@ float CGameItem::damageFactor() const
 			return CWeaponCraftParameters::PikeDmg + (CWeaponCraftParameters::PikeDmgMax - CWeaponCraftParameters::PikeDmg) * _CraftParameters->Dmg;
 		case ITEM_TYPE::TWO_HAND_MACE:
 			return CWeaponCraftParameters::TwoHandMaceDmg + (CWeaponCraftParameters::TwoHandMaceDmgMax - CWeaponCraftParameters::TwoHandMaceDmg) * _CraftParameters->Dmg;
-			
+
 			// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
 			return CWeaponCraftParameters::AutolauchDmg + (CWeaponCraftParameters::AutolauchDmgMax - CWeaponCraftParameters::AutolauchDmg) * _CraftParameters->Dmg;
@@ -2424,7 +2494,7 @@ float CGameItem::damageFactor() const
 			return CWeaponCraftParameters::BowpistolDmg + (CWeaponCraftParameters::BowpistolDmgMax - CWeaponCraftParameters::BowpistolDmg) * _CraftParameters->Dmg;
 		case ITEM_TYPE::RIFLE:
 			return CWeaponCraftParameters::RifleDmg + (CWeaponCraftParameters::RifleDmgMax - CWeaponCraftParameters::RifleDmg) * _CraftParameters->Dmg;
-			
+
 			// ammo
 		case ITEM_TYPE::AUTOLAUNCH_AMMO:
 			return CWeaponCraftParameters::AutolaunchAmmoDmg + (CWeaponCraftParameters::AutolaunchAmmoDmgMax - CWeaponCraftParameters::AutolaunchAmmoDmg) * _CraftParameters->Dmg;
@@ -2438,18 +2508,16 @@ float CGameItem::damageFactor() const
 			return CWeaponCraftParameters::BowpistolAmmoDmg + (CWeaponCraftParameters::BowpistolAmmoDmgMax - CWeaponCraftParameters::BowpistolAmmoDmg) * _CraftParameters->Dmg;
 		case ITEM_TYPE::RIFLE_AMMO:
 			return CWeaponCraftParameters::RifleAmmoDmg + (CWeaponCraftParameters::RifleAmmoDmgMax - CWeaponCraftParameters::RifleAmmoDmg) * _CraftParameters->Dmg;
-		default:
-			;// dont warn : can be called for all weapons
+		default:; // dont warn : can be called for all weapons
 		}
 	}
 	return 0.0f;
 }
 
-
 //-----------------------------------------------
 // return damage/max damage
 //-----------------------------------------------
-void CGameItem::damage( sint32 skill, uint32& currentDamage, uint32& maxDamage ) const
+void CGameItem::damage(sint32 skill, uint32 &currentDamage, uint32 &maxDamage) const
 {
 	float dmgFactor;
 
@@ -2457,24 +2525,23 @@ void CGameItem::damage( sint32 skill, uint32& currentDamage, uint32& maxDamage )
 	maxDamage = 0;
 
 	dmgFactor = damageFactor();
-	if( dmgFactor != 0.0f )
+	if (dmgFactor != 0.0f)
 	{
-		currentDamage = (uint32) ( ( CWeaponDamageTable::getInstance().getRefenceDamage( _Recommended, skill ) * dmgFactor ) ); 
-		maxDamage = (uint32) ( ( CWeaponDamageTable::getInstance().getRefenceDamage( _Recommended, _Recommended ) * dmgFactor ) );
+		currentDamage = (uint32)((CWeaponDamageTable::getInstance().getRefenceDamage(_Recommended, skill) * dmgFactor));
+		maxDamage = (uint32)((CWeaponDamageTable::getInstance().getRefenceDamage(_Recommended, _Recommended) * dmgFactor));
 	}
 }
-
 
 //-----------------------------------------------
 // return speed
 //-----------------------------------------------
 float CGameItem::hitRate() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
@@ -2513,7 +2580,7 @@ float CGameItem::hitRate() const
 			return CWeaponCraftParameters::BowpistolHitRate + (CWeaponCraftParameters::BowpistolHitRateMax - CWeaponCraftParameters::BowpistolHitRate) * _CraftParameters->Speed;
 		case ITEM_TYPE::RIFLE:
 			return CWeaponCraftParameters::RifleHitRate + (CWeaponCraftParameters::RifleHitRateMax - CWeaponCraftParameters::RifleHitRate) * _CraftParameters->Speed;
-		
+
 		// ammo
 		case ITEM_TYPE::AUTOLAUNCH_AMMO:
 			return CWeaponCraftParameters::AutolaunchAmmoHitRate + (CWeaponCraftParameters::AutolaunchAmmoHitRateMax - CWeaponCraftParameters::AutolaunchAmmoHitRate) * _CraftParameters->Speed;
@@ -2533,17 +2600,16 @@ float CGameItem::hitRate() const
 	return 0.0f;
 }
 
-
 //-----------------------------------------------
 // return range in meters
 //-----------------------------------------------
 float CGameItem::range() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 		// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
@@ -2558,7 +2624,7 @@ float CGameItem::range() const
 			return CWeaponCraftParameters::BowpistolRange + CWeaponCraftParameters::BowpistolRange * _CraftParameters->Range;
 		case ITEM_TYPE::RIFLE:
 			return CWeaponCraftParameters::RifleRange + CWeaponCraftParameters::RifleRange * _CraftParameters->Range;
-		
+
 		// ammo
 		case ITEM_TYPE::AUTOLAUNCH_AMMO:
 			return CWeaponCraftParameters::AutolaunchAmmoRange + CWeaponCraftParameters::AutolaunchAmmoRange * _CraftParameters->Range;
@@ -2576,189 +2642,186 @@ float CGameItem::range() const
 		}
 	}
 	return 0.0f;
-
 }
-
 
 //-----------------------------------------------
 // return dodge modifier
 //-----------------------------------------------
 sint32 CGameItem::dodgeModifier() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
-			return (sint32) ( CWeaponCraftParameters::DaggerDodgeMinModifier + (CWeaponCraftParameters::DaggerDodgeMaxModifier - CWeaponCraftParameters::DaggerDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::DaggerDodgeMinModifier + (CWeaponCraftParameters::DaggerDodgeMaxModifier - CWeaponCraftParameters::DaggerDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::SWORD:
-			return (sint32) ( CWeaponCraftParameters::SwordDodgeMinModifier + (CWeaponCraftParameters::SwordDodgeMaxModifier - CWeaponCraftParameters::SwordDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::SwordDodgeMinModifier + (CWeaponCraftParameters::SwordDodgeMaxModifier - CWeaponCraftParameters::SwordDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::MACE:
-			return (sint32) ( CWeaponCraftParameters::MaceDodgeMinModifier + (CWeaponCraftParameters::MaceDodgeMaxModifier - CWeaponCraftParameters::MaceDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::MaceDodgeMinModifier + (CWeaponCraftParameters::MaceDodgeMaxModifier - CWeaponCraftParameters::MaceDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::AXE:
-			return (sint32) ( CWeaponCraftParameters::AxeDodgeMinModifier + (CWeaponCraftParameters::AxeDodgeMaxModifier - CWeaponCraftParameters::AxeDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::AxeDodgeMinModifier + (CWeaponCraftParameters::AxeDodgeMaxModifier - CWeaponCraftParameters::AxeDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::SPEAR:
-			return (sint32) ( CWeaponCraftParameters::SpearDodgeMinModifier + (CWeaponCraftParameters::SpearDodgeMaxModifier - CWeaponCraftParameters::SpearDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::SpearDodgeMinModifier + (CWeaponCraftParameters::SpearDodgeMaxModifier - CWeaponCraftParameters::SpearDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::STAFF:
-			return (sint32) ( CWeaponCraftParameters::StaffDodgeMinModifier + (CWeaponCraftParameters::StaffDodgeMaxModifier - CWeaponCraftParameters::StaffDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::StaffDodgeMinModifier + (CWeaponCraftParameters::StaffDodgeMaxModifier - CWeaponCraftParameters::StaffDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::MAGICIAN_STAFF:
-			return (sint32) ( CWeaponCraftParameters::MagicianStaffDodgeMinModifier + (CWeaponCraftParameters::MagicianStaffDodgeMaxModifier - CWeaponCraftParameters::MagicianStaffDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::MagicianStaffDodgeMinModifier + (CWeaponCraftParameters::MagicianStaffDodgeMaxModifier - CWeaponCraftParameters::MagicianStaffDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::TWO_HAND_SWORD:
-			return (sint32) ( CWeaponCraftParameters::TwoHandSwordDodgeMinModifier + (CWeaponCraftParameters::TwoHandSwordDodgeMaxModifier - CWeaponCraftParameters::TwoHandSwordDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::TwoHandSwordDodgeMinModifier + (CWeaponCraftParameters::TwoHandSwordDodgeMaxModifier - CWeaponCraftParameters::TwoHandSwordDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::TWO_HAND_AXE:
-			return (sint32) ( CWeaponCraftParameters::TwoHandAxeDodgeMinModifier + (CWeaponCraftParameters::TwoHandAxeDodgeMaxModifier - CWeaponCraftParameters::TwoHandAxeDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::TwoHandAxeDodgeMinModifier + (CWeaponCraftParameters::TwoHandAxeDodgeMaxModifier - CWeaponCraftParameters::TwoHandAxeDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::PIKE:
-			return (sint32) ( CWeaponCraftParameters::PikeDodgeMinModifier + (CWeaponCraftParameters::PikeDodgeMaxModifier - CWeaponCraftParameters::PikeDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::PikeDodgeMinModifier + (CWeaponCraftParameters::PikeDodgeMaxModifier - CWeaponCraftParameters::PikeDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::TWO_HAND_MACE:
-			return (sint32) ( CWeaponCraftParameters::TwoHandMaceDodgeMinModifier + (CWeaponCraftParameters::TwoHandMaceDodgeMaxModifier - CWeaponCraftParameters::TwoHandMaceDodgeMinModifier ) * _CraftParameters->DodgeModifier );
-		
+			return (sint32)(CWeaponCraftParameters::TwoHandMaceDodgeMinModifier + (CWeaponCraftParameters::TwoHandMaceDodgeMaxModifier - CWeaponCraftParameters::TwoHandMaceDodgeMinModifier) * _CraftParameters->DodgeModifier);
+
 		// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
-			return (sint32) ( CWeaponCraftParameters::AutolauchDodgeMinModifier + (CWeaponCraftParameters::AutolauchDodgeMaxModifier - CWeaponCraftParameters::AutolauchDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::AutolauchDodgeMinModifier + (CWeaponCraftParameters::AutolauchDodgeMaxModifier - CWeaponCraftParameters::AutolauchDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::BOWRIFLE:
-			return (sint32) ( CWeaponCraftParameters::BowrifleDodgeMinModifier + (CWeaponCraftParameters::BowrifleDodgeMaxModifier - CWeaponCraftParameters::BowrifleDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::BowrifleDodgeMinModifier + (CWeaponCraftParameters::BowrifleDodgeMaxModifier - CWeaponCraftParameters::BowrifleDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::LAUNCHER:
-			return (sint32) ( CWeaponCraftParameters::LauncherDodgeMinModifier + (CWeaponCraftParameters::LauncherDodgeMaxModifier - CWeaponCraftParameters::LauncherDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::LauncherDodgeMinModifier + (CWeaponCraftParameters::LauncherDodgeMaxModifier - CWeaponCraftParameters::LauncherDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::PISTOL:
-			return (sint32) ( CWeaponCraftParameters::PistolDodgeMinModifier + (CWeaponCraftParameters::PistolDodgeMaxModifier - CWeaponCraftParameters::PistolDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::PistolDodgeMinModifier + (CWeaponCraftParameters::PistolDodgeMaxModifier - CWeaponCraftParameters::PistolDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::BOWPISTOL:
-			return (sint32) ( CWeaponCraftParameters::BowpistolDodgeMinModifier + (CWeaponCraftParameters::BowpistolDodgeMaxModifier - CWeaponCraftParameters::BowpistolDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::BowpistolDodgeMinModifier + (CWeaponCraftParameters::BowpistolDodgeMaxModifier - CWeaponCraftParameters::BowpistolDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::RIFLE:
-			return (sint32) ( CWeaponCraftParameters::RifleDodgeMinModifier + (CWeaponCraftParameters::RifleDodgeMaxModifier - CWeaponCraftParameters::RifleDodgeMinModifier ) * _CraftParameters->DodgeModifier );
-		
+			return (sint32)(CWeaponCraftParameters::RifleDodgeMinModifier + (CWeaponCraftParameters::RifleDodgeMaxModifier - CWeaponCraftParameters::RifleDodgeMinModifier) * _CraftParameters->DodgeModifier);
+
 		// armor and shield
 		case ITEM_TYPE::SHIELD:
-			return (sint32) ( CWeaponCraftParameters::ShieldDodgeMinModifier + (CWeaponCraftParameters::ShieldDodgeMaxModifier - CWeaponCraftParameters::ShieldDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::ShieldDodgeMinModifier + (CWeaponCraftParameters::ShieldDodgeMaxModifier - CWeaponCraftParameters::ShieldDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::BUCKLER:
-			return (sint32) ( CWeaponCraftParameters::BucklerDodgeMinModifier + (CWeaponCraftParameters::BucklerDodgeMaxModifier - CWeaponCraftParameters::BucklerDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::BucklerDodgeMinModifier + (CWeaponCraftParameters::BucklerDodgeMaxModifier - CWeaponCraftParameters::BucklerDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::LIGHT_BOOTS:
-			return (sint32) ( CWeaponCraftParameters::LightBootsDodgeMinModifier + (CWeaponCraftParameters::LightBootsDodgeMaxModifier - CWeaponCraftParameters::LightBootsDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::LightBootsDodgeMinModifier + (CWeaponCraftParameters::LightBootsDodgeMaxModifier - CWeaponCraftParameters::LightBootsDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::LIGHT_GLOVES:
-			return (sint32) ( CWeaponCraftParameters::LightGlovesDodgeMinModifier + (CWeaponCraftParameters::LightGlovesDodgeMaxModifier - CWeaponCraftParameters::LightGlovesDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::LightGlovesDodgeMinModifier + (CWeaponCraftParameters::LightGlovesDodgeMaxModifier - CWeaponCraftParameters::LightGlovesDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::LIGHT_PANTS:
-			return (sint32) ( CWeaponCraftParameters::LightPantsDodgeMinModifier + (CWeaponCraftParameters::LightPantsDodgeMaxModifier - CWeaponCraftParameters::LightPantsDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::LightPantsDodgeMinModifier + (CWeaponCraftParameters::LightPantsDodgeMaxModifier - CWeaponCraftParameters::LightPantsDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::LIGHT_SLEEVES:
-			return (sint32) ( CWeaponCraftParameters::LightSleevesDodgeMinModifier + (CWeaponCraftParameters::LightSleevesDodgeMaxModifier - CWeaponCraftParameters::LightSleevesDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::LightSleevesDodgeMinModifier + (CWeaponCraftParameters::LightSleevesDodgeMaxModifier - CWeaponCraftParameters::LightSleevesDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::LIGHT_VEST:
-			return (sint32) ( CWeaponCraftParameters::LightVestDodgeMinModifier + (CWeaponCraftParameters::LightVestDodgeMaxModifier - CWeaponCraftParameters::LightVestDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::LightVestDodgeMinModifier + (CWeaponCraftParameters::LightVestDodgeMaxModifier - CWeaponCraftParameters::LightVestDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::MEDIUM_BOOTS:
-			return (sint32) ( CWeaponCraftParameters::MediumBootsDodgeMinModifier + (CWeaponCraftParameters::MediumBootsDodgeMaxModifier - CWeaponCraftParameters::MediumBootsDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::MediumBootsDodgeMinModifier + (CWeaponCraftParameters::MediumBootsDodgeMaxModifier - CWeaponCraftParameters::MediumBootsDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::MEDIUM_GLOVES:
-			return (sint32) ( CWeaponCraftParameters::MediumGlovesDodgeMinModifier + (CWeaponCraftParameters::MediumGlovesDodgeMaxModifier - CWeaponCraftParameters::MediumGlovesDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::MediumGlovesDodgeMinModifier + (CWeaponCraftParameters::MediumGlovesDodgeMaxModifier - CWeaponCraftParameters::MediumGlovesDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::MEDIUM_PANTS:
-			return (sint32) ( CWeaponCraftParameters::MediumPantsDodgeMinModifier + (CWeaponCraftParameters::MediumPantsDodgeMaxModifier - CWeaponCraftParameters::MediumPantsDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::MediumPantsDodgeMinModifier + (CWeaponCraftParameters::MediumPantsDodgeMaxModifier - CWeaponCraftParameters::MediumPantsDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::MEDIUM_SLEEVES:
-			return (sint32) ( CWeaponCraftParameters::MediumSleevesDodgeMinModifier + (CWeaponCraftParameters::MediumSleevesDodgeMaxModifier - CWeaponCraftParameters::MediumSleevesDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::MediumSleevesDodgeMinModifier + (CWeaponCraftParameters::MediumSleevesDodgeMaxModifier - CWeaponCraftParameters::MediumSleevesDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::MEDIUM_VEST:
-			return (sint32) ( CWeaponCraftParameters::MediumVestDodgeMinModifier + (CWeaponCraftParameters::MediumVestDodgeMaxModifier - CWeaponCraftParameters::MediumVestDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::MediumVestDodgeMinModifier + (CWeaponCraftParameters::MediumVestDodgeMaxModifier - CWeaponCraftParameters::MediumVestDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::HEAVY_BOOTS:
-			return (sint32) ( CWeaponCraftParameters::HeavyBootsDodgeMinModifier + (CWeaponCraftParameters::HeavyBootsDodgeMaxModifier - CWeaponCraftParameters::HeavyBootsDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::HeavyBootsDodgeMinModifier + (CWeaponCraftParameters::HeavyBootsDodgeMaxModifier - CWeaponCraftParameters::HeavyBootsDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::HEAVY_GLOVES:
-			return (sint32) ( CWeaponCraftParameters::HeavyGlovesDodgeMinModifier + (CWeaponCraftParameters::HeavyGlovesDodgeMaxModifier - CWeaponCraftParameters::HeavyGlovesDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::HeavyGlovesDodgeMinModifier + (CWeaponCraftParameters::HeavyGlovesDodgeMaxModifier - CWeaponCraftParameters::HeavyGlovesDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::HEAVY_PANTS:
-			return (sint32) ( CWeaponCraftParameters::HeavyPantsDodgeMinModifier + (CWeaponCraftParameters::HeavyPantsDodgeMaxModifier - CWeaponCraftParameters::HeavyPantsDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::HeavyPantsDodgeMinModifier + (CWeaponCraftParameters::HeavyPantsDodgeMaxModifier - CWeaponCraftParameters::HeavyPantsDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::HEAVY_SLEEVES:
-			return (sint32) ( CWeaponCraftParameters::HeavySleevesDodgeMinModifier + (CWeaponCraftParameters::HeavySleevesDodgeMaxModifier - CWeaponCraftParameters::HeavySleevesDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::HeavySleevesDodgeMinModifier + (CWeaponCraftParameters::HeavySleevesDodgeMaxModifier - CWeaponCraftParameters::HeavySleevesDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::HEAVY_VEST:
-			return (sint32) ( CWeaponCraftParameters::HeavyVestDodgeMinModifier + (CWeaponCraftParameters::HeavyVestDodgeMaxModifier - CWeaponCraftParameters::HeavyVestDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::HeavyVestDodgeMinModifier + (CWeaponCraftParameters::HeavyVestDodgeMaxModifier - CWeaponCraftParameters::HeavyVestDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		case ITEM_TYPE::HEAVY_HELMET:
-			return (sint32) ( CWeaponCraftParameters::HeavyHelmetDodgeMinModifier + (CWeaponCraftParameters::HeavyHelmetDodgeMaxModifier - CWeaponCraftParameters::HeavyHelmetDodgeMinModifier ) * _CraftParameters->DodgeModifier );
+			return (sint32)(CWeaponCraftParameters::HeavyHelmetDodgeMinModifier + (CWeaponCraftParameters::HeavyHelmetDodgeMaxModifier - CWeaponCraftParameters::HeavyHelmetDodgeMinModifier) * _CraftParameters->DodgeModifier);
 		default:;
 		}
 	}
 	return 0;
 }
 
-
 //-----------------------------------------------
 // return parry modifier
 //-----------------------------------------------
 sint32 CGameItem::parryModifier() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
-			return (sint32) ( CWeaponCraftParameters::DaggerParryMinModifier + (CWeaponCraftParameters::DaggerParryMaxModifier - CWeaponCraftParameters::DaggerParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::DaggerParryMinModifier + (CWeaponCraftParameters::DaggerParryMaxModifier - CWeaponCraftParameters::DaggerParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::SWORD:
-			return (sint32) ( CWeaponCraftParameters::SwordParryMinModifier + (CWeaponCraftParameters::SwordParryMaxModifier - CWeaponCraftParameters::SwordParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::SwordParryMinModifier + (CWeaponCraftParameters::SwordParryMaxModifier - CWeaponCraftParameters::SwordParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::MACE:
-			return (sint32) ( CWeaponCraftParameters::MaceParryMinModifier + (CWeaponCraftParameters::MaceParryMaxModifier - CWeaponCraftParameters::MaceParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::MaceParryMinModifier + (CWeaponCraftParameters::MaceParryMaxModifier - CWeaponCraftParameters::MaceParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::AXE:
-			return (sint32) ( CWeaponCraftParameters::AxeParryMinModifier + (CWeaponCraftParameters::AxeParryMaxModifier - CWeaponCraftParameters::AxeParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::AxeParryMinModifier + (CWeaponCraftParameters::AxeParryMaxModifier - CWeaponCraftParameters::AxeParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::SPEAR:
-			return (sint32) ( CWeaponCraftParameters::SpearParryMinModifier + (CWeaponCraftParameters::SpearParryMaxModifier - CWeaponCraftParameters::SpearParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::SpearParryMinModifier + (CWeaponCraftParameters::SpearParryMaxModifier - CWeaponCraftParameters::SpearParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::STAFF:
-			return (sint32) ( CWeaponCraftParameters::StaffParryMinModifier + (CWeaponCraftParameters::StaffParryMaxModifier - CWeaponCraftParameters::StaffParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::StaffParryMinModifier + (CWeaponCraftParameters::StaffParryMaxModifier - CWeaponCraftParameters::StaffParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::MAGICIAN_STAFF:
-			return (sint32) ( CWeaponCraftParameters::MagicianStaffParryMinModifier + (CWeaponCraftParameters::MagicianStaffParryMaxModifier - CWeaponCraftParameters::MagicianStaffParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::MagicianStaffParryMinModifier + (CWeaponCraftParameters::MagicianStaffParryMaxModifier - CWeaponCraftParameters::MagicianStaffParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::TWO_HAND_SWORD:
-			return (sint32) ( CWeaponCraftParameters::TwoHandSwordParryMinModifier + (CWeaponCraftParameters::TwoHandSwordParryMaxModifier - CWeaponCraftParameters::TwoHandSwordParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::TwoHandSwordParryMinModifier + (CWeaponCraftParameters::TwoHandSwordParryMaxModifier - CWeaponCraftParameters::TwoHandSwordParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::TWO_HAND_AXE:
-			return (sint32) ( CWeaponCraftParameters::TwoHandAxeParryMinModifier + (CWeaponCraftParameters::TwoHandAxeParryMaxModifier - CWeaponCraftParameters::TwoHandAxeParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::TwoHandAxeParryMinModifier + (CWeaponCraftParameters::TwoHandAxeParryMaxModifier - CWeaponCraftParameters::TwoHandAxeParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::PIKE:
-			return (sint32) ( CWeaponCraftParameters::PikeParryMinModifier + (CWeaponCraftParameters::PikeParryMaxModifier - CWeaponCraftParameters::PikeParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::PikeParryMinModifier + (CWeaponCraftParameters::PikeParryMaxModifier - CWeaponCraftParameters::PikeParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::TWO_HAND_MACE:
-			return (sint32) ( CWeaponCraftParameters::TwoHandMaceParryMinModifier + (CWeaponCraftParameters::TwoHandMaceParryMaxModifier - CWeaponCraftParameters::TwoHandMaceParryMinModifier ) * _CraftParameters->ParryModifier );
-			
+			return (sint32)(CWeaponCraftParameters::TwoHandMaceParryMinModifier + (CWeaponCraftParameters::TwoHandMaceParryMaxModifier - CWeaponCraftParameters::TwoHandMaceParryMinModifier) * _CraftParameters->ParryModifier);
+
 			// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
-			return (sint32) ( CWeaponCraftParameters::AutolauchParryMinModifier + (CWeaponCraftParameters::AutolauchParryMaxModifier - CWeaponCraftParameters::AutolauchParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::AutolauchParryMinModifier + (CWeaponCraftParameters::AutolauchParryMaxModifier - CWeaponCraftParameters::AutolauchParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::BOWRIFLE:
-			return (sint32) ( CWeaponCraftParameters::BowrifleParryMinModifier + (CWeaponCraftParameters::BowrifleParryMaxModifier - CWeaponCraftParameters::BowrifleParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::BowrifleParryMinModifier + (CWeaponCraftParameters::BowrifleParryMaxModifier - CWeaponCraftParameters::BowrifleParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::LAUNCHER:
-			return (sint32) ( CWeaponCraftParameters::LauncherParryMinModifier + (CWeaponCraftParameters::LauncherParryMaxModifier - CWeaponCraftParameters::LauncherParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::LauncherParryMinModifier + (CWeaponCraftParameters::LauncherParryMaxModifier - CWeaponCraftParameters::LauncherParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::PISTOL:
-			return (sint32) ( CWeaponCraftParameters::PistolParryMinModifier + (CWeaponCraftParameters::PistolParryMaxModifier - CWeaponCraftParameters::PistolParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::PistolParryMinModifier + (CWeaponCraftParameters::PistolParryMaxModifier - CWeaponCraftParameters::PistolParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::BOWPISTOL:
-			return (sint32) ( CWeaponCraftParameters::BowpistolParryMinModifier + (CWeaponCraftParameters::BowpistolParryMaxModifier - CWeaponCraftParameters::BowpistolParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::BowpistolParryMinModifier + (CWeaponCraftParameters::BowpistolParryMaxModifier - CWeaponCraftParameters::BowpistolParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::RIFLE:
-			return (sint32) ( CWeaponCraftParameters::RifleParryMinModifier + (CWeaponCraftParameters::RifleParryMaxModifier - CWeaponCraftParameters::RifleParryMinModifier ) * _CraftParameters->ParryModifier );
-			
+			return (sint32)(CWeaponCraftParameters::RifleParryMinModifier + (CWeaponCraftParameters::RifleParryMaxModifier - CWeaponCraftParameters::RifleParryMinModifier) * _CraftParameters->ParryModifier);
+
 			// armor and shield
 		case ITEM_TYPE::SHIELD:
-			return (sint32) ( CWeaponCraftParameters::ShieldParryMinModifier + (CWeaponCraftParameters::ShieldParryMaxModifier - CWeaponCraftParameters::ShieldParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::ShieldParryMinModifier + (CWeaponCraftParameters::ShieldParryMaxModifier - CWeaponCraftParameters::ShieldParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::BUCKLER:
-			return (sint32) ( CWeaponCraftParameters::BucklerParryMinModifier + (CWeaponCraftParameters::BucklerParryMaxModifier - CWeaponCraftParameters::BucklerParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::BucklerParryMinModifier + (CWeaponCraftParameters::BucklerParryMaxModifier - CWeaponCraftParameters::BucklerParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::LIGHT_BOOTS:
-			return (sint32) ( CWeaponCraftParameters::LightBootsParryMinModifier + (CWeaponCraftParameters::LightBootsParryMaxModifier - CWeaponCraftParameters::LightBootsParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::LightBootsParryMinModifier + (CWeaponCraftParameters::LightBootsParryMaxModifier - CWeaponCraftParameters::LightBootsParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::LIGHT_GLOVES:
-			return (sint32) ( CWeaponCraftParameters::LightGlovesParryMinModifier + (CWeaponCraftParameters::LightGlovesParryMaxModifier - CWeaponCraftParameters::LightGlovesParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::LightGlovesParryMinModifier + (CWeaponCraftParameters::LightGlovesParryMaxModifier - CWeaponCraftParameters::LightGlovesParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::LIGHT_PANTS:
-			return (sint32) ( CWeaponCraftParameters::LightPantsParryMinModifier + (CWeaponCraftParameters::LightPantsParryMaxModifier - CWeaponCraftParameters::LightPantsParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::LightPantsParryMinModifier + (CWeaponCraftParameters::LightPantsParryMaxModifier - CWeaponCraftParameters::LightPantsParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::LIGHT_SLEEVES:
-			return (sint32) ( CWeaponCraftParameters::LightSleevesParryMinModifier + (CWeaponCraftParameters::LightSleevesParryMaxModifier - CWeaponCraftParameters::LightSleevesParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::LightSleevesParryMinModifier + (CWeaponCraftParameters::LightSleevesParryMaxModifier - CWeaponCraftParameters::LightSleevesParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::LIGHT_VEST:
-			return (sint32) ( CWeaponCraftParameters::LightVestParryMinModifier + (CWeaponCraftParameters::LightVestParryMaxModifier - CWeaponCraftParameters::LightVestParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::LightVestParryMinModifier + (CWeaponCraftParameters::LightVestParryMaxModifier - CWeaponCraftParameters::LightVestParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::MEDIUM_BOOTS:
-			return (sint32) ( CWeaponCraftParameters::MediumBootsParryMinModifier + (CWeaponCraftParameters::MediumBootsParryMaxModifier - CWeaponCraftParameters::MediumBootsParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::MediumBootsParryMinModifier + (CWeaponCraftParameters::MediumBootsParryMaxModifier - CWeaponCraftParameters::MediumBootsParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::MEDIUM_GLOVES:
-			return (sint32) ( CWeaponCraftParameters::MediumGlovesParryMinModifier + (CWeaponCraftParameters::MediumGlovesParryMaxModifier - CWeaponCraftParameters::MediumGlovesParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::MediumGlovesParryMinModifier + (CWeaponCraftParameters::MediumGlovesParryMaxModifier - CWeaponCraftParameters::MediumGlovesParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::MEDIUM_PANTS:
-			return (sint32) ( CWeaponCraftParameters::MediumPantsParryMinModifier + (CWeaponCraftParameters::MediumPantsParryMaxModifier - CWeaponCraftParameters::MediumPantsParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::MediumPantsParryMinModifier + (CWeaponCraftParameters::MediumPantsParryMaxModifier - CWeaponCraftParameters::MediumPantsParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::MEDIUM_SLEEVES:
-			return (sint32) ( CWeaponCraftParameters::MediumSleevesParryMinModifier + (CWeaponCraftParameters::MediumSleevesParryMaxModifier - CWeaponCraftParameters::MediumSleevesParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::MediumSleevesParryMinModifier + (CWeaponCraftParameters::MediumSleevesParryMaxModifier - CWeaponCraftParameters::MediumSleevesParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::MEDIUM_VEST:
-			return (sint32) ( CWeaponCraftParameters::MediumVestParryMinModifier + (CWeaponCraftParameters::MediumVestParryMaxModifier - CWeaponCraftParameters::MediumVestParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::MediumVestParryMinModifier + (CWeaponCraftParameters::MediumVestParryMaxModifier - CWeaponCraftParameters::MediumVestParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::HEAVY_BOOTS:
-			return (sint32) ( CWeaponCraftParameters::HeavyBootsParryMinModifier + (CWeaponCraftParameters::HeavyBootsParryMaxModifier - CWeaponCraftParameters::HeavyBootsParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::HeavyBootsParryMinModifier + (CWeaponCraftParameters::HeavyBootsParryMaxModifier - CWeaponCraftParameters::HeavyBootsParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::HEAVY_GLOVES:
-			return (sint32) ( CWeaponCraftParameters::HeavyGlovesParryMinModifier + (CWeaponCraftParameters::HeavyGlovesParryMaxModifier - CWeaponCraftParameters::HeavyGlovesParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::HeavyGlovesParryMinModifier + (CWeaponCraftParameters::HeavyGlovesParryMaxModifier - CWeaponCraftParameters::HeavyGlovesParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::HEAVY_PANTS:
-			return (sint32) ( CWeaponCraftParameters::HeavyPantsParryMinModifier + (CWeaponCraftParameters::HeavyPantsParryMaxModifier - CWeaponCraftParameters::HeavyPantsParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::HeavyPantsParryMinModifier + (CWeaponCraftParameters::HeavyPantsParryMaxModifier - CWeaponCraftParameters::HeavyPantsParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::HEAVY_SLEEVES:
-			return (sint32) ( CWeaponCraftParameters::HeavySleevesParryMinModifier + (CWeaponCraftParameters::HeavySleevesParryMaxModifier - CWeaponCraftParameters::HeavySleevesParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::HeavySleevesParryMinModifier + (CWeaponCraftParameters::HeavySleevesParryMaxModifier - CWeaponCraftParameters::HeavySleevesParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::HEAVY_VEST:
-			return (sint32) ( CWeaponCraftParameters::HeavyVestParryMinModifier + (CWeaponCraftParameters::HeavyVestParryMaxModifier - CWeaponCraftParameters::HeavyVestParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::HeavyVestParryMinModifier + (CWeaponCraftParameters::HeavyVestParryMaxModifier - CWeaponCraftParameters::HeavyVestParryMinModifier) * _CraftParameters->ParryModifier);
 		case ITEM_TYPE::HEAVY_HELMET:
-			return (sint32) ( CWeaponCraftParameters::HeavyHelmetParryMinModifier + (CWeaponCraftParameters::HeavyHelmetParryMaxModifier - CWeaponCraftParameters::HeavyHelmetParryMinModifier ) * _CraftParameters->ParryModifier );
+			return (sint32)(CWeaponCraftParameters::HeavyHelmetParryMinModifier + (CWeaponCraftParameters::HeavyHelmetParryMaxModifier - CWeaponCraftParameters::HeavyHelmetParryMinModifier) * _CraftParameters->ParryModifier);
 		default:;
 		}
 	}
@@ -2770,49 +2833,49 @@ sint32 CGameItem::parryModifier() const
 //-----------------------------------------------
 sint32 CGameItem::adversaryDodgeModifier() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
-			return (sint32) ( CWeaponCraftParameters::DaggerAdversaryDodgeMinModifier + (CWeaponCraftParameters::DaggerAdversaryDodgeMaxModifier - CWeaponCraftParameters::DaggerAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::DaggerAdversaryDodgeMinModifier + (CWeaponCraftParameters::DaggerAdversaryDodgeMaxModifier - CWeaponCraftParameters::DaggerAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::SWORD:
-			return (sint32) ( CWeaponCraftParameters::SwordAdversaryDodgeMinModifier + (CWeaponCraftParameters::SwordAdversaryDodgeMaxModifier - CWeaponCraftParameters::SwordAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::SwordAdversaryDodgeMinModifier + (CWeaponCraftParameters::SwordAdversaryDodgeMaxModifier - CWeaponCraftParameters::SwordAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::MACE:
-			return (sint32) ( CWeaponCraftParameters::MaceAdversaryDodgeMinModifier + (CWeaponCraftParameters::MaceAdversaryDodgeMaxModifier - CWeaponCraftParameters::MaceAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::MaceAdversaryDodgeMinModifier + (CWeaponCraftParameters::MaceAdversaryDodgeMaxModifier - CWeaponCraftParameters::MaceAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::AXE:
-			return (sint32) ( CWeaponCraftParameters::AxeAdversaryDodgeMinModifier + (CWeaponCraftParameters::AxeAdversaryDodgeMaxModifier - CWeaponCraftParameters::AxeAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::AxeAdversaryDodgeMinModifier + (CWeaponCraftParameters::AxeAdversaryDodgeMaxModifier - CWeaponCraftParameters::AxeAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::SPEAR:
-			return (sint32) ( CWeaponCraftParameters::SpearAdversaryDodgeMinModifier + (CWeaponCraftParameters::SpearAdversaryDodgeMaxModifier - CWeaponCraftParameters::SpearAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::SpearAdversaryDodgeMinModifier + (CWeaponCraftParameters::SpearAdversaryDodgeMaxModifier - CWeaponCraftParameters::SpearAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::STAFF:
-			return (sint32) ( CWeaponCraftParameters::StaffAdversaryDodgeMinModifier + (CWeaponCraftParameters::StaffAdversaryDodgeMaxModifier - CWeaponCraftParameters::StaffAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::StaffAdversaryDodgeMinModifier + (CWeaponCraftParameters::StaffAdversaryDodgeMaxModifier - CWeaponCraftParameters::StaffAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::MAGICIAN_STAFF:
-			return (sint32) ( CWeaponCraftParameters::MagicianStaffAdversaryDodgeMinModifier + (CWeaponCraftParameters::MagicianStaffAdversaryDodgeMaxModifier - CWeaponCraftParameters::MagicianStaffAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::MagicianStaffAdversaryDodgeMinModifier + (CWeaponCraftParameters::MagicianStaffAdversaryDodgeMaxModifier - CWeaponCraftParameters::MagicianStaffAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::TWO_HAND_SWORD:
-			return (sint32) ( CWeaponCraftParameters::TwoHandSwordAdversaryDodgeMinModifier + (CWeaponCraftParameters::TwoHandSwordAdversaryDodgeMaxModifier - CWeaponCraftParameters::TwoHandSwordAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::TwoHandSwordAdversaryDodgeMinModifier + (CWeaponCraftParameters::TwoHandSwordAdversaryDodgeMaxModifier - CWeaponCraftParameters::TwoHandSwordAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::TWO_HAND_AXE:
-			return (sint32) ( CWeaponCraftParameters::TwoHandAxeAdversaryDodgeMinModifier + (CWeaponCraftParameters::TwoHandAxeAdversaryDodgeMaxModifier - CWeaponCraftParameters::TwoHandAxeAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::TwoHandAxeAdversaryDodgeMinModifier + (CWeaponCraftParameters::TwoHandAxeAdversaryDodgeMaxModifier - CWeaponCraftParameters::TwoHandAxeAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::PIKE:
-			return (sint32) ( CWeaponCraftParameters::PikeAdversaryDodgeMinModifier + (CWeaponCraftParameters::PikeAdversaryDodgeMaxModifier - CWeaponCraftParameters::PikeAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::PikeAdversaryDodgeMinModifier + (CWeaponCraftParameters::PikeAdversaryDodgeMaxModifier - CWeaponCraftParameters::PikeAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::TWO_HAND_MACE:
-			return (sint32) ( CWeaponCraftParameters::TwoHandMaceAdversaryDodgeMinModifier + (CWeaponCraftParameters::TwoHandMaceAdversaryDodgeMaxModifier - CWeaponCraftParameters::TwoHandMaceAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
-			
+			return (sint32)(CWeaponCraftParameters::TwoHandMaceAdversaryDodgeMinModifier + (CWeaponCraftParameters::TwoHandMaceAdversaryDodgeMaxModifier - CWeaponCraftParameters::TwoHandMaceAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
+
 			// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
-			return (sint32) ( CWeaponCraftParameters::AutolauchAdversaryDodgeMinModifier + (CWeaponCraftParameters::AutolauchAdversaryDodgeMaxModifier - CWeaponCraftParameters::AutolauchAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::AutolauchAdversaryDodgeMinModifier + (CWeaponCraftParameters::AutolauchAdversaryDodgeMaxModifier - CWeaponCraftParameters::AutolauchAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::BOWRIFLE:
-			return (sint32) ( CWeaponCraftParameters::BowrifleAdversaryDodgeMinModifier + (CWeaponCraftParameters::BowrifleAdversaryDodgeMaxModifier - CWeaponCraftParameters::BowrifleAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::BowrifleAdversaryDodgeMinModifier + (CWeaponCraftParameters::BowrifleAdversaryDodgeMaxModifier - CWeaponCraftParameters::BowrifleAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::LAUNCHER:
-			return (sint32) ( CWeaponCraftParameters::LauncherAdversaryDodgeMinModifier + (CWeaponCraftParameters::LauncherAdversaryDodgeMaxModifier - CWeaponCraftParameters::LauncherAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::LauncherAdversaryDodgeMinModifier + (CWeaponCraftParameters::LauncherAdversaryDodgeMaxModifier - CWeaponCraftParameters::LauncherAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::PISTOL:
-			return (sint32) ( CWeaponCraftParameters::PistolAdversaryDodgeMinModifier + (CWeaponCraftParameters::PistolAdversaryDodgeMaxModifier - CWeaponCraftParameters::PistolAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::PistolAdversaryDodgeMinModifier + (CWeaponCraftParameters::PistolAdversaryDodgeMaxModifier - CWeaponCraftParameters::PistolAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::BOWPISTOL:
-			return (sint32) ( CWeaponCraftParameters::BowpistolAdversaryDodgeMinModifier + (CWeaponCraftParameters::BowpistolAdversaryDodgeMaxModifier - CWeaponCraftParameters::BowpistolAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::BowpistolAdversaryDodgeMinModifier + (CWeaponCraftParameters::BowpistolAdversaryDodgeMaxModifier - CWeaponCraftParameters::BowpistolAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		case ITEM_TYPE::RIFLE:
-			return (sint32) ( CWeaponCraftParameters::RifleAdversaryDodgeMinModifier + (CWeaponCraftParameters::RifleAdversaryDodgeMaxModifier - CWeaponCraftParameters::RifleAdversaryDodgeMinModifier ) * _CraftParameters->AdversaryDodgeModifier );
+			return (sint32)(CWeaponCraftParameters::RifleAdversaryDodgeMinModifier + (CWeaponCraftParameters::RifleAdversaryDodgeMaxModifier - CWeaponCraftParameters::RifleAdversaryDodgeMinModifier) * _CraftParameters->AdversaryDodgeModifier);
 		default:;
 		}
 	}
@@ -2824,49 +2887,49 @@ sint32 CGameItem::adversaryDodgeModifier() const
 //-----------------------------------------------
 sint32 CGameItem::adversaryParryModifier() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
-			return (sint32) ( CWeaponCraftParameters::DaggerAdversaryParryMinModifier + (CWeaponCraftParameters::DaggerAdversaryParryMaxModifier - CWeaponCraftParameters::DaggerAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::DaggerAdversaryParryMinModifier + (CWeaponCraftParameters::DaggerAdversaryParryMaxModifier - CWeaponCraftParameters::DaggerAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::SWORD:
-			return (sint32) ( CWeaponCraftParameters::SwordAdversaryParryMinModifier + (CWeaponCraftParameters::SwordAdversaryParryMaxModifier - CWeaponCraftParameters::SwordAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::SwordAdversaryParryMinModifier + (CWeaponCraftParameters::SwordAdversaryParryMaxModifier - CWeaponCraftParameters::SwordAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::MACE:
-			return (sint32) ( CWeaponCraftParameters::MaceAdversaryParryMinModifier + (CWeaponCraftParameters::MaceAdversaryParryMaxModifier - CWeaponCraftParameters::MaceAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::MaceAdversaryParryMinModifier + (CWeaponCraftParameters::MaceAdversaryParryMaxModifier - CWeaponCraftParameters::MaceAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::AXE:
-			return (sint32) ( CWeaponCraftParameters::AxeAdversaryParryMinModifier + (CWeaponCraftParameters::AxeAdversaryParryMaxModifier - CWeaponCraftParameters::AxeAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::AxeAdversaryParryMinModifier + (CWeaponCraftParameters::AxeAdversaryParryMaxModifier - CWeaponCraftParameters::AxeAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::SPEAR:
-			return (sint32) ( CWeaponCraftParameters::SpearAdversaryParryMinModifier + (CWeaponCraftParameters::SpearAdversaryParryMaxModifier - CWeaponCraftParameters::SpearAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::SpearAdversaryParryMinModifier + (CWeaponCraftParameters::SpearAdversaryParryMaxModifier - CWeaponCraftParameters::SpearAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::STAFF:
-			return (sint32) ( CWeaponCraftParameters::StaffAdversaryParryMinModifier + (CWeaponCraftParameters::StaffAdversaryParryMaxModifier - CWeaponCraftParameters::StaffAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::StaffAdversaryParryMinModifier + (CWeaponCraftParameters::StaffAdversaryParryMaxModifier - CWeaponCraftParameters::StaffAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::MAGICIAN_STAFF:
-			return (sint32) ( CWeaponCraftParameters::MagicianStaffAdversaryParryMinModifier + (CWeaponCraftParameters::MagicianStaffAdversaryParryMaxModifier - CWeaponCraftParameters::MagicianStaffAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::MagicianStaffAdversaryParryMinModifier + (CWeaponCraftParameters::MagicianStaffAdversaryParryMaxModifier - CWeaponCraftParameters::MagicianStaffAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::TWO_HAND_SWORD:
-			return (sint32) ( CWeaponCraftParameters::TwoHandSwordAdversaryParryMinModifier + (CWeaponCraftParameters::TwoHandSwordAdversaryParryMaxModifier - CWeaponCraftParameters::TwoHandSwordAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::TwoHandSwordAdversaryParryMinModifier + (CWeaponCraftParameters::TwoHandSwordAdversaryParryMaxModifier - CWeaponCraftParameters::TwoHandSwordAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::TWO_HAND_AXE:
-			return (sint32) ( CWeaponCraftParameters::TwoHandAxeAdversaryParryMinModifier + (CWeaponCraftParameters::TwoHandAxeAdversaryParryMaxModifier - CWeaponCraftParameters::TwoHandAxeAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::TwoHandAxeAdversaryParryMinModifier + (CWeaponCraftParameters::TwoHandAxeAdversaryParryMaxModifier - CWeaponCraftParameters::TwoHandAxeAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::PIKE:
-			return (sint32) ( CWeaponCraftParameters::PikeAdversaryParryMinModifier + (CWeaponCraftParameters::PikeAdversaryParryMaxModifier - CWeaponCraftParameters::PikeAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::PikeAdversaryParryMinModifier + (CWeaponCraftParameters::PikeAdversaryParryMaxModifier - CWeaponCraftParameters::PikeAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::TWO_HAND_MACE:
-			return (sint32) ( CWeaponCraftParameters::TwoHandMaceAdversaryParryMinModifier + (CWeaponCraftParameters::TwoHandMaceAdversaryParryMaxModifier - CWeaponCraftParameters::TwoHandMaceAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
-			
+			return (sint32)(CWeaponCraftParameters::TwoHandMaceAdversaryParryMinModifier + (CWeaponCraftParameters::TwoHandMaceAdversaryParryMaxModifier - CWeaponCraftParameters::TwoHandMaceAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
+
 			// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
-			return (sint32) ( CWeaponCraftParameters::AutolauchAdversaryParryMinModifier + (CWeaponCraftParameters::AutolauchAdversaryParryMaxModifier - CWeaponCraftParameters::AutolauchAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::AutolauchAdversaryParryMinModifier + (CWeaponCraftParameters::AutolauchAdversaryParryMaxModifier - CWeaponCraftParameters::AutolauchAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::BOWRIFLE:
-			return (sint32) ( CWeaponCraftParameters::BowrifleAdversaryParryMinModifier + (CWeaponCraftParameters::BowrifleAdversaryParryMaxModifier - CWeaponCraftParameters::BowrifleAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::BowrifleAdversaryParryMinModifier + (CWeaponCraftParameters::BowrifleAdversaryParryMaxModifier - CWeaponCraftParameters::BowrifleAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::LAUNCHER:
-			return (sint32) ( CWeaponCraftParameters::LauncherAdversaryParryMinModifier + (CWeaponCraftParameters::LauncherAdversaryParryMaxModifier - CWeaponCraftParameters::LauncherAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::LauncherAdversaryParryMinModifier + (CWeaponCraftParameters::LauncherAdversaryParryMaxModifier - CWeaponCraftParameters::LauncherAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::PISTOL:
-			return (sint32) ( CWeaponCraftParameters::PistolAdversaryParryMinModifier + (CWeaponCraftParameters::PistolAdversaryParryMaxModifier - CWeaponCraftParameters::PistolAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::PistolAdversaryParryMinModifier + (CWeaponCraftParameters::PistolAdversaryParryMaxModifier - CWeaponCraftParameters::PistolAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::BOWPISTOL:
-			return (sint32) ( CWeaponCraftParameters::BowpistolAdversaryParryMinModifier + (CWeaponCraftParameters::BowpistolAdversaryParryMaxModifier - CWeaponCraftParameters::BowpistolAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::BowpistolAdversaryParryMinModifier + (CWeaponCraftParameters::BowpistolAdversaryParryMaxModifier - CWeaponCraftParameters::BowpistolAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		case ITEM_TYPE::RIFLE:
-			return (sint32) ( CWeaponCraftParameters::RifleAdversaryParryMinModifier + (CWeaponCraftParameters::RifleAdversaryParryMaxModifier - CWeaponCraftParameters::RifleAdversaryParryMinModifier ) * _CraftParameters->AdversaryParryModifier );
+			return (sint32)(CWeaponCraftParameters::RifleAdversaryParryMinModifier + (CWeaponCraftParameters::RifleAdversaryParryMaxModifier - CWeaponCraftParameters::RifleAdversaryParryMinModifier) * _CraftParameters->AdversaryParryModifier);
 		default:;
 		}
 	}
@@ -2878,11 +2941,11 @@ sint32 CGameItem::adversaryParryModifier() const
 //-----------------------------------------------
 float CGameItem::protectionFactor() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// armor and shield
 		case ITEM_TYPE::SHIELD:
@@ -2932,49 +2995,49 @@ float CGameItem::protectionFactor() const
 //-----------------------------------------------
 uint32 CGameItem::maxSlashingProtection() const
 {
-	if( _Form == 0)
+	if (_Form == 0)
 		return 0;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// armor and shield
 		case ITEM_TYPE::SHIELD:
-			return (uint32) ( ( CWeaponCraftParameters::ShieldMaxSlashingProtection + CWeaponCraftParameters::ShieldMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::ShieldMaxSlashingProtection + CWeaponCraftParameters::ShieldMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::BUCKLER:
-			return (uint32) ( ( CWeaponCraftParameters::BucklerMaxSlashingProtection + CWeaponCraftParameters::BucklerMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::BucklerMaxSlashingProtection + CWeaponCraftParameters::BucklerMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_BOOTS:
-			return (uint32) ( ( CWeaponCraftParameters::LightBootsMaxSlashingProtection + CWeaponCraftParameters::LightBootsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightBootsMaxSlashingProtection + CWeaponCraftParameters::LightBootsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_GLOVES:
-			return (uint32) ( ( CWeaponCraftParameters::LightGlovesMaxSlashingProtection + CWeaponCraftParameters::LightGlovesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightGlovesMaxSlashingProtection + CWeaponCraftParameters::LightGlovesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_PANTS:
-			return (uint32) ( ( CWeaponCraftParameters::LightPantsMaxSlashingProtection + CWeaponCraftParameters::LightPantsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightPantsMaxSlashingProtection + CWeaponCraftParameters::LightPantsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_SLEEVES:
-			return (uint32) ( ( CWeaponCraftParameters::LightSleevesMaxSlashingProtection + CWeaponCraftParameters::LightSleevesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightSleevesMaxSlashingProtection + CWeaponCraftParameters::LightSleevesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_VEST:
-			return (uint32) ( ( CWeaponCraftParameters::LightVestMaxSlashingProtection + CWeaponCraftParameters::LightVestMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightVestMaxSlashingProtection + CWeaponCraftParameters::LightVestMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_BOOTS:
-			return (uint32) ( ( CWeaponCraftParameters::MediumBootsMaxSlashingProtection + CWeaponCraftParameters::MediumBootsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumBootsMaxSlashingProtection + CWeaponCraftParameters::MediumBootsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_GLOVES:
-			return (uint32) ( ( CWeaponCraftParameters::MediumGlovesMaxSlashingProtection + CWeaponCraftParameters::MediumGlovesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumGlovesMaxSlashingProtection + CWeaponCraftParameters::MediumGlovesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_PANTS:
-			return (uint32) ( ( CWeaponCraftParameters::MediumPantsMaxSlashingProtection + CWeaponCraftParameters::MediumPantsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumPantsMaxSlashingProtection + CWeaponCraftParameters::MediumPantsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_SLEEVES:
-			return (uint32) ( ( CWeaponCraftParameters::MediumSleevesMaxSlashingProtection + CWeaponCraftParameters::MediumSleevesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumSleevesMaxSlashingProtection + CWeaponCraftParameters::MediumSleevesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_VEST:
-			return (uint32) ( ( CWeaponCraftParameters::MediumVestMaxSlashingProtection + CWeaponCraftParameters::MediumVestMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumVestMaxSlashingProtection + CWeaponCraftParameters::MediumVestMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_BOOTS:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyBootsMaxSlashingProtection + CWeaponCraftParameters::HeavyBootsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyBootsMaxSlashingProtection + CWeaponCraftParameters::HeavyBootsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_GLOVES:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyGlovesMaxSlashingProtection + CWeaponCraftParameters::HeavyGlovesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyGlovesMaxSlashingProtection + CWeaponCraftParameters::HeavyGlovesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_PANTS:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyPantsMaxSlashingProtection + CWeaponCraftParameters::HeavyPantsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyPantsMaxSlashingProtection + CWeaponCraftParameters::HeavyPantsMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_SLEEVES:
-			return (uint32) ( ( CWeaponCraftParameters::HeavySleevesMaxSlashingProtection + CWeaponCraftParameters::HeavySleevesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavySleevesMaxSlashingProtection + CWeaponCraftParameters::HeavySleevesMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_VEST:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyVestMaxSlashingProtection + CWeaponCraftParameters::HeavyVestMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyVestMaxSlashingProtection + CWeaponCraftParameters::HeavyVestMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_HELMET:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyHelmetMaxSlashingProtection + CWeaponCraftParameters::HeavyHelmetMaxSlashingProtection * _CraftParameters->MaxSlashingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyHelmetMaxSlashingProtection + CWeaponCraftParameters::HeavyHelmetMaxSlashingProtection * _CraftParameters->MaxSlashingProtection) * _Recommended);
 		default:;
 		}
 	}
@@ -2986,49 +3049,49 @@ uint32 CGameItem::maxSlashingProtection() const
 //-----------------------------------------------
 uint32 CGameItem::maxBluntProtection() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// armor and shield
 		case ITEM_TYPE::SHIELD:
-			return (uint32) ( ( CWeaponCraftParameters::ShieldMaxBluntProtection + CWeaponCraftParameters::ShieldMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::ShieldMaxBluntProtection + CWeaponCraftParameters::ShieldMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::BUCKLER:
-			return (uint32) ( ( CWeaponCraftParameters::BucklerMaxBluntProtection + CWeaponCraftParameters::BucklerMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::BucklerMaxBluntProtection + CWeaponCraftParameters::BucklerMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_BOOTS:
-			return (uint32) ( ( CWeaponCraftParameters::LightBootsMaxBluntProtection + CWeaponCraftParameters::LightBootsMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightBootsMaxBluntProtection + CWeaponCraftParameters::LightBootsMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_GLOVES:
-			return (uint32) ( ( CWeaponCraftParameters::LightGlovesMaxBluntProtection + CWeaponCraftParameters::LightGlovesMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightGlovesMaxBluntProtection + CWeaponCraftParameters::LightGlovesMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_PANTS:
-			return (uint32) ( ( CWeaponCraftParameters::LightPantsMaxBluntProtection + CWeaponCraftParameters::LightPantsMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightPantsMaxBluntProtection + CWeaponCraftParameters::LightPantsMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_SLEEVES:
-			return (uint32) ( ( CWeaponCraftParameters::LightSleevesMaxBluntProtection + CWeaponCraftParameters::LightSleevesMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightSleevesMaxBluntProtection + CWeaponCraftParameters::LightSleevesMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_VEST:
-			return (uint32) ( ( CWeaponCraftParameters::LightVestMaxBluntProtection + CWeaponCraftParameters::LightVestMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightVestMaxBluntProtection + CWeaponCraftParameters::LightVestMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_BOOTS:
-			return (uint32) ( ( CWeaponCraftParameters::MediumBootsMaxBluntProtection + CWeaponCraftParameters::MediumBootsMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumBootsMaxBluntProtection + CWeaponCraftParameters::MediumBootsMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_GLOVES:
-			return (uint32) ( ( CWeaponCraftParameters::MediumGlovesMaxBluntProtection + CWeaponCraftParameters::MediumGlovesMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumGlovesMaxBluntProtection + CWeaponCraftParameters::MediumGlovesMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_PANTS:
-			return (uint32) ( ( CWeaponCraftParameters::MediumPantsMaxBluntProtection + CWeaponCraftParameters::MediumPantsMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumPantsMaxBluntProtection + CWeaponCraftParameters::MediumPantsMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_SLEEVES:
-			return (uint32) ( ( CWeaponCraftParameters::MediumSleevesMaxBluntProtection + CWeaponCraftParameters::MediumSleevesMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumSleevesMaxBluntProtection + CWeaponCraftParameters::MediumSleevesMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_VEST:
-			return (uint32) ( ( CWeaponCraftParameters::MediumVestMaxBluntProtection + CWeaponCraftParameters::MediumVestMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumVestMaxBluntProtection + CWeaponCraftParameters::MediumVestMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_BOOTS:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyBootsMaxBluntProtection + CWeaponCraftParameters::HeavyBootsMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyBootsMaxBluntProtection + CWeaponCraftParameters::HeavyBootsMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_GLOVES:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyGlovesMaxBluntProtection + CWeaponCraftParameters::HeavyGlovesMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyGlovesMaxBluntProtection + CWeaponCraftParameters::HeavyGlovesMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_PANTS:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyPantsMaxBluntProtection + CWeaponCraftParameters::HeavyPantsMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended);
+			return (uint32)((CWeaponCraftParameters::HeavyPantsMaxBluntProtection + CWeaponCraftParameters::HeavyPantsMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_SLEEVES:
-			return (uint32) ( ( CWeaponCraftParameters::HeavySleevesMaxBluntProtection + CWeaponCraftParameters::HeavySleevesMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavySleevesMaxBluntProtection + CWeaponCraftParameters::HeavySleevesMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_VEST:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyVestMaxBluntProtection + CWeaponCraftParameters::HeavyVestMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyVestMaxBluntProtection + CWeaponCraftParameters::HeavyVestMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_HELMET:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyHelmetMaxBluntProtection + CWeaponCraftParameters::HeavyHelmetMaxBluntProtection * _CraftParameters->MaxBluntProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyHelmetMaxBluntProtection + CWeaponCraftParameters::HeavyHelmetMaxBluntProtection * _CraftParameters->MaxBluntProtection) * _Recommended);
 		default:;
 		}
 	}
@@ -3040,60 +3103,59 @@ uint32 CGameItem::maxBluntProtection() const
 //-----------------------------------------------
 uint32 CGameItem::maxPiercingProtection() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// armor and shield
 		case ITEM_TYPE::SHIELD:
-			return (uint32) ( ( CWeaponCraftParameters::ShieldMaxPiercingProtection + CWeaponCraftParameters::ShieldMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::ShieldMaxPiercingProtection + CWeaponCraftParameters::ShieldMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::BUCKLER:
-			return (uint32) ( ( CWeaponCraftParameters::BucklerMaxPiercingProtection + CWeaponCraftParameters::BucklerMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::BucklerMaxPiercingProtection + CWeaponCraftParameters::BucklerMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_BOOTS:
-			return (uint32) ( ( CWeaponCraftParameters::LightBootsMaxPiercingProtection + CWeaponCraftParameters::LightBootsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightBootsMaxPiercingProtection + CWeaponCraftParameters::LightBootsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_GLOVES:
-			return (uint32) ( ( CWeaponCraftParameters::LightGlovesMaxPiercingProtection + CWeaponCraftParameters::LightGlovesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightGlovesMaxPiercingProtection + CWeaponCraftParameters::LightGlovesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_PANTS:
-			return (uint32) ( ( CWeaponCraftParameters::LightPantsMaxPiercingProtection + CWeaponCraftParameters::LightPantsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightPantsMaxPiercingProtection + CWeaponCraftParameters::LightPantsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_SLEEVES:
-			return (uint32) ( ( CWeaponCraftParameters::LightSleevesMaxPiercingProtection + CWeaponCraftParameters::LightSleevesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightSleevesMaxPiercingProtection + CWeaponCraftParameters::LightSleevesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::LIGHT_VEST:
-			return (uint32) ( ( CWeaponCraftParameters::LightVestMaxPiercingProtection + CWeaponCraftParameters::LightVestMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::LightVestMaxPiercingProtection + CWeaponCraftParameters::LightVestMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_BOOTS:
-			return (uint32) ( ( CWeaponCraftParameters::MediumBootsMaxPiercingProtection + CWeaponCraftParameters::MediumBootsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumBootsMaxPiercingProtection + CWeaponCraftParameters::MediumBootsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_GLOVES:
-			return (uint32) ( ( CWeaponCraftParameters::MediumGlovesMaxPiercingProtection + CWeaponCraftParameters::MediumGlovesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumGlovesMaxPiercingProtection + CWeaponCraftParameters::MediumGlovesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_PANTS:
-			return (uint32) ( ( CWeaponCraftParameters::MediumPantsMaxPiercingProtection + CWeaponCraftParameters::MediumPantsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumPantsMaxPiercingProtection + CWeaponCraftParameters::MediumPantsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_SLEEVES:
-			return (uint32) ( ( CWeaponCraftParameters::MediumSleevesMaxPiercingProtection + CWeaponCraftParameters::MediumSleevesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumSleevesMaxPiercingProtection + CWeaponCraftParameters::MediumSleevesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::MEDIUM_VEST:
-			return (uint32) ( ( CWeaponCraftParameters::MediumVestMaxPiercingProtection + CWeaponCraftParameters::MediumVestMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::MediumVestMaxPiercingProtection + CWeaponCraftParameters::MediumVestMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_BOOTS:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyBootsMaxPiercingProtection + CWeaponCraftParameters::HeavyBootsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyBootsMaxPiercingProtection + CWeaponCraftParameters::HeavyBootsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_GLOVES:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyGlovesMaxPiercingProtection + CWeaponCraftParameters::HeavyGlovesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyGlovesMaxPiercingProtection + CWeaponCraftParameters::HeavyGlovesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_PANTS:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyPantsMaxPiercingProtection + CWeaponCraftParameters::HeavyPantsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyPantsMaxPiercingProtection + CWeaponCraftParameters::HeavyPantsMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_SLEEVES:
-			return (uint32) ( ( CWeaponCraftParameters::HeavySleevesMaxPiercingProtection + CWeaponCraftParameters::HeavySleevesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavySleevesMaxPiercingProtection + CWeaponCraftParameters::HeavySleevesMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_VEST:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyVestMaxPiercingProtection + CWeaponCraftParameters::HeavyVestMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyVestMaxPiercingProtection + CWeaponCraftParameters::HeavyVestMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		case ITEM_TYPE::HEAVY_HELMET:
-			return (uint32) ( ( CWeaponCraftParameters::HeavyHelmetMaxPiercingProtection + CWeaponCraftParameters::HeavyHelmetMaxPiercingProtection * _CraftParameters->MaxPiercingProtection ) * _Recommended );
+			return (uint32)((CWeaponCraftParameters::HeavyHelmetMaxPiercingProtection + CWeaponCraftParameters::HeavyHelmetMaxPiercingProtection * _CraftParameters->MaxPiercingProtection) * _Recommended);
 		default:;
 		}
 	}
 	return 0;
 }
 
-
 //-----------------------------------------------
 // get one of the three possible protection
 //-----------------------------------------------
-void CGameItem::magicProtection(uint32 protectionNumber, PROTECTION_TYPE::TProtectionType& protectionType, uint32& protectionValue) const
+void CGameItem::magicProtection(uint32 protectionNumber, PROTECTION_TYPE::TProtectionType &protectionType, uint32 &protectionValue) const
 {
 	protectionType = PROTECTION_TYPE::None;
 	protectionValue = 0;
@@ -3105,15 +3167,15 @@ void CGameItem::magicProtection(uint32 protectionNumber, PROTECTION_TYPE::TProte
 	{
 	case 1:
 		protectionType = _CraftParameters->Protection1;
-		protectionValue = (uint32)(_CraftParameters->Protection1Factor * getMagicProtectionCraftParateters( protectionType ) * 100.0f);
+		protectionValue = (uint32)(_CraftParameters->Protection1Factor * getMagicProtectionCraftParateters(protectionType) * 100.0f);
 		break;
 	case 2:
 		protectionType = _CraftParameters->Protection2;
-		protectionValue = (uint32)(_CraftParameters->Protection2Factor * getMagicProtectionCraftParateters( protectionType ) * 100.0f);
+		protectionValue = (uint32)(_CraftParameters->Protection2Factor * getMagicProtectionCraftParateters(protectionType) * 100.0f);
 		break;
 	case 3:
 		protectionType = _CraftParameters->Protection3;
-		protectionValue = (uint32)(_CraftParameters->Protection3Factor * getMagicProtectionCraftParateters( protectionType ) * 100.0f);
+		protectionValue = (uint32)(_CraftParameters->Protection3Factor * getMagicProtectionCraftParateters(protectionType) * 100.0f);
 		break;
 	default:
 		BOMB("CGameItem::protection called with invalid protectionNumber(uint32) parameter", return);
@@ -3121,13 +3183,12 @@ void CGameItem::magicProtection(uint32 protectionNumber, PROTECTION_TYPE::TProte
 	}
 }
 
-
 //-----------------------------------------------
-// return the CWeaponCraftParameters variable corresponding to protection type 
+// return the CWeaponCraftParameters variable corresponding to protection type
 //-----------------------------------------------
-float CGameItem::getMagicProtectionCraftParateters( PROTECTION_TYPE::TProtectionType protection ) const
+float CGameItem::getMagicProtectionCraftParateters(PROTECTION_TYPE::TProtectionType protection) const
 {
-	switch( protection )
+	switch (protection)
 	{
 	case PROTECTION_TYPE::Cold:
 		return CWeaponCraftParameters::ColdJewelProtection;
@@ -3149,7 +3210,7 @@ float CGameItem::getMagicProtectionCraftParateters( PROTECTION_TYPE::TProtection
 }
 
 //-----------------------------------------------
-// return protection gived by item for a protection type 
+// return protection gived by item for a protection type
 //-----------------------------------------------
 uint32 CGameItem::magicProtection(PROTECTION_TYPE::TProtectionType protectionType) const
 {
@@ -3158,42 +3219,41 @@ uint32 CGameItem::magicProtection(PROTECTION_TYPE::TProtectionType protectionTyp
 
 	if (protectionType == _CraftParameters->Protection1)
 	{
-		return (uint32)(_CraftParameters->Protection1Factor * getMagicProtectionCraftParateters( protectionType ) * 100.0f);
+		return (uint32)(_CraftParameters->Protection1Factor * getMagicProtectionCraftParateters(protectionType) * 100.0f);
 	}
 	else if (protectionType == _CraftParameters->Protection2)
 	{
-		return (uint32)(_CraftParameters->Protection2Factor * getMagicProtectionCraftParateters( protectionType ) * 100.0f);
+		return (uint32)(_CraftParameters->Protection2Factor * getMagicProtectionCraftParateters(protectionType) * 100.0f);
 	}
 	else if (protectionType == _CraftParameters->Protection3)
 	{
-		return (uint32)(_CraftParameters->Protection3Factor * getMagicProtectionCraftParateters( protectionType ) * 100.0f);
+		return (uint32)(_CraftParameters->Protection3Factor * getMagicProtectionCraftParateters(protectionType) * 100.0f);
 	}
 	return 0;
 }
-
 
 //-----------------------------------------------
 // return resistance gived by item for a resistance type
 //-----------------------------------------------
 uint32 CGameItem::magicResistance(RESISTANCE_TYPE::TResistanceType resistanceType) const
 {
-	if( _CraftParameters == 0 || resistanceType == RESISTANCE_TYPE::None )
+	if (_CraftParameters == 0 || resistanceType == RESISTANCE_TYPE::None)
 		return 0;
 
-	switch(resistanceType)
+	switch (resistanceType)
 	{
-		case RESISTANCE_TYPE::Desert:
-			return (uint32)(_CraftParameters->DesertResistanceFactor * CWeaponCraftParameters::DesertResistance * 100.0f);
-		case RESISTANCE_TYPE::Forest:
-			return (uint32)(_CraftParameters->ForestResistanceFactor * CWeaponCraftParameters::ForestResistance * 100.0f);
-		case RESISTANCE_TYPE::Lacustre:
-			return (uint32)(_CraftParameters->LacustreResistanceFactor * CWeaponCraftParameters::LacustreResistance * 100.0f);
-		case RESISTANCE_TYPE::Jungle:
-			return (uint32)(_CraftParameters->JungleResistanceFactor * CWeaponCraftParameters::JungleResistance * 100.0f);
-		case RESISTANCE_TYPE::PrimaryRoot:
-			return (uint32)(_CraftParameters->PrimaryRootResistanceFactor * CWeaponCraftParameters::PrimaryRootResistance * 100.0f);
-		default:
-			return 0;
+	case RESISTANCE_TYPE::Desert:
+		return (uint32)(_CraftParameters->DesertResistanceFactor * CWeaponCraftParameters::DesertResistance * 100.0f);
+	case RESISTANCE_TYPE::Forest:
+		return (uint32)(_CraftParameters->ForestResistanceFactor * CWeaponCraftParameters::ForestResistance * 100.0f);
+	case RESISTANCE_TYPE::Lacustre:
+		return (uint32)(_CraftParameters->LacustreResistanceFactor * CWeaponCraftParameters::LacustreResistance * 100.0f);
+	case RESISTANCE_TYPE::Jungle:
+		return (uint32)(_CraftParameters->JungleResistanceFactor * CWeaponCraftParameters::JungleResistance * 100.0f);
+	case RESISTANCE_TYPE::PrimaryRoot:
+		return (uint32)(_CraftParameters->PrimaryRootResistanceFactor * CWeaponCraftParameters::PrimaryRootResistance * 100.0f);
+	default:
+		return 0;
 	}
 }
 
@@ -3247,15 +3307,15 @@ sint32 CGameItem::armorHpBuff() const
 }
 
 //-----------------------------------------------
-// return ElementalCastingTimeFactor 
+// return ElementalCastingTimeFactor
 //-----------------------------------------------
 float CGameItem::getElementalCastingTimeFactor() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
@@ -3286,17 +3346,16 @@ float CGameItem::getElementalCastingTimeFactor() const
 	return 0.0f;
 }
 
-
 //-----------------------------------------------
 // return ElementalPowerFactor
 //-----------------------------------------------
 float CGameItem::getElementalPowerFactor() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
@@ -3327,17 +3386,16 @@ float CGameItem::getElementalPowerFactor() const
 	return 0.0f;
 }
 
-
 //-----------------------------------------------
 // return OffensiveAfflictionCastingTimeFactor
 //-----------------------------------------------
 float CGameItem::getOffensiveAfflictionCastingTimeFactor() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
@@ -3368,17 +3426,16 @@ float CGameItem::getOffensiveAfflictionCastingTimeFactor() const
 	return 0.0f;
 }
 
-
 //-----------------------------------------------
 // return OffensiveAfflictionPowerFactor
 //-----------------------------------------------
 float CGameItem::getOffensiveAfflictionPowerFactor() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
@@ -3409,17 +3466,16 @@ float CGameItem::getOffensiveAfflictionPowerFactor() const
 	return 0.0f;
 }
 
-
 //-----------------------------------------------
-// return getHealCastingTimeFactor 
+// return getHealCastingTimeFactor
 //-----------------------------------------------
 float CGameItem::getHealCastingTimeFactor() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
@@ -3450,17 +3506,16 @@ float CGameItem::getHealCastingTimeFactor() const
 	return 0.0f;
 }
 
-
 //-----------------------------------------------
 // return HealPowerFactor
 //-----------------------------------------------
 float CGameItem::getHealPowerFactor() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
@@ -3492,15 +3547,15 @@ float CGameItem::getHealPowerFactor() const
 }
 
 //-----------------------------------------------
-// return DefensiveAfflictionCastingTimeFactor 
+// return DefensiveAfflictionCastingTimeFactor
 //-----------------------------------------------
 float CGameItem::getDefensiveAfflictionCastingTimeFactor() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
@@ -3536,11 +3591,11 @@ float CGameItem::getDefensiveAfflictionCastingTimeFactor() const
 //-----------------------------------------------
 float CGameItem::getDefensiveAfflictionPowerFactor() const
 {
-	if( _Form == 0 )
+	if (_Form == 0)
 		return 0.0f;
-	if( _CraftParameters != 0 )
+	if (_CraftParameters != 0)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// melee weapons
 		case ITEM_TYPE::DAGGER:
@@ -3574,43 +3629,42 @@ float CGameItem::getDefensiveAfflictionPowerFactor() const
 //-----------------------------------------------
 // Set item stats with craft parameters
 //-----------------------------------------------
-void CGameItem::setCraftParameters( const CCraftParameters& param )
+void CGameItem::setCraftParameters(const CCraftParameters &param)
 {
-	if( _CraftParameters == 0 )
+	if (_CraftParameters == 0)
 		_CraftParameters = new CItemCraftParameters();
 	*_CraftParameters = param;
 	_HP = maxDurability();
 }
 
-
 //-----------------------------------------------
 // displayInLog
 //-----------------------------------------------
-void CGameItem::displayInLog( CLog &log )
+void CGameItem::displayInLog(CLog &log)
 {
-	log.displayRawNL( "%s QT=%u QL=%hu Class=%u StatEnergy=%.1f",
-		_SheetId.toString().c_str(), _StackSize, quality(), (uint)getItemClass(), getStatEnergy() );
-	log.displayRawNL( "\tHP=%u/%u SapLoad=%u/%u creator=%s ",
-		durability(), maxDurability(), sapLoad(), maxSapLoad(), getCreator().toString().c_str() );
+	log.displayRawNL("%s QT=%u QL=%hu Class=%u StatEnergy=%.1f",
+	    _SheetId.toString().c_str(), _StackSize, quality(), (uint)getItemClass(), getStatEnergy());
+	log.displayRawNL("\tHP=%u/%u SapLoad=%u/%u creator=%s ",
+	    durability(), maxDurability(), sapLoad(), maxSapLoad(), getCreator().toString().c_str());
 
 	if (_Form)
-	{						
-		log.displayRawNL("\t%s Bulk=%u Weight=%u", _Form->Name.c_str(), _Form->Bulk, _Form->Weight );
+	{
+		log.displayRawNL("\t%s Bulk=%u Weight=%u", _Form->Name.c_str(), _Form->Bulk, _Form->Weight);
 	}
 } // displayInLog //
 
 //-----------------------------------------------
 // getStats
 //-----------------------------------------------
-bool CGameItem::getStats(const std::string &stats, std::string &final )
+bool CGameItem::getStats(const std::string &stats, std::string &final)
 {
 	if (stats.size() % 2)
 		return false;
 
 	// cut hash in portion of 4
-	for (uint i=0; i<stats.size()/2; i++)
+	for (uint i = 0; i < stats.size() / 2; i++)
 	{
-		string part = stats.substr(i*2, 2);
+		string part = stats.substr(i * 2, 2);
 		if (part == "Sh")
 			final += NLMISC::toString("%s|", _SheetId.toString().c_str());
 		else if (part == "Qt")
@@ -3650,54 +3704,53 @@ bool CGameItem::getStats(const std::string &stats, std::string &final )
 //-----------------------------------------------
 uint16 CGameItem::getClientEnchantValue() const
 {
-	if  ( _Enchantment.empty() || maxSapLoad() == 0 )
+	if (_Enchantment.empty() || maxSapLoad() == 0)
 		return 0;
 	const uint32 sapLoad = this->sapLoad();
 	sint16 sabrinaValue = 0;
 	float sabrinaRelativeValue = 1.0f;
-	for ( uint i = 0; i < _Enchantment.size(); i++ )
+	for (uint i = 0; i < _Enchantment.size(); i++)
 	{
-		const CStaticBrick * brick = CSheets::getSBrickForm(_Enchantment[i]);
-		if ( !brick )
+		const CStaticBrick *brick = CSheets::getSBrickForm(_Enchantment[i]);
+		if (!brick)
 		{
-			nlwarning("getClientEnchantValue : invalid brick %s",_Enchantment[i].toString().c_str());
+			nlwarning("getClientEnchantValue : invalid brick %s", _Enchantment[i].toString().c_str());
 		}
 		else
 		{
-			if ( brick->SabrinaValue > 0 )
+			if (brick->SabrinaValue > 0)
 			{
-				sabrinaValue+= brick->SabrinaValue;
+				sabrinaValue += brick->SabrinaValue;
 			}
 
-			if( brick->SabrinaRelativeValue > 0.0f )
+			if (brick->SabrinaRelativeValue > 0.0f)
 			{
 				sabrinaRelativeValue += brick->SabrinaRelativeValue;
 			}
 		}
 	}
-	if ( sabrinaValue != 0)
+	if (sabrinaValue != 0)
 	{
-		return uint8( 1 + sapLoad / (uint32)(sabrinaValue * sabrinaRelativeValue) );
+		return uint8(1 + sapLoad / (uint32)(sabrinaValue * sabrinaRelativeValue));
 	}
 	else
 	{
 		nlwarning("an enchanted item has no sabrina value. Dumping sheets");
-		for ( uint i = 0; i< _Enchantment.size(); i++ )
+		for (uint i = 0; i < _Enchantment.size(); i++)
 		{
-			const CStaticBrick * brick = CSheets::getSBrickForm(_Enchantment[i]);
-			if ( !brick )
+			const CStaticBrick *brick = CSheets::getSBrickForm(_Enchantment[i]);
+			if (!brick)
 			{
-				nlwarning("UNKNOWN ('%s')",_Enchantment[i].toString().c_str());
+				nlwarning("UNKNOWN ('%s')", _Enchantment[i].toString().c_str());
 			}
-			else if ( brick->SabrinaValue > 0 )
+			else if (brick->SabrinaValue > 0)
 			{
-				nlwarning("'%s'",_Enchantment[i].toString().c_str());
+				nlwarning("'%s'", _Enchantment[i].toString().c_str());
 			}
 		}
 		return 0;
 	}
 }
-
 
 //-----------------------------------------------
 // getWearPerAction
@@ -3706,9 +3759,9 @@ float CGameItem::getWearPerAction() const
 {
 	if (!_Form) return 0.0f;
 
-	if ( _Form->Family == ITEMFAMILY::MELEE_WEAPON )
+	if (_Form->Family == ITEMFAMILY::MELEE_WEAPON)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 		// melee weapons
 		case ITEM_TYPE::DAGGER:
@@ -3738,9 +3791,9 @@ float CGameItem::getWearPerAction() const
 			return 0.0f;
 		}
 	}
-	else if ( _Form->Family == ITEMFAMILY::RANGE_WEAPON )
+	else if (_Form->Family == ITEMFAMILY::RANGE_WEAPON)
 	{
-		switch( _Form->Type )
+		switch (_Form->Type)
 		{
 			// range weapon
 		case ITEM_TYPE::AUTOLAUCH:
@@ -3762,7 +3815,7 @@ float CGameItem::getWearPerAction() const
 	}
 	else
 	{
-		switch(_Form->Family)
+		switch (_Form->Family)
 		{
 		case ITEMFAMILY::CRAFTING_TOOL:
 			return CraftingToolWearPerAction;
@@ -3778,21 +3831,20 @@ float CGameItem::getWearPerAction() const
 			nlwarning("Bad family for a getWearPerAction");
 		};
 	}
-	
+
 	return 0.0f;
 }
-
 
 //-----------------------------------------------
 // a bit of dummy code for debugging..
 //-----------------------------------------------
 static bool IsRootSheet(NLMISC::CSheetId sheet)
 {
-	bool init=false;
+	bool init = false;
 	static std::set<NLMISC::CSheetId> theSet;
 	if (!init)
 	{
-		init=true;
+		init = true;
 		theSet.insert(NLMISC::CSheetId("bag.sitem"));
 		theSet.insert(NLMISC::CSheetId("guild_inventory.sitem"));
 		theSet.insert(NLMISC::CSheetId("hand_inventory.sitem"));
@@ -3803,23 +3855,22 @@ static bool IsRootSheet(NLMISC::CSheetId sheet)
 		theSet.insert(NLMISC::CSheetId("bot_gift_inventory.sitem"));
 		theSet.insert(NLMISC::CSheetId("player_room_inventory.sitem"));
 	}
-	return theSet.find(sheet)!=theSet.end();
+	return theSet.find(sheet) != theSet.end();
 }
-
 
 //-----------------------------------------------
 // post load treatment
 //-----------------------------------------------
-void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter * owner)
+void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter *owner)
 {
 	_Form = CSheets::getForm(_SheetId);
-	
-//	GameItemManager.insertItem(this);
+
+	//	GameItemManager.insertItem(this);
 
 	computeItemWornState();
 
 	// Backward Compatibility: Old Item format get old requirement System
-	if(!_UseNewSystemRequirement)
+	if (!_UseNewSystemRequirement)
 		computeRequirementFromOldSystem();
 
 	computeHasPrerequisit();
@@ -3827,9 +3878,9 @@ void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter * o
 	// memory optimization for non craftable items, also mandatory for tools otherwise maxDurability() would always return 0
 	if (_Form != NULL)
 	{
-		switch(_Form->Family) 
+		switch (_Form->Family)
 		{
-			//craftable families
+			// craftable families
 		case ITEMFAMILY::ARMOR:
 		case ITEMFAMILY::MELEE_WEAPON:
 		case ITEMFAMILY::RANGE_WEAPON:
@@ -3839,9 +3890,9 @@ void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter * o
 		case ITEMFAMILY::HARVEST_TOOL:
 			break;
 		case ITEMFAMILY::JEWELRY:
-			if( _CraftParameters != NULL )
+			if (_CraftParameters != NULL)
 			{
-				switch( _CraftParameters->Protection )
+				switch (_CraftParameters->Protection)
 				{
 				case BACK_COMPAT::OLD_PROTECTION_TYPE::Fire:
 				case BACK_COMPAT::OLD_PROTECTION_TYPE::Blind:
@@ -3898,8 +3949,8 @@ void CGameItem::postApply(INVENTORIES::TInventory refInventoryId, CCharacter * o
 				CGameItemPtr itemPtr(this);
 				inv->insertItem(itemPtr, slot);
 			}
-			
-			//owner->equipCharacter(refInventoryId, slot,getInventorySlot());
+
+			// owner->equipCharacter(refInventoryId, slot,getInventorySlot());
 		}
 	}
 	else
@@ -4010,11 +4061,10 @@ void CGameItem::testItemsForBugs()
 }
 #endif
 
-
 //-----------------------------------------------
 // testItemsForBugs
 //-----------------------------------------------
-//void CGameItem::testPlayerInventoryForBugs(const std::vector<CGameItemPtr>& inventory)
+// void CGameItem::testPlayerInventoryForBugs(const std::vector<CGameItemPtr>& inventory)
 //{
 //	NLMISC::CSheetId stackSheetId("stack.sitem");
 //
@@ -4032,11 +4082,11 @@ void CGameItem::testItemsForBugs()
 //	nlassert(inventory[INVENTORIES::pickup]->getSheetId()==NLMISC::CSheetId("temporary_inventory.sitem"));
 //	nlassert(inventory[INVENTORIES::equipment]->getSheetId()==NLMISC::CSheetId("equipment_inventory.sitem"));
 //	nlassert(inventory[INVENTORIES::bag]->getSheetId()==NLMISC::CSheetId("bag_inventory.sitem"));
-//	for( int ii = 0; ii < MAX_INVENTORY_ANIMAL; ++ii ) 
+//	for( int ii = 0; ii < MAX_INVENTORY_ANIMAL; ++ii )
 //	{
 //		nlassert(inventory[INVENTORIES::pack_animal+ii]->getSheetId()==NLMISC::CSheetId("pack_animal_inventory.sitem")); //must be re-init with true pack animal inventory (but this break character save, waiting the backup system)
 //	}
-//	nlassert(inventory[INVENTORIES::harvest]->getSheetId()==NLMISC::CSheetId("temporary_inventory.sitem")); 
+//	nlassert(inventory[INVENTORIES::harvest]->getSheetId()==NLMISC::CSheetId("temporary_inventory.sitem"));
 //	nlassert(inventory[INVENTORIES::bot_gift]->getSheetId()==NLMISC::CSheetId("bot_gift_inventory.sitem"));
 ////	nlassert(inventory[INVENTORIES::pack_steed ]->getSheetId()==NLMISC::CSheetId("pack_animal_inventory.sitem")); //must be re-init with true pack animal inventory (but this break character save, waiting the backup system)
 //
@@ -4148,7 +4198,9 @@ void CGameItem::checkItemForBugs()
 NLMISC_COMMAND(testParanoidItemSystem,"run some test code that should provoke a crash","<test case to run>")
 {
 	log.displayNL("not implemented yet");
-#define TEST(x) egs_giinfo("Testing: " #x); x
+#define TEST(x)                 \
+	egs_giinfo("Testing: " #x); \
+	x
 
 	return true;	
 //#define TEST(x) nlinfo("Testing: " #x); x
@@ -4213,82 +4265,82 @@ NLMISC_COMMAND(testParanoidItemSystem,"run some test code that should provoke a 
 //-----------------------------------------------
 std::string CGameItem::showItemsStats()
 {
-//#pragma message(NL_LOC_MSG "Implement me")
-	// TODO: implement this
+	// #pragma message(NL_LOC_MSG "Implement me")
+	//  TODO: implement this
 
 	return "";
-//	NLMISC::CSheetId stackSheet=NLMISC::CSheetId("stack.sitem");
-//
-//	uint32 freeItemCount=0;
-//	uint32 rootItemCount=0;
-//	uint32 stackChildrenCount=0;
-//	uint32 attachedItemCount=0;
-//	uint32 detachedItemCount=0;
-//	uint32 attachedStackCount=0;
-//	uint32 detachedStackCount=0;
-//	
-//	for (uint32 i=0;i<_Items.size();++i)
-//	{
-//		const CGameItem& item= _Items[i];
-//		// is the item allocated?
-//		if (item._AllocatorData<0)
-//		{
-//			// this item is supposedly allocated so run a few tests
-//			bool isRootItem= IsRootSheet(item._SheetId);
-//			bool isStack= item._SheetId==stackSheet;
-//			
-//			if (isRootItem)
-//			{
-//				nlassert(item._Parent==NULL);
-//				++rootItemCount;
-//			}
-//			else
-//			{
-//				if (isStack)
-//				{
-//					if (item._Parent==NULL)
-//						++detachedStackCount;
-//					else
-//						++attachedStackCount;
-//				}
-//				else
-//				{
-//					if (item._Parent==NULL)
-//						++detachedItemCount;
-//					else
-//						++attachedItemCount;
-//				}
-//			}
-//			
-//			if (isStack)
-//			{
-//				// make sure my children refference me
-//				nlassert(item._Children.size()<256);
-//				for (uint32 j=0;j<item._Children.size();++j)
-//				{
-//					if (item._Children[j]!=NULL)
-//					{
-//						nlassert(item._Children[j]->_Parent==&item);
-//						nlassert(item._Children[j]->Loc.Slot==j);
-//						++stackChildrenCount;
-//					}
-//				}
-//			}
-//			else
-//			{
-//				// make sure I don't have children
-//				if (!isRootItem)
-//					nlassert(item._Children.empty());
-//			}
-//		}
-//		else
-//		{
-//			// this item is free so just skip it and move on to the next one
-//			++freeItemCount;
-//		}		
-//	}
-//	return NLMISC::toString("Item stats: FREE:%d  ROOT:%d  STACK_ATTACHED:%d  STACK_DETACHED:%d  CHILD:%d  ITEM_ATTACHED:%d  ITEM_DETACHED:%d, TOTAL: %d (Allocated Memory %d)",
-//		freeItemCount,rootItemCount,attachedStackCount,detachedStackCount,stackChildrenCount,attachedItemCount,detachedItemCount, _Items.size(), sizeof(CGameItem) * _Items.size());
+	//	NLMISC::CSheetId stackSheet=NLMISC::CSheetId("stack.sitem");
+	//
+	//	uint32 freeItemCount=0;
+	//	uint32 rootItemCount=0;
+	//	uint32 stackChildrenCount=0;
+	//	uint32 attachedItemCount=0;
+	//	uint32 detachedItemCount=0;
+	//	uint32 attachedStackCount=0;
+	//	uint32 detachedStackCount=0;
+	//
+	//	for (uint32 i=0;i<_Items.size();++i)
+	//	{
+	//		const CGameItem& item= _Items[i];
+	//		// is the item allocated?
+	//		if (item._AllocatorData<0)
+	//		{
+	//			// this item is supposedly allocated so run a few tests
+	//			bool isRootItem= IsRootSheet(item._SheetId);
+	//			bool isStack= item._SheetId==stackSheet;
+	//
+	//			if (isRootItem)
+	//			{
+	//				nlassert(item._Parent==NULL);
+	//				++rootItemCount;
+	//			}
+	//			else
+	//			{
+	//				if (isStack)
+	//				{
+	//					if (item._Parent==NULL)
+	//						++detachedStackCount;
+	//					else
+	//						++attachedStackCount;
+	//				}
+	//				else
+	//				{
+	//					if (item._Parent==NULL)
+	//						++detachedItemCount;
+	//					else
+	//						++attachedItemCount;
+	//				}
+	//			}
+	//
+	//			if (isStack)
+	//			{
+	//				// make sure my children refference me
+	//				nlassert(item._Children.size()<256);
+	//				for (uint32 j=0;j<item._Children.size();++j)
+	//				{
+	//					if (item._Children[j]!=NULL)
+	//					{
+	//						nlassert(item._Children[j]->_Parent==&item);
+	//						nlassert(item._Children[j]->Loc.Slot==j);
+	//						++stackChildrenCount;
+	//					}
+	//				}
+	//			}
+	//			else
+	//			{
+	//				// make sure I don't have children
+	//				if (!isRootItem)
+	//					nlassert(item._Children.empty());
+	//			}
+	//		}
+	//		else
+	//		{
+	//			// this item is free so just skip it and move on to the next one
+	//			++freeItemCount;
+	//		}
+	//	}
+	//	return NLMISC::toString("Item stats: FREE:%d  ROOT:%d  STACK_ATTACHED:%d  STACK_DETACHED:%d  CHILD:%d  ITEM_ATTACHED:%d  ITEM_DETACHED:%d, TOTAL: %d (Allocated Memory %d)",
+	//		freeItemCount,rootItemCount,attachedStackCount,detachedStackCount,stackChildrenCount,attachedItemCount,detachedItemCount, _Items.size(), sizeof(CGameItem) * _Items.size());
 }
 
 #if 0
@@ -4305,8 +4357,8 @@ NLMISC_COMMAND(testItemSystem,"call CGameItem::testItemsForBugs()","")
 //-----------------------------------------------
 // COMMAND: items stats
 //-----------------------------------------------
-NLMISC_COMMAND(displayItemsStats,"Display items stats and memory allocation","")
+NLMISC_COMMAND(displayItemsStats, "Display items stats and memory allocation", "")
 {
-	log.displayNL( CGameItem::showItemsStats().c_str() );
+	log.displayNL(CGameItem::showItemsStats().c_str());
 	return true;
 }

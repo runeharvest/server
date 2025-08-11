@@ -21,8 +21,7 @@
 
 class CCharacter;
 
-void buildingCheckIntegrity(CCharacter * skipChar = NULL);
-
+void buildingCheckIntegrity(CCharacter *skipChar = NULL);
 
 #endif // !FINAL_VERSION
 

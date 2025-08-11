@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include	"stdpch.h"
+#include "stdpch.h"
 
 #include "script_compiler.h"
 
@@ -49,32 +49,32 @@ AITYPES::CPropertySet readSet(std::string strings, std::string separator = "|")
 }
 
 // CStateInstance
-IScriptContext* spawnNewGroup(CStateInstance* entity, CScriptStack& stack, CAIInstance* aiInstance, CAIVector const& spawnPosition, sint32 baseLevel, double dispersionRadius)
+IScriptContext *spawnNewGroup(CStateInstance *entity, CScriptStack &stack, CAIInstance *aiInstance, CAIVector const &spawnPosition, sint32 baseLevel, double dispersionRadius)
 {
 	string stateMachineName = stack.top();
 	stack.pop();
 	string dynGroupName = stack.top();
 	stack.pop();
-	
+
 	if (!entity)
 	{
 		nlwarning("spawnNewGroup failed because entity==NULL");
-		return NULL;	//	return a normal stack.
+		return NULL; //	return a normal stack.
 	}
-	
-	CGroupDesc<CGroupFamily> const* groupDesc = NULL;
-	
+
+	CGroupDesc<CGroupFamily> const *groupDesc = NULL;
+
 	//	Find the group template.
 	// :TODO: Replace it with a faster map access.
-	FOREACH (itCont, CCont<CContinent>, aiInstance->continents())
+	FOREACH(itCont, CCont<CContinent>, aiInstance->continents())
 	{
-		FOREACH (itRegion, CCont<CRegion>, itCont->regions())
+		FOREACH(itRegion, CCont<CRegion>, itCont->regions())
 		{
-			FOREACH (itFamily, CCont<CGroupFamily>, itRegion->groupFamilies())
+			FOREACH(itFamily, CCont<CGroupFamily>, itRegion->groupFamilies())
 			{
-				FOREACH (itGroupDesc, CCont<CGroupDesc<CGroupFamily> >, itFamily->groupDescs())
+				FOREACH(itGroupDesc, CCont<CGroupDesc<CGroupFamily>>, itFamily->groupDescs())
 				{
-					if (itGroupDesc->getFullName()==dynGroupName || itGroupDesc->getName()==dynGroupName)
+					if (itGroupDesc->getFullName() == dynGroupName || itGroupDesc->getName() == dynGroupName)
 					{
 						groupDesc = *itGroupDesc;
 						goto groupFound;
@@ -84,17 +84,17 @@ IScriptContext* spawnNewGroup(CStateInstance* entity, CScriptStack& stack, CAIIn
 		}
 	}
 groupFound:
-	if (groupDesc==NULL)
+	if (groupDesc == NULL)
 	{
-		nlwarning("spawnNewGroup failed: No Group Template Found: '%s'",dynGroupName.c_str());
+		nlwarning("spawnNewGroup failed: No Group Template Found: '%s'", dynGroupName.c_str());
 		return NULL;
 	}
-	
+
 	// Find the state machine as a manager
-	CManager* manager=NULL;
+	CManager *manager = NULL;
 	FOREACH(itCont, CCont<CManager>, aiInstance->managers())
 	{
-		if (itCont->getFullName()==stateMachineName || itCont->getName()==stateMachineName)
+		if (itCont->getFullName() == stateMachineName || itCont->getName() == stateMachineName)
 		{
 			manager = *itCont;
 			break;
@@ -106,15 +106,15 @@ groupFound:
 		return NULL;
 	}
 	// Find the state machine as a npc manager
-	CMgrNpc* npcManager = dynamic_cast<CMgrNpc*>(manager);
+	CMgrNpc *npcManager = dynamic_cast<CMgrNpc *>(manager);
 	if (!npcManager)
 	{
 		nlwarning("spawnNpcGroup failed : Not a npc state machine !: '%s'", stateMachineName.c_str());
 		return NULL;
 	}
 	// Get the state machine
-	CStateMachine const* stateMachine = manager->getStateMachine();
-	if (stateMachine->cstStates().size()==0)
+	CStateMachine const *stateMachine = manager->getStateMachine();
+	if (stateMachine->cstStates().size() == 0)
 		stateMachine = NULL;
 	// Save the creator state
 	bool const savePlayerAttackable = groupDesc->getGDPlayerAttackable();
@@ -123,7 +123,7 @@ groupFound:
 	groupDesc->setGDPlayerAttackable(true);
 	groupDesc->setGDBotAttackable(true);
 	// Create the group
-	CGroupNpc* const grp = groupDesc->createNpcGroup(npcManager, spawnPosition, dispersionRadius, baseLevel);
+	CGroupNpc *const grp = groupDesc->createNpcGroup(npcManager, spawnPosition, dispersionRadius, baseLevel);
 	// Restore the creator state
 	groupDesc->setGDPlayerAttackable(savePlayerAttackable);
 	groupDesc->setGDBotAttackable(saveBotAttackable);
@@ -139,22 +139,22 @@ groupFound:
 	grp->initDynGrp(groupDesc, NULL);
 	// Verify that we have a state in the state machine
 #if !FINAL_VERSION
-	if (!stateMachine || stateMachine->cstStates().size()==0)
+	if (!stateMachine || stateMachine->cstStates().size() == 0)
 		nlwarning("no state defined for StateMachine in Manager %s", manager->getFullName().c_str());
 #endif
 	// Set the group in that state
-	if(stateMachine)
-		grp->setStartState(stateMachine->cstStates()[0]);	//	sets the first state (must exist!).
-	grp->updateStateInstance();	//	directly call his first state (to retrieve associated params).
-	
+	if (stateMachine)
+		grp->setStartState(stateMachine->cstStates()[0]); //	sets the first state (must exist!).
+	grp->updateStateInstance(); //	directly call his first state (to retrieve associated params).
+
 	return grp;
 }
 
-void getZoneWithFlags_helper(CStateInstance* entity, CScriptStack& stack, CAIInstance* const aiInstance, CZoneScorer const& scorer)
+void getZoneWithFlags_helper(CStateInstance *entity, CScriptStack &stack, CAIInstance *const aiInstance, CZoneScorer const &scorer)
 {
 	// :FIXME: Copy n past from getZoneWithFlags2 begin
 	// Get all the cell-zones
-	vector<CCellZone*> cellZones;
+	vector<CCellZone *> cellZones;
 	FOREACH(itCont, CCont<CContinent>, aiInstance->continents())
 	{
 		FOREACH(itRegion, CCont<CRegion>, itCont->regions())
@@ -172,12 +172,12 @@ void getZoneWithFlags_helper(CStateInstance* entity, CScriptStack& stack, CAIIns
 	std::shuffle(cellZones.begin(), cellZones.end(), CAIS::instance().RandomGenerator);
 #endif
 	// While no zone found
-	FOREACH(itCellZone, std::vector<CCellZone*>, cellZones)
+	FOREACH(itCellZone, std::vector<CCellZone *>, cellZones)
 	{
 		// Get all cells
-		vector<CCell*> cells;
+		vector<CCell *> cells;
 		FOREACH(it, CCont<CCell>, (*itCellZone)->cells())
-			cells.push_back(*it);
+		cells.push_back(*it);
 		// Shuffle 'em
 #ifndef NL_CPP17
 		std::random_shuffle(cells.begin(), cells.end());
@@ -185,16 +185,15 @@ void getZoneWithFlags_helper(CStateInstance* entity, CScriptStack& stack, CAIIns
 		std::shuffle(cells.begin(), cells.end(), CAIS::instance().RandomGenerator);
 #endif
 		// Get a zone with a good score
-		CNpcZone const* spawnZone = CCellZone::lookupNpcZoneScorer(cells, scorer);
+		CNpcZone const *spawnZone = CCellZone::lookupNpcZoneScorer(cells, scorer);
 		if (spawnZone)
 		{
 			stack.push(spawnZone->getAliasTreeOwner().getAliasFullName());
 			return;
 		}
 	}
-	
+
 	nlwarning("getZoneWithFlags/getNearestZoneWithFlags No Zone Found");
 	stack.push(string());
 	return;
 }
-

@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 // Nel Misc
 #include "nel/misc/command.h"
@@ -29,7 +28,7 @@
 #include "game_share/ecosystem.h"
 #include "game_share/people.h"
 #include "game_share/roles.h"
-//#include "game_share/jobs.h"
+// #include "game_share/jobs.h"
 #include "game_share/skills.h"
 #include "game_share/scores.h"
 #include "game_share/characteristics.h"
@@ -42,7 +41,6 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 using namespace STRING_MANAGER;
-
 
 NLMISC_COMMAND(smReload, "reload all translation files in string manager", "")
 {
@@ -101,20 +99,20 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 	if (ci == NULL)
 	{
 		// try to find a valid client
-		
+
 		log.displayNL("Unknown client '%s' !", args[0].c_str());
 		return false;
 	}
 
 	uint dynId;
-	TVectorParamCheck	params;
-	TParam					p;
+	TVectorParamCheck params;
+	TParam p;
 
 	if (args[1] == "TEST_SELF")
 	{
 		if (args.size() != 2)
 			return false;
-		
+
 		dynId = sendStringToClient(ci->DataSetIndex, "TEST_SELF", params, &IosLocalSender);
 	}
 	else
@@ -146,7 +144,7 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 			if (other)
 			{
 				p.Type = STRING_MANAGER::player;
-				p.setEId( other->EntityId );
+				p.setEId(other->EntityId);
 				params.push_back(p);
 				dynId = sendStringToClient(ci->DataSetIndex, "TEST_PLAYER", params, &IosLocalSender);
 			}
@@ -159,18 +157,18 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 		else if (args[1] == "TEST_ENTITY")
 		{
 			// try to retreive the player infos
-//			CCharacterInfos *other = IOS->getCharInfos(args[2]);
-			CEntityId	eid(args[2]);
+			//			CCharacterInfos *other = IOS->getCharInfos(args[2]);
+			CEntityId eid(args[2]);
 			if (eid != CEntityId::Unknown)
 			{
 				p.Type = STRING_MANAGER::entity;
-				p.setEId( eid );
+				p.setEId(eid);
 
 				// for some obscure reason, GCC 3.2.3 fail internaly to compile the push_back !
 				// so, I replaced the push_back with a resize + affectation.
 				params.resize(1);
 				params[0] = p;
-//				params.push_back(p);
+				//				params.push_back(p);
 
 				dynId = sendStringToClient(ci->DataSetIndex, "TEST_ENTITY", params, &IosLocalSender);
 			}
@@ -183,9 +181,9 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 		else if (args[1] == "TEST_SBRICK")
 		{
 			NLMISC::CSheetId sid(args[2]);
-//			BRICK_FAMILIES::TBrickFamily brick = BRICK_FAMILIES::toSBrickFamily(args[2]);
-//			if (brick != BRICK_FAMILIES::Unknown)
-			if (sid != CSheetId::Unknown )
+			//			BRICK_FAMILIES::TBrickFamily brick = BRICK_FAMILIES::toSBrickFamily(args[2]);
+			//			if (brick != BRICK_FAMILIES::Unknown)
+			if (sid != CSheetId::Unknown)
 			{
 				p.Type = STRING_MANAGER::sbrick;
 				p.SheetId = sid;
@@ -218,7 +216,7 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 		{
 			std::string sheetName = args[2];
 			CSheetId sid(sheetName);
-//			EGSPD::CPeople::TPeople people = EGSPD::CPeople::fromString(args[1]);
+			//			EGSPD::CPeople::TPeople people = EGSPD::CPeople::fromString(args[1]);
 			if (sid != CSheetId::Unknown)
 			{
 				p.Type = STRING_MANAGER::creature_model;
@@ -234,7 +232,7 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 		}
 		else if (args[1] == "TEST_RACE")
 		{
-			//RACES::TRace race = RACES::toRaceId(args[1]);
+			// RACES::TRace race = RACES::toRaceId(args[1]);
 			EGSPD::CPeople::TPeople people = EGSPD::CPeople::fromString(args[2]);
 			if (people != EGSPD::CPeople::EndPeople)
 			{
@@ -249,40 +247,40 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 				return true;
 			}
 		}
-/*		else if (args[1] == "TEST_CAREER")
-		{
-			ROLES::ERole career = ROLES::toRoleId(args[2]);
-			if (career != ROLES::role_unknown)
-			{
-				p.Type = STRING_MANAGER::career;
-				p.Enum = career;
-				params.push_back(p);
-				dynId = sendStringToClient(ci->DataSetIndex, "TEST_CAREER", params, &IosLocalSender);
-			}
-			else
-			{
-				log.displayNL("Unknown career %s", args[2].c_str());
-				return true;
-			}
-		}
-*/
-/*		else if (args[1] == "TEST_JOB")
-		{
-			JOBS::TJob job = JOBS::toJob(args[2]);
-			if (job != JOBS::Unknown)
-			{
-				p.Type = STRING_MANAGER::job;
-				p.Enum = job;
-				params.push_back(p);
-				dynId = sendStringToClient(ci->DataSetIndex, "TEST_JOB", params, &IosLocalSender);
-			}
-			else
-			{
-				log.displayNL("Unknown job %s", args[2].c_str());
-				return true;
-			}
-		}
-*/
+		/*		else if (args[1] == "TEST_CAREER")
+		        {
+		            ROLES::ERole career = ROLES::toRoleId(args[2]);
+		            if (career != ROLES::role_unknown)
+		            {
+		                p.Type = STRING_MANAGER::career;
+		                p.Enum = career;
+		                params.push_back(p);
+		                dynId = sendStringToClient(ci->DataSetIndex, "TEST_CAREER", params, &IosLocalSender);
+		            }
+		            else
+		            {
+		                log.displayNL("Unknown career %s", args[2].c_str());
+		                return true;
+		            }
+		        }
+		*/
+		/*		else if (args[1] == "TEST_JOB")
+		        {
+		            JOBS::TJob job = JOBS::toJob(args[2]);
+		            if (job != JOBS::Unknown)
+		            {
+		                p.Type = STRING_MANAGER::job;
+		                p.Enum = job;
+		                params.push_back(p);
+		                dynId = sendStringToClient(ci->DataSetIndex, "TEST_JOB", params, &IosLocalSender);
+		            }
+		            else
+		            {
+		                log.displayNL("Unknown job %s", args[2].c_str());
+		                return true;
+		            }
+		        }
+		*/
 		else if (args[1] == "TEST_SKILL")
 		{
 			SKILLS::ESkills skill = SKILLS::toSkill(args[2]);
@@ -471,7 +469,7 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 		else if (args[1] == "TEST_OUTPOST_WORD")
 		{
 			NLMISC::CSheetId sid(args[2]);
-			if (sid != CSheetId::Unknown )
+			if (sid != CSheetId::Unknown)
 			{
 				p.Type = STRING_MANAGER::outpost;
 				p.SheetId = sid;
@@ -492,17 +490,16 @@ NLMISC_COMMAND(smTest, "Send a test dyn string to a client (look at first phrase
 	}
 
 	log.displayNL("Dyn string send to client %s with ID = %u", args[0].c_str(), dynId);
-	
+
 	return true;
 }
 
-
-NLMISC_COMMAND(sysCmd, "Run preprogrammed system command(s)","commands are in the SystemCmd config variable")
+NLMISC_COMMAND(sysCmd, "Run preprogrammed system command(s)", "commands are in the SystemCmd config variable")
 {
 	CConfigFile::CVar *sysCmds = IService::getInstance()->ConfigFile.getVarPtr("SystemCmd");
 	if (sysCmds != NULL)
 	{
-		for (uint i=0; i<sysCmds->size(); ++i)
+		for (uint i = 0; i < sysCmds->size(); ++i)
 		{
 			string cmd = sysCmds->asString(i);
 
@@ -519,115 +516,110 @@ NLMISC_COMMAND(sysCmd, "Run preprogrammed system command(s)","commands are in th
 	return true;
 }
 
-
 //-----------------------------------------------
 //	'mute'
 //
 //-----------------------------------------------
-NLMISC_COMMAND(mute,"Mute or unmute a player. the player can be muted for a fixed period of time","<player>[<delay>]")
+NLMISC_COMMAND(mute, "Mute or unmute a player. the player can be muted for a fixed period of time", "<player>[<delay>]")
 {
-	if( args.size() == 0 )
+	if (args.size() == 0)
 	{
 		return false;
 	}
 	sint32 delay = -1;
-	if( args.size() > 1 )
+	if (args.size() > 1)
 	{
 		NLMISC::fromString(args[1], delay);
 	}
 
-	CCharacterInfos * charInfos = IOS->getCharInfos( args[0] );
-	if( charInfos != NULL )
+	CCharacterInfos *charInfos = IOS->getCharInfos(args[0]);
+	if (charInfos != NULL)
 	{
 		try
 		{
-			IOS->getChatManager().getClient(charInfos->DataSetIndex).mute( delay );
+			IOS->getChatManager().getClient(charInfos->DataSetIndex).mute(delay);
 		}
-		catch(const Exception &e)
+		catch (const Exception &e)
 		{
-			nlwarning("<mite> %s",e.what());
+			nlwarning("<mite> %s", e.what());
 		}
 	}
 	else
 	{
-		nlwarning("(mute) No infos about the character %s",args[0].c_str());
+		nlwarning("(mute) No infos about the character %s", args[0].c_str());
 	}
-		
+
 	return true;
 
 } // mode //
-
-
 
 //-----------------------------------------------
 //	'remove'
 //
 //-----------------------------------------------
-NLMISC_COMMAND(remove,"remove an entity from","<entity name>")
+NLMISC_COMMAND(remove, "remove an entity from", "<entity name>")
 {
-	if( args.size() < 1 )
+	if (args.size() < 1)
 	{
 		return false;
 	}
 
-	CCharacterInfos * charInfos = IOS->getCharInfos( args[0] );
-	if( charInfos )
+	CCharacterInfos *charInfos = IOS->getCharInfos(args[0]);
+	if (charInfos)
 	{
-		IOS->removeEntity( charInfos->DataSetIndex);
+		IOS->removeEntity(charInfos->DataSetIndex);
 	}
 	else
 	{
-		nlwarning("<remove> Entity %s is not in the IOS",args[0].c_str());
+		nlwarning("<remove> Entity %s is not in the IOS", args[0].c_str());
 		return false;
 	}
 	return true;
 }
-
 
 /*
 NLMISC_COMMAND(genImpulsion,"generate a fake impulsion, used to debug the CActionGeneric on the FS","<nb_uint8>")
 {
-	if( args.size() != 1 )
-	{
-		return false;
-	}
+    if( args.size() != 1 )
+    {
+        return false;
+    }
 
-	CEntityId id;
-	CMessage msgout( "IMPULSION_ID" );
-	msgout.serial( id );
-	
-	CBitMemStream stream;
+    CEntityId id;
+    CMessage msgout( "IMPULSION_ID" );
+    msgout.serial( id );
 
-	uint count;
-	NLMISC::fromString(args[0], count);
-	uint8 val = 0xAC;
-	for (uint i = 0; i < count; i++)
-		stream.serial (val);
+    CBitMemStream stream;
 
-	//vector<uint8> &v = stream.bufferAsVector();
-	msgout.serialBufferWithSize ((uint8*)stream.buffer(), stream.length());
+    uint count;
+    NLMISC::fromString(args[0], count);
+    uint8 val = 0xAC;
+    for (uint i = 0; i < count; i++)
+        stream.serial (val);
 
-	//const uint16 frontEndId = _Id.DynamicId;
-	sendMessageViaMirror ("FS", msgout);
+    //vector<uint8> &v = stream.bufferAsVector();
+    msgout.serialBufferWithSize ((uint8*)stream.buffer(), stream.length());
 
-	return true;
+    //const uint16 frontEndId = _Id.DynamicId;
+    sendMessageViaMirror ("FS", msgout);
+
+    return true;
 }
 */
 
-
-NLMISC_COMMAND(display,"display","")
+NLMISC_COMMAND(display, "display", "")
 {
 	IOS->display(log);
 	return true;
 }
 
-NLMISC_COMMAND( displayChatClients, "Display the list of clients", "" )
+NLMISC_COMMAND(displayChatClients, "Display the list of clients", "")
 {
 	IOS->getChatManager().displayChatClients(log);
 	return true;
 }
 
-NLMISC_COMMAND( displayChatGroups, "Display the list of chat groups, optionally, display universe chat group and/or player audience groups", "[universe] [player]" )
+NLMISC_COMMAND(displayChatGroups, "Display the list of chat groups, optionally, display universe chat group and/or player audience groups", "[universe] [player]")
 {
 	bool displayUniverse = false;
 	bool playerAudience = false;
@@ -650,7 +642,7 @@ NLMISC_COMMAND( displayChatGroups, "Display the list of chat groups, optionally,
 	return true;
 }
 
-NLMISC_COMMAND( displayChatAudience, "Display the current chat dynamic audience for a player, optionally, force the update", "<playerId> [update]" )
+NLMISC_COMMAND(displayChatAudience, "Display the current chat dynamic audience for a player, optionally, force the update", "<playerId> [update]")
 {
 	bool update = false;
 	if (args.size() < 1)
@@ -664,15 +656,14 @@ NLMISC_COMMAND( displayChatAudience, "Display the current chat dynamic audience 
 	return true;
 }
 
-
 //-----------------------------------------------
 //	'showChat'
 //
 //-----------------------------------------------
-NLMISC_COMMAND(showChat,"show or hide chat messages","")
+NLMISC_COMMAND(showChat, "show or hide chat messages", "")
 {
 	ShowChat = !ShowChat;
-	
+
 	return true;
 
 } // showChat //

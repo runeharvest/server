@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 // Misc
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
@@ -33,7 +30,6 @@
 // Local
 #include "sheets.h"
 
-
 ///////////
 // USING //
 ///////////
@@ -45,8 +41,8 @@ using namespace NLGEORGES;
 //-------------------------------------------------------------------------
 // the singleton data
 
-std::map<CSheetId,CSheets::CSheet> CSheets::_Sheets;
-bool CSheets::_Initialised=false;
+std::map<CSheetId, CSheets::CSheet> CSheets::_Sheets;
+bool CSheets::_Initialised = false;
 
 //-------------------------------------------------------------------------
 // init
@@ -62,11 +58,10 @@ void CSheets::init()
 	filters.push_back("creature");
 	filters.push_back("player");
 
-	loadForm(filters, IService::getInstance()->WriteFilesDirectory+"evs.packed_sheets", _Sheets);
+	loadForm(filters, IService::getInstance()->WriteFilesDirectory + "evs.packed_sheets", _Sheets);
 
-	_Initialised=true;
+	_Initialised = true;
 }
-
 
 //-------------------------------------------------------------------------
 // display
@@ -75,27 +70,26 @@ void CSheets::display()
 {
 	nlassert(_Initialised);
 
-	std::map<CSheetId,CSheets::CSheet>::iterator it;
-	for(it=_Sheets.begin();it!=_Sheets.end();++it)
+	std::map<CSheetId, CSheets::CSheet>::iterator it;
+	for (it = _Sheets.begin(); it != _Sheets.end(); ++it)
 	{
-		nlinfo("SHEET:%s Walk:%f Run:%f Radius:%f Height:%f Bounding:%f",(*it).first.toString().c_str(),
-			(*it).second.WalkSpeed, (*it).second.RunSpeed, (*it).second.Radius, (*it).second.Height, (*it).second.BoundingRadius);
+		nlinfo("SHEET:%s Walk:%f Run:%f Radius:%f Height:%f Bounding:%f", (*it).first.toString().c_str(),
+		    (*it).second.WalkSpeed, (*it).second.RunSpeed, (*it).second.Radius, (*it).second.Height, (*it).second.BoundingRadius);
 	}
 }
-
 
 //-------------------------------------------------------------------------
 // lookup
 
-const CSheets::CSheet *CSheets::lookup( CSheetId id )
+const CSheets::CSheet *CSheets::lookup(CSheetId id)
 {
 	nlassert(_Initialised);
 
 	// setup an iterator and lookup the sheet id in the map
-	std::map<CSheetId,CSheets::CSheet>::iterator it=_Sheets.find(id);
+	std::map<CSheetId, CSheets::CSheet>::iterator it = _Sheets.find(id);
 
 	// if we found a valid entry return a pointer to the creature record otherwise 0
-	if (it!=_Sheets.end())
+	if (it != _Sheets.end())
 		return &((*it).second);
 	else
 		return NULL;

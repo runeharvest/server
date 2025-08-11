@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #include "history.h"
@@ -32,34 +30,33 @@ CHistory::CHistory()
 	_PacketHistory.setPropertyHistory(&_PropertyHistory);
 }
 
-
-void	CHistory::clear()
+void CHistory::clear()
 {
 	_PacketHistory.clear();
 	_PropertyHistory.clear();
 }
 
-void	CHistory::setMaximumClient(uint maxClient)
+void CHistory::setMaximumClient(uint maxClient)
 {
-	_MaxClientId = maxClient-1;
+	_MaxClientId = maxClient - 1;
 	_PacketHistory.setMaximumClient(maxClient);
 	_PropertyHistory.setMaximumClient(maxClient);
 }
 
 //
-void	CHistory::addClient(TClientId clientId)
+void CHistory::addClient(TClientId clientId)
 {
 	_PacketHistory.addClient(clientId);
 	_PropertyHistory.addClient(clientId);
 }
 
-void	CHistory::removeClient(TClientId clientId)
+void CHistory::removeClient(TClientId clientId)
 {
 	_PacketHistory.removeClient(clientId);
 	_PropertyHistory.removeClient(clientId);
 }
 
-void	CHistory::resetClient(TClientId clientId)
+void CHistory::resetClient(TClientId clientId)
 {
 	_PacketHistory.resetClient(clientId);
 	_PropertyHistory.resetClient(clientId);
@@ -67,12 +64,12 @@ void	CHistory::resetClient(TClientId clientId)
 
 //
 
-bool	CHistory::addEntityToClient(TCLEntityId entityId, TClientId clientId)
+bool CHistory::addEntityToClient(TCLEntityId entityId, TClientId clientId)
 {
 	return _PropertyHistory.addEntityToClient(entityId, clientId);
 }
 
-void	CHistory::removeEntityOfClient(TCLEntityId entityId, TClientId clientId)
+void CHistory::removeEntityOfClient(TCLEntityId entityId, TClientId clientId)
 {
 	_PropertyHistory.removeEntityOfClient(entityId, clientId);
 }
@@ -81,23 +78,23 @@ void	CHistory::removeEntityOfClient(TCLEntityId entityId, TClientId clientId)
 /*
 bool	CHistory::packDelta(TClientId clientId, CAction *action)
 {
-	return _ContinuousHistory.packDelta(clientId, *action, true);
+    return _ContinuousHistory.packDelta(clientId, *action, true);
 }
 */
 /*
 void	CHistory::store(TClientId clientId, uint32 packetNumber, CAction *action)
 {
-	_PacketHistory.store(clientId, packetNumber, action);
-	_ContinuousHistory.updateProperty(clientId, packetNumber, *action);
+    _PacketHistory.store(clientId, packetNumber, action);
+    _ContinuousHistory.updateProperty(clientId, packetNumber, *action);
 }
 */
 
-void	CHistory::ack(TClientId clientId, uint32 packet, uint32 bits, uint ackBitWidth)
+void CHistory::ack(TClientId clientId, uint32 packet, uint32 bits, uint ackBitWidth)
 {
 	_PacketHistory.ack(clientId, packet, bits, ackBitWidth);
 }
 
-void	CHistory::ack(TClientId clientId, uint32 packet, bool ackvalue)
+void CHistory::ack(TClientId clientId, uint32 packet, bool ackvalue)
 {
 	_PacketHistory.ack(clientId, packet, ackvalue);
 }
@@ -109,4 +106,4 @@ void	CHistory::setPropertyConversion(uint32 property, sint8 conversion) { _Conti
 void	CHistory::setPropertyConversion(CPropertyTranslation *properties, sint numProperties) { _ContinuousHistory.setPropertyConversion(properties, numProperties); }
 void	CHistory::setPositionPropertyId(uint32 id) { _ContinuousHistory.setPositionPropertyId(id); }
 */
-//bool	CHistory::isContinuousProperty(uint32 property) { return _ContinuousHistory.isContinuousProperty(property); }
+// bool	CHistory::isContinuousProperty(uint32 property) { return _ContinuousHistory.isContinuousProperty(property); }

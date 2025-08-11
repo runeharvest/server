@@ -14,14 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_COMBAT_ACTION_BLEED_H
 #define RY_COMBAT_ACTION_BLEED_H
 
 #include "combat_action.h"
 #include "bleed_effect.h"
-
 
 /**
  * Class managing the creation of bleed effects for combat (nb: combat bleed effects stacks)
@@ -33,17 +30,21 @@ class CCombatActionBleed : public CCombatDynamicAction
 {
 public:
 	/// Constructor
-	CCombatActionBleed(): CCombatDynamicAction(), _BleedDuration(0), _BleedCycleDuration(0)
+	CCombatActionBleed()
+	    : CCombatDynamicAction()
+	    , _BleedDuration(0)
+	    , _BleedCycleDuration(0)
 	{
 	}
 
 	/// Constructor
-	CCombatActionBleed(const TDataSetRow & actorRowId, CCombatPhrase *phrase, NLMISC::TGameCycle totalDuration, NLMISC::TGameCycle cycleDuration)
-	: _BleedDuration(totalDuration), _BleedCycleDuration(cycleDuration)
+	CCombatActionBleed(const TDataSetRow &actorRowId, CCombatPhrase *phrase, NLMISC::TGameCycle totalDuration, NLMISC::TGameCycle cycleDuration)
+	    : _BleedDuration(totalDuration)
+	    , _BleedCycleDuration(cycleDuration)
 	{
 		_CombatPhrase = phrase;
-		
-		if(TheDataset.isAccessible(actorRowId))
+
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -58,23 +59,22 @@ public:
 	virtual void apply(CCombatPhrase *phrase);
 
 	/// apply on entity
-	virtual void applyOnEntity( CEntityBase *entity, float successFactor );
+	virtual void applyOnEntity(CEntityBase *entity, float successFactor);
 
 private:
 	/// apply combat action effects on target
-	void applyOnTarget( uint8 targetIndex, CCombatPhrase *phrase);
+	void applyOnTarget(uint8 targetIndex, CCombatPhrase *phrase);
 
 	/// bleed total duration (in ticks)
-	NLMISC::TGameCycle		_BleedDuration;
+	NLMISC::TGameCycle _BleedDuration;
 
 	/// time between two hp loss (in ticks)
-	NLMISC::TGameCycle		_BleedCycleDuration;
+	NLMISC::TGameCycle _BleedCycleDuration;
 
 	// temp vars
-	mutable sint32			_TotalBleedDamage;
-	mutable float			_CycleDamage;
+	mutable sint32 _TotalBleedDamage;
+	mutable float _CycleDamage;
 };
-
 
 #endif // RY_COMBAT_ACTION_BLEED_H
 

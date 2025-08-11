@@ -14,12 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "environmental_effect.h"
 #include "nel/misc/variable.h"
-
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -28,9 +25,8 @@ using namespace std;
 NL_INSTANCE_COUNTER_IMPL(CEnvironmentalEffect);
 NL_INSTANCE_COUNTER_IMPL(CEnvironmentalEffectManager);
 
-NLMISC::TGameCycle								CEnvironmentalEffect::DefaultLifetime = 200; // 20 s
-NL_ISO_TEMPLATE_SPEC CSimpleEntityManager<CEnvironmentalEffect>	*	CSimpleEntityManager<CEnvironmentalEffect>::_Instance = NULL;
-
+NLMISC::TGameCycle CEnvironmentalEffect::DefaultLifetime = 200; // 20 s
+NL_ISO_TEMPLATE_SPEC CSimpleEntityManager<CEnvironmentalEffect> *CSimpleEntityManager<CEnvironmentalEffect>::_Instance = NULL;
 
 /*
  * Despawn the effect in mirror
@@ -38,10 +34,9 @@ NL_ISO_TEMPLATE_SPEC CSimpleEntityManager<CEnvironmentalEffect>	*	CSimpleEntityM
 void CEnvironmentalEffect::despawn()
 {
 	// Remove from mirror
-	CEntityId entityId = TheDataset.getEntityId( _DataSetRow );
-	Mirror.removeEntity( entityId );
+	CEntityId entityId = TheDataset.getEntityId(_DataSetRow);
+	Mirror.removeEntity(entityId);
 }
-
 
 /*
  * Tick update. Return false if the effect's life is ended.
@@ -61,21 +56,20 @@ bool CEnvironmentalEffect::update()
 	}
 }
 
-
-NLMISC_DYNVARIABLE( uint, NbEnvironmentalEffects, "Number of environmental effects" )
+NLMISC_DYNVARIABLE(uint, NbEnvironmentalEffects, "Number of environmental effects")
 {
-	if ( get )
+	if (get)
 		*pointer = CEnvironmentalEffectManager::getInstance()->nbEntities();
 }
 
 /// Singleton access
 CEnvironmentalEffectManager *CEnvironmentalEffectManager::getInstance()
 {
-	return (CEnvironmentalEffectManager*)_Instance;
+	return (CEnvironmentalEffectManager *)_Instance;
 }
 
 /// Release
 void CEnvironmentalEffectManager::release()
 {
-	delete (CEnvironmentalEffectManager*)_Instance;
+	delete (CEnvironmentalEffectManager *)_Instance;
 }

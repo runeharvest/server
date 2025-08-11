@@ -14,28 +14,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_CHARACTER_SENTENCE_H
 #define RY_CHARACTER_SENTENCE_H
 
-
-typedef std::vector<NLMISC::CSheetId>	TSheetIdVector;
+typedef std::vector<NLMISC::CSheetId> TSheetIdVector;
 
 /// Class for sentences
 class CCharacterSentence
 {
 public:
-	std::string					Name;
-	TSheetIdVector				BricksIds;
-	std::vector<uint8>			BricksIndexInSentence;
-	
+	std::string Name;
+	TSheetIdVector BricksIds;
+	std::vector<uint8> BricksIndexInSentence;
+
 	/// Serialisation
 	void serial(NLMISC::IStream &f)
 	{
-		f.serial( Name );
-		f.serialCont( BricksIds );
-		f.serialCont( BricksIndexInSentence );
+		f.serial(Name);
+		f.serialCont(BricksIds);
+		f.serialCont(BricksIndexInSentence);
 	}
 };
 
@@ -43,7 +40,6 @@ static bool operator==(const CCharacterSentence &a, const CCharacterSentence &b)
 {
 	return a.BricksIds == b.BricksIds;
 }
-
 
 #endif // RY_CHARACTER_SENTENCE_H
 /* character_sentence.h */

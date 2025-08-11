@@ -22,14 +22,13 @@
 #include "building_manager/building_manager.h"
 #include "building_manager/room_instance.h"
 
-
 /////////////////////////////////////////////////////////////
 // CPlayerRoomInventory
 /////////////////////////////////////////////////////////////
 
 // ****************************************************************************
-CPlayerRoomInventory::CPlayerRoomInventory(CCharacter * owner)
-: _Owner(owner)
+CPlayerRoomInventory::CPlayerRoomInventory(CCharacter *owner)
+    : _Owner(owner)
 {
 	nlassert(owner != NULL);
 }
@@ -50,19 +49,19 @@ uint32 CPlayerRoomInventory::getMaxSlot() const
 CInventoryBase::TInventoryOpResult CPlayerRoomInventory::insertItem(CGameItemPtr &item, uint32 slot, bool autoStack)
 {
 	/*if (!canUseInventory(_Owner))
-		return ior_access_denied;*/
+	    return ior_access_denied;*/
 
 	return CInventoryBase::insertItem(item, slot, autoStack);
 }
 
 // ****************************************************************************
-CGameItemPtr CPlayerRoomInventory::removeItem(uint32 slot, uint32 quantity, TInventoryOpResult * res)
+CGameItemPtr CPlayerRoomInventory::removeItem(uint32 slot, uint32 quantity, TInventoryOpResult *res)
 {
 	/*if (!canUseInventory(_Owner))
 	{
-		if (res != NULL)
-			*res = ior_access_denied;
-		return NULL;
+	    if (res != NULL)
+	        *res = ior_access_denied;
+	    return NULL;
 	}*/
 
 	return CInventoryBase::removeItem(slot, quantity, res);
@@ -71,26 +70,26 @@ CGameItemPtr CPlayerRoomInventory::removeItem(uint32 slot, uint32 quantity, TInv
 // ****************************************************************************
 /*bool CPlayerRoomInventory::canUseInventory(CCharacter * c) const
 {
-	nlassert(c != NULL);
+    nlassert(c != NULL);
 
-	// for the moment only owner can use his room inventory
-	if (c != _Owner)
-		return false;
+    // for the moment only owner can use his room inventory
+    if (c != _Owner)
+        return false;
 
-	// player must be in the room to access the inventory
-	CMirrorPropValueRO<TYPE_CELL> mirrorCell(TheDataset, c->getEntityRowId(), DSPropertyCELL);
-	const sint32 cell = mirrorCell;
-	if ( !CBuildingManager::getInstance()->isRoomCell(cell) )
-		return false;
+    // player must be in the room to access the inventory
+    CMirrorPropValueRO<TYPE_CELL> mirrorCell(TheDataset, c->getEntityRowId(), DSPropertyCELL);
+    const sint32 cell = mirrorCell;
+    if ( !CBuildingManager::getInstance()->isRoomCell(cell) )
+        return false;
 
-	const CRoomInstancePlayer * room = dynamic_cast<CRoomInstancePlayer*>( CBuildingManager::getInstance()->getRoomInstanceFromCell(cell) );
-	if (room == NULL)
-		return false;
+    const CRoomInstancePlayer * room = dynamic_cast<CRoomInstancePlayer*>( CBuildingManager::getInstance()->getRoomInstanceFromCell(cell) );
+    if (room == NULL)
+        return false;
 
-	if (room->getPlayer() != c->getId())
-		return false;
+    if (room->getPlayer() != c->getId())
+        return false;
 
-	return true;
+    return true;
 }*/
 
 /////////////////////////////////////////////////////////////
@@ -101,4 +100,3 @@ CGameItemPtr CPlayerRoomInventory::removeItem(uint32 slot, uint32 quantity, TInv
 void CPlayerRoomInvView::onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags)
 {
 }
-

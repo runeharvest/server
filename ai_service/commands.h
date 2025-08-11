@@ -27,15 +27,15 @@
 class CStringFilter
 {
 public:
-	CStringFilter(std::string const& filter)
-		: _Filter(filter)
+	CStringFilter(std::string const &filter)
+	    : _Filter(filter)
 	{
 	}
 	virtual ~CStringFilter() { }
-	
-	bool operator !=(std::string const& other) const { return !operator ==(other); }
-	bool operator ==(std::string const& other) const { return NLMISC::testWildCard(other, _Filter); }
-	
+
+	bool operator!=(std::string const &other) const { return !operator==(other); }
+	bool operator==(std::string const &other) const { return NLMISC::testWildCard(other, _Filter); }
+
 private:
 	std::string _Filter;
 };
@@ -84,166 +84,166 @@ CAIS
 //- Fetchers -----------------------------------------------------------------
 
 template <class TContainer>
-void buildInstanceList(TContainer& container)
+void buildInstanceList(TContainer &container)
 {
 	FOREACH(itAIInstance, CCont<CAIInstance>, CAIS::instance().AIList())
 	{
-		CAIInstance* aiinstance = *itAIInstance;
+		CAIInstance *aiinstance = *itAIInstance;
 		container.push_back(aiinstance);
 	}
 }
 
 template <class TContainer>
-void buildContinentList(TContainer& container)
+void buildContinentList(TContainer &container)
 {
-	std::deque<CAIInstance*> aiinstances;
+	std::deque<CAIInstance *> aiinstances;
 	buildInstanceList(aiinstances);
-	FOREACH(itAIInstance, std::deque<CAIInstance*>, aiinstances)
+	FOREACH(itAIInstance, std::deque<CAIInstance *>, aiinstances)
 	{
-		CAIInstance* aiinstance = *itAIInstance;
+		CAIInstance *aiinstance = *itAIInstance;
 		if (aiinstance == NULL)
 			continue;
 		FOREACH(itContinent, CCont<CContinent>, aiinstance->continents())
 		{
-			CContinent* continent = *itContinent;
+			CContinent *continent = *itContinent;
 			container.push_back(continent);
 		}
 	}
 }
 
 template <class TContainer>
-void buildRegionList(TContainer& container)
+void buildRegionList(TContainer &container)
 {
-	std::deque<CContinent*> continents;
+	std::deque<CContinent *> continents;
 	buildContinentList(continents);
-	FOREACH(itContinent, std::deque<CContinent*>, continents)
+	FOREACH(itContinent, std::deque<CContinent *>, continents)
 	{
-		CContinent* continent = *itContinent;
+		CContinent *continent = *itContinent;
 		if (continent == NULL)
 			continue;
 		FOREACH(itRegion, CCont<CRegion>, continent->regions())
 		{
-			CRegion* region = *itRegion;
+			CRegion *region = *itRegion;
 			container.push_back(region);
 		}
 	}
 }
 
 template <class TContainer>
-void buildCellZoneList(TContainer& container)
+void buildCellZoneList(TContainer &container)
 {
-	std::deque<CRegion*> regions;
+	std::deque<CRegion *> regions;
 	buildRegionList(regions);
-	FOREACH(itRegion, std::deque<CRegion*>, regions)
+	FOREACH(itRegion, std::deque<CRegion *>, regions)
 	{
-		CRegion* region = *itRegion;
+		CRegion *region = *itRegion;
 		if (region == NULL)
 			continue;
 		FOREACH(itCellZone, CCont<CCellZone>, region->cellZones())
 		{
-			CCellZone* cellZone = *itCellZone;
+			CCellZone *cellZone = *itCellZone;
 			container.push_back(cellZone);
 		}
 	}
 }
 
 template <class TContainer>
-void buildFamilyBehaviorList(TContainer& container)
+void buildFamilyBehaviorList(TContainer &container)
 {
-	std::deque<CCellZone*> cellZones;
+	std::deque<CCellZone *> cellZones;
 	buildCellZoneList(cellZones);
-	FOREACH(itCellZone, std::deque<CCellZone*>, cellZones)
+	FOREACH(itCellZone, std::deque<CCellZone *>, cellZones)
 	{
-		CCellZone* cellZone = *itCellZone;
+		CCellZone *cellZone = *itCellZone;
 		if (cellZone == NULL)
 			continue;
 		FOREACH(itFamilyBehavior, CCont<CFamilyBehavior>, cellZone->familyBehaviors())
 		{
-			CFamilyBehavior* familyBehavior = *itFamilyBehavior;
+			CFamilyBehavior *familyBehavior = *itFamilyBehavior;
 			container.push_back(familyBehavior);
 		}
 	}
 }
 
 template <class TContainer>
-void buildOutpostList(TContainer& container)
+void buildOutpostList(TContainer &container)
 {
-	std::deque<CContinent*> continents;
+	std::deque<CContinent *> continents;
 	buildContinentList(continents);
-	FOREACH(itContinent, std::deque<CContinent*>, continents)
+	FOREACH(itContinent, std::deque<CContinent *>, continents)
 	{
-		CContinent* continent = *itContinent;
+		CContinent *continent = *itContinent;
 		if (continent == NULL)
 			continue;
 		FOREACH(itOutpost, CCont<COutpost>, continent->outposts())
 		{
-			COutpost* outpost = *itOutpost;
+			COutpost *outpost = *itOutpost;
 			container.push_back(outpost);
 		}
 	}
 }
 
 template <class TContainer>
-void buildManagerList(TContainer& container)
+void buildManagerList(TContainer &container)
 {
-	std::deque<CFamilyBehavior*> familyBehaviors;
+	std::deque<CFamilyBehavior *> familyBehaviors;
 	buildFamilyBehaviorList(familyBehaviors);
-	FOREACH(itFamilyBehavior, std::deque<CFamilyBehavior*>, familyBehaviors)
+	FOREACH(itFamilyBehavior, std::deque<CFamilyBehavior *>, familyBehaviors)
 	{
-		CFamilyBehavior* familyBehavior = *itFamilyBehavior;
+		CFamilyBehavior *familyBehavior = *itFamilyBehavior;
 		if (familyBehavior == NULL)
 			continue;
-		container.push_back(static_cast<CManager*>(familyBehavior->mgrNpc()));
-		container.push_back(static_cast<CManager*>(familyBehavior->mgrFauna()));
+		container.push_back(static_cast<CManager *>(familyBehavior->mgrNpc()));
+		container.push_back(static_cast<CManager *>(familyBehavior->mgrFauna()));
 	}
-	std::deque<CAIInstance*> aiinstances;
+	std::deque<CAIInstance *> aiinstances;
 	buildInstanceList(aiinstances);
-	FOREACH(itAIInstance, std::deque<CAIInstance*>, aiinstances)
+	FOREACH(itAIInstance, std::deque<CAIInstance *>, aiinstances)
 	{
-		CAIInstance* aiinstance = *itAIInstance;
+		CAIInstance *aiinstance = *itAIInstance;
 		if (aiinstance == NULL)
 			continue;
 		FOREACH(itManager, CCont<CManager>, aiinstance->managers())
 		{
-			CManager* manager = *itManager;
+			CManager *manager = *itManager;
 			container.push_back(manager);
 		}
 	}
-	std::deque<COutpost*> outposts;
+	std::deque<COutpost *> outposts;
 	buildOutpostList(outposts);
-	FOREACH(itOutpost, std::deque<COutpost*>, outposts)
+	FOREACH(itOutpost, std::deque<COutpost *>, outposts)
 	{
-		COutpost* outpost = *itOutpost;
+		COutpost *outpost = *itOutpost;
 		if (outpost == NULL)
 			continue;
 		FOREACH(itManager, CCont<COutpostManager>, outpost->managers())
 		{
-			CManager* manager = static_cast<CManager*>(*itManager);
+			CManager *manager = static_cast<CManager *>(*itManager);
 			container.push_back(manager);
 		}
 	}
 }
 
 template <class TContainer>
-void buildGroupList(TContainer& container)
+void buildGroupList(TContainer &container)
 {
-	std::deque<CManager*> managers;
+	std::deque<CManager *> managers;
 	buildManagerList(managers);
-	FOREACH(itManager, std::deque<CManager*>, managers)
+	FOREACH(itManager, std::deque<CManager *>, managers)
 	{
-		CManager* manager = *itManager;
+		CManager *manager = *itManager;
 		if (manager == NULL)
 			continue;
 		FOREACH(itGroup, CCont<CGroup>, manager->groups())
 		{
-			CGroup* group = *itGroup;
+			CGroup *group = *itGroup;
 			container.push_back(group);
 		}
 	}
 }
 
 template <class TContainer>
-bool buildFilteredGroupList(TContainer& container, std::string filterString)
+bool buildFilteredGroupList(TContainer &container, std::string filterString)
 {
 	typedef typename TContainer::value_type TValue;
 	std::deque<TValue> _container;
@@ -262,25 +262,25 @@ bool buildFilteredGroupList(TContainer& container, std::string filterString)
 }
 
 template <class TContainer>
-void buildBotList(TContainer& container)
+void buildBotList(TContainer &container)
 {
-	std::deque<CGroup*> groups;
+	std::deque<CGroup *> groups;
 	buildGroupList(groups);
-	FOREACH(itGroup, std::deque<CGroup*>, groups)
+	FOREACH(itGroup, std::deque<CGroup *>, groups)
 	{
-		CGroup* group = *itGroup;
+		CGroup *group = *itGroup;
 		if (group == NULL)
 			continue;
 		FOREACH(itBot, CCont<CBot>, group->bots())
 		{
-			CBot* bot = *itBot;
+			CBot *bot = *itBot;
 			container.push_back(bot);
 		}
 	}
 }
 
 template <class TContainer>
-bool buildFilteredBotList(TContainer& container, std::string filterString)
+bool buildFilteredBotList(TContainer &container, std::string filterString)
 {
 	typedef typename TContainer::value_type TValue;
 	std::deque<TValue> _container;
@@ -299,39 +299,38 @@ bool buildFilteredBotList(TContainer& container, std::string filterString)
 }
 
 template <class TContainer>
-void buildPlayerList(TContainer& container)
+void buildPlayerList(TContainer &container)
 {
-	std::deque<CAIInstance*> aiinstances;
+	std::deque<CAIInstance *> aiinstances;
 	buildInstanceList(aiinstances);
-	FOREACH(itAIInstance, std::deque<CAIInstance*>, aiinstances)
+	FOREACH(itAIInstance, std::deque<CAIInstance *>, aiinstances)
 	{
-		CAIInstance* aiinstance = *itAIInstance;
+		CAIInstance *aiinstance = *itAIInstance;
 		if (!aiinstance)
 			continue;
-		CManagerPlayer* manager = aiinstance->getPlayerMgr();
+		CManagerPlayer *manager = aiinstance->getPlayerMgr();
 		if (!manager)
 			continue;
 		FOREACH(itPlayer, CManagerPlayer::TPlayerMap, manager->playerList())
 		{
-			CBotPlayer* player = itPlayer->second;
+			CBotPlayer *player = itPlayer->second;
 			container.push_back(player);
 		}
 	}
 }
 
-
 template <class TContainer>
-void buildFaunaPlaceList(TContainer& container)
+void buildFaunaPlaceList(TContainer &container)
 {
 	std::deque<CGroup *> groups;
 	buildGroupList(groups);
-	FOREACH(itGroup, std::deque<CGroup*>, groups)
+	FOREACH(itGroup, std::deque<CGroup *>, groups)
 	{
 		CGrpFauna *grpFauna = dynamic_cast<CGrpFauna *>(*itGroup);
 		if (!grpFauna)
-			continue;		
+			continue;
 		FOREACH(itPlaces, CAliasCont<CAIPlace>, grpFauna->places())
-		{			
+		{
 			container.push_back(*itPlaces);
 		}
 	}
@@ -340,122 +339,113 @@ void buildFaunaPlaceList(TContainer& container)
 //- Selector -----------------------------------------------------------------
 
 template <class TValue>
-bool isIdentifiedAs(TValue const& value, CStringFilter const& filter)
+bool isIdentifiedAs(TValue const &value, CStringFilter const &filter)
 {
-	if (filter==value.getIndexString())
+	if (filter == value.getIndexString())
 		return true;
 	return false;
 }
 
 template <>
-inline
-bool isIdentifiedAs<CBot>(CBot const& value, CStringFilter const& filter)
+inline bool isIdentifiedAs<CBot>(CBot const &value, CStringFilter const &filter)
 {
-	if (filter==value.getIndexString())
+	if (filter == value.getIndexString())
 		return true;
-	if (filter==value.getEntityIdString())
+	if (filter == value.getEntityIdString())
 		return true;
-	if (filter==value.getAliasString())
+	if (filter == value.getAliasString())
 		return true;
-	if (filter==value.getName())
+	if (filter == value.getName())
 		return true;
-	if (filter==value.getFullName())
+	if (filter == value.getFullName())
 		return true;
 	return false;
 }
 
 template <>
-inline
-bool isIdentifiedAs<CGroup>(CGroup const& value, CStringFilter const& filter)
+inline bool isIdentifiedAs<CGroup>(CGroup const &value, CStringFilter const &filter)
 {
-	if (filter==value.getIndexString())
+	if (filter == value.getIndexString())
 		return true;
-	if (filter==value.getAliasString())
+	if (filter == value.getAliasString())
 		return true;
-	if (filter==value.getName())
+	if (filter == value.getName())
 		return true;
-	if (filter==value.getFullName())
+	if (filter == value.getFullName())
 		return true;
 	return false;
 }
 
 template <>
-inline
-bool isIdentifiedAs<CManager>(CManager const& value, CStringFilter const& filter)
+inline bool isIdentifiedAs<CManager>(CManager const &value, CStringFilter const &filter)
 {
-	if (filter==value.getIndexString())
+	if (filter == value.getIndexString())
 		return true;
-	if (filter==value.getAliasString())
+	if (filter == value.getAliasString())
 		return true;
-	if (filter==value.getName())
+	if (filter == value.getName())
 		return true;
-	if (filter==value.getFullName())
+	if (filter == value.getFullName())
 		return true;
 	return false;
 }
 
 template <>
-inline
-bool isIdentifiedAs<CBotPlayer>(CBotPlayer const& value, CStringFilter const& filter)
+inline bool isIdentifiedAs<CBotPlayer>(CBotPlayer const &value, CStringFilter const &filter)
 {
-	if (filter==value.getIndexString())
+	if (filter == value.getIndexString())
 		return true;
-	if (filter==value.getEntityIdString())
+	if (filter == value.getEntityIdString())
 		return true;
 	return false;
 }
 
 template <>
-inline
-bool isIdentifiedAs<CAIInstance>(CAIInstance const& value, CStringFilter const& filter)
+inline bool isIdentifiedAs<CAIInstance>(CAIInstance const &value, CStringFilter const &filter)
 {
-	if (filter==value.getIndexString())
+	if (filter == value.getIndexString())
 		return true;
-	if (filter==value.getContinentName())
+	if (filter == value.getContinentName())
 		return true;
 	return false;
 }
 
 template <>
-inline
-bool isIdentifiedAs<CContinent>(CContinent const& value, CStringFilter const& filter)
+inline bool isIdentifiedAs<CContinent>(CContinent const &value, CStringFilter const &filter)
 {
-	if (filter==value.getIndexString())
+	if (filter == value.getIndexString())
 		return true;
-	if (filter==value.getName())
+	if (filter == value.getName())
 		return true;
 	return false;
 }
 
 template <>
-inline
-bool isIdentifiedAs<CRegion>(CRegion const& value, CStringFilter const& filter)
+inline bool isIdentifiedAs<CRegion>(CRegion const &value, CStringFilter const &filter)
 {
-	if (filter==value.getIndexString())
+	if (filter == value.getIndexString())
 		return true;
-	if (filter==value.getName())
+	if (filter == value.getName())
 		return true;
 	return false;
 }
 
 template <>
-inline
-bool isIdentifiedAs<CCellZone>(CCellZone const& value, CStringFilter const& filter)
+inline bool isIdentifiedAs<CCellZone>(CCellZone const &value, CStringFilter const &filter)
 {
-	if (filter==value.getIndexString())
+	if (filter == value.getIndexString())
 		return true;
-	if (filter==value.getName())
+	if (filter == value.getName())
 		return true;
 	return false;
 }
 
 template <>
-inline
-bool isIdentifiedAs<CFamilyBehavior>(CFamilyBehavior const& value, CStringFilter const& filter)
+inline bool isIdentifiedAs<CFamilyBehavior>(CFamilyBehavior const &value, CStringFilter const &filter)
 {
-	if (filter==value.getIndexString())
+	if (filter == value.getIndexString())
 		return true;
-	if (filter==value.grpFamily()->getName())
+	if (filter == value.grpFamily()->getName())
 		return true;
 	return false;
 }
@@ -463,27 +453,27 @@ bool isIdentifiedAs<CFamilyBehavior>(CFamilyBehavior const& value, CStringFilter
 //- Functors -----------------------------------------------------------------
 
 template <class TValue>
-void display(TValue& value, NLMISC::CLog& log)
+void display(TValue &value, NLMISC::CLog &log)
 {
 	log.displayNL("%s %s", value.getIndexString().c_str(), value.getOneLineInfoString().c_str());
 }
 
 template <class TValue>
-void displayEx(TValue& value, NLMISC::CLog& log)
+void displayEx(TValue &value, NLMISC::CLog &log)
 {
 	std::vector<std::string> strings = value.getMultiLineInfoString();
 	FOREACHC(itString, std::vector<std::string>, strings)
-		log.displayNL("%s", itString->c_str());
+	log.displayNL("%s", itString->c_str());
 }
 
 template <class TValue>
-void spawn(TValue& value)
+void spawn(TValue &value)
 {
 	value.spawn();
 }
 
 template <class TValue>
-void despawn(TValue& value)
+void despawn(TValue &value)
 {
 	value.despawn();
 }
@@ -491,22 +481,19 @@ void despawn(TValue& value)
 //- Specialized functors -----------------------------------------------------
 
 template <>
-inline
-void despawn(CGroup& value)
+inline void despawn(CGroup &value)
 {
 	value.despawnGrp();
 }
 
 template <>
-inline
-void despawn(CManager& value)
+inline void despawn(CManager &value)
 {
 	value.despawnMgr();
 }
 
 // CFaunaGenericPlace specialization
-inline
-void spawn(CAIPlace &value)
+inline void spawn(CAIPlace &value)
 {
 	CFaunaGenericPlace *fgp = dynamic_cast<CFaunaGenericPlace *>(&value);
 	if (fgp)
@@ -522,8 +509,7 @@ void spawn(CAIPlace &value)
 	}
 }
 
-inline
-void despawn(CAIPlace &value)
+inline void despawn(CAIPlace &value)
 {
 	CFaunaGenericPlace *fgp = dynamic_cast<CFaunaGenericPlace *>(&value);
 	if (fgp)
@@ -535,15 +521,14 @@ void despawn(CAIPlace &value)
 		else
 		{
 			nlwarning("Places %s is not time driven, cannot deactivate it", value.getIndexString().c_str());
-		}		
+		}
 	}
 }
-
 
 //- Top-level functions ------------------------------------------------------
 
 template <class TContainer>
-void displayList(NLMISC::CLog& log, TContainer const& container, std::string filterString = std::string("*"))
+void displayList(NLMISC::CLog &log, TContainer const &container, std::string filterString = std::string("*"))
 {
 	FOREACHC(it, typename TContainer, container)
 	{
@@ -558,7 +543,7 @@ void displayList(NLMISC::CLog& log, TContainer const& container, std::string fil
 }
 
 template <class TContainer>
-void displayListEx(NLMISC::CLog& log, TContainer const& container, std::string filter = std::string("*"))
+void displayListEx(NLMISC::CLog &log, TContainer const &container, std::string filter = std::string("*"))
 {
 	CLogStringWriter stringWriter(&log);
 	FOREACHC(it, typename TContainer, container)
@@ -573,7 +558,7 @@ void displayListEx(NLMISC::CLog& log, TContainer const& container, std::string f
 }
 
 template <class TContainer>
-void spawnList(NLMISC::CLog& log, TContainer const& container, std::string filterString = std::string("*"))
+void spawnList(NLMISC::CLog &log, TContainer const &container, std::string filterString = std::string("*"))
 {
 	FOREACHC(it, typename TContainer, container)
 	{
@@ -588,7 +573,7 @@ void spawnList(NLMISC::CLog& log, TContainer const& container, std::string filte
 }
 
 template <class TContainer>
-void despawnList(NLMISC::CLog& log, TContainer const& container, std::string filterString = std::string("*"))
+void despawnList(NLMISC::CLog &log, TContainer const &container, std::string filterString = std::string("*"))
 {
 	FOREACHC(it, typename TContainer, container)
 	{
@@ -604,16 +589,16 @@ void despawnList(NLMISC::CLog& log, TContainer const& container, std::string fil
 
 //- NeL commands -------------------------------------------------------------
 
-#define RYAI_TEMPLATED_COMMAND(__name,__help,__args,__type,__fetchmethod,__functor) \
-NLMISC_COMMAND(__name,__help,__args)			\
-{												\
-	std::deque<__type*> container;				\
-	__fetchmethod(container);					\
-	if (args.size()>0)							\
-		__functor(log, container, args[0]);		\
-	else										\
-		__functor(log, container);				\
-	return true;								\
-}
+#define RYAI_TEMPLATED_COMMAND(__name, __help, __args, __type, __fetchmethod, __functor) \
+	NLMISC_COMMAND(__name, __help, __args)                                               \
+	{                                                                                    \
+		std::deque<__type *> container;                                                  \
+		__fetchmethod(container);                                                        \
+		if (args.size() > 0)                                                             \
+			__functor(log, container, args[0]);                                          \
+		else                                                                             \
+			__functor(log, container);                                                   \
+		return true;                                                                     \
+	}
 
 #endif

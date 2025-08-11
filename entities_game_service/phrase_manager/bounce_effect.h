@@ -14,16 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_BOUNCE_EFFECT_H
 #define RY_BOUNCE_EFFECT_H
 
 //
 #include "phrase_manager/s_effect.h"
 #include "entity_manager/entity_base.h"
-
-
 
 /**
  * class for 'bounce' effects
@@ -37,17 +33,18 @@ public:
 	NLMISC_DECLARE_CLASS(CBounceEffect)
 
 	/// ctor
-	CBounceEffect() : CSTimedEffect()
-	{}
+	CBounceEffect()
+	    : CSTimedEffect()
+	{
+	}
 
 	///\ctor
-	CBounceEffect( const TDataSetRow & creatorRowId, 
-						const TDataSetRow & targetRowId, 
-						EFFECT_FAMILIES::TEffectFamily family, 
-						sint32 effectValue, 
-						NLMISC::TGameCycle endDate
-						)
-		:	CSTimedEffect(creatorRowId, targetRowId, family, false, effectValue,(uint8)0, endDate)
+	CBounceEffect(const TDataSetRow &creatorRowId,
+	    const TDataSetRow &targetRowId,
+	    EFFECT_FAMILIES::TEffectFamily family,
+	    sint32 effectValue,
+	    NLMISC::TGameCycle endDate)
+	    : CSTimedEffect(creatorRowId, targetRowId, family, false, effectValue, (uint8)0, endDate)
 	{
 		// range of the effect in meters = effecValue
 	}
@@ -55,7 +52,7 @@ public:
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect) { return false; }
+	virtual bool update(CTimerEvent *event, bool applyEffect) { return false; }
 
 	/// callback called when the effect is actually removed
 	virtual void removed();
@@ -71,7 +68,6 @@ private:
 	/// affected entity
 	mutable CEntityBaseRefPtr _AffectedEntity;
 };
-
 
 #endif // RY_BOUNCE_EFFECT_H
 

@@ -20,7 +20,6 @@
 #include "nel/misc/types_nl.h"
 #include "nel/net/service.h"
 
-
 /**
  * Persistant Data Service Class
  * \author Benjamin Legros
@@ -30,23 +29,18 @@
 class CPersistantDataService : public NLNET::IService
 {
 public:
-
 	/// Constructor
 	CPersistantDataService();
 
-
-
 	/// Initialization
-	virtual void	init();
+	virtual void init();
 
 	/// Release
-	virtual void	release();
+	virtual void release();
 
 	/// Update
-	virtual bool	update();
-
+	virtual bool update();
 };
-
 
 #endif // NL_PERSISTANT_DATA_SERVICE_H
 

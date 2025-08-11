@@ -17,9 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -36,16 +33,14 @@
 #include "player_manager/player.h"
 #include "mod_defense_effect.h"
 
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CSpecialPowerModDefense::apply()
 {
@@ -65,29 +60,29 @@ void CSpecialPowerModDefense::apply()
 	const TGameCycle endDate = _Duration + CTickEventHandler::getGameCycle();
 
 	EFFECT_FAMILIES::TEffectFamily effectFamily;
-	switch( _PowerType )
+	switch (_PowerType)
 	{
-		case POWERS::ModDodgeSkill:
-			effectFamily = EFFECT_FAMILIES::PowerModDodgeSkill;
-			break;
-		case POWERS::ModParrySkill:
-			effectFamily = EFFECT_FAMILIES::PowerModParrySkill;
-			break;
-		case POWERS::ModDefenseSkill:
-			effectFamily = EFFECT_FAMILIES::PowerModDefenseSkill;
-			break;
-		default:
-			effectFamily = EFFECT_FAMILIES::Unknown;
-			break;
+	case POWERS::ModDodgeSkill:
+		effectFamily = EFFECT_FAMILIES::PowerModDodgeSkill;
+		break;
+	case POWERS::ModParrySkill:
+		effectFamily = EFFECT_FAMILIES::PowerModParrySkill;
+		break;
+	case POWERS::ModDefenseSkill:
+		effectFamily = EFFECT_FAMILIES::PowerModDefenseSkill;
+		break;
+	default:
+		effectFamily = EFFECT_FAMILIES::Unknown;
+		break;
 	}
-	
+
 	// create effect and apply it on target
-	CModDefenseEffect *effect = new CModDefenseEffect(_ActorRowId, 
-													endDate, 
-													effectFamily,
-													_DefenseMode,
-													_Modifier1,
-													_Modifier2);
+	CModDefenseEffect *effect = new CModDefenseEffect(_ActorRowId,
+	    endDate,
+	    effectFamily,
+	    _DefenseMode,
+	    _Modifier1,
+	    _Modifier2);
 	if (!effect)
 	{
 		nlwarning("<CSpecialPowerModDefense::apply> Failed to allocate new CModDefenseEffect");
@@ -98,7 +93,7 @@ void CSpecialPowerModDefense::apply()
 
 	// send messages
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::power_type);
-//	TVectorParamCheck params;
+	//	TVectorParamCheck params;
 	// for actor
 	if (actor->getId().getType() == RYZOMID::player)
 	{

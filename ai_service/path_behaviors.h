@@ -24,7 +24,7 @@
 #include "time_interface.h"
 #include "nel/misc/variable.h"
 
-extern NLMISC::CVariable<bool>	LogAcceptablePos;
+extern NLMISC::CVariable<bool> LogAcceptablePos;
 
 //////////////////////////////////////////////////////////////////////////////
 // CAIPath                                                                  //
@@ -34,16 +34,16 @@ class CAIPath : public NLMISC::CRefCount
 {
 public:
 	/// @name Accessors
-	std::vector<RYAI_MAP_CRUNCH::CTopology::TTopologyRef> const& topologiesPath() const { return _TopologiesPath; }
-	std::vector<RYAI_MAP_CRUNCH::CTopology::TTopologyRef>& topologiesPathForCalc() { return _TopologiesPath; }
-	
-	RYAI_MAP_CRUNCH::CWorldPosition const& getStartPos() const { return _Start; }
-	void setStartPos(RYAI_MAP_CRUNCH::CWorldPosition const& pos) { _Start = pos; }
-	
-	RYAI_MAP_CRUNCH::CWorldPosition const& getEndPos() const { return _End; }
-	void setEndPos(RYAI_MAP_CRUNCH::CWorldPosition const& pos) { _End = pos; }
+	std::vector<RYAI_MAP_CRUNCH::CTopology::TTopologyRef> const &topologiesPath() const { return _TopologiesPath; }
+	std::vector<RYAI_MAP_CRUNCH::CTopology::TTopologyRef> &topologiesPathForCalc() { return _TopologiesPath; }
+
+	RYAI_MAP_CRUNCH::CWorldPosition const &getStartPos() const { return _Start; }
+	void setStartPos(RYAI_MAP_CRUNCH::CWorldPosition const &pos) { _Start = pos; }
+
+	RYAI_MAP_CRUNCH::CWorldPosition const &getEndPos() const { return _End; }
+	void setEndPos(RYAI_MAP_CRUNCH::CWorldPosition const &pos) { _End = pos; }
 	//@}
-	
+
 private:
 	RYAI_MAP_CRUNCH::CWorldPosition _Start;
 	RYAI_MAP_CRUNCH::CWorldPosition _End;
@@ -77,38 +77,38 @@ public:
 		REACH_END,
 		NO_PATH
 	};
-	
+
 	/// @name Constructor and destructor
 	//@{
-	CPathPosition(CAngle const& angle);
+	CPathPosition(CAngle const &angle);
 	virtual ~CPathPosition() { } // Defined coz no base class
 	//@}
-	
+
 	/// @name Accessors
 	//@{
-	NLMISC::CSmartPtr<CAIPath> const& getPath() const { return _Path; }
-	RYAI_MAP_CRUNCH::CTopology::TTopologyRef const& getTopology() const;
-	RYAI_MAP_CRUNCH::CTopology::TTopologyRef const& getNextTopology() const;
+	NLMISC::CSmartPtr<CAIPath> const &getPath() const { return _Path; }
+	RYAI_MAP_CRUNCH::CTopology::TTopologyRef const &getTopology() const;
+	RYAI_MAP_CRUNCH::CTopology::TTopologyRef const &getNextTopology() const;
 	//@}
-	
+
 	bool isPathValid() const;
 	bool isFinished() const;
 	bool nextTopology();
 	bool haveNextTopology(uint nbTopo = 1);
-	
-	NLMISC::CSmartPtr<CAIPath>		_Path;
-	NLMISC::CSmartPtr<CInsidePath>	_InsidePath;
-	RYAI_MAP_CRUNCH::CMapPosition	_InsideStartPos;
-	RYAI_MAP_CRUNCH::CMapPosition	_InsideDestPos;
-	uint			_InsideIndex;
-	TPathPosState	_PathState;
-	uint32			_TimeTopoChanged;
-	uint32			_TimeDestChanged;
-	CAngle			_Angle;
-	
+
+	NLMISC::CSmartPtr<CAIPath> _Path;
+	NLMISC::CSmartPtr<CInsidePath> _InsidePath;
+	RYAI_MAP_CRUNCH::CMapPosition _InsideStartPos;
+	RYAI_MAP_CRUNCH::CMapPosition _InsideDestPos;
+	uint _InsideIndex;
+	TPathPosState _PathState;
+	uint32 _TimeTopoChanged;
+	uint32 _TimeDestChanged;
+	CAngle _Angle;
+
 private:
-	friend	class CPathCont;
-	uint	_Index;
+	friend class CPathCont;
+	uint _Index;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -121,40 +121,40 @@ public:
 	/// @name Constructors
 	//@{
 	CPathCont(RYAI_MAP_CRUNCH::TAStarFlag denyFlags);
-	CPathCont(CPathCont const& pathCont);
+	CPathCont(CPathCont const &pathCont);
 	//@}
-	
+
 	/// @name Accessors
 	//@{
-	RYAI_MAP_CRUNCH::TAStarFlag const& denyFlags() const { return _denyFlags; }
-	RYAI_MAP_CRUNCH::TAStarFlag const& getDenyFlags() const { return _denyFlags; }
+	RYAI_MAP_CRUNCH::TAStarFlag const &denyFlags() const { return _denyFlags; }
+	RYAI_MAP_CRUNCH::TAStarFlag const &getDenyFlags() const { return _denyFlags; }
 	void setDenyFlags(RYAI_MAP_CRUNCH::TAStarFlag denyFlags) { _denyFlags = denyFlags; }
-	
-	CAIVector const& getDestination() const { return _Destination; }
-	RYAI_MAP_CRUNCH::CWorldPosition const& getDestPos() const { return _DestPos; }
-	void setDestination(RYAI_MAP_CRUNCH::CWorldPosition const& destPos);
-	void setDestination(AITYPES::TVerticalPos verticalPos, CAIVector const& destPos);
+
+	CAIVector const &getDestination() const { return _Destination; }
+	RYAI_MAP_CRUNCH::CWorldPosition const &getDestPos() const { return _DestPos; }
+	void setDestination(RYAI_MAP_CRUNCH::CWorldPosition const &destPos);
+	void setDestination(AITYPES::TVerticalPos verticalPos, CAIVector const &destPos);
 	//@}
-	
+
 	void clearPaths();
-	
-	bool getPathForSource(CPathPosition& pathPos, RYAI_MAP_CRUNCH::CWorldPosition const& startPos) const;
-	bool calcPathForSource(CPathPosition& pathPos, RYAI_MAP_CRUNCH::CWorldPosition const& startPos);
-	bool getCalcPathForSource(CPathPosition& pathPos, RYAI_MAP_CRUNCH::CWorldPosition const& startPos);
-	
+
+	bool getPathForSource(CPathPosition &pathPos, RYAI_MAP_CRUNCH::CWorldPosition const &startPos) const;
+	bool calcPathForSource(CPathPosition &pathPos, RYAI_MAP_CRUNCH::CWorldPosition const &startPos);
+	bool getCalcPathForSource(CPathPosition &pathPos, RYAI_MAP_CRUNCH::CWorldPosition const &startPos);
+
 	uint32 _TimeTopoChanged;
 	uint32 _TimeDestChanged;
-	
+
 private:
-	CAIVector						_Destination;
-	RYAI_MAP_CRUNCH::CMapPosition	_DestinationMapPos;
-	AITYPES::TVerticalPos			_VerticalPos;
-	
-	RYAI_MAP_CRUNCH::CTopology::TTopologyRef	_TopoRef;
-	RYAI_MAP_CRUNCH::CWorldPosition				_DestPos;
-	std::vector<NLMISC::CSmartPtr<CAIPath> >	_SourcePaths;
-	
-	RYAI_MAP_CRUNCH::TAStarFlag		_denyFlags;
+	CAIVector _Destination;
+	RYAI_MAP_CRUNCH::CMapPosition _DestinationMapPos;
+	AITYPES::TVerticalPos _VerticalPos;
+
+	RYAI_MAP_CRUNCH::CTopology::TTopologyRef _TopoRef;
+	RYAI_MAP_CRUNCH::CWorldPosition _DestPos;
+	std::vector<NLMISC::CSmartPtr<CAIPath>> _SourcePaths;
+
+	RYAI_MAP_CRUNCH::TAStarFlag _denyFlags;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -184,7 +184,7 @@ public:
 	// - CFollowPathContext context3.~CFollowPathContext()	: CFollowPath::_MaxSearchDepth => 456
 	// - CFollowPathContext context2.~CFollowPathContext()	: CFollowPath::_MaxSearchDepth => std::numeric_limits<uint32>::max()
 	// - CFollowPathContext context1.~CFollowPathContext()	: CFollowPath::_MaxSearchDepth => std::numeric_limits<uint32>::max()
-	CFollowPathContext(const char* contextName, uint32 maxSearchDepth=std::numeric_limits<uint32>::max(), bool forceMaxDepth=false);
+	CFollowPathContext(const char *contextName, uint32 maxSearchDepth = std::numeric_limits<uint32>::max(), bool forceMaxDepth = false);
 
 	// dtor
 	// - This method removes the destroyed object from the CFollowPath singleton's context stack
@@ -198,12 +198,11 @@ public:
 	void buildContextName(std::string &result) const;
 
 private:
-	CFollowPathContext* _PrevContext;
-	CFollowPathContext* _NextContext;
-	const char* _ContextName;
+	CFollowPathContext *_PrevContext;
+	CFollowPathContext *_NextContext;
+	const char *_ContextName;
 	uint32 _MaxSearchDepth;
 };
-
 
 //////////////////////////////////////////////////////////////////////////////
 // CFollowPath                                                              //
@@ -212,18 +211,19 @@ private:
 class CFollowPath
 {
 private:
-	static CFollowPath* _Instance;
+	static CFollowPath *_Instance;
+
 public:
-	static CFollowPath* getInstance();
+	static CFollowPath *getInstance();
 	static void destroyInstance();
 	CFollowPath();
 
 	enum TFollowStatus
 	{
-		FOLLOWING,		// normal
-		FOLLOW_NO_PATH,	// no path found
-		FOLLOW_ARRIVED,	// arrived
-		FOLLOW_BLOCKED	// Is blocked by someone(s), cannot move.
+		FOLLOWING, // normal
+		FOLLOW_NO_PATH, // no path found
+		FOLLOW_ARRIVED, // arrived
+		FOLLOW_BLOCKED // Is blocked by someone(s), cannot move.
 	};
 	enum TFollowReason
 	{
@@ -232,7 +232,7 @@ public:
 		FNP_NOT_INITIALIZED,
 		FNP_NO_INSIDE_ASTAR_PATH
 	};
-	
+
 private:
 	TFollowReason _LastReason;
 	RYAI_MAP_CRUNCH::CWorldMap::TFindInsideAStarPathReason _LastFIASPReason;
@@ -252,27 +252,27 @@ public:
 	}
 	TFollowReason lastReason() { return _LastReason; }
 	RYAI_MAP_CRUNCH::CWorldMap::TFindInsideAStarPathReason lastFIASPReason() { return _LastFIASPReason; }
-	
+
 public:
-	NLMISC::CMustConsume<TFollowStatus>	followPath(
-			CModEntityPhysical* bot,
-			CPathPosition& pathPos,
-			CPathCont& pathCont,
-			float dist,
-			float modecalageDist,
-			float angleAmort = 1.f,
-			bool focusOnTargetDirection = true,
-			CAIVector* realDestination = NULL,
-			float repulsSpeed = 0.025f,
-			bool updateOrient = true);
+	NLMISC::CMustConsume<TFollowStatus> followPath(
+	    CModEntityPhysical *bot,
+	    CPathPosition &pathPos,
+	    CPathCont &pathCont,
+	    float dist,
+	    float modecalageDist,
+	    float angleAmort = 1.f,
+	    bool focusOnTargetDirection = true,
+	    CAIVector *realDestination = NULL,
+	    float repulsSpeed = 0.025f,
+	    bool updateOrient = true);
 
 private:
 	friend class CFollowPathContext;
-	CFollowPathContext* _TopFollowPathContext;
+	CFollowPathContext *_TopFollowPathContext;
+
 public:
-	uint32 getMaxSearchDepth() const { return (_TopFollowPathContext==NULL)? std::numeric_limits<uint32>::max(): _TopFollowPathContext->getMaxSearchDepth(); }
-	const char* getContextName() const;
+	uint32 getMaxSearchDepth() const { return (_TopFollowPathContext == NULL) ? std::numeric_limits<uint32>::max() : _TopFollowPathContext->getMaxSearchDepth(); }
+	const char *getContextName() const;
 };
 
 #endif
-

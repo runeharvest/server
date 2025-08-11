@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "visual_properties_interface.h"
 #include "ai.h"
@@ -24,7 +22,7 @@
 #include "ai_mgr.h"
 #include "game_share/synchronised_message.h"
 
-//#include "nel/misc/ucstring.h"
+// #include "nel/misc/ucstring.h"
 
 /*
 // Nel Include
@@ -37,21 +35,22 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
-
 //-----------------------------------------------
 /// Macro to read a Bool from the CFG.
 /// variableName : Variable Name to Read and Set.
 //-----------------------------------------------
-#define READ_BOOL(variableName)												\
-	/* Read the Variable Value From Script */								\
-	{CConfigFile::CVar *varPtr = IService::getInstance()->ConfigFile.getVarPtr(#variableName);	\
-	/* Value found, set the Variable */										\
-	if(varPtr)																\
-		variableName = varPtr->asInt() ? true : false;						\
-	nlinfo("IOS Entity naming constrol: "#variableName" %d",variableName?"1":"0");}
+#define READ_BOOL(variableName)                                                                   \
+	/* Read the Variable Value From Script */                                                     \
+	{                                                                                             \
+		CConfigFile::CVar *varPtr = IService::getInstance()->ConfigFile.getVarPtr(#variableName); \
+		/* Value found, set the Variable */                                                       \
+		if (varPtr)                                                                               \
+			variableName = varPtr->asInt() ? true : false;                                        \
+		nlinfo("IOS Entity naming constrol: " #variableName " %d", variableName ? "1" : "0");     \
+	}
 
-bool CVisualPropertiesInterface::UseIdForName=false;
-bool CVisualPropertiesInterface::ForceNames=false;
+bool CVisualPropertiesInterface::UseIdForName = false;
+bool CVisualPropertiesInterface::ForceNames = false;
 
 // classic init(), update() and release()
 void CVisualPropertiesInterface::init()
@@ -60,23 +59,23 @@ void CVisualPropertiesInterface::init()
 	READ_BOOL(ForceNames);
 }
 
-void	CVisualPropertiesInterface::update()
+void CVisualPropertiesInterface::update()
 {
 }
 
-void	CVisualPropertiesInterface::release()
+void CVisualPropertiesInterface::release()
 {
 }
 
 //	set different visual properties for a bot.
-void	CVisualPropertiesInterface::setName(const TDataSetRow&	dataSetRow, ucstring name)
+void CVisualPropertiesInterface::setName(const TDataSetRow &dataSetRow, ucstring name)
 {
 	if (!IOSHasMirrorReady)
 		return;
-	
-	NLNET::CMessage	msgout("CHARACTER_NAME");
-	CEntityId		eid=CMirrors::DataSet->getEntityId(dataSetRow);
-	msgout.serial	(const_cast<TDataSetRow&>(dataSetRow));
-	msgout.serial	(name);
-	sendMessageViaMirror("IOS",msgout);
+
+	NLNET::CMessage msgout("CHARACTER_NAME");
+	CEntityId eid = CMirrors::DataSet->getEntityId(dataSetRow);
+	msgout.serial(const_cast<TDataSetRow &>(dataSetRow));
+	msgout.serial(name);
+	sendMessageViaMirror("IOS", msgout);
 }

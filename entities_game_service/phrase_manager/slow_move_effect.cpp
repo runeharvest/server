@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -29,7 +27,6 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
 //--------------------------------------------------------------
 //		CSlowMoveEffect::isTimeToUpdate()
 //--------------------------------------------------------------
@@ -41,7 +38,7 @@ bool CSlowMoveEffect::isTimeToUpdate()
 //--------------------------------------------------------------
 //		CSlowMoveEffect::update()
 //--------------------------------------------------------------
-bool CSlowMoveEffect::update( uint32 & updateFlag )
+bool CSlowMoveEffect::update(uint32 &updateFlag)
 {
 	if (!_SlowedEntity)
 	{
@@ -64,7 +61,7 @@ bool CSlowMoveEffect::update( uint32 & updateFlag )
 
 	// set flag, only the strongest slow effect is applied
 	updateFlag |= _Family;
-	
+
 	return (_EndDate <= CTickEventHandler::getGameCycle());
 } // update //
 
@@ -80,7 +77,7 @@ void CSlowMoveEffect::removed()
 		return;
 
 	DEBUGLOG("EFFECT: slow move effect (value %d) ends on entity %s", _Value, _SlowedEntity->getId().toString().c_str());
-	
+
 	// restore entity speed (for creatures only)
 	if (_SlowedEntity->getId().getType() != RYZOMID::player)
 	{
@@ -93,10 +90,10 @@ void CSlowMoveEffect::removed()
 	}
 	else
 	{
-		const std::vector<CSEffectPtr>& effects = _SlowedEntity->getSEffects();
-		for (uint i = 0 ; i < effects.size() ; ++i)
+		const std::vector<CSEffectPtr> &effects = _SlowedEntity->getSEffects();
+		for (uint i = 0; i < effects.size(); ++i)
 		{
-			if (effects[i] && effects[i] != this && (effects[i]->getFamily() == EFFECT_FAMILIES::SlowMove || effects[i]->getFamily() == EFFECT_FAMILIES::CombatMvtSlow) )
+			if (effects[i] && effects[i] != this && (effects[i]->getFamily() == EFFECT_FAMILIES::SlowMove || effects[i]->getFamily() == EFFECT_FAMILIES::CombatMvtSlow))
 				return;
 		}
 	}
@@ -106,14 +103,14 @@ void CSlowMoveEffect::removed()
 	if (TheDataset.isDataSetRowStillValid(_CreatorRowId))
 		actorId = TheDataset.getEntityId(_CreatorRowId);
 
-//	TVectorParamCheck params;
+	//	TVectorParamCheck params;
 
 	if (_SlowedEntity->getId().getType() == RYZOMID::player)
 	{
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_SlowedEntity->getEntityRowId(), "EFFECT_SLOW_MOVE_END_TARGET");
 	}
 
-	if ( actorId.getType() == RYZOMID::player)
+	if (actorId.getType() == RYZOMID::player)
 	{
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::entity);
 		params[0].EId = _SlowedEntity->getId();
@@ -124,4 +121,4 @@ void CSlowMoveEffect::removed()
 
 } // removed //
 
-//CEffectTFactory<CSlowMoveEffect> *CSnareEffectFactory = new CEffectTFactory<CSlowMoveEffect>(EFFECT_FAMILIES::CombatMvtSlow);
+// CEffectTFactory<CSlowMoveEffect> *CSnareEffectFactory = new CEffectTFactory<CSlowMoveEffect>(EFFECT_FAMILIES::CombatMvtSlow);

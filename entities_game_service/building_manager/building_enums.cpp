@@ -14,40 +14,35 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "building_enums.h"
 #include "nel/misc/string_conversion.h"
 
-namespace ROOM_RESTRICTION
+namespace ROOM_RESTRICTION {
+NL_BEGIN_STRING_CONVERSION_TABLE(TRestriction)
+NL_STRING_CONVERSION_TABLE_ENTRY(Rm_Fight)
+NL_STRING_CONVERSION_TABLE_ENTRY(Rm_Magic)
+NL_STRING_CONVERSION_TABLE_ENTRY(Rm_Harvest)
+NL_STRING_CONVERSION_TABLE_ENTRY(Rm_Craft)
+NL_END_STRING_CONVERSION_TABLE(TRestriction, Conversion, Unknown)
+
+//----------------------------------------------------------------------------
+TRestriction fromString(const std::string &str)
 {
-	NL_BEGIN_STRING_CONVERSION_TABLE (TRestriction)
-		NL_STRING_CONVERSION_TABLE_ENTRY (Rm_Fight)
-		NL_STRING_CONVERSION_TABLE_ENTRY (Rm_Magic)
-		NL_STRING_CONVERSION_TABLE_ENTRY (Rm_Harvest)
-		NL_STRING_CONVERSION_TABLE_ENTRY (Rm_Craft)
-	NL_END_STRING_CONVERSION_TABLE(TRestriction, Conversion, Unknown)
-			
-	//----------------------------------------------------------------------------
-	TRestriction fromString( const std::string & str )
-	{
-		return Conversion.fromString( str );
-	}	
+	return Conversion.fromString(str);
+}
 }
 
-namespace BUILDING_TYPES
+namespace BUILDING_TYPES {
+NL_BEGIN_STRING_CONVERSION_TABLE(TBuildingType)
+NL_STRING_CONVERSION_TABLE_ENTRY(Common)
+NL_STRING_CONVERSION_TABLE_ENTRY(Player)
+NL_STRING_CONVERSION_TABLE_ENTRY(Guild)
+NL_END_STRING_CONVERSION_TABLE(TBuildingType, Conversion, Unknown)
+
+//----------------------------------------------------------------------------
+TBuildingType fromString(const std::string &str)
 {
-	NL_BEGIN_STRING_CONVERSION_TABLE (TBuildingType)
-		NL_STRING_CONVERSION_TABLE_ENTRY (Common)
-		NL_STRING_CONVERSION_TABLE_ENTRY (Player)
-		NL_STRING_CONVERSION_TABLE_ENTRY (Guild)
-	NL_END_STRING_CONVERSION_TABLE(TBuildingType, Conversion, Unknown)
-		
-		//----------------------------------------------------------------------------
-	TBuildingType fromString( const std::string & str )
-	{
-		return Conversion.fromString( str );
-	}	
+	return Conversion.fromString(str);
 }
-
-
+}

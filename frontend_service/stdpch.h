@@ -28,7 +28,7 @@
 #include <map>
 #include <set>
 #include <algorithm>
-//#include <sstream>
+// #include <sstream>
 #include <exception>
 #include <utility>
 #include <deque>
@@ -65,7 +65,6 @@
 #include "game_share/action_target_slot.h"
 #include "game_share/simlag.h"
 
-
 #include "game_share/entity_types.h"
 
 #ifndef NL_RELEASE
@@ -73,4 +72,3 @@
 #define TRACE_SHARD_MESSAGES
 #endif
 #endif
-

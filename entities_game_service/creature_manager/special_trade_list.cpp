@@ -18,4 +18,3 @@
 #include "special_trade_list.h"
 
 NLMISC::TInstanceCounterData CSpecialTradeList::CContent::CContentInstanceCounter::_InstanceCounterData("CContent");
-

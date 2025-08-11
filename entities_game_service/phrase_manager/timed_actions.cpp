@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "timed_actions.h"
 #include "player_manager/character.h"
@@ -39,20 +37,20 @@
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
-using namespace	PHRASE_UTILITIES;
+using namespace PHRASE_UTILITIES;
 
 NL_INSTANCE_COUNTER_IMPL(CTimedAction);
 
 extern CRandom RandomGenerator;
 
 //-----------------------------------------------
-bool CTimedAction::testCancelOnHit( sint32 attackSkillValue, CEntityBase * attacker, CEntityBase * defender)
+bool CTimedAction::testCancelOnHit(sint32 attackSkillValue, CEntityBase *attacker, CEntityBase *defender)
 {
 	// get defender defense skill
 	sint32 defenderValue;
-	if ( defender->getId().getType() == RYZOMID::player )
+	if (defender->getId().getType() == RYZOMID::player)
 	{
-		CCharacter *pC = dynamic_cast<CCharacter*> (defender);
+		CCharacter *pC = dynamic_cast<CCharacter *>(defender);
 		if (!pC)
 		{
 			nlwarning("Entity %s type is player but dynamic_cast in CCharacter * returns NULL ?!", defender->getId().toString().c_str());
@@ -62,20 +60,20 @@ bool CTimedAction::testCancelOnHit( sint32 attackSkillValue, CEntityBase * attac
 	}
 	else
 	{
-		const CStaticCreatures * form = defender->getForm();
-		if ( !form )
+		const CStaticCreatures *form = defender->getForm();
+		if (!form)
 		{
-			nlwarning( "<MAGIC>invalid creature form %s in entity %s", defender->getType().toString().c_str(), defender->getId().toString().c_str() );
+			nlwarning("<MAGIC>invalid creature form %s in entity %s", defender->getType().toString().c_str(), defender->getId().toString().c_str());
 			return false;
-		}	
+		}
 		defenderValue = form->getAttackLevel();
 	}
-	
-	//test if the spell is broken
-	const uint8 chances = CStaticSuccessTable::getSuccessChance( SUCCESS_TABLE_TYPE::BreakCastResist, defenderValue - attackSkillValue);
-	const uint8 roll = (uint8) RandomGenerator.rand(99);
-	
-	if ( roll >= chances )
+
+	// test if the spell is broken
+	const uint8 chances = CStaticSuccessTable::getSuccessChance(SUCCESS_TABLE_TYPE::BreakCastResist, defenderValue - attackSkillValue);
+	const uint8 roll = (uint8)RandomGenerator.rand(99);
+
+	if (roll >= chances)
 		return true;
 	else
 		return false;
@@ -86,7 +84,7 @@ bool CTimedAction::testCancelOnHit( sint32 attackSkillValue, CEntityBase * attac
 //-----------------------------------------------
 bool CTPTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
-	if (!actor || !actor->canEntityUseAction() )
+	if (!actor || !actor->canEntityUseAction())
 		return false;
 
 	return true;
@@ -102,14 +100,14 @@ void CTPTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 		return;
 
 	// must be used by a player
-	CCharacter *character = dynamic_cast<CCharacter *> (actor);
+	CCharacter *character = dynamic_cast<CCharacter *>(actor);
 	if (!character)
 	{
 		nlwarning("Error, cannot cast actor in CCharacter *, actor Id %s", actor->getId().toString().c_str());
 		return;
 	}
 
-	if( CPVPManager2::getInstance()->isTPValid(character, item) )
+	if (CPVPManager2::getInstance()->isTPValid(character, item))
 	{
 		const uint32 slot = character->getTpTicketSlot();
 
@@ -119,7 +117,7 @@ void CTPTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 	}
 	else
 	{
-		if( character->getPvPRecentActionFlag() )
+		if (character->getPvPRecentActionFlag())
 		{
 			sendDynamicSystemMessage(character->getEntityRowId(), "PVP_TP_FORBIDEN");
 		}
@@ -137,7 +135,7 @@ void CTPTimedAction::stopAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 		return;
 
 	// must be used by a player
-	CCharacter *character = dynamic_cast<CCharacter *> (actor);
+	CCharacter *character = dynamic_cast<CCharacter *>(actor);
 	if (!character)
 	{
 		nlwarning("Error, cannot cast actor in CCharacter *, actor Id %s", actor->getId().toString().c_str());
@@ -148,49 +146,49 @@ void CTPTimedAction::stopAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 	character->resetTpTicketSlot();
 
 	// send message to player
-	CCharacter::sendDynamicSystemMessage( actor->getId(), "TELEPORT_CANCELED" );
+	CCharacter::sendDynamicSystemMessage(actor->getId(), "TELEPORT_CANCELED");
 }
 
 //-----------------------------------------------
 CGameItemPtr CTPTimedAction::getAndUnlockTP(CEntityBase *actor)
 {
 	if (!actor) return NULL;
-	
+
 	// must be used by a player
-	CCharacter *character = dynamic_cast<CCharacter *> (actor);
+	CCharacter *character = dynamic_cast<CCharacter *>(actor);
 	if (!character)
 	{
 		nlwarning("Error, cannot cast actor in CCharacter *, actor Id %s", actor->getId().toString().c_str());
 		return NULL;
 	}
-	
+
 	// get used TP ticket
 	uint32 ticketSlot = character->getTpTicketSlot();
 	if (ticketSlot == INVENTORIES::INVALID_INVENTORY_SLOT)
 	{
-		//nlwarning("Error, player %s, TpTicketSlot should be != INVALID_INVENTORY_SLOT", character->getId().toString().c_str());
+		// nlwarning("Error, player %s, TpTicketSlot should be != INVALID_INVENTORY_SLOT", character->getId().toString().c_str());
 		return NULL;
 	}
-	
+
 	// get ticket item
-	CGameItemPtr item = character->getItem( INVENTORIES::bag, ticketSlot);
-	if ( item == NULL)
+	CGameItemPtr item = character->getItem(INVENTORIES::bag, ticketSlot);
+	if (item == NULL)
 	{
 		nlwarning("No item found in slot %d in bag for player %s !! BUG", ticketSlot, character->getId().toString().c_str());
 		return NULL;
 	}
 	// check item is a teleport item
-	if ( item->getStaticForm() == NULL || item->getStaticForm()->Family != ITEMFAMILY::TELEPORT)
+	if (item->getStaticForm() == NULL || item->getStaticForm()->Family != ITEMFAMILY::TELEPORT)
 	{
 		nlwarning("Item found in slot %d in bag for player %s  is NOT a tp ticket!! BUG", ticketSlot, character->getId().toString().c_str());
 		return NULL;
 	}
-	
+
 	// unlock item, Tp player and destroy item
-	character->unLockItem(INVENTORIES::bag, ticketSlot,1);
+	character->unLockItem(INVENTORIES::bag, ticketSlot, 1);
 
 	// Remove fx
-	CMirrorPropValue<TYPE_VISUAL_FX> visualFx( TheDataset, character->getEntityRowId(), DSPropertyVISUAL_FX );
+	CMirrorPropValue<TYPE_VISUAL_FX> visualFx(TheDataset, character->getEntityRowId(), DSPropertyVISUAL_FX);
 	CVisualFX fx;
 	fx.unpack(visualFx.getValue());
 	fx.Aura = MAGICFX::NoAura;
@@ -215,7 +213,7 @@ bool CDisconnectTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *a
 void CDisconnectTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
 	// must be used by a player
-	CCharacter *character = dynamic_cast<CCharacter *> (actor);
+	CCharacter *character = dynamic_cast<CCharacter *>(actor);
 	if (!character)
 	{
 		nlwarning("Error, cannot cast actor in CCharacter *, actor Id %s", actor->getId().toString().c_str());
@@ -224,33 +222,32 @@ void CDisconnectTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBase
 
 	// disconnect player
 	const uint32 userId = PlayerManager.getPlayerId(actor->getId());
-	PlayerManager.disconnectPlayer( userId );
+	PlayerManager.disconnectPlayer(userId);
 }
 
 //-----------------------------------------------
 void CDisconnectTimedAction::stopAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
 	// send message to player
-	CCharacter::sendDynamicSystemMessage( actor->getId(), "DISCONNECT_CANCELED" );
+	CCharacter::sendDynamicSystemMessage(actor->getId(), "DISCONNECT_CANCELED");
 
-	CMessage msgout( "IMPULSION_ID" );
-	msgout.serial( const_cast<CEntityId&> (actor->getId()) );
+	CMessage msgout("IMPULSION_ID");
+	msgout.serial(const_cast<CEntityId &>(actor->getId()));
 	CBitMemStream bms;
-	if ( ! GenericMsgManager.pushNameToStream( "CONNECTION:SERVER_QUIT_ABORT", bms) )
+	if (!GenericMsgManager.pushNameToStream("CONNECTION:SERVER_QUIT_ABORT", bms))
 	{
 		nlwarning("<disconnectPlayer> Msg name CONNECTION:SERVER_QUIT_ABORT not found");
 		return;
 	}
-	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
-	CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(actor->getId().getDynamicId()), msgout );
+	msgout.serialBufferWithSize((uint8 *)bms.buffer(), bms.length());
+	CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(actor->getId().getDynamicId()), msgout);
 }
 
 //-----------------------------------------------
 void CDisconnectTimedAction::stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
-	stopAction(phrase,actor);
+	stopAction(phrase, actor);
 }
-
 
 /*******************************************************************************/
 
@@ -260,42 +257,42 @@ bool CMountTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *actor)
 	CBypassCheckFlags bypassCheckFlags;
 	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::Invulnerability, true);
 
-	if (!actor || !phrase || !actor->canEntityUseAction(bypassCheckFlags) )
+	if (!actor || !phrase || !actor->canEntityUseAction(bypassCheckFlags))
 		return false;
 
-	CCharacter *playerChar = dynamic_cast<CCharacter*> (actor);
+	CCharacter *playerChar = dynamic_cast<CCharacter *>(actor);
 	if (!playerChar)
 		return false;
 
 	// test invisibility
-	if ( !R2_VISION::isEntityVisibleToPlayers(playerChar->getWhoSeesMe()) )
+	if (!R2_VISION::isEntityVisibleToPlayers(playerChar->getWhoSeesMe()))
 	{
-		PHRASE_UTILITIES::sendDynamicSystemMessage( playerChar->getEntityRowId(), "CANT_MOUNT_WHILE_INVISIBLE" ); // not translated (only for GM)
+		PHRASE_UTILITIES::sendDynamicSystemMessage(playerChar->getEntityRowId(), "CANT_MOUNT_WHILE_INVISIBLE"); // not translated (only for GM)
 		return false;
 	}
 
 	_EntityToMount = phrase->getTarget();
-	
-	CEntityBase * e = CEntityBaseManager::getEntityBasePtr( _EntityToMount );
-	if( e )
+
+	CEntityBase *e = CEntityBaseManager::getEntityBasePtr(_EntityToMount);
+	if (e)
 	{
-		const CStaticCreatures * form = e->getForm();
-		if( form )
+		const CStaticCreatures *form = e->getForm();
+		if (form)
 		{
-			if( form->getProperties().mountable() )
+			if (form->getProperties().mountable())
 			{
-				if( e->getRiderEntity().isNull() )
+				if (e->getRiderEntity().isNull())
 				{
 					// check distance from mount
 					playerChar->setAfkState(false);
-					sint32 petIndex = playerChar->getPlayerPet( _EntityToMount );
-					if( (petIndex!=-1) )
+					sint32 petIndex = playerChar->getPlayerPet(_EntityToMount);
+					if ((petIndex != -1))
 					{
-						COfflineEntityState state =  e->getState();
-						CVector2d destination( state.X, state.Y );
-						CVector2d start( playerChar->getState().X, playerChar->getState().Y );
+						COfflineEntityState state = e->getState();
+						CVector2d destination(state.X, state.Y);
+						CVector2d start(playerChar->getState().X, playerChar->getState().Y);
 						float distance = (float)(start - destination).sqrnorm();
-						if( distance <= MaxTalkingDistSquare * 1000 * 1000 )
+						if (distance <= MaxTalkingDistSquare * 1000 * 1000)
 						{
 							return true;
 						}
@@ -305,25 +302,25 @@ bool CMountTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *actor)
 			}
 			else
 			{
-				nlwarning("<cbAnimalMount> %d Entity %s %s is not moutable !! sheeter or client bug ?", CTickEventHandler::getGameCycle(), e->getId().toString().c_str(), e->getType().toString().c_str() );
+				nlwarning("<cbAnimalMount> %d Entity %s %s is not moutable !! sheeter or client bug ?", CTickEventHandler::getGameCycle(), e->getId().toString().c_str(), e->getType().toString().c_str());
 			}
 		}
 		else
 		{
-			nlwarning("<cbAnimalMount> %d Can't found static form sheet for entity %s %s !!", CTickEventHandler::getGameCycle(), e->getId().toString().c_str(), e->getType().toString().c_str() );
+			nlwarning("<cbAnimalMount> %d Can't found static form sheet for entity %s %s !!", CTickEventHandler::getGameCycle(), e->getId().toString().c_str(), e->getType().toString().c_str());
 		}
 	}
-	
-	CMessage msgout( "IMPULSION_ID" );
-	msgout.serial( const_cast<CEntityId&> (playerChar->getId()) );
+
+	CMessage msgout("IMPULSION_ID");
+	msgout.serial(const_cast<CEntityId &>(playerChar->getId()));
 	CBitMemStream bms;
-	if ( ! GenericMsgManager.pushNameToStream( "ANIMALS:MOUNT_ABORT", bms) )
+	if (!GenericMsgManager.pushNameToStream("ANIMALS:MOUNT_ABORT", bms))
 	{
 		nlwarning("<CEntityBase::tickUpdate> Msg name ANIMALS:MOUNT_ABORT not found");
 		return false;
 	}
-	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
-	CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(playerChar->getId().getDynamicId()), msgout );
+	msgout.serialBufferWithSize((uint8 *)bms.buffer(), bms.length());
+	CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(playerChar->getId().getDynamicId()), msgout);
 
 	return false;
 }
@@ -333,7 +330,7 @@ void CMountTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBase *act
 {
 	BOMB_IF(!actor, "Actor is NULL", return);
 
-	CCharacter *playerChar = dynamic_cast<CCharacter*> (actor);
+	CCharacter *playerChar = dynamic_cast<CCharacter *>(actor);
 	if (!playerChar)
 		return;
 
@@ -346,27 +343,25 @@ void CMountTimedAction::stopAction(CTimedActionPhrase *phrase, CEntityBase *acto
 	if (!actor)
 		return;
 
-	CMessage msgout( "IMPULSION_ID" );
-	msgout.serial( const_cast<CEntityId&> (actor->getId()) );
+	CMessage msgout("IMPULSION_ID");
+	msgout.serial(const_cast<CEntityId &>(actor->getId()));
 	CBitMemStream bms;
-	if ( ! GenericMsgManager.pushNameToStream( "ANIMALS:MOUNT_ABORT", bms) )
+	if (!GenericMsgManager.pushNameToStream("ANIMALS:MOUNT_ABORT", bms))
 	{
 		nlwarning("<CEntityBase::tickUpdate> Msg name ANIMALS:MOUNT_ABORT not found");
 		return;
 	}
-	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
-	CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(actor->getId().getDynamicId()), msgout );
+	msgout.serialBufferWithSize((uint8 *)bms.buffer(), bms.length());
+	CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(actor->getId().getDynamicId()), msgout);
 }
 
 //-----------------------------------------------
 void CMountTimedAction::stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
-	stopAction(phrase,actor);
+	stopAction(phrase, actor);
 }
 
-
 /*******************************************************************************/
-
 
 //-----------------------------------------------
 bool CUnmountTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *actor)
@@ -375,7 +370,7 @@ bool CUnmountTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *acto
 	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::OnMount, true);
 	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::Invulnerability, true);
 
-	if (!actor || !phrase || !actor->canEntityUseAction(bypassCheckFlags) )
+	if (!actor || !phrase || !actor->canEntityUseAction(bypassCheckFlags))
 		return false;
 
 	return true;
@@ -386,7 +381,7 @@ void CUnmountTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBase *a
 {
 	BOMB_IF(!actor, "Actor is NULL", return);
 
-	CCharacter *playerChar = dynamic_cast<CCharacter*> (actor);
+	CCharacter *playerChar = dynamic_cast<CCharacter *>(actor);
 	if (!playerChar)
 		return;
 
@@ -405,16 +400,15 @@ void CUnmountTimedAction::stopBeforeExecution(CTimedActionPhrase *phrase, CEntit
 
 /*******************************************************************************/
 
-
 //-----------------------------------------------
 bool CConsumeItemTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
-	CCharacter *player = dynamic_cast<CCharacter *> (actor);
+	CCharacter *player = dynamic_cast<CCharacter *>(actor);
 	// get consumed item
 	BOMB_IF(player == NULL, "actor is null", return false);
 
 	CGameItemPtr consumedItem = player->getConsumedItem();
-	if (consumedItem ==NULL)
+	if (consumedItem == NULL)
 		return false;
 
 	const CStaticItem *form = consumedItem->getStaticForm();
@@ -431,23 +425,23 @@ bool CConsumeItemTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *
 
 	if (form->ConsumableItem->Flags.Swim != 0)
 		bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::InWater, true);
-	
+
 	if (form->ConsumableItem->Flags.StandUp == false)
 	{
 		// check player is sit, on a mektoub or swimming otherwise return false
 		const MBEHAV::EMode mode = player->getMode();
 		if (mode != MBEHAV::SIT && mode != MBEHAV::MOUNT_NORMAL && mode != MBEHAV::MOUNT_SWIM && mode != MBEHAV::SWIM && !player->isInWater())
 		{
-			CCharacter::sendDynamicSystemMessage(player->getId(),"CONSUMABLE_NOT_STAND_UP");
+			CCharacter::sendDynamicSystemMessage(player->getId(), "CONSUMABLE_NOT_STAND_UP");
 			return false;
 		}
 	}
 
-	if (!actor || !phrase || !player->canEntityUseAction(bypassCheckFlags) )
+	if (!actor || !phrase || !player->canEntityUseAction(bypassCheckFlags))
 		return false;
 
-	//NB: overdose timer is checked before lauching this action
-	
+	// NB: overdose timer is checked before lauching this action
+
 	return true;
 }
 
@@ -455,41 +449,40 @@ bool CConsumeItemTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *
 void CConsumeItemTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
 	BOMB_IF(!actor, "Actor is NULL", return);
-	
-	CCharacter *playerChar = dynamic_cast<CCharacter*> (actor);
+
+	CCharacter *playerChar = dynamic_cast<CCharacter *>(actor);
 	if (!playerChar)
 		return;
 
 	// get consumed item form
 	CGameItemPtr consumedItem = playerChar->getConsumedItem();
-	if (consumedItem ==NULL)
+	if (consumedItem == NULL)
 		return;
 
 	uint16 quality = consumedItem->quality();
-	
+
 	_Form = consumedItem->getStaticForm();
 	if (!_Form || !_Form->ConsumableItem)
 		return;
 
 	// destroy consumed item
 	playerChar->destroyConsumedItem();
-	playerChar->disableConsumableFamily(_Form->ConsumableItem->Family, CTickEventHandler::getGameCycle() + TGameCycle(_Form->ConsumableItem->OverdoseTimer /  CTickEventHandler::getGameTimeStep()) );
-	
+	playerChar->disableConsumableFamily(_Form->ConsumableItem->Family, CTickEventHandler::getGameCycle() + TGameCycle(_Form->ConsumableItem->OverdoseTimer / CTickEventHandler::getGameTimeStep()));
+
 	// execute power
 	CPhraseManager::getInstance().useConsumableItem(actor->getEntityRowId(), _Form, quality);
-	
 }
 
 //-----------------------------------------------
 void CConsumeItemTimedAction::stopAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
 	BOMB_IF(actor == NULL, "actor is null", return);
-	CCharacter *playerChar = dynamic_cast<CCharacter*> (actor);
+	CCharacter *playerChar = dynamic_cast<CCharacter *>(actor);
 	if (!playerChar)
 		return;
 
-	CCharacter::sendDynamicSystemMessage(playerChar->getId(),"CONSUMABLE_CANCEL");
-//	Fix: item are already desalocated, and _Form is NULL
+	CCharacter::sendDynamicSystemMessage(playerChar->getId(), "CONSUMABLE_CANCEL");
+	//	Fix: item are already desalocated, and _Form is NULL
 	playerChar->resetConsumedItem(true);
 }
 
@@ -497,25 +490,25 @@ void CConsumeItemTimedAction::stopAction(CTimedActionPhrase *phrase, CEntityBase
 void CConsumeItemTimedAction::stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
 	BOMB_IF(actor == NULL, "actor is null", return);
-	CCharacter *playerChar = dynamic_cast<CCharacter*> (actor);
+	CCharacter *playerChar = dynamic_cast<CCharacter *>(actor);
 	if (!playerChar)
 		return;
 
-	CCharacter::sendDynamicSystemMessage(playerChar->getId(),"CONSUMABLE_CANCEL");
+	CCharacter::sendDynamicSystemMessage(playerChar->getId(), "CONSUMABLE_CANCEL");
 
 	playerChar->resetConsumedItem(true);
 }
 
 //-----------------------------------------------
-bool CConsumeItemTimedAction::testCancelOnHit( sint32 attackSkillValue, CEntityBase * attacker, CEntityBase * defender)
+bool CConsumeItemTimedAction::testCancelOnHit(sint32 attackSkillValue, CEntityBase *attacker, CEntityBase *defender)
 {
 	// get consumed item
-	CCharacter *player = dynamic_cast<CCharacter *> (defender);
+	CCharacter *player = dynamic_cast<CCharacter *>(defender);
 	// get consumed item
 	BOMB_IF(player == NULL, "actor is null", return false);
 
 	CGameItemPtr consumedItem = player->getConsumedItem();
-	if (consumedItem ==NULL)
+	if (consumedItem == NULL)
 		return true;
 
 	const CStaticItem *form = consumedItem->getStaticForm();

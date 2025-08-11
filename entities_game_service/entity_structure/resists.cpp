@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 //////////////
 //	INCLUDE	//
 //////////////
@@ -32,7 +30,7 @@ using namespace NLMISC;
 uint16 CCreatureResists::ImmuneScore = 0xffff;
 
 //--------------------------------------------------------------
-//					serial() 
+//					serial()
 //--------------------------------------------------------------
 void CCreatureResists::serial(NLMISC::IStream &f)
 {
@@ -44,12 +42,12 @@ void CCreatureResists::serial(NLMISC::IStream &f)
 	f.serial(Snare);
 	f.serial(Blind);
 	f.serial(Madness);
-	
+
 	f.serial(Acid);
 	f.serial(Cold);
 	f.serial(Electricity);
 	f.serial(Fire);
 	f.serial(Poison);
 	f.serial(Rot);
-	f.serial(Shockwave);	
+	f.serial(Shockwave);
 } // serial //

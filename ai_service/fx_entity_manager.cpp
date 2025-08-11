@@ -19,9 +19,9 @@
 #include <queue>
 #include "fx_entity_manager.h"
 
-CFxEntityManager* CFxEntityManager::_Instance = NULL;
+CFxEntityManager *CFxEntityManager::_Instance = NULL;
 
-CFxEntityManager* CFxEntityManager::getInstance()
+CFxEntityManager *CFxEntityManager::getInstance()
 {
 	if (!_Instance)
 		_Instance = new CFxEntityManager();
@@ -34,32 +34,32 @@ void CFxEntityManager::destroyInstance()
 	_Instance = NULL;
 }
 
-CFxEntityPtr CFxEntityManager::create(CAIPos const& pos, NLMISC::CSheetId const& sheet)
+CFxEntityPtr CFxEntityManager::create(CAIPos const &pos, NLMISC::CSheetId const &sheet)
 {
 	CFxEntityPtr entity(new CFxEntity(pos, sheet));
 	_Entities.insert(entity);
 	return entity;
 }
 
-void CFxEntityManager::registerEntity(CFxEntityPtr const& entity)
+void CFxEntityManager::registerEntity(CFxEntityPtr const &entity)
 {
 	_IdIndex.insert(std::make_pair(entity->id(), entity));
 }
 
-void CFxEntityManager::unregisterEntity(CFxEntityPtr const& entity)
+void CFxEntityManager::unregisterEntity(CFxEntityPtr const &entity)
 {
 	_IdIndex.erase(entity->id());
 }
 
-void CFxEntityManager::destroy(CFxEntityPtr const& entity)
+void CFxEntityManager::destroy(CFxEntityPtr const &entity)
 {
 	_Entities.erase(entity);
 }
 
-CFxEntityPtr CFxEntityManager::get(NLMISC::CEntityId const& id)
+CFxEntityPtr CFxEntityManager::get(NLMISC::CEntityId const &id)
 {
 	TEntityIdContainer::iterator it = _IdIndex.find(id);
-	if (it!=_IdIndex.end())
+	if (it != _IdIndex.end())
 		return it->second;
 	else
 		return NULL;
@@ -75,21 +75,21 @@ void CFxEntityManager::tickUpdate()
 	// The following loop is there to allow entities to destroy themselves
 	FOREACH(itEntity, TFxEntityContainer, _Entities)
 	{
-		CFxEntityPtr entity = (*itEntity);
-		if (entity.isNull())
-			continue;
-		
-		if (!entity->update())
-		{
-			entity->despawn();
-			(*itEntity) = NULL;
-			--_NbEntities;
-		}
+	    CFxEntityPtr entity = (*itEntity);
+	    if (entity.isNull())
+	        continue;
+
+	    if (!entity->update())
+	    {
+	        entity->despawn();
+	        (*itEntity) = NULL;
+	        --_NbEntities;
+	    }
 	}
 	*/
 }
 
-bool CFxEntityManager::exists(NLMISC::CEntityId const& id)
+bool CFxEntityManager::exists(NLMISC::CEntityId const &id)
 {
 	return _IdIndex.find(id) != _IdIndex.end();
 }
@@ -98,11 +98,11 @@ bool CFxEntityManager::exists(NLMISC::CEntityId const& id)
 /// - *				Select all entities
 /// - <entity id>	Select the specified entity using his eid (format is "(id:type:crea:dyn)")
 /// - <name>		Select an entity with its name (any name allowed for a fx entity)
-void CFxEntityManager::select(std::string const& request, std::vector<NLMISC::CEntityId>& entities)
+void CFxEntityManager::select(std::string const &request, std::vector<NLMISC::CEntityId> &entities)
 {
 	if (request.empty())
 		return;
-	
+
 	if (request == "*")
 	{
 		// we want all entities
@@ -124,52 +124,59 @@ void CFxEntityManager::select(std::string const& request, std::vector<NLMISC::CE
 	}
 }
 
-#define ENTITY_VARIABLE(__name,__help) \
-struct __name##Class : public NLMISC::ICommand \
-{ \
-__name##Class () : NLMISC::ICommand("variables",#__name, __help, "<entity> [<value>]") { Type = Variable; } \
-	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) \
-	{ \
-		if (args.size() != 1 && args.size() != 2) \
-			return false; \
- \
-		std::vector<NLMISC::CEntityId> entities; \
-		CFxEntityManager::getInstance()->select(args[0], entities); \
- \
-		for (uint i = 0; i < entities.size(); i++) \
-		{ \
-			std::string value; \
-			if (args.size()==2) \
-				value = args[1]; \
-			else \
-				value = "???"; \
-			pointer(entities[i], (args.size()==1), value); \
-			if (quiet) \
-				log.displayNL("%s %s", entities[i].toString().c_str(), value.c_str()); \
-			else \
-				log.displayNL("Entity %s Variable %s = %s", entities[i].toString().c_str(), _CommandName.c_str(), value.c_str()); \
-		} \
-		return true; \
-	} \
-	void pointer(NLMISC::CEntityId entity, bool get, std::string &value); \
-}; \
-__name##Class __name##Instance; \
-void __name##Class::pointer(NLMISC::CEntityId entity, bool get, std::string &value)
+#define ENTITY_VARIABLE(__name, __help)                                                                                                            \
+	struct __name##Class : public NLMISC::ICommand                                                                                                 \
+	{                                                                                                                                              \
+		__name##Class()                                                                                                                            \
+		    : NLMISC::ICommand("variables", #__name, __help, "<entity> [<value>]")                                                                 \
+		{                                                                                                                                          \
+			Type = Variable;                                                                                                                       \
+		}                                                                                                                                          \
+		virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) \
+		{                                                                                                                                          \
+			if (args.size() != 1 && args.size() != 2)                                                                                              \
+				return false;                                                                                                                      \
+                                                                                                                                                   \
+			std::vector<NLMISC::CEntityId> entities;                                                                                               \
+			CFxEntityManager::getInstance()->select(args[0], entities);                                                                            \
+                                                                                                                                                   \
+			for (uint i = 0; i < entities.size(); i++)                                                                                             \
+			{                                                                                                                                      \
+				std::string value;                                                                                                                 \
+				if (args.size() == 2)                                                                                                              \
+					value = args[1];                                                                                                               \
+				else                                                                                                                               \
+					value = "???";                                                                                                                 \
+				pointer(entities[i], (args.size() == 1), value);                                                                                   \
+				if (quiet)                                                                                                                         \
+					log.displayNL("%s %s", entities[i].toString().c_str(), value.c_str());                                                         \
+				else                                                                                                                               \
+					log.displayNL("Entity %s Variable %s = %s", entities[i].toString().c_str(), _CommandName.c_str(), value.c_str());              \
+			}                                                                                                                                      \
+			return true;                                                                                                                           \
+		}                                                                                                                                          \
+		void pointer(NLMISC::CEntityId entity, bool get, std::string &value);                                                                      \
+	};                                                                                                                                             \
+	__name##Class __name##Instance;                                                                                                                \
+	void __name##Class::pointer(NLMISC::CEntityId entity, bool get, std::string &value)
 
-#define ENTITY_GET_FXENTITY \
-	CFxEntity* fxEntity = CFxEntityManager::getInstance()->get(entity); \
-	if(fxEntity == 0) \
-	{ \
-		nlwarning("Unknown entity '%s'", entity.toString().c_str()); \
-		if (get) value = "UnknownEntity"; \
-		return; \
-	} \
-
+#define ENTITY_GET_FXENTITY                                             \
+	CFxEntity *fxEntity = CFxEntityManager::getInstance()->get(entity); \
+	if (fxEntity == 0)                                                  \
+	{                                                                   \
+		nlwarning("Unknown entity '%s'", entity.toString().c_str());    \
+		if (get) value = "UnknownEntity";                               \
+		return;                                                         \
+	}
 
 struct FxEntityChange
 {
 	FxEntityChange(NLMISC::CEntityId _id, std::string _prop, std::string _value)
-		: id(_id), prop(_prop), value(_value) { }
+	    : id(_id)
+	    , prop(_prop)
+	    , value(_value)
+	{
+	}
 	NLMISC::CEntityId id;
 	std::string prop;
 	std::string value;
@@ -178,12 +185,12 @@ std::queue<FxEntityChange> fxEntityChangeQueue;
 
 void execFxEntityChanges()
 {
-	CFxEntityManager* manager = CFxEntityManager::getInstance();
+	CFxEntityManager *manager = CFxEntityManager::getInstance();
 	while (!fxEntityChangeQueue.empty())
 	{
-		FxEntityChange& fxEntityChange = fxEntityChangeQueue.front();
+		FxEntityChange &fxEntityChange = fxEntityChangeQueue.front();
 		CFxEntityPtr fxEntity = manager->get(fxEntityChange.id);
-		if(fxEntity != 0)
+		if (fxEntity != 0)
 		{
 			fxEntity->set(fxEntityChange.prop, fxEntityChange.value, true);
 		}
@@ -191,12 +198,10 @@ void execFxEntityChanges()
 	}
 }
 
-
-
 ENTITY_VARIABLE(FxEntitySheet, "Sheet of a fx entity")
 {
 	ENTITY_GET_FXENTITY
-	
+
 	if (get)
 		value = fxEntity->get("sheet");
 	else
@@ -206,19 +211,19 @@ ENTITY_VARIABLE(FxEntitySheet, "Sheet of a fx entity")
 ENTITY_VARIABLE(FxEntityPosition, "Position of a fx entity")
 {
 	ENTITY_GET_FXENTITY
-		
-		if (get)
-			value = fxEntity->get("position");
-		else
-			nlwarning("Trying to change a fx entity's position: '%s' to '%s'", fxEntity->get("position").c_str(), value.c_str());
+
+	if (get)
+		value = fxEntity->get("position");
+	else
+		nlwarning("Trying to change a fx entity's position: '%s' to '%s'", fxEntity->get("position").c_str(), value.c_str());
 }
 
 NLMISC_COMMAND(fxCreateEntity, "Create an fx entity", "<sheet> <x> <y>")
 {
-	if (args.size()<3)
+	if (args.size() < 3)
 		return false;
 	NLMISC::CSheetId sheetId(args[0]);
-	if (sheetId==NLMISC::CSheetId::Unknown)
+	if (sheetId == NLMISC::CSheetId::Unknown)
 	{
 		log.displayNL("'%s' is not a valid fx sheet id", args[0].c_str());
 		return true;
@@ -238,15 +243,15 @@ NLMISC_COMMAND(fxCreateEntity, "Create an fx entity", "<sheet> <x> <y>")
 
 NLMISC_COMMAND(fxDestroyEntity, "Create an fx entity", "<entity id>")
 {
-	if (args.size()<1)
+	if (args.size() < 1)
 		return false;
 	NLMISC::CEntityId entityId(args[0]);
-	if (entityId==NLMISC::CEntityId::Unknown)
+	if (entityId == NLMISC::CEntityId::Unknown)
 	{
 		log.displayNL("'%s' is not a valid entity id", args[0].c_str());
 		return true;
 	}
-	
+
 	CFxEntityPtr fx = CFxEntityManager::getInstance()->get(entityId);
 	if (fx.isNull())
 	{

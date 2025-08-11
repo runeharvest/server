@@ -20,28 +20,24 @@
 #include "nel/misc/entity_id.h"
 
 class CGuild;
-namespace EGSPD
-{
-	class CGuildPD;
+namespace EGSPD {
+class CGuildPD;
 }
 
 class IGuild
 {
 public:
-
 	static IGuild *getGuildInterface(CGuild *guild);
 	static IGuild *getGuildInterface(EGSPD::CGuildPD *guildPd);
 
-	uint32			getIdWrap();
-	void			setNameWrap(const ucstring &name);
-	const ucstring	&getNameWrap();
+	uint32 getIdWrap();
+	void setNameWrap(const ucstring &name);
+	const ucstring &getNameWrap();
 
-	bool			isProxyWrap();
-	virtual void	removeMember(const NLMISC::CEntityId &id) =0;
+	bool isProxyWrap();
+	virtual void removeMember(const NLMISC::CEntityId &id) = 0;
 
-
-	void			updateMembersStringIds();
+	void updateMembersStringIds();
 };
 
-#endif //GUILD_INTERFACE_H
-
+#endif // GUILD_INTERFACE_H

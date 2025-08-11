@@ -23,21 +23,18 @@
 #include "player_manager/character.h"
 #include "game_share/backup_service_interface.h"
 
-
 // ----------------------------------------------------------------------------
 
 using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
-
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
-
 
 // ----------------------------------------------------------------------------
 
-CVariable<std::string>	MissionQueueFile("egs", "MissionQueueFile", "file holding all mission queues stuff", std::string("mission_queues.txt"), 0, true );
-CVariable<uint32>		MissionQueueSavePeriod("egs", "MissionQueueSavePeriod", "interval between saves in ticks (default = 90s)", 90, 0, true );
+CVariable<std::string> MissionQueueFile("egs", "MissionQueueFile", "file holding all mission queues stuff", std::string("mission_queues.txt"), 0, true);
+CVariable<uint32> MissionQueueSavePeriod("egs", "MissionQueueSavePeriod", "interval between saves in ticks (default = 90s)", 90, 0, true);
 
 CMissionQueueManager *CMissionQueueManager::_Instance = NULL;
 
@@ -53,7 +50,7 @@ void CMissionQueueManager::init()
 {
 	string sFilename = MissionQueueFile.get();
 	sFilename = Bsi.getLocalPath() + sFilename;
-	
+
 	if (CFile::fileExists(sFilename))
 	{
 		static CPersistentDataRecord pdr;
@@ -74,16 +71,16 @@ void CMissionQueueManager::characterLoadedCallback(CCharacter *c)
 	vector<uint32> playerQueues = c->getMissionQueues();
 
 	// get queues for this player
-	TPlayerQueues::const_iterator itPQ =  _PlayerQueues.find(c->getId());
+	TPlayerQueues::const_iterator itPQ = _PlayerQueues.find(c->getId());
 	if (itPQ != _PlayerQueues.end())
 	{
 		const CQueueVect &queues = (*itPQ).second;
-		for ( uint i = 0 ; i < queues.QueueIds.size() ; )
+		for (uint i = 0; i < queues.QueueIds.size();)
 		{
 			// check coherency with infos kept in manager
 			const uint size2 = (uint)playerQueues.size();
 			uint j;
-			for ( j = 0 ; j < size2 ; ++j)
+			for (j = 0; j < size2; ++j)
 			{
 				if (playerQueues[j] == queues.QueueIds[i])
 				{
@@ -101,8 +98,8 @@ void CMissionQueueManager::characterLoadedCallback(CCharacter *c)
 			}
 			else
 			{
-				map<uint32,CMissionQueue>::iterator itMQ = _Queues.find(queues.QueueIds[i]);
-				BOMB_IF(itMQ == _Queues.end(),"Failed to find queue from it's id, but referenced in _PlayerQueues queues list, BUG", continue);
+				map<uint32, CMissionQueue>::iterator itMQ = _Queues.find(queues.QueueIds[i]);
+				BOMB_IF(itMQ == _Queues.end(), "Failed to find queue from it's id, but referenced in _PlayerQueues queues list, BUG", continue);
 				(*itMQ).second.characterLoadedCallback(c);
 
 				++i;
@@ -112,21 +109,20 @@ void CMissionQueueManager::characterLoadedCallback(CCharacter *c)
 
 	/*for ( map<uint32,CMissionQueue>::iterator it = _Queues.begin() ; it != _Queues.end() ; ++it )
 	{
-		(*it).second.characterLoadedCallback(c);
+	    (*it).second.characterLoadedCallback(c);
 	}
 	*/
 }
 
-
 // ----------------------------------------------------------------------------
 void CMissionQueueManager::tickUpdate()
 {
-	if( IsRingShard ) // Temporary Fix potential problem with multi shard instance Ring unification: 
-		return;	// Mission saved tick must be adapted for have relative value saved
+	if (IsRingShard) // Temporary Fix potential problem with multi shard instance Ring unification:
+		return; // Mission saved tick must be adapted for have relative value saved
 
 	H_AUTO(CMissionQueueManagerUpdate);
 
-	for ( map<uint32,CMissionQueue>::iterator it = _Queues.begin() ; it != _Queues.end() ; ++it )
+	for (map<uint32, CMissionQueue>::iterator it = _Queues.begin(); it != _Queues.end(); ++it)
 	{
 		(*it).second.tickUpdate();
 	}
@@ -136,34 +132,33 @@ void CMissionQueueManager::tickUpdate()
 		saveToFile();
 }
 
-
 // ----------------------------------------------------------------------------
 void CMissionQueueManager::saveToFile()
 {
 	H_AUTO(CMissionQueueManagerSaveToFile);
 
-	if( _InitOk )
+	if (_InitOk)
 	{
 		string sFilename = MissionQueueFile.get();
-		
+
 		// save file via Backup Service (BS)
 		try
 		{
-			static CPersistentDataRecordRyzomStore	pdr;
+			static CPersistentDataRecordRyzomStore pdr;
 			pdr.clear();
 			store(pdr);
 
-			CBackupMsgSaveFile msg( sFilename, CBackupMsgSaveFile::SaveFile, Bsi );
+			CBackupMsgSaveFile msg(sFilename, CBackupMsgSaveFile::SaveFile, Bsi);
 			{
 				std::string s;
 				pdr.toString(s);
-				msg.DataMsg.serialBuffer((uint8*)&s[0], (uint)s.size());
+				msg.DataMsg.serialBuffer((uint8 *)&s[0], (uint)s.size());
 			}
-			Bsi.sendFile( msg );
+			Bsi.sendFile(msg);
 		}
-		catch(const Exception &)
+		catch (const Exception &)
 		{
-			nlwarning("(EGS)<CMissionQueueManager::saveToFile>  :  Can't serial file %s (connection with BS service down ?)",sFilename.c_str());
+			nlwarning("(EGS)<CMissionQueueManager::saveToFile>  :  Can't serial file %s (connection with BS service down ?)", sFilename.c_str());
 			return;
 		}
 	}
@@ -175,12 +170,12 @@ void CMissionQueueManager::addPlayerInQueue(const CEntityId &id, CMission *missi
 	H_AUTO(CMissionQueueManagerAddPlayer);
 
 	nlassert(mission != NULL);
-		
+
 	uint32 queueId = 0;
 
-	map<uint32,CMissionQueue>::iterator it;
+	map<uint32, CMissionQueue>::iterator it;
 
-	const map< string, uint32 >::const_iterator itId = _QueueNamesToIds.find(queueName);
+	const map<string, uint32>::const_iterator itId = _QueueNamesToIds.find(queueName);
 	if (itId == _QueueNamesToIds.end())
 	{
 		++_QueueIdCounter;
@@ -188,15 +183,15 @@ void CMissionQueueManager::addPlayerInQueue(const CEntityId &id, CMission *missi
 
 		queueId = _QueueIdCounter;
 
-		it = _Queues.insert( make_pair(_QueueIdCounter,CMissionQueue(queueName,queueId,timer,mission->getTemplateId(),stepIndex)) ).first;
+		it = _Queues.insert(make_pair(_QueueIdCounter, CMissionQueue(queueName, queueId, timer, mission->getTemplateId(), stepIndex))).first;
 		if (it == _Queues.end())
 		{
 			nlwarning("Failed to create new queue name %s in queue list", queueName.c_str());
 			return;
 		}
-		
+
 		// map new queue
-		_QueueNamesToIds.insert( make_pair(queueName, queueId) );
+		_QueueNamesToIds.insert(make_pair(queueName, queueId));
 	}
 	else
 	{
@@ -204,13 +199,13 @@ void CMissionQueueManager::addPlayerInQueue(const CEntityId &id, CMission *missi
 		it = _Queues.find(queueId);
 	}
 
-	if ( it == _Queues.end() )
+	if (it == _Queues.end())
 	{
 		nlwarning("Failed to find queue name %s in map, but is referenced in _QueueNamesToIds, BUG", queueName.c_str());
 		return;
 	}
 
-	(*it).second.addPlayer(id,mission);
+	(*it).second.addPlayer(id, mission);
 
 	// manage the player queues map
 	TPlayerQueues::iterator itPQ = _PlayerQueues.find(id);
@@ -218,14 +213,14 @@ void CMissionQueueManager::addPlayerInQueue(const CEntityId &id, CMission *missi
 	{
 		CQueueVect list;
 		list.addQueue(queueId);
-		_PlayerQueues.insert( make_pair(id, list) );
+		_PlayerQueues.insert(make_pair(id, list));
 	}
 	else
 	{
 		(*itPQ).second.addQueue(queueId);
 	}
 
-	//saveToFile();
+	// saveToFile();
 }
 
 // ----------------------------------------------------------------------------
@@ -233,8 +228,8 @@ void CMissionQueueManager::removePlayerFromQueue(const CEntityId &id, uint32 que
 {
 	H_AUTO(CMissionQueueManagerRemovePlayer);
 
-	map<uint32,CMissionQueue>::iterator it = _Queues.find(queueId);
-	if ( it == _Queues.end() )
+	map<uint32, CMissionQueue>::iterator it = _Queues.find(queueId);
+	if (it == _Queues.end())
 	{
 		nlwarning("Trying to remove %s from queue %u but this queue doesn't exist in manager !", id.toString().c_str(), queueId);
 		return;
@@ -267,14 +262,14 @@ void CMissionQueueManager::disconnectPlayer(const CCharacter *c)
 		return;
 
 	// get queues for this player
-	TPlayerQueues::const_iterator itPQ =  _PlayerQueues.find(c->getId());
+	TPlayerQueues::const_iterator itPQ = _PlayerQueues.find(c->getId());
 	if (itPQ != _PlayerQueues.end())
 	{
 		const CQueueVect &queues = (*itPQ).second;
-		for ( uint i = 0 ; i < queues.QueueIds.size() ; ++i)
+		for (uint i = 0; i < queues.QueueIds.size(); ++i)
 		{
-			map<uint32,CMissionQueue>::iterator itMQ = _Queues.find(queues.QueueIds[i]);
-			BOMB_IF(itMQ == _Queues.end(),"Failed to find queue from it's id, but referenced in _PlayerQueues queues list, BUG", continue);
+			map<uint32, CMissionQueue>::iterator itMQ = _Queues.find(queues.QueueIds[i]);
+			BOMB_IF(itMQ == _Queues.end(), "Failed to find queue from it's id, but referenced in _PlayerQueues queues list, BUG", continue);
 			(*itMQ).second.disconnectPlayer(c->getId());
 		}
 	}
@@ -285,8 +280,8 @@ void CMissionQueueManager::playerEntersCriticalArea(const NLMISC::CEntityId &id,
 {
 	H_AUTO(CMissionQueueManagerPlayerEntersCriticalArea);
 
-	map<uint32,CMissionQueue>::iterator it = _Queues.find(queueId);
-	if ( it == _Queues.end() )
+	map<uint32, CMissionQueue>::iterator it = _Queues.find(queueId);
+	if (it == _Queues.end())
 	{
 		nlwarning("Trying to make player %s enters critical area of queue %u but this queue doesn't exist in manager !", id.toString().c_str(), queueId);
 		return;
@@ -296,9 +291,9 @@ void CMissionQueueManager::playerEntersCriticalArea(const NLMISC::CEntityId &id,
 }
 
 // ----------------------------------------------------------------------------
-uint32 CMissionQueueManager::getQueueId( const std::string &name ) const
+uint32 CMissionQueueManager::getQueueId(const std::string &name) const
 {
-	const map< string, uint32 >::const_iterator itId = _QueueNamesToIds.find(name);
+	const map<string, uint32>::const_iterator itId = _QueueNamesToIds.find(name);
 	if (itId != _QueueNamesToIds.end())
 	{
 		return (*itId).second;
@@ -310,8 +305,8 @@ uint32 CMissionQueueManager::getQueueId( const std::string &name ) const
 // ----------------------------------------------------------------------------
 bool CMissionQueueManager::getPlayerPositions(uint32 queueId, const NLMISC::CEntityId &id, uint16 &position, uint16 &positionOnline, bool &hasPlayerInCritZone) const
 {
-	const map<uint32,CMissionQueue>::const_iterator it = _Queues.find(queueId);
-	if ( it == _Queues.end() )
+	const map<uint32, CMissionQueue>::const_iterator it = _Queues.find(queueId);
+	if (it == _Queues.end())
 	{
 		return false;
 	}
@@ -327,10 +322,10 @@ void CMissionQueueManager::playerWakesUp(const NLMISC::CEntityId &id, TAIAlias m
 #ifdef NL_DEBUG
 	bool found = false;
 #endif
-	
-	map<uint32,CMissionQueue>::iterator it;
 
-	for ( it = _Queues.begin() ; it != _Queues.end() ; ++it )
+	map<uint32, CMissionQueue>::iterator it;
+
+	for (it = _Queues.begin(); it != _Queues.end(); ++it)
 	{
 		if ((*it).second.getMissionAlias() == missionAlias)
 		{
@@ -351,7 +346,7 @@ void CMissionQueueManager::dump()
 {
 	nlinfo("_QueueIdCounter = %u", _QueueIdCounter);
 	nlinfo(" Nb queues = %u", _Queues.size());
-	for ( map<uint32,CMissionQueue>::iterator it = _Queues.begin() ; it != _Queues.end() ; ++it )
+	for (map<uint32, CMissionQueue>::iterator it = _Queues.begin(); it != _Queues.end(); ++it)
 	{
 		nlinfo("-------------------------------------------------------");
 		(*it).second.dump();
@@ -372,16 +367,16 @@ void CMissionQueueManager::dump()
 //-----------------------------------------------------------------------------
 #define PERSISTENT_CLASS CQueueVect
 
-#define PERSISTENT_PRE_STORE\
-	H_AUTO(CQueueVectStore);\
+#define PERSISTENT_PRE_STORE \
+	H_AUTO(CQueueVectStore);
 
-#define PERSISTENT_PRE_APPLY\
-	H_AUTO(CQueueVectApply);\
+#define PERSISTENT_PRE_APPLY \
+	H_AUTO(CQueueVectApply);
 
-#define PERSISTENT_DATA\
-	PROP_VECT(uint32, QueueIds)\
+#define PERSISTENT_DATA \
+	PROP_VECT(uint32, QueueIds)
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //-----------------------------------------------------------------------------
@@ -389,19 +384,17 @@ void CMissionQueueManager::dump()
 //-----------------------------------------------------------------------------
 #define PERSISTENT_CLASS CMissionQueueManager
 
-#define PERSISTENT_PRE_STORE\
-	H_AUTO(CMissionQueueManagerStore);\
-	
-#define PERSISTENT_PRE_APPLY\
-	H_AUTO(CMissionQueueManagerApply);\
-	
-#define PERSISTENT_DATA\
-	PROP(uint32, _QueueIdCounter)\
-	PROP_MAP(std::string, uint32, _QueueNamesToIds)\
-	STRUCT_MAP(uint32, CMissionQueue, _Queues)\
-	STRUCT_MAP(CEntityId, CQueueVect, _PlayerQueues)\
-	
+#define PERSISTENT_PRE_STORE \
+	H_AUTO(CMissionQueueManagerStore);
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#define PERSISTENT_PRE_APPLY \
+	H_AUTO(CMissionQueueManagerApply);
+
+#define PERSISTENT_DATA                             \
+	PROP(uint32, _QueueIdCounter)                   \
+	PROP_MAP(std::string, uint32, _QueueNamesToIds) \
+	STRUCT_MAP(uint32, CMissionQueue, _Queues)      \
+	STRUCT_MAP(CEntityId, CQueueVect, _PlayerQueues)
+
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
-

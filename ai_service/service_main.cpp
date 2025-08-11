@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #include "nel/ligo/primitive.h"
@@ -41,18 +39,17 @@
 #include "ais_user_models.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
 
-//#include "nel/misc/bitmap.h"
+// #include "nel/misc/bitmap.h"
 
 using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
-
 
 bool EGSHasMirrorReady = false;
 bool IOSHasMirrorReady = false;
@@ -60,13 +57,12 @@ bool IOSHasMirrorReady = false;
 // The ligo config
 NLLIGO::CLigoConfig LigoConfig;
 
-namespace AICOMP
-{
-	bool compileExternalScript (const char *filename, const char *outputFilename);
+namespace AICOMP {
+bool compileExternalScript(const char *filename, const char *outputFilename);
 }
 
 /*-----------------------------------------------------------------*\
-						SERVICE CLASS
+                        SERVICE CLASS
 \*-----------------------------------------------------------------*/
 
 class CAIService : public NLNET::IService
@@ -85,29 +81,28 @@ void cbTick();
 // callback for the 'tick' release message
 void cbTickRelease()
 {
-	(static_cast<CAIService*>(CAIService::getInstance()))->tickRelease();
+	(static_cast<CAIService *>(CAIService::getInstance()))->tickRelease();
 }
 
 /*-----------------------------------------------------------------*\
-						SERVICE INIT & RELEASE
+                        SERVICE INIT & RELEASE
 \*-----------------------------------------------------------------*/
 
-
-static void cbServiceMirrorUp( const std::string& serviceName, NLNET::TServiceId serviceId, void * )
+static void cbServiceMirrorUp(const std::string &serviceName, NLNET::TServiceId serviceId, void *)
 {
-	if	(serviceName == "IOS")
+	if (serviceName == "IOS")
 	{
 		IOSHasMirrorReady = true;
 	}
 
-	if	(serviceName == "EGS")
+	if (serviceName == "EGS")
 	{
 		EGSHasMirrorReady = true;
 
 		// force an AI update on EGS up
 		CAIS::instance().update();
 
-		//send custom data to EGS
+		// send custom data to EGS
 		CAIUserModelManager::getInstance()->sendUserModels();
 		CAIUserModelManager::getInstance()->sendCustomLootTables();
 	}
@@ -115,53 +110,52 @@ static void cbServiceMirrorUp( const std::string& serviceName, NLNET::TServiceId
 	CAIS::instance().serviceEvent(CServiceEvent(serviceId, serviceName, CServiceEvent::SERVICE_UP));
 }
 
-static void cbServiceDown( const std::string& serviceName, NLNET::TServiceId serviceId, void * )
+static void cbServiceDown(const std::string &serviceName, NLNET::TServiceId serviceId, void *)
 {
-	if ( serviceName == "IOS" )
+	if (serviceName == "IOS")
 	{
 		IOSHasMirrorReady = false;
 	}
 
-	if ( serviceName == "EGS" )
+	if (serviceName == "EGS")
 	{
 		EGSHasMirrorReady = false;
 	}
 
 	CAIS::instance().serviceEvent(CServiceEvent(serviceId, serviceName, CServiceEvent::SERVICE_DOWN));
-
 }
 
 void CAIService::commandStart()
 {
 	// Compile an AI script ?
-	if (haveArg ('c'))
+	if (haveArg('c'))
 	{
-		string scriptFilename = getArg ('c');
+		string scriptFilename = getArg('c');
 		bool result = false;
-		if (!scriptFilename.empty ())
+		if (!scriptFilename.empty())
 		{
 			string outputFilename;
-			if (haveArg ('o'))
-				outputFilename = getArg ('o');
+			if (haveArg('o'))
+				outputFilename = getArg('o');
 
 			// Compile and exit
-			result = AICOMP::compileExternalScript (scriptFilename.c_str (), outputFilename.c_str ());
+			result = AICOMP::compileExternalScript(scriptFilename.c_str(), outputFilename.c_str());
 		}
 		else
-			nlwarning ("No script filename");
+			nlwarning("No script filename");
 
-		::exit (result?0:-1);
+		::exit(result ? 0 : -1);
 	}
 }
 
-///init
-void CAIService::init (void)
+/// init
+void CAIService::init(void)
 {
 	// start any available system command.
 	CConfigFile::CVar *sysCmds = IService::getInstance()->ConfigFile.getVarPtr("SystemCmd");
 	if (sysCmds != NULL)
 	{
-		for (uint i=0; i<sysCmds->size(); ++i)
+		for (uint i = 0; i < sysCmds->size(); ++i)
 		{
 			string cmd = sysCmds->asString(i);
 
@@ -174,29 +168,26 @@ void CAIService::init (void)
 	// read sheet_id.bin and don't prune out unknown files
 	CSheetId::init(false);
 
-    // Init singleton manager
+	// Init singleton manager
 	CSingletonRegistry::getInstance()->init();
 
 	// init static fame manager
 	CStaticFames::getInstance();
 
-	setVersion (RYZOM_PRODUCT_VERSION);
+	setVersion(RYZOM_PRODUCT_VERSION);
 
 	// Init ligo
-	if (!LigoConfig.readPrimitiveClass ("world_editor_classes.xml", false))
+	if (!LigoConfig.readPrimitiveClass("world_editor_classes.xml", false))
 	{
 		// Should be in R:\leveldesign\world_editor_files
-		nlerror ("Can't load ligo primitive config file world_editor_classes.xml");
+		nlerror("Can't load ligo primitive config file world_editor_classes.xml");
 	}
-
 
 	// have ligo library register its own class types for its class factory
 	NLLIGO::Register();
 
 	// setup the update systems
 	setUpdateTimeout(100);
-
-
 
 	// init sub systems
 	CAIKeywords::init();
@@ -220,25 +211,23 @@ void CAIService::init (void)
 
 	// register the service up and service down callbacks
 	CMirrors::Mirror.setServiceMirrorUpCallback("*", cbServiceMirrorUp, 0);
-	CMirrors::Mirror.setServiceDownCallback( "*", cbServiceDown, 0);
-//	CUnifiedNetwork::getInstance()->setServiceDownCallback( "*", cbServiceDown, 0);
+	CMirrors::Mirror.setServiceDownCallback("*", cbServiceDown, 0);
+	//	CUnifiedNetwork::getInstance()->setServiceDownCallback( "*", cbServiceDown, 0);
 
-	CConfigFile::CVar	*clientCreature=IService::getInstance()->ConfigFile.getVarPtr ("CreatureDebug");
+	CConfigFile::CVar *clientCreature = IService::getInstance()->ConfigFile.getVarPtr("CreatureDebug");
 	if (clientCreature)
 	{
-		CAIS::instance().setClientCreatureDebug(clientCreature->asInt()!=0);
+		CAIS::instance().setClientCreatureDebug(clientCreature->asInt() != 0);
 	}
 }
 
-
-///release
+/// release
 
 void CAIService::release()
 {
 }
 
-
-void CAIService::tickRelease (void)
+void CAIService::tickRelease(void)
 {
 	CWorldContainer::clear();
 
@@ -268,40 +257,40 @@ void dispatchEvents()
 	H_AUTO(dispatchEvents);
 	while (!CCombatInterface::_events.empty())
 	{
-		CAIEntityPhysical	*target=CAIS::instance().getEntityPhysical(CCombatInterface::_events.front()._targetRow);
+		CAIEntityPhysical *target = CAIS::instance().getEntityPhysical(CCombatInterface::_events.front()._targetRow);
 		if (target)
-			target->processEvent( CCombatInterface::_events.front() );
+			target->processEvent(CCombatInterface::_events.front());
 		CCombatInterface::_events.pop_front();
 	}
 }
 
 /*-----------------------------------------------------------------*\
-						SERVICE UPDATES
+                        SERVICE UPDATES
 \*-----------------------------------------------------------------*/
 
-///update called on each 'tick' message from tick service
+/// update called on each 'tick' message from tick service
 
 void cbTick()
 {
 	// cleanup stat variables
-//	StatCSpawnBotFauna	 = 0;
-//	StatCSpawnBotNpc	 = 0;
-//	StatCBotPet			 = 0;
-//	StatCAIContinent	 = 0;
-//	StatCSpawnGroupFauna = 0;
-//	StatCSpawnGroupNpc	 = 0;
-//	StatCSpawnGroupPet	 = 0;
-//	StatCAIInstance		 = 0;
-//	StatCMgrFauna		 = 0;
-//	StatCMgrNpc			 = 0;
-//	StatCMgrPet			 = 0;
-//	StatCBotPlayer		 = 0;
-//	StatCPlayerManager	 = 0;
-//	StatCcontinent		 = 0;
-//	StatCRegion			 = 0;
-//	StatCCellZone		 = 0;
+	//	StatCSpawnBotFauna	 = 0;
+	//	StatCSpawnBotNpc	 = 0;
+	//	StatCBotPet			 = 0;
+	//	StatCAIContinent	 = 0;
+	//	StatCSpawnGroupFauna = 0;
+	//	StatCSpawnGroupNpc	 = 0;
+	//	StatCSpawnGroupPet	 = 0;
+	//	StatCAIInstance		 = 0;
+	//	StatCMgrFauna		 = 0;
+	//	StatCMgrNpc			 = 0;
+	//	StatCMgrPet			 = 0;
+	//	StatCBotPlayer		 = 0;
+	//	StatCPlayerManager	 = 0;
+	//	StatCcontinent		 = 0;
+	//	StatCRegion			 = 0;
+	//	StatCCellZone		 = 0;
 
-	if ( CMirrors::mirrorIsReady() )
+	if (CMirrors::mirrorIsReady())
 	{
 		CAIS::instance().update();
 
@@ -315,24 +304,22 @@ void cbTick()
 	}
 	{
 		H_AUTO(CSingletonRegistry_tickUpdate)
-			CSingletonRegistry::getInstance()->tickUpdate();
+		CSingletonRegistry::getInstance()->tickUpdate();
 	}
 }
 
-
-
-//prototype for a global routine in commands.cpp
+// prototype for a global routine in commands.cpp
 void UpdateWatches();
 
-uint ForceTicks=0;
+uint ForceTicks = 0;
 
-///update called every coplete cycle of service loop
-bool CAIService::update (void)
+/// update called every coplete cycle of service loop
+bool CAIService::update(void)
 {
-//	NLMEMORY::CheckHeap(true);
+	//	NLMEMORY::CheckHeap(true);
 
 	UpdateWatches();
-//	NLMEMORY::CheckHeap(true);
+	//	NLMEMORY::CheckHeap(true);
 
 	if (ForceTicks)
 	{
@@ -348,10 +335,7 @@ bool CAIService::update (void)
 	return true;
 }
 
-
-
 /*-----------------------------------------------------------------*\
-						NLNET_SERVICE_MAIN
+                        NLNET_SERVICE_MAIN
 \*-----------------------------------------------------------------*/
-NLNET_SERVICE_MAIN (CAIService, "AIS", "ai_service", 0, EmptyCallbackArray, "", "")
-
+NLNET_SERVICE_MAIN(CAIService, "AIS", "ai_service", 0, EmptyCallbackArray, "", "")

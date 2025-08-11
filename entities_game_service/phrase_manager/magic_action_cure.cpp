@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
-
 #include "stdpch.h"
 #include "magic_action.h"
 #include "phrase_manager/magic_phrase.h"
@@ -25,70 +23,67 @@
 #include "s_link_effect_dot.h"
 #include "phrase_manager/phrase_utilities_functions.h"
 
-
 using namespace NLNET;
 using namespace NLMISC;
 using namespace std;
-
-
 
 class CMagicActionCure : public IMagicAction
 {
 public:
 	CMagicActionCure()
-		:_Power(0){}
+	    : _Power(0)
+	{
+	}
 
 protected:
 	struct CTargetInfos
 	{
-		TDataSetRow	RowId;
-		bool		MainTarget;
+		TDataSetRow RowId;
+		bool MainTarget;
 	};
 
 protected:
-	virtual bool addBrick( const CStaticBrick & brick, CMagicPhrase * phrase, bool &effectEnd, CBuildParameters &buildParams )
+	virtual bool addBrick(const CStaticBrick &brick, CMagicPhrase *phrase, bool &effectEnd, CBuildParameters &buildParams)
 	{
-		for ( uint i=0 ; i<brick.Params.size() ; ++i)
+		for (uint i = 0; i < brick.Params.size(); ++i)
 		{
-			const TBrickParam::IId* param = brick.Params[i];
+			const TBrickParam::IId *param = brick.Params[i];
 
-			switch(param->id())
+			switch (param->id())
 			{
 			case TBrickParam::MA_END:
 				INFOLOG("MA_END Found: end of effect");
 				effectEnd = true;
 				return true;
-			case TBrickParam::MA_EFFECT:
+			case TBrickParam::MA_EFFECT: {
+				INFOLOG("MA_EFFECT: %s", ((CSBrickParamMagicEffect *)param)->Effect.c_str());
+				EFFECT_FAMILIES::TEffectFamily effectFamily = EFFECT_FAMILIES::toEffectFamily(((CSBrickParamMagicEffect *)param)->Effect);
+				if (effectFamily == EFFECT_FAMILIES::Unknown)
 				{
-					INFOLOG("MA_EFFECT: %s",((CSBrickParamMagicEffect *)param)->Effect.c_str());
-					EFFECT_FAMILIES::TEffectFamily effectFamily = EFFECT_FAMILIES::toEffectFamily( ((CSBrickParamMagicEffect *)param)->Effect );
-					if ( effectFamily == EFFECT_FAMILIES::Unknown )
-					{
-						nlwarning("<CMagicActionCure addBrick> invalid effect type %s", ((CSBrickParamMagicEffect *)param)->Effect.c_str());
-						return false;
-					}
-					_AffectedEffects.push_back(effectFamily);
-					break;
+					nlwarning("<CMagicActionCure addBrick> invalid effect type %s", ((CSBrickParamMagicEffect *)param)->Effect.c_str());
+					return false;
 				}
-			case TBrickParam::MA_DMG_TYPE:
+				_AffectedEffects.push_back(effectFamily);
+				break;
+			}
+			case TBrickParam::MA_DMG_TYPE: {
+				INFOLOG("MA_DMG_TYPE: %s", ((CSBrickParamMagicDmgType *)param)->DmgType.c_str());
+				DMGTYPE::EDamageType dmgType = DMGTYPE::stringToDamageType(((CSBrickParamMagicDmgType *)param)->DmgType);
+				if (dmgType == DMGTYPE::UNDEFINED)
 				{
-					INFOLOG("MA_DMG_TYPE: %s",((CSBrickParamMagicDmgType *)param)->DmgType.c_str());
-					DMGTYPE::EDamageType dmgType = DMGTYPE::stringToDamageType( ((CSBrickParamMagicDmgType *)param)->DmgType );
-					if ( dmgType == DMGTYPE::UNDEFINED )
-					{
-						nlwarning("<CMagicActionCure addBrick> invalid dmg type %s", ((CSBrickParamMagicDmgType *)param)->DmgType.c_str());
-						return false;
-					}
-					_AffectedDots.push_back(dmgType);
-					break;
+					nlwarning("<CMagicActionCure addBrick> invalid dmg type %s", ((CSBrickParamMagicDmgType *)param)->DmgType.c_str());
+					return false;
 				}
-			case TBrickParam::MA_LINK_POWER:	
-				INFOLOG("MA_LINK_POWER: %u",((CSBrickParamMagicLinkPower *)param)->Power);
-				_Power = uint16 ( ((CSBrickParamMagicLinkPower *)param)->Power );
+				_AffectedDots.push_back(dmgType);
+				break;
+			}
+			case TBrickParam::MA_LINK_POWER:
+				INFOLOG("MA_LINK_POWER: %u", ((CSBrickParamMagicLinkPower *)param)->Power);
+				_Power = uint16(((CSBrickParamMagicLinkPower *)param)->Power);
 				break;
 			default:
 				// unused param, can be useful in the phrase
-				phrase->applyBrickParam( param, brick, buildParams );
+				phrase->applyBrickParam(param, brick, buildParams);
 				break;
 			}
 		}
@@ -96,48 +91,48 @@ protected:
 		return true;
 	}
 
-	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode)
+	virtual bool validate(CMagicPhrase *phrase, std::string &errorCode)
 	{
-		if ( !PHRASE_UTILITIES::validateSpellTarget(phrase->getActor(),phrase->getTargets()[0].getId(), ACTNATURE::CURATIVE_MAGIC, errorCode, true) )
+		if (!PHRASE_UTILITIES::validateSpellTarget(phrase->getActor(), phrase->getTargets()[0].getId(), ACTNATURE::CURATIVE_MAGIC, errorCode, true))
 		{
-//			PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
+			//			PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
 			return false;
 		}
 		return true;
 	}
 
-	virtual void launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
+	virtual void launch(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+	    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+	    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport)
 	{
 		TReportAction reportAction = actionReport;
 
 		reportAction.DeltaLvl = deltaLevel;
-		CEntityBase* actor = CEntityBaseManager::getEntityBasePtr( phrase->getActor() );
-		if ( !actor)
+		CEntityBase *actor = CEntityBaseManager::getEntityBasePtr(phrase->getActor());
+		if (!actor)
 		{
-			nlwarning("<CMagicActionCure launch> invalid actor: %u", phrase->getActor().getIndex() );
+			nlwarning("<CMagicActionCure launch> invalid actor: %u", phrase->getActor().getIndex());
 			return;
 		}
-		if ( successFactor <= 0.0f )
+		if (successFactor <= 0.0f)
 		{
-//			if ( actor->getId().getType() == RYZOMID::player )
-//				CCharacter::sendMessageToClient( actor->getId(),"MAGIC_TOTAL_MISS" );
+			//			if ( actor->getId().getType() == RYZOMID::player )
+			//				CCharacter::sendMessageToClient( actor->getId(),"MAGIC_TOTAL_MISS" );
 			return;
 		}
-		const std::vector< CSpellTarget > & targets = phrase->getTargets();
-		for ( uint i = 0; i < targets.size(); i++ )
+		const std::vector<CSpellTarget> &targets = phrase->getTargets();
+		for (uint i = 0; i < targets.size(); i++)
 		{
 			TReportAction reportAction = actionReport;
 
 			reportAction.TargetRowId = targets[i].getId();
 			// check target
-			CEntityBase* target = CEntityBaseManager::getEntityBasePtr( targets[i].getId() );
-			if ( !target)
+			CEntityBase *target = CEntityBaseManager::getEntityBasePtr(targets[i].getId());
+			if (!target)
 				continue;
 
 			string errorCode;
-			if( !isMad && !PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(),target->getEntityRowId(),ACTNATURE::CURATIVE_MAGIC, errorCode, i==0))
+			if (!isMad && !PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(), target->getEntityRowId(), ACTNATURE::CURATIVE_MAGIC, errorCode, i == 0))
 			{
 				// dont warn because of multi target
 				// PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
@@ -146,59 +141,59 @@ protected:
 			affectedTargets.set(i);
 
 			CTargetInfos targetInfos;
-			targetInfos.RowId		= target->getEntityRowId();
-			targetInfos.MainTarget	= (i == 0);
+			targetInfos.RowId = target->getEntityRowId();
+			targetInfos.MainTarget = (i == 0);
 
 			_ApplyTargets.push_back(targetInfos);
 		}
 
-		//behav.Spell.Resist = 0;
-		//behav.Spell.KillingBlow = 0;
+		// behav.Spell.Resist = 0;
+		// behav.Spell.KillingBlow = 0;
 		resists.clearAll();
 	}
 
-	virtual void apply( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-						const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport,
-						sint32 vamp, float vampRatio, bool reportXp )
+	virtual void apply(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+	    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+	    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport,
+	    sint32 vamp, float vampRatio, bool reportXp)
 	{
-		CEntityBase* actor = CEntityBaseManager::getEntityBasePtr( phrase->getActor() );
-		if ( !actor)
+		CEntityBase *actor = CEntityBaseManager::getEntityBasePtr(phrase->getActor());
+		if (!actor)
 		{
 			return;
 		}
 
 		const uint nbTargets = _ApplyTargets.size();
-		for ( uint i = 0; i < nbTargets; i++ )
+		for (uint i = 0; i < nbTargets; i++)
 		{
-			CEntityBase* target = CEntityBaseManager::getEntityBasePtr( _ApplyTargets[i].RowId );
-			if ( !target)
+			CEntityBase *target = CEntityBaseManager::getEntityBasePtr(_ApplyTargets[i].RowId);
+			if (!target)
 				continue;
 
 			string errorCode;
-			if( !PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(),target->getEntityRowId(),ACTNATURE::CURATIVE_MAGIC, errorCode, _ApplyTargets[i].MainTarget))
+			if (!PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(), target->getEntityRowId(), ACTNATURE::CURATIVE_MAGIC, errorCode, _ApplyTargets[i].MainTarget))
 			{
 				// dont warn because of multi target
 				// PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
 				continue;
 			}
 
-			for (uint i = 0; i < target->getSEffects().size(); )
+			for (uint i = 0; i < target->getSEffects().size();)
 			{
-				CSEffect* effect = target->getSEffects()[i];
-				if ( effect )
+				CSEffect *effect = target->getSEffects()[i];
+				if (effect)
 				{
 					bool removed = false;
-					if ( effect->getPower() <= _Power )
+					if (effect->getPower() <= _Power)
 					{
-						if ( effect->getFamily() == EFFECT_FAMILIES::Dot )
+						if (effect->getFamily() == EFFECT_FAMILIES::Dot)
 						{
-							CSLinkEffectDot * dot = (CSLinkEffectDot *)effect;
-							for ( uint j = 0; j < _AffectedDots.size(); j++ )
+							CSLinkEffectDot *dot = (CSLinkEffectDot *)effect;
+							for (uint j = 0; j < _AffectedDots.size(); j++)
 							{
-								if ( _AffectedDots[j] == dot->getDamageType() )
+								if (_AffectedDots[j] == dot->getDamageType())
 								{
-									target->removeSabrinaEffect( dot );
+									target->removeSabrinaEffect(dot);
 									removed = true;
 									break;
 								}
@@ -206,34 +201,34 @@ protected:
 						}
 						else
 						{
-							for ( uint j = 0; j < _AffectedEffects.size(); j++ )
+							for (uint j = 0; j < _AffectedEffects.size(); j++)
 							{
-								if ( _AffectedEffects[j] == effect->getFamily() )
+								if (_AffectedEffects[j] == effect->getFamily())
 								{
-									target->removeSabrinaEffect( effect );
+									target->removeSabrinaEffect(effect);
 									removed = true;
 									break;
 								}
 							}
 						}
 					}
-					if ( !removed )
+					if (!removed)
 						i++;
 				}
 				else
-					nlwarning("<CEntityBase dispellEffects> NULL effect #%u found in an entity. Debug needed",i);
+					nlwarning("<CEntityBase dispellEffects> NULL effect #%u found in an entity. Debug needed", i);
 			}
 		}
 	}
 
 	std::vector<EFFECT_FAMILIES::TEffectFamily> _AffectedEffects;
-	std::vector<DMGTYPE::EDamageType>			_AffectedDots;
-	uint16										_Power;
+	std::vector<DMGTYPE::EDamageType> _AffectedDots;
+	uint16 _Power;
 
 	/// targets that need to be treated by apply()
-	std::vector<CTargetInfos>		_ApplyTargets;
+	std::vector<CTargetInfos> _ApplyTargets;
 };
 
 BEGIN_MAGIC_ACTION_FACTORY(CMagicActionCure)
-	ADD_MAGIC_ACTION_TYPE( "mtcb" )
+ADD_MAGIC_ACTION_TYPE("mtcb")
 END_MAGIC_ACTION_FACTORY(CMagicActionCure)

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -33,7 +31,7 @@ using namespace NLNET;
 //--------------------------------------------------------------
 //		CRegenModifierEffect::update()
 //--------------------------------------------------------------
-bool CRegenModifierEffect::update(CTimerEvent * event, bool applyEffect)
+bool CRegenModifierEffect::update(CTimerEvent *event, bool applyEffect)
 {
 	if (_AffectedScore >= SCORES::NUM_SCORES)
 	{
@@ -51,23 +49,23 @@ bool CRegenModifierEffect::update(CTimerEvent * event, bool applyEffect)
 	if (applyEffect)
 	{
 		_RegenModifier = (-1.0f) * entity->getScores()._PhysicalScores[_AffectedScore].Base * _DebuffFactor;
-		
+
 		entity->getScores()._PhysicalScores[_AffectedScore].RegenerateModifier = _RegenModifier + entity->getScores()._PhysicalScores[_AffectedScore].RegenerateModifier;
 	}
-	
+
 	// set next event
 	/*if (entity->getId().getType() == RYZOMID::player)
 	{
-		// for player, set value every ticks
-		_UpdateTimer.setRemaining(1, event);
+	    // for player, set value every ticks
+	    _UpdateTimer.setRemaining(1, event);
 	}
 	else
 	{
-		// creature : only modify value once
+	    // creature : only modify value once
 	}
 	*/
 
-	return false;	
+	return false;
 } // update //
 
 //--------------------------------------------------------------
@@ -86,8 +84,8 @@ void CRegenModifierEffect::removed()
 	}
 
 	// if any other effect of the same family still exists on the target then returns without sending msg
-	const std::vector<CSEffectPtr>& effects = entity->getSEffects();
-	for (uint i = 0 ; i < effects.size() ; ++i)
+	const std::vector<CSEffectPtr> &effects = entity->getSEffects();
+	for (uint i = 0; i < effects.size(); ++i)
 	{
 		if (effects[i] && effects[i] != this && effects[i]->getFamily() == _Family)
 			return;
@@ -96,4 +94,3 @@ void CRegenModifierEffect::removed()
 	// send messages to clients
 	PHRASE_UTILITIES::sendEffectStandardEndMessages(_CreatorRowId, _TargetRowId, _EffectName);
 } // removed //
-

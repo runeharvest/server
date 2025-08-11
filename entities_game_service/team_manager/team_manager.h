@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef TEAM_MANAGER_H
 #define TEAM_MANAGER_H
 
@@ -25,9 +23,7 @@
 // EGS
 #include "team_manager/team.h"
 
-
 class CCharacter;
-
 
 ///\todo: avoid team reallocation problems?
 ///\todo: check if we have to remove team from IOS if crash/shutdown
@@ -56,110 +52,103 @@ public:
 	};
 	/// default constructor
 	CTeamManager()
-		:_FirstFreeTeamId(0),_TeamAllocStep(128){}
+	    : _FirstFreeTeamId(0)
+	    , _TeamAllocStep(128)
+	{
+	}
 
 	/// add all created to chat groups
 	void addAllTeamsToChatGroup();
 
 	/// player leaderId invites player targetId to join his League. Only leaders can invite other leaders
-	void joinLeagueProposal( CCharacter * leader, const NLMISC::CEntityId &targetId );
+	void joinLeagueProposal(CCharacter *leader, const NLMISC::CEntityId &targetId);
 	/// player charId declines an invitation
-	void joinLeagueDecline( const NLMISC::CEntityId &charId );
+	void joinLeagueDecline(const NLMISC::CEntityId &charId);
 	/// player charId accepts an invitation
-	void joinLeagueAccept( const NLMISC::CEntityId &charId );
+	void joinLeagueAccept(const NLMISC::CEntityId &charId);
 
 	/// player leaderId invites plyer targetId to join his team. Only leaders can invite
-	void joinProposal( CCharacter * leader, const NLMISC::CEntityId &targetId );
+	void joinProposal(CCharacter *leader, const NLMISC::CEntityId &targetId);
 
 	/// player charId declines an invitation
-	void joinDecline( const NLMISC::CEntityId &charId );
+	void joinDecline(const NLMISC::CEntityId &charId);
 
 	/// player charId accepts an invitation
-	void joinAccept( const NLMISC::CEntityId &charId );
+	void joinAccept(const NLMISC::CEntityId &charId);
 
 	/// a character quits its team
-	void quitTeam( const NLMISC::CEntityId &charId );
+	void quitTeam(const NLMISC::CEntityId &charId);
 
 	/**
 	 * remove the specified character from his team
 	 * \param charId id of the character
 	 */
-	void removeCharacter( const NLMISC::CEntityId &charId );
+	void removeCharacter(const NLMISC::CEntityId &charId);
 	/**
 	 * remove the specified character from his team, check the kicking char is the team leader
 	 * \param leader the character kicking (should be the team leader)
 	 * \param memberIndex index of the kicked character in the leader team list
 	 */
-	void kickCharacter( CCharacter * leader,uint8 memberIndex );
-
+	void kickCharacter(CCharacter *leader, uint8 memberIndex);
 
 	/// remove a team from the manager
-	void removeTeam( uint16 teamId );
+	void removeTeam(uint16 teamId);
 
 	/// add a fake team to this player
-	void addFakeTeam(CCharacter * player);
+	void addFakeTeam(CCharacter *player);
 
 	/// remove a fake team to this player
-	void removeFakeTeam(CCharacter * player);
+	void removeFakeTeam(CCharacter *player);
 
 	///\return a pointer on a team, NULL if invalid
-	CTeam* getTeam(uint16 id);
+	CTeam *getTeam(uint16 id);
 	///\return a pointer on a team, NULL if invalid or fake
-	CTeam* getRealTeam(uint16 id);
+	CTeam *getRealTeam(uint16 id);
 
 	/**
 	 * \param invited: character being invited
 	 * \param invitor: character inviting the other one
 	 * \return true if the invited is invitable by the invitor
 	 */
-	TInviteRetCode isInvitableBy(CCharacter * invited, CCharacter * invitor );
+	TInviteRetCode isInvitableBy(CCharacter *invited, CCharacter *invitor);
 
 	/**
 	 * \param invited: character being invited
 	 * \param invitor: character inviting the other one
 	 * \return true if the invited is invitable by the invitor
 	 */
-	TInviteRetCode isLeagueInvitableBy(CCharacter * invited, CCharacter * invitor );
+	TInviteRetCode isLeagueInvitableBy(CCharacter *invited, CCharacter *invitor);
 
 	/**
 	 * PvP attack occurs in a team
 	 * \param actor is the attacker character
 	 * \param target is the victime character
 	 */
-	void pvpAttackOccursInTeam( CCharacter * actor, CCharacter * target );
+	void pvpAttackOccursInTeam(CCharacter *actor, CCharacter *target);
 
 	/**
 	 * PvP help occurs in a team
 	 * \param actor is the helper
 	 * \param target is character received the help
 	 */
-	void pvpHelpOccursInTeam( CCharacter * actor, CCharacter * target );
+	void pvpHelpOccursInTeam(CCharacter *actor, CCharacter *target);
 
 	/**
 	 * update method, called each tick
 	 */
 	void update();
-	
-	
+
 private:
 	/// the managed teams
-	std::vector< CTeam >	_Teams;
+	std::vector<CTeam> _Teams;
 
 	/// lowest free team Id
-	uint16					_FirstFreeTeamId;
+	uint16 _FirstFreeTeamId;
 
 	/// Allocation step for the team container
-	const uint				_TeamAllocStep;
-
+	const uint _TeamAllocStep;
 };
-
-
-
 
 extern CTeamManager TeamManager;
 
-
-#endif //TEAM_MANAGER
-
-
-
+#endif // TEAM_MANAGER

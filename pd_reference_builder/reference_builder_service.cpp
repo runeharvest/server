@@ -24,44 +24,30 @@
 #include "delta_builder_task.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
 
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
-void	onServiceDown(const std::string &serviceName, TServiceId sid, void *arg);
-void	cbGenerateReference(NLNET::CMessage& msgin, const std::string &serviceName, TServiceId serviceId);
-void	cbGenerateDelta(NLNET::CMessage& msgin, const std::string &serviceName, TServiceId serviceId);
-void	cbKillTasks(NLNET::CMessage& msgin, const std::string &serviceName, TServiceId serviceId);
-
+void onServiceDown(const std::string &serviceName, TServiceId sid, void *arg);
+void cbGenerateReference(NLNET::CMessage &msgin, const std::string &serviceName, TServiceId serviceId);
+void cbGenerateDelta(NLNET::CMessage &msgin, const std::string &serviceName, TServiceId serviceId);
+void cbKillTasks(NLNET::CMessage &msgin, const std::string &serviceName, TServiceId serviceId);
 
 //-----------------------------------------------
-//	callback table for input message 
+//	callback table for input message
 //
 //-----------------------------------------------
-TUnifiedCallbackItem CbArray[] =
-{
-	{ "RB_GEN_REF",		cbGenerateReference },
-	{ "RB_GEN_DELTA",	cbGenerateDelta },
-	{ "RB_KILL_TASKS",	cbKillTasks },
+TUnifiedCallbackItem CbArray[] = {
+	{ "RB_GEN_REF", cbGenerateReference },
+	{ "RB_GEN_DELTA", cbGenerateDelta },
+	{ "RB_KILL_TASKS", cbKillTasks },
 };
-
-
-
-
-
-
-
-
-
-
-
 
 /*
  * Constructor
@@ -71,39 +57,30 @@ CReferenceBuilderService::CReferenceBuilderService()
 	CurrentTask = NULL;
 }
 
-
 //-----------------------------------------------
 //	NLNET_SERVICE_MAIN
 //-----------------------------------------------
-NLNET_SERVICE_MAIN( CReferenceBuilderService, "RBS", "reference_builder_service", 0, CbArray, "", "" );
-
-
-
-
+NLNET_SERVICE_MAIN(CReferenceBuilderService, "RBS", "reference_builder_service", 0, CbArray, "", "");
 
 /*
  * Initialization
  */
-void	CReferenceBuilderService::init()
+void CReferenceBuilderService::init()
 {
 	CUnifiedNetwork::getInstance()->setServiceDownCallback("*", onServiceDown);
 }
 
-
 /*
  * Release
  */
-void	CReferenceBuilderService::release()
+void CReferenceBuilderService::release()
 {
 }
-
-
-
 
 /*
  * Update
  */
-bool	CReferenceBuilderService::update()
+bool CReferenceBuilderService::update()
 {
 	// if current task is completed, delete it
 	if (CurrentTask != NULL && CurrentTask->State == IRefTask::Completed)
@@ -111,13 +88,13 @@ bool	CReferenceBuilderService::update()
 		// report execution result to requester
 		if (CurrentTask->ExecutionSuccess)
 		{
-			CMessage	msgsuccess("RB_TASK_SUCCESS");
+			CMessage msgsuccess("RB_TASK_SUCCESS");
 			msgsuccess.serial(CurrentTask->TaskId);
 			CUnifiedNetwork::getInstance()->send(CurrentTask->RequesterService, msgsuccess);
 		}
 		else
 		{
-			CMessage	msgfailed("RB_TASK_FAILED");
+			CMessage msgfailed("RB_TASK_FAILED");
 			msgfailed.serial(CurrentTask->TaskId);
 			CUnifiedNetwork::getInstance()->send(CurrentTask->RequesterService, msgfailed);
 		}
@@ -140,38 +117,25 @@ bool	CReferenceBuilderService::update()
 	return true;
 }
 
-
 NLMISC_COMMAND(testNextTimestamp, "...", "timestamp")
 {
 	if (args.size() != 1)
 		return false;
 
-	string	ret = CRefBuilderTask::getNextTimestamp(args[0]);
+	string ret = CRefBuilderTask::getNextTimestamp(args[0]);
 	log.displayNL("%s", ret.c_str());
 	return !ret.empty();
 }
-
-
-
-
-
-
-
-
-
 
 /*
  * Connection/Deconnection Handling
  */
 
-void	onServiceDown(const std::string &serviceName, TServiceId sid, void *arg)
+void onServiceDown(const std::string &serviceName, TServiceId sid, void *arg)
 {
-	CReferenceBuilderService*	service = (CReferenceBuilderService*)IService::getInstance();
+	CReferenceBuilderService *service = (CReferenceBuilderService *)IService::getInstance();
 	service->killTasks(sid);
 }
-
-
-
 
 /*
  * Messages Handling
@@ -192,19 +156,19 @@ void	onServiceDown(const std::string &serviceName, TServiceId sid, void *arg)
  * string	maxtimestamp			Maximum timestamp of delta to use
  * string	deleteDeltaOlderThan	Minimum timestamp of delta files to keep
  */
-void	cbGenerateReference(NLNET::CMessage& msgin, const std::string &serviceName, TServiceId serviceId)
+void cbGenerateReference(NLNET::CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
-	uint32	taskId;
-	string	rootRefPath;
-	string	previousReferencePath;
-	string	nextReferencePath;
-	string	hoursUpdatePath;
-	string	minutesUpdatePath;
-	string	secondsUpdatePath;
-	string	logUpdatePath;
-	string	mintimestamp;
-	string	maxtimestamp;
-	string	deleteDeltaOlderThan;
+	uint32 taskId;
+	string rootRefPath;
+	string previousReferencePath;
+	string nextReferencePath;
+	string hoursUpdatePath;
+	string minutesUpdatePath;
+	string secondsUpdatePath;
+	string logUpdatePath;
+	string mintimestamp;
+	string maxtimestamp;
+	string deleteDeltaOlderThan;
 
 	msgin.serial(taskId);
 
@@ -219,28 +183,26 @@ void	cbGenerateReference(NLNET::CMessage& msgin, const std::string &serviceName,
 	msgin.serial(maxtimestamp);
 	msgin.serial(deleteDeltaOlderThan);
 
-	CRefBuilderTask*	task = new CRefBuilderTask();
+	CRefBuilderTask *task = new CRefBuilderTask();
 
 	task->TaskId = taskId;
 	task->RequesterService = serviceId;
 
 	task->setup(rootRefPath,
-				previousReferencePath,
-				nextReferencePath,
-				hoursUpdatePath,
-				minutesUpdatePath,
-				secondsUpdatePath,
-				logUpdatePath,
-				mintimestamp,
-				maxtimestamp,
-				deleteDeltaOlderThan);
+	    previousReferencePath,
+	    nextReferencePath,
+	    hoursUpdatePath,
+	    minutesUpdatePath,
+	    secondsUpdatePath,
+	    logUpdatePath,
+	    mintimestamp,
+	    maxtimestamp,
+	    deleteDeltaOlderThan);
 
-	CReferenceBuilderService*	service = (CReferenceBuilderService*)IService::getInstance();
+	CReferenceBuilderService *service = (CReferenceBuilderService *)IService::getInstance();
 
 	service->Tasks.push_back(task);
 }
-
-
 
 /**
  * Generate a delta update from other delta updates
@@ -256,17 +218,17 @@ void	cbGenerateReference(NLNET::CMessage& msgin, const std::string &serviceName,
  * CDeltaBuilder::TDelta	type	Type of delta update (Minute, Hour)
  * string	deleteDeltaOlderThan	Minimum timestamp of delta files to keep
  */
-void	cbGenerateDelta(NLNET::CMessage& msgin, const std::string &serviceName, TServiceId serviceId)
+void cbGenerateDelta(NLNET::CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
-	uint32	taskId;
-	string	outputPath;
-	string	hoursUpdatePath;
-	string	minutesUpdatePath;
-	string	secondsUpdatePath;
-	string	mintimestamp;
-	string	maxtimestamp;
-	CDeltaBuilder::TDelta	type;
-	string	deleteDeltaOlderThan;
+	uint32 taskId;
+	string outputPath;
+	string hoursUpdatePath;
+	string minutesUpdatePath;
+	string secondsUpdatePath;
+	string mintimestamp;
+	string maxtimestamp;
+	CDeltaBuilder::TDelta type;
+	string deleteDeltaOlderThan;
 
 	msgin.serial(taskId);
 
@@ -279,41 +241,38 @@ void	cbGenerateDelta(NLNET::CMessage& msgin, const std::string &serviceName, TSe
 	msgin.serialEnum(type);
 	msgin.serial(deleteDeltaOlderThan);
 
-	CDeltaBuilderTask*	task = new CDeltaBuilderTask();
+	CDeltaBuilderTask *task = new CDeltaBuilderTask();
 
 	task->TaskId = taskId;
 	task->RequesterService = serviceId;
 
 	task->setup(outputPath,
-				hoursUpdatePath,
-				minutesUpdatePath,
-				secondsUpdatePath,
-				mintimestamp,
-				maxtimestamp,
-				type,
-				deleteDeltaOlderThan);
+	    hoursUpdatePath,
+	    minutesUpdatePath,
+	    secondsUpdatePath,
+	    mintimestamp,
+	    maxtimestamp,
+	    type,
+	    deleteDeltaOlderThan);
 
-	CReferenceBuilderService*	service = (CReferenceBuilderService*)IService::getInstance();
+	CReferenceBuilderService *service = (CReferenceBuilderService *)IService::getInstance();
 
 	service->Tasks.push_back(task);
 }
 
-
 /**
  * Ask RBS to Kill all requested tasks
  */
-void	cbKillTasks(NLNET::CMessage& msgin, const std::string &serviceName, TServiceId serviceId)
+void cbKillTasks(NLNET::CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
-	CReferenceBuilderService*	service = (CReferenceBuilderService*)IService::getInstance();
+	CReferenceBuilderService *service = (CReferenceBuilderService *)IService::getInstance();
 	service->killTasks(serviceId);
 }
-
-
 
 /*
  * Kill All Submitted Task By A Service
  */
-void	CReferenceBuilderService::killTasks(TServiceId serviceId)
+void CReferenceBuilderService::killTasks(TServiceId serviceId)
 {
 	// if current task is owned by disconnecting service, ask it to stop
 	if (CurrentTask != NULL && CurrentTask->RequesterService == serviceId)
@@ -322,10 +281,10 @@ void	CReferenceBuilderService::killTasks(TServiceId serviceId)
 	}
 
 	// remove all awaiting tasks this service requested
-	std::deque<IRefTask*>::iterator	it;
-	for (it=Tasks.begin(); it!=Tasks.end(); )
+	std::deque<IRefTask *>::iterator it;
+	for (it = Tasks.begin(); it != Tasks.end();)
 	{
-		IRefTask*	task = (*it);
+		IRefTask *task = (*it);
 
 		if (task->RequesterService == serviceId)
 			it = Tasks.erase(it);
@@ -334,23 +293,19 @@ void	CReferenceBuilderService::killTasks(TServiceId serviceId)
 	}
 }
 
-
-
-
 /*
- * 
+ *
  */
 
-void	IRefTask::start()
+void IRefTask::start()
 {
 	_Thread = IThread::create(this);
 	_Thread->start();
 }
 
-void	IRefTask::run()
+void IRefTask::run()
 {
 	State = Running;
 	ExecutionSuccess = execute();
 	State = Completed;
 }
-

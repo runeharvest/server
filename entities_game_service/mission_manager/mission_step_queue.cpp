@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "mission_step_queue.h"
 #include "mission_manager.h"
@@ -34,15 +33,15 @@
 using namespace std;
 using namespace NLMISC;
 
-MISSION_REGISTER_STEP(CMissionStepQueueStart,"queue_start")
-MISSION_REGISTER_STEP(CMissionStepQueueEnd,"queue_end")
+MISSION_REGISTER_STEP(CMissionStepQueueStart, "queue_start")
+MISSION_REGISTER_STEP(CMissionStepQueueEnd, "queue_end")
 
 //----------------------------------------------------------------------------
-bool CMissionStepQueueStart::buildStep( uint32 line, const vector< string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+bool CMissionStepQueueStart::buildStep(uint32 line, const vector<string> &script, CMissionGlobalParsingData &globalData, CMissionSpecificParsingData &missionData)
 {
 	_SourceLine = line;
 	bool ret = true;
-	if ( script.size() != 3)
+	if (script.size() != 3)
 	{
 		MISLOGSYNTAXERROR("<name> <timer in ticks>");
 		return false;
@@ -54,40 +53,40 @@ bool CMissionStepQueueStart::buildStep( uint32 line, const vector< string > & sc
 		if (missionData.Name.empty())
 		{
 			nlwarning("Problem : mission has no name");
-			QueueName = "default_" + script[1];	
+			QueueName = "default_" + script[1];
 		}
 		else
 			QueueName = missionData.Name + "_" + script[1];
-		
+
 		// remove all blanks in name
 		string::size_type pos = QueueName.find_first_of(" ");
-		while ( pos != string::npos )
+		while (pos != string::npos)
 		{
-			QueueName.erase(pos,1);
+			QueueName.erase(pos, 1);
 			pos = QueueName.find_first_of(" ");
 		}
-		
+
 		NLMISC::fromString(script[2], Timer);
-		
+
 		return true;
 	}
 }
 
 //----------------------------------------------------------------------------
-uint CMissionStepQueueStart::processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+uint CMissionStepQueueStart::processEvent(const TDataSetRow &userRow, const CMissionEvent &event, uint subStepIndex, const TDataSetRow &giverRow)
 {
-	if( event.Type == CMissionEvent::QueueEntryOk )
+	if (event.Type == CMissionEvent::QueueEntryOk)
 	{
 		return 1;
 	}
 	return 0;
 }
-	
+
 //----------------------------------------------------------------------------
-void CMissionStepQueueStart::getInitState( std::vector<uint32>& ret )
+void CMissionStepQueueStart::getInitState(std::vector<uint32> &ret)
 {
 	ret.clear();
-	ret.resize( 1 );
+	ret.resize(1);
 	ret[0] = 1;
 }
 
@@ -95,12 +94,12 @@ void CMissionStepQueueStart::getInitState( std::vector<uint32>& ret )
 static void getDHMS(uint32 nSecondsIN, uint32 &nDays, uint32 &nHours, uint32 &nMinutes, uint32 &nSeconds)
 {
 	uint32 seconds = nSecondsIN;
-	nMinutes = uint32(seconds/60);
-	nHours = uint32(nMinutes/60);
-	nDays = uint32(nHours/24);
-	seconds = seconds%60;
-	nMinutes = nMinutes%60;
-	nHours = nHours%24;
+	nMinutes = uint32(seconds / 60);
+	nHours = uint32(nMinutes / 60);
+	nDays = uint32(nHours / 24);
+	seconds = seconds % 60;
+	nMinutes = nMinutes % 60;
+	nHours = nHours % 24;
 	if (seconds > 0)
 	{
 		++nMinutes;
@@ -118,9 +117,8 @@ static void getDHMS(uint32 nSecondsIN, uint32 &nDays, uint32 &nHours, uint32 &nM
 	nSeconds = seconds;
 }
 
-
 //----------------------------------------------------------------------------
-uint32 CMissionStepQueueStart::sendStepText(CCharacter * user,const std::vector<uint32>& stepStates,const NLMISC::CEntityId & giver)
+uint32 CMissionStepQueueStart::sendStepText(CCharacter *user, const std::vector<uint32> &stepStates, const NLMISC::CEntityId &giver)
 {
 	//---- update local parameters from user ----//
 	nlassert(user);
@@ -130,24 +128,24 @@ uint32 CMissionStepQueueStart::sendStepText(CCharacter * user,const std::vector<
 	CMissionQueueManager::getInstance()->getPlayerPositions(queueId, user->getId(), _NbWaiters, _NbOnlineWaiters, _HasPlayerInCriticalZone);
 
 	// get text params
-	return IMissionStepTemplate::sendStepText(user,stepStates,giver);
+	return IMissionStepTemplate::sendStepText(user, stepStates, giver);
 }
 
 //----------------------------------------------------------------------------
-void CMissionStepQueueStart::getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+void CMissionStepQueueStart::getTextParams(uint &nbSubSteps, const std::string *&textPtr, TVectorParamCheck &retParams, const std::vector<uint32> &subStepStates)
 {
 	// get estimated remaining time
 	uint32 days, hours, minutes, seconds;
-	getDHMS(uint32(Timer*(_HasPlayerInCriticalZone?1+_NbOnlineWaiters:_NbOnlineWaiters)*CTickEventHandler::getGameTimeStep()),
-		days, hours, minutes, seconds);
-	
+	getDHMS(uint32(Timer * (_HasPlayerInCriticalZone ? 1 + _NbOnlineWaiters : _NbOnlineWaiters) * CTickEventHandler::getGameTimeStep()),
+	    days, hours, minutes, seconds);
+
 	static const std::string stepText = "MISSION_QUEUE_WAIT";
 	textPtr = &stepText;
-	nlassert( subStepStates.size() == 1);
+	nlassert(subStepStates.size() == 1);
 	retParams.push_back(STRING_MANAGER::TParam());
 	retParams.back().Type = STRING_MANAGER::integer;
 	retParams.back().Int = _NbWaiters;
-	
+
 	retParams.push_back(STRING_MANAGER::TParam());
 	retParams.back().Type = STRING_MANAGER::integer;
 	retParams.back().Int = _NbOnlineWaiters;
@@ -166,28 +164,27 @@ void CMissionStepQueueStart::getTextParams( uint & nbSubSteps,const std::string*
 }
 
 //----------------------------------------------------------------------------
-void CMissionStepQueueStart::onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList)
+void CMissionStepQueueStart::onActivation(CMission *inst, uint32 stepIndex, std::list<CMissionEvent *> &eventList)
 {
-	IMissionStepTemplate::onActivation(inst,stepIndex,eventList);
+	IMissionStepTemplate::onActivation(inst, stepIndex, eventList);
 
-	CCharacter * user = inst->getMainEntity();
-	if ( user )
+	CCharacter *user = inst->getMainEntity();
+	if (user)
 	{
-		CMissionQueueManager::getInstance()->addPlayerInQueue( user->getId(), inst, (uint16)stepIndex, QueueName, Timer );
+		CMissionQueueManager::getInstance()->addPlayerInQueue(user->getId(), inst, (uint16)stepIndex, QueueName, Timer);
 	}
 }
-
 
 /************************************************************************/
 /*                                                                      */
 /************************************************************************/
 
 //----------------------------------------------------------------------------
-bool CMissionStepQueueEnd::buildStep( uint32 line, const vector< string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+bool CMissionStepQueueEnd::buildStep(uint32 line, const vector<string> &script, CMissionGlobalParsingData &globalData, CMissionSpecificParsingData &missionData)
 {
 	_SourceLine = line;
 	bool ret = true;
-	if ( script.size() != 2)
+	if (script.size() != 2)
 	{
 		MISLOGSYNTAXERROR("<name>");
 		return false;
@@ -197,16 +194,16 @@ bool CMissionStepQueueEnd::buildStep( uint32 line, const vector< string > & scri
 	if (missionData.Name.empty())
 	{
 		nlwarning("Problem : mission has no name");
-		QueueName = "default_" + script[1];	
+		QueueName = "default_" + script[1];
 	}
 	else
 		QueueName = missionData.Name + "_" + script[1];
 
 	// remove all blanks in name
 	string::size_type pos = QueueName.find_first_of(" ");
-	while ( pos != string::npos )
+	while (pos != string::npos)
 	{
-		QueueName.erase(pos,1);
+		QueueName.erase(pos, 1);
 		pos = QueueName.find_first_of(" ");
 	}
 
@@ -214,34 +211,34 @@ bool CMissionStepQueueEnd::buildStep( uint32 line, const vector< string > & scri
 }
 
 //----------------------------------------------------------------------------
-uint CMissionStepQueueEnd::processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+uint CMissionStepQueueEnd::processEvent(const TDataSetRow &userRow, const CMissionEvent &event, uint subStepIndex, const TDataSetRow &giverRow)
 {
-	if( event.Type == CMissionEvent::QueueExit )
+	if (event.Type == CMissionEvent::QueueExit)
 	{
 		// remove player from queue
 		uint32 queueId = CMissionQueueManager::getInstance()->getQueueId(QueueName);
 		BOMB_IF(queueId == 0, "Bad id for queue", return 0);
 
 		CEntityId userId = getEntityIdFromRow(userRow);
-		CMissionQueueManager::getInstance()->removePlayerFromQueue( userId, queueId);
+		CMissionQueueManager::getInstance()->removePlayerFromQueue(userId, queueId);
 
 		return 1;
 	}
 	return 0;
 }
-	
+
 //----------------------------------------------------------------------------
-void CMissionStepQueueEnd::getInitState( std::vector<uint32>& ret )
+void CMissionStepQueueEnd::getInitState(std::vector<uint32> &ret)
 {
 	ret.clear();
-	ret.resize( 1 );
+	ret.resize(1);
 	ret[0] = 1;
 }
 
 //----------------------------------------------------------------------------
-void CMissionStepQueueEnd::onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList)
+void CMissionStepQueueEnd::onActivation(CMission *inst, uint32 stepIndex, std::list<CMissionEvent *> &eventList)
 {
-	IMissionStepTemplate::onActivation(inst,stepIndex,eventList);
+	IMissionStepTemplate::onActivation(inst, stepIndex, eventList);
 
 	// set queue id to 0 in mission as it's no longer in a queue, and reset critical part end date
 	if (inst)

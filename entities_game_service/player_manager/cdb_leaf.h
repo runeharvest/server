@@ -17,14 +17,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef CDB_LEAF_H
 #define CDB_LEAF_H
 
 #include "player_manager/cdb.h"
 #include "player_manager/cdb_branch.h"
-
 
 /**
  * Database node which contains a unique property
@@ -35,78 +32,82 @@
 class CCDBStructNodeLeaf : public ICDBStructNode
 {
 public:
+	/// Return the type of the property.
+	inline const EPropType &type() const { return _Type; }
 
 	/// Return the type of the property.
-	inline const EPropType &	type() const {return _Type;}
-
-	/// Return the type of the property.
-	inline bool					nullable() const {return _Nullable;}
+	inline bool nullable() const { return _Nullable; }
 
 	/// The overridden version that is usable from ICDBStructNode
-	virtual EPropType			getType() const		{return _Type;}
-
+	virtual EPropType getType() const { return _Type; }
 
 	/// Set the property Type.
-	inline void					type(const EPropType &t) {_Type = t;}
+	inline void type(const EPropType &t) { _Type = t; }
 
 	/**
 	 * Default constructor
 	 */
-	CCDBStructNodeLeaf() : ICDBStructNode(), _Parent( NULL ), _Type( UNKNOWN ), _Nullable( false ) {}
-	
+	CCDBStructNodeLeaf()
+	    : ICDBStructNode()
+	    , _Parent(NULL)
+	    , _Type(UNKNOWN)
+	    , _Nullable(false)
+	{
+	}
+
 	/**
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNode *node, NLMISC::IProgressCallback &progressCallBack );
+	void init(xmlNode *node, NLMISC::IProgressCallback &progressCallBack);
 
 	/**
 	 * Get a node
 	 * \param ids is the list of property index
 	 * \param idx is the property index of the current node(updated by the method)
 	 */
-	ICDBStructNode * getNode( std::vector<uint16>& ids, uint idx );
+	ICDBStructNode *getNode(std::vector<uint16> &ids, uint idx);
 
 	/**
 	 * Get a node
 	 * \param idx is the node index
 	 */
-	ICDBStructNode * getNode( uint16 idx );
+	ICDBStructNode *getNode(uint16 idx);
 
 	/**
 	 * Get a node . Create it if it does not exist yet
 	 * \param id : the CTextId identifying the node
 	 */
-	ICDBStructNode * getNode( const CTextId& id, bool bCreate=true ) ;
+	ICDBStructNode *getNode(const CTextId &id, bool bCreate = true);
 
 	/**
 	 * Get a node index
 	 * \param node is a pointer to the node
 	 */
-	bool getNodeIndex( ICDBStructNode* node , uint& index) const
+	bool getNodeIndex(ICDBStructNode *node, uint &index) const
 	{
 		return false;
 	}
 
 	// the parent node for a branch (NULL by default)
-	void setParent(CCDBStructNodeBranch* parent) { _Parent=parent; }
+	void setParent(CCDBStructNodeBranch *parent) { _Parent = parent; }
 
 	// Get the node parent
-	virtual CCDBStructNodeBranch* getParent()
+	virtual CCDBStructNodeBranch *getParent()
 	{
 		return _Parent;
 	}
 
 	// Get the node parent (const)
-	const CCDBStructNodeBranch *getParent() const	{ return _Parent; }
+	const CCDBStructNodeBranch *getParent() const { return _Parent; }
 
 	// get the node name
-	const std::string * getName()
+	const std::string *getName()
 	{
 		if (_Parent == NULL) return NULL;
-		for (uint16 i = 0; i < _Parent->getNbNodes() ;i++)
-		if (_Parent->getNode(i) == this)
-			return _Parent->getNodeName(i);
+		for (uint16 i = 0; i < _Parent->getNbNodes(); i++)
+			if (_Parent->getNode(i) == this)
+				return _Parent->getNodeName(i);
 		return NULL;
 	}
 
@@ -114,25 +115,25 @@ public:
 	 * Browse the tree, building the text id, and for each leaf encountered, call the callback
 	 * passing the argument provided, the index and the text id.
 	 */
-	void			foreachLeafCall( void (*callback)(void*,TCDBDataIndex,CTextId*), CTextId& id, void *arg )
+	void foreachLeafCall(void (*callback)(void *, TCDBDataIndex, CTextId *), CTextId &id, void *arg)
 	{
-		callback( arg, _DataIndex, &id );
+		callback(arg, _DataIndex, &id);
 	}
 
 	/*
 	 * Browse the tree, and for each leaf encountered, call the callback
 	 * passing the argument provided and the leaf, and post-incrementing the counter
 	 */
-	void			foreachLeafCall( void (*callback)(void*,CCDBStructNodeLeaf*,uint&), uint& counter, void *arg )
+	void foreachLeafCall(void (*callback)(void *, CCDBStructNodeLeaf *, uint &), uint &counter, void *arg)
 	{
-		callback( arg, this, counter );
+		callback(arg, this, counter);
 		++counter;
 	}
 
 	/**
 	 * Return the first leaf found, and set the number of indirections in siblingLevel
 	 */
-	const CCDBStructNodeLeaf *findFirstLeaf( uint& siblingLevel ) const
+	const CCDBStructNodeLeaf *findFirstLeaf(uint &siblingLevel) const
 	{
 		return this;
 	}
@@ -140,19 +141,19 @@ public:
 	/**
 	 * Return the data index corresponding to a text id (from the root)
 	 */
-	TCDBDataIndex	findDataIndex( ICDBStructNode::CTextId& id ) const
+	TCDBDataIndex findDataIndex(ICDBStructNode::CTextId &id) const
 	{
 #ifdef NL_DEBUG
-		nlassert( id.getCurrentIndex() == id.size() ); // assert that there are no lines left in the textid
+		nlassert(id.getCurrentIndex() == id.size()); // assert that there are no lines left in the textid
 #endif
 		return _DataIndex;
 	}
-	
+
 	/**
 	 * Set the data index into the leaves. The passed index is incremented for each leaf leaf or atomic branch.
 	 * The "returned" value of index is the number of indices set.
 	 */
-	void			initDataIndex( TCDBDataIndex& index )
+	void initDataIndex(TCDBDataIndex &index)
 	{
 		_DataIndex = index;
 		checkIfNotMaxIndex();
@@ -162,42 +163,32 @@ public:
 	/**
 	 * For each different index (leaf of atomic branch), call the callback. Sets the id in leaves.
 	 */
-	void			initIdAndCallForEachIndex( CBinId& id, void (*callback)(ICDBStructNode*, void*), void *arg )
+	void initIdAndCallForEachIndex(CBinId &id, void (*callback)(ICDBStructNode *, void *), void *arg)
 	{
-		callback( this, arg );
+		callback(this, arg);
 		_LeafId = id;
 	}
 
 	/// Move the siblings that match the bank name to the destination tree
-	void			moveBranchesToBank( CCDBStructNodeBranch *destRoot, TCDBBank bank );
+	void moveBranchesToBank(CCDBStructNodeBranch *destRoot, TCDBBank bank);
 
 	/// Return the binary leaf id
-	const CBinId&	binLeafId() const { return _LeafId; }
+	const CBinId &binLeafId() const { return _LeafId; }
 
 	/// Build a textid corresponding to the leaf
-	CTextId			buildTextId() const;
+	CTextId buildTextId() const;
 
 private:
-
 	CCDBStructNodeBranch *_Parent;
 
 	/// property type
-	EPropType			_Type;
+	EPropType _Type;
 
 	/// nullable
-	bool				_Nullable;
+	bool _Nullable;
 
 	/// Binary property id of the leaf (precalculated & stored to avoid having to get back in the tree to build it)
-	CBinId				_LeafId;
+	CBinId _LeafId;
 };
 
-
-
-
 #endif // CDB_LEAF_H
-
-
-
-
-
-

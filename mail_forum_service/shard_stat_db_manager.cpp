@@ -21,21 +21,19 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
-CShardStatDBManager * CShardStatDBManager::_Instance = NULL;
-
+CShardStatDBManager *CShardStatDBManager::_Instance = NULL;
 
 // ****************************************************************************
 // CStatDBNameManager
 // ****************************************************************************
 
 // ****************************************************************************
-void CStatDBNameManager::setPlayerName(NLMISC::CEntityId playerId, const std::string & playerName)
+void CStatDBNameManager::setPlayerName(NLMISC::CEntityId playerId, const std::string &playerName)
 {
 	if (playerName.empty())
 		return;
 
-	string & oldPlayerName = _PlayerNames[playerId];
+	string &oldPlayerName = _PlayerNames[playerId];
 	if (playerName != oldPlayerName)
 	{
 		oldPlayerName = playerName;
@@ -43,12 +41,12 @@ void CStatDBNameManager::setPlayerName(NLMISC::CEntityId playerId, const std::st
 }
 
 // ****************************************************************************
-void CStatDBNameManager::setGuildName(EGSPD::TGuildId guildId, const std::string & guildName)
+void CStatDBNameManager::setGuildName(EGSPD::TGuildId guildId, const std::string &guildName)
 {
 	if (guildName.empty())
 		return;
 
-	string & oldGuildName = _GuildNames[guildId];
+	string &oldGuildName = _GuildNames[guildId];
 	if (guildName != oldGuildName)
 	{
 		oldGuildName = guildName;
@@ -56,9 +54,9 @@ void CStatDBNameManager::setGuildName(EGSPD::TGuildId guildId, const std::string
 }
 
 // ****************************************************************************
-bool CStatDBNameManager::getPlayerName(NLMISC::CEntityId playerId, std::string & playerName) const
+bool CStatDBNameManager::getPlayerName(NLMISC::CEntityId playerId, std::string &playerName) const
 {
-	map<NLMISC::CEntityId,std::string>::const_iterator it = _PlayerNames.find(playerId);
+	map<NLMISC::CEntityId, std::string>::const_iterator it = _PlayerNames.find(playerId);
 	if (it != _PlayerNames.end())
 	{
 		playerName = (*it).second;
@@ -69,9 +67,9 @@ bool CStatDBNameManager::getPlayerName(NLMISC::CEntityId playerId, std::string &
 }
 
 // ****************************************************************************
-bool CStatDBNameManager::getGuildName(EGSPD::TGuildId guildId, std::string & guildName) const
+bool CStatDBNameManager::getGuildName(EGSPD::TGuildId guildId, std::string &guildName) const
 {
-	map<EGSPD::TGuildId,std::string>::const_iterator it = _GuildNames.find(guildId);
+	map<EGSPD::TGuildId, std::string>::const_iterator it = _GuildNames.find(guildId);
 	if (it != _GuildNames.end())
 	{
 		guildName = (*it).second;
@@ -94,18 +92,18 @@ void CStatDBNameManager::removeGuildName(EGSPD::TGuildId guildId)
 }
 
 // ****************************************************************************
-void CStatDBNameManager::loadNames(const CStatDBNamesMsg & namesMsg)
+void CStatDBNameManager::loadNames(const CStatDBNamesMsg &namesMsg)
 {
-	for (	map<NLMISC::CEntityId,std::string>::const_iterator it = namesMsg.PlayerNames.begin();
-			it != namesMsg.PlayerNames.end();
-			++it)
+	for (map<NLMISC::CEntityId, std::string>::const_iterator it = namesMsg.PlayerNames.begin();
+	     it != namesMsg.PlayerNames.end();
+	     ++it)
 	{
 		setPlayerName((*it).first, (*it).second);
 	}
 
-	for (	map<EGSPD::TGuildId,std::string>::const_iterator it = namesMsg.GuildNames.begin();
-			it != namesMsg.GuildNames.end();
-			++it)
+	for (map<EGSPD::TGuildId, std::string>::const_iterator it = namesMsg.GuildNames.begin();
+	     it != namesMsg.GuildNames.end();
+	     ++it)
 	{
 		setGuildName((*it).first, (*it).second);
 	}
@@ -116,7 +114,7 @@ void CStatDBNameManager::loadNames(const CStatDBNamesMsg & namesMsg)
 // ****************************************************************************
 
 // ****************************************************************************
-void CStatDBNodeDisplayer::displayNode(IStatDBNodePtr node, const std::string & currentPath, NLMISC::CLog & log, const CStatDBNameManager & nameManager)
+void CStatDBNodeDisplayer::displayNode(IStatDBNodePtr node, const std::string &currentPath, NLMISC::CLog &log, const CStatDBNameManager &nameManager)
 {
 	_Log = &log;
 	_NameManager = &nameManager;
@@ -129,8 +127,8 @@ void CStatDBNodeDisplayer::displayNode(IStatDBNodePtr node, const std::string & 
 	{
 		displayOneNode(node, currentPath);
 
-		// if the node is a branch 
-		CStatDBBranch * branch = dynamic_cast<CStatDBBranch *>(node.getPtr());
+		// if the node is a branch
+		CStatDBBranch *branch = dynamic_cast<CStatDBBranch *>(node.getPtr());
 		if (branch != NULL)
 		{
 			vector<IStatDBNode::CMatchingNode> children;
@@ -145,25 +143,25 @@ void CStatDBNodeDisplayer::displayNode(IStatDBNodePtr node, const std::string & 
 }
 
 // ****************************************************************************
-void CStatDBNodeDisplayer::displayOneNode(IStatDBNodePtr node, const std::string & currentPath)
+void CStatDBNodeDisplayer::displayOneNode(IStatDBNodePtr node, const std::string &currentPath)
 {
 	BOMB_IF(node == NULL, "node is NULL!", return);
 
-	CStatDBBranch * branch = dynamic_cast<CStatDBBranch *>(node.getPtr());
+	CStatDBBranch *branch = dynamic_cast<CStatDBBranch *>(node.getPtr());
 	if (branch != NULL)
 	{
 		visitBranch(branch, currentPath);
 		return;
 	}
 
-	CStatDBValueLeaf * valueLeaf = dynamic_cast<CStatDBValueLeaf *>(node.getPtr());
+	CStatDBValueLeaf *valueLeaf = dynamic_cast<CStatDBValueLeaf *>(node.getPtr());
 	if (valueLeaf != NULL)
 	{
 		visitValueLeaf(valueLeaf, currentPath);
 		return;
 	}
 
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(node.getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(node.getPtr());
 	if (tableLeaf != NULL)
 	{
 		visitTableLeaf(tableLeaf, currentPath);
@@ -172,7 +170,7 @@ void CStatDBNodeDisplayer::displayOneNode(IStatDBNodePtr node, const std::string
 }
 
 // ****************************************************************************
-void CStatDBNodeDisplayer::visitBranch(CStatDBBranch * branch, const std::string & path)
+void CStatDBNodeDisplayer::visitBranch(CStatDBBranch *branch, const std::string &path)
 {
 	if (_Settings.DisplayBranch)
 	{
@@ -181,7 +179,7 @@ void CStatDBNodeDisplayer::visitBranch(CStatDBBranch * branch, const std::string
 }
 
 // ****************************************************************************
-void CStatDBNodeDisplayer::visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path)
+void CStatDBNodeDisplayer::visitValueLeaf(CStatDBValueLeaf *valueLeaf, const std::string &path)
 {
 	if (_Settings.DisplayValueLeaf)
 	{
@@ -193,36 +191,36 @@ void CStatDBNodeDisplayer::visitValueLeaf(CStatDBValueLeaf * valueLeaf, const st
 }
 
 // ****************************************************************************
-void CStatDBNodeDisplayer::visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path)
+void CStatDBNodeDisplayer::visitTableLeaf(CStatDBTableLeaf *tableLeaf, const std::string &path)
 {
 	if (_Settings.DisplayTableLeaf)
 	{
 		_Log->displayNL("(T) %s", path.c_str());
 		if (_Settings.DisplayTableLeafContent)
 		{
-			for (	map<NLMISC::CEntityId,sint32>::const_iterator it = tableLeaf->getPlayerValues().begin();
-					it != tableLeaf->getPlayerValues().end();
-					++it)
+			for (map<NLMISC::CEntityId, sint32>::const_iterator it = tableLeaf->getPlayerValues().begin();
+			     it != tableLeaf->getPlayerValues().end();
+			     ++it)
 			{
 				string playerName;
 				if (!_NameManager->getPlayerName((*it).first, playerName))
 				{
 					playerName = "[not found] " + (*it).first.toString();
 				}
-				
+
 				_Log->displayNL("\tplayer '%s' = %d", playerName.c_str(), (*it).second);
 			}
 
-			for (	map<EGSPD::TGuildId,sint32>::const_iterator it = tableLeaf->getGuildValues().begin();
-					it != tableLeaf->getGuildValues().end();
-					++it)
+			for (map<EGSPD::TGuildId, sint32>::const_iterator it = tableLeaf->getGuildValues().begin();
+			     it != tableLeaf->getGuildValues().end();
+			     ++it)
 			{
 				string guildName;
 				if (!_NameManager->getGuildName((*it).first, guildName))
 				{
 					guildName = toString("[not found] %u", (*it).first);
 				}
-				
+
 				_Log->displayNL("\tguild '%s' = %d", guildName.c_str(), (*it).second);
 			}
 		}
@@ -235,7 +233,7 @@ void CStatDBNodeDisplayer::visitTableLeaf(CStatDBTableLeaf * tableLeaf, const st
 
 // ****************************************************************************
 CShardStatDBReader::CShardStatDBReader(CShardStatDBPtr statDB)
-: _StatDB(statDB)
+    : _StatDB(statDB)
 {
 	nlassert(_StatDB != NULL);
 }
@@ -247,9 +245,9 @@ uint32 CShardStatDBReader::getShardId() const
 }
 
 // ****************************************************************************
-bool CShardStatDBReader::getValue(const std::string & path, sint32 & val) const
+bool CShardStatDBReader::getValue(const std::string &path, sint32 &val) const
 {
-	CStatDBValueLeaf * valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_StatDB->_Root->getNode(path).getPtr());
+	CStatDBValueLeaf *valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_StatDB->_Root->getNode(path).getPtr());
 	if (valueLeaf == NULL)
 		return false;
 
@@ -258,7 +256,7 @@ bool CShardStatDBReader::getValue(const std::string & path, sint32 & val) const
 }
 
 // ****************************************************************************
-bool CShardStatDBReader::getValues(const std::string & pathPattern, std::vector<sint32> & values) const
+bool CShardStatDBReader::getValues(const std::string &pathPattern, std::vector<sint32> &values) const
 {
 	vector<IStatDBNode::CMatchingNode> nodes;
 	_StatDB->_Root->getNodes(pathPattern, nodes, "");
@@ -270,7 +268,7 @@ bool CShardStatDBReader::getValues(const std::string & pathPattern, std::vector<
 
 	for (uint i = 0; i < nodes.size(); i++)
 	{
-		CStatDBValueLeaf * valueLeaf = dynamic_cast<CStatDBValueLeaf *>(nodes[i].Node.getPtr());
+		CStatDBValueLeaf *valueLeaf = dynamic_cast<CStatDBValueLeaf *>(nodes[i].Node.getPtr());
 		if (valueLeaf == NULL)
 		{
 			nlwarning("a node found at '%s' is not a value leaf", pathPattern.c_str());
@@ -284,11 +282,11 @@ bool CShardStatDBReader::getValues(const std::string & pathPattern, std::vector<
 }
 
 // ****************************************************************************
-bool CShardStatDBReader::getTable(const std::string & path,
-								  const TPlayerValues * & playerValues,
-								  const TGuildValues * & guildValues) const
+bool CShardStatDBReader::getTable(const std::string &path,
+    const TPlayerValues *&playerValues,
+    const TGuildValues *&guildValues) const
 {
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_StatDB->_Root->getNode(path).getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_StatDB->_Root->getNode(path).getPtr());
 	if (tableLeaf == NULL)
 		return false;
 
@@ -298,9 +296,9 @@ bool CShardStatDBReader::getTable(const std::string & path,
 }
 
 // ****************************************************************************
-bool CShardStatDBReader::getTables(const std::string & pathPattern,
-								   std::vector<const TPlayerValues *> & playerValuesVec,
-								   std::vector<const TGuildValues *> & guildValuesVec) const
+bool CShardStatDBReader::getTables(const std::string &pathPattern,
+    std::vector<const TPlayerValues *> &playerValuesVec,
+    std::vector<const TGuildValues *> &guildValuesVec) const
 {
 	vector<IStatDBNode::CMatchingNode> nodes;
 	_StatDB->_Root->getNodes(pathPattern, nodes, "");
@@ -313,7 +311,7 @@ bool CShardStatDBReader::getTables(const std::string & pathPattern,
 
 	for (uint i = 0; i < nodes.size(); i++)
 	{
-		CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(nodes[i].Node.getPtr());
+		CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(nodes[i].Node.getPtr());
 		if (tableLeaf == NULL)
 		{
 			nlwarning("a node found at '%s' is not a table leaf", pathPattern.c_str());
@@ -328,13 +326,13 @@ bool CShardStatDBReader::getTables(const std::string & pathPattern,
 }
 
 // ****************************************************************************
-bool CShardStatDBReader::getPlayerName(NLMISC::CEntityId playerId, std::string & playerName) const
+bool CShardStatDBReader::getPlayerName(NLMISC::CEntityId playerId, std::string &playerName) const
 {
 	return _StatDB->getPlayerName(playerId, playerName);
 }
 
 // ****************************************************************************
-bool CShardStatDBReader::getGuildName(EGSPD::TGuildId guildId, std::string & guildName) const
+bool CShardStatDBReader::getGuildName(EGSPD::TGuildId guildId, std::string &guildName) const
 {
 	return _StatDB->getGuildName(guildId, guildName);
 }
@@ -345,7 +343,7 @@ bool CShardStatDBReader::getGuildName(EGSPD::TGuildId guildId, std::string & gui
 
 // ****************************************************************************
 CShardStatDB::CShardStatDB(uint32 shardId)
-: _ShardId(shardId)
+    : _ShardId(shardId)
 {
 	_Root = new CStatDBBranch;
 }
@@ -357,7 +355,7 @@ void CShardStatDB::resetStatDB()
 }
 
 // ****************************************************************************
-bool CShardStatDB::createValue(const std::string & path, sint32 val)
+bool CShardStatDB::createValue(const std::string &path, sint32 val)
 {
 	IStatDBNodePtr node = _Root->getNode(path);
 	if (node != NULL)
@@ -367,9 +365,9 @@ bool CShardStatDB::createValue(const std::string & path, sint32 val)
 }
 
 // ****************************************************************************
-bool CShardStatDB::valueSet(const std::string & path, sint32 val)
+bool CShardStatDB::valueSet(const std::string &path, sint32 val)
 {
-	CStatDBValueLeaf * valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBValueLeaf *valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_Root->getNode(path).getPtr());
 	if (valueLeaf == NULL)
 		return false;
 
@@ -378,9 +376,9 @@ bool CShardStatDB::valueSet(const std::string & path, sint32 val)
 }
 
 // ****************************************************************************
-bool CShardStatDB::valueAdd(const std::string & path, sint32 val)
+bool CShardStatDB::valueAdd(const std::string &path, sint32 val)
 {
-	CStatDBValueLeaf * valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBValueLeaf *valueLeaf = dynamic_cast<CStatDBValueLeaf *>(_Root->getNode(path).getPtr());
 	if (valueLeaf == NULL)
 		return false;
 
@@ -389,10 +387,9 @@ bool CShardStatDB::valueAdd(const std::string & path, sint32 val)
 }
 
 // ****************************************************************************
-bool CShardStatDB::createTable(const std::string & path,
-							   const std::map<NLMISC::CEntityId,sint32> & playerValues,
-							   const std::map<EGSPD::TGuildId,sint32> & guildValues
-							   )
+bool CShardStatDB::createTable(const std::string &path,
+    const std::map<NLMISC::CEntityId, sint32> &playerValues,
+    const std::map<EGSPD::TGuildId, sint32> &guildValues)
 {
 	IStatDBNodePtr node = _Root->getNode(path);
 	if (node != NULL)
@@ -402,9 +399,9 @@ bool CShardStatDB::createTable(const std::string & path,
 }
 
 // ****************************************************************************
-bool CShardStatDB::tablePlayerAdd(const std::string & path, NLMISC::CEntityId playerId, sint32 val)
+bool CShardStatDB::tablePlayerAdd(const std::string &path, NLMISC::CEntityId playerId, sint32 val)
 {
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
 	if (tableLeaf == NULL)
 		return false;
 
@@ -413,9 +410,9 @@ bool CShardStatDB::tablePlayerAdd(const std::string & path, NLMISC::CEntityId pl
 }
 
 // ****************************************************************************
-bool CShardStatDB::tablePlayerSet(const std::string & path, NLMISC::CEntityId playerId, sint32 val)
+bool CShardStatDB::tablePlayerSet(const std::string &path, NLMISC::CEntityId playerId, sint32 val)
 {
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
 	if (tableLeaf == NULL)
 		return false;
 
@@ -424,9 +421,9 @@ bool CShardStatDB::tablePlayerSet(const std::string & path, NLMISC::CEntityId pl
 }
 
 // ****************************************************************************
-bool CShardStatDB::tableGuildAdd(const std::string & path, EGSPD::TGuildId guildId, sint32 val)
+bool CShardStatDB::tableGuildAdd(const std::string &path, EGSPD::TGuildId guildId, sint32 val)
 {
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
 	if (tableLeaf == NULL)
 		return false;
 
@@ -435,9 +432,9 @@ bool CShardStatDB::tableGuildAdd(const std::string & path, EGSPD::TGuildId guild
 }
 
 // ****************************************************************************
-bool CShardStatDB::tableGuildSet(const std::string & path, EGSPD::TGuildId guildId, sint32 val)
+bool CShardStatDB::tableGuildSet(const std::string &path, EGSPD::TGuildId guildId, sint32 val)
 {
-	CStatDBTableLeaf * tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
+	CStatDBTableLeaf *tableLeaf = dynamic_cast<CStatDBTableLeaf *>(_Root->getNode(path).getPtr());
 	if (tableLeaf == NULL)
 		return false;
 
@@ -446,7 +443,7 @@ bool CShardStatDB::tableGuildSet(const std::string & path, EGSPD::TGuildId guild
 }
 
 // ****************************************************************************
-bool CShardStatDB::removeNode(const std::string & path)
+bool CShardStatDB::removeNode(const std::string &path)
 {
 	IStatDBNodePtr removedNode = _Root->removeNode(path);
 	return (removedNode != NULL);
@@ -473,7 +470,7 @@ void CShardStatDB::removeGuild(EGSPD::TGuildId guildId)
 }
 
 // ****************************************************************************
-bool CShardStatDB::displayNodes(const std::string & pathPattern, NLMISC::CLog & log, const CStatDBNodeDisplayer::CSettings & settings)
+bool CShardStatDB::displayNodes(const std::string &pathPattern, NLMISC::CLog &log, const CStatDBNodeDisplayer::CSettings &settings)
 {
 	vector<IStatDBNode::CMatchingNode> nodes;
 	_Root->getNodes(pathPattern, nodes, "");
@@ -504,27 +501,38 @@ CShardStatDBManager::CShardStatDBManager()
 // ****************************************************************************
 void CShardStatDBManager::init()
 {
-	TUnifiedCallbackItem cbClientArray[] =
-	{
-		"SDB:INIT",					cbInit,
-		"SDB:CREATE_VALUE",			cbCreateValue,
-		"SDB:CREATE_TABLE",			cbCreateTable,
-		"SDB:VALUE_SET",			cbValueSet,
-		"SDB:VALUE_ADD",			cbValueAdd,
-		"SDB:TABLE_PLAYER_ADD",		cbTablePlayerAdd,
-		"SDB:TABLE_PLAYER_SET",		cbTablePlayerSet,
-		"SDB:TABLE_GUILD_ADD",		cbTableGuildAdd,
-		"SDB:TABLE_GUILD_SET",		cbTableGuildSet,
-		"SDB:REMOVE_NODE",			cbRemoveNode,
-		"SDB:REMOVE_PLAYER",		cbRemovePlayer,
-		"SDB:REMOVE_GUILD",			cbRemoveGuild,
+	TUnifiedCallbackItem cbClientArray[] = {
+		"SDB:INIT",
+		cbInit,
+		"SDB:CREATE_VALUE",
+		cbCreateValue,
+		"SDB:CREATE_TABLE",
+		cbCreateTable,
+		"SDB:VALUE_SET",
+		cbValueSet,
+		"SDB:VALUE_ADD",
+		cbValueAdd,
+		"SDB:TABLE_PLAYER_ADD",
+		cbTablePlayerAdd,
+		"SDB:TABLE_PLAYER_SET",
+		cbTablePlayerSet,
+		"SDB:TABLE_GUILD_ADD",
+		cbTableGuildAdd,
+		"SDB:TABLE_GUILD_SET",
+		cbTableGuildSet,
+		"SDB:REMOVE_NODE",
+		cbRemoveNode,
+		"SDB:REMOVE_PLAYER",
+		cbRemovePlayer,
+		"SDB:REMOVE_GUILD",
+		cbRemoveGuild,
 	};
 
-	CUnifiedNetwork::getInstance()->addCallbackArray(cbClientArray, sizeof(cbClientArray)/sizeof(cbClientArray[0]));
+	CUnifiedNetwork::getInstance()->addCallbackArray(cbClientArray, sizeof(cbClientArray) / sizeof(cbClientArray[0]));
 }
 
 // ****************************************************************************
-void CShardStatDBManager::getShardStatDBReaders(std::vector<CShardStatDBReader> & statDBReaders) const
+void CShardStatDBManager::getShardStatDBReaders(std::vector<CShardStatDBReader> &statDBReaders) const
 {
 	statDBReaders.clear();
 	for (uint i = 0; i < _ShardStatDB.size(); i++)
@@ -534,7 +542,7 @@ void CShardStatDBManager::getShardStatDBReaders(std::vector<CShardStatDBReader> 
 }
 
 // ****************************************************************************
-void CShardStatDBManager::initShardStatDB(uint32 shardId, const CStatDBAllLeavesMsg & allLeavesMsg)
+void CShardStatDBManager::initShardStatDB(uint32 shardId, const CStatDBAllLeavesMsg &allLeavesMsg)
 {
 	CShardStatDBPtr statDB;
 
@@ -557,7 +565,7 @@ void CShardStatDBManager::initShardStatDB(uint32 shardId, const CStatDBAllLeaves
 
 	for (uint i = 0; i < allLeavesMsg.ValueLeavesMsg.size(); i++)
 	{
-		const CStatDBValueLeafMsg & valueLeafMsg = allLeavesMsg.ValueLeavesMsg[i];
+		const CStatDBValueLeafMsg &valueLeafMsg = allLeavesMsg.ValueLeavesMsg[i];
 		if (!statDB->createValue(valueLeafMsg.Path, valueLeafMsg.Value))
 		{
 			STOP(toString("cannot create a value leaf at '%s'", valueLeafMsg.Path.c_str()));
@@ -566,20 +574,20 @@ void CShardStatDBManager::initShardStatDB(uint32 shardId, const CStatDBAllLeaves
 
 	for (uint i = 0; i < allLeavesMsg.TableLeavesMsg.size(); i++)
 	{
-		const CStatDBTableLeafMsg & tableLeafMsg = allLeavesMsg.TableLeavesMsg[i];
+		const CStatDBTableLeafMsg &tableLeafMsg = allLeavesMsg.TableLeavesMsg[i];
 		statDB->createTable(tableLeafMsg.Path, tableLeafMsg.PlayerValues, tableLeafMsg.GuildValues);
 	}
 
-	for (	map<NLMISC::CEntityId,std::string>::const_iterator it = allLeavesMsg.NamesMsg.PlayerNames.begin();
-			it != allLeavesMsg.NamesMsg.PlayerNames.end();
-			++it)
+	for (map<NLMISC::CEntityId, std::string>::const_iterator it = allLeavesMsg.NamesMsg.PlayerNames.begin();
+	     it != allLeavesMsg.NamesMsg.PlayerNames.end();
+	     ++it)
 	{
 		statDB->setPlayerName((*it).first, (*it).second);
 	}
 
-	for (	map<EGSPD::TGuildId,std::string>::const_iterator it = allLeavesMsg.NamesMsg.GuildNames.begin();
-			it != allLeavesMsg.NamesMsg.GuildNames.end();
-			++it)
+	for (map<EGSPD::TGuildId, std::string>::const_iterator it = allLeavesMsg.NamesMsg.GuildNames.begin();
+	     it != allLeavesMsg.NamesMsg.GuildNames.end();
+	     ++it)
 	{
 		statDB->setGuildName((*it).first, (*it).second);
 	}
@@ -600,7 +608,7 @@ CShardStatDBPtr CShardStatDBManager::getShardStatDB(uint32 shardId)
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbInit(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbInit(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	CStatDBAllLeavesMsg allLeavesMsg;
@@ -612,7 +620,7 @@ void CShardStatDBManager::cbInit(CMessage & msgin, const std::string & serviceNa
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbCreateValue(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbCreateValue(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	CStatDBValueLeafMsg valueLeafMsg;
@@ -620,18 +628,18 @@ void CShardStatDBManager::cbCreateValue(CMessage & msgin, const std::string & se
 	msgin.serial(shardId);
 	msgin.serial(valueLeafMsg);
 
-	CShardStatDB * statDB = getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		STOP(toString("stat db of shard %u is not initialized yet!", shardId));
 		return;
 	}
-	
+
 	statDB->createValue(valueLeafMsg.Path, valueLeafMsg.Value);
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbCreateTable(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbCreateTable(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	CStatDBTableLeafMsg tableLeafMsg;
@@ -641,19 +649,19 @@ void CShardStatDBManager::cbCreateTable(CMessage & msgin, const std::string & se
 	msgin.serial(tableLeafMsg);
 	msgin.serial(namesMsg);
 
-	CShardStatDB * statDB = getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		STOP(toString("stat db of shard %u is not initialized yet!", shardId));
 		return;
 	}
-	
+
 	statDB->createTable(tableLeafMsg.Path, tableLeafMsg.PlayerValues, tableLeafMsg.GuildValues);
 	statDB->loadNames(namesMsg);
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbValueSet(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbValueSet(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	string path;
@@ -663,18 +671,18 @@ void CShardStatDBManager::cbValueSet(CMessage & msgin, const std::string & servi
 	msgin.serial(path);
 	msgin.serial(val);
 
-	CShardStatDB * statDB = getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		STOP(toString("stat db of shard %u is not initialized yet!", shardId));
 		return;
 	}
-	
+
 	statDB->valueSet(path, val);
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbValueAdd(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbValueAdd(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	string path;
@@ -684,18 +692,18 @@ void CShardStatDBManager::cbValueAdd(CMessage & msgin, const std::string & servi
 	msgin.serial(path);
 	msgin.serial(val);
 
-	CShardStatDB * statDB = getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		STOP(toString("stat db of shard %u is not initialized yet!", shardId));
 		return;
 	}
-	
+
 	statDB->valueAdd(path, val);
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbTablePlayerAdd(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbTablePlayerAdd(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	string path;
@@ -709,19 +717,19 @@ void CShardStatDBManager::cbTablePlayerAdd(CMessage & msgin, const std::string &
 	msgin.serial(playerName);
 	msgin.serial(val);
 
-	CShardStatDB * statDB = getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		STOP(toString("stat db of shard %u is not initialized yet!", shardId));
 		return;
 	}
-	
+
 	statDB->tablePlayerAdd(path, playerId, val);
 	statDB->setPlayerName(playerId, playerName);
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbTablePlayerSet(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbTablePlayerSet(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	string path;
@@ -735,19 +743,19 @@ void CShardStatDBManager::cbTablePlayerSet(CMessage & msgin, const std::string &
 	msgin.serial(playerName);
 	msgin.serial(val);
 
-	CShardStatDB * statDB = getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		STOP(toString("stat db of shard %u is not initialized yet!", shardId));
 		return;
 	}
-	
+
 	statDB->tablePlayerSet(path, playerId, val);
 	statDB->setPlayerName(playerId, playerName);
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbTableGuildAdd(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbTableGuildAdd(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	string path;
@@ -761,19 +769,19 @@ void CShardStatDBManager::cbTableGuildAdd(CMessage & msgin, const std::string & 
 	msgin.serial(guildName);
 	msgin.serial(val);
 
-	CShardStatDB * statDB = getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		STOP(toString("stat db of shard %u is not initialized yet!", shardId));
 		return;
 	}
-	
+
 	statDB->tableGuildAdd(path, guildId, val);
 	statDB->setGuildName(guildId, guildName);
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbTableGuildSet(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbTableGuildSet(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	string path;
@@ -787,19 +795,19 @@ void CShardStatDBManager::cbTableGuildSet(CMessage & msgin, const std::string & 
 	msgin.serial(guildName);
 	msgin.serial(val);
 
-	CShardStatDB * statDB = getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		STOP(toString("stat db of shard %u is not initialized yet!", shardId));
 		return;
 	}
-	
+
 	statDB->tableGuildSet(path, guildId, val);
 	statDB->setGuildName(guildId, guildName);
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbRemoveNode(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbRemoveNode(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	string path;
@@ -807,18 +815,18 @@ void CShardStatDBManager::cbRemoveNode(CMessage & msgin, const std::string & ser
 	msgin.serial(shardId);
 	msgin.serial(path);
 
-	CShardStatDB * statDB = getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		STOP(toString("stat db of shard %u is not initialized yet!", shardId));
 		return;
 	}
-	
+
 	statDB->removeNode(path);
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbRemovePlayer(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbRemovePlayer(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	CEntityId playerId;
@@ -826,18 +834,18 @@ void CShardStatDBManager::cbRemovePlayer(CMessage & msgin, const std::string & s
 	msgin.serial(shardId);
 	msgin.serial(playerId);
 
-	CShardStatDB * statDB = getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		STOP(toString("stat db of shard %u is not initialized yet!", shardId));
 		return;
 	}
-	
+
 	statDB->removePlayer(playerId);
 }
 
 // ****************************************************************************
-void CShardStatDBManager::cbRemoveGuild(CMessage & msgin, const std::string & serviceName, TServiceId serviceId)
+void CShardStatDBManager::cbRemoveGuild(CMessage &msgin, const std::string &serviceName, TServiceId serviceId)
 {
 	uint32 shardId;
 	EGSPD::TGuildId guildId;
@@ -845,13 +853,13 @@ void CShardStatDBManager::cbRemoveGuild(CMessage & msgin, const std::string & se
 	msgin.serial(shardId);
 	msgin.serial(guildId);
 
-	CShardStatDB * statDB = getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		STOP(toString("stat db of shard %u is not initialized yet!", shardId));
 		return;
 	}
-	
+
 	statDB->removeGuild(guildId);
 }
 
@@ -860,7 +868,7 @@ void CShardStatDBManager::cbRemoveGuild(CMessage & msgin, const std::string & se
 // ****************************************************************************
 
 // ****************************************************************************
-NLMISC_COMMAND (sdbDisplayNodes, "display nodes of SDB", "<shard_id> <path> [<recursive>] [<display_values>] [<display_tables>]")
+NLMISC_COMMAND(sdbDisplayNodes, "display nodes of SDB", "<shard_id> <path> [<recursive>] [<display_values>] [<display_tables>]")
 {
 	if (args.size() < 2 || args.size() > 5)
 		return false;
@@ -868,14 +876,14 @@ NLMISC_COMMAND (sdbDisplayNodes, "display nodes of SDB", "<shard_id> <path> [<re
 	uint32 shardId;
 	NLMISC::fromString(args[0], shardId);
 
-	CShardStatDB * statDB = CShardStatDBManager::getInstance()->getShardStatDB(shardId);
+	CShardStatDB *statDB = CShardStatDBManager::getInstance()->getShardStatDB(shardId);
 	if (statDB == NULL)
 	{
 		log.displayNL("shard %u has no stat db", shardId);
 		return true;
 	}
 
-	const string & pathPattern = args[1];
+	const string &pathPattern = args[1];
 
 	CStatDBNodeDisplayer::CSettings settings;
 
@@ -897,4 +905,3 @@ NLMISC_COMMAND (sdbDisplayNodes, "display nodes of SDB", "<shard_id> <path> [<re
 
 	return true;
 }
-

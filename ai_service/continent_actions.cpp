@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 //----------------------------------------------------------------------------
 
 #include "stdpch.h"
@@ -30,48 +27,48 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 using namespace CAISActionEnums;
-using	namespace	AITYPES;
+using namespace AITYPES;
 
 extern CAIInstance *currentInstance;
 
-DEFINE_ACTION(ContextGlobal,DYNSYS)
+DEFINE_ACTION(ContextGlobal, DYNSYS)
 {
-/*	{ // init the ai instance if necessaray
-		CAIS &ais = CAIS::instance();
+	/*	{ // init the ai instance if necessaray
+	        CAIS &ais = CAIS::instance();
 
-		CAIInstance	*aiInstance=NULL;
-		
-		if (0<ais.AIList().size())
-		{
-			aiInstance=ais.AIList()[0];
-		}
-		
-		if	(!aiInstance)
-		{
-			aiInstance=ais.AIList().addChild(new CAIInstance(*((CAIS*)NULL)),	0);	//	Arggghhh !!!
-			if (!aiInstance)
-			{
-				return;
-			}
+	        CAIInstance	*aiInstance=NULL;
 
-		}
-		CWorkPtr::instance(aiInstance);	// set the current AIInstance.
-	}
-*/
+	        if (0<ais.AIList().size())
+	        {
+	            aiInstance=ais.AIList()[0];
+	        }
+
+	        if	(!aiInstance)
+	        {
+	            aiInstance=ais.AIList().addChild(new CAIInstance(*((CAIS*)NULL)),	0);	//	Arggghhh !!!
+	            if (!aiInstance)
+	            {
+	                return;
+	            }
+
+	        }
+	        CWorkPtr::instance(aiInstance);	// set the current AIInstance.
+	    }
+	*/
 	nlassertex(currentInstance != NULL, ("No AIInstance created !"));
 	CWorkPtr::aiInstance(currentInstance);
 	CAIInstance *aii = CWorkPtr::aiInstance();
 
-//	uint32	alias;
-//	string	name, mapName;
+	//	uint32	alias;
+	//	string	name, mapName;
 	string contName, mapName;
-	if	(!getArgs(args,"DYNSYS", contName, mapName))
+	if (!getArgs(args, "DYNSYS", contName, mapName))
 		return;
 
 	CWorkPtr::continent(NULL);
 	// look for a continent with this name.
 	CCont<CContinent> &continents = aii->continents();
-	for (uint i=0; i<continents.size(); ++i)
+	for (uint i = 0; i < continents.size(); ++i)
 	{
 		if (!continents[i])
 			continue;
@@ -86,49 +83,48 @@ DEFINE_ACTION(ContextGlobal,DYNSYS)
 	if (CWorkPtr::continent() == NULL)
 	{
 		// continent not found, need to create one
-		CContinent	*const	cont = new	CContinent(aii);
+		CContinent *const cont = new CContinent(aii);
 		aii->continents().addChild(cont);
 		cont->setName(contName);
 		CWorkPtr::continent(cont);
 	}
 
 	CContextStack::setContext(ContextContinent);
-
 }
 
 bool dumpContinentImp(uint instanceIndex, const std::string &continentName, NLMISC::CLog &log);
 
-DEFINE_ACTION(ContextGlobal,DYN_END)	//	ContextContinent
+DEFINE_ACTION(ContextGlobal, DYN_END) //	ContextContinent
 {
 	CContinent *continent = CWorkPtr::continent();
-	if	(!continent)
+	if (!continent)
 		return;
 
-//	dumpContinentImp(0, continent->ContinentName, *NLMISC::DebugLog);
+	//	dumpContinentImp(0, continent->ContinentName, *NLMISC::DebugLog);
 
 	continent->pushLazyProcess(new CRebuildContinentAndOutPost(continent));
 }
 
-DEFINE_ACTION(ContextContinent,DYNREG)
+DEFINE_ACTION(ContextContinent, DYNREG)
 {
-	CContinent *const	continent = CWorkPtr::continent();
-	if	(!continent)
+	CContinent *const continent = CWorkPtr::continent();
+	if (!continent)
 		return;
 
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode *aliasTree;
-	string	filename;
-	if	(!getArgs(args,name(),aliasTree, filename))
+	string filename;
+	if (!getArgs(args, name(), aliasTree, filename))
 		return;
 
 	// see whether the region is already created
-	CRegion	*region	=	CWorkPtr::continent()->regions().getChildByName(aliasTree->getName());
+	CRegion *region = CWorkPtr::continent()->regions().getChildByName(aliasTree->getName());
 
 	// not found so create it
-	if	(!region)
+	if (!region)
 	{
 		region = new CRegion(CWorkPtr::continent(), aliasTree->getAlias(), aliasTree->getName(), filename);
-		
+
 		CWorkPtr::continent()->regions().addAliasChild(region);
 		CWorkPtr::region(region);
 	}
@@ -138,12 +134,12 @@ DEFINE_ACTION(ContextContinent,DYNREG)
 	}
 
 	// clear delete flag (if any)
-//	region->clearDeleteFlag();
+	//	region->clearDeleteFlag();
 	CWorkPtr::region(region);
 	CContextStack::setContext(ContextRegion);
 }
 
-DEFINE_ACTION(ContextRegion,IDTREE)
+DEFINE_ACTION(ContextRegion, IDTREE)
 {
 	// set the id tree for the region (results in creation or update of region's object tree)
 	// args: aliasTree
@@ -153,39 +149,35 @@ DEFINE_ACTION(ContextRegion,IDTREE)
 
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode *aliasTree;
-	if (!getArgs(args,name(),aliasTree))
+	if (!getArgs(args, name(), aliasTree))
 		return;
 
-		
 	// have the manager update it's structure from the id tree
-	nlinfo("ACTION IDTREE: Applying new tree to region[%u]: '%s'%s in continent '%s'", 
-		CWorkPtr::region()->getChildIndex(), 
-		CWorkPtr::region()->getName().c_str(),
-		CWorkPtr::region()->getAliasString().c_str(), 
-		CWorkPtr::region()->getOwner()->getName().c_str()
-		);
-	
+	nlinfo("ACTION IDTREE: Applying new tree to region[%u]: '%s'%s in continent '%s'",
+	    CWorkPtr::region()->getChildIndex(),
+	    CWorkPtr::region()->getName().c_str(),
+	    CWorkPtr::region()->getAliasString().c_str(),
+	    CWorkPtr::region()->getOwner()->getName().c_str());
+
 	if (aliasTree && CWorkPtr::region())
 		CWorkPtr::region()->updateAliasTree(*aliasTree);
 
-//	dumpContinentImp(0, CWorkPtr::continent()->ContinentName, *NLMISC::DebugLog);
-
+	//	dumpContinentImp(0, CWorkPtr::continent()->ContinentName, *NLMISC::DebugLog);
 }
 
-
-DEFINE_ACTION(ContextRegion,CELLZNE)
+DEFINE_ACTION(ContextRegion, CELLZNE)
 {
-	CRegion *region= CWorkPtr::region();
+	CRegion *region = CWorkPtr::region();
 	if (!region)
 		return;
 
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode *aliasTree;
-	if (!getArgs(args,name(),aliasTree))
+	if (!getArgs(args, name(), aliasTree))
 		return;
 
 	// see whether the region is already loaded
-	CCellZone *czone= region->cellZones().getChildByAlias(aliasTree->getAlias());
+	CCellZone *czone = region->cellZones().getChildByAlias(aliasTree->getAlias());
 	if (!czone)
 		return;
 
@@ -193,10 +185,7 @@ DEFINE_ACTION(ContextRegion,CELLZNE)
 	CContextStack::setContext(ContextCellZone);
 }
 
-
-
-
-//DEFINE_ACTION(ContextCellZone,CZ_NRJ)
+// DEFINE_ACTION(ContextCellZone,CZ_NRJ)
 //{
 //	return;
 //
@@ -207,9 +196,9 @@ DEFINE_ACTION(ContextRegion,CELLZNE)
 //	std::string	family;
 //	args[0].get(family);
 //	if	(family.empty())
-//		return;	
+//		return;
 //
-//	// read the alias tree from the argument list	
+//	// read the alias tree from the argument list
 //	CLevelEnergy	&levelEnergy=czone->_FamiliesLevelEnergy[CPropertyId::create(family)];
 //
 //	for	(uint32 i=0;i<4;i++)
@@ -224,20 +213,18 @@ DEFINE_ACTION(ContextRegion,CELLZNE)
 //		levelEnergy.setLevelEnergyValue(value, i);
 //	}
 //
-//}
+// }
 
-
-DEFINE_ACTION(ContextGroupFamily,CZ_NRJ)
+DEFINE_ACTION(ContextGroupFamily, CZ_NRJ)
 {
-	CGroupFamily *const	groupFamily = CWorkPtr::groupFamily();
-	if	(!groupFamily)
+	CGroupFamily *const groupFamily = CWorkPtr::groupFamily();
+	if (!groupFamily)
 		return;
 
-
-	for	(uint32 i=0;i<4;i++)
+	for (uint32 i = 0; i < 4; i++)
 	{
-		std::string	str;
-		double	value=1;
+		std::string str;
+		double value = 1;
 		if (args[i].get(str))
 		{
 			if (!str.empty())
@@ -245,49 +232,48 @@ DEFINE_ACTION(ContextGroupFamily,CZ_NRJ)
 		}
 		groupFamily->setLevelEnergyValue(value, i);
 	}
-	
-//	groupFamily->setLevelEnergy();
-//
-//
-//	CCellZone *czone=CWorkPtr::cellZone();
-//	if (!czone || args.size()!=5)
-//		return;
-//	
-//	std::string	family;
-//	args[0].get(family);
-//	if	(family.empty())
-//		return;	
-//	
-//	// read the alias tree from the argument list	
-//	CLevelEnergy	&levelEnergy=czone->_FamiliesLevelEnergy[CPropertyId::create(family)];
-//	
-//	for	(uint32 i=0;i<4;i++)
-//	{
-//		std::string	str;
-//		double	value=1;
-//		if (args[i+1].get(str))
-//		{
-//			if (!str.empty())
-//				NLMISC::fromString(str, value);
-//		}
-//		levelEnergy.setLevelEnergyValue(value, i);
-//	}
-	
+
+	//	groupFamily->setLevelEnergy();
+	//
+	//
+	//	CCellZone *czone=CWorkPtr::cellZone();
+	//	if (!czone || args.size()!=5)
+	//		return;
+	//
+	//	std::string	family;
+	//	args[0].get(family);
+	//	if	(family.empty())
+	//		return;
+	//
+	//	// read the alias tree from the argument list
+	//	CLevelEnergy	&levelEnergy=czone->_FamiliesLevelEnergy[CPropertyId::create(family)];
+	//
+	//	for	(uint32 i=0;i<4;i++)
+	//	{
+	//		std::string	str;
+	//		double	value=1;
+	//		if (args[i+1].get(str))
+	//		{
+	//			if (!str.empty())
+	//				NLMISC::fromString(str, value);
+	//		}
+	//		levelEnergy.setLevelEnergyValue(value, i);
+	//	}
 }
 
-DEFINE_ACTION(ContextCellZone,CELL)
+DEFINE_ACTION(ContextCellZone, CELL)
 {
-	CCellZone *cellZone= CWorkPtr::cellZone();
+	CCellZone *cellZone = CWorkPtr::cellZone();
 	if (!cellZone)
 		return;
 
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode *aliasTree;
-	if (!getArgs(args,name(),aliasTree))
+	if (!getArgs(args, name(), aliasTree))
 		return;
 
 	// see whether the region is already loaded
-	CCell *cell= cellZone->cells().getChildByAlias(aliasTree->getAlias());
+	CCell *cell = cellZone->cells().getChildByAlias(aliasTree->getAlias());
 	if (!cell)
 		return;
 
@@ -295,70 +281,68 @@ DEFINE_ACTION(ContextCellZone,CELL)
 	CContextStack::setContext(ContextCell);
 }
 
-DEFINE_ACTION(ContextCell,CELLFLG)
+DEFINE_ACTION(ContextCell, CELLFLG)
 {
-//	CCell *cell= CWorkPtr::cell();
-//	if (!cell)
-//		return;
-//
-//	cell->_FamilyFlags.clearFamily();
-//
-//	for (uint i=0; i<args.size(); ++i)
-//	{
-//		string flag;
-//		args[i].get(flag);
-//		TPopulationFamily fam(flag);
-//		if (fam.FamilyTag != family_bad)
-//			cell->_FamilyFlags.addFamily(flag);
-//	}
-//	cell->_FamilyFlags.addFamily(TPopulationFamily("kitin_invasion"));	//	Arghh !! to much hard code!
+	//	CCell *cell= CWorkPtr::cell();
+	//	if (!cell)
+	//		return;
+	//
+	//	cell->_FamilyFlags.clearFamily();
+	//
+	//	for (uint i=0; i<args.size(); ++i)
+	//	{
+	//		string flag;
+	//		args[i].get(flag);
+	//		TPopulationFamily fam(flag);
+	//		if (fam.FamilyTag != family_bad)
+	//			cell->_FamilyFlags.addFamily(flag);
+	//	}
+	//	cell->_FamilyFlags.addFamily(TPopulationFamily("kitin_invasion"));	//	Arghh !! to much hard code!
 
-	CCell *cell= CWorkPtr::cell();
-	if	(!cell)
+	CCell *cell = CWorkPtr::cell();
+	if (!cell)
 		return;
 
-	for (uint i=0; i<args.size(); ++i)
+	for (uint i = 0; i < args.size(); ++i)
 	{
 		string property;
 		args[i].get(property);
 		cell->properties().addProperty(property);
 	}
-	cell->properties().addProperty(string("kitin_invasion"));	//	Arghh !! to much hard code!
+	cell->properties().addProperty(string("kitin_invasion")); //	Arghh !! to much hard code!
 
-//	cell->_FamilyFlags.addFamily(TPopulationFamily("kitin_invasion"));	//	Arghh !! to much hard code!
+	//	cell->_FamilyFlags.addFamily(TPopulationFamily("kitin_invasion"));	//	Arghh !! to much hard code!
 }
 
-DEFINE_ACTION(ContextCell,CELLGEO)
+DEFINE_ACTION(ContextCell, CELLGEO)
 {
-	CCell *cell= CWorkPtr::cell();
+	CCell *cell = CWorkPtr::cell();
 	if (!cell)
 		return;
 
 	cell->_Coords.clear();
-	for (uint i=0; i<args.size(); i+=2)
+	for (uint i = 0; i < args.size(); i += 2)
 	{
 		double x, y;
 		args[i].get(x);
-		args[i+1].get(y);
+		args[i + 1].get(y);
 
 		cell->_Coords.push_back(CAIVector(x, y));
 	}
 }
 
-
-
-DEFINE_ACTION(ContextCell,DYNFZ)
+DEFINE_ACTION(ContextCell, DYNFZ)
 {
-	CCell *cell= CWorkPtr::cell();
-	if	(!cell)
+	CCell *cell = CWorkPtr::cell();
+	if (!cell)
 		return;
 
 	float x, y, r;
-//	uint32 activities;
+	//	uint32 activities;
 	uint32 verticalPos;
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode *aliasTree;
-	if (!getArgs(args,name(),aliasTree, x, y, r, /*activities,*/ verticalPos))
+	if (!getArgs(args, name(), aliasTree, x, y, r, /*activities,*/ verticalPos))
 		return;
 
 	// see whether the region is already loaded
@@ -366,32 +350,31 @@ DEFINE_ACTION(ContextCell,DYNFZ)
 	if (!faunaZone)
 		return;
 
-	faunaZone->setPosAndRadius((TVerticalPos)verticalPos, CAIPos(x, y,0,0.0f), uint32(r*1000));
+	faunaZone->setPosAndRadius((TVerticalPos)verticalPos, CAIPos(x, y, 0, 0.0f), uint32(r * 1000));
 
-//	faunaZone->setFaunaActivity(activities);
+	//	faunaZone->setFaunaActivity(activities);
 
 	CWorkPtr::faunaZone(faunaZone);
 	CContextStack::setContext(ContextFaunaZone);
 }
 
-DEFINE_ACTION(ContextFaunaZone,ACT_PARM)
+DEFINE_ACTION(ContextFaunaZone, ACT_PARM)
 {
-	CFaunaZone	*faunaZone=CWorkPtr::faunaZone();
-	if	(!faunaZone)
+	CFaunaZone *faunaZone = CWorkPtr::faunaZone();
+	if (!faunaZone)
 		return;
 
-	for (uint i=0; i<args.size(); ++i)
+	for (uint i = 0; i < args.size(); ++i)
 	{
 		string activityProp;
 		args[i].get(activityProp);
 		faunaZone->initialActivities().addProperty(CPropertyId::create(activityProp));
 	}
-
 }
 
-DEFINE_ACTION(ContextCell,DYNNZ)
+DEFINE_ACTION(ContextCell, DYNNZ)
 {
-	CCell *cell= CWorkPtr::cell();
+	CCell *cell = CWorkPtr::cell();
 	if (!cell)
 		return;
 
@@ -399,7 +382,7 @@ DEFINE_ACTION(ContextCell,DYNNZ)
 	uint32 verticalPos;
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode *aliasTree;
-	if (!getArgs(args,name(),aliasTree, x, y, r, verticalPos))
+	if (!getArgs(args, name(), aliasTree, x, y, r, verticalPos))
 		return;
 
 	// see whether the region is already loaded
@@ -407,63 +390,62 @@ DEFINE_ACTION(ContextCell,DYNNZ)
 	if (!npcZone)
 		return;
 
-	npcZone->setPosAndRadius((TVerticalPos)verticalPos, CAIPos(x, y,0,0.0f), uint32(r*1000));
-//	npcZone->setNpcActivity(activities);
+	npcZone->setPosAndRadius((TVerticalPos)verticalPos, CAIPos(x, y, 0, 0.0f), uint32(r * 1000));
+	//	npcZone->setNpcActivity(activities);
 
 	CWorkPtr::npcZone(npcZone);
 	CContextStack::setContext(ContextNpcZone);
 }
 
-DEFINE_ACTION(ContextCell,DYNNZSHP)
+DEFINE_ACTION(ContextCell, DYNNZSHP)
 {
-	CCell *cell= CWorkPtr::cell();
-	if (!cell || args.size()<2)
+	CCell *cell = CWorkPtr::cell();
+	if (!cell || args.size() < 2)
 		return;
-	
+
 	std::vector<CAIVector> points;
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode *aliasTree;
 	uint32 verticalPos;
 	args[0].get(aliasTree);
 	args[1].get(verticalPos);
-	for (uint i=3;i<args.size();i+=2)
+	for (uint i = 3; i < args.size(); i += 2)
 	{
-		double x,y;
-		args[i-1].get(x);
+		double x, y;
+		args[i - 1].get(x);
 		args[i].get(y);
-		points.push_back(CAIVector(x,y));
+		points.push_back(CAIVector(x, y));
 	}
-	
+
 	// see whether the region is already loaded
 	CNpcZoneShape *npcZone = cell->npcZoneShapes().getChildByAlias(aliasTree->getAlias());
 	if (!npcZone)
 		return;
 
 	npcZone->setPatat((TVerticalPos)verticalPos, points);
-//	npcZone->setNpcActivity(activities);
+	//	npcZone->setNpcActivity(activities);
 
 	CWorkPtr::npcZone(npcZone);
 	CContextStack::setContext(ContextNpcZone);
 }
 
-DEFINE_ACTION(ContextNpcZone,DYNNZPRM)
+DEFINE_ACTION(ContextNpcZone, DYNNZPRM)
 {
-	CNpcZone	*npcZone=CWorkPtr::npcZone();
-	if	(!npcZone)
+	CNpcZone *npcZone = CWorkPtr::npcZone();
+	if (!npcZone)
 		return;
 
-	for (uint i=0; i<args.size(); ++i)
+	for (uint i = 0; i < args.size(); ++i)
 	{
 		string activityProp;
 		args[i].get(activityProp);
 		npcZone->properties().addProperty(CPropertyId::create(activityProp));
 	}
-
 }
 
-DEFINE_ACTION(ContextRegion,DYNROAD)
+DEFINE_ACTION(ContextRegion, DYNROAD)
 {
-	CCell *cell= CWorkPtr::cell();
+	CCell *cell = CWorkPtr::cell();
 	if (!cell)
 		return;
 
@@ -471,7 +453,7 @@ DEFINE_ACTION(ContextRegion,DYNROAD)
 	CAIAliasDescriptionNode *aliasTree;
 	float difficulty;
 	uint32 verticalPos;
-	if (!getArgs(args,name(),aliasTree, difficulty, verticalPos))
+	if (!getArgs(args, name(), aliasTree, difficulty, verticalPos))
 		return;
 
 	// see whether the region is already loaded
@@ -486,38 +468,39 @@ DEFINE_ACTION(ContextRegion,DYNROAD)
 	CContextStack::setContext(ContextRoad);
 }
 
-DEFINE_ACTION(ContextRoad,ROADGEO)
+DEFINE_ACTION(ContextRoad, ROADGEO)
 {
-	CRoad *road= CWorkPtr::road();
-	if	(	!road
-		||	args.empty())
+	CRoad *road = CWorkPtr::road();
+	if (!road
+	    || args.empty())
 		return;
 
-	vector<CAIVector>	points;
+	vector<CAIVector> points;
 
 	road->clearCoords();
 
-	for	(uint i=1; i<args.size(); i+=2)
+	for (uint i = 1; i < args.size(); i += 2)
 	{
 		double x, y;
-		args[i-1].get(x);
+		args[i - 1].get(x);
 		args[i].get(y);
 
 		points.push_back(CAIVector(x, y));
 	}
 
-	road->setPathPoints(road->verticalPos(), points);;
+	road->setPathPoints(road->verticalPos(), points);
+	;
 }
 
-DEFINE_ACTION(ContextRoad,TRIGGER)
+DEFINE_ACTION(ContextRoad, TRIGGER)
 {
-	CRoad *road= CWorkPtr::road();
+	CRoad *road = CWorkPtr::road();
 	if (!road)
 		return;
 
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode *aliasTree;
-	if (!getArgs(args,name(),aliasTree))
+	if (!getArgs(args, name(), aliasTree))
 		return;
 
 	// see whether the region is already loaded
@@ -529,9 +512,9 @@ DEFINE_ACTION(ContextRoad,TRIGGER)
 	CContextStack::setContext(ContextRoadTrigger);
 }
 
-DEFINE_ACTION(ContextRoadTrigger,TRIGT1)
+DEFINE_ACTION(ContextRoadTrigger, TRIGT1)
 {
-	CRoadTrigger *trigger= CWorkPtr::roadTrigger();
+	CRoadTrigger *trigger = CWorkPtr::roadTrigger();
 	if (!trigger)
 		return;
 
@@ -542,9 +525,9 @@ DEFINE_ACTION(ContextRoadTrigger,TRIGT1)
 
 	trigger->_Trigger1 = CAICircle(CAIVector(x, y), r);
 }
-DEFINE_ACTION(ContextRoadTrigger,TRIGT2)
+DEFINE_ACTION(ContextRoadTrigger, TRIGT2)
 {
-	CRoadTrigger *trigger= CWorkPtr::roadTrigger();
+	CRoadTrigger *trigger = CWorkPtr::roadTrigger();
 	if (!trigger)
 		return;
 
@@ -555,9 +538,9 @@ DEFINE_ACTION(ContextRoadTrigger,TRIGT2)
 
 	trigger->_Trigger2 = CAICircle(CAIVector(x, y), r);
 }
-DEFINE_ACTION(ContextRoadTrigger,TRIGSP)
+DEFINE_ACTION(ContextRoadTrigger, TRIGSP)
 {
-	CRoadTrigger *trigger= CWorkPtr::roadTrigger();
+	CRoadTrigger *trigger = CWorkPtr::roadTrigger();
 	if (!trigger)
 		return;
 
@@ -568,181 +551,177 @@ DEFINE_ACTION(ContextRoadTrigger,TRIGSP)
 
 	trigger->_Spawn = CAICircle(CAIVector(x, y), r);
 }
-DEFINE_ACTION(ContextRoadTrigger,TRIGFLG)
+DEFINE_ACTION(ContextRoadTrigger, TRIGFLG)
 {
-//	CRoadTrigger *trigger= CWorkPtr::roadTrigger();
-//	if (!trigger)
-//		return;
-//
-//	string flag;
-//
-//	trigger->_FamilyFlags.clearFamily();
-//
-//	for (uint i=0; i<args.size(); ++i)
-//	{
-//		string flag;
-//		args[i].get(flag);
-//		TPopulationFamily fam(flag);
-//		if (fam.FamilyTag != family_bad)
-//			trigger->_FamilyFlags.addFamily(flag);
-//	}
+	//	CRoadTrigger *trigger= CWorkPtr::roadTrigger();
+	//	if (!trigger)
+	//		return;
+	//
+	//	string flag;
+	//
+	//	trigger->_FamilyFlags.clearFamily();
+	//
+	//	for (uint i=0; i<args.size(); ++i)
+	//	{
+	//		string flag;
+	//		args[i].get(flag);
+	//		TPopulationFamily fam(flag);
+	//		if (fam.FamilyTag != family_bad)
+	//			trigger->_FamilyFlags.addFamily(flag);
+	//	}
 }
 
-
- DEFINE_ACTION(BaseContextState, GRPFAM)
+DEFINE_ACTION(BaseContextState, GRPFAM)
 {
-	string	family;
+	string family;
 	CAIAliasDescriptionNode *
-		aliasTree;
-	std::string grpFamName;	
+	    aliasTree;
+	std::string grpFamName;
 	uint32 logicActionAlias;
-	if	(!getArgs(args,name(),aliasTree, family, grpFamName, logicActionAlias))
-		return;		
+	if (!getArgs(args, name(), aliasTree, family, grpFamName, logicActionAlias))
+		return;
 	IAILogicAction *action = CWorkPtr::getLogicActionFromAlias(logicActionAlias);
 	if (!action) return;
-	
+
 	CSmartPtr<CGroupFamily> grpFam = new CGroupFamily(NULL, aliasTree->getAlias(), grpFamName);
-	
+
 	grpFam->updateAliasTree(*aliasTree);
 
 	action->addGroupFamily(grpFam);
-		
+
 	CWorkPtr::groupFamily(grpFam);
 	CContextStack::setContext(ContextGroupFamily);
 }
 
-DEFINE_ACTION(ContextRegion,GRPFAM)
+DEFINE_ACTION(ContextRegion, GRPFAM)
 {
-	string	family;
+	string family;
 	CAIAliasDescriptionNode *aliasTree;
-	if	(!getArgs(args,name(),aliasTree, family))
-		return;		
-	CGroupFamily *groupFamily;	
-	CRegion *const	region = CWorkPtr::region();
-	if	(!region)
+	if (!getArgs(args, name(), aliasTree, family))
+		return;
+	CGroupFamily *groupFamily;
+	CRegion *const region = CWorkPtr::region();
+	if (!region)
 		return;
 	// see whether the region is already loaded
-	groupFamily= region->groupFamilies().getChildByAlias(aliasTree->getAlias());	
-	
-	if	(!groupFamily)
-		return;	
+	groupFamily = region->groupFamilies().getChildByAlias(aliasTree->getAlias());
+
+	if (!groupFamily)
+		return;
 	groupFamily->setFamilyTag(family);
 	CWorkPtr::groupFamily(groupFamily);
 	CContextStack::setContext(ContextGroupFamily);
 }
 
-DEFINE_ACTION(ContextGroupFamily,TMPPRFF)
-{	
-	CGroupFamily *const	groupFamily = CWorkPtr::groupFamily();
-	if	(!groupFamily)
+DEFINE_ACTION(ContextGroupFamily, TMPPRFF)
+{
+	CGroupFamily *const groupFamily = CWorkPtr::groupFamily();
+	if (!groupFamily)
 		return;
 
 	groupFamily->setProfileName("groupFamilyProfileFauna");
 }
 
-DEFINE_ACTION(ContextGroupFamily,TMPPRFT)
-{	
-	CGroupFamily *const	groupFamily = CWorkPtr::groupFamily();
-	if	(!groupFamily)
+DEFINE_ACTION(ContextGroupFamily, TMPPRFT)
+{
+	CGroupFamily *const groupFamily = CWorkPtr::groupFamily();
+	if (!groupFamily)
 		return;
 
-	if (args.size()!=1)
+	if (args.size() != 1)
 		return;
 
-	CAggroGroupContainer *aggroGroupContainer= new CAggroGroupContainer();
+	CAggroGroupContainer *aggroGroupContainer = new CAggroGroupContainer();
 	string aggroGroupString;
-	args[0].get(aggroGroupString);	
+	args[0].get(aggroGroupString);
 	AISHEETS::CCreature::getGroupStr(aggroGroupContainer->aggroGroupIds, aggroGroupString);
-	
+
 	groupFamily->setProfileName("groupFamilyProfileTribe");
 	groupFamily->setProfileParams("aggro_groups", aggroGroupContainer);
 }
 
-DEFINE_ACTION(ContextGroupFamily,TMPPRFN)
-{	
-	CGroupFamily *const	groupFamily = CWorkPtr::groupFamily();
-	if	(!groupFamily)
+DEFINE_ACTION(ContextGroupFamily, TMPPRFN)
+{
+	CGroupFamily *const groupFamily = CWorkPtr::groupFamily();
+	if (!groupFamily)
 		return;
 
 	groupFamily->setProfileName("groupFamilyProfileNpc");
 }
 
-DEFINE_ACTION(ContextGroupFamily,TMPPRFNF)	//	Npc flags
-{	
-	CGroupFamily *const	groupFamily = CWorkPtr::groupFamily();
-	if	(!groupFamily)
+DEFINE_ACTION(ContextGroupFamily, TMPPRFNF) //	Npc flags
+{
+	CGroupFamily *const groupFamily = CWorkPtr::groupFamily();
+	if (!groupFamily)
 		return;
 
-	AITYPES::CPropertySet	actSet;
+	AITYPES::CPropertySet actSet;
 
-	for (uint i=0; i<args.size(); ++i)
+	for (uint i = 0; i < args.size(); ++i)
 	{
 		string activityProp;
 		args[i].get(activityProp);
 		actSet.addProperty(CPropertyId::create(activityProp));
 	}
-	
+
 	groupFamily->addProfileProperty(string("npc"), actSet);
 }
-DEFINE_ACTION(ContextGroupFamily,TMPPRFFF)	//	Food
-{	
-	CGroupFamily *const	groupFamily = CWorkPtr::groupFamily();
-	if	(!groupFamily)
+DEFINE_ACTION(ContextGroupFamily, TMPPRFFF) //	Food
+{
+	CGroupFamily *const groupFamily = CWorkPtr::groupFamily();
+	if (!groupFamily)
 		return;
 
-	AITYPES::CPropertySet	actSet;
+	AITYPES::CPropertySet actSet;
 
-	for (uint i=0; i<args.size(); ++i)
+	for (uint i = 0; i < args.size(); ++i)
 	{
 		string activityProp;
 		args[i].get(activityProp);
 		actSet.addProperty(CPropertyId::create(activityProp));
 	}
-	
+
 	groupFamily->addProfileProperty(string("food"), actSet);
 }
-DEFINE_ACTION(ContextGroupFamily,TMPPRFFR)	//	Rest
-{	
-	CGroupFamily *const	groupFamily = CWorkPtr::groupFamily();
-	if	(!groupFamily)
+DEFINE_ACTION(ContextGroupFamily, TMPPRFFR) //	Rest
+{
+	CGroupFamily *const groupFamily = CWorkPtr::groupFamily();
+	if (!groupFamily)
 		return;
 
-	AITYPES::CPropertySet	actSet;
-	
-	for (uint i=0; i<args.size(); ++i)
+	AITYPES::CPropertySet actSet;
+
+	for (uint i = 0; i < args.size(); ++i)
 	{
 		string activityProp;
 		args[i].get(activityProp);
 		actSet.addProperty(CPropertyId::create(activityProp));
 	}
-	
+
 	groupFamily->addProfileProperty(string("rest"), actSet);
 }
 
-
-
-DEFINE_ACTION(ContextGroupFamily,GRPTMPL)
+DEFINE_ACTION(ContextGroupFamily, GRPTMPL)
 {
-	CGroupFamily *const	groupFamily = CWorkPtr::groupFamily();
-	if	(!groupFamily)
+	CGroupFamily *const groupFamily = CWorkPtr::groupFamily();
+	if (!groupFamily)
 		return;
 
-	string	grpFamily;
-	uint32	botCount;
-	bool	countMultipliedBySheet;
-	bool	multiLevel;
+	string grpFamily;
+	uint32 botCount;
+	bool countMultipliedBySheet;
+	bool multiLevel;
 
 	// read the alias tree from the argument list
 	CAIAliasDescriptionNode *aliasTree;
-	if	(!getArgs(args, name(), aliasTree, grpFamily, botCount, countMultipliedBySheet, multiLevel))
+	if (!getArgs(args, name(), aliasTree, grpFamily, botCount, countMultipliedBySheet, multiLevel))
 		return;
 
-	CGroupDesc<CGroupFamily> *const	groupDesc= groupFamily->groupDescs().getChildByAlias(aliasTree->getAlias());
-	if	(!groupDesc)
+	CGroupDesc<CGroupFamily> *const groupDesc = groupFamily->groupDescs().getChildByAlias(aliasTree->getAlias());
+	if (!groupDesc)
 		return;
 
-	
-	groupDesc->setBaseBotCount	(botCount);
+	groupDesc->setBaseBotCount(botCount);
 	groupDesc->setCountMultiplierFlag(countMultipliedBySheet);
 	groupDesc->setMultiLevel(multiLevel);
 
@@ -750,12 +729,11 @@ DEFINE_ACTION(ContextGroupFamily,GRPTMPL)
 	CContextStack::setContext(ContextGroupDesc);
 }
 
-DEFINE_ACTION(ContextGroupFamily,GF_FAM)
+DEFINE_ACTION(ContextGroupFamily, GF_FAM)
 {
-	CGroupFamily *const	groupFamily = CWorkPtr::groupFamily();
-	if	(!groupFamily)
+	CGroupFamily *const groupFamily = CWorkPtr::groupFamily();
+	if (!groupFamily)
 		return;
-
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -763,20 +741,20 @@ DEFINE_ACTION(ContextGroupFamily,GF_FAM)
 //////////////////////////////////////////////////////////////////////////////
 
 // C for continent
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,GT_SHEE,C,CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, GT_SHEE, C, CGroupFamily);
 
-//static CActionHandler_GT_SHEE<ContextGroupDesc, CGroupFamily> ActionHandler_ContextGroupDesc_GT_SHEE("GT_SHEE""C");
+// static CActionHandler_GT_SHEE<ContextGroupDesc, CGroupFamily> ActionHandler_ContextGroupDesc_GT_SHEE("GT_SHEE""C");
 
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,GT_LVLD,C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,GT_SEAS,C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,GT_ACT, C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,GT_APRM,C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,GT_NRG, C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,GT_EQUI,C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,GT_GPRM,C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,BOTTMPL,C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextBotDesc,BT_EQUI,C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextBotDesc,BT_LVLD,C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,GT_GNRJ,C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,POPVER, C,CGroupFamily);
-DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc,GT_END, C,CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, GT_LVLD, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, GT_SEAS, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, GT_ACT, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, GT_APRM, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, GT_NRG, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, GT_EQUI, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, GT_GPRM, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, BOTTMPL, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextBotDesc, BT_EQUI, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextBotDesc, BT_LVLD, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, GT_GNRJ, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, POPVER, C, CGroupFamily);
+DEFINE_ACTION_TEMPLATE1_INSTANCE(ContextGroupDesc, GT_END, C, CGroupFamily);

@@ -23,10 +23,10 @@
 
 #include <time.h>
 
-uint32	CTableBuffer::_MaxRefFileSize = 32768; //128*1024*1024;
+uint32 CTableBuffer::_MaxRefFileSize = 32768; // 128*1024*1024;
 
 // Common stamp
-uint32	CTableBuffer::_CommonStamp = 0;
+uint32 CTableBuffer::_CommonStamp = 0;
 
 /*
  * Constructor
@@ -47,7 +47,7 @@ CTableBuffer::~CTableBuffer()
 /*
  * Clear all
  */
-void	CTableBuffer::clear()
+void CTableBuffer::clear()
 {
 	_Init = false;
 	_TableId = 0;
@@ -67,7 +67,7 @@ void	CTableBuffer::clear()
 /*
  * Init
  */
-void	CTableBuffer::init(uint32 tableId, uint32 rowSize, bool mapped)
+void CTableBuffer::init(uint32 tableId, uint32 rowSize, bool mapped)
 {
 	clear();
 
@@ -85,7 +85,7 @@ void	CTableBuffer::init(uint32 tableId, uint32 rowSize, bool mapped)
 /*
  * Init
  */
-void	CTableBuffer::init(uint32 tableId, const std::string& refRootPath, const std::string& refPath) //CRefIndex& ref)
+void CTableBuffer::init(uint32 tableId, const std::string &refRootPath, const std::string &refPath) // CRefIndex& ref)
 {
 	clear();
 
@@ -100,7 +100,7 @@ void	CTableBuffer::init(uint32 tableId, const std::string& refRootPath, const st
 /*
  * Setup Ref
  */
-void	CTableBuffer::setupRef(CRefIndex& ref)
+void CTableBuffer::setupRef(CRefIndex &ref)
 {
 	nlassert(_Init);
 
@@ -115,19 +115,16 @@ void	CTableBuffer::setupRef(CRefIndex& ref)
 	flushReleased();
 }
 
-
-
-
 /*
  * Return a pointer to straight row data
  * If row is not loaded, data are loaded from table file
  */
-CTableBuffer::CAccessor	CTableBuffer::getRow(RY_PDS::TRowIndex row)
+CTableBuffer::CAccessor CTableBuffer::getRow(RY_PDS::TRowIndex row)
 {
 	nlassert(_Init);
 
-	TRowData			rowData = NULL;
-	TRowMap::iterator	it = _RowMap.find(row);
+	TRowData rowData = NULL;
+	TRowMap::iterator it = _RowMap.find(row);
 
 	PDS_FULL_DEBUG("getRow(): row '%d'", row);
 
@@ -148,12 +145,12 @@ CTableBuffer::CAccessor	CTableBuffer::getRow(RY_PDS::TRowIndex row)
  * Return a pointer to straight new row data
  * Row is filled with blank, not loaded from file
  */
-CTableBuffer::CAccessor	CTableBuffer::getEmptyRow(RY_PDS::TRowIndex row)
+CTableBuffer::CAccessor CTableBuffer::getEmptyRow(RY_PDS::TRowIndex row)
 {
 	nlassert(_Init);
 
-	TRowData			rowData = NULL;
-	TRowMap::iterator	it = _RowMap.find(row);
+	TRowData rowData = NULL;
+	TRowMap::iterator it = _RowMap.find(row);
 
 	if (it == _RowMap.end())
 	{
@@ -175,7 +172,7 @@ CTableBuffer::CAccessor	CTableBuffer::getEmptyRow(RY_PDS::TRowIndex row)
  * Acquire a Row
  * Row is marked as non releasable until it is released enough time
  */
-bool	CTableBuffer::acquireRow(CAccessor accessor)
+bool CTableBuffer::acquireRow(CAccessor accessor)
 {
 	nlassert(_Init);
 
@@ -187,7 +184,7 @@ bool	CTableBuffer::acquireRow(CAccessor accessor)
  * Row is marked as purgeable, and will be purged as soon as possible
  * unless it is reactivated before purge
  */
-bool	CTableBuffer::releaseRow(CAccessor accessor)
+bool CTableBuffer::releaseRow(CAccessor accessor)
 {
 	nlassert(_Init);
 
@@ -199,11 +196,11 @@ bool	CTableBuffer::releaseRow(CAccessor accessor)
  * Row is marked as purgeable, and will be purged as soon as possible
  * unless it is reactivated before purge
  */
-bool	CTableBuffer::releaseRow(RY_PDS::TRowIndex row)
+bool CTableBuffer::releaseRow(RY_PDS::TRowIndex row)
 {
 	nlassert(_Init);
 
-	TRowMap::iterator	it = _RowMap.find(row);
+	TRowMap::iterator it = _RowMap.find(row);
 
 	if (it == _RowMap.end())
 	{
@@ -216,11 +213,11 @@ bool	CTableBuffer::releaseRow(RY_PDS::TRowIndex row)
 /*
  * Release all rows
  */
-bool	CTableBuffer::releaseAll()
+bool CTableBuffer::releaseAll()
 {
-	TRowMap::iterator	it, itr;
+	TRowMap::iterator it, itr;
 
-	for (it=_RowMap.begin(); it!=_RowMap.end(); )
+	for (it = _RowMap.begin(); it != _RowMap.end();)
 	{
 		// force all rows as unacquired
 		itr = it++;
@@ -230,33 +227,28 @@ bool	CTableBuffer::releaseAll()
 	return true;
 }
 
-
-
-
-
-
 /*
  * Load a row from the appropriate reference file
  */
-bool	CTableBuffer::loadRow(RY_PDS::TRowIndex row, TRowData rowData)
+bool CTableBuffer::loadRow(RY_PDS::TRowIndex row, TRowData rowData)
 {
 	nlassert(_Init);
 
 	// locate reference file
-	uint32	file = row / _RowsPerFile;
+	uint32 file = row / _RowsPerFile;
 
 	// check reference is ready
 	if (!checkRef(file))
 		return false;
 
-	CDBReferenceFile&	refFile = *(_RefFileMap[file]);
+	CDBReferenceFile &refFile = *(_RefFileMap[file]);
 
 	if (!refFile.read(row, rowData))
 		return false;
 
 	// row comes from reference
 	// clear Dirty and AcquireCount, as row was loaded from reference
-	CHeader*	hdr = (CHeader*)rowData;
+	CHeader *hdr = (CHeader *)rowData;
 
 	hdr->clearDirtStamp();
 	hdr->clearAcquireCount();
@@ -264,13 +256,11 @@ bool	CTableBuffer::loadRow(RY_PDS::TRowIndex row, TRowData rowData)
 	return true;
 }
 
-
-
 /*
  * Update a Row
  * Update in file the whole row
  */
-bool	CTableBuffer::updateRow(CAccessor accessor)
+bool CTableBuffer::updateRow(CAccessor accessor)
 {
 	return updateRow(accessor.row(), accessor.fullRow(), true);
 }
@@ -278,23 +268,23 @@ bool	CTableBuffer::updateRow(CAccessor accessor)
 /*
  * Update a Row
  */
-bool	CTableBuffer::updateRow(RY_PDS::TRowIndex row, const TRowData rowData, bool forceWriteToDisk)
+bool CTableBuffer::updateRow(RY_PDS::TRowIndex row, const TRowData rowData, bool forceWriteToDisk)
 {
 	nlassert(_Init);
 
-	TRowMap::iterator	it = _RowMap.find(row);
+	TRowMap::iterator it = _RowMap.find(row);
 
 	// if row is not mapped in ram or if disk write is forced
 	if (it == _RowMap.end() || forceWriteToDisk)
 	{
 		// locate reference file
-		uint32	file = row / _RowsPerFile;
+		uint32 file = row / _RowsPerFile;
 		// check reference is ready
 		if (!checkRef(file))
 			return false;
 
 		// update row
-		CDBReferenceFile&	refFile = *(_RefFileMap[file]);
+		CDBReferenceFile &refFile = *(_RefFileMap[file]);
 		if (!refFile.update(row, rowData))
 			return false;
 	}
@@ -303,10 +293,10 @@ bool	CTableBuffer::updateRow(RY_PDS::TRowIndex row, const TRowData rowData, bool
 	if (it != _RowMap.end())
 	{
 		// get row data buffer
-		TRowData	dest = (*it).second;
+		TRowData dest = (*it).second;
 
 		// row is clean and warm from reference file
-		((CHeader*)rowData)->clearDirtStamp();
+		((CHeader *)rowData)->clearDirtStamp();
 
 		// copy data
 		memcpy(dest, rowData, _InternalRowSize);
@@ -318,11 +308,11 @@ bool	CTableBuffer::updateRow(RY_PDS::TRowIndex row, const TRowData rowData, bool
 /*
  * Mark a Row as being dirty for later delta save
  */
-bool	CTableBuffer::dirtyRow(CAccessor accessor)
+bool CTableBuffer::dirtyRow(CAccessor accessor)
 {
 	nlassert(_Init);
 
-	CHeader*	header = (CHeader*)accessor.fullRow();
+	CHeader *header = (CHeader *)accessor.fullRow();
 
 	// check row not dirty already
 	if (!header->dirty())
@@ -338,7 +328,7 @@ bool	CTableBuffer::dirtyRow(CAccessor accessor)
 /*
  * Build Delta
  */
-bool	CTableBuffer::buildDelta(const CTimestamp& starttimestamp, const CTimestamp& endtimestamp)
+bool CTableBuffer::buildDelta(const CTimestamp &starttimestamp, const CTimestamp &endtimestamp)
 {
 	nlassert(_Init);
 
@@ -347,23 +337,23 @@ bool	CTableBuffer::buildDelta(const CTimestamp& starttimestamp, const CTimestamp
 		return true;
 
 	// setup delta file
-	CDBDeltaFile	delta;
-	std::string		deltaFilename = CDBDeltaFile::getDeltaFileName(_TableId, endtimestamp);
-	delta.setup(deltaFilename, _RefRootPath+"seconds", _InternalRowSize, starttimestamp, endtimestamp);
+	CDBDeltaFile delta;
+	std::string deltaFilename = CDBDeltaFile::getDeltaFileName(_TableId, endtimestamp);
+	delta.setup(deltaFilename, _RefRootPath + "seconds", _InternalRowSize, starttimestamp, endtimestamp);
 
 	// setup delta id
 	delta.setDeltaIds(_CurrentDeltaId, _CurrentDeltaId);
 	++_CurrentDeltaId;
 
-	uint	i;
+	uint i;
 	// go through all dirty rows
-	for (i=0; i<_DirtyList.size(); ++i)
+	for (i = 0; i < _DirtyList.size(); ++i)
 	{
-		RY_PDS::TRowIndex	row = _DirtyList[i].row();
-		TRowData			data = _DirtyList[i].fullRow();
+		RY_PDS::TRowIndex row = _DirtyList[i].row();
+		TRowData data = _DirtyList[i].fullRow();
 
 		// clean dirty flag
-		((CHeader*)data)->clearFlags(CHeader::Dirty);
+		((CHeader *)data)->clearFlags(CHeader::Dirty);
 
 		if (!delta.write(row, data))
 			return false;
@@ -373,7 +363,7 @@ bool	CTableBuffer::buildDelta(const CTimestamp& starttimestamp, const CTimestamp
 	_DirtyList.clear();
 
 	//
-	std::string		filename = _RefRootPath+"seconds/"+deltaFilename;
+	std::string filename = _RefRootPath + "seconds/" + deltaFilename;
 	PDS_DEBUG("buildDelta(): built table delta '%s', %d rows written", filename.c_str(), i);
 
 	return true;
@@ -382,9 +372,9 @@ bool	CTableBuffer::buildDelta(const CTimestamp& starttimestamp, const CTimestamp
 /*
  * Apply delta changes from a file
  */
-bool	CTableBuffer::applyDeltaChanges(const std::string& filename)
+bool CTableBuffer::applyDeltaChanges(const std::string &filename)
 {
-	CDBDeltaFile	delta;
+	CDBDeltaFile delta;
 
 	delta.setup(filename, _InternalRowSize, CTimestamp(), CTimestamp());
 
@@ -408,7 +398,7 @@ bool	CTableBuffer::applyDeltaChanges(const std::string& filename)
 		return false;
 	}
 
-	uint32				startDeltaId, endDeltaId;
+	uint32 startDeltaId, endDeltaId;
 	delta.getDeltaIds(startDeltaId, endDeltaId);
 
 	if (!updateDeltaIds(startDeltaId, endDeltaId))
@@ -417,9 +407,9 @@ bool	CTableBuffer::applyDeltaChanges(const std::string& filename)
 		return false;
 	}
 
-	uint32				index;
-	std::vector<uint8>	buffer(_InternalRowSize);
-	uint8*				data = &(buffer[0]);
+	uint32 index;
+	std::vector<uint8> buffer(_InternalRowSize);
+	uint8 *data = &(buffer[0]);
 
 	// read data from delta till the end
 	while (true)
@@ -445,35 +435,34 @@ bool	CTableBuffer::applyDeltaChanges(const std::string& filename)
 	return true;
 }
 
-
 /*
  * Flush Released Rows from memory
  */
-void	CTableBuffer::flushReleased()
+void CTableBuffer::flushReleased()
 {
-	TReleaseSet::iterator	it;
+	TReleaseSet::iterator it;
 
 	// go through all released rows
-	for (it=_ReleaseSet.begin(); it!=_ReleaseSet.end(); )
+	for (it = _ReleaseSet.begin(); it != _ReleaseSet.end();)
 	{
 		// get row
-		TRowMap::iterator	rit = _RowMap.find(*it);
+		TRowMap::iterator rit = _RowMap.find(*it);
 		if (rit == _RowMap.end())
 		{
 			PDS_WARNING("flushReleased(): row '%d' not present, already released?", *it);
 			// anyway, remove from released set
-			TReleaseSet::iterator	itr = (it++);
+			TReleaseSet::iterator itr = (it++);
 			_ReleaseSet.erase(itr);
 			continue;
 		}
 
 		// check row has really been released
-		CHeader*	header = (CHeader*)(*rit).second;
+		CHeader *header = (CHeader *)(*rit).second;
 		if (!header->isAcquired())
 		{
 			PDS_WARNING("flushReleased(): try to release row '%d' not flagged as being released, bypassed", *it);
 			// remove from release set
-			TReleaseSet::iterator	itr = (it++);
+			TReleaseSet::iterator itr = (it++);
 			_ReleaseSet.erase(itr);
 			continue;
 		}
@@ -491,7 +480,7 @@ void	CTableBuffer::flushReleased()
 		_RowMap.erase(rit);
 
 		// remove from set
-		TReleaseSet::iterator	itr = (it++);
+		TReleaseSet::iterator itr = (it++);
 		_ReleaseSet.erase(itr);
 	}
 }
@@ -499,14 +488,14 @@ void	CTableBuffer::flushReleased()
 /*
  * Reset dirty tags
  */
-void	CTableBuffer::resetDirty()
+void CTableBuffer::resetDirty()
 {
 	_DirtyList.clear();
 
-	TRowMap::iterator	it;
-	for (it=_RowMap.begin(); it!=_RowMap.end(); ++it)
+	TRowMap::iterator it;
+	for (it = _RowMap.begin(); it != _RowMap.end(); ++it)
 	{
-		CHeader*	header = (CHeader*)((*it).second);
+		CHeader *header = (CHeader *)((*it).second);
 		header->clearFlags(CHeader::Dirty);
 	}
 }
@@ -514,10 +503,10 @@ void	CTableBuffer::resetDirty()
 /*
  * Flush Reference files
  */
-void	CTableBuffer::flushRefFiles()
+void CTableBuffer::flushRefFiles()
 {
-	uint	i;
-	for (i=0; i<_RefFileMap.size(); ++i)
+	uint i;
+	for (i = 0; i < _RefFileMap.size(); ++i)
 		if (_RefFileMap[i] != NULL && _RefFileMap[i]->initialised())
 			_RefFileMap[i]->flush();
 }
@@ -525,10 +514,10 @@ void	CTableBuffer::flushRefFiles()
 /*
  * Purge all references
  */
-bool	CTableBuffer::purgeReferences()
+bool CTableBuffer::purgeReferences()
 {
-	uint	i;
-	for (i=0; i<_RefFileMap.size(); ++i)
+	uint i;
+	for (i = 0; i < _RefFileMap.size(); ++i)
 	{
 		if (_RefFileMap[i] != NULL && _RefFileMap[i]->initialised())
 		{
@@ -546,17 +535,17 @@ bool	CTableBuffer::purgeReferences()
 /*
  * Open all reference files in reference directory
  */
-bool	CTableBuffer::openAllRefFilesWrite()
+bool CTableBuffer::openAllRefFilesWrite()
 {
-	std::vector<std::string>	refs;
+	std::vector<std::string> refs;
 
 	getReferenceFilesList(refs);
 
-	uint	i;
-	for (i=0; i<refs.size(); ++i)
+	uint i;
+	for (i = 0; i < refs.size(); ++i)
 	{
-		uint32	tableId;
-		uint32	refFileId;
+		uint32 tableId;
+		uint32 refFileId;
 
 		// check file is a reference of the table
 		if (!CDBReferenceFile::isRefFile(refs[i], tableId, refFileId) || tableId != _TableId)
@@ -584,20 +573,20 @@ bool	CTableBuffer::openAllRefFilesWrite()
 /*
  * Open all reference files in reference directory
  */
-bool	CTableBuffer::openAllRefFilesRead()
+bool CTableBuffer::openAllRefFilesRead()
 {
-	std::vector<std::string>	refs;
+	std::vector<std::string> refs;
 
 	getReferenceFilesList(refs);
 
-	uint32	startId = 0xffffffff;
-	uint32	endId = 0xffffffff;
+	uint32 startId = 0xffffffff;
+	uint32 endId = 0xffffffff;
 
-	uint	i;
-	for (i=0; i<refs.size(); ++i)
+	uint i;
+	for (i = 0; i < refs.size(); ++i)
 	{
-		uint32	tableId;
-		uint32	refFileId;
+		uint32 tableId;
+		uint32 refFileId;
 
 		// check file is a reference of the table
 		if (!CDBReferenceFile::isRefFile(refs[i], tableId, refFileId) || tableId != _TableId)
@@ -618,7 +607,7 @@ bool	CTableBuffer::openAllRefFilesRead()
 			return false;
 		}
 
-		uint32	endIdCheck;
+		uint32 endIdCheck;
 		_RefFileMap[refFileId]->getUpdateDeltaIds(startId, endIdCheck);
 
 		if (endId == 0xffffffff)
@@ -637,14 +626,13 @@ bool	CTableBuffer::openAllRefFilesRead()
 	return true;
 }
 
-
 /*
  * Update delta ids for all references
  */
-bool	CTableBuffer::updateDeltaIds(uint32 start, uint32 end)
+bool CTableBuffer::updateDeltaIds(uint32 start, uint32 end)
 {
-	uint	i;
-	for (i=0; i<_RefFileMap.size(); ++i)
+	uint i;
+	for (i = 0; i < _RefFileMap.size(); ++i)
 	{
 		if (_RefFileMap[i] == NULL || !_RefFileMap[i]->initialised())
 		{
@@ -662,60 +650,57 @@ bool	CTableBuffer::updateDeltaIds(uint32 start, uint32 end)
 	return true;
 }
 
-
-
 /*
  * Get Reference Files list
  */
-void	CTableBuffer::getReferenceFilesList(std::vector<std::string> &result)
+void CTableBuffer::getReferenceFilesList(std::vector<std::string> &result)
 {
 	result.clear();
-	std::vector<std::string>	files;
+	std::vector<std::string> files;
 	NLMISC::CPath::getPathContent(_RefPath, false, false, true, files);
 
-	uint	i;
+	uint i;
 	// check all files in reference directory
-	for (i=0; i<files.size(); ++i)
+	for (i = 0; i < files.size(); ++i)
 	{
-		uint32	tableId;
-		uint32	refFileId;
+		uint32 tableId;
+		uint32 refFileId;
 
 		// check file is a reference of the table
 		if (!CDBReferenceFile::isRefFile(files[i], tableId, refFileId) || tableId != _TableId)
 			continue;
 
 		if (result.size() <= refFileId)
-			result.resize(refFileId+1);
+			result.resize(refFileId + 1);
 
 		result[refFileId] = files[i];
 	}
 }
 
-
 /*
  * Build RowMapper
  */
-bool	CTableBuffer::buildRowMapper()
+bool CTableBuffer::buildRowMapper()
 {
-	std::vector<std::string>	files;
+	std::vector<std::string> files;
 	getReferenceFilesList(files);
 
-	std::vector<uint8>	buffer(_InternalRowSize);
-	uint8*	rowData = &(buffer[0]);
+	std::vector<uint8> buffer(_InternalRowSize);
+	uint8 *rowData = &(buffer[0]);
 
 	_RowMapper.clear();
 
-	uint	i;
+	uint i;
 	// check all files in reference directory
-	for (i=0; i<files.size(); ++i)
+	for (i = 0; i < files.size(); ++i)
 	{
 		if (files[i].empty())
 			continue;
 
 		// get row indices in reference file
-		RY_PDS::TRowIndex	base, end, row;
+		RY_PDS::TRowIndex base, end, row;
 
-		CDBReferenceFile	refFile;
+		CDBReferenceFile refFile;
 
 		// init and preload file
 		refFile.setup(NLMISC::CFile::getFilename(files[i]), _RefPath, 0, 0, _InternalRowSize);
@@ -731,9 +716,9 @@ bool	CTableBuffer::buildRowMapper()
 
 		refFile.close();
 
-		for (row=base; row<end; ++row)
+		for (row = base; row < end; ++row)
 		{
-			CAccessor		accessor = getRow(row);
+			CAccessor accessor = getRow(row);
 
 			if (!processRow(accessor))
 			{
@@ -752,9 +737,9 @@ bool	CTableBuffer::buildRowMapper()
 /*
  * Process row for RowMapper
  */
-bool	CTableBuffer::processRow(CAccessor& accessor)
+bool CTableBuffer::processRow(CAccessor &accessor)
 {
-	CMappedHeader*	header = (CMappedHeader*)accessor.fullRow();
+	CMappedHeader *header = (CMappedHeader *)accessor.fullRow();
 
 	// allocate row if needed
 	if (!header->allocated())
@@ -784,7 +769,7 @@ bool	CTableBuffer::processRow(CAccessor& accessor)
 	if (_RowMapper.isMapped(header->getKey()))
 	{
 		// check key not yet mapped
-		RY_PDS::CObjectIndex	prevMap = _RowMapper.get(header->getKey());
+		RY_PDS::CObjectIndex prevMap = _RowMapper.get(header->getKey());
 
 		// already mapped
 		if (!RY_PDS::ResolveDoubleMappedRows)
@@ -815,22 +800,20 @@ bool	CTableBuffer::processRow(CAccessor& accessor)
 	return true;
 }
 
-
-
 /*
  * Process Rows, apply external row processing after rows are loaded
  */
-bool	CTableBuffer::processRows(IRowProcessor* processor)
+bool CTableBuffer::processRows(IRowProcessor *processor)
 {
-	RY_PDS::TRowIndex	row;
+	RY_PDS::TRowIndex row;
 
-	for (row=0; row<maxRowIndex(); ++row)
+	for (row = 0; row < maxRowIndex(); ++row)
 	{
 		// process only allocated rows
 		if (!_RowMapper.allocated(row))
 			continue;
 
-		CAccessor		accessor = getRow(row);
+		CAccessor accessor = getRow(row);
 
 		if (!processor->processRow((RY_PDS::TTableIndex)_TableId, accessor))
 		{
@@ -845,14 +828,12 @@ bool	CTableBuffer::processRows(IRowProcessor* processor)
 	return true;
 }
 
-
-
 /*
  * Allocate a row in a table
  * \param row is the row to allocate
  * Return true if succeeded
  */
-bool	CTableBuffer::allocate(RY_PDS::TRowIndex row, CAccessor& accessor)
+bool CTableBuffer::allocate(RY_PDS::TRowIndex row, CAccessor &accessor)
 {
 	// check row is free
 	if (_RowMapper.allocated(row))
@@ -862,7 +843,7 @@ bool	CTableBuffer::allocate(RY_PDS::TRowIndex row, CAccessor& accessor)
 	}
 
 	accessor = getRow(row);
-	CMappedHeader	*header = (CMappedHeader*)accessor.fullRow();
+	CMappedHeader *header = (CMappedHeader *)accessor.fullRow();
 	header->setFlags(CHeader::Allocated);
 	_RowMapper.allocate(row);
 
@@ -880,7 +861,7 @@ bool	CTableBuffer::allocate(RY_PDS::TRowIndex row, CAccessor& accessor)
  * \param row is the row to deallocate
  * Return true if succeeded
  */
-bool	CTableBuffer::deallocate(RY_PDS::TRowIndex row)
+bool CTableBuffer::deallocate(RY_PDS::TRowIndex row)
 {
 	// check row is allocated
 	if (!_RowMapper.allocated(row))
@@ -889,8 +870,8 @@ bool	CTableBuffer::deallocate(RY_PDS::TRowIndex row)
 		return false;
 	}
 
-	CAccessor		accessor = getRow(row);
-	CMappedHeader	*header = (CMappedHeader*)accessor.fullRow();
+	CAccessor accessor = getRow(row);
+	CMappedHeader *header = (CMappedHeader *)accessor.fullRow();
 
 	// unmap row if was previously mapped -- just in case unmap not called
 	if (_Mapped && header->getKey() != 0)
@@ -912,7 +893,7 @@ bool	CTableBuffer::deallocate(RY_PDS::TRowIndex row)
  * \param key is the 64 bits row key
  * Return true if succeeded
  */
-bool	CTableBuffer::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
+bool CTableBuffer::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 {
 	if (!_Mapped)
 	{
@@ -927,8 +908,8 @@ bool	CTableBuffer::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 		return false;
 	}
 
-	CAccessor		accessor = getRow(index.row());
-	CMappedHeader	*header = (CMappedHeader*)accessor.fullRow();
+	CAccessor accessor = getRow(index.row());
+	CMappedHeader *header = (CMappedHeader *)accessor.fullRow();
 
 	if (!_RowMapper.map(key, index))
 	{
@@ -954,7 +935,7 @@ bool	CTableBuffer::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
  * \param key is the 64 bits row key
  * Return true if succeeded
  */
-bool	CTableBuffer::unmapRow(const RY_PDS::CObjectIndex &index, uint64 key)
+bool CTableBuffer::unmapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 {
 	if (!_Mapped)
 	{
@@ -975,8 +956,8 @@ bool	CTableBuffer::unmapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 		return false;
 	}
 
-	CAccessor		accessor = getRow(index.row());
-	CMappedHeader	*header = (CMappedHeader*)accessor.fullRow();
+	CAccessor accessor = getRow(index.row());
+	CMappedHeader *header = (CMappedHeader *)accessor.fullRow();
 
 	if (header->getKey() != key)
 	{
@@ -994,7 +975,7 @@ bool	CTableBuffer::unmapRow(const RY_PDS::CObjectIndex &index, uint64 key)
  * \param key is the 64 bits row key
  * Return a valid TRowIndex if success
  */
-RY_PDS::CObjectIndex	CTableBuffer::getMappedRow(uint64 key) const
+RY_PDS::CObjectIndex CTableBuffer::getMappedRow(uint64 key) const
 {
 	if (!_Mapped)
 	{
@@ -1005,28 +986,18 @@ RY_PDS::CObjectIndex	CTableBuffer::getMappedRow(uint64 key) const
 	return _RowMapper.get(key);
 }
 
-
-
 /*
  * Update common Timestamp
  */
-void	CTableBuffer::updateCommonStamp()
+void CTableBuffer::updateCommonStamp()
 {
 	_CommonStamp = NLMISC::CTime::getSecondsSince1970();
 }
 
-
-
-
-
-
-
-
-
 /*
  * Setup debug delta file
  */
-bool	CTableBuffer::setupDebugDeltaFile(const std::string& filename, CDBDeltaFile& delta) const
+bool CTableBuffer::setupDebugDeltaFile(const std::string &filename, CDBDeltaFile &delta) const
 {
 	delta.setup(filename, _InternalRowSize, CTimestamp(), CTimestamp());
 
@@ -1042,12 +1013,12 @@ bool	CTableBuffer::setupDebugDeltaFile(const std::string& filename, CDBDeltaFile
 /*
  * Get Delta file Row
  */
-uint8*	CTableBuffer::getDeltaRow(uint32& row, CDBDeltaFile& delta) const
+uint8 *CTableBuffer::getDeltaRow(uint32 &row, CDBDeltaFile &delta) const
 {
-	static std::vector<uint8>	buffer;
+	static std::vector<uint8> buffer;
 
 	buffer.resize(_InternalRowSize);
-	uint8*	data = &(buffer[0]);
+	uint8 *data = &(buffer[0]);
 
 	// read data from delta file
 	if (!delta.read(row, data))

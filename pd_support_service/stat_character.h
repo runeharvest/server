@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef STAT_CHARACTER_H
 #define STAT_CHARACTER_H
 
@@ -25,13 +24,11 @@
 #include "nel/misc/sstring.h"
 #include "game_share/persistent_data.h"
 
-
 //-----------------------------------------------------------------------------
 // Data types
 //-----------------------------------------------------------------------------
 
 typedef uint32 TAIAlias;
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatScanMissionStepState
@@ -47,11 +44,10 @@ public:
 
 	CStatScanMissionStepState()
 	{
-		Index= 0;
-		State= 0;
+		Index = 0;
+		State = 0;
 	}
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatScanMissionStep
@@ -63,15 +59,14 @@ public:
 	DECLARE_PERSISTENCE_METHODS
 
 	uint32 IndexInTemplate;
-	typedef std::map<uint32,CStatScanMissionStepState> TStates;
+	typedef std::map<uint32, CStatScanMissionStepState> TStates;
 	TStates States;
 
 	CStatScanMissionStep()
 	{
-		IndexInTemplate= 0;
+		IndexInTemplate = 0;
 	}
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatScanMissionInstanceParent
@@ -100,30 +95,29 @@ public:
 	uint32 DescIndex;
 	uint32 WaitingQueueId;
 
-	typedef std::map<uint32,CStatScanMissionStep> TSteps;
+	typedef std::map<uint32, CStatScanMissionStep> TSteps;
 	TSteps Steps;
 
 	CStatScanMissionInstanceParent()
 	{
-		TemplateId= 0;
-		MainMissionTemplateId= 0;
-		Giver= 0;
-		MonoEndDate= 0;
-		EndDate= 0;
-		CriticalPartEndDate= 0;
-		BeginDate= 0;
-		FailureIndex= 0;
-		CrashHandlerIndex= 0;
-		PlayerReconnectHandlerIndex= 0;
-		Finished= 0;
-		MissionSuccess= 0;
-		DescIndex= 0;
-		WaitingQueueId= 0;
-		HourLowerBound= 0.0f;
-		HourUpperBound= 0.0f;
+		TemplateId = 0;
+		MainMissionTemplateId = 0;
+		Giver = 0;
+		MonoEndDate = 0;
+		EndDate = 0;
+		CriticalPartEndDate = 0;
+		BeginDate = 0;
+		FailureIndex = 0;
+		CrashHandlerIndex = 0;
+		PlayerReconnectHandlerIndex = 0;
+		Finished = 0;
+		MissionSuccess = 0;
+		DescIndex = 0;
+		WaitingQueueId = 0;
+		HourLowerBound = 0.0f;
+		HourUpperBound = 0.0f;
 	}
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatScanMissionInstanceMissions
@@ -136,7 +130,6 @@ public:
 
 	CStatScanMissionInstanceParent __Parent__;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatScanMissionInstance
@@ -151,7 +144,6 @@ public:
 	CStatScanMissionInstanceMissions Missions;
 };
 
-
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanMissions
 //-----------------------------------------------------------------------------
@@ -162,10 +154,9 @@ public:
 	DECLARE_PERSISTENCE_METHODS
 
 	NLMISC::CEntityId CharId;
-	typedef std::map<uint32,CStatScanMissionInstance> TMissions;
+	typedef std::map<uint32, CStatScanMissionInstance> TMissions;
 	TMissions Missions;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanMissionHistory
@@ -181,11 +172,10 @@ public:
 
 	CStatsScanMissionHistory()
 	{
-		Successfull=false;
-		LastSuccessDate=0;
+		Successfull = false;
+		LastSuccessDate = 0;
 	}
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanDeathPenalties
@@ -198,10 +188,10 @@ public:
 
 	CStatsScanDeathPenalties()
 	{
-		_NbDeath=0;
-		_CurrentDeathXP=0.0;
-		_DeathXPToGain=0.0;
-		_BonusUpdateTime=0;
+		_NbDeath = 0;
+		_CurrentDeathXP = 0.0;
+		_DeathXPToGain = 0.0;
+		_BonusUpdateTime = 0;
 	}
 
 	uint8 _NbDeath;
@@ -209,7 +199,6 @@ public:
 	double _DeathXPToGain;
 	uint32 _BonusUpdateTime;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanRespawnPoints
@@ -222,7 +211,6 @@ public:
 
 	std::vector<NLMISC::CSString> RespawnPoints;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanFameContainerEntry
@@ -239,12 +227,10 @@ public:
 
 	CStatsScanFameContainerEntry()
 	{
-		Fame=0;
-		FameMemory=0;
+		Fame = 0;
+		FameMemory = 0;
 	}
-
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanFameContainer
@@ -255,9 +241,8 @@ class CStatsScanFameContainer
 public:
 	DECLARE_PERSISTENCE_METHODS
 
-	std::map<NLMISC::CSheetId,CStatsScanFameContainerEntry> _Fame;
+	std::map<NLMISC::CSheetId, CStatsScanFameContainerEntry> _Fame;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanEncyCharThema
@@ -273,11 +258,10 @@ public:
 
 	CStatsScanEncyCharThema()
 	{
-		ThemaState=0;
-		RiteTaskStatePacked=0;
+		ThemaState = 0;
+		RiteTaskStatePacked = 0;
 	}
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanEncyCharAlbum
@@ -293,10 +277,9 @@ public:
 
 	CStatsScanEncyCharAlbum()
 	{
-		AlbumState=0;
+		AlbumState = 0;
 	}
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanCharaterEncyclopedia
@@ -310,7 +293,6 @@ public:
 	std::vector<CStatsScanEncyCharAlbum> _EncyCharAlbums;
 };
 
-
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanCharacterLogTime
 //-----------------------------------------------------------------------------
@@ -322,16 +304,15 @@ public:
 
 	CStatsScanCharacterLogTime()
 	{
-		Duration= 0;
-		LoginTime= 0;
-		LogoffTime= 0;
+		Duration = 0;
+		LoginTime = 0;
+		LogoffTime = 0;
 	}
 
 	uint32 Duration;
 	uint32 LoginTime;
 	uint32 LogoffTime;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanGameEvent
@@ -340,18 +321,16 @@ public:
 class CStatsScanGameEvent
 {
 public:
-
 	DECLARE_PERSISTENCE_METHODS
 
 	CStatsScanGameEvent()
 	{
-		_Date=0;
+		_Date = 0;
 	}
 
 	uint32 _Date;
 	NLMISC::CSString _EventFaction;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanPosition
@@ -364,18 +343,17 @@ public:
 
 	CStatsScanPosition()
 	{
-		X= 0;
-		Y= 0;
-		Z= 0;
-		Heading= 0;
+		X = 0;
+		Y = 0;
+		Z = 0;
+		Heading = 0;
 	}
 
-	sint32	X;
-	sint32	Y;
-	sint32	Z;
-	float	Heading;
+	sint32 X;
+	sint32 Y;
+	sint32 Z;
+	float Heading;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanPositionStackEntry
@@ -388,13 +366,12 @@ public:
 
 	CStatsScanPositionStackEntry()
 	{
-		SessionId= 0;
+		SessionId = 0;
 	}
 
-	uint32				SessionId;	
-	CStatsScanPosition	PosState;
+	uint32 SessionId;
+	CStatsScanPosition PosState;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanPositionStack
@@ -408,7 +385,6 @@ public:
 	std::vector<CStatsScanPositionStackEntry> _Vec;
 };
 
-
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanPact
 //-----------------------------------------------------------------------------
@@ -420,14 +396,13 @@ public:
 
 	CStatsScanPact()
 	{
-		PactNature=0;
-		PactType=0;
+		PactNature = 0;
+		PactType = 0;
 	}
 
 	uint8 PactNature;
 	uint8 PactType;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanPetAnimal
@@ -455,20 +430,19 @@ public:
 
 	CStatsScanPetAnimal()
 	{
-		Price=0;
-		StableAlias=0;
-		Landscape_X=0;
-		Landscape_Y=0;
-		Landscape_Z=0;
-		DeathTick=0;
-		PetStatus=0;
-		Slot=0;
-		IsFollowing=false;
-		IsMounted=false;
-		IsTpAllowed=false;
+		Price = 0;
+		StableAlias = 0;
+		Landscape_X = 0;
+		Landscape_Y = 0;
+		Landscape_Z = 0;
+		DeathTick = 0;
+		PetStatus = 0;
+		Slot = 0;
+		IsFollowing = false;
+		IsMounted = false;
+		IsTpAllowed = false;
 	}
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanPhysCharacs
@@ -479,9 +453,8 @@ class CStatsScanPhysCharacs
 public:
 	DECLARE_PERSISTENCE_METHODS
 
-	std::map<NLMISC::CSString,sint32> _PhysicalCharacteristics;
+	std::map<NLMISC::CSString, sint32> _PhysicalCharacteristics;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanPhysScoresEntry
@@ -494,14 +467,14 @@ public:
 
 	CStatsScanPhysScoresEntry()
 	{
-		Current=0;
-		Base=0;
-		Max=0;
-		BaseRegenerateRepos=0.0f;
-		BaseRegenerateAction=0.0f;
-		CurrentRegenerate=0.0f;
+		Current = 0;
+		Base = 0;
+		Max = 0;
+		BaseRegenerateRepos = 0.0f;
+		BaseRegenerateAction = 0.0f;
+		CurrentRegenerate = 0.0f;
 	}
-	
+
 	sint32 Current;
 	sint32 Base;
 	sint32 Max;
@@ -509,7 +482,6 @@ public:
 	float BaseRegenerateAction;
 	float CurrentRegenerate;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanPhysScores
@@ -522,19 +494,18 @@ public:
 
 	CStatsScanPhysScores()
 	{
-		BaseWalkSpeed=0.0f;
-		BaseRunSpeed=0.0f;
-		CurrentWalkSpeed=0.0f;
-		CurrentRunSpeed=0.0f;
+		BaseWalkSpeed = 0.0f;
+		BaseRunSpeed = 0.0f;
+		CurrentWalkSpeed = 0.0f;
+		CurrentRunSpeed = 0.0f;
 	}
-	
+
 	float BaseWalkSpeed;
 	float BaseRunSpeed;
 	float CurrentWalkSpeed;
 	float CurrentRunSpeed;
-	std::map<NLMISC::CSString,CStatsScanPhysScoresEntry> PhysicalScores;
+	std::map<NLMISC::CSString, CStatsScanPhysScoresEntry> PhysicalScores;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanSkillsEntry
@@ -547,20 +518,19 @@ public:
 
 	CStatsScanSkillsEntry()
 	{
-		Base=0;
-		Current=0;
-		MaxLvlReached=0;
-		Xp=0.0;
-		XpNextLvl=0.0;
+		Base = 0;
+		Current = 0;
+		MaxLvlReached = 0;
+		Xp = 0.0;
+		XpNextLvl = 0.0;
 	}
-	
+
 	sint32 Base;
 	sint32 Current;
 	sint32 MaxLvlReached;
 	double Xp;
 	double XpNextLvl;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanSkills
@@ -571,9 +541,8 @@ class CStatsScanSkills
 public:
 	DECLARE_PERSISTENCE_METHODS
 
-	std::map<NLMISC::CSString,CStatsScanSkillsEntry> Skills;
+	std::map<NLMISC::CSString, CStatsScanSkillsEntry> Skills;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanItemCraftParameters
@@ -586,34 +555,34 @@ public:
 
 	CStatsScanItemCraftParameters()
 	{
-		Durability=0.0f;
-		Weight=0.0f;
-		SapLoad=0.0f;
-		StatEnergy=0.0f;
-		Dmg=0.0f;
-		Speed=0.0f;
-		Range=0.0f;
-		DodgeModifier=0.0f;
-		ParryModifier=0.0f;
-		AdversaryDodgeModifier=0.0f;
-		AdversaryParryModifier=0.0f;
-		ProtectionFactor=0.0f;
-		MaxSlashingProtection=0.0f;
-		MaxBluntProtection=0.0f;
-		MaxPiercingProtection=0.0f;
-		ElementalCastingTimeFactor=0.0f;
-		ElementalPowerFactor=0.0f;
-		OffensiveAfflictionCastingTimeFactor=0.0f;
-		OffensiveAfflictionPowerFactor=0.0f;
-		HealCastingTimeFactor=0.0f;
-		HealPowerFactor=0.0f;
-		DefensiveAfflictionCastingTimeFactor=0.0f;
-		DefensiveAfflictionPowerFactor=0.0f;
-		Color=0;
-		HpBuff=0;
-		SapBuff=0;
-		StaBuff=0;
-		FocusBuff=0;
+		Durability = 0.0f;
+		Weight = 0.0f;
+		SapLoad = 0.0f;
+		StatEnergy = 0.0f;
+		Dmg = 0.0f;
+		Speed = 0.0f;
+		Range = 0.0f;
+		DodgeModifier = 0.0f;
+		ParryModifier = 0.0f;
+		AdversaryDodgeModifier = 0.0f;
+		AdversaryParryModifier = 0.0f;
+		ProtectionFactor = 0.0f;
+		MaxSlashingProtection = 0.0f;
+		MaxBluntProtection = 0.0f;
+		MaxPiercingProtection = 0.0f;
+		ElementalCastingTimeFactor = 0.0f;
+		ElementalPowerFactor = 0.0f;
+		OffensiveAfflictionCastingTimeFactor = 0.0f;
+		OffensiveAfflictionPowerFactor = 0.0f;
+		HealCastingTimeFactor = 0.0f;
+		HealPowerFactor = 0.0f;
+		DefensiveAfflictionCastingTimeFactor = 0.0f;
+		DefensiveAfflictionPowerFactor = 0.0f;
+		Color = 0;
+		HpBuff = 0;
+		SapBuff = 0;
+		StaBuff = 0;
+		FocusBuff = 0;
 	}
 
 	float Durability;
@@ -647,7 +616,6 @@ public:
 	NLMISC::CSString Protection;
 };
 
-
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanItem
 //-----------------------------------------------------------------------------
@@ -659,16 +627,16 @@ public:
 
 	CStatsScanItem()
 	{
-		_ClientInventoryPosition=0;
-		_HP=0;
-		_Recommended=0;
-		_LocSlot=0;
-		_SlotImage=0;
-		_SlotCount=0;
-		_SapLoad=0;
-		_Dropable=true;
-		_Destroyable=true;
-		StackSize=0;
+		_ClientInventoryPosition = 0;
+		_HP = 0;
+		_Recommended = 0;
+		_LocSlot = 0;
+		_SlotImage = 0;
+		_SlotCount = 0;
+		_SapLoad = 0;
+		_Dropable = true;
+		_Destroyable = true;
+		StackSize = 0;
 	}
 
 	NLMISC::CSheetId _SheetId;
@@ -689,7 +657,6 @@ public:
 	std::vector<CStatsScanItem> Child;
 };
 
-
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanInventory
 //-----------------------------------------------------------------------------
@@ -701,7 +668,6 @@ public:
 
 	std::vector<CStatsScanItem> _Item;
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanPlayerRoom
@@ -719,12 +685,11 @@ public:
 
 	CStatsScanPlayerRoom()
 	{
-		Building=0;
-		Bulk=0;
-		MaxBulk=0;
+		Building = 0;
+		Bulk = 0;
+		MaxBulk = 0;
 	}
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanEntityPosition
@@ -742,13 +707,12 @@ public:
 
 	CStatsScanEntityPosition()
 	{
-		X=0;
-		Y=0;
-		Z=0;
-		Heading=0.0f;
+		X = 0;
+		Y = 0;
+		Z = 0;
+		Heading = 0.0f;
 	}
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanEntityBase
@@ -798,39 +762,38 @@ public:
 
 	CStatsScanEntityBase()
 	{
-		_DodgeAsDefense=false;
-		_SheetId=0;
-		_Gender=0;
-		_Size=0;
+		_DodgeAsDefense = false;
+		_SheetId = 0;
+		_Gender = 0;
+		_Size = 0;
 
-		MeleeAttackModifierOnEnemy=0;
-		MeleeAttackModifierOnSelf=0;
-		MagicCastingModifierOnSelf=0;
-		MagicCastingModifierOnEnemy=0;
-		RangeAttackModifierOnEnemy=0;
-		RangeAttackModifierOnSelf=0;
-		AttackModifierOnSelf=0;
-		ChanceToFailStrategy=0;
-		ChanceToFailSpell=0;
-		ChanceToFailFaber=0;
-		ChanceToFailHarvest=0;
-		ChanceToFailTracking=0;
-		MeleeAttackSlow=0;
-		MeleeSlashingDamageArmor=0;
-		MeleeBluntDamageArmor=0;
-		MeleePiercingDamageArmor=0;
-		MeleeDamageModifierFactor=0;
-		RangeDamageModifierFactor=0;
-		CreatureMeleeTakenDamageFactor=0;
-		CreatureRangeTakenDamageFactor=0;
-		CombatBrickLatencyMultiplier=0;
-		MagicBrickLatencyMultiplier=0;
-		ArmorQualityModifier=0;
-		WeaponQualityModifier=0;
-		ArmorAbsorbtionMultiplier=0;
+		MeleeAttackModifierOnEnemy = 0;
+		MeleeAttackModifierOnSelf = 0;
+		MagicCastingModifierOnSelf = 0;
+		MagicCastingModifierOnEnemy = 0;
+		RangeAttackModifierOnEnemy = 0;
+		RangeAttackModifierOnSelf = 0;
+		AttackModifierOnSelf = 0;
+		ChanceToFailStrategy = 0;
+		ChanceToFailSpell = 0;
+		ChanceToFailFaber = 0;
+		ChanceToFailHarvest = 0;
+		ChanceToFailTracking = 0;
+		MeleeAttackSlow = 0;
+		MeleeSlashingDamageArmor = 0;
+		MeleeBluntDamageArmor = 0;
+		MeleePiercingDamageArmor = 0;
+		MeleeDamageModifierFactor = 0;
+		RangeDamageModifierFactor = 0;
+		CreatureMeleeTakenDamageFactor = 0;
+		CreatureRangeTakenDamageFactor = 0;
+		CombatBrickLatencyMultiplier = 0;
+		MagicBrickLatencyMultiplier = 0;
+		ArmorQualityModifier = 0;
+		WeaponQualityModifier = 0;
+		ArmorAbsorbtionMultiplier = 0;
 	}
 };
-
 
 //-----------------------------------------------------------------------------
 // Persistent data for CStatsScanCharacter
@@ -843,48 +806,47 @@ public:
 
 	CStatsScanCharacter()
 	{
-		VERSION						= (uint32) 0;
+		VERSION = (uint32)0;
 
-		_HairType					= (uint8) 0;
-		_HairColor					= (uint8) 0;
-		_HatColor					= (uint8) 0;
-		_JacketColor				= (uint8) 0;
-		_ArmsColor					= (uint8) 0;
-		_TrousersColor				= (uint8) 0;
-		_FeetColor					= (uint8) 0;
-		_HandsColor					= (uint8) 0;
-		_Money						= (uint64) 0;
-		_GuildId					= (uint32) 0;
-		_NewCharacter				= false;
-		_CreationPointsRepartition	= (uint8) 0;
-		_ForbidAuraUseEndDate		= (uint32) 0;
+		_HairType = (uint8)0;
+		_HairColor = (uint8)0;
+		_HatColor = (uint8)0;
+		_JacketColor = (uint8)0;
+		_ArmsColor = (uint8)0;
+		_TrousersColor = (uint8)0;
+		_FeetColor = (uint8)0;
+		_HandsColor = (uint8)0;
+		_Money = (uint64)0;
+		_GuildId = (uint32)0;
+		_NewCharacter = false;
+		_CreationPointsRepartition = (uint8)0;
+		_ForbidAuraUseEndDate = (uint32)0;
 
-		HairType					= (uint8) 0;
-		HairColor					= (uint8) 0;
-		GabaritHeight				= (uint8) 0;
-		GabaritTorsoWidth			= (uint8) 0;
-		GabaritArmsWidth			= (uint8) 0;
-		GabaritLegsWidth			= (uint8) 0;
-		GabaritBreastSize			= (uint8) 0;
-		MorphTarget1				= (uint8) 0;
-		MorphTarget2				= (uint8) 0;
-		MorphTarget3				= (uint8) 0;
-		MorphTarget4				= (uint8) 0;
-		MorphTarget5				= (uint8) 0;
-		MorphTarget6				= (uint8) 0;
-		MorphTarget7				= (uint8) 0;
-		MorphTarget8				= (uint8) 0;
-		EyesColor					= (uint8) 0;
-		Tattoo						= (uint8) 0;
-		NameStringId				= (uint8) 0;
+		HairType = (uint8)0;
+		HairColor = (uint8)0;
+		GabaritHeight = (uint8)0;
+		GabaritTorsoWidth = (uint8)0;
+		GabaritArmsWidth = (uint8)0;
+		GabaritLegsWidth = (uint8)0;
+		GabaritBreastSize = (uint8)0;
+		MorphTarget1 = (uint8)0;
+		MorphTarget2 = (uint8)0;
+		MorphTarget3 = (uint8)0;
+		MorphTarget4 = (uint8)0;
+		MorphTarget5 = (uint8)0;
+		MorphTarget6 = (uint8)0;
+		MorphTarget7 = (uint8)0;
+		MorphTarget8 = (uint8)0;
+		EyesColor = (uint8)0;
+		Tattoo = (uint8)0;
+		NameStringId = (uint8)0;
 
-		_FirstConnectedTime			= 0;
-		_LastConnectedTime			= 0;
-		_PlayedTime					= 0;
+		_FirstConnectedTime = 0;
+		_LastConnectedTime = 0;
+		_PlayedTime = 0;
 
-		_HairCuteDiscount			= false;
-		_NextDeathPenaltyFactor		= 0.0f;
-
+		_HairCuteDiscount = false;
+		_NextDeathPenaltyFactor = 0.0f;
 	}
 
 	uint32 VERSION;
@@ -905,7 +867,6 @@ public:
 	NLMISC::CSString _Title;
 	NLMISC::CSString DeclaredCult;
 	NLMISC::CSString DeclaredCiv;
-
 
 	// Visual Properties
 	uint8 HairType;
@@ -933,7 +894,7 @@ public:
 	uint32 _PlayedTime;
 	std::list<CStatsScanCharacterLogTime> _LastLogStats;
 
-	bool _HairCuteDiscount ;
+	bool _HairCuteDiscount;
 	float _NextDeathPenaltyFactor;
 
 	CStatsScanDeathPenalties _DeathPenalties;
@@ -955,15 +916,14 @@ public:
 
 	std::vector<CStatsScanPact> _Pact;
 
-	std::map<TAIAlias,CStatsScanMissionHistory> _MissionHistories;
-	std::map<NLMISC::CSString,double> SkillPoints;
-	std::map<NLMISC::CSString,uint32> SpentSkillPoints;
-	std::map<NLMISC::CSString,sint32> ScorePermanentModifiers;
-	std::map<NLMISC::CSString,uint8> StartingCharacteristicValues;
-	std::map<NLMISC::CSString,uint32> FactionPoints;
-	std::map<NLMISC::CSString,CStatsScanInventory> Inventory;
-	std::map<uint32,CStatsScanPetAnimal> _PlayerPets;
+	std::map<TAIAlias, CStatsScanMissionHistory> _MissionHistories;
+	std::map<NLMISC::CSString, double> SkillPoints;
+	std::map<NLMISC::CSString, uint32> SpentSkillPoints;
+	std::map<NLMISC::CSString, sint32> ScorePermanentModifiers;
+	std::map<NLMISC::CSString, uint8> StartingCharacteristicValues;
+	std::map<NLMISC::CSString, uint32> FactionPoints;
+	std::map<NLMISC::CSString, CStatsScanInventory> Inventory;
+	std::map<uint32, CStatsScanPetAnimal> _PlayerPets;
 };
-
 
 #endif

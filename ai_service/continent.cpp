@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "nel/misc/string_mapper.h"
 #include "nel/net/service.h"
@@ -32,7 +30,7 @@
 #include "ai_mgr_npc.h"
 #include "ai_bot_npc.h"
 #include "group_profile.h"
-//#include "family_behavior.h"
+// #include "family_behavior.h"
 #include "family_profile_tribe.h"
 
 #include "continent_inline.h"
@@ -47,24 +45,23 @@ using namespace AITYPES;
 
 CVariable<bool> LogScorerScores("ai", "LogScorerScores", "", false, 0, true);
 
-
 //////////////////////////////////////////////////////////////////////////////
 // CFaunaZone                                                               //
 //////////////////////////////////////////////////////////////////////////////
 
 CFaunaZone::CFaunaZone(CCell *owner, CAIAliasDescriptionNode *adn)
-	: CAIPlaceXYR(owner, adn)
+    : CAIPlaceXYR(owner, adn)
 {
-//	nldebug("Creating fauna zone '%s', alias %u", getName().c_str(), getAlias());
+	//	nldebug("Creating fauna zone '%s', alias %u", getName().c_str(), getAlias());
 }
 CFaunaZone::~CFaunaZone()
 {
-//	nldebug("Deleting fauna zone '%s', alias %u", getName().c_str(), getAlias());
+	//	nldebug("Deleting fauna zone '%s', alias %u", getName().c_str(), getAlias());
 }
 
-CCell* CFaunaZone::getOwner()	const
+CCell *CFaunaZone::getOwner() const
 {
-	return static_cast<CCell*>(CAIPlaceXYR::getOwner());
+	return static_cast<CCell *>(CAIPlaceXYR::getOwner());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -75,7 +72,6 @@ CNpcZone::~CNpcZone()
 {
 	unlinkNpcZone();
 }
-
 
 void CNpcZone::unlinkNpcZone()
 {
@@ -99,38 +95,37 @@ void CNpcZone::unlinkNpcZone()
 	}
 }
 
-
 float CNpcZone::getFreeAreaScore() const
 {
 	const float area = getArea();
-	return area/((float)getNbUse()+0.001f);
-}	
-
-std::string	CNpcZone::getIndexString() const
-{
-	return getOwner()->getIndexString()+NLMISC::toString(":nz%d", getIndex());
+	return area / ((float)getNbUse() + 0.001f);
 }
 
-AITYPES::CPropertySet& CNpcZone::properties()
+std::string CNpcZone::getIndexString() const
 {
-	return _Properties;
-}	
-const AITYPES::CPropertySet& CNpcZone::properties() const
+	return getOwner()->getIndexString() + NLMISC::toString(":nz%d", getIndex());
+}
+
+AITYPES::CPropertySet &CNpcZone::properties()
 {
 	return _Properties;
 }
-std::vector<NLMISC::CDbgPtr<CRoad> >& CNpcZone::roads()
+const AITYPES::CPropertySet &CNpcZone::properties() const
 {
-	return	_Roads;
+	return _Properties;
+}
+std::vector<NLMISC::CDbgPtr<CRoad>> &CNpcZone::roads()
+{
+	return _Roads;
 }
 
 uint32 CNpcZone::getNbUse() const
 {
 	const sint nbUse = getRefCount() - 1; // -1 for the container
 #ifdef NL_DEBUG
-	nlassert(nbUse>=0);
+	nlassert(nbUse >= 0);
 #endif
-	return	nbUse;
+	return nbUse;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -138,25 +133,25 @@ uint32 CNpcZone::getNbUse() const
 //////////////////////////////////////////////////////////////////////////////
 
 CNpcZonePlace::CNpcZonePlace(CCell *owner, CAIAliasDescriptionNode *adn)
-	: CAIPlace(owner, adn)
+    : CAIPlace(owner, adn)
 {
-	owner->getOwner()->getAIInstance()->addZone(getAliasFullName(), this);	
-//	nldebug("Creating npc zone '%s', alias %u", getName().c_str(), getAlias());
+	owner->getOwner()->getAIInstance()->addZone(getAliasFullName(), this);
+	//	nldebug("Creating npc zone '%s', alias %u", getName().c_str(), getAlias());
 }
 
 CNpcZonePlace::~CNpcZonePlace()
 {
 	getOwner()->getOwner()->getAIInstance()->removeZone(getAliasFullName(), this);
-	
-//	nldebug("Deleting npc zone '%s', alias %u", getName().c_str(), getAlias());
+
+	//	nldebug("Deleting npc zone '%s', alias %u", getName().c_str(), getAlias());
 }
 
-CCell* CNpcZonePlace::getOwner() const
-{ 
-	return static_cast<CCell*>(CAIPlace::getOwner());
+CCell *CNpcZonePlace::getOwner() const
+{
+	return static_cast<CCell *>(CAIPlace::getOwner());
 }
 
-const CAliasTreeOwner& CNpcZonePlace::getAliasTreeOwner() const
+const CAliasTreeOwner &CNpcZonePlace::getAliasTreeOwner() const
 {
 	return *this;
 }
@@ -166,43 +161,43 @@ uint32 CNpcZonePlace::getIndex() const
 	return getIndex();
 }
 
-CPlaceRandomPos& CNpcZonePlace::getPlaceRandomPos()
+CPlaceRandomPos &CNpcZonePlace::getPlaceRandomPos()
 {
 	return *this;
 }
 
-const CPlaceRandomPos& CNpcZonePlace::getPlaceRandomPos() const
+const CPlaceRandomPos &CNpcZonePlace::getPlaceRandomPos() const
 {
 	return *this;
 }
 
-bool CNpcZonePlace::atPlace(const CAIVector& pos) const 
+bool CNpcZonePlace::atPlace(const CAIVector &pos) const
 {
-	return (pos-_pos).sqrnorm() <= ((double)_radius*(double)_radius);
+	return (pos - _pos).sqrnorm() <= ((double)_radius * (double)_radius);
 }
 
-bool CNpcZonePlace::atPlace(const CAIVectorMirror& pos) const 
+bool CNpcZonePlace::atPlace(const CAIVectorMirror &pos) const
 {
-	return (pos-_pos).sqrnorm() <= ((double)_radius*(double)_radius);
+	return (pos - _pos).sqrnorm() <= ((double)_radius * (double)_radius);
 }
 
-bool CNpcZonePlace::atPlace(CAIEntityPhysical const* entity) const
+bool CNpcZonePlace::atPlace(CAIEntityPhysical const *entity) const
 {
 	return atPlace(entity->pos());
 }
 
-const CAIPos& CNpcZonePlace::midPos() const
+const CAIPos &CNpcZonePlace::midPos() const
 {
-	return	_pos;
+	return _pos;
 }
 
 float CNpcZonePlace::getArea() const
 {
-	const float	radius = getRadius();
-	return (float)(radius*radius*NLMISC::Pi);
-}	
+	const float radius = getRadius();
+	return (float)(radius * radius * NLMISC::Pi);
+}
 
-const RYAI_MAP_CRUNCH::CWorldPosition& CNpcZonePlace::worldValidPos() const
+const RYAI_MAP_CRUNCH::CWorldPosition &CNpcZonePlace::worldValidPos() const
 {
 	return _worldValidPos;
 }
@@ -212,7 +207,7 @@ float CNpcZonePlace::getRadius() const
 	return _radius;
 }
 
-void CNpcZonePlace::display(CStringWriter& stringWriter) const
+void CNpcZonePlace::display(CStringWriter &stringWriter) const
 {
 	// :TODO: Implement that method
 	nlassert(false && "not yet implemented!");
@@ -222,55 +217,54 @@ AITYPES::TVerticalPos CNpcZonePlace::getVerticalPos() const
 {
 	return CPlaceRandomPos::getVerticalPos();
 }
-void CNpcZonePlace::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const
+void CNpcZonePlace::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition &pos) const
 {
 	CPlaceRandomPos::getRandomPos(pos);
 }
 
-void CNpcZonePlace::setPosAndRadius(AITYPES::TVerticalPos verticalPos, const CAIPos& pos, uint32 radius)
+void CNpcZonePlace::setPosAndRadius(AITYPES::TVerticalPos verticalPos, const CAIPos &pos, uint32 radius)
 {
 	_VerticalPos = verticalPos;
 	_pos = pos;
-	_radius = float(radius)/1000.0f;
+	_radius = float(radius) / 1000.0f;
 #ifdef NL_DEBUG
 	nlassert(_radius > 0);
-	nlassert(pos.x()!=0||pos.y()!=0);
+	nlassert(pos.x() != 0 || pos.y() != 0);
 #endif
-	if (	pos.x()==0
-		&&	pos.y()==0)
+	if (pos.x() == 0
+	    && pos.y() == 0)
 	{
 		nlwarning("Null place Position for %s", getAliasFullName().c_str());
 	}
-	
+
 	if (!CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, _worldValidPos, _pos, _radius, 1000, CWorldContainer::CPosValidatorDefault()))
 	{
 		if (LogAcceptablePos)
 			nlwarning("Unvalid place (no collision free position found) at %d %d ", _pos.x().asInt(), _pos.y().asInt());
 	}
-	
+
 	buildRandomPos(_worldValidPos, _radius);
 }
 
-bool CNpcZonePlace::calcRandomPos(CAIPos& pos) const
+bool CNpcZonePlace::calcRandomPos(CAIPos &pos) const
 {
 	double dx, dy;
 	const double r = (double)_radius;
-	const double rSquare = r*r;
+	const double rSquare = r * r;
 	// :TODO: Replace that while with a theta/r rand and a space conversion
 	do
 	{
 		dx = CAIS::frandPlusMinus(r);
 		dy = CAIS::frandPlusMinus(r);
-	}
-	while (dx*dx+dy*dy>rSquare);
-	
-	pos.setX(_pos.x()+dx);
-	pos.setY(_pos.y()+dy);
+	} while (dx * dx + dy * dy > rSquare);
+
+	pos.setX(_pos.x() + dx);
+	pos.setY(_pos.y() + dy);
 	pos.setH(_pos.h());
-	pos.setTheta(pos.angleTo(_pos)+CAngle(NLMISC::Pi/2));
-	
+	pos.setTheta(pos.angleTo(_pos) + CAngle(NLMISC::Pi / 2));
+
 	return true;
-}	
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // CNpcZonePlaceNoPrim                                                      //
@@ -284,32 +278,32 @@ CNpcZonePlaceNoPrim::~CNpcZonePlaceNoPrim()
 {
 }
 
-bool CNpcZonePlaceNoPrim::atPlace(const CAIVector& pos) const 
+bool CNpcZonePlaceNoPrim::atPlace(const CAIVector &pos) const
 {
-	return (pos-_Pos).sqrnorm() <= ((double)_Radius*(double)_Radius);
+	return (pos - _Pos).sqrnorm() <= ((double)_Radius * (double)_Radius);
 }
 
-bool CNpcZonePlaceNoPrim::atPlace(const CAIVectorMirror& pos) const 
+bool CNpcZonePlaceNoPrim::atPlace(const CAIVectorMirror &pos) const
 {
-	return (pos-_Pos).sqrnorm() <= ((double)_Radius*(double)_Radius);
+	return (pos - _Pos).sqrnorm() <= ((double)_Radius * (double)_Radius);
 }
 
-bool CNpcZonePlaceNoPrim::atPlace(CAIEntityPhysical const* entity) const
+bool CNpcZonePlaceNoPrim::atPlace(CAIEntityPhysical const *entity) const
 {
 	return atPlace(entity->pos());
 }
 
-const CAIPos& CNpcZonePlaceNoPrim::midPos() const
+const CAIPos &CNpcZonePlaceNoPrim::midPos() const
 {
 	return _Pos;
 }
 
 float CNpcZonePlaceNoPrim::getArea() const
 {
-	return (float)(_Radius*_Radius*NLMISC::Pi);
-}	
+	return (float)(_Radius * _Radius * NLMISC::Pi);
+}
 
-const RYAI_MAP_CRUNCH::CWorldPosition& CNpcZonePlaceNoPrim::worldValidPos() const
+const RYAI_MAP_CRUNCH::CWorldPosition &CNpcZonePlaceNoPrim::worldValidPos() const
 {
 	return _WorldValidPos;
 }
@@ -319,7 +313,7 @@ float CNpcZonePlaceNoPrim::getRadius() const
 	return _Radius;
 }
 
-void CNpcZonePlaceNoPrim::display(CStringWriter& stringWriter) const
+void CNpcZonePlaceNoPrim::display(CStringWriter &stringWriter) const
 {
 	// :TODO: Implement that method
 	nlassert(false && "not yet implemented!");
@@ -329,7 +323,7 @@ AITYPES::TVerticalPos CNpcZonePlaceNoPrim::getVerticalPos() const
 {
 	return AITYPES::vp_auto;
 }
-void CNpcZonePlaceNoPrim::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const
+void CNpcZonePlaceNoPrim::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition &pos) const
 {
 	uint maxTries = RandomPosMaxRetry;
 	CAIPos dummyPos;
@@ -339,7 +333,7 @@ void CNpcZonePlaceNoPrim::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) con
 		if (calcRandomPos(dummyPos))
 			foundRandomPos = CWorldContainer::getWorldMap().setWorldPosition(_VerticalPos, pos, dummyPos);
 		--maxTries;
-		if (maxTries<=0)
+		if (maxTries <= 0)
 			break;
 	}
 	if (!foundRandomPos)
@@ -352,17 +346,17 @@ void CNpcZonePlaceNoPrim::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) con
 	}
 }
 
-void CNpcZonePlaceNoPrim::setPosAndRadius(AITYPES::TVerticalPos verticalPos, const CAIPos& pos, uint32 radius)
+void CNpcZonePlaceNoPrim::setPosAndRadius(AITYPES::TVerticalPos verticalPos, const CAIPos &pos, uint32 radius)
 {
 #ifdef NL_DEBUG
 	nlassert(radius > 0);
-	nlassert(pos.x()!=0||pos.y()!=0);
+	nlassert(pos.x() != 0 || pos.y() != 0);
 #endif
-	
+
 	_VerticalPos = verticalPos;
 	_Pos = pos;
-	_Radius = float(radius)/1000.0f;
-	
+	_Radius = float(radius) / 1000.0f;
+
 	if (!CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, _WorldValidPos, _Pos, _Radius, 1000, CWorldContainer::CPosValidatorDefault()))
 	{
 		if (LogAcceptablePos)
@@ -370,49 +364,48 @@ void CNpcZonePlaceNoPrim::setPosAndRadius(AITYPES::TVerticalPos verticalPos, con
 	}
 }
 
-bool CNpcZonePlaceNoPrim::calcRandomPos(CAIPos& pos) const
+bool CNpcZonePlaceNoPrim::calcRandomPos(CAIPos &pos) const
 {
 	double dx, dy;
 	const double r = (double)_Radius;
-	const double rSquare = r*r;
+	const double rSquare = r * r;
 	// :TODO: Replace that while with a theta/r rand and a space conversion
 	do
 	{
 		dx = CAIS::frandPlusMinus(r);
 		dy = CAIS::frandPlusMinus(r);
-	}
-	while (dx*dx+dy*dy>rSquare);
-	
-	pos.setX(_Pos.x()+dx);
-	pos.setY(_Pos.y()+dy);
+	} while (dx * dx + dy * dy > rSquare);
+
+	pos.setX(_Pos.x() + dx);
+	pos.setY(_Pos.y() + dy);
 	pos.setH(_Pos.h());
-	pos.setTheta(pos.angleTo(_Pos)+CAngle(NLMISC::Pi/2));
-	
+	pos.setTheta(pos.angleTo(_Pos) + CAngle(NLMISC::Pi / 2));
+
 	return true;
-}	
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // CNpcZoneShape                                                            //
 //////////////////////////////////////////////////////////////////////////////
 
-CNpcZoneShape::CNpcZoneShape(CCell* owner, CAIAliasDescriptionNode* adn)
-	: CAIPlace(owner, adn)
+CNpcZoneShape::CNpcZoneShape(CCell *owner, CAIAliasDescriptionNode *adn)
+    : CAIPlace(owner, adn)
 {
-	owner->getOwner()->getAIInstance()->addZone(getAliasFullName(), this);	
-//	nldebug("Creating npc zone '%s', alias %u", getName().c_str(), getAlias());
+	owner->getOwner()->getAIInstance()->addZone(getAliasFullName(), this);
+	//	nldebug("Creating npc zone '%s', alias %u", getName().c_str(), getAlias());
 }
 
 CNpcZoneShape::~CNpcZoneShape()
 {
 	getOwner()->getOwner()->getAIInstance()->removeZone(getAliasFullName(), this);
-//	nldebug("Deleting npc zone '%s', alias %u", getName().c_str(), getAlias());
+	//	nldebug("Deleting npc zone '%s', alias %u", getName().c_str(), getAlias());
 }
 
-CCell* CNpcZoneShape::getOwner() const
-{ 
-	return static_cast<CCell*>(CAIPlace::getOwner());
+CCell *CNpcZoneShape::getOwner() const
+{
+	return static_cast<CCell *>(CAIPlace::getOwner());
 }
-const CAliasTreeOwner& CNpcZoneShape::getAliasTreeOwner() const
+const CAliasTreeOwner &CNpcZoneShape::getAliasTreeOwner() const
 {
 	return *this;
 }
@@ -421,29 +414,29 @@ uint32 CNpcZoneShape::getIndex() const
 	return getIndex();
 }
 
-CPlaceRandomPos& CNpcZoneShape::getPlaceRandomPos()
+CPlaceRandomPos &CNpcZoneShape::getPlaceRandomPos()
 {
 	return this->_shape;
 }
-const CPlaceRandomPos& CNpcZoneShape::getPlaceRandomPos() const
+const CPlaceRandomPos &CNpcZoneShape::getPlaceRandomPos() const
 {
 	return this->_shape;
 }
 
-bool CNpcZoneShape::atPlace(const CAIVector& pos) const 
+bool CNpcZoneShape::atPlace(const CAIVector &pos) const
 {
 	return _shape.contains(pos);
 }
-bool CNpcZoneShape::atPlace(const CAIVectorMirror &pos) const 
+bool CNpcZoneShape::atPlace(const CAIVectorMirror &pos) const
 {
 	return _shape.contains(pos);
 }
-bool CNpcZoneShape::atPlace(CAIEntityPhysical const* entity) const
+bool CNpcZoneShape::atPlace(CAIEntityPhysical const *entity) const
 {
 	return atPlace(entity->pos());
 }
 
-const CAIPos& CNpcZoneShape::midPos() const
+const CAIPos &CNpcZoneShape::midPos() const
 {
 	return _midPos;
 }
@@ -453,9 +446,9 @@ float CNpcZoneShape::getArea() const
 	const float area = 20.0f;
 	nlwarning("CNpcZoneShape area asked although it's a fake value.");
 	return area;
-}	
+}
 
-const RYAI_MAP_CRUNCH::CWorldPosition& CNpcZoneShape::worldValidPos() const
+const RYAI_MAP_CRUNCH::CWorldPosition &CNpcZoneShape::worldValidPos() const
 {
 	return _worldValidPos;
 }
@@ -466,7 +459,7 @@ float CNpcZoneShape::getRadius() const
 	return radius;
 }
 
-void CNpcZoneShape::display(CStringWriter& stringWriter) const
+void CNpcZoneShape::display(CStringWriter &stringWriter) const
 {
 	// :TODO: Implement that method
 	nlassert(false && "not yet implemented!");
@@ -474,28 +467,28 @@ void CNpcZoneShape::display(CStringWriter& stringWriter) const
 
 AITYPES::TVerticalPos CNpcZoneShape::getVerticalPos() const
 {
-	return	_shape.getVerticalPos();
+	return _shape.getVerticalPos();
 }
-void CNpcZoneShape::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const
+void CNpcZoneShape::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition &pos) const
 {
 	_shape.getRandomPos(pos);
 }
 
-void CNpcZoneShape::setPatat(AITYPES::TVerticalPos verticalPos, const std::vector<CAIVector>& points)
+void CNpcZoneShape::setPatat(AITYPES::TVerticalPos verticalPos, const std::vector<CAIVector> &points)
 {
 	if (!_shape.setPatat(verticalPos, points))
 	{
 		nlwarning("CNpcZoneShape::setPatat: error while placing the points of '%s'",
-			getAliasFullName().c_str());
+		    getAliasFullName().c_str());
 	}
 	buildMidPos();
 }
 void CNpcZoneShape::buildMidPos()
 {
-	//nlassert(false && "build appropriate _midPos");
+	// nlassert(false && "build appropriate _midPos");
 	int count = 0;
 	bool succeeded = _shape.calcRandomPos(_midPos);
-	while (!succeeded && count<1000)
+	while (!succeeded && count < 1000)
 	{
 		succeeded = _shape.calcRandomPos(_midPos);
 		++count;
@@ -506,46 +499,46 @@ void CNpcZoneShape::buildMidPos()
 // CCell                                                                    //
 //////////////////////////////////////////////////////////////////////////////
 
-std::string	CCell::getIndexString()	const
+std::string CCell::getIndexString() const
 {
-	return getOwner()->getIndexString()+NLMISC::toString(":ce%d", getChildIndex());
+	return getOwner()->getIndexString() + NLMISC::toString(":ce%d", getChildIndex());
 }
 
-void	CCell::connectRoads()
+void CCell::connectRoads()
 {
-	CContinent	&continent=*getOwner()->getOwner()->getOwner();
-	vector<CCell*>	neighBourgCellList;
+	CContinent &continent = *getOwner()->getOwner()->getOwner();
+	vector<CCell *> neighBourgCellList;
 	getNeighBourgCellList(neighBourgCellList);
-	
-	for (uint i=0; i<_Roads.size(); ++i)
+
+	for (uint i = 0; i < _Roads.size(); ++i)
 	{
 		CRoad *road = roads()[i];
 		if (!road)
 			continue;
-		
-		road->calcLength	();
+
+		road->calcLength();
 		// clear existing link;
 		road->unlinkRoad();
-		
-		if	(road->coords().size() > 1)
+
+		if (road->coords().size() > 1)
 		{
 			// ok, there are 2 points, try to found the zone they belong to
-			
+
 			// starting zone try first in the same CCell, after in the neighbourg, and last in the whole continent.
 			CNpcZone *nz = findNpcZone(road->getLogicStart());
-			if	(!nz)
+			if (!nz)
 			{
-				FOREACH(itCell, vector<CCell*>, neighBourgCellList)
+				FOREACH(itCell, vector<CCell *>, neighBourgCellList)
 				{
-					nz=(*itCell)->findNpcZone(road->getLogicStart());
+					nz = (*itCell)->findNpcZone(road->getLogicStart());
 					if (nz)
 						break;
 				}
 			}
 			if (!nz)
 				nz = continent.findNpcZone(road->getLogicStart());
-			
-			if	(nz)
+
+			if (nz)
 			{
 				// ok, we found the first zone
 				road->setStartZone(nz);
@@ -553,28 +546,28 @@ void	CCell::connectRoads()
 			}
 			else
 			{
-				//#if	!FINAL_VERSION
-				nlwarning("Road '%s'%s end don't reach a zone at %s", 
-					road->getAliasFullName().c_str(),
-					road->getAliasString().c_str(),
-					road->getLogicStart().toString().c_str());
-				//#endif
+				// #if	!FINAL_VERSION
+				nlwarning("Road '%s'%s end don't reach a zone at %s",
+				    road->getAliasFullName().c_str(),
+				    road->getAliasString().c_str(),
+				    road->getLogicStart().toString().c_str());
+				// #endif
 			}
 			// ending zone
 			nz = findNpcZone(road->getLogicEnd());
-			if	(!nz)
+			if (!nz)
 			{
-				FOREACH(itCell, vector<CCell*>, neighBourgCellList)
+				FOREACH(itCell, vector<CCell *>, neighBourgCellList)
 				{
-					nz=(*itCell)->findNpcZone(road->getLogicEnd());
+					nz = (*itCell)->findNpcZone(road->getLogicEnd());
 					if (nz)
 						break;
 				}
 			}
 			if (!nz)
 				nz = continent.findNpcZone(road->getLogicEnd());
-			
-			if	(nz)
+
+			if (nz)
 			{
 				// ok, we found the first zone
 				road->setEndZone(nz);
@@ -582,30 +575,27 @@ void	CCell::connectRoads()
 			}
 			else
 			{
-				//#ifndef FINAL_VERSION
-				nlwarning("Road '%s'%s: end don't reach a zone at %s", 
-					road->getAliasFullName().c_str(),
-					road->getAliasString().c_str(),
-					road->getLogicEnd().toString().c_str());
-				//#endif
+				// #ifndef FINAL_VERSION
+				nlwarning("Road '%s'%s: end don't reach a zone at %s",
+				    road->getAliasFullName().c_str(),
+				    road->getAliasString().c_str(),
+				    road->getLogicEnd().toString().c_str());
+				// #endif
 			}
-			
 		}
 		else
 		{
-			//#ifndef FINAL_VERSION
-			if	(road->coords().size()==1)
+			// #ifndef FINAL_VERSION
+			if (road->coords().size() == 1)
 			{
-				nlwarning("Road '%s'%s: only one point at %s", 
-					road->getAliasFullName().c_str(),
-					road->getAliasString().c_str(),
-					road->getLogicStart().toString().c_str());
+				nlwarning("Road '%s'%s: only one point at %s",
+				    road->getAliasFullName().c_str(),
+				    road->getAliasString().c_str(),
+				    road->getLogicStart().toString().c_str());
 			}
-			//#endif
+			// #endif
 		}
-		
 	}
-	
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -631,26 +621,25 @@ CContinent::~CContinent()
 	}
 }
 
-IAliasCont* CContinent::getAliasCont(TAIType type)
+IAliasCont *CContinent::getAliasCont(TAIType type)
 {
-	switch(type)
+	switch (type)
 	{
 	case AITypeDynamicRegion:
 		return &_Regions;
 	case AITypeOutpost:
 		return &_Outposts;
 	default:
-		return	NULL;
+		return NULL;
 	}
-	
 }
 
 std::string CContinent::getIndexString() const
 {
-	return getOwner()->getIndexString()+NLMISC::toString(":c%u", getChildIndex());
+	return getOwner()->getIndexString() + NLMISC::toString(":c%u", getChildIndex());
 }
 
-std::string	CContinent::getOneLineInfoString() const
+std::string CContinent::getOneLineInfoString() const
 {
 	return std::string("Continent '") + getName() + "'";
 }
@@ -658,27 +647,25 @@ std::string	CContinent::getOneLineInfoString() const
 std::vector<std::string> CContinent::getMultiLineInfoString() const
 {
 	std::vector<std::string> container;
-	
-	
+
 	pushTitle(container, "CContinent");
 	pushEntry(container, "id=" + getIndexString());
 	container.back() += " name=" + getName();
 	pushEntry(container, "fullname=" + getFullName());
 	pushFooter(container);
-	
-	
+
 	return container;
 }
 
-CNpcZone* CContinent::findNpcZone(CAIVector const& posInside)
+CNpcZone *CContinent::findNpcZone(CAIVector const &posInside)
 {
-	for (CCont<CRegion>::iterator	itRegion=_Regions.begin(), itEndRegion=_Regions.end(); itRegion!=itEndRegion; ++itRegion)
+	for (CCont<CRegion>::iterator itRegion = _Regions.begin(), itEndRegion = _Regions.end(); itRegion != itEndRegion; ++itRegion)
 	{
-		for (CCont<CCellZone>::iterator	itCellZone=itRegion->cellZones().begin(), itEndCellZone=itRegion->cellZones().end(); itCellZone!=itEndCellZone; ++itCellZone)
+		for (CCont<CCellZone>::iterator itCellZone = itRegion->cellZones().begin(), itEndCellZone = itRegion->cellZones().end(); itCellZone != itEndCellZone; ++itCellZone)
 		{
-			for (CCont<CCell>::iterator	itCell=itCellZone->cells().begin(), itEndCell=itCellZone->cells().end(); itCell!=itEndCell; ++itCell)
+			for (CCont<CCell>::iterator itCell = itCellZone->cells().begin(), itEndCell = itCellZone->cells().end(); itCell != itEndCell; ++itCell)
 			{
-				CNpcZone* npcZone = itCell->findNpcZone(posInside);
+				CNpcZone *npcZone = itCell->findNpcZone(posInside);
 				if (npcZone)
 					return npcZone;
 			}
@@ -691,86 +678,84 @@ CNpcZone* CContinent::findNpcZone(CAIVector const& posInside)
 bool CContinent::markTagForDelete(NLMISC::TStringId fileId)
 {
 	CAliasTreeRoot::CMarkTagForDelete const deleteMarker(fileId);
-	for_each(_Regions.begin(),_Regions.end(),deleteMarker);
-	for_each(_Outposts.begin(),_Outposts.end(),deleteMarker);
-	return	true;
+	for_each(_Regions.begin(), _Regions.end(), deleteMarker);
+	for_each(_Outposts.begin(), _Outposts.end(), deleteMarker);
+	return true;
 }
 
-
-bool	CContinent::deleteTaggedAlias(NLMISC::TStringId fileId)
+bool CContinent::deleteTaggedAlias(NLMISC::TStringId fileId)
 {
-	for_each(_Regions.begin(),_Regions.end(),	CAliasTreeRoot::CDeleteTagged<CRegion>	(_Regions));
-	for_each(_Outposts.begin(),_Outposts.end(),	CAliasTreeRoot::CDeleteTagged<COutpost>	(_Outposts));
-	return	true;
+	for_each(_Regions.begin(), _Regions.end(), CAliasTreeRoot::CDeleteTagged<CRegion>(_Regions));
+	for_each(_Outposts.begin(), _Outposts.end(), CAliasTreeRoot::CDeleteTagged<COutpost>(_Outposts));
+	return true;
 }
 
-void	CContinent::updateLazyProcess()
+void CContinent::updateLazyProcess()
 {
-	if (_LazyProcess.size()<=0)
+	if (_LazyProcess.size() <= 0)
 		return;
 
 	FOREACH(lazy, TLazyProcessList, _LazyProcess)
-		(*lazy)->update();
+	(*lazy)->update();
 
 	_LazyProcess.clear();
 }
 
-void	CContinent::pushLazyProcess(CSmartPtr<CLazyProcess>	lazyProcess)
+void CContinent::pushLazyProcess(CSmartPtr<CLazyProcess> lazyProcess)
 {
 	FOREACH(lazy, TLazyProcessList, _LazyProcess)
-		if ((*lazy)->absorb(*lazyProcess))
-			return;
+	if ((*lazy)->absorb(*lazyProcess))
+		return;
 
 	_LazyProcess.push_back(lazyProcess);
 }
 
-void	CRebuildContinentAndOutPost::update()	const
+void CRebuildContinentAndOutPost::update() const
 {
-	nlinfo	("Build Continent %s dependencies ..", _Continent->getFullName().c_str());
+	nlinfo("Build Continent %s dependencies ..", _Continent->getFullName().c_str());
 	// rebuild the bounding box
 	_Continent->rebuildBoundingBox();
 	// rebuild the connectivity graph
 
-	FOREACH(region,CAliasCont<CRegion>,_Continent->regions())
-		region->rebuildConnectivity();
+	FOREACH(region, CAliasCont<CRegion>, _Continent->regions())
+	region->rebuildConnectivity();
 	/*
 	// relocate the outpost into the correct cellZone
 	FOREACH(outpost, CAliasCont<COutpost>, _Continent->outposts())
 	{
-		CCellZone	*const	czone = _Continent->getOwner()->locateCellZoneForPos(outpost->getPosition());
+	    CCellZone	*const	czone = _Continent->getOwner()->locateCellZoneForPos(outpost->getPosition());
 
-		outpost->setCellZone(czone);
+	    outpost->setCellZone(czone);
 
-		// relink outpost and tribe
-		_Continent->relinkOutpost();
+	    // relink outpost and tribe
+	    _Continent->relinkOutpost();
 	}
 	*/
 }
 
-void	CContinent::update()
+void CContinent::update()
 {
 	updateLazyProcess();
 
 	{
 		H_AUTO(RegionsUpdate)
 		// update all the regions
-		FOREACH(region,CAliasCont<CRegion>,_Regions)
-			(*region)->update();
+		FOREACH(region, CAliasCont<CRegion>, _Regions)
+		(*region)->update();
 	}
 	{
 		H_AUTO(OutpostsUpdate)
 		// update all the outpost
 		FOREACH(outpost, CAliasCont<COutpost>, _Outposts)
-			(*outpost)->update();
+		(*outpost)->update();
 	}
-
 }
 
 void CContinent::rebuildBoundingBox()
 {
 	// build the AABB to speedup the task
 	_BoundingBox.init();
-	for (uint i=0; i<_Regions.size(); ++i)
+	for (uint i = 0; i < _Regions.size(); ++i)
 	{
 		CRegion *region = _Regions[i];
 		if (!region)
@@ -782,16 +767,16 @@ void CContinent::rebuildBoundingBox()
 	}
 }
 
-void	CContinent::serviceEvent	(const	CServiceEvent	&info)
+void CContinent::serviceEvent(const CServiceEvent &info)
 {
-	CCont<CRegion>::iterator	itRegion=_Regions.begin(), itRegionEnd=_Regions.end();
-	while	(itRegion!=itRegionEnd)
+	CCont<CRegion>::iterator itRegion = _Regions.begin(), itRegionEnd = _Regions.end();
+	while (itRegion != itRegionEnd)
 	{
 		itRegion->serviceEvent(info);
 		++itRegion;
 	}
-	CCont<COutpost>::iterator	itOutpost=_Outposts.begin(), itOutpostEnd=_Outposts.end();
-	while	(itOutpost!=itOutpostEnd)
+	CCont<COutpost>::iterator itOutpost = _Outposts.begin(), itOutpostEnd = _Outposts.end();
+	while (itOutpost != itOutpostEnd)
 	{
 		itOutpost->serviceEvent(info);
 		++itOutpost;
@@ -801,17 +786,17 @@ void	CContinent::serviceEvent	(const	CServiceEvent	&info)
 bool CContinent::spawn()
 {
 	// Spawn regions
-	for (size_t i=0; i<_Regions.size(); ++i)
+	for (size_t i = 0; i < _Regions.size(); ++i)
 	{
-		CRegion* region = _Regions[(uint32)i];
+		CRegion *region = _Regions[(uint32)i];
 		if (!region)
 			continue;
 		region->spawn();
 	}
 	// Spawn outposts
-	for (size_t i=0; i<_Outposts.size(); ++i)
+	for (size_t i = 0; i < _Outposts.size(); ++i)
 	{
-		COutpost* outpost = _Outposts[(uint32)i];
+		COutpost *outpost = _Outposts[(uint32)i];
 		if (!outpost)
 			continue;
 		outpost->spawn();
@@ -823,17 +808,17 @@ bool CContinent::spawn()
 bool CContinent::despawn()
 {
 	// Despawn regions
-	for (size_t i=0; i<_Regions.size(); ++i)
+	for (size_t i = 0; i < _Regions.size(); ++i)
 	{
-		CRegion* region = _Regions[(uint32)i];
+		CRegion *region = _Regions[(uint32)i];
 		if (!region)
 			continue;
 		region->despawn();
 	}
 	// Despawn outposts
-	for (size_t i=0; i<_Outposts.size(); ++i)
+	for (size_t i = 0; i < _Outposts.size(); ++i)
 	{
-		COutpost* outpost = _Outposts[(uint32)i];
+		COutpost *outpost = _Outposts[(uint32)i];
 		if (!outpost)
 			continue;
 		outpost->despawn();
@@ -846,9 +831,9 @@ bool CContinent::despawn()
 // CRegion                                                                  //
 //////////////////////////////////////////////////////////////////////////////
 
-CRegion::CRegion(CContinent* owner, uint32 alias, std::string const& name, std::string const& filename)
-: CAliasChild<CContinent>(owner, alias, name)
-, CAliasTreeRoot(filename)
+CRegion::CRegion(CContinent *owner, uint32 alias, std::string const &name, std::string const &filename)
+    : CAliasChild<CContinent>(owner, alias, name)
+    , CAliasTreeRoot(filename)
 {
 }
 
@@ -861,31 +846,30 @@ CRegion::~CRegion()
 	nldebug("Deleting region '%s'%s", getName().c_str(), getAliasString().c_str());
 }
 
-IAliasCont* CRegion::getAliasCont(TAIType type)
+IAliasCont *CRegion::getAliasCont(TAIType type)
 {
-	switch	(type)
+	switch (type)
 	{
 	case AITypeCellZone:
-		return	&_CellZones;
+		return &_CellZones;
 	case AITypeGroupFamilyProfileFauna:
 	case AITypeGroupFamilyProfileTribe:
-		return	&_GroupFamilies;
+		return &_GroupFamilies;
 	case AITypeGroupFamilyProfileNpc:
-		return	&_GroupFamilies;
+		return &_GroupFamilies;
 	default:
-		return	NULL;
+		return NULL;
 	}
-	
 }
 
-CAliasTreeOwner* CRegion::createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree)
+CAliasTreeOwner *CRegion::createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree)
 {
 	if (!cont)
 		return NULL;
-	
-	CAliasTreeOwner* child = NULL;
-	
-	switch(aliasTree->getType())
+
+	CAliasTreeOwner *child = NULL;
+
+	switch (aliasTree->getType())
 	{
 		//	create the child and adds it to the corresponding position.
 	case AITypeCellZone:
@@ -901,7 +885,7 @@ CAliasTreeOwner* CRegion::createChild(IAliasCont* cont, CAIAliasDescriptionNode*
 	default:
 		break;
 	}
-	
+
 	if (child)
 		cont->addAliasChild(child);
 	return child;
@@ -909,10 +893,10 @@ CAliasTreeOwner* CRegion::createChild(IAliasCont* cont, CAIAliasDescriptionNode*
 
 std::string CRegion::getIndexString() const
 {
-	return getOwner()->getIndexString()+toString(":r%u", getChildIndex());
+	return getOwner()->getIndexString() + toString(":r%u", getChildIndex());
 }
 
-std::string	CRegion::getOneLineInfoString() const
+std::string CRegion::getOneLineInfoString() const
 {
 	return std::string("Region '") + getName() + "'";
 }
@@ -920,39 +904,37 @@ std::string	CRegion::getOneLineInfoString() const
 std::vector<std::string> CRegion::getMultiLineInfoString() const
 {
 	std::vector<std::string> container;
-	
-	
+
 	pushTitle(container, "CRegion");
 	pushEntry(container, "id=" + getIndexString());
 	container.back() += " alias=" + getAliasString();
 	container.back() += " name=" + getName();
 	pushEntry(container, "fullname=" + getFullName());
 	pushFooter(container);
-	
-	
+
 	return container;
 }
 
 std::string CRegion::getFullName() const
 {
-	return std::string(getOwner()->getFullName() +":"+ getName());
+	return std::string(getOwner()->getFullName() + ":" + getName());
 }
 
 void CRegion::rebuildBoundingBox()
 {
 	// build the AABB to speedup the task
 	_BoundingBox.init();
-	for (uint i=0; i<_CellZones.size(); ++i)
+	for (uint i = 0; i < _CellZones.size(); ++i)
 	{
 		CCellZone *czone = _CellZones[i];
 		if (!czone)
 			continue;
-		
+
 		//		CAIVector vmaxZone(INT_MIN/CAICoord::UNITS_PER_METER, INT_MIN/CAICoord::UNITS_PER_METER);
 		//		CAIVector vminZone(INT_MAX/CAICoord::UNITS_PER_METER, INT_MAX/CAICoord::UNITS_PER_METER);
-		
+
 		czone->_BoundingBox.init();
-		for (uint j=0; j<czone->cells().size(); ++j)
+		for (uint j = 0; j < czone->cells().size(); ++j)
 		{
 			CCell *cell = czone->cells()[j];
 			if (!cell)
@@ -966,7 +948,7 @@ void CRegion::rebuildBoundingBox()
 
 void CRegion::rebuildConnectivity()
 {
-	nlinfo	("Build Region '%s' dependencies ..", getFullName().c_str());
+	nlinfo("Build Region '%s' dependencies ..", getFullName().c_str());
 
 	// prestep : clear the road and cell connectivity
 	FOREACH(czone, CAliasCont<CCellZone>, _CellZones)
@@ -975,50 +957,49 @@ void CRegion::rebuildConnectivity()
 		FOREACH(itCell, CCont<CCell>, czone->cells())
 		{
 			itCell->_NeighbourCells.clear();
-			for (TAliasZonePlaceList::iterator	itZone=itCell->npcZonePlaces().begin(),itEndZone=itCell->npcZonePlaces().end();itZone!=itEndZone;++itZone)
-				itZone->roads().clear();			
-			for (TAliasZoneShapeList::iterator	itZone=itCell->npcZoneShapes().begin(),itEndZone=itCell->npcZoneShapes().end();itZone!=itEndZone;++itZone)
-				itZone->roads().clear();			
+			for (TAliasZonePlaceList::iterator itZone = itCell->npcZonePlaces().begin(), itEndZone = itCell->npcZonePlaces().end(); itZone != itEndZone; ++itZone)
+				itZone->roads().clear();
+			for (TAliasZoneShapeList::iterator itZone = itCell->npcZoneShapes().begin(), itEndZone = itCell->npcZoneShapes().end(); itZone != itEndZone; ++itZone)
+				itZone->roads().clear();
 		}
-		
 	}
-	
+
 	// First pass : build the connectivity between cells
-	const double SCALE_DIAG = 1/10.0;
-	for (uint i=0; i<_CellZones.size(); ++i)
+	const double SCALE_DIAG = 1 / 10.0;
+	for (uint i = 0; i < _CellZones.size(); ++i)
 	{
 		CCellZone *czone = _CellZones[i];
 		if (!czone)
 			continue;
-		for (uint j=0; j<czone->cells().size(); ++j)
+		for (uint j = 0; j < czone->cells().size(); ++j)
 		{
 			CCell *cell1 = czone->cells()[j];
 			if (!cell1)
 				continue;
 			// maximum dist for aproximation of contact
-			double epsilon1 = (cell1->_BoundingBox.vmax() - cell1->_BoundingBox.vmin()).norm()*SCALE_DIAG ;
+			double epsilon1 = (cell1->_BoundingBox.vmax() - cell1->_BoundingBox.vmin()).norm() * SCALE_DIAG;
 
-//			for (uint k=i; k<_CellZones.size(); ++k)
+			//			for (uint k=i; k<_CellZones.size(); ++k)
 			{
-				CCellZone *czone2 = czone;	//_CellZones[k];
+				CCellZone *czone2 = czone; //_CellZones[k];
 				if (!czone2)
 					continue;
-				for (uint l=0; l<czone2->cells().size(); ++l)
+				for (uint l = 0; l < czone2->cells().size(); ++l)
 				{
 					CCell *cell2 = czone->cells()[l];
-					
-					if	(	!cell2
-						||	cell2 == cell1
-						||	cell1->_NeighbourCells.find(cell2) != cell1->_NeighbourCells.end())
+
+					if (!cell2
+					    || cell2 == cell1
+					    || cell1->_NeighbourCells.find(cell2) != cell1->_NeighbourCells.end())
 						continue;
 
-					if	(cell2->_NeighbourCells.find(cell1) != cell2->_NeighbourCells.end())
+					if (cell2->_NeighbourCells.find(cell1) != cell2->_NeighbourCells.end())
 					{
 						nlassert(false);
 						continue;
 					}
 
-					double epsilon2 = (cell2->_BoundingBox.vmax() - cell2->_BoundingBox.vmin()).norm()*SCALE_DIAG;
+					double epsilon2 = (cell2->_BoundingBox.vmax() - cell2->_BoundingBox.vmin()).norm() * SCALE_DIAG;
 					double epsilon = max(epsilon1, epsilon2);
 
 					// check distance between AABB to reduce vertex checking
@@ -1053,14 +1034,14 @@ void CRegion::rebuildConnectivity()
 					{
 						// square the espilon to check distance faster
 						epsilon = std::min(epsilon, 4.0);
-						epsilon = epsilon*epsilon;
+						epsilon = epsilon * epsilon;
 						uint32 nbCnx = 0;
-						for (uint i=0; i<cell1->_Coords.size(); ++i)
+						for (uint i = 0; i < cell1->_Coords.size(); ++i)
 						{
-							for (uint j=0; j<cell2->_Coords.size(); ++j)
+							for (uint j = 0; j < cell2->_Coords.size(); ++j)
 							{
 								if ((cell1->_Coords[i] - cell2->_Coords[j]).sqrnorm() < epsilon)
-									nbCnx ++;
+									nbCnx++;
 							}
 						}
 
@@ -1070,7 +1051,7 @@ void CRegion::rebuildConnectivity()
 							bool ok = cell1->_NeighbourCells.insert(cell2).second;
 							ok = cell2->_NeighbourCells.insert(cell1).second;
 
-						//	nldebug("Connecting cell '%s' with '%s'", cell1->getName().c_str(), cell2->getName().c_str());
+							//	nldebug("Connecting cell '%s' with '%s'", cell1->getName().c_str(), cell2->getName().c_str());
 						}
 					}
 				}
@@ -1079,7 +1060,7 @@ void CRegion::rebuildConnectivity()
 	}
 
 	// second pass, link road with cells
-	
+
 	FOREACH(czone, CAliasCont<CCellZone>, _CellZones)
 	{
 		FOREACH(itCell, CCont<CCell>, czone->cells())
@@ -1091,32 +1072,31 @@ void CRegion::rebuildConnectivity()
 
 void CRegion::update()
 {
-	for (uint j=0; j<_CellZones.size(); ++j)
+	for (uint j = 0; j < _CellZones.size(); ++j)
 	{
 		CCellZone *czone = _CellZones[j];
-		if	(!czone)
+		if (!czone)
 			continue;
 
 		czone->update();
 	}
 }
 
-void	CRegion::serviceEvent	(const	CServiceEvent	&info)
+void CRegion::serviceEvent(const CServiceEvent &info)
 {
 	CCont<CCellZone>::iterator first(_CellZones.begin()), last(_CellZones.end());
-	for(; first != last; ++first)
+	for (; first != last; ++first)
 	{
-		(*first)->serviceEvent	(info);
+		(*first)->serviceEvent(info);
 	}
-	
 }
 
 bool CRegion::spawn()
 {
 	// Spawn cellzones
-	for (size_t j=0; j<_CellZones.size(); ++j)
+	for (size_t j = 0; j < _CellZones.size(); ++j)
 	{
-		CCellZone* cellZone = _CellZones[(uint32)j];
+		CCellZone *cellZone = _CellZones[(uint32)j];
 		if (!cellZone)
 			continue;
 		cellZone->spawn();
@@ -1128,9 +1108,9 @@ bool CRegion::spawn()
 bool CRegion::despawn()
 {
 	// Despawn cellzones
-	for (size_t j=0; j<_CellZones.size(); ++j)
+	for (size_t j = 0; j < _CellZones.size(); ++j)
 	{
-		CCellZone* cellZone = _CellZones[(uint32)j];
+		CCellZone *cellZone = _CellZones[(uint32)j];
 		if (!cellZone)
 			continue;
 		cellZone->despawn();
@@ -1143,31 +1123,30 @@ bool CRegion::despawn()
 // CGroupFamily                                                             //
 //////////////////////////////////////////////////////////////////////////////
 
-IAliasCont		*CGroupFamily::getAliasCont(TAIType type)
+IAliasCont *CGroupFamily::getAliasCont(TAIType type)
 {
-	switch	(type)
+	switch (type)
 	{
 	case AITypeGroupTemplate:
 	case AITypeGroupTemplateMultiLevel:
 	case AITypeGroupTemplateFauna:
 		return &_GroupDescs;
-	break;
+		break;
 	case AITypeGroupTemplateNpc:
 		return &_GroupDescs;
 	default:
-		return	NULL;
+		return NULL;
 	}
-
 }
 
-CAliasTreeOwner	*CGroupFamily::createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree)
+CAliasTreeOwner *CGroupFamily::createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree)
 {
-	if	(!cont)
-		return	NULL;
-	
-	CAliasTreeOwner*	child	=	NULL;
-	
-	switch(aliasTree->getType())
+	if (!cont)
+		return NULL;
+
+	CAliasTreeOwner *child = NULL;
+
+	switch (aliasTree->getType())
 	{
 	case AITypeGroupTemplate:
 	case AITypeGroupTemplateMultiLevel:
@@ -1178,110 +1157,112 @@ CAliasTreeOwner	*CGroupFamily::createChild(IAliasCont	*cont, CAIAliasDescription
 	default:
 		break;
 	}
-	
-	if	(child)
+
+	if (child)
 		cont->addAliasChild(child);
-	return	child;
+	return child;
 }
 
-
-const CGroupDesc<CGroupFamily> *CGroupFamily::getProportionalGroupDesc(const	CFamilyBehavior *const	familyBehavior, const	CPropertySet &needActFlag, const	CPropertySet &maskActFlag)
+const CGroupDesc<CGroupFamily> *CGroupFamily::getProportionalGroupDesc(const CFamilyBehavior *const familyBehavior, const CPropertySet &needActFlag, const CPropertySet &maskActFlag)
 {
 	H_AUTO(getProportionalGroupDesc)
-	
-	// first, build a list of group that match 
+
+	// first, build a list of group that match
 	// the family, energy level and spawn type
-	
+
 	//	TODO
 	//	const	TPopulationFamily &family	=familyBehavior->getFamily();
-	const	uint32	level	=	familyBehavior->getLevelIndex();
+	const uint32 level = familyBehavior->getLevelIndex();
 
-	vector<const	CGroupDesc<CGroupFamily>*>	groups;
+	vector<const CGroupDesc<CGroupFamily> *> groups;
 
-	const	bool	&isDay	=	CTimeInterface::isDay();
-	uint32	totalWeight=0;
-	uint32	totalSpawnGroup=0;
+	const bool &isDay = CTimeInterface::isDay();
+	uint32 totalWeight = 0;
+	uint32 totalSpawnGroup = 0;
 
-	for (uint i=0; i<_GroupDescs.size(); ++i)
+	for (uint i = 0; i < _GroupDescs.size(); ++i)
 	{
-		const	CGroupDesc<CGroupFamily> *const	gd = _GroupDescs[i];
-		if	(!gd)
+		const CGroupDesc<CGroupFamily> *const gd = _GroupDescs[i];
+		if (!gd)
 			continue;
 
-		const	uint32	weight=gd->getWeightForEnergy	(level);
-		if (weight<=0)
+		const uint32 weight = gd->getWeightForEnergy(level);
+		if (weight <= 0)
 			continue;
 
-		if	(!gd->isValidForSeason(CTimeInterface::season()))
+		if (!gd->isValidForSeason(CTimeInterface::season()))
 			continue;
 
-		if	(!gd->isValidForDayOrNight(isDay))
+		if (!gd->isValidForDayOrNight(isDay))
 			continue;
 
-		if	(gd->properties().containsPartOfStrict(maskActFlag))
+		if (gd->properties().containsPartOfStrict(maskActFlag))
 			continue;
 
-		if	(!gd->properties().containsAllOf(needActFlag))
+		if (!gd->properties().containsAllOf(needActFlag))
 			continue;
-			
-		totalWeight		+=	weight;
-		totalSpawnGroup	+=	gd->getNbUse();
+
+		totalWeight += weight;
+		totalSpawnGroup += gd->getNbUse();
 		groups.push_back(gd);
-
 	}
 
-	if	(groups.empty())
+	if (groups.empty())
 	{
-		if	(!LogGroupCreationFailure)
-			return	NULL;
+		if (!LogGroupCreationFailure)
+			return NULL;
 
 		return NULL;
 	}
 
-	float	maxScore=0;
-	const	CGroupDesc<CGroupFamily>	*choosenGroup=NULL;
+	float maxScore = 0;
+	const CGroupDesc<CGroupFamily> *choosenGroup = NULL;
 
-	for	(std::vector<const CGroupDesc<CGroupFamily>*>::iterator	it=groups.begin(), itEnd=groups.end(); it!=itEnd;	++it)
+	for (std::vector<const CGroupDesc<CGroupFamily> *>::iterator it = groups.begin(), itEnd = groups.end(); it != itEnd; ++it)
 	{
 		//	score to reach theorical rate.
-		const	float	score	=	((*it)->getWeightForEnergy(level)*totalSpawnGroup)
-								-	((float)(*it)->getNbUse()*totalWeight);
-		if	(score<maxScore)
+		const float score = ((*it)->getWeightForEnergy(level) * totalSpawnGroup)
+		    - ((float)(*it)->getNbUse() * totalWeight);
+		if (score < maxScore)
 			continue;
-		
-		choosenGroup=*it;
-		maxScore=score;
-	}
-	return	choosenGroup;
-}
 
+		choosenGroup = *it;
+		maxScore = score;
+	}
+	return choosenGroup;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // CGroupDesc                                                               //
 //////////////////////////////////////////////////////////////////////////////
 
-template <> size_t const CGroupDesc<CGroupFamily>::_MultiLevelSheetCount = 20;
+template <>
+size_t const CGroupDesc<CGroupFamily>::_MultiLevelSheetCount = 20;
 
 //////////////////////////////////////////////////////////////////////////////
 // CBotDesc                                                                 //
 //////////////////////////////////////////////////////////////////////////////
 
-template <> size_t const CBotDesc<CGroupFamily>::_MultiLevelSheetCount = 20;
+template <>
+size_t const CBotDesc<CGroupFamily>::_MultiLevelSheetCount = 20;
 
 //////////////////////////////////////////////////////////////////////////////
 // CRoad                                                                    //
 //////////////////////////////////////////////////////////////////////////////
 
 CRoad::CRoad(CCell *owner, uint32 alias, const std::string &name)
-	: CAliasChild<CCell>(owner, alias, name),
-	_StartZone(), _StartExternal(false), _EndZone(), _EndExternal(false)
+    : CAliasChild<CCell>(owner, alias, name)
+    , _StartZone()
+    , _StartExternal(false)
+    , _EndZone()
+    , _EndExternal(false)
 {
-//	nldebug("Creating road '%s', alias %u", getName().c_str(), getAlias());
+	//	nldebug("Creating road '%s', alias %u", getName().c_str(), getAlias());
 }
 
 CRoad::~CRoad()
 {
-//	nldebug("Deleting road '%s', alias %u", getName().c_str(), getAlias());
+	//	nldebug("Deleting road '%s', alias %u", getName().c_str(), getAlias());
 
 	// need to unlink the road from the start and end zones
 	unlinkRoad();
@@ -1292,38 +1273,38 @@ void CRoad::unlinkRoad()
 	// unlink the road from the start and end zones
 	if (!_StartZone.isNULL())
 	{
-		std::vector<NLMISC::CDbgPtr<CRoad> > &roads = _StartZone->roads();
+		std::vector<NLMISC::CDbgPtr<CRoad>> &roads = _StartZone->roads();
 
 		roads.erase(std::remove(roads.begin(), roads.end(), CDbgPtr<CRoad>(this)), roads.end());
 	}
-	_StartZone = (CNpcZone*)NULL;
+	_StartZone = (CNpcZone *)NULL;
 	if (!_EndZone.isNULL())
 	{
-		std::vector<NLMISC::CDbgPtr<CRoad> > &roads = _EndZone->roads();
+		std::vector<NLMISC::CDbgPtr<CRoad>> &roads = _EndZone->roads();
 
 		roads.erase(std::remove(roads.begin(), roads.end(), CDbgPtr<CRoad>(this)), roads.end());
 	}
-	_EndZone = (CNpcZone*)NULL;
+	_EndZone = (CNpcZone *)NULL;
 }
 
-IAliasCont		*CRoad::getAliasCont(TAIType type)
+IAliasCont *CRoad::getAliasCont(TAIType type)
 {
-	switch(type)
+	switch (type)
 	{
 	case AITypeRoadTrigger:
 		return &_RoadTriggers;
 	default:
-		return	NULL;
+		return NULL;
 	}
 }
-CAliasTreeOwner	*CRoad::createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree)
+CAliasTreeOwner *CRoad::createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree)
 {
 	if (!cont)
-		return	NULL;
-	
-	CAliasTreeOwner*	child	=	NULL;
+		return NULL;
 
-	switch(aliasTree->getType())
+	CAliasTreeOwner *child = NULL;
+
+	switch (aliasTree->getType())
 	{
 		//	create the child and adds it to the corresponding position.
 	case AITypeRoadTrigger:
@@ -1333,19 +1314,18 @@ CAliasTreeOwner	*CRoad::createChild(IAliasCont	*cont, CAIAliasDescriptionNode *a
 
 	if (child)
 		cont->addAliasChild(child);
-	return	child;
+	return child;
 }
 
 std::string CRoad::getIndexString() const
 {
-	return	getOwner()->getIndexString()+NLMISC::toString(":ro%u", getChildIndex());
+	return getOwner()->getIndexString() + NLMISC::toString(":ro%u", getChildIndex());
 }
 
-
-void	CRoad::setPathPoints(TVerticalPos	verticalPos, const std::vector<CAIVector> &points)
+void CRoad::setPathPoints(TVerticalPos verticalPos, const std::vector<CAIVector> &points)
 {
 	_VerticalPos = verticalPos;
-	for (uint i=0; i<points.size(); ++i)
+	for (uint i = 0; i < points.size(); ++i)
 	{
 		RYAI_MAP_CRUNCH::CWorldPosition newpos;
 		CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, newpos, points[i], 0, 1, CWorldContainer::CPosValidatorDefault());
@@ -1356,54 +1336,52 @@ void	CRoad::setPathPoints(TVerticalPos	verticalPos, const std::vector<CAIVector>
 			{
 				if (LogAcceptablePos)
 					nlinfo("DynRoad '%s'%s: Path pos Error at position %s for size %d, an acceptable position could be %s",
-						getAliasFullName().c_str(),
-						getAliasString().c_str(),
-						points[i].toString().c_str(), 
-						0, 
-						newpos.toString().c_str() );
+					    getAliasFullName().c_str(),
+					    getAliasString().c_str(),
+					    points[i].toString().c_str(),
+					    0,
+					    newpos.toString().c_str());
 			}
 			else
-				nlwarning("Dynroad '%s'%s: Path pos Error at position %s for size %d, no acceptable position found around", 
-					getAliasFullName().c_str(),
-					getAliasString().c_str(),
-					points[i].toString().c_str(),
-					0);
+				nlwarning("Dynroad '%s'%s: Path pos Error at position %s for size %d, no acceptable position found around",
+				    getAliasFullName().c_str(),
+				    getAliasString().c_str(),
+				    points[i].toString().c_str(),
+				    0);
 		}
-	 	_Coords.push_back(newpos);
+		_Coords.push_back(newpos);
 	}
 
-	if (points.size()>0)
-		_Start=points.front();
+	if (points.size() > 0)
+		_Start = points.front();
 
-	if (points.size()>1)
-		_End=points.back();
+	if (points.size() > 1)
+		_End = points.back();
 }
 
-void	CRoad::setStartZone(const	CNpcZone	*const	npcZone)
+void CRoad::setStartZone(const CNpcZone *const npcZone)
 {
-	_StartZone=(CNpcZone*)npcZone;
+	_StartZone = (CNpcZone *)npcZone;
 	if (!npcZone)
 	{
-		_StartExternal=false;
+		_StartExternal = false;
 	}
 	else
 	{
-		_StartExternal=npcZone->getOwner()->getOwner()->getOwner()!=getOwner()->getOwner()->getOwner();
+		_StartExternal = npcZone->getOwner()->getOwner()->getOwner() != getOwner()->getOwner()->getOwner();
 	}
-
 }
-void	CRoad::setEndZone(const	CNpcZone	*const	npcZone)
+void CRoad::setEndZone(const CNpcZone *const npcZone)
 {
-	_EndZone=npcZone;
+	_EndZone = npcZone;
 	if (!npcZone)
 	{
-		_EndExternal=false;
+		_EndExternal = false;
 	}
 	else
 	{
-		_EndExternal=npcZone->getOwner()->getOwner()->getOwner()!=getOwner()->getOwner()->getOwner();
+		_EndExternal = npcZone->getOwner()->getOwner()->getOwner() != getOwner()->getOwner()->getOwner();
 	}
-
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1412,43 +1390,43 @@ void	CRoad::setEndZone(const	CNpcZone	*const	npcZone)
 
 struct CCellChoice
 {
-	struct	CZoneScore
+	struct CZoneScore
 	{
-		float		score;
-		const	CFaunaZone*	zone;
+		float score;
+		const CFaunaZone *zone;
 	};
 	CCellChoice()
 	{
-		for (uint32 i=0;i<MAX_ZONE_SCORE;i++)
+		for (uint32 i = 0; i < MAX_ZONE_SCORE; i++)
 		{
-			zones[i].score=0;
-			zones[i].zone=NULL;
+			zones[i].score = 0;
+			zones[i].zone = NULL;
 		}
 	}
 
-	float	getTotalScore()	const
+	float getTotalScore() const
 	{
-		float	totalScore=1;
-		for (uint32 i=0;i<MAX_ZONE_SCORE;i++)
-			totalScore*=zones[i].score;
-		return	totalScore;
+		float totalScore = 1;
+		for (uint32 i = 0; i < MAX_ZONE_SCORE; i++)
+			totalScore *= zones[i].score;
+		return totalScore;
 	}
 
-	enum	TZoneScoreType
+	enum TZoneScoreType
 	{
-		FOOD_ZONE_SCORE=0,
-		REST_ZONE_SCORE=1,
-		MAX_ZONE_SCORE=2
+		FOOD_ZONE_SCORE = 0,
+		REST_ZONE_SCORE = 1,
+		MAX_ZONE_SCORE = 2
 	};
-	CZoneScore	zones[MAX_ZONE_SCORE];
+	CZoneScore zones[MAX_ZONE_SCORE];
 };
 
 CCellZone::CCellZone(CRegion *owner, uint32 alias, const std::string &name)
-: CAliasChild<CRegion>(owner, alias, name)
+    : CAliasChild<CRegion>(owner, alias, name)
 {
-	nldebug("Creating cell zone '%s'%s", 
-		getName().c_str(), 
-		getAliasString().c_str());
+	nldebug("Creating cell zone '%s'%s",
+	    getName().c_str(),
+	    getAliasString().c_str());
 }
 
 CCellZone::~CCellZone()
@@ -1456,13 +1434,12 @@ CCellZone::~CCellZone()
 	// clear the families first to despawn all the groups (managers are in the families)
 	_Families.clear();
 	_Cells.clear();
-	nldebug("Deleting cell zone '%s'%s", 
-		getName().c_str(), 
-		getAliasString().c_str());
+	nldebug("Deleting cell zone '%s'%s",
+	    getName().c_str(),
+	    getAliasString().c_str());
 }
 
-
-std::string	CCellZone::getOneLineInfoString() const
+std::string CCellZone::getOneLineInfoString() const
 {
 	return std::string("Cell zone '") + getName() + "'";
 }
@@ -1470,94 +1447,91 @@ std::string	CCellZone::getOneLineInfoString() const
 std::vector<std::string> CCellZone::getMultiLineInfoString() const
 {
 	std::vector<std::string> container;
-	
-	
+
 	pushTitle(container, "CCellZone");
 	pushEntry(container, "id=" + getIndexString());
 	container.back() += " name=" + getName();
 	pushEntry(container, "fullname=" + getFullName());
 	pushFooter(container);
-	
-	
+
 	return container;
 }
 std::string CCellZone::getFullName() const
 {
-	return std::string(getOwner()->getFullName()+":"+getName());
+	return std::string(getOwner()->getFullName() + ":" + getName());
 }
 
-IAliasCont* CCellZone::getAliasCont(TAIType type)
+IAliasCont *CCellZone::getAliasCont(TAIType type)
 {
-	switch(type)
+	switch (type)
 	{
 	case AITypeCell:
 		return &_Cells;
 	default:
-		return	NULL;
+		return NULL;
 	}
-	
 }
 
-CAliasTreeOwner	*CCellZone::createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree)
+CAliasTreeOwner *CCellZone::createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree)
 {
-	if	(!cont)
-		return	NULL;
-	
-	CAliasTreeOwner*	child	=	NULL;
-	
-	switch	(aliasTree->getType())
+	if (!cont)
+		return NULL;
+
+	CAliasTreeOwner *child = NULL;
+
+	switch (aliasTree->getType())
 	{
 		//	create the child and adds it to the corresponding position.
 	case AITypeCell:
 		child = new CCell(this, aliasTree->getAlias(), aliasTree->getName());
 		break;
 	}
-	
+
 	if (child)
 		cont->addAliasChild(child);
-	return	child;
+	return child;
 }
 
-bool CCellZone::findRestAndFoodFaunaZoneInCellList(CFaunaZone const*& rest, CPropertySet const& restActivity, CFaunaZone const*& food, CPropertySet const& foodActivity, std::vector<CCell*> const& cells, TAStarFlag const denyflags)
+bool CCellZone::findRestAndFoodFaunaZoneInCellList(CFaunaZone const *&rest, CPropertySet const &restActivity, CFaunaZone const *&food, CPropertySet const &foodActivity, std::vector<CCell *> const &cells, TAStarFlag const denyflags)
 {
 	static bool extensiveDebug = false; // That extensive debug has code 0001
 	if (extensiveDebug) nldebug("ED0001.01: restActivity=%s foodActivity=%s", restActivity.toString().c_str(), foodActivity.toString().c_str());
-	
+
 	// Flags topology
-	typedef CHashMap<uint,CCellChoice> TSearchMapCellChoice;
-	typedef CHashMap<uint,TSearchMapCellChoice > TSearchMap;
-	TSearchMap	searchMap;
-	const	float	minimumScore=/*28*28*/24*24; // :FIXME: Put that in a config thing (like a config file)
-	
+	typedef CHashMap<uint, CCellChoice> TSearchMapCellChoice;
+	typedef CHashMap<uint, TSearchMapCellChoice> TSearchMap;
+	TSearchMap searchMap;
+	const float minimumScore = /*28*28*/ 24 * 24; // :FIXME: Put that in a config thing (like a config file)
+
 	// Property sets for all activities
 	CPropertySet activities[CCellChoice::MAX_ZONE_SCORE];
 	activities[CCellChoice::FOOD_ZONE_SCORE].merge(foodActivity);
 	activities[CCellChoice::REST_ZONE_SCORE].merge(restActivity);
-	
+
 	// Look for a conveninent zone in a convenient cell.
 	if (extensiveDebug) nldebug("ED0001.02: cells.size()=%d", cells.size());
 	// For each cell
-	FOREACHC(itCell, std::vector<CCell*>, cells)
+	FOREACHC(itCell, std::vector<CCell *>, cells)
 	{
-		CCell const* const cell = *itCell;
-		if	(!cell)
+		CCell const *const cell = *itCell;
+		if (!cell)
 			continue;
-		
+
 		if (extensiveDebug) nldebug("ED0001.03: cell->faunaZonesCst().size()=%d", cell->faunaZonesCst().size());
 		// For each zone
 		FOREACHC(itFaunaZone, CCont<CFaunaZone>, cell->faunaZonesCst())
 		{
-			CFaunaZone const* const faunaZone = *itFaunaZone;
-			#ifdef NL_DEBUG
+			CFaunaZone const *const faunaZone = *itFaunaZone;
+#ifdef NL_DEBUG
 			nlassert(faunaZone);
-			#endif
+#endif
 			// For each activity
-			for (uint32	typeZone=0; typeZone<CCellChoice::MAX_ZONE_SCORE; ++typeZone)
-			{			
+			for (uint32 typeZone = 0; typeZone < CCellChoice::MAX_ZONE_SCORE; ++typeZone)
+			{
 				// Get zone position
-				CWorldPosition const& wpos = faunaZone->worldValidPos();
+				CWorldPosition const &wpos = faunaZone->worldValidPos();
 				// Check it's valid
-				if	(!wpos.isValid())
+				if (!wpos.isValid())
 				{
 					if (extensiveDebug) nldebug("ED0001.04: !wpos.isValid()");
 					continue;
@@ -1567,143 +1541,141 @@ bool CCellZone::findRestAndFoodFaunaZoneInCellList(CFaunaZone const*& rest, CPro
 				static bool displayActivities = false;
 				if (displayActivities)
 				{
-					nlinfo("Zone activities");
-					const AITYPES::CPropertySet &ps = faunaZone->additionalActivities();
-					const std::set<NLMISC::TStringId> &props = ps.properties();
-					std::set<NLMISC::TStringId>::const_iterator it;
-					for (it = props.begin(); it != props.end(); ++it)
-					{
-						nlinfo("Prop = %s", NLMISC::CStringMapper::unmap(*it).c_str());
-					}
-					nlinfo("Wanted activities");
-					for (it = activities[typeZone].properties().begin(); it != activities[typeZone].properties().end(); ++it)
-					{
-						nlinfo("Prop = %s", NLMISC::CStringMapper::unmap(*it).c_str());
-					}
+				    nlinfo("Zone activities");
+				    const AITYPES::CPropertySet &ps = faunaZone->additionalActivities();
+				    const std::set<NLMISC::TStringId> &props = ps.properties();
+				    std::set<NLMISC::TStringId>::const_iterator it;
+				    for (it = props.begin(); it != props.end(); ++it)
+				    {
+				        nlinfo("Prop = %s", NLMISC::CStringMapper::unmap(*it).c_str());
+				    }
+				    nlinfo("Wanted activities");
+				    for (it = activities[typeZone].properties().begin(); it != activities[typeZone].properties().end(); ++it)
+				    {
+				        nlinfo("Prop = %s", NLMISC::CStringMapper::unmap(*it).c_str());
+				    }
 				}
 				*/
 				// Check that zone activity match
-				if	(!faunaZone->haveActivity(activities[typeZone]))
+				if (!faunaZone->haveActivity(activities[typeZone]))
 				{
 					if (extensiveDebug) nldebug("ED0001.05: !faunaZone->haveActivity(activities[typeZone])");
 					continue;
 				}
-				
-				TAStarFlag const flags = (TAStarFlag)(wpos.getFlags()&GroundFlags);	//	Erase unused flags.
+
+				TAStarFlag const flags = (TAStarFlag)(wpos.getFlags() & GroundFlags); //	Erase unused flags.
 				float const score = faunaZone->getFreeAreaScore();
-				
-				for	(TAStarFlag	possibleFlag=Nothing;possibleFlag<=GroundFlags;possibleFlag=(TAStarFlag)(possibleFlag+2))	//	tricky !! -> to replace with a defined list of flags to checks.
+
+				for (TAStarFlag possibleFlag = Nothing; possibleFlag <= GroundFlags; possibleFlag = (TAStarFlag)(possibleFlag + 2)) //	tricky !! -> to replace with a defined list of flags to checks.
 				{
-					const	uint32	incompatibilityFlags=possibleFlag&denyflags&GroundFlags;	//	Erase unused flags.
-					if	(incompatibilityFlags)
+					const uint32 incompatibilityFlags = possibleFlag & denyflags & GroundFlags; //	Erase unused flags.
+					if (incompatibilityFlags)
 					{
 						if (extensiveDebug) nldebug("ED0001.06: incompatibilityFlags");
 						continue;
 					}
-					
-					const	uint32	masterTopo=wpos.getTopologyRef().getCstTopologyNode().getMasterTopo(possibleFlag);
-					if	(masterTopo==~0)
+
+					const uint32 masterTopo = wpos.getTopologyRef().getCstTopologyNode().getMasterTopo(possibleFlag);
+					if (masterTopo == ~0)
 					{
 						if (extensiveDebug) nldebug("ED0001.07: masterTopo==~0");
 						continue;
 					}
-					
-					if	(score<minimumScore)
+
+					if (score < minimumScore)
 					{
 						if (extensiveDebug) nldebug("ED0001.08: score<minimumScore");
 						continue;
 					}
-					
-					CCellChoice::CZoneScore	&zoneScore=searchMap[possibleFlag][masterTopo].zones[typeZone];
-					
-					if	(score<zoneScore.score)
+
+					CCellChoice::CZoneScore &zoneScore = searchMap[possibleFlag][masterTopo].zones[typeZone];
+
+					if (score < zoneScore.score)
 					{
 						if (extensiveDebug) nldebug("ED0001.09: score<zoneScore.score");
 						continue;
 					}
-					
-					if	(score==zoneScore.score)
+
+					if (score == zoneScore.score)
 					{
 						if (extensiveDebug) nldebug("ED0001.10: score==zoneScore.score");
-						if	(CAIS::rand16(1)==0)
-							zoneScore.zone=faunaZone;
+						if (CAIS::rand16(1) == 0)
+							zoneScore.zone = faunaZone;
 					}
 					else
 					{
 						if (extensiveDebug) nldebug("ED0001.11: score!=zoneScore.score");
-						zoneScore.score=score;
-						zoneScore.zone=faunaZone;
+						zoneScore.score = score;
+						zoneScore.zone = faunaZone;
 					}
 				}
 			}
 		}
 	}
-	
+
 	//	find now the best score :)
 	{
-		CCellChoice	*selectedCell=NULL;
-		float	minScore=minimumScore;
-		for	(TSearchMap::iterator	flagIt=searchMap.begin(), flagItEnd=searchMap.end();flagIt!=flagItEnd;++flagIt)
+		CCellChoice *selectedCell = NULL;
+		float minScore = minimumScore;
+		for (TSearchMap::iterator flagIt = searchMap.begin(), flagItEnd = searchMap.end(); flagIt != flagItEnd; ++flagIt)
 		{
-			for	(TSearchMapCellChoice::iterator	topoIt=flagIt->second.begin(), topoItEnd=flagIt->second.end();topoIt!=topoItEnd;++topoIt)
+			for (TSearchMapCellChoice::iterator topoIt = flagIt->second.begin(), topoItEnd = flagIt->second.end(); topoIt != topoItEnd; ++topoIt)
 			{
 				if (extensiveDebug) nldebug("ED0001.12: topoIt->second.getTotalScore()=%g minScore=%g", topoIt->second.getTotalScore(), minScore);
 				float theScore = topoIt->second.getTotalScore();
-				if	(theScore > minScore)
+				if (theScore > minScore)
 				{
-					selectedCell=&topoIt->second;
-					minScore=selectedCell->getTotalScore();
+					selectedCell = &topoIt->second;
+					minScore = selectedCell->getTotalScore();
 				}
 			}
 		}
 
 		if (selectedCell)
 		{
-			rest=selectedCell->zones[CCellChoice::REST_ZONE_SCORE].zone;
-			food=selectedCell->zones[CCellChoice::FOOD_ZONE_SCORE].zone;
+			rest = selectedCell->zones[CCellChoice::REST_ZONE_SCORE].zone;
+			food = selectedCell->zones[CCellChoice::FOOD_ZONE_SCORE].zone;
 
 #if !FINAL_VERSION
-			const	RYAI_MAP_CRUNCH::TAStarFlag	restFlags=rest->worldValidPos().getTopologyRef().getCstTopologyNode().getFlags();
-			const	RYAI_MAP_CRUNCH::TAStarFlag	foodFlags=food->worldValidPos().getTopologyRef().getCstTopologyNode().getFlags();
-			nlassert((restFlags&denyflags)==0);
-			nlassert((foodFlags&denyflags)==0);
+			const RYAI_MAP_CRUNCH::TAStarFlag restFlags = rest->worldValidPos().getTopologyRef().getCstTopologyNode().getFlags();
+			const RYAI_MAP_CRUNCH::TAStarFlag foodFlags = food->worldValidPos().getTopologyRef().getCstTopologyNode().getFlags();
+			nlassert((restFlags & denyflags) == 0);
+			nlassert((foodFlags & denyflags) == 0);
 #endif
-			return	true;
+			return true;
 		}
 	}
-	return	false;
+	return false;
 }
 
-
-const	CFaunaZone	*CCellZone::lookupFaunaZone(const	CPropertySet &activity,	TAStarFlag	denyflags, size_t replacementGroupFamilyId)
+const CFaunaZone *CCellZone::lookupFaunaZone(const CPropertySet &activity, TAStarFlag denyflags, size_t replacementGroupFamilyId)
 {
-	float	totalScore=28*28;
+	float totalScore = 28 * 28;
 
-	vector<const CFaunaZone*>	candidates;
-	
+	vector<const CFaunaZone *> candidates;
+
 	//	prepare a randomly ordered list of cell.
-	vector<CCell*>	cells;
-	for	(CCont<CCell>::iterator	it=_Cells.begin(), itEnd=_Cells.end();it!=itEnd;++it)
+	vector<CCell *> cells;
+	for (CCont<CCell>::iterator it = _Cells.begin(), itEnd = _Cells.end(); it != itEnd; ++it)
 		cells.push_back(*it);
 #ifndef NL_CPP17
 	random_shuffle(cells.begin(), cells.end());
 #else
 	std::shuffle(cells.begin(), cells.end(), CAIS::instance().RandomGenerator);
 #endif
-	
 
 	// look for a conveninent zone in a convenient cell.
 	for (uint c = 0; c < cells.size(); ++c)
 	{
-		const	CCell *const	cell = cells[c];
-		
-		if	(!cell)
+		const CCell *const cell = cells[c];
+
+		if (!cell)
 			continue;
 
 		// look for a zone that support activity.
-		for	(CCont<CFaunaZone>::const_iterator	it=cell->faunaZonesCst().begin(), itEnd=cell->faunaZonesCst().end(); it!=itEnd;++it)
+		for (CCont<CFaunaZone>::const_iterator it = cell->faunaZonesCst().begin(), itEnd = cell->faunaZonesCst().end(); it != itEnd; ++it)
 		{
-			const	CFaunaZone	*const	faunaZone=*it;
+			const CFaunaZone *const faunaZone = *it;
 #ifdef NL_DEBUG
 			nlassert(faunaZone);
 #endif
@@ -1712,27 +1684,27 @@ const	CFaunaZone	*CCellZone::lookupFaunaZone(const	CPropertySet &activity,	TASta
 			static bool displayActivities = false;
 			if (displayActivities)
 			{
-				nlinfo("Zone activities");
-				const AITYPES::CPropertySet &ps = faunaZone->additionalActivities();
-				const std::set<NLMISC::TStringId> &props = ps.properties();
-				std::set<NLMISC::TStringId>::const_iterator it;
-				for (it = props.begin(); it != props.end(); ++it)
-				{
-					nlinfo("Prop = %s", NLMISC::CStringMapper::unmap(*it).c_str());
-				}
-				nlinfo("Wanted activities num = %d ", (int) activity.properties().size());
-				if (activity.properties().size() != 0)
-				{
-					for (it = activity.properties().begin(); it != activity.properties().end(); ++it)
-					{
-						nlinfo("Prop = %s", NLMISC::CStringMapper::unmap(*it).c_str());
-					}
-				}
+			    nlinfo("Zone activities");
+			    const AITYPES::CPropertySet &ps = faunaZone->additionalActivities();
+			    const std::set<NLMISC::TStringId> &props = ps.properties();
+			    std::set<NLMISC::TStringId>::const_iterator it;
+			    for (it = props.begin(); it != props.end(); ++it)
+			    {
+			        nlinfo("Prop = %s", NLMISC::CStringMapper::unmap(*it).c_str());
+			    }
+			    nlinfo("Wanted activities num = %d ", (int) activity.properties().size());
+			    if (activity.properties().size() != 0)
+			    {
+			        for (it = activity.properties().begin(); it != activity.properties().end(); ++it)
+			        {
+			            nlinfo("Prop = %s", NLMISC::CStringMapper::unmap(*it).c_str());
+			        }
+			    }
 			}
 			*/
 
-			if	(	!faunaZone->worldValidPos().isValid()
-				||	!faunaZone->haveActivity(activity)	)
+			if (!faunaZone->worldValidPos().isValid()
+			    || !faunaZone->haveActivity(activity))
 				continue;
 
 			// if a replacement GroupFamily was asked, it must be in the zone
@@ -1746,14 +1718,14 @@ const	CFaunaZone	*CCellZone::lookupFaunaZone(const	CPropertySet &activity,	TASta
 				if (faunaZone->isSubstituted()) continue; // zone wants a substitution group
 			}
 
-			const	RYAI_MAP_CRUNCH::TAStarFlag	flags=faunaZone->worldValidPos().getTopologyRef().getCstTopologyNode().getFlags();
-			if	(flags&denyflags)
+			const RYAI_MAP_CRUNCH::TAStarFlag flags = faunaZone->worldValidPos().getTopologyRef().getCstTopologyNode().getFlags();
+			if (flags & denyflags)
 				continue;
 
-			const	float	score=faunaZone->getFreeAreaScore();
-			if	(score>=totalScore)
+			const float score = faunaZone->getFreeAreaScore();
+			if (score >= totalScore)
 			{
-				if	(score==totalScore)
+				if (score == totalScore)
 				{
 					candidates.push_back(faunaZone);
 				}
@@ -1761,31 +1733,30 @@ const	CFaunaZone	*CCellZone::lookupFaunaZone(const	CPropertySet &activity,	TASta
 				{
 					candidates.clear();
 					candidates.push_back(faunaZone);
-					totalScore=score;
+					totalScore = score;
 				}
 			}
 		}
 	}
-	if	(candidates.size()>0)
-		return	candidates[CAIS::rand16((uint32)candidates.size())];
+	if (candidates.size() > 0)
+		return candidates[CAIS::rand16((uint32)candidates.size())];
 	return NULL;
 }
 
 struct TLookupLogFilter
 {
-	CPropertySet	Properties;
-	uint32			Alias;
+	CPropertySet Properties;
+	uint32 Alias;
 
-	bool operator ==(const TLookupLogFilter &other) const
+	bool operator==(const TLookupLogFilter &other) const
 	{
 		if (Alias != other.Alias)
 			return false;
 
 		return Properties == other.Properties;
-
 	}
 
-	bool operator <(const TLookupLogFilter &other) const
+	bool operator<(const TLookupLogFilter &other) const
 	{
 		if (Alias != other.Alias)
 			return Alias < other.Alias;
@@ -1794,39 +1765,38 @@ struct TLookupLogFilter
 	}
 };
 
-const CNpcZone	*CCellZone::lookupNpcZone(const	CPropertySet &activity, size_t replacementGroupFamilyId)
+const CNpcZone *CCellZone::lookupNpcZone(const CPropertySet &activity, size_t replacementGroupFamilyId)
 {
-	float	totalScore=0;
+	float totalScore = 0;
 
 	//	prepare a randomly ordered list of cell.
-	vector<CCell*>	cells;
-	for	(CCont<CCell>::iterator	it=_Cells.begin(), itEnd=_Cells.end();it!=itEnd;++it)
+	vector<CCell *> cells;
+	for (CCont<CCell>::iterator it = _Cells.begin(), itEnd = _Cells.end(); it != itEnd; ++it)
 		cells.push_back(*it);
 #ifndef NL_CPP17
 	random_shuffle(cells.begin(), cells.end());
 #else
 	std::shuffle(cells.begin(), cells.end(), CAIS::instance().RandomGenerator);
 #endif
-	
-	vector<const CNpcZone*>	candidates;
+
+	vector<const CNpcZone *> candidates;
 
 	// look for a convenient zone in a convenient cell.
-	for (uint c=0; c < cells.size(); ++c)
+	for (uint c = 0; c < cells.size(); ++c)
 	{
-		const	CCell *const	cell = cells[c];
+		const CCell *const cell = cells[c];
 
-		if	(!cell)
+		if (!cell)
 			continue;
-
 
 		FOREACHC(it, TAliasZonePlaceList, cell->npcZonePlacesCst())
 		{
-			const CNpcZone	*npcZone=*it;
+			const CNpcZone *npcZone = *it;
 #ifdef NL_DEBUG
 			nlassert(npcZone);
 #endif
-			if	(	!activity.empty()
-				&&	!npcZone->properties().containsPartOfNotStrict(activity))
+			if (!activity.empty()
+			    && !npcZone->properties().containsPartOfNotStrict(activity))
 				continue;
 
 			// if a replacement GroupFamily was asked, it must be in the zone
@@ -1840,46 +1810,45 @@ const CNpcZone	*CCellZone::lookupNpcZone(const	CPropertySet &activity, size_t re
 				if (npcZone->isSubstituted()) continue; // zone wants a substitution group
 			}
 
-			const	float	score=npcZone->getFreeAreaScore();
-			if	(score>totalScore)
+			const float score = npcZone->getFreeAreaScore();
+			if (score > totalScore)
 			{
-				totalScore=score;
+				totalScore = score;
 				candidates.clear();
 				candidates.push_back(npcZone);
 				continue;
 			}
 
-			if	(score==totalScore)
+			if (score == totalScore)
 				candidates.push_back(npcZone);
 		}
 		FOREACHC(it, TAliasZoneShapeList, cell->npcZoneShapesCst())
 		{
 			// :FIXME: Same code than above, cut n paste
-			const	CNpcZone	*const	npcZone=*it;
+			const CNpcZone *const npcZone = *it;
 #ifdef NL_DEBUG
 			nlassert(npcZone);
 #endif
-			if	(	!activity.empty()
-				&&	!npcZone->properties().containsPartOfNotStrict(activity))
+			if (!activity.empty()
+			    && !npcZone->properties().containsPartOfNotStrict(activity))
 				continue;
 
-			const	float	score=npcZone->getFreeAreaScore();
-			if	(score>totalScore)
+			const float score = npcZone->getFreeAreaScore();
+			if (score > totalScore)
 			{
-				totalScore=score;
+				totalScore = score;
 				candidates.clear();
 				candidates.push_back(npcZone);
 				continue;
 			}
 
-			if	(score==totalScore)
+			if (score == totalScore)
 				candidates.push_back(npcZone);
 		}
-
 	}
-				
-	if	(candidates.size()>0)
-		return	candidates[CAIS::rand16((uint32)candidates.size())];
+
+	if (candidates.size() > 0)
+		return candidates[CAIS::rand16((uint32)candidates.size())];
 
 	// warning only once
 	{
@@ -1892,9 +1861,9 @@ const CNpcZone	*CCellZone::lookupNpcZone(const	CPropertySet &activity, size_t re
 		if (filter.find(lf) == filter.end())
 		{
 			nlwarning("CCellZone::lookupNpcZone can't find zone for activity '%s' in cellZone '%s'%s (display only ONCE)",
-				activity.toString().c_str(),
-				getAliasFullName().c_str(),
-				getAliasString().c_str());
+			    activity.toString().c_str(),
+			    getAliasFullName().c_str(),
+			    getAliasString().c_str());
 
 			filter.insert(lf);
 		}
@@ -1902,94 +1871,84 @@ const CNpcZone	*CCellZone::lookupNpcZone(const	CPropertySet &activity, size_t re
 	return NULL;
 }
 
-
-
-
-const CNpcZone	*CCellZone::lookupNpcZoneByName(/*const TPopulationFamily &family, */const std::string &zoneName)
+const CNpcZone *CCellZone::lookupNpcZoneByName(/*const TPopulationFamily &family, */ const std::string &zoneName)
 {
-	for	(uint i=0; i<_Cells.size(); ++i)
+	for (uint i = 0; i < _Cells.size(); ++i)
 	{
-		CCell *const	cell = _Cells[i];
-		if	(!cell)
+		CCell *const cell = _Cells[i];
+		if (!cell)
 			continue;
 
-//		if	(!cell->_FamilyFlags.containsFamily(family))
-//			continue;
+		//		if	(!cell->_FamilyFlags.containsFamily(family))
+		//			continue;
 
-		for (uint j=0; j<cell->npcZoneCount(); ++j)
+		for (uint j = 0; j < cell->npcZoneCount(); ++j)
 		{
-			CNpcZone *const		zone = cell->npcZone(j);
-			if	(!zone)
+			CNpcZone *const zone = cell->npcZone(j);
+			if (!zone)
 				continue;
 
-			if	(zone->getAliasTreeOwner().getName() == zoneName)
-			{	// ok, we found it !
+			if (zone->getAliasTreeOwner().getName() == zoneName)
+			{ // ok, we found it !
 				return zone;
 			}
-
 		}
-		
 	}
-	return	NULL;
+	return NULL;
 }
 
 std::string CCellZone::getIndexString() const
 {
-	return getOwner()->getIndexString()+toString(":cz%u", getChildIndex());
+	return getOwner()->getIndexString() + toString(":cz%u", getChildIndex());
 }
 
-
-void	CCellZone::rebuildEnergyLevels()
+void CCellZone::rebuildEnergyLevels()
 {
-	CCont<CGroupFamily>	&groupFamilies=getOwner()->groupFamilies();
+	CCont<CGroupFamily> &groupFamilies = getOwner()->groupFamilies();
 
 	{
-		CPropertySet	groupFamiliesNames;
-		
-		for (CCont<CGroupFamily>::iterator	it=groupFamilies.begin(), itEnd=groupFamilies.end();it!=itEnd;++it)
+		CPropertySet groupFamiliesNames;
+
+		for (CCont<CGroupFamily>::iterator it = groupFamilies.begin(), itEnd = groupFamilies.end(); it != itEnd; ++it)
 			groupFamiliesNames.addProperty(it->getName());
-		
-		for	(CCont<CFamilyBehavior>::iterator	it=_Families.begin(), itEnd=_Families.end();it!=itEnd;)
-		{	
+
+		for (CCont<CFamilyBehavior>::iterator it = _Families.begin(), itEnd = _Families.end(); it != itEnd;)
+		{
 			if (!groupFamiliesNames.have(it->getName()))
 			{
-				CCont<CFamilyBehavior>::iterator	last=it;
+				CCont<CFamilyBehavior>::iterator last = it;
 				++it;
 				_Families.removeChildByIndex(last->getChildIndex());
 				continue;
 			}
 			++it;
 		}
-
 	}
 
-	
-	for (CCont<CGroupFamily>::iterator	it=groupFamilies.begin(), itEnd=groupFamilies.end();it!=itEnd;++it)
+	for (CCont<CGroupFamily>::iterator it = groupFamilies.begin(), itEnd = groupFamilies.end(); it != itEnd; ++it)
 	{
-		CCont<CFamilyBehavior>::iterator	itBehav=_Families.begin(),	itBehavEnd=_Families.end();
-		for	(;itBehav!=itBehavEnd;++itBehav)
-		{	
-			if	(itBehav->getName()==it->getName())
+		CCont<CFamilyBehavior>::iterator itBehav = _Families.begin(), itBehavEnd = _Families.end();
+		for (; itBehav != itBehavEnd; ++itBehav)
+		{
+			if (itBehav->getName() == it->getName())
 				break;
 		}
-		if	(itBehav!=itBehavEnd)	//	present ?
+		if (itBehav != itBehavEnd) //	present ?
 			continue;
 
 		//	else create the missing Behavior.
-		CSmartPtr<CFamilyBehavior>	fb=new CFamilyBehavior(this, *it);
-		if	(!fb->isFamilyProfileValid())
+		CSmartPtr<CFamilyBehavior> fb = new CFamilyBehavior(this, *it);
+		if (!fb->isFamilyProfileValid())
 		{
-			fb=NULL;
+			fb = NULL;
 			continue;
 		}
-		
-		fb->setBaseLevel		((uint32)(0.45*(double)ENERGY_SCALE));	//	forced to 0 at start instead of 0.5 ..
-		fb->setEffectiveLevel	(fb->baseLevel());
-		
-		_Families.addChild		(fb);
 
+		fb->setBaseLevel((uint32)(0.45 * (double)ENERGY_SCALE)); //	forced to 0 at start instead of 0.5 ..
+		fb->setEffectiveLevel(fb->baseLevel());
+
+		_Families.addChild(fb);
 	}
-		
 }
 
 // predicate to remove old family manager
@@ -2012,13 +1971,13 @@ public:
 	}
 };
 
-void	CCellZone::update()
+void CCellZone::update()
 {
 	H_AUTO(CellZoneUpdate);
 
 	// update all family managers
 
-	for	(CCont<CFamilyBehavior>::iterator	it=_Families.begin(), itEnd=_Families.end(); it!=itEnd;++it)
+	for (CCont<CFamilyBehavior>::iterator it = _Families.begin(), itEnd = _Families.end(); it != itEnd; ++it)
 	{
 
 		{
@@ -2027,7 +1986,7 @@ void	CCellZone::update()
 		}
 		{
 			H_AUTO(FamiliesUpdate);
-			if	(it->needUpdate())
+			if (it->needUpdate())
 				it->update(it->getDt());
 		}
 	}
@@ -2036,90 +1995,89 @@ void	CCellZone::update()
 	_Families.getInternalCont().erase(std::remove_if(_Families.getInternalCont().begin(), _Families.getInternalCont().end(), CObsoleteFamilyManagerRemover()), _Families.getInternalCont().end());
 }
 
-void CCellZone::serviceEvent	(const	CServiceEvent	&info)
+void CCellZone::serviceEvent(const CServiceEvent &info)
 {
 	CCont<CFamilyBehavior>::iterator first(_Families.begin()), last(_Families.end());
-	for(; first != last; ++first)
+	for (; first != last; ++first)
 	{
-		(*first)->serviceEvent	(info);
+		(*first)->serviceEvent(info);
 	}
 }
 
-const	CNpcZone	*CCellZone::lookupNpcZoneScorer	(std::vector<CCell*>	cells,	const	CZoneScorer		&scorer)
+const CNpcZone *CCellZone::lookupNpcZoneScorer(std::vector<CCell *> cells, const CZoneScorer &scorer)
 {
-	float	totalScore=0;
-	
-	vector<const CNpcZone*>	candidates;
-	
+	float totalScore = 0;
+
+	vector<const CNpcZone *> candidates;
+
 	// look for a convenient zone in a convenient cell.
-	for (uint c=0; c < cells.size(); ++c)
+	for (uint c = 0; c < cells.size(); ++c)
 	{
-		const	CCell *const	cell = cells[c];
-		
-		if	(!cell)
+		const CCell *const cell = cells[c];
+
+		if (!cell)
 			continue;
-		
+
 		FOREACHC(it, TAliasZonePlaceList, cell->npcZonePlacesCst())
 		{
-			const	CNpcZone	*const	npcZone=*it;
-			
+			const CNpcZone *const npcZone = *it;
+
 #ifdef NL_DEBUG
 			nlassert(npcZone);
-#endif			
-			const	float	score=scorer.getScore(*npcZone);
+#endif
+			const float score = scorer.getScore(*npcZone);
 			float const distance = scorer.getParam(*npcZone);
-			if (LogScorerScores && score>=0.f)
+			if (LogScorerScores && score >= 0.f)
 				nldebug("Zone: %s - Score: %f - Distance: %f", npcZone->getAliasTreeOwner().getAliasFullName().c_str(), score, distance);
-			if	(score<totalScore)
+			if (score < totalScore)
 				continue;
-			
-			if	(score>totalScore)
+
+			if (score > totalScore)
 			{
-				totalScore=score;
+				totalScore = score;
 				candidates.clear();
 				candidates.push_back(npcZone);
 				continue;
 			}
-			
+
 			candidates.push_back(npcZone);
 		}
 		FOREACHC(it, TAliasZoneShapeList, cell->npcZoneShapesCst())
 		{
 			// :FIXME: Same code than above, cut n paste
-			const	CNpcZone	*const	npcZone=*it;
-			
+			const CNpcZone *const npcZone = *it;
+
 #ifdef NL_DEBUG
 			nlassert(npcZone);
-#endif			
-			const	float	score=scorer.getScore(*npcZone);
+#endif
+			const float score = scorer.getScore(*npcZone);
 			float const distance = scorer.getParam(*npcZone);
-			if (LogScorerScores && score>=0.f)
+			if (LogScorerScores && score >= 0.f)
 				nldebug("Zone: %s - Score: %f - Distance: %f", npcZone->getAliasTreeOwner().getAliasFullName().c_str(), score, distance);
-			if	(score<totalScore)
+			if (score < totalScore)
 				continue;
-			
-			if	(score>totalScore)
+
+			if (score > totalScore)
 			{
-				totalScore=score;
+				totalScore = score;
 				candidates.clear();
 				candidates.push_back(npcZone);
 				continue;
-			}			
+			}
 			candidates.push_back(npcZone);
 		}
-		
 	}
-	if	(candidates.size()>0)
-		return	candidates[CAIS::rand16((uint32)candidates.size())];
+	if (candidates.size() > 0)
+		return candidates[CAIS::rand16((uint32)candidates.size())];
 	return NULL;
 }
 
 bool CCellZone::spawn()
 {
 	// Spawn families
-	for (size_t k=0; k<_Families.size(); ++k)
+	for (size_t k = 0; k < _Families.size(); ++k)
 	{
-		CFamilyBehavior* familyBehavior = _Families[(uint32)k];
+		CFamilyBehavior *familyBehavior = _Families[(uint32)k];
 		if (!familyBehavior)
 			continue;
 		familyBehavior->spawn();
@@ -2131,9 +2089,9 @@ bool CCellZone::spawn()
 bool CCellZone::despawn()
 {
 	// Despawn families
-	for (size_t k=0; k<_Families.size(); ++k)
+	for (size_t k = 0; k < _Families.size(); ++k)
 	{
-		CFamilyBehavior* familyBehavior = _Families[(uint32)k];
+		CFamilyBehavior *familyBehavior = _Families[(uint32)k];
 		if (!familyBehavior)
 			continue;
 		familyBehavior->despawn();
@@ -2147,19 +2105,18 @@ bool CCellZone::despawn()
 //////////////////////////////////////////////////////////////////////////////
 
 CCell::CCell(CCellZone *owner, uint32 alias, const std::string &name)
-	: CAliasChild<CCellZone>(owner, alias, name)
+    : CAliasChild<CCellZone>(owner, alias, name)
 {
 }
 
-
 CCell::~CCell()
-{ 
+{
 	unlinkCell();
 }
 
 std::string CCell::getFullName() const
 {
-	return std::string(getOwner()->getFullName()+":"+getName());
+	return std::string(getOwner()->getFullName() + ":" + getName());
 }
 
 void CCell::unlinkCell()
@@ -2172,9 +2129,9 @@ void CCell::unlinkCell()
 	}
 }
 
-IAliasCont		*CCell::getAliasCont(TAIType type)
+IAliasCont *CCell::getAliasCont(TAIType type)
 {
-	switch(type)
+	switch (type)
 	{
 	case AITypeDynFaunaZone:
 		return &_FaunaZones;
@@ -2183,47 +2140,44 @@ IAliasCont		*CCell::getAliasCont(TAIType type)
 	case AITypeDynNpcZoneShape:
 		return &_NpcZoneShapes;
 	case AITypeDynRoad:
-		return	&_Roads;
+		return &_Roads;
 	default:
-		return	NULL;
+		return NULL;
 	}
-
 }
 
-CNpcZone	*CCell::findNpcZone(const CAIVector &posInside)
+CNpcZone *CCell::findNpcZone(const CAIVector &posInside)
 {
-//	for (CCont<CNpcZone>::iterator	itNpcZone=npcZones().begin(), itEndNpcZone=npcZones().end(); itNpcZone!=itEndNpcZone; ++itNpcZone)
+	//	for (CCont<CNpcZone>::iterator	itNpcZone=npcZones().begin(), itEndNpcZone=npcZones().end(); itNpcZone!=itEndNpcZone; ++itNpcZone)
 	FOREACH(itNpcZone, TAliasZonePlaceList, npcZonePlaces())
 	{
-		if	(!itNpcZone->atPlace(posInside))
-			continue;		
+		if (!itNpcZone->atPlace(posInside))
+			continue;
 		// This zone match the position
-		return	*itNpcZone;
+		return *itNpcZone;
 	}
 	FOREACH(itNpcZone, TAliasZoneShapeList, npcZoneShapes())
 	{
 		// :FIXME: Same code than above, cut n paste
-		if	(!itNpcZone->atPlace(posInside))
-			continue;		
+		if (!itNpcZone->atPlace(posInside))
+			continue;
 		// This zone match the position
-		return	*itNpcZone;
+		return *itNpcZone;
 	}
-	return	NULL;
+	return NULL;
 }
 
-
-CAliasTreeOwner	*CCell::createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree)
+CAliasTreeOwner *CCell::createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree)
 {
 	if (!cont)
-		return	NULL;
-	
-	CAliasTreeOwner*	child	=	NULL;
+		return NULL;
 
-	switch(aliasTree->getType())
+	CAliasTreeOwner *child = NULL;
+
+	switch (aliasTree->getType())
 	{
 		//	create the child and adds it to the corresponding position.
-	case AITypeDynFaunaZone:
-	{
+	case AITypeDynFaunaZone: {
 		CFaunaZone *fzc = new CFaunaZone(this, aliasTree);
 		child = fzc;
 	}
@@ -2241,7 +2195,7 @@ CAliasTreeOwner	*CCell::createChild(IAliasCont	*cont, CAIAliasDescriptionNode *a
 
 	if (child)
 		cont->addAliasChild(child);
-	return	child;
+	return child;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2250,125 +2204,126 @@ CAliasTreeOwner	*CCell::createChild(IAliasCont	*cont, CAIAliasDescriptionNode *a
 
 // data structure for path finding
 //****************************************
-class	TListItem
+class TListItem
 {
 public:
 	//	only for search purpose.
-	TListItem(const	CNpcZone	*const	zone)
-		: _Zone(zone)
-		,_MvtCost(0)
-		,_TargetDist(0)
-		,_Value(0)
-		,_Parent(NULL)
-		,_Road(NULL)
-	{}
-
-	TListItem	(const	CNpcZone	*const	zone,	const	float	&mvtCost, const	float	&targetDist, const	float	&value, const	CNpcZone	*const	parent, const	CRoad	*const	road)
-		:_Zone(zone)
-		,_MvtCost(mvtCost)
-		,_TargetDist(targetDist)
-		,_Value(value)
-		,_Parent(parent)
-		,_Road(road)
-	{}
-
-	const	float	&value	()	const
+	TListItem(const CNpcZone *const zone)
+	    : _Zone(zone)
+	    , _MvtCost(0)
+	    , _TargetDist(0)
+	    , _Value(0)
+	    , _Parent(NULL)
+	    , _Road(NULL)
 	{
-		return	_Value;
 	}
 
-	const	CNpcZone	*zone	()	const
+	TListItem(const CNpcZone *const zone, const float &mvtCost, const float &targetDist, const float &value, const CNpcZone *const parent, const CRoad *const road)
+	    : _Zone(zone)
+	    , _MvtCost(mvtCost)
+	    , _TargetDist(targetDist)
+	    , _Value(value)
+	    , _Parent(parent)
+	    , _Road(road)
 	{
-		return	_Zone;
 	}
 
-	const	CNpcZone	*parent	()	const
+	const float &value() const
 	{
-		return	_Parent;
+		return _Value;
 	}
 
-	const	CRoad		*road	()	const
+	const CNpcZone *zone() const
 	{
-		return	_Road;
+		return _Zone;
 	}
 
-	const	float	&mvtCost	()	const
+	const CNpcZone *parent() const
 	{
-		return	_MvtCost;
+		return _Parent;
+	}
+
+	const CRoad *road() const
+	{
+		return _Road;
+	}
+
+	const float &mvtCost() const
+	{
+		return _MvtCost;
 	}
 
 private:
-	const	CNpcZone	*const	_Zone;
-	const	CNpcZone	*const	_Parent;
-	const	CRoad		*const	_Road;
-	float	_MvtCost;
-	float	_TargetDist;
-	float	_Value;
+	const CNpcZone *const _Zone;
+	const CNpcZone *const _Parent;
+	const CRoad *const _Road;
+	float _MvtCost;
+	float _TargetDist;
+	float _Value;
 };
 
-struct	TOrderItemOnValue	
+struct TOrderItemOnValue
 #ifndef NL_CPP17
-	:	unary_function<TListItem, bool>
+    : unary_function<TListItem, bool>
 #endif
 {
-	bool operator () (const TListItem &item1, const TListItem &item2) const
+	bool operator()(const TListItem &item1, const TListItem &item2) const
 	{
 		return item1.value() < item2.value();
 	}
-
 };
 
 struct TOrderItemOnZone
 #ifndef NL_CPP17
-	: unary_function<TListItem, bool>
+    : unary_function<TListItem, bool>
 #endif
 {
-	bool operator () (const TListItem &item1, const TListItem &item2) const
+	bool operator()(const TListItem &item1, const TListItem &item2) const
 	{
-		return item1.zone()< item2.zone();
+		return item1.zone() < item2.zone();
 	}
-
 };
 
-class	TFindItemOnZone
+class TFindItemOnZone
 {
 public:
-	TFindItemOnZone(const	CNpcZone *zone)
-		: _Zone(zone)
-	{}
-	bool operator () (const TListItem &item) const
+	TFindItemOnZone(const CNpcZone *zone)
+	    : _Zone(zone)
 	{
-		return item.zone()== _Zone;
 	}
+	bool operator()(const TListItem &item) const
+	{
+		return item.zone() == _Zone;
+	}
+
 private:
-	const	CNpcZone	*_Zone;
+	const CNpcZone *_Zone;
 };
 
-bool	pathFind(const	CNpcZone	*const	start, const	CNpcZone	*const	end, const	CPropertySet	&zoneFilter, std::vector<NLMISC::CSmartPtr<CRoad> > &path, bool logError)
+bool pathFind(const CNpcZone *const start, const CNpcZone *const end, const CPropertySet &zoneFilter, std::vector<NLMISC::CSmartPtr<CRoad>> &path, bool logError)
 {
 	/// check that the start and end are in the same continent.
-	const	CContinent	*cont = start->getOwner()->getOwner()->getOwner()->getOwner();
+	const CContinent *cont = start->getOwner()->getOwner()->getOwner()->getOwner();
 	if (end->getOwner()->getOwner()->getOwner()->getOwner() != cont)
 	{
 		nlwarning("Searching path for zone in different continent !");
-		return	false;
+		return false;
 	}
 
-#if	!FINAL_VERSION
-	if (start==end)
+#if !FINAL_VERSION
+	if (start == end)
 	{
 		nlwarning("trying to find a path between same zone %s", start->getAliasTreeOwner().getAliasFullName().c_str());
-		path.clear();	//	->leads to an assert in the caller ?
-		return	true;
+		path.clear(); //	->leads to an assert in the caller ?
+		return true;
 	}
 #endif
 
+	multiset<TListItem, TOrderItemOnValue> openList;
+	set<TListItem, TOrderItemOnZone> closedList;
 
-	multiset<TListItem, TOrderItemOnValue>	openList;
-	set<TListItem, TOrderItemOnZone>	closedList;
-	
-	const	float	localDist=(float)(end->midPos() - start->midPos()).norm();
-	TListItem	li(start, 0, localDist, localDist, NULL, NULL);
+	const float localDist = (float)(end->midPos() - start->midPos()).norm();
+	TListItem li(start, 0, localDist, localDist, NULL, NULL);
 	openList.insert(li);
 
 	do
@@ -2377,16 +2332,16 @@ bool	pathFind(const	CNpcZone	*const	start, const	CNpcZone	*const	end, const	CPro
 		openList.erase(openList.begin());
 		closedList.insert(bestItem);
 		nlassert(closedList.find(bestItem) != closedList.end());
-	
+
 		// check if we are at destination
-		if (bestItem.zone()== end)
+		if (bestItem.zone() == end)
 		{
 			// yeee!  we found the path! build the resulting path
 			const TListItem *pli = &bestItem;
-			while	(	pli->parent()
-					&&	pli->road())
+			while (pli->parent()
+			    && pli->road())
 			{
-				path.push_back(const_cast<CRoad*>(pli->road()));
+				path.push_back(const_cast<CRoad *>(pli->road()));
 				set<TListItem, TOrderItemOnZone>::iterator it(closedList.find(pli->parent()));
 				if (it != closedList.end())
 					pli = &(*it);
@@ -2397,59 +2352,57 @@ bool	pathFind(const	CNpcZone	*const	start, const	CNpcZone	*const	end, const	CPro
 					nlassert(it != openList.end());
 					pli = &(*it);
 				}
-
 			}
 			// make the path in correct order
 			std::reverse(path.begin(), path.end());
-			return	true;
+			return true;
 		}
 
+		CNpcZone *const z1 = const_cast<CNpcZone *>(bestItem.zone());
 
-		CNpcZone*const	z1 = const_cast<CNpcZone*>(bestItem.zone());
-
-		FOREACH(road, vector<CDbgPtr<CRoad> >, z1->roads())
+		FOREACH(road, vector<CDbgPtr<CRoad>>, z1->roads())
 		{
 			CNpcZone *z2 = (*road)->startZone();
 
-			if	(z2 == z1)
+			if (z2 == z1)
 			{
 				z2 = (*road)->endZone();
-				if	(z2==z1)
+				if (z2 == z1)
 					continue;
 			}
 
-			if	(	!z2
-				||	closedList.find(TListItem(z2)) != closedList.end()
-				||	(	z2!=end
-					&&	z2->properties().containsPartOfStrict(zoneFilter)))
+			if (!z2
+			    || closedList.find(TListItem(z2)) != closedList.end()
+			    || (z2 != end
+			        && z2->properties().containsPartOfStrict(zoneFilter)))
 			{
 				continue;
 			}
 
-			const	float	localDist=(float)(end->midPos() - z2->midPos()).norm();
+			const float localDist = (float)(end->midPos() - z2->midPos()).norm();
 
 			//	_Length in meters
 			//	_Difficulty between 0 and ??
-			TListItem	li(z2,	bestItem.mvtCost()+(*road)->getCost(),	localDist, localDist+li.mvtCost(), z1, *road);
+			TListItem li(z2, bestItem.mvtCost() + (*road)->getCost(), localDist, localDist + li.mvtCost(), z1, *road);
 
 			// first, check if the zone is already in the open list
 			multiset<TListItem, TOrderItemOnValue>::iterator it(find_if(openList.begin(), openList.end(), TFindItemOnZone(z2)));
 
 			if (it == openList.end())
 			{
-				// If it isn't on the open list, add it to the open list. 
-				// Make the current square the parent of this square. 
-				// Record the F, G, and H costs of the square. 
+				// If it isn't on the open list, add it to the open list.
+				// Make the current square the parent of this square.
+				// Record the F, G, and H costs of the square.
 
 				openList.insert(li);
 			}
 			else
 			{
-				// If it is on the open list already, check to see if this path 
-				// to that square is better, using G cost as the measure. A lower 
-				// G cost means that this is a better path. If so, change the parent 
-				// of the square to the current square, and recalculate the G and F 
-				// scores of the square. If you are keeping your open list sorted by F 
+				// If it is on the open list already, check to see if this path
+				// to that square is better, using G cost as the measure. A lower
+				// G cost means that this is a better path. If so, change the parent
+				// of the square to the current square, and recalculate the G and F
+				// scores of the square. If you are keeping your open list sorted by F
 				// score, you may need to resort the list to account for the change.
 
 				if (li.mvtCost() < it->mvtCost())
@@ -2457,22 +2410,19 @@ bool	pathFind(const	CNpcZone	*const	start, const	CNpcZone	*const	end, const	CPro
 					openList.erase(it);
 					openList.insert(li);
 				}
-
 			}
-
 		}
 
-	} while(!openList.empty());
+	} while (!openList.empty());
 
 	if (logError)
-		nlwarning("Could't find path from '%s'%s to '%s'%s", 
-			start->getAliasTreeOwner().getAliasFullName().c_str(),	
-			start->getAliasTreeOwner().getAliasString().c_str(),
-			end->getAliasTreeOwner().getAliasFullName().c_str(),	
-			end->getAliasTreeOwner().getAliasString().c_str());
-	return	false;
+		nlwarning("Could't find path from '%s'%s to '%s'%s",
+		    start->getAliasTreeOwner().getAliasFullName().c_str(),
+		    start->getAliasTreeOwner().getAliasString().c_str(),
+		    end->getAliasTreeOwner().getAliasFullName().c_str(),
+		    end->getAliasTreeOwner().getAliasString().c_str());
+	return false;
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 // CPopulation                                                              //
@@ -2480,7 +2430,7 @@ bool	pathFind(const	CNpcZone	*const	start, const	CNpcZone	*const	end, const	CPro
 
 std::string CPopulation::getIndexString() const
 {
-	return	getOwner()->getIndexString()+NLMISC::toString(":po%u", getChildIndex());
+	return getOwner()->getIndexString() + NLMISC::toString(":po%u", getChildIndex());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2489,22 +2439,19 @@ std::string CPopulation::getIndexString() const
 
 std::string CRoadTrigger::getIndexString() const
 {
-	return	getOwner()->getIndexString()+NLMISC::toString(":rt%u", getChildIndex());
+	return getOwner()->getIndexString() + NLMISC::toString(":rt%u", getChildIndex());
 }
 
-
-
-CGroupFamily::CGroupFamily(CAliasTreeOwner *owner, uint32 alias, std::string const& name)
-: CAliasTreeOwner(alias, name),
-  _Owner(owner),
-  _ProfileName(0),
-  _SubstitutionId(0),
-  _Index(~0)
+CGroupFamily::CGroupFamily(CAliasTreeOwner *owner, uint32 alias, std::string const &name)
+    : CAliasTreeOwner(alias, name)
+    , _Owner(owner)
+    , _ProfileName(0)
+    , _SubstitutionId(0)
+    , _Index(~0)
 {
 }
 
-
-bool CAIRefPlaceXYR::atPlace(CAIEntityPhysical const* entity) const
+bool CAIRefPlaceXYR::atPlace(CAIEntityPhysical const *entity) const
 {
 	return _Zone->atPlace(entity);
 }

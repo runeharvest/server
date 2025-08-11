@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef BACKUP_FILE_ACCESS_H
 #define BACKUP_FILE_ACCESS_H
 
@@ -31,18 +30,15 @@
 #include <deque>
 #include <map>
 
-namespace NLMISC
-{
-	class CMemStream;
+namespace NLMISC {
+class CMemStream;
 };
-
 
 class IFileAccess;
 
-extern NLMISC::CVariable<std::string>	BSFilePrefix;
+extern NLMISC::CVariable<std::string> BSFilePrefix;
 
-std::string	getBackupFileName(const std::string& filename);
-
+std::string getBackupFileName(const std::string &filename);
 
 struct TRequester
 {
@@ -53,31 +49,34 @@ struct TRequester
 		rt_module
 	};
 
-	TRequesterType			RequesterType;
+	TRequesterType RequesterType;
 	// for service requester
-	NLNET::TServiceId		ServiceId;
+	NLNET::TServiceId ServiceId;
 	// for layer 3 requester
-	NLNET::TSockId			From;
-	NLNET::CCallbackNetBase	*Netbase;
+	NLNET::TSockId From;
+	NLNET::CCallbackNetBase *Netbase;
 
 	// for module requester
-	NLNET::TModuleProxyPtr	ModuleProxy;
+	NLNET::TModuleProxyPtr ModuleProxy;
 
 	TRequester(NLNET::TServiceId serviceId)
-		:	RequesterType(rt_service),
-			ServiceId(serviceId)
-	{}
+	    : RequesterType(rt_service)
+	    , ServiceId(serviceId)
+	{
+	}
 
 	TRequester(NLNET::IModuleProxy *proxy)
-		:	RequesterType(rt_module),
-			ModuleProxy(proxy)
-	{}
+	    : RequesterType(rt_module)
+	    , ModuleProxy(proxy)
+	{
+	}
 
 	TRequester(NLNET::TSockId from, NLNET::CCallbackNetBase *netBase)
-		:	RequesterType(rt_layer3),
-			From(from),
-			Netbase(netBase)
-	{}
+	    : RequesterType(rt_layer3)
+	    , From(from)
+	    , Netbase(netBase)
+	{
+	}
 
 	std::string toString()
 	{
@@ -95,7 +94,7 @@ struct TRequester
 		return std::string();
 	}
 
-	bool operator ==(const TRequester &other) const
+	bool operator==(const TRequester &other) const
 	{
 		if (RequesterType != other.RequesterType)
 			return false;
@@ -109,8 +108,6 @@ struct TRequester
 	}
 };
 
-
-
 /**
  * CFileAccessManager
  * Perform all read/write access to files.
@@ -123,26 +120,25 @@ struct TRequester
 class CFileAccessManager
 {
 public:
-	typedef std::vector<TRequester>	TRequesters;
+	typedef std::vector<TRequester> TRequesters;
 
 	/// Init File manager
-	void		init();
+	void init();
 
 	/// Add an access to perform to stack of accesses
-	void		stackFileAccess(IFileAccess* access);
+	void stackFileAccess(IFileAccess *access);
 
 	/// Remove a file access
-	void		removeFileAccess(IFileAccess* access);
+	void removeFileAccess(IFileAccess *access);
 
 	/// Flushes file accesses
-	void		update();
+	void update();
 
 	/// Release File manager
-	void		release();
-
+	void release();
 
 	/// display stacked accesses
-	void		displayFileAccesses(NLMISC::CLog& log);
+	void displayFileAccesses(NLMISC::CLog &log);
 
 	enum TMode
 	{
@@ -151,55 +147,52 @@ public:
 	};
 
 	/// Force manager mode
-	void		setMode(TMode mode, const std::string& reason);
+	void setMode(TMode mode, const std::string &reason);
 
 	/// Get current manager mode
-	TMode		getMode()				{ return _Mode; }
+	TMode getMode() { return _Mode; }
 
 	/// Forbid stall mode
-	void		forbidStall(bool s = true)		{ _StallAllowed = !s; }
+	void forbidStall(bool s = true) { _StallAllowed = !s; }
 
 	/// Notify service connection
-	void		notifyServiceConnection(NLNET::TServiceId serviceId, const std::string& serviceName);
+	void notifyServiceConnection(NLNET::TServiceId serviceId, const std::string &serviceName);
 
 private:
+	std::deque<IFileAccess *> _Accesses;
 
-	std::deque<IFileAccess*>	_Accesses;
-
-	bool						_StallAllowed;
-	TMode						_Mode;
-	std::string					_Reason;
+	bool _StallAllowed;
+	TMode _Mode;
+	std::string _Reason;
 };
-
-
 
 class IFileAccess
 {
 public:
-
-	IFileAccess(const std::string& filename, const TRequester &requester = NLNET::TServiceId(0xffff), uint32 requestid = 0xffffffff) 
-		:	Requester(requester), 
-			RequestId(requestid), 
-			Filename(filename), 
-			FailureMode(NeverFail)	
-	{ }
+	IFileAccess(const std::string &filename, const TRequester &requester = NLNET::TServiceId(0xffff), uint32 requestid = 0xffffffff)
+	    : Requester(requester)
+	    , RequestId(requestid)
+	    , Filename(filename)
+	    , FailureMode(NeverFail)
+	{
+	}
 
 	enum
 	{
 		NeverFail = 0
 	};
 
-	virtual ~IFileAccess()	{ }
+	virtual ~IFileAccess() { }
 
 	/// \name Standard file access info
 	// @{
 
-	TRequester		Requester;
-	uint32			RequestId;
-	std::string		Filename;
-	uint32			FailureMode;
+	TRequester Requester;
+	uint32 RequestId;
+	std::string Filename;
+	uint32 FailureMode;
 
-	std::string		FailureReason;
+	std::string FailureReason;
 
 	// @}
 
@@ -207,7 +200,7 @@ public:
 	{
 		Success,
 		MinorFailure,
-		MajorFailure		// Stall recommended
+		MajorFailure // Stall recommended
 	};
 
 	/**
@@ -215,22 +208,19 @@ public:
 	 * Returns true if executed successfully.
 	 * WARNING: access may be called multiple times, in case previous call failed.
 	 */
-	virtual TReturnCode		execute(CFileAccessManager& manager) = 0;
-
+	virtual TReturnCode execute(CFileAccessManager &manager) = 0;
 
 protected:
-
-	bool			checkFailureMode(uint32 flags)	{ return (flags & FailureMode) != 0; }
+	bool checkFailureMode(uint32 flags) { return (flags & FailureMode) != 0; }
 };
-
 
 class CLoadFile : public IFileAccess
 {
 public:
-
-	CLoadFile(const std::string& filename, const TRequester &requester, uint32 requestid) 
-		:	IFileAccess(filename, requester, requestid)	
-	{ }
+	CLoadFile(const std::string &filename, const TRequester &requester, uint32 requestid)
+	    : IFileAccess(filename, requester, requestid)
+	{
+	}
 
 	enum TFailureMode
 	{
@@ -241,16 +231,14 @@ public:
 	};
 
 	/// Execute file loading
-	virtual TReturnCode		execute(CFileAccessManager& manager);
+	virtual TReturnCode execute(CFileAccessManager &manager);
 };
-
 
 class CWriteFile : public IFileAccess
 {
 public:
-
-	CWriteFile(const std::string& filename, const TRequester &requester, uint32 requestid, NLMISC::CMemStream& data);
-	CWriteFile(const std::string& filename, const TRequester &requester, uint32 requestid, uint8* data, uint dataSize);
+	CWriteFile(const std::string &filename, const TRequester &requester, uint32 requestid, NLMISC::CMemStream &data);
+	CWriteFile(const std::string &filename, const TRequester &requester, uint32 requestid, uint8 *data, uint dataSize);
 
 	enum TFailureMode
 	{
@@ -266,25 +254,24 @@ public:
 		MajorFailureMode = MajorFailureIfFileUnwritable,
 	};
 
-	std::vector<uint8>		Data;
+	std::vector<uint8> Data;
 
-	bool					Append;
-	bool					BackupFile;
-	bool					CreateDir;
+	bool Append;
+	bool BackupFile;
+	bool CreateDir;
 
 	/// Execute file writing
-	virtual TReturnCode		execute(CFileAccessManager& manager);
-
+	virtual TReturnCode execute(CFileAccessManager &manager);
 };
-
 
 class CDeleteFile : public IFileAccess
 {
 public:
-
-	CDeleteFile(const std::string& filename, const TRequester &requester, uint32 requestid) 
-		:	IFileAccess(filename, requester, requestid), BackupFile(true)	
-	{ }
+	CDeleteFile(const std::string &filename, const TRequester &requester, uint32 requestid)
+	    : IFileAccess(filename, requester, requestid)
+	    , BackupFile(true)
+	{
+	}
 
 	enum TFailureMode
 	{
@@ -298,10 +285,9 @@ public:
 	};
 
 	/// Execute file writing
-	virtual TReturnCode		execute(CFileAccessManager& manager);
+	virtual TReturnCode execute(CFileAccessManager &manager);
 
-	bool					BackupFile;
+	bool BackupFile;
 };
-
 
 #endif

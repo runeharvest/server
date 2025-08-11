@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_PACKET_HISTORY_H
 #define NL_PACKET_HISTORY_H
 
@@ -27,14 +25,12 @@
 
 class CPropertyHistory;
 
-namespace CLFECOMMON
-{
-	class CAction;
+namespace CLFECOMMON {
+class CAction;
 }
 
 // Make sure this is not define in final version
 #undef TEST_LOST_PACKET
-
 
 /**
  * <Class description>
@@ -48,11 +44,15 @@ private:
 	class CMessageEntry
 	{
 	public:
-		CLFECOMMON::TCLEntityId	EntityId;
-		CLFECOMMON::TPropIndex	PropIndex;
+		CLFECOMMON::TCLEntityId EntityId;
+		CLFECOMMON::TPropIndex PropIndex;
 
-		CMessageEntry() {}
-		CMessageEntry(CLFECOMMON::TCLEntityId eid, CLFECOMMON::TPropIndex pi) : EntityId(eid), PropIndex(pi) {}
+		CMessageEntry() { }
+		CMessageEntry(CLFECOMMON::TCLEntityId eid, CLFECOMMON::TPropIndex pi)
+		    : EntityId(eid)
+		    , PropIndex(pi)
+		{
+		}
 	};
 
 	typedef std::vector<CMessageEntry> CPacket;
@@ -60,52 +60,58 @@ private:
 	class CPacketEntry
 	{
 	public:
-		uint32					Number;
-		CPacket					Packet;
+		uint32 Number;
+		CPacket Packet;
 	};
 
-	typedef std::deque<CPacketEntry>	TPacketQueue;
+	typedef std::deque<CPacketEntry> TPacketQueue;
 
 	class CClientEntry
 	{
 	public:
-		bool					EntryUsed;
-		TPacketQueue			Queue;
+		bool EntryUsed;
+		TPacketQueue Queue;
 
-		CClientEntry() : EntryUsed(false) {}
+		CClientEntry()
+		    : EntryUsed(false)
+		{
+		}
 	};
 
-	std::vector<CClientEntry>	_ClientsHistories;
-	CPropertyHistory			*_PropertyHistory;
+	std::vector<CClientEntry> _ClientsHistories;
+	CPropertyHistory *_PropertyHistory;
 
 public:
-
 	/// Constructor
 	CPacketHistory();
 
 	//
-	void	clear();
-	void	init(uint maxClient) { setMaximumClient(maxClient); clear(); }
-	void	setMaximumClient(uint maxClient);
+	void clear();
+	void init(uint maxClient)
+	{
+		setMaximumClient(maxClient);
+		clear();
+	}
+	void setMaximumClient(uint maxClient);
 
 	//
-	void	setPropertyHistory(CPropertyHistory *history) { _PropertyHistory = history; }
+	void setPropertyHistory(CPropertyHistory *history) { _PropertyHistory = history; }
 
 	//
-	void	addClient(TClientId clientId);
-	void	removeClient(TClientId clientId);
-	void	resetClient(TClientId clientId);
-	bool	isValidClient(TClientId clientId);
+	void addClient(TClientId clientId);
+	void removeClient(TClientId clientId);
+	void resetClient(TClientId clientId);
+	bool isValidClient(TClientId clientId);
 
 	//
-	void	store(TClientId clientId, uint packetNumber, CLFECOMMON::CAction *action);
-	void	storeDisassociation(TClientId clientId, CLFECOMMON::TCLEntityId slot, uint packetNumber );
-		
+	void store(TClientId clientId, uint packetNumber, CLFECOMMON::CAction *action);
+	void storeDisassociation(TClientId clientId, CLFECOMMON::TCLEntityId slot, uint packetNumber);
+
 	/// Ack a received packet (with full ack bit field
-	void	ack(TClientId clientId, uint32 packet, uint32 bits, uint ackBitWidth = 8);
+	void ack(TClientId clientId, uint32 packet, uint32 bits, uint ackBitWidth = 8);
 
 	/// Ack a single packet
-	void	ack(TClientId clientId, uint32 packet, bool ackvalue);
+	void ack(TClientId clientId, uint32 packet, bool ackvalue);
 
 #ifdef TEST_LOST_PACKET
 public:
@@ -113,23 +119,20 @@ public:
 private:
 #endif
 	//
-	void	positiveAck(TClientId clientId, CLFECOMMON::TCLEntityId entityId, CLFECOMMON::TPropIndex propindex, uint32 packet);
+	void positiveAck(TClientId clientId, CLFECOMMON::TCLEntityId entityId, CLFECOMMON::TPropIndex propindex, uint32 packet);
 
 	//
-	void	negativeAck(TClientId clientId, CLFECOMMON::TCLEntityId entityId, CLFECOMMON::TPropIndex propindex, uint32 packet);
+	void negativeAck(TClientId clientId, CLFECOMMON::TCLEntityId entityId, CLFECOMMON::TPropIndex propindex, uint32 packet);
 };
 
-
-
-
-inline void	CPacketHistory::store(TClientId clientId, uint packetNumber, CLFECOMMON::CAction *action)
+inline void CPacketHistory::store(TClientId clientId, uint packetNumber, CLFECOMMON::CAction *action)
 {
 	// get the packet queue of the client
-	TPacketQueue	&queue = _ClientsHistories[clientId].Queue;
+	TPacketQueue &queue = _ClientsHistories[clientId].Queue;
 
 	nlassert(queue.empty() || packetNumber >= queue.back().Number);
 
-	if (queue.empty() || packetNumber>queue.back().Number)
+	if (queue.empty() || packetNumber > queue.back().Number)
 	{
 		queue.push_back(CPacketEntry());
 		queue.back().Number = packetNumber;
@@ -137,7 +140,6 @@ inline void	CPacketHistory::store(TClientId clientId, uint packetNumber, CLFECOM
 
 	queue.back().Packet.push_back(CMessageEntry(action->Slot, action->PropertyCode));
 }
-
 
 #endif // NL_PACKET_HISTORY_H
 

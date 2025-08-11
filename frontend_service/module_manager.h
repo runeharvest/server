@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_MODULE_MANAGER_H
 #define NL_MODULE_MANAGER_H
 
@@ -31,8 +29,7 @@
 #include "nel/misc/thread.h"
 #include "nel/misc/debug.h"
 
-
-typedef void	(*TModuleExecCallback)();
+typedef void (*TModuleExecCallback)();
 
 /**
  * A simple function call stacker
@@ -46,29 +43,28 @@ class CModuleManager : public NLMISC::IRunnable
 {
 private:
 	/// The maximum number of modules
-	static uint									_MaxModules;
+	static uint _MaxModules;
 
 	/// The mutexes associated to each module
-	static NLMISC::CMutex						*_ModMutexes;
+	static NLMISC::CMutex *_ModMutexes;
 
 	/// The managers currently used
-	static std::vector<CModuleManager*>			_RegisteredManagers;
-
+	static std::vector<CModuleManager *> _RegisteredManagers;
 
 	/// The name (for display) of this manager
-	std::string									_StackName;
+	std::string _StackName;
 
 	/// The Id of the manager
-	uint										_Id;
+	uint _Id;
 
 	/// Run on an independent thread
-	bool										_Independent;
+	bool _Independent;
 
 	/// The current cycle (same for all managers, used for synchro.)
-	volatile uint64								_Cycle;
+	volatile uint64 _Cycle;
 
 	/// Complete coutner (used for synchro, as cycle restart.)
-	volatile uint64								_CompleteCycle;
+	volatile uint64 _CompleteCycle;
 
 	/// The type of an item (module or wait)
 	enum TExecutionType
@@ -80,25 +76,24 @@ private:
 	/// An execution item
 	struct CExecutionItem
 	{
-		TExecutionType			Type;
-		uint					Id;
-		TModuleExecCallback		Cb;
+		TExecutionType Type;
+		uint Id;
+		TModuleExecCallback Cb;
 	};
 
 	/// The stack of execution items
-	std::vector<CExecutionItem>					_ExecutionStack;
+	std::vector<CExecutionItem> _ExecutionStack;
 
 	/// The list of modules per manager
-	std::vector<uint>							_ExecutedModules;
-
+	std::vector<uint> _ExecutedModules;
 
 	/// The thread associated to this manager
-	NLMISC::IThread								*_Thread;
+	NLMISC::IThread *_Thread;
 
 	/// @name The stop flags
 	//@{
-	NLMISC::CAtomicBool							_StopThread;
-	NLMISC::CAtomicBool							_ThreadStopped;
+	NLMISC::CAtomicBool _StopThread;
+	NLMISC::CAtomicBool _ThreadStopped;
 	//@}
 
 private:
@@ -107,27 +102,22 @@ private:
 	CModuleManager &operator=(const CModuleManager &mod) = delete;
 
 public:
-
 	/// Inits the whole manager structure, and setup the maximum number of usable modules
-	static void		init(uint maxModules);
+	static void init(uint maxModules);
 
 	/// Releases the whole manager structure.
-	static void		release();
-
+	static void release();
 
 	///
 
 	/// Starts all managers at the same time
-	static void		startAll();
+	static void startAll();
 
 	/// Stop all managers before timeout (if can't, the threads are hard terminated.)
-	static void		stopAll(NLMISC::TTime timeout = 2000);
+	static void stopAll(NLMISC::TTime timeout = 2000);
 
 	/// Resets the whole managers list
-	static void		resetManagers();
-
-
-
+	static void resetManagers();
 
 	/// Constructor
 	CModuleManager(const char *name = NULL, bool independent = false);
@@ -135,64 +125,55 @@ public:
 	/// Destructor
 	~CModuleManager();
 
-
 	/// Adds a new module to this manager (id must be unique.)
-	void			addModule(uint id, TModuleExecCallback cb);
+	void addModule(uint id, TModuleExecCallback cb);
 
 	/// Adds a wait for a module (id doesn't have to be unique.)
-	void			addWait(uint id);
-
+	void addWait(uint id);
 
 	/// Starts the manager loop, independantly from the other managers
-	void			start();
+	void start();
 
 	/// Run the execution stack only once
-	void			runOnce();
+	void runOnce();
 
 	/** Stops the manager loop
 	 * \param blockingMode if set, the stop will wait for timeout before terminating the thread.
 	 */
-	void			stop(bool blockingMode=true, NLMISC::TTime timeout = 2000);
-
-
+	void stop(bool blockingMode = true, NLMISC::TTime timeout = 2000);
 
 	/// The run() method from the runnable interface. Not to be called it.
-	virtual void	run();
+	virtual void run();
 
 private:
+	///
+	static void resetCycle();
 
 	///
-	static void		resetCycle();
+	static bool allReady();
 
 	///
-	static bool		allReady();
+	static bool allComplete();
 
 	///
-	static bool		allComplete();
+	static bool allStopped();
 
 	///
-	static bool		allStopped();
-
-
+	void executeStack();
 
 	///
-	void			executeStack();
+	void enterMutexes();
 
 	///
-	void			enterMutexes();
-
-
-	///
-	void			stepCycle()
+	void stepCycle()
 	{
 		++_Cycle;
 	}
 
-
 	///
-	void			waitAllReady()
+	void waitAllReady()
 	{
-		//nldebug("FEMMAN: [%s] waiting for all modules to increase cycle", _StackName.c_str());
+		// nldebug("FEMMAN: [%s] waiting for all modules to increase cycle", _StackName.c_str());
 		while (!allReady())
 			NLMISC::nlSleep(0); // FIXME
 
@@ -204,15 +185,15 @@ private:
 	}
 
 	///
-	void			completeCycle()
+	void completeCycle()
 	{
 		++_CompleteCycle;
 	}
 
 	///
-	void			waitAllComplete()
+	void waitAllComplete()
 	{
-		//nldebug("FEMMAN: [%s] waiting for all modules to restart cycle", _StackName.c_str());
+		// nldebug("FEMMAN: [%s] waiting for all modules to restart cycle", _StackName.c_str());
 		while (!allComplete())
 			NLMISC::nlSleep(0); // FIXME
 
@@ -220,7 +201,6 @@ private:
 		 */
 	}
 };
-
 
 #endif // NL_MODULE_MANAGER_H
 

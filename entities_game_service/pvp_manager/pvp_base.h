@@ -14,18 +14,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_PVP_BASE_H
 #define RY_PVP_BASE_H
 
 #include "game_share/pvp_mode.h"
 #include "server_share/pvp_relation.h"
 
-//#ifdef NL_DEBUG
-// uncomment this if you want PVP stuff to be verbose
-# define PVP_DEBUG
-//#endif
+// #ifdef NL_DEBUG
+//  uncomment this if you want PVP stuff to be verbose
+#define PVP_DEBUG
+// #endif
 
 class CCharacter;
 class CEntityBase;
@@ -41,8 +39,8 @@ class IPVP : public NLMISC::CRefCount
 	friend class CPVPInterface;
 
 	NL_INSTANCE_COUNTER_DECL(IPVP);
-public:
 
+public:
 	/// reasons that can potentially stop PVP session
 	enum TEndType
 	{
@@ -56,7 +54,7 @@ public:
 		QuitTeam,
 	};
 
-	virtual ~IPVP() {}
+	virtual ~IPVP() { }
 
 	/// get PVP mode to send to the client
 	virtual PVP_MODE::TPVPMode getPVPMode() const = 0;
@@ -71,18 +69,17 @@ public:
 	virtual bool isCharacterInConflict(CCharacter *user) const { return true; }
 
 	/// return pvp relation between the two players
-	virtual PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * actor, CEntityBase * target ) const = 0;
+	virtual PVP_RELATION::TPVPRelation getPVPRelation(CCharacter *actor, CEntityBase *target) const = 0;
 
 private:
 	///\name interface callbacks
 	//@{
 
 	/// callback when user potentially leaves PVP. Return false if an error occurred
-	virtual bool leavePVP( CCharacter * user, IPVP::TEndType type) = 0;
+	virtual bool leavePVP(CCharacter *user, IPVP::TEndType type) = 0;
 
 	/// callback when a player hurts another, does nothing by default
-	virtual void userHurtsTarget(CCharacter * user, CCharacter * target) {}
-
+	virtual void userHurtsTarget(CCharacter *user, CCharacter *target) { }
 
 	//@}
 
@@ -96,13 +93,13 @@ private:
 	 * property will be used (default non-pvp rules).
 	 * Preconditions: we are in the user PVP session and user != target
 	 */
-	//virtual bool canUserHurtTarget(CCharacter * user, CEntityBase * target) const = 0;
+	// virtual bool canUserHurtTarget(CCharacter * user, CEntityBase * target) const = 0;
 
 	/**
 	 * Returns true if user can help target in the PVP rules.
 	 * Preconditions: we are in the user PVP session and user != target
 	 */
-	//virtual bool canUserHelpTarget(CCharacter * user, CEntityBase * target) const = 0;
+	// virtual bool canUserHelpTarget(CCharacter * user, CEntityBase * target) const = 0;
 
 	/**
 	 * Returns true if caster area effect can be applied on areaTarget in the PVP rules.
@@ -110,7 +107,7 @@ private:
 	 * Preconditions: we are in the caster PVP session
 	 * Warning: caster can be the same character than areaTarget
 	 */
-	//virtual bool canApplyAreaEffect(CCharacter * caster, CEntityBase * areaTarget, bool offensive, bool ignoreMainTarget) const = 0;
+	// virtual bool canApplyAreaEffect(CCharacter * caster, CEntityBase * areaTarget, bool offensive, bool ignoreMainTarget) const = 0;
 
 	//@}
 
@@ -119,4 +116,3 @@ private:
 };
 
 #endif // RY_PVP_BASE_H
-

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_WEATHER_H
 #define RY_WEATHER_H
 
@@ -51,14 +49,14 @@ public:
 	static float getRyzomTime() { return _RyzomTime.getValue(); }
 
 	// Get Day Cycle
-	static uint8 getDayCycle() { return _DayCycle.getValue(); } 
+	static uint8 getDayCycle() { return _DayCycle.getValue(); }
 
 	// get string of day cycle
-	static const std::string& toString( uint8 );
-	
+	static const std::string &toString(uint8);
+
 private:
-	static CPropertyBaseType< float >	_RyzomTime;
-	static CPropertyBaseType< uint8 >	_DayCycle;
+	static CPropertyBaseType<float> _RyzomTime;
+	static CPropertyBaseType<uint8> _DayCycle;
 };
 #endif // RY_WEATHER_H
 

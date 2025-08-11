@@ -14,12 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_EGS_CLIENT_MESSAGES_H
 #define RY_EGS_CLIENT_MESSAGES_H
-
-
 
 /**
  * class used to handle message from client with the new IOS message forwaeding system
@@ -33,7 +29,6 @@ public:
 	static void init();
 	static void release();
 };
-
 
 #endif // RY_EGS_CLIENT_MESSAGES_H
 

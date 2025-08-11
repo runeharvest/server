@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "dynamic_scenario_service.h"
 
 #include <sstream>
@@ -37,7 +36,7 @@
 
 #include "game_share/tick_event_handler.h"
 #include "game_share/ryzom_version.h"
-//#include "game_share/module_security.h"
+// #include "game_share/module_security.h"
 #include "game_share/ryzom_entity_id.h"
 #include "game_share/chat_group.h"
 #include "game_share/singleton_registry.h"
@@ -46,20 +45,16 @@ using namespace NLNET;
 using namespace NLMISC;
 using namespace R2;
 
-
-
-
-namespace R2
-{
-	// The ligo config
-	extern NLLIGO::CLigoConfig * LigoConfigPtr;
-	CR2LigoConfig R2LigoConfig;
+namespace R2 {
+// The ligo config
+extern NLLIGO::CLigoConfig *LigoConfigPtr;
+CR2LigoConfig R2LigoConfig;
 }
 
-void CDynamicScenarioService::forwardToStringManagerModule (CMessage &msgin)
+void CDynamicScenarioService::forwardToStringManagerModule(CMessage &msgin)
 {
 	TDataSetRow senderId;
-	CChatGroup::TGroupType groupType= CChatGroup::universe;
+	CChatGroup::TGroupType groupType = CChatGroup::universe;
 	std::string id_;
 	TSessionId scenarioId;
 	msgin.serial(senderId);
@@ -67,11 +62,10 @@ void CDynamicScenarioService::forwardToStringManagerModule (CMessage &msgin)
 
 	msgin.serial(id_);
 	msgin.serial(scenarioId);
-	_Dms->translateAndForwardRequested(senderId,groupType,id_,scenarioId);
+	_Dms->translateAndForwardRequested(senderId, groupType, id_, scenarioId);
 }
 
-
-static  void cbForwardToStringManagerModule(CMessage &msgin, const std::string &serviceName, TServiceId sid)
+static void cbForwardToStringManagerModule(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	nldebug("forwardToStringManagerModule");
 	CDynamicScenarioService::instance().forwardToStringManagerModule(msgin);
@@ -80,15 +74,15 @@ static void cbForwardToStringManagerModuleWithArg(CMessage &msgin, const std::st
 {
 	nldebug("forwardToStringManagerModuleWithArg");
 	IServerAnimationModule *imodule = CDynamicMapService::getInstance()->getAnimationModule();
-	CServerAnimationModule* module = safe_cast<CServerAnimationModule*>(imodule);
+	CServerAnimationModule *module = safe_cast<CServerAnimationModule *>(imodule);
 	nlassert(module);
-	module->onProcessModuleMessage(0,msgin);
+	module->onProcessModuleMessage(0, msgin);
 }
 
-void CDynamicScenarioService::forwardIncarnChat(TChanID id,TDataSetRow senderId,ucstring sentence)
+void CDynamicScenarioService::forwardIncarnChat(TChanID id, TDataSetRow senderId, ucstring sentence)
 {
-	_Dms->forwardIncarnChat(id,senderId,sentence);
-	nldebug("Forwarding dyn chat \"%s\" to dms",sentence.c_str());
+	_Dms->forwardIncarnChat(id, senderId, sentence);
+	nldebug("Forwarding dyn chat \"%s\" to dms", sentence.c_str());
 }
 
 static void cbDynChatForward(CMessage &msgin, const std::string &serviceName, TServiceId sid)
@@ -103,24 +97,24 @@ static void cbDynChatForward(CMessage &msgin, const std::string &serviceName, TS
 	msgin.serial(sender);
 	msgin.serial(ucsentence);
 	sentence = ucsentence.toString();
-	CDynamicScenarioService::instance().forwardIncarnChat(id,sender,sentence);
-	nldebug("forwarding dyn chat \"%s\"",sentence.c_str());
+	CDynamicScenarioService::instance().forwardIncarnChat(id, sender, sentence);
+	nldebug("forwarding dyn chat \"%s\"", sentence.c_str());
 }
 
 static void cbSessionAck(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
-	CDynamicMapService* dms = CDynamicMapService::getInstance();
+	CDynamicMapService *dms = CDynamicMapService::getInstance();
 	IServerAnimationModule *imodule = dms->getAnimationModule();
-	CServerAnimationModule* module = safe_cast<CServerAnimationModule*>(imodule);
+	CServerAnimationModule *module = safe_cast<CServerAnimationModule *>(imodule);
 	module->onProcessModuleMessage(0, msgin);
 }
 
 static void cbDssStartAct(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
-	CDynamicScenarioService& service = CDynamicScenarioService::instance();
-	CDynamicMapService* dms = CDynamicMapService::getInstance();
-	IServerAnimationModule*  imodule= dms->getAnimationModule();
-	CServerAnimationModule* module = safe_cast<CServerAnimationModule*>(imodule);
+	CDynamicScenarioService &service = CDynamicScenarioService::instance();
+	CDynamicMapService *dms = CDynamicMapService::getInstance();
+	IServerAnimationModule *imodule = dms->getAnimationModule();
+	CServerAnimationModule *module = safe_cast<CServerAnimationModule *>(imodule);
 	TSessionId sessionId;
 
 	uint32 actId;
@@ -133,7 +127,7 @@ static void cbDssStartAct(CMessage &msgin, const std::string &serviceName, TServ
 static void cbExecCommandResult(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	// treat the rely message sent back from a service whom we asked to execute a command
-	NLMISC::InfoLog->displayNL("EXEC_COMMAND_RESULT' Received from: %3d: %s", sid.get() ,serviceName.c_str());
+	NLMISC::InfoLog->displayNL("EXEC_COMMAND_RESULT' Received from: %3d: %s", sid.get(), serviceName.c_str());
 
 	// retrieve the text from the input message
 	CSString txt;
@@ -144,9 +138,9 @@ static void cbExecCommandResult(CMessage &msgin, const std::string &serviceName,
 	txt.splitLines(lines);
 
 	// display the lines of text
-	for (uint32 i=0;i<lines.size();++i)
+	for (uint32 i = 0; i < lines.size(); ++i)
 	{
-		NLMISC::InfoLog->displayNL("%s",lines[i].c_str());
+		NLMISC::InfoLog->displayNL("%s", lines[i].c_str());
 	}
 }
 
@@ -156,12 +150,11 @@ static void cbBotDespawnNotification(NLNET::CMessage &msgin, const std::string &
 	CEntityId creatureId;
 	msgin.serial(alias);
 	msgin.serial(creatureId);
-	CDynamicMapService* dms = CDynamicMapService::getInstance();
-	IServerAnimationModule*  imodule= dms->getAnimationModule();
-	CServerAnimationModule* module = safe_cast<CServerAnimationModule*>(imodule);
+	CDynamicMapService *dms = CDynamicMapService::getInstance();
+	IServerAnimationModule *imodule = dms->getAnimationModule();
+	CServerAnimationModule *module = safe_cast<CServerAnimationModule *>(imodule);
 
 	module->onBotDespawnNotification(creatureId);
-
 }
 
 static void cbBotDeathNotification(NLNET::CMessage &msgin, const std::string &serviceName, TServiceId sid)
@@ -170,12 +163,11 @@ static void cbBotDeathNotification(NLNET::CMessage &msgin, const std::string &se
 	CEntityId creatureId;
 	msgin.serial(alias);
 	msgin.serial(creatureId);
-	CDynamicMapService* dms = CDynamicMapService::getInstance();
-	IServerAnimationModule*  imodule= dms->getAnimationModule();
-	CServerAnimationModule* module = safe_cast<CServerAnimationModule*>(imodule);
+	CDynamicMapService *dms = CDynamicMapService::getInstance();
+	IServerAnimationModule *imodule = dms->getAnimationModule();
+	CServerAnimationModule *module = safe_cast<CServerAnimationModule *>(imodule);
 
 	module->onBotDeathNotification(creatureId);
-
 }
 
 static void cbStopNpcControlNotification(NLNET::CMessage &msgin, const std::string &serviceName, TServiceId sid)
@@ -184,79 +176,75 @@ static void cbStopNpcControlNotification(NLNET::CMessage &msgin, const std::stri
 	CEntityId creatureId;
 	msgin.serial(alias);
 	msgin.serial(creatureId);
-	CDynamicMapService* dms = CDynamicMapService::getInstance();
-	IServerAnimationModule*  imodule= dms->getAnimationModule();
-	CServerAnimationModule* module = safe_cast<CServerAnimationModule*>(imodule);
+	CDynamicMapService *dms = CDynamicMapService::getInstance();
+	IServerAnimationModule *imodule = dms->getAnimationModule();
+	CServerAnimationModule *module = safe_cast<CServerAnimationModule *>(imodule);
 
 	module->onStopNpcControlNotification(creatureId);
-
 }
 
-TUnifiedCallbackItem CbArray[]=
-{
-	{"translateAndForward", cbForwardToStringManagerModule},
-	{"DYN_CHAT:FORWARD", cbDynChatForward},
-	{"DSS_START_ACT", cbDssStartAct},
-	{"translateAndForwardArg", cbForwardToStringManagerModuleWithArg},
-	{"SESSION_ACK", cbSessionAck},
-	{"EXEC_COMMAND_RESULT",	cbExecCommandResult},
-	{"BOT_DESPAWN_NOTIFICATION", cbBotDespawnNotification},
-	{"BOT_DEATH_NOTIFICATION", cbBotDeathNotification},
-	{"BOT_STOPCCONTROL_NOTIFICATION", cbStopNpcControlNotification},
-	{"", NULL}
+TUnifiedCallbackItem CbArray[] = {
+	{ "translateAndForward", cbForwardToStringManagerModule },
+	{ "DYN_CHAT:FORWARD", cbDynChatForward },
+	{ "DSS_START_ACT", cbDssStartAct },
+	{ "translateAndForwardArg", cbForwardToStringManagerModuleWithArg },
+	{ "SESSION_ACK", cbSessionAck },
+	{ "EXEC_COMMAND_RESULT", cbExecCommandResult },
+	{ "BOT_DESPAWN_NOTIFICATION", cbBotDespawnNotification },
+	{ "BOT_DEATH_NOTIFICATION", cbBotDeathNotification },
+	{ "BOT_STOPCCONTROL_NOTIFICATION", cbStopNpcControlNotification },
+	{ "", NULL }
 };
-
 
 void cbServiceUp(const std::string &serviceName, TServiceId serviceId, void *)
 {
 
-	CDynamicScenarioService& instance = CDynamicScenarioService::instance();
-	nlinfo( "DSS: %s Service up", serviceName.c_str() );
-	if ( instance.getR2Sbm())
+	CDynamicScenarioService &instance = CDynamicScenarioService::instance();
+	nlinfo("DSS: %s Service up", serviceName.c_str());
+	if (instance.getR2Sbm())
 	{
 		instance.getR2Sbm()->onServiceUp(serviceName, serviceId);
 	}
-	if( serviceName == "AIS" )
+	if (serviceName == "AIS")
 	{
-		nlinfo( "DSS: AI server up" );
+		nlinfo("DSS: AI server up");
 		CDynamicMapService *dms = CDynamicMapService::getInstance();
-		if( dms )
+		if (dms)
 		{
 			IServerAnimationModule *imodule = dms->getAnimationModule();
-			CServerAnimationModule* module = safe_cast<CServerAnimationModule*>(imodule);
-			if( module )
+			CServerAnimationModule *module = safe_cast<CServerAnimationModule *>(imodule);
+			if (module)
 			{
-				nlinfo( "DSS: notifying ServerAnimModule that AI server is up" );
-				module->onServiceUp( serviceName, serviceId );
+				nlinfo("DSS: notifying ServerAnimModule that AI server is up");
+				module->onServiceUp(serviceName, serviceId);
 			}
 
 			{
 
-				IServerEditionModule*imodule = dms->getEditionModule();
-				CServerEditionModule* module = safe_cast<CServerEditionModule*>(imodule);
-				if( module )
+				IServerEditionModule *imodule = dms->getEditionModule();
+				CServerEditionModule *module = safe_cast<CServerEditionModule *>(imodule);
+				if (module)
 				{
-					nlinfo( "DSS: notifying ServerEditionModule that '%s' server is up", serviceName.c_str() );
-					module->onServiceUp( serviceName, serviceId );
+					nlinfo("DSS: notifying ServerEditionModule that '%s' server is up", serviceName.c_str());
+					module->onServiceUp(serviceName, serviceId);
 				}
 			}
-
 		}
 	}
 
-	if( serviceName == "BS" )
+	if (serviceName == "BS")
 	{
 		instance.setBsUp(true);
-		nlinfo( "DSS: %s server up", serviceName.c_str() );
+		nlinfo("DSS: %s server up", serviceName.c_str());
 		CDynamicMapService *dms = CDynamicMapService::getInstance();
-		if( dms )
+		if (dms)
 		{
-			IServerEditionModule*imodule = dms->getEditionModule();
-			CServerEditionModule* module = safe_cast<CServerEditionModule*>(imodule);
-			if( module )
+			IServerEditionModule *imodule = dms->getEditionModule();
+			CServerEditionModule *module = safe_cast<CServerEditionModule *>(imodule);
+			if (module)
 			{
-				nlinfo( "DSS: notifying ServerEditionModule that '%s' server is up", serviceName.c_str() );
-				module->onServiceUp( serviceName, serviceId );
+				nlinfo("DSS: notifying ServerEditionModule that '%s' server is up", serviceName.c_str());
+				module->onServiceUp(serviceName, serviceId);
 			}
 		}
 	}
@@ -264,54 +252,54 @@ void cbServiceUp(const std::string &serviceName, TServiceId serviceId, void *)
 
 void cbServiceDown(const std::string &serviceName, TServiceId serviceId, void *)
 {
-	nlinfo( "DSS: %s Service down", serviceName.c_str() );
+	nlinfo("DSS: %s Service down", serviceName.c_str());
 
-	CDynamicScenarioService& instance = CDynamicScenarioService::instance();
-	nlinfo( "DSS: %s Service up", serviceName.c_str() );
-	if ( instance.getR2Sbm())
+	CDynamicScenarioService &instance = CDynamicScenarioService::instance();
+	nlinfo("DSS: %s Service up", serviceName.c_str());
+	if (instance.getR2Sbm())
 	{
 		instance.getR2Sbm()->onServiceDown(serviceName, serviceId);
 	}
-	if( serviceName == "AIS" )
+	if (serviceName == "AIS")
 	{
-		nlinfo( "DSS: AI server down" );
-		CDynamicMapService* dms = CDynamicMapService::getInstance();
-		if( dms )
+		nlinfo("DSS: AI server down");
+		CDynamicMapService *dms = CDynamicMapService::getInstance();
+		if (dms)
 		{
 			{
 
-				IServerEditionModule*imodule = dms->getEditionModule();
-				CServerEditionModule* module = safe_cast<CServerEditionModule*>(imodule);
-				if( module )
+				IServerEditionModule *imodule = dms->getEditionModule();
+				CServerEditionModule *module = safe_cast<CServerEditionModule *>(imodule);
+				if (module)
 				{
-					nlinfo( "DSS: notifying ServerEditionModule that '%s' server is down", serviceName.c_str() );
-					module->onServiceDown( serviceName, serviceId );
+					nlinfo("DSS: notifying ServerEditionModule that '%s' server is down", serviceName.c_str());
+					module->onServiceDown(serviceName, serviceId);
 				}
 			}
 
 			IServerAnimationModule *imodule = dms->getAnimationModule();
-			CServerAnimationModule* module = safe_cast<CServerAnimationModule*>(imodule);
-			if( module )
+			CServerAnimationModule *module = safe_cast<CServerAnimationModule *>(imodule);
+			if (module)
 			{
-				nlinfo( "DSS: notifying ServerAnimModule that AI server is down" );
-//				module->onServiceDown( serviceName, serviceId );
+				nlinfo("DSS: notifying ServerAnimModule that AI server is down");
+				//				module->onServiceDown( serviceName, serviceId );
 			}
 		}
 	}
 
-	if( serviceName == "BS" )
+	if (serviceName == "BS")
 	{
 		instance.setBsUp(false);
-		nlinfo( "DSS: %s server up", serviceName.c_str() );
+		nlinfo("DSS: %s server up", serviceName.c_str());
 		CDynamicMapService *dms = CDynamicMapService::getInstance();
-		if( dms )
+		if (dms)
 		{
-			IServerEditionModule*imodule = dms->getEditionModule();
-			CServerEditionModule* module = safe_cast<CServerEditionModule*>(imodule);
-			if( module )
+			IServerEditionModule *imodule = dms->getEditionModule();
+			CServerEditionModule *module = safe_cast<CServerEditionModule *>(imodule);
+			if (module)
 			{
-				nlinfo( "DSS: notifying ServerEditionModule that '%s' server is down", serviceName.c_str() );
-//				module->onServiceDown( serviceName, serviceId );
+				nlinfo("DSS: notifying ServerEditionModule that '%s' server is down", serviceName.c_str());
+				//				module->onServiceDown( serviceName, serviceId );
 			}
 		}
 	}
@@ -326,14 +314,15 @@ void CDynamicScenarioService::init()
 	if (haveLongArg("r2sbm"))
 	{
 		_Mode = R2Sbm;
-	} else if (haveLongArg("NoSu"))
+	}
+	else if (haveLongArg("NoSu"))
 	{
 		_Mode = DssWithNoSu;
 	}
 
 	// initialize callbacks for service up / down
 	CUnifiedNetwork::getInstance()->setServiceUpCallback("*", cbServiceUp, NULL);
-	CUnifiedNetwork::getInstance()->setServiceDownCallback( "*", cbServiceDown, NULL);
+	CUnifiedNetwork::getInstance()->setServiceDownCallback("*", cbServiceDown, NULL);
 
 	CSingletonRegistry::getInstance()->init();
 
@@ -347,7 +336,7 @@ void CDynamicScenarioService::init()
 		nlwarning("No variable ShardId in config file, this could result in miss registered DSS into SU because of late WS shard id message");
 	}
 
-	setVersion (RYZOM_PRODUCT_VERSION);
+	setVersion(RYZOM_PRODUCT_VERSION);
 
 	// setup the update systems
 	setUpdateTimeout(100);
@@ -356,12 +345,12 @@ void CDynamicScenarioService::init()
 	{
 		CAiWrapper::setInstance(new CAiWrapperServer);
 
-		LigoConfigPtr=&R2LigoConfig;
+		LigoConfigPtr = &R2LigoConfig;
 		// Init ligo
-		if (!R2LigoConfig.readPrimitiveClass ("world_editor_classes.xml", false))
+		if (!R2LigoConfig.readPrimitiveClass("world_editor_classes.xml", false))
 		{
 			// Should be in R:\leveldesign\world_editor_files
-			nlerror ("Can't load ligo primitive config file world_editor_classes.xml");
+			nlerror("Can't load ligo primitive config file world_editor_classes.xml");
 		}
 		R2LigoConfig.updateDynamicAliasBitCount(16);
 
@@ -369,7 +358,7 @@ void CDynamicScenarioService::init()
 		NLLIGO::Register();
 
 		IModuleManager &mm = IModuleManager::getInstance();
-		IModule * serverGw = mm.createModule("StandardGateway", "serverGw", "");
+		IModule *serverGw = mm.createModule("StandardGateway", "serverGw", "");
 		nlassert(serverGw != NULL);
 
 		NLNET::IModuleSocket *socketServerGw = mm.getModuleSocket("serverGw");
@@ -387,7 +376,7 @@ void CDynamicScenarioService::init()
 	else
 	{
 		CR2SessionBackupModule_WantToBeLinked();
-		nldebug("Launching the module '%s'",RSMGR::CR2SessionBackupModuleClassName);
+		nldebug("Launching the module '%s'", RSMGR::CR2SessionBackupModuleClassName);
 	}
 }
 
@@ -400,27 +389,24 @@ bool CDynamicScenarioService::update()
 void CDynamicScenarioService::release()
 {
 
-
 	CSheetId::uninit();
 	delete _Dms;
 	_Dms = NULL;
 	IModuleManager &mm = IModuleManager::getInstance();
-	IModule * clientGw = mm.getLocalModule("serverGw");
+	IModule *clientGw = mm.getLocalModule("serverGw");
 	nlassert(clientGw != NULL);
 	mm.deleteModule(clientGw);
 
 	CSingletonRegistry::getInstance()->release();
-
 }
 
 //-----------------------------------------------
 //	NLNET_SERVICE_MAIN
 //-----------------------------------------------
 
-static const char* getCompleteServiceName(const IService* theService)
+static const char *getCompleteServiceName(const IService *theService)
 {
 	static std::string s = "dynamic_scenario_service";
-
 
 	if (theService->haveLongArg("r2sbm"))
 	{
@@ -430,7 +416,7 @@ static const char* getCompleteServiceName(const IService* theService)
 	return s.c_str();
 }
 
-static const char* getShortServiceName(const IService* theService)
+static const char *getShortServiceName(const IService *theService)
 {
 	static std::string s = "DSS";
 
@@ -441,5 +427,4 @@ static const char* getShortServiceName(const IService* theService)
 	return s.c_str();
 }
 
-NLNET_SERVICE_MAIN( CDynamicScenarioService, getShortServiceName(scn), getCompleteServiceName(scn), 0, CbArray, "", "" );
-
+NLNET_SERVICE_MAIN(CDynamicScenarioService, getShortServiceName(scn), getCompleteServiceName(scn), 0, CbArray, "", "");

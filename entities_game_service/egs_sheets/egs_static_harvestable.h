@@ -17,30 +17,43 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_EGS_STATIC_HARVESTABLE_H
 #define RY_EGS_STATIC_HARVESTABLE_H
 
-//Nel georges
+// Nel georges
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form_loader.h"
 
-//#include "server_share/creature_size.h"
+// #include "server_share/creature_size.h"
 #include "game_share/skills.h"
 
 #include "egs_sheets/egs_static_raw_material.h"
 
+enum TRMUsage
+{
+	RMUTotalQuantity,
+	RMUFixedQuantity,
+	NbRMUsages
+};
 
-enum TRMUsage { RMUTotalQuantity, RMUFixedQuantity, NbRMUsages };
-
-enum TRMQuantityVariable { RMQVHerbivore, RMQVCarnivore, RMQVBoss5, RMQVBossBegin=RMQVBoss5, RMQVBoss7, RMQVBossEnd=RMQVBoss7, RMQVInvasion5, RMQVInvasion7, RMQVForceBase, NBRMQuantityVariables=RMQVForceBase+6 };
+enum TRMQuantityVariable
+{
+	RMQVHerbivore,
+	RMQVCarnivore,
+	RMQVBoss5,
+	RMQVBossBegin = RMQVBoss5,
+	RMQVBoss7,
+	RMQVBossEnd = RMQVBoss7,
+	RMQVInvasion5,
+	RMQVInvasion7,
+	RMQVForceBase,
+	NBRMQuantityVariables = RMQVForceBase + 6
+};
 
 #ifndef NO_EGS_VARS
-extern const float *QuarteringQuantityByVariable [NBRMQuantityVariables];
+extern const float *QuarteringQuantityByVariable[NBRMQuantityVariables];
 #endif
-
 
 /**
  * CStaticCreatureRawMaterial
@@ -49,34 +62,33 @@ extern const float *QuarteringQuantityByVariable [NBRMQuantityVariables];
  * \date 2002
  */
 struct CStaticCreatureRawMaterial
-{	
+{
 	/**
 	 *	Default constructor
 	 */
 	inline CStaticCreatureRawMaterial()
-	{}
-
+	{
+	}
 
 	/**
 	 * Serial
 	 */
 	inline void serial(NLMISC::IStream &f)
 	{
-		f.serial( MpCommon );
-		f.serial( UsageAndQuantity );
-		f.serial( ItemId );
-//		f.serial( PresenceProbabilities );
+		f.serial(MpCommon);
+		f.serial(UsageAndQuantity);
+		f.serial(ItemId);
+		//		f.serial( PresenceProbabilities );
 	}
 
-
 	/// struc used by the brick service
-	CStaticRawMaterial			MpCommon;
-	
+	CStaticRawMaterial MpCommon;
+
 	/// the associated item sheet id
-	NLMISC::CSheetId			ItemId;
+	NLMISC::CSheetId ItemId;
 
 	/// Return the RM usage
-	TRMUsage					rmUsage() const
+	TRMUsage rmUsage() const
 	{
 		return (TRMUsage)UsageAndQuantity.Usage;
 	}
@@ -85,7 +97,7 @@ struct CStaticCreatureRawMaterial
 	 * Return the RM quantity (if rmUsage() returns RMUFixedQuantity, it's quantity per RM, otherwise total quantity).
 	 * After loading, it is ensured that this quantity is > 0.
 	 */
-	uint16						quantityVariable() const
+	uint16 quantityVariable() const
 	{
 		return UsageAndQuantity.QuantityVar;
 	}
@@ -95,22 +107,24 @@ struct CStaticCreatureRawMaterial
 	{
 		struct
 		{
-			uint16					Usage		: 8; // TRMUsage
-			uint16					QuantityVar	: 8; // TRMQuantityVariable
+			uint16 Usage : 8; // TRMUsage
+			uint16 QuantityVar : 8; // TRMQuantityVariable
 		};
 
-		uint16						Raw;
+		uint16 Raw;
 
 		///
-		TUsageOrQuantity() : Usage((uint16)RMUFixedQuantity), QuantityVar(0) {}
+		TUsageOrQuantity()
+		    : Usage((uint16)RMUFixedQuantity)
+		    , QuantityVar(0)
+		{
+		}
 
 		///
-		void	serial( NLMISC::IStream& s ) { s.serial( Raw ); }
+		void serial(NLMISC::IStream &s) { s.serial(Raw); }
 
 	} UsageAndQuantity;
-
 };
-
 
 /**
  * CStaticHarvestable
@@ -122,7 +136,6 @@ struct CStaticCreatureRawMaterial
 class CStaticHarvestable
 {
 public:
-
 	/// Constructor
 	CStaticHarvestable();
 
@@ -134,31 +147,31 @@ public:
 	 */
 	void serial(NLMISC::IStream &f)
 	{
-		f.serialEnum( _HarvestSkill );
-		f.serialCont( _Mps );
-		f.serialCont( _ItemsForMissions );
+		f.serialEnum(_HarvestSkill);
+		f.serialCont(_Mps);
+		f.serialCont(_ItemsForMissions);
 	}
 
 	/**
 	 * load the infos from a georges sheet
 	 * \param root the root node of the georges sheet
 	 */
-	void loadFromGeorges( const NLGEORGES::UForm &root, const NLMISC::CSheetId &sheetId );
+	void loadFromGeorges(const NLGEORGES::UForm &root, const NLMISC::CSheetId &sheetId);
 
 	/**
-	 * get the mp of specified index 
+	 * get the mp of specified index
 	 * \param index index of the mp to retrieve
 	 * \return pointer on the raw material object or NULL if invald index
 	 */
-	inline const CStaticRawMaterial *getRawMaterial( uint8 index ) const
+	inline const CStaticRawMaterial *getRawMaterial(uint8 index) const
 	{
-		if (index >= _Mps.size() )
+		if (index >= _Mps.size())
 		{
-			nlwarning("<CStaticHarvestable::getRawMaterial> Invalid index %u, max value is %u", index, _Mps.size() );
+			nlwarning("<CStaticHarvestable::getRawMaterial> Invalid index %u, max value is %u", index, _Mps.size());
 			return NULL;
 		}
 		else
-			return & _Mps[index].MpCommon;
+			return &_Mps[index].MpCommon;
 	}
 
 	/// get the raw materials (mp) vector
@@ -167,18 +180,18 @@ public:
 	/// get the items for missions
 	inline const std::vector<NLMISC::CSheetId> &getItemsForMissions() const { return _ItemsForMissions; }
 
-	/// get skill used to harvest 
+	/// get skill used to harvest
 	inline SKILLS::ESkills getHarvestSkill() const { return _HarvestSkill; }
 
 protected:
 	/// The harvestable Mps (except the ones for missions)
-	std::vector <CStaticCreatureRawMaterial>	_Mps;
+	std::vector<CStaticCreatureRawMaterial> _Mps;
 
 	/// The items (including raw material) for mission auto-quarter
-	std::vector <NLMISC::CSheetId>	_ItemsForMissions;
+	std::vector<NLMISC::CSheetId> _ItemsForMissions;
 
 	/// Skill used to harvest this creature
-	SKILLS::ESkills				_HarvestSkill;
+	SKILLS::ESkills _HarvestSkill;
 };
 
 #endif // NL_HARVESTABLE_H

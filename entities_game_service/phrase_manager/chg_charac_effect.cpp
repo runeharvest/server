@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -32,11 +30,10 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
 //		CChgCharacEffect::update()
 //--------------------------------------------------------------
-bool CChgCharacEffect::update(CTimerEvent * event, bool applyEffect)
+bool CChgCharacEffect::update(CTimerEvent *event, bool applyEffect)
 {
 	if (!TheDataset.isAccessible(_TargetRowId))
 	{
@@ -50,17 +47,17 @@ bool CChgCharacEffect::update(CTimerEvent * event, bool applyEffect)
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
 	}
-		
-	//player->getScores()._PhysicalScores[_AffectedScore].RegenerateModifier += _RegenModifier;
+
+	// player->getScores()._PhysicalScores[_AffectedScore].RegenerateModifier += _RegenModifier;
 	string var = "Modifier" + _AffectedCharac;
-	
+
 	string currentValueStr;
-	player->getValue(var,currentValueStr);
+	player->getValue(var, currentValueStr);
 	sint32 currentValue;
 	NLMISC::fromString(currentValueStr, currentValue);
 	string newValueStr = toString(currentValue + _Modifier1 + _Modifier2);
-	player->setValue(var,newValueStr);
-	
+	player->setValue(var, newValueStr);
+
 	// now only one update is needed, but the end methos must reset the modifier !
 	// must update this every ticks NO !!!!
 	//_UpdateTimer.setRemaining(1, event);
@@ -80,16 +77,16 @@ void CChgCharacEffect::removed()
 		nlwarning("Cannot find target entity %s", _TargetRowId.toString().c_str());
 		return;
 	}
-	
-	//player->getScores()._PhysicalScores[_AffectedScore].RegenerateModifier -= _RegenModifier;
+
+	// player->getScores()._PhysicalScores[_AffectedScore].RegenerateModifier -= _RegenModifier;
 	string var = "Modifier" + _AffectedCharac;
 
 	string currentValueStr;
-	player->getValue(var,currentValueStr);
+	player->getValue(var, currentValueStr);
 	sint32 currentValue;
 	NLMISC::fromString(currentValueStr, currentValue);
 	string newValueStr = toString(currentValue - _Modifier1 - _Modifier2);
-	player->setValue(var,newValueStr);
+	player->setValue(var, newValueStr);
 }
 
 //--------------------------------------------------------------
@@ -101,14 +98,14 @@ void CChgCharacEffect::activate()
 		nlwarning("<CChgCharacEffect::activate> Cannot find actor entity or not a player");
 		return;
 	}
-	
-	CChgCharacEffect *effect = new CChgCharacEffect(actor->getEntityRowId(), 
-		getEndDate()+CTickEventHandler::getGameCycle(), 
-		EFFECT_FAMILIES::PowerChgCharac,
-		_AffectedCharac,
-		_Modifier1,
-		_Modifier2);
-	
+
+	CChgCharacEffect *effect = new CChgCharacEffect(actor->getEntityRowId(),
+	    getEndDate() + CTickEventHandler::getGameCycle(),
+	    EFFECT_FAMILIES::PowerChgCharac,
+	    _AffectedCharac,
+	    _Modifier1,
+	    _Modifier2);
+
 	if (!effect)
 	{
 		nlwarning("<CChgCharacEffect::activate> Failed to allocate new CChgCharacEffect");
@@ -124,13 +121,13 @@ void CChgCharacEffect::activate()
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
 #define PERSISTENT_CLASS CChgCharacEffect
 
-#define PERSISTENT_DATA\
-	STRUCT2(STimedEffect,					CSTimedEffect::store(pdr),						CSTimedEffect::apply(pdr))\
-	PROP2(_CreatorEntityId,		CEntityId,	TheDataset.getEntityId(getCreatorRowId()),		_CreatorEntityId = val)\
-	PROP2(_TargetDisableTime,	TGameCycle,	_TargetDisableTime>CTickEventHandler::getGameCycle()?_TargetDisableTime-CTickEventHandler::getGameCycle():0,	_TargetDisableTime=val)\
-	PROP(std::string,_AffectedCharac)\
-	PROP(float,_Modifier1)\
-	PROP(float,_Modifier2)\
+#define PERSISTENT_DATA                                                                                                                                                                  \
+	STRUCT2(STimedEffect, CSTimedEffect::store(pdr), CSTimedEffect::apply(pdr))                                                                                                          \
+	PROP2(_CreatorEntityId, CEntityId, TheDataset.getEntityId(getCreatorRowId()), _CreatorEntityId = val)                                                                                \
+	PROP2(_TargetDisableTime, TGameCycle, _TargetDisableTime > CTickEventHandler::getGameCycle() ? _TargetDisableTime - CTickEventHandler::getGameCycle() : 0, _TargetDisableTime = val) \
+	PROP(std::string, _AffectedCharac)                                                                                                                                                   \
+	PROP(float, _Modifier1)                                                                                                                                                              \
+	PROP(float, _Modifier2)
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

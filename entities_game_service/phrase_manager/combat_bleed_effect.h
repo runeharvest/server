@@ -14,16 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_COMBAT_BLEED_EFFECT_H
 #define RY_COMBAT_BLEED_EFFECT_H
 
 //
 #include "phrase_manager/s_effect.h"
 #include "entity_manager/entity_base.h"
-
-
 
 /**
  * class for bleeding effects
@@ -35,18 +31,17 @@ class CCombatBleedEffect : public CSEffect
 {
 public:
 	///\ctor
-	CCombatBleedEffect( const TDataSetRow & creatorRowId, 
-						const TDataSetRow & targetRowId, 
-						EFFECT_FAMILIES::TEffectFamily family, 
-						sint32 effectValue, 
-						NLMISC::TGameCycle endDate,
-						NLMISC::TGameCycle cycleLenght,
-						uint16 cycleDamage
-						)
-		:	CSEffect(creatorRowId, targetRowId, family, effectValue,0),
-			_BleedEndDate(endDate),
-			_CycleLength(cycleLenght),
-			_CycleDamage(cycleDamage)
+	CCombatBleedEffect(const TDataSetRow &creatorRowId,
+	    const TDataSetRow &targetRowId,
+	    EFFECT_FAMILIES::TEffectFamily family,
+	    sint32 effectValue,
+	    NLMISC::TGameCycle endDate,
+	    NLMISC::TGameCycle cycleLenght,
+	    uint16 cycleDamage)
+	    : CSEffect(creatorRowId, targetRowId, family, effectValue, 0)
+	    , _BleedEndDate(endDate)
+	    , _CycleLength(cycleLenght)
+	    , _CycleDamage(cycleDamage)
 	{
 		_NextCycleDate = CTickEventHandler::getGameCycle() + _CycleLength;
 	}
@@ -61,7 +56,7 @@ public:
 	 * \param updateFlag is a flag telling which effect type has been already processed for an entity. An effect shoud set to 1 the bit corresponding to its effect family
 	 * \return true if the effect ends and must be removed
 	 */
-	virtual bool update( uint32 & updateFlag );
+	virtual bool update(uint32 &updateFlag);
 
 	/// callback called when the effect is actually removed
 	virtual void removed();
@@ -74,21 +69,20 @@ public:
 
 private:
 	/// effect end date in ticks
-	NLMISC::TGameCycle		_BleedEndDate;
+	NLMISC::TGameCycle _BleedEndDate;
 
 	/// next cycle date (for hp loss)
-	NLMISC::TGameCycle		_NextCycleDate;
+	NLMISC::TGameCycle _NextCycleDate;
 
 	/// cycle lenght in ticks
-	NLMISC::TGameCycle		_CycleLength;
+	NLMISC::TGameCycle _CycleLength;
 
 	/// number of hp lost by target each cycle
-	uint16					_CycleDamage;
+	uint16 _CycleDamage;
 
 	/// affected entity
-	CEntityBase				*_BleedingEntity;
+	CEntityBase *_BleedingEntity;
 };
-
 
 #endif // NL_COMBAT_STUN_EFFECT_H
 

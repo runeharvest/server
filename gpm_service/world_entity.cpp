@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 
 #include "world_entity.h"
@@ -29,31 +28,29 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLPACS;
 
-#define DUMP_VAR(var)	log->displayNL("%28s: %s", #var, toString(var).c_str());
-#define DUMP_VARPTR(var)	log->displayNL("%28s: %s", #var, toStringPtr(var).c_str());
+#define DUMP_VAR(var) log->displayNL("%28s: %s", #var, toString(var).c_str());
+#define DUMP_VARPTR(var) log->displayNL("%28s: %s", #var, toStringPtr(var).c_str());
 
 /****************************************************************\
  ****************************************************************
-						CWorldEntity
+                        CWorldEntity
  ****************************************************************
 \****************************************************************/
 
 // Static entity allocator
-CBlockMemory<CWorldEntity>	CWorldEntity::_EntityAllocator;
+CBlockMemory<CWorldEntity> CWorldEntity::_EntityAllocator;
 
-
-template<class T>
-void	registerEntityProperty(const string &propertyName, CMirrorPropValue1DS<T> *property, const CEntityId &id)
+template <class T>
+void registerEntityProperty(const string &propertyName, CMirrorPropValue1DS<T> *property, const CEntityId &id)
 {
 	// TODO: optimize: use entity index instead of Id, prop index instead of name
-	property->init( TheDataset, id, propertyName );
+	property->init(TheDataset, id, propertyName);
 }
 
-
 /// Creates a new entity (new equivalent). This must be initialised later using init();
-CWorldEntity*	CWorldEntity::create()
+CWorldEntity *CWorldEntity::create()
 {
-	CWorldEntity*	entity = _EntityAllocator.allocate();
+	CWorldEntity *entity = _EntityAllocator.allocate();
 	if (entity != NULL)
 	{
 		entity->ListIterator = CWorldPositionManager::_EntityList.insert(CWorldPositionManager::_EntityList.end(), entity);
@@ -63,7 +60,7 @@ CWorldEntity*	CWorldEntity::create()
 }
 
 /// Removes an entity (delete equivalent).
-void			CWorldEntity::remove(CWorldEntity* entity)
+void CWorldEntity::remove(CWorldEntity *entity)
 {
 	CWorldPositionManager::_EntityList.erase(entity->ListIterator);
 	if (entity->PrimIterator != CWorldPositionManager::_PrimitivedList.end())
@@ -73,12 +70,10 @@ void			CWorldEntity::remove(CWorldEntity* entity)
 	_EntityAllocator.freeBlock(entity);
 }
 
-
-
 /****************************************************************\
-						init
+                        init
 \****************************************************************/
-void	CWorldEntity::init( const CEntityId& id, const TDataSetRow &index )
+void CWorldEntity::init(const CEntityId &id, const TDataSetRow &index)
 {
 	Id = id;
 	Index = index;
@@ -89,8 +84,8 @@ void	CWorldEntity::init( const CEntityId& id, const TDataSetRow &index )
 	// the same for aiVision and visible entities, i.e. we used the CMirrorPropValueAlice.
 	// Now the 'Alice' version is not needed anymore, because all entities go into
 	// registerEntityProperty().
-//	if ( Id.getType() != RYZOMID::aiVision )
-//	{
+	//	if ( Id.getType() != RYZOMID::aiVision )
+	//	{
 
 	registerEntityProperty("X", &X, id);
 	registerEntityProperty("Y", &Y, id);
@@ -109,15 +104,15 @@ void	CWorldEntity::init( const CEntityId& id, const TDataSetRow &index )
 		nlwarning("Entity %s Cell is preset to %d which should be 0 or negative, forced to 0", id.toString().c_str(), Cell());
 		Cell = 0;
 	}
-//	}
-//	else
-//		Cell = -1;
+	//	}
+	//	else
+	//		Cell = -1;
 
-	//IsStaticObject = false;
-	//IsInvisible = false;
-	//IsAgent = false;
-	//IsTrigger = false;
-	//IsInvisibleToPlayer = false;
+	// IsStaticObject = false;
+	// IsInvisible = false;
+	// IsAgent = false;
+	// IsTrigger = false;
+	// IsInvisibleToPlayer = false;
 
 	RefCounter = 0;
 	TickLock = 0;
@@ -152,7 +147,7 @@ void	CWorldEntity::init( const CEntityId& id, const TDataSetRow &index )
 
 	PatatEntryIndex = 0;
 
-	if (id.getType() == RYZOMID::object )
+	if (id.getType() == RYZOMID::object)
 	{
 		_Type = Object;
 	}
@@ -173,29 +168,26 @@ void	CWorldEntity::init( const CEntityId& id, const TDataSetRow &index )
 		_Type = Unknown;
 	}
 
-
 	// commented, now set by the EGS
-	//WhoSeesMe = 0xffffffff;
+	// WhoSeesMe = 0xffffffff;
 
 	CheckMotion = true;
 
 } // CWorldEntity constructor
 
 /****************************************************************\
-			CWorldEntity destructor
+            CWorldEntity destructor
 \****************************************************************/
 CWorldEntity::~CWorldEntity()
 {
 	// the Primitive should have been removed in the UMoveContainer, and so is already deleted
-	
+
 } // CWorldEntity destructor
 
-
-  
 /**
  * Display debug
  */
-void	CWorldEntity::display(NLMISC::CLog *log) const
+void CWorldEntity::display(NLMISC::CLog *log) const
 {
 	if (this == NULL)
 		log->displayNL("CWorldEntity::display called on NULL");
@@ -224,10 +216,10 @@ void	CWorldEntity::display(NLMISC::CLog *log) const
 	DUMP_VAR(ForceUsePrimitive);
 	DUMP_VAR(ForceDontUsePrimitive);
 	DUMP_VAR(TickLock);
-	DUMP_VARPTR((CWorldEntity*)Previous);
-	DUMP_VARPTR((CWorldEntity*)Next);
-	DUMP_VARPTR((CWorldEntity*)Parent);
-	DUMP_VARPTR((CWorldEntity*)Control);
+	DUMP_VARPTR((CWorldEntity *)Previous);
+	DUMP_VARPTR((CWorldEntity *)Next);
+	DUMP_VARPTR((CWorldEntity *)Parent);
+	DUMP_VARPTR((CWorldEntity *)Control);
 	DUMP_VAR(HasVision);
 	DUMP_VAR(CheckMotion);
 	DUMP_VAR(TempVisionState);
@@ -239,13 +231,12 @@ void	CWorldEntity::display(NLMISC::CLog *log) const
 		PlayerInfos->display(log);
 }
 
-
 /****************************************************************\
-			create primitive for fiche type entity
+            create primitive for fiche type entity
 \****************************************************************/
 void CWorldEntity::createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8 worldImage)
 {
-	UMovePrimitive		*primitive;
+	UMovePrimitive *primitive;
 
 	if (PrimIterator != CWorldPositionManager::_PrimitivedList.end())
 	{
@@ -312,11 +303,11 @@ void CWorldEntity::createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8
 	Primitive = NULL;
 	MoveContainer = NULL;
 
-	const CGpmSheets::CSheet	*sheet = CGpmSheets::lookup(CSheetId(Sheet()));
+	const CGpmSheets::CSheet *sheet = CGpmSheets::lookup(CSheetId(Sheet()));
 
-	float	primRadius = 0.5f;
-	float	primHeight = 2.0f;
-	
+	float primRadius = 0.5f;
+	float primHeight = 2.0f;
+
 	if (sheet != NULL)
 	{
 		primRadius = sheet->Radius * sheet->Scale;
@@ -331,16 +322,16 @@ void CWorldEntity::createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8
 		return;
 	}
 	primitive->UserData = ((uint64)(Index.getIndex()) << 16);
-	//nldebug("Set entity E%u to %" NL_I64 "d", Index.getIndex(), primitive->UserData);
-	primitive->setPrimitiveType( UMovePrimitive::_2DOrientedCylinder );
-	primitive->setReactionType( UMovePrimitive::Slide );
-	primitive->setTriggerType( UMovePrimitive::NotATrigger );
-	primitive->setCollisionMask( 0xffffffff );
-	primitive->setOcclusionMask( 0x00000000 );
-	primitive->setObstacle( false );
-	primitive->setAbsorbtion( 0 );
-	primitive->setHeight( primHeight );
-	primitive->setRadius( primRadius-0.1f );	// decrease primitive usable radius to lessen pacs load (avoid collision test)
+	// nldebug("Set entity E%u to %" NL_I64 "d", Index.getIndex(), primitive->UserData);
+	primitive->setPrimitiveType(UMovePrimitive::_2DOrientedCylinder);
+	primitive->setReactionType(UMovePrimitive::Slide);
+	primitive->setTriggerType(UMovePrimitive::NotATrigger);
+	primitive->setCollisionMask(0xffffffff);
+	primitive->setOcclusionMask(0x00000000);
+	primitive->setObstacle(false);
+	primitive->setAbsorbtion(0);
+	primitive->setHeight(primHeight);
+	primitive->setRadius(primRadius - 0.1f); // decrease primitive usable radius to lessen pacs load (avoid collision test)
 
 	Primitive = primitive;
 	MoveContainer = pMoveContainer;
@@ -349,7 +340,7 @@ void CWorldEntity::createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8
 }
 
 /****************************************************************\
-			removePrimitive
+            removePrimitive
 \****************************************************************/
 void CWorldEntity::removePrimitive()
 {
@@ -371,50 +362,43 @@ void CWorldEntity::removePrimitive()
 	}
 }
 
-
-
 /****************************************************************\
-			updatePositionUsingMovePrimitive
+            updatePositionUsingMovePrimitive
 \****************************************************************/
-void	CWorldEntity::updatePositionUsingMovePrimitive(uint wi)
+void CWorldEntity::updatePositionUsingMovePrimitive(uint wi)
 {
 	if (Primitive == NULL || Continent == INVALID_CONTINENT_INDEX || Continent == NO_CONTINENT_INDEX)
 		return;
 
-	NLPACS::UGlobalRetriever	*retriever = CWorldPositionManager::getContinentContainer().getRetriever(Continent);
+	NLPACS::UGlobalRetriever *retriever = CWorldPositionManager::getContinentContainer().getRetriever(Continent);
 
 	if (retriever == NULL)
 		return;
 
-	NLPACS::UGlobalPosition		gp;
+	NLPACS::UGlobalPosition gp;
 	Primitive->getGlobalPosition(gp, wi);
 
-	bool		interior = retriever->isInterior(gp);
-	bool		local = localMotion();
+	bool interior = retriever->isInterior(gp);
+	bool local = localMotion();
 
-	float		dummy;
-	bool		water = retriever->isWaterPosition(gp, dummy);
+	float dummy;
+	bool water = retriever->isWaterPosition(gp, dummy);
 
-	NLMISC::CVectorD	pos = Primitive->getFinalPosition(wi);
+	NLMISC::CVectorD pos = Primitive->getFinalPosition(wi);
 
-	setPosition((sint32)(pos.x*1000), (sint32)(pos.y*1000), (sint32)(pos.z*1000), local, interior, water);
+	setPosition((sint32)(pos.x * 1000), (sint32)(pos.y * 1000), (sint32)(pos.z * 1000), local, interior, water);
 }
-
-
-
-
 
 /****************************************************************\
  ****************************************************************
-							CPlayerInfos
+                            CPlayerInfos
  ****************************************************************
 \****************************************************************/
 
 // Static player allocator
-CBlockMemory<CPlayerInfos>	CPlayerInfos::_PlayerAllocator;
+CBlockMemory<CPlayerInfos> CPlayerInfos::_PlayerAllocator;
 
-
-void	CPlayerInfos::display(CLog *log) const
+void CPlayerInfos::display(CLog *log) const
 {
 	if (this == NULL)
 		log->displayNL("CPlayerInfos::display called on NULL");
@@ -432,12 +416,11 @@ void	CPlayerInfos::display(CLog *log) const
 #ifdef RECORD_LAST_PLAYER_POSITIONS
 
 	log->displayNL("Last positions recorded:");
-	uint	i;
-	for (i=0; i<DistanceHistory.size(); ++i)
+	uint i;
+	for (i = 0; i < DistanceHistory.size(); ++i)
 		log->displayNL("(%+9.3f,%+9.3f,%+9.3f) %d ticks", DistanceHistory[i].first.x, DistanceHistory[i].first.y, DistanceHistory[i].first.z, DistanceHistory[i].second);
 
 #endif
 
 	log->displayNL("--- End of Display ---");
 }
-

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_PATAT_GRID_H
 #define NL_PATAT_GRID_H
 
@@ -37,8 +35,8 @@
 #include <string>
 
 // resolution in meters
-#define	PatatGridResolution 1.0f
-#define	mmPatatGridResolution 1000
+#define PatatGridResolution 1.0f
+#define mmPatatGridResolution 1000
 
 /**
  * <Class description>
@@ -53,7 +51,7 @@ public:
 	//@{
 
 	/// The grid entry index
-	typedef uint16							TEntryIndex;
+	typedef uint16 TEntryIndex;
 
 	//@}
 
@@ -62,42 +60,47 @@ protected:
 	//@{
 
 	/// The container of prim zone
-	typedef std::vector<NLLIGO::CPrimZone>	TZoneVector;
+	typedef std::vector<NLLIGO::CPrimZone> TZoneVector;
 
 	/// The entry type
 	class CEntry
 	{
 	public:
-		CEntry() : EntryIndex(0), HashCode(0), NumSamples(0) {}
+		CEntry()
+		    : EntryIndex(0)
+		    , HashCode(0)
+		    , NumSamples(0)
+		{
+		}
 		/// The entry index for this entry
-		TEntryIndex							EntryIndex;
+		TEntryIndex EntryIndex;
 		/// The entry hash code
-		uint32								HashCode;
+		uint32 HashCode;
 		/// The number of point in grid that point to this entry
-		uint32								NumSamples;
+		uint32 NumSamples;
 		/// The zones for this
-		std::vector<uint32>					Zones;
+		std::vector<uint32> Zones;
 
 		/// serial
-		void	serial(NLMISC::IStream &f)
+		void serial(NLMISC::IStream &f)
 		{
-			sint	version = f.serialVersion(0);
+			sint version = f.serialVersion(0);
 			f.serial(EntryIndex, HashCode, NumSamples);
 			f.serialCont(Zones);
 		}
 	};
 
 	/// The entry table type
-	typedef std::vector<CEntry>				TEntryTable;
+	typedef std::vector<CEntry> TEntryTable;
 
 	/// The entry map type to find entry quickly
-	typedef std::multimap<uint32, TEntryIndex>	TEntryMap;
+	typedef std::multimap<uint32, TEntryIndex> TEntryMap;
 
 	/// The map of zone name (to zone id)
-	typedef std::map<std::string, sint32>	TZoneMap;
+	typedef std::map<std::string, sint32> TZoneMap;
 
 	/// The move grid, used as grid
-	typedef CMoveGrid<TEntryIndex, 1024, mmPatatGridResolution>	TGrid;
+	typedef CMoveGrid<TEntryIndex, 1024, mmPatatGridResolution> TGrid;
 
 	//@}
 
@@ -105,37 +108,36 @@ protected:
 	//@{
 
 	/// Patats
-	TZoneVector			_PrimZones;
+	TZoneVector _PrimZones;
 
 	/// Patat map
-	TZoneMap			_ZoneMap;
+	TZoneMap _ZoneMap;
 
 	/// The move grid
-	TGrid				_SelectGrid;
+	TGrid _SelectGrid;
 
 	/// The entry table
-	TEntryTable			_EntryTable;
+	TEntryTable _EntryTable;
 
 	/// The flag table
-	std::vector<bool>	_FlagTable;
+	std::vector<bool> _FlagTable;
 
 	/// The fast entry map
-	TEntryMap			_EntryMap;
+	TEntryMap _EntryMap;
 
 	/// The free table entries
-	std::deque<TEntryIndex>	_FreeEntries;
+	std::deque<TEntryIndex> _FreeEntries;
 
 	//@}
 
 	/// \name Class filtering
 	//@{
 
-	std::set<std::string>	_PrimZoneFilters;
+	std::set<std::string> _PrimZoneFilters;
 
 	//@}
 
 public:
-
 	/// Constructor
 	CPatatGrid();
 
@@ -143,45 +145,45 @@ public:
 	~CPatatGrid();
 
 	/// Init grid;
-	void	init();
+	void init();
 
 	/// Use a prim file
-	void	usePrim(const std::string &primFile, std::vector<uint32> &inFile);
+	void usePrim(const std::string &primFile, std::vector<uint32> &inFile);
 
 	/// Check if patat exists
-	bool	exist(const std::string &name) const	{ return (_ZoneMap.find(name) != _ZoneMap.end()); }
+	bool exist(const std::string &name) const { return (_ZoneMap.find(name) != _ZoneMap.end()); }
 
 	/// Get entry index
-	sint32	getEntryIndex(const NLMISC::CVector &v)
+	sint32 getEntryIndex(const NLMISC::CVector &v)
 	{
 		_SelectGrid.select(v);
-		TGrid::CIterator	it = _SelectGrid.begin();
-		sint32	index = (it != _SelectGrid.end()) ? (*it) : 0;
+		TGrid::CIterator it = _SelectGrid.begin();
+		sint32 index = (it != _SelectGrid.end()) ? (*it) : 0;
 		_SelectGrid.clearSelection();
 		return index;
 	}
 
 	/// Set entry index
-	void	setEntryIndex(const NLMISC::CVector &v, sint32 entry)
+	void setEntryIndex(const NLMISC::CVector &v, sint32 entry)
 	{
 		_SelectGrid.select(v);
-		TGrid::CIterator	it = _SelectGrid.begin();
+		TGrid::CIterator it = _SelectGrid.begin();
 		if (it != _SelectGrid.end())
 		{
 			(*it) = (TEntryIndex)entry;
 		}
 		else
 		{
-			TEntryIndex	idx = (TEntryIndex)entry;
+			TEntryIndex idx = (TEntryIndex)entry;
 			_SelectGrid.insert(idx, v);
 		}
 		_SelectGrid.clearSelection();
 	}
 
 	/// Get zone id from its name
-	sint32	getZoneId(const std::string &name) const
+	sint32 getZoneId(const std::string &name) const
 	{
-		TZoneMap::const_iterator	it = _ZoneMap.find(name);
+		TZoneMap::const_iterator it = _ZoneMap.find(name);
 		if (it == _ZoneMap.end())
 		{
 			nlwarning("Can't find Prim zone %s", name.c_str());
@@ -191,7 +193,7 @@ public:
 	}
 
 	/// Get zone name from its id
-	const std::string	&getZoneName(uint32 id) const
+	const std::string &getZoneName(uint32 id) const
 	{
 		std::string *ret;
 		if (_PrimZones[id].getPropertyByName("name", ret))
@@ -204,12 +206,12 @@ public:
 	}
 
 	/// Get zone differences between 2 entry
-	bool	diff(TEntryIndex previous, TEntryIndex next, std::vector<uint32> &in, std::vector<uint32> &out);
+	bool diff(TEntryIndex previous, TEntryIndex next, std::vector<uint32> &in, std::vector<uint32> &out);
 
 	/// Serial
-	void	serial(NLMISC::IStream &f)
+	void serial(NLMISC::IStream &f)
 	{
-		sint	version = f.serialVersion(1);
+		sint version = f.serialVersion(1);
 
 		f.serialCont(_PrimZones);
 		f.serialCont(_ZoneMap);
@@ -224,11 +226,11 @@ public:
 	}
 
 	/// Display
-	void	displayInfo(NLMISC::CLog *log = NLMISC::InfoLog)
+	void displayInfo(NLMISC::CLog *log = NLMISC::InfoLog)
 	{
 		log->displayNL("Display PatatGrid PrimZones: %d zones", _PrimZones.size());
-		uint	i, j;
-		for (i=0; i<_PrimZones.size(); ++i)
+		uint i, j;
+		for (i = 0; i < _PrimZones.size(); ++i)
 		{
 			std::string name;
 			_PrimZones[i].getPropertyByName("name", name);
@@ -236,50 +238,47 @@ public:
 		}
 
 		log->displayNL("Display PatatGrid entries: %d entries", _EntryTable.size());
-		for (i=0; i<_EntryTable.size(); ++i)
+		for (i = 0; i < _EntryTable.size(); ++i)
 		{
 			log->displayNL(" + %d: EntryIndex:%d HashCode:%d NumSamples:%d", i, _EntryTable[i].EntryIndex, _EntryTable[i].HashCode, _EntryTable[i].NumSamples);
-			for (j=0; j<_EntryTable[i].Zones.size(); ++j)
+			for (j = 0; j < _EntryTable[i].Zones.size(); ++j)
 				log->displayNL("   + Zone %d", _EntryTable[i].Zones[j]);
 		}
 
 		log->displayNL("Display quick EntryMap: %d in map", _EntryMap.size());
-		TEntryMap::iterator	ite;
-		for (ite=_EntryMap.begin(); ite!=_EntryMap.end(); ++ite)
+		TEntryMap::iterator ite;
+		for (ite = _EntryMap.begin(); ite != _EntryMap.end(); ++ite)
 			log->displayNL(" + %d->%d", (*ite).first, (*ite).second);
 
 		log->displayNL("Display free Entries: %d free entries", _FreeEntries.size());
-		for (i=0; i<_FreeEntries.size(); ++i)
+		for (i = 0; i < _FreeEntries.size(); ++i)
 			log->displayNL(" + %d", _FreeEntries[i]);
 
 		log->displayNL("End of PatatGrid info");
 	}
 
 	/// Add CPrimZone class filter
-	void	addPrimZoneFilter(const std::string &filter)
+	void addPrimZoneFilter(const std::string &filter)
 	{
 		_PrimZoneFilters.insert(filter);
 	}
 
 	/// Remove CPrimZone class filter
-	void	removePrimZoneFilter(const std::string &filter)
+	void removePrimZoneFilter(const std::string &filter)
 	{
 		_PrimZoneFilters.erase(filter);
 	}
 
 	/// Reset CPrimZone class filter
-	void	resetPrimZoneFilter()
+	void resetPrimZoneFilter()
 	{
 		_PrimZoneFilters.clear();
 	}
 
 protected:
-
 	/// read recursive primitive
-	void	readPrimitive(NLLIGO::IPrimitive *primitive, std::vector<uint32> &inFile);
-
+	void readPrimitive(NLLIGO::IPrimitive *primitive, std::vector<uint32> &inFile);
 };
-
 
 #endif // NL_PATAT_GRID_H
 

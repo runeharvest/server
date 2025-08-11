@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #ifndef RY_S_PHRASE_H
 #define RY_S_PHRASE_H
 
@@ -34,8 +31,8 @@ class CStaticBrick;
 class CSPhrase : public NLMISC::CRefCount
 {
 	NL_INSTANCE_COUNTER_DECL(CSPhrase);
-public:
 
+public:
 	enum TPhraseState
 	{
 		New = 0,
@@ -50,7 +47,7 @@ public:
 
 public:
 	/// Constructor
-	CSPhrase() 
+	CSPhrase()
 	{
 		_State = New;
 		_Idle = false;
@@ -74,22 +71,22 @@ public:
 	}
 
 	/// get Id
-	//inline const TPhraseId &getId() const { return _Id; }
+	// inline const TPhraseId &getId() const { return _Id; }
 
 	/// get internal state
 	inline TPhraseState state() const { return _State; }
 
 	/// set internal state
-	inline void setState(TPhraseState state) 
-	{ 
-		_State = state; 
+	inline void setState(TPhraseState state)
+	{
+		_State = state;
 	}
-	
+
 	/// get idle flag
 	inline bool idle() const { return _Idle; }
-	
+
 	/// set idle flag
-	inline void idle( bool idle ) { _Idle = idle; }
+	inline void idle(bool idle) { _Idle = idle; }
 
 	/// get execution end date
 	inline NLMISC::TGameCycle executionEndDate() const { return _ExecutionEndDate; }
@@ -107,13 +104,13 @@ public:
 	 * \param buildToExecute if true then phrase is built to be executed right now, if false it's only for memorisation
 	 * \return true on success
 	 */
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true ) = 0;
+	virtual bool build(const TDataSetRow &actorRowId, const std::vector<const CStaticBrick *> &bricks, bool buildToExecute = true) = 0;
 
 	/**
 	 * set the primary target
 	 * \param entityId id of the primary target
 	 */
-	virtual void setPrimaryTarget( const TDataSetRow &/* entityRowId */ ) {}
+	virtual void setPrimaryTarget(const TDataSetRow & /* entityRowId */) { }
 
 	/**
 	 * evaluate phrase
@@ -146,7 +143,7 @@ public:
 
 	/**
 	 * apply phrase
-	 */ 
+	 */
 	virtual void apply() = 0;
 
 	/**
@@ -162,7 +159,7 @@ public:
 	/**
 	 * called for brutal stop of the phrase befire it's execution
 	 */
-	virtual void stopBeforeExecution() {}
+	virtual void stopBeforeExecution() { }
 
 	/// get being processed flag
 	inline bool beingProcessed() const { return _BeingProcessed; }
@@ -170,13 +167,13 @@ public:
 	/// set the being processed flag
 	inline void beingProcessed(bool flag) { _BeingProcessed = flag; }
 
-	/// 
+	///
 	inline uint8 nextCounter() const { return _NextCounter; }
 	inline void nextCounter(uint8 c) { _NextCounter = c; }
 	///
 	inline uint16 phraseBookIndex() const { return _PhraseBookIndex; }
 	inline void phraseBookIndex(uint16 i) { _PhraseBookIndex = i; }
-	/// 
+	///
 	inline bool isStatic() const { return _IsStatic; }
 	inline void isStatic(bool b) { _IsStatic = b; }
 	///
@@ -188,10 +185,10 @@ public:
 	/** Return true if the phrase if grammatically valid (otherwise, send a msg to the player actorRowId)
 	 * TODO: anti-hacking
 	 */
-	static bool	validateSabrinaGrammar( const std::vector< const CStaticBrick* >& /* bricks */, TDataSetRow /* actorRowId */ ) { return true; }
+	static bool validateSabrinaGrammar(const std::vector<const CStaticBrick *> & /* bricks */, TDataSetRow /* actorRowId */) { return true; }
 
-	virtual void setBrickSheets( const std::vector<NLMISC::CSheetId> & /* bricks */){}
-	virtual void setEnchantMode(bool){}
+	virtual void setBrickSheets(const std::vector<NLMISC::CSheetId> & /* bricks */) { }
+	virtual void setEnchantMode(bool) { }
 
 	inline void cyclic(bool b) { _CyclicPhrase = b; }
 	inline bool cyclic() const { return _CyclicPhrase; }
@@ -199,45 +196,43 @@ public:
 	/// Return true if a cancellation of the phrase due to character's movement must be ignored at the moment
 	virtual bool mustOverrideCancelStaticAction() const { return false; }
 
-protected:	
+protected:
 	/// idle or not
-	bool					_Idle;
+	bool _Idle;
 	/// execution end date
-	NLMISC::TGameCycle		_ExecutionEndDate;
+	NLMISC::TGameCycle _ExecutionEndDate;
 	/// apply date
-	NLMISC::TGameCycle		_ApplyDate;
+	NLMISC::TGameCycle _ApplyDate;
 	/// latency end date
-	double		_LatencyEndDate;
+	double _LatencyEndDate;
 	///	index in client phrase book (0 = not in the phrase book)
-	uint16					_PhraseBookIndex;
+	uint16 _PhraseBookIndex;
 	///	next counter
-	uint8					_NextCounter;
+	uint8 _NextCounter;
 	/// is static
-	bool					_IsStatic;
+	bool _IsStatic;
 	/// is applied
-	bool					_IsApplied;
+	bool _IsApplied;
 
 	/// being processed flag
-	mutable bool			_BeingProcessed;
+	mutable bool _BeingProcessed;
 
 	// phrase type
-	BRICK_TYPE::EBrickType	_PhraseType;
+	BRICK_TYPE::EBrickType _PhraseType;
 
 	/// repeat mode on/off
-	bool					_CyclicPhrase;
+	bool _CyclicPhrase;
 
 private:
 	/// phrase state
-	TPhraseState			_State;
-
+	TPhraseState _State;
 
 public:
-	static uint32	NbAllocatedPhrases;
-	static uint32	NbDesallocatedPhrases;
+	static uint32 NbAllocatedPhrases;
+	static uint32 NbDesallocatedPhrases;
 };
 
 typedef NLMISC::CSmartPtr<CSPhrase> CSPhrasePtr;
-
 
 #endif // RY_S_PHRASE_H
 

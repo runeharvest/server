@@ -14,20 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_GPM_DEFS_H
 #define RY_GPM_DEFS_H
 
 #include "nel/misc/types_nl.h"
 
-const uint16	MAX_SEEN_ENTITIES = 255;
-const uint16	MAX_SEEN_OBJECTS = 64;
-const sint32	GLOBAL_POSITION_TAG = 0x80000000;
-const uint8		INVALID_CONTINENT_INDEX = 0xff;
-const uint8		NO_CONTINENT_INDEX = 0xfe;
+const uint16 MAX_SEEN_ENTITIES = 255;
+const uint16 MAX_SEEN_OBJECTS = 64;
+const sint32 GLOBAL_POSITION_TAG = 0x80000000;
+const uint8 INVALID_CONTINENT_INDEX = 0xff;
+const uint8 NO_CONTINENT_INDEX = 0xfe;
 
 #define RECORD_LAST_PLAYER_POSITIONS
-
 
 #endif

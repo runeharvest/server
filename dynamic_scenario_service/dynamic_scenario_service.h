@@ -22,69 +22,65 @@
 #include "game_share/dyn_chat.h"
 #include "server_share/r2_session_backup_module.h"
 
-namespace NLNET
-{
-	class IModuleSocket;
-	class IModule;
+namespace NLNET {
+class IModuleSocket;
+class IModule;
 }
-namespace NLMISC
-{
-	class CConfigFile;
-	struct CEntityId;
+namespace NLMISC {
+class CConfigFile;
+struct CEntityId;
 }
-namespace R2
-{
+namespace R2 {
 class CDynamicMapService;
 
 class CDynamicScenarioService : public NLNET::IService
 {
 
 public:
-	//CDynamicScenarioService();
+	// CDynamicScenarioService();
 	//~CDynamicScenarioService();
-	// Initialisation of service
-	void init ();
+	//  Initialisation of service
+	void init();
 
 	// Update net processing
-	bool update ();
+	bool update();
 
 	// Update service processing
 	static void serviceUpdate();
 
 	// Release the service
-	void release ();
+	void release();
 
+	static R2::CDynamicScenarioService &instance() { return (CDynamicScenarioService &)*IService::getInstance(); }
 
-	static R2::CDynamicScenarioService & instance()  { return (CDynamicScenarioService&)*IService::getInstance(); }
+	R2::CDynamicMapService &getDynamicMapService() const { return *_Dms; }
 
-	R2::CDynamicMapService & getDynamicMapService() const { return *_Dms; }
+	void forwardToStringManagerModule(NLNET::CMessage &msgin);
 
-	void forwardToStringManagerModule (NLNET::CMessage &msgin);
+	void forwardIncarnChat(TChanID id, TDataSetRow senderId, ucstring sentence);
 
+	void setR2Sbm(NLNET::IModule *module) { _R2Sbm = module; }
 
-	void forwardIncarnChat(TChanID id,TDataSetRow senderId,ucstring sentence);
-
-	void setR2Sbm(NLNET::IModule* module) { _R2Sbm = module; }
-
-	NLNET::IModule* getR2Sbm() const { return _R2Sbm; }
+	NLNET::IModule *getR2Sbm() const { return _R2Sbm; }
 
 	bool getBsUp() const { return _BsUp; }
-	void setBsUp(bool up){ _BsUp = up; }
-
-
+	void setBsUp(bool up) { _BsUp = up; }
 
 private:
-	enum  TMode {R2Sbm, Dss, DssWithNoSu};
+	enum TMode
+	{
+		R2Sbm,
+		Dss,
+		DssWithNoSu
+	};
 
 private:
 	TMode _Mode;
-	R2::CDynamicMapService* _Dms; // Null if _Mode == RESbm
-	NLNET::IModule* _R2Sbm;
+	R2::CDynamicMapService *_Dms; // Null if _Mode == RESbm
+	NLNET::IModule *_R2Sbm;
 	bool _BsUp;
 	//
-
 };
-} //namespace R2
+} // namespace R2
 
-#endif //R2_DYNAMIC_SCENARIO_SERVICE_H
-
+#endif // R2_DYNAMIC_SCENARIO_SERVICE_H

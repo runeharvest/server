@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include	"stdpch.h"
+#include "stdpch.h"
 
 #include "script_compiler.h"
 
@@ -43,8 +43,8 @@ using namespace AITYPES;
 using namespace RYAI_MAP_CRUNCH;
 
 // a big bad global var !
-extern CAIEntityPhysical	*TempSpeaker;
-extern CBotPlayer			*TempPlayer;
+extern CAIEntityPhysical *TempSpeaker;
+extern CBotPlayer *TempPlayer;
 
 /****************************************************************************/
 /* CGroupNpc methods                                                        */
@@ -83,41 +83,41 @@ Arguments: s(Property),s(Content) ->
 
 */
 // CGroupNpc
-void setFactionProp_ss_(CStateInstance* entity, CScriptStack& stack)
+void setFactionProp_ss_(CStateInstance *entity, CScriptStack &stack)
 {
-	std::string params = stack.top();	// ToChange
+	std::string params = stack.top(); // ToChange
 	stack.pop();
 	TStringId const factionType = CStringMapper::map(stack.top());
 	stack.pop();
-	
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("setFactionProp on a non Npc Group, doesnt work");
 		return;
 	}
-	
+
 	static TStringId factionStrId = CStringMapper::map("faction");
 	static TStringId ennemyFactionStrId = CStringMapper::map("ennemyFaction");
 	static TStringId friendFactionStrId = CStringMapper::map("friendFaction");
 	breakable
 	{
-		CPropertySetWithExtraList<TAllianceId> tmpSet;	
-		CStringSeparator const sep(params,"|");
+		CPropertySetWithExtraList<TAllianceId> tmpSet;
+		CStringSeparator const sep(params, "|");
 		while (sep.hasNext())
 			tmpSet.addProperty(AITYPES::CPropertyId::create(sep.get()));
-		
-		if (factionType==factionStrId)
+
+		if (factionType == factionStrId)
 		{
 			grpNpc->faction() = tmpSet;
 			break;
 		}
-		if (factionType==ennemyFactionStrId)
+		if (factionType == ennemyFactionStrId)
 		{
 			grpNpc->ennemyFaction() = tmpSet;
 			break;
 		}
-		if (factionType==friendFactionStrId)
+		if (factionType == friendFactionStrId)
 		{
 			grpNpc->friendFaction() = tmpSet;
 			break;
@@ -127,12 +127,13 @@ void setFactionProp_ss_(CStateInstance* entity, CScriptStack& stack)
 	}
 }
 
-void setOupostMode_ss_(CStateInstance* entity, CScriptStack& stack)
+void setOupostMode_ss_(CStateInstance *entity, CScriptStack &stack)
 {
-	std::string sideStr = stack.top(); stack.pop();
+	std::string sideStr = stack.top();
+	stack.pop();
 	std::string aliasStr = stack.top();
-	CGroupNpc* const npcGroup = dynamic_cast<CGroupNpc*>(entity->getGroup());
-	if ( ! npcGroup)
+	CGroupNpc *const npcGroup = dynamic_cast<CGroupNpc *>(entity->getGroup());
+	if (!npcGroup)
 	{
 		nlwarning("setOutpostMode on a non Npc Group, doesnt work");
 		return;
@@ -151,16 +152,16 @@ void setOupostMode_ss_(CStateInstance* entity, CScriptStack& stack)
 	{
 		nlwarning("setOutpostMode: invalid side");
 	}
-	
+
 	npcGroup->setOutpostSide(side);
 	npcGroup->setOutpostFactions(side);
 	FOREACH(botIt, CCont<CBot>, npcGroup->bots())
 	{
-		CBot* bot = *botIt;
-		CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
+		CBot *bot = *botIt;
+		CBotNpc *botNpc = NLMISC::safe_cast<CBotNpc *>(bot);
 		if (botNpc)
 		{
-			CSpawnBotNpc* spawnBotNpc = botNpc->getSpawn();
+			CSpawnBotNpc *spawnBotNpc = botNpc->getSpawn();
 			if (spawnBotNpc)
 			{
 				spawnBotNpc->setOutpostSide(side);
@@ -188,18 +189,18 @@ Arguments: s(From), s(To) ->
 
 */
 // Spawned CGroupNpc not in a family behaviour
-void moveToZone_ss_(CStateInstance* entity, CScriptStack& stack)
+void moveToZone_ss_(CStateInstance *entity, CScriptStack &stack)
 {
 	TStringId const zoneDest = CStringMapper::map(stack.top());
 	stack.pop();
 	TStringId const zoneSrc = CStringMapper::map(stack.top());
 	stack.pop();
-	
-	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+
+	IManagerParent *const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (!aiInstance)
 		return;
-	
+
 	if (!entity)
 	{
 		nlwarning("moveToZone failed: no state instance!");
@@ -208,7 +209,7 @@ void moveToZone_ss_(CStateInstance* entity, CScriptStack& stack)
 		return;
 	}
 
-	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	CGroupNpc *group = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!group)
 	{
 		nlwarning("moveToZone failed: no NPC group!");
@@ -216,7 +217,7 @@ void moveToZone_ss_(CStateInstance* entity, CScriptStack& stack)
 		nlwarning(" - to %s", CStringMapper::unmap(zoneDest).c_str());
 		return;
 	}
-	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
+	CSpawnGroupNpc *spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
 	{
 		nlwarning("moveToZone failed: no spawned group!");
@@ -224,10 +225,10 @@ void moveToZone_ss_(CStateInstance* entity, CScriptStack& stack)
 		nlwarning(" - to %s", CStringMapper::unmap(zoneDest).c_str());
 		return;
 	}
-	
-	CNpcZone const* const destZone = aiInstance->getZone(zoneDest);
-	CNpcZone const* const srcZone = aiInstance->getZone(zoneSrc);
-	
+
+	CNpcZone const *const destZone = aiInstance->getZone(zoneDest);
+	CNpcZone const *const srcZone = aiInstance->getZone(zoneSrc);
+
 	if (!destZone)
 	{
 		nlwarning("moveToZone: getZone destination failed!");
@@ -242,15 +243,15 @@ void moveToZone_ss_(CStateInstance* entity, CScriptStack& stack)
 	}
 	if (!destZone || !srcZone)
 		return;
-	
-	if (destZone==srcZone)
+
+	if (destZone == srcZone)
 	{
 		nlwarning("Trying to find a path between two same zones in %s, aborting moveToZone", entity->getActiveState()->getAliasFullName().c_str());
 		nlwarning(" - from %s", CStringMapper::unmap(zoneSrc).c_str());
 		nlwarning(" - to %s", CStringMapper::unmap(zoneDest).c_str());
 		return;
 	}
-	
+
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileDynFollowPath(spawnGroup, srcZone, destZone, AITYPES::CPropertySet()));
 }
 
@@ -277,68 +278,74 @@ Arguments: s(Activity) ->
 
 */
 // Spawned CGroupNpc not in a family behaviour
-void setActivity_s_(CStateInstance* entity, CScriptStack& stack)
+void setActivity_s_(CStateInstance *entity, CScriptStack &stack)
 {
 	string activity = stack.top();
 	stack.pop();
-	
-	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+
+	IManagerParent *const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (!aiInstance)
 		return;
-	
-	if (!entity) { nlwarning("setActivity failed!"); return; }
-	
-	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
+
+	if (!entity)
+	{
+		nlwarning("setActivity failed!");
+		return;
+	}
+
+	CGroupNpc *group = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!group)
-	{	nlwarning("setActivity failed: no NPC group");
+	{
+		nlwarning("setActivity failed: no NPC group");
 		return;
 	}
-	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
+	CSpawnGroupNpc *spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
-	{	nlwarning("setActivity failed: no spawned group");
+	{
+		nlwarning("setActivity failed: no spawned group");
 		return;
 	}
-	
+
 	breakable
 	{
-		if (activity=="no_change")
+		if (activity == "no_change")
 			break;
-		
-		if (activity=="escorted")
+
+		if (activity == "escorted")
 		{
 			spawnGroup->activityProfile().setAIProfile(new CGrpProfileEscorted(spawnGroup));
 			break;
 		}
-		if (activity=="guard")
+		if (activity == "guard")
 		{
 			spawnGroup->activityProfile().setAIProfile(new CGrpProfileGuard(spawnGroup));
 			break;
 		}
-		if (activity=="guard_escorted")
+		if (activity == "guard_escorted")
 		{
 			spawnGroup->activityProfile().setAIProfile(new CGrpProfileGuardEscorted(spawnGroup));
 			break;
 		}
 
-		if (activity=="normal")
+		if (activity == "normal")
 		{
 			spawnGroup->activityProfile().setAIProfile(new CGrpProfileNormal(spawnGroup));
 			break;
 		}
-		if (activity=="faction")
+		if (activity == "faction")
 		{
 			spawnGroup->activityProfile().setAIProfile(new CGrpProfileFaction(spawnGroup));
 			break;
 		}
-		if (activity=="faction_no_assist")
+		if (activity == "faction_no_assist")
 		{
-			CGrpProfileFaction * grpPro = new CGrpProfileFaction(spawnGroup);
+			CGrpProfileFaction *grpPro = new CGrpProfileFaction(spawnGroup);
 			grpPro->noAssist();
 			spawnGroup->activityProfile().setAIProfile(grpPro);
 			break;
 		}
-		if (activity=="bandit")
+		if (activity == "bandit")
 		{
 			spawnGroup->activityProfile().setAIProfile(new CGrpProfileBandit(spawnGroup));
 			break;
@@ -364,42 +371,42 @@ Arguments: s(Zone) ->
 
 */
 // Spawned CGroupNpc not in a family behaviour
-void waitInZone_s_(CStateInstance* entity, CScriptStack& stack)
+void waitInZone_s_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string zoneName = stack.top();
 	TStringId const zoneDest = CStringMapper::map(zoneName);
 	stack.pop();
-	
+
 	if (!entity)
 	{
 		nlwarning("waitInZone failed!");
 		return;
 	}
-	
-	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+
+	IManagerParent *const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (!aiInstance)
 	{
 		// :TODO: Check is that warning was a flood
-		//nlwarning("waitInZone failed!");
+		// nlwarning("waitInZone failed!");
 		return;
 	}
-	
-	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
+
+	CGroupNpc *group = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!group)
 	{
 		nlwarning("waitInZone failed: no NPC group");
 		return;
 	}
-	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
+	CSpawnGroupNpc *spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
 	{
 		nlwarning("waitInZone failed: no spawned group");
 		return;
 	}
-	
-	CNpcZone const* const destZone = aiInstance->getZone(zoneDest);
-	
+
+	CNpcZone const *const destZone = aiInstance->getZone(zoneDest);
+
 	if (!destZone)
 	{
 		nlwarning("waitInZone: getZone destination failed! (%s)", zoneName.c_str());
@@ -422,32 +429,32 @@ Arguments: ->
 
 */
 // Spawned CGroupNpc not in a family behaviour
-void stopMoving__(CStateInstance* entity, CScriptStack& stack)
+void stopMoving__(CStateInstance *entity, CScriptStack &stack)
 {
 	if (!entity)
 	{
 		nlwarning("stopMoving failed!");
 		return;
 	}
-	
-	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+
+	IManagerParent *const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (!aiInstance)
 		return;
-	
-	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
+
+	CGroupNpc *group = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!group)
 	{
 		nlwarning("stopMoving failed: no NPC group");
 		return;
 	}
-	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
+	CSpawnGroupNpc *spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
 	{
 		nlwarning("stopMoving failed: no spawned group");
 		return;
 	}
-	
+
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileIdle(spawnGroup));
 }
 
@@ -466,37 +473,44 @@ Arguments: f(Radius) ->
 
 */
 // Spawned CGroupNpc not in a family behaviour
-void startWander_f_(CStateInstance* entity, CScriptStack& stack)
+void startWander_f_(CStateInstance *entity, CScriptStack &stack)
 {
-	uint32 dispersionRadius = (uint32)(float&)stack.top();
+	uint32 dispersionRadius = (uint32)(float &)stack.top();
 	stack.pop();
-	
-	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+
+	IManagerParent *const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (!aiInstance)
 		return;
-	
-	if (!entity) { nlwarning("setActivity failed!"); return; }
-	
-	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
-	if (!group)
-	{	nlwarning("startWander failed: no NPC group");
+
+	if (!entity)
+	{
+		nlwarning("setActivity failed!");
 		return;
 	}
-	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
+
+	CGroupNpc *group = dynamic_cast<CGroupNpc *>(entity->getGroup());
+	if (!group)
+	{
+		nlwarning("startWander failed: no NPC group");
+		return;
+	}
+	CSpawnGroupNpc *spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
-	{	nlwarning("startWander failed: no spawned group");
+	{
+		nlwarning("startWander failed: no spawned group");
 		return;
 	}
 
 	CAIVector centerPos;
-	if	(!spawnGroup->calcCenterPos(centerPos))	// true if there's some bots in the group.
-	{	nlwarning("startWander failed: no center pos");
+	if (!spawnGroup->calcCenterPos(centerPos)) // true if there's some bots in the group.
+	{
+		nlwarning("startWander failed: no center pos");
 		return;
 	}
 
 	NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> destZone = NLMISC::CSmartPtr<CNpcZonePlaceNoPrim>(new CNpcZonePlaceNoPrim());
-	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(centerPos, 0, 0), (uint32)(dispersionRadius*1000.));
+	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(centerPos, 0, 0), (uint32)(dispersionRadius * 1000.));
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
 }
 
@@ -515,35 +529,41 @@ Arguments: f(Radius) ->
 
 */
 // Spawned CGroupNpc not in a family behaviour
-void startMoving_fff_(CStateInstance* entity, CScriptStack& stack)
+void startMoving_fff_(CStateInstance *entity, CScriptStack &stack)
 {
-	uint32 dispersionRadius = (uint32)(float&)stack.top();
+	uint32 dispersionRadius = (uint32)(float &)stack.top();
 	stack.pop();
-	float const y = (float&)stack.top();
+	float const y = (float &)stack.top();
 	stack.pop();
-	float const x = (float&)stack.top();
- 	stack.pop();
-	
-	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	float const x = (float &)stack.top();
+	stack.pop();
+
+	IManagerParent *const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (!aiInstance)
 		return;
-	
-	if (!entity) { nlwarning("setActivity failed!"); return; }
-	
-	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
-	if (!group)
-	{	nlwarning("setActivity failed: no NPC group");
+
+	if (!entity)
+	{
+		nlwarning("setActivity failed!");
 		return;
 	}
-	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
+
+	CGroupNpc *group = dynamic_cast<CGroupNpc *>(entity->getGroup());
+	if (!group)
+	{
+		nlwarning("setActivity failed: no NPC group");
+		return;
+	}
+	CSpawnGroupNpc *spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
-	{	nlwarning("setActivity failed: no spawned group");
+	{
+		nlwarning("setActivity failed: no spawned group");
 		return;
 	}
 
 	NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> destZone = NLMISC::CSmartPtr<CNpcZonePlaceNoPrim>(new CNpcZonePlaceNoPrim());
-	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(CAIVector(x, y), 0, 0), (uint32)(dispersionRadius*1000.));
+	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(CAIVector(x, y), 0, 0), (uint32)(dispersionRadius * 1000.));
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
 
 	return;
@@ -565,26 +585,33 @@ Arguments: s(PlayerEid) f(Radius) ->
 
 */
 // Spawned CGroupNpc not in a family behaviour
-void followPlayer_sf_(CStateInstance* entity, CScriptStack& stack)
+void followPlayer_sf_(CStateInstance *entity, CScriptStack &stack)
 {
-	uint32 dispersionRadius = (uint32)(float&)stack.top(); stack.pop();
+	uint32 dispersionRadius = (uint32)(float &)stack.top();
+	stack.pop();
 	NLMISC::CEntityId playerId = NLMISC::CEntityId((std::string)stack.top());
-	
-	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+
+	IManagerParent *const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (!aiInstance)
 		return;
-	
-	if (!entity) { nlwarning("followPlayer failed!"); return; }
-	
-	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
-	if (!group)
-	{	nlwarning("followPlayer failed: no NPC group");
+
+	if (!entity)
+	{
+		nlwarning("followPlayer failed!");
 		return;
 	}
-	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
+
+	CGroupNpc *group = dynamic_cast<CGroupNpc *>(entity->getGroup());
+	if (!group)
+	{
+		nlwarning("followPlayer failed: no NPC group");
+		return;
+	}
+	CSpawnGroupNpc *spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
-	{	nlwarning("followPlayer failed: no spawned group");
+	{
+		nlwarning("followPlayer failed: no spawned group");
 		return;
 	}
 
@@ -600,7 +627,6 @@ void followPlayer_sf_(CStateInstance* entity, CScriptStack& stack)
 	return;
 }
 
-
 //----------------------------------------------------------------------------
 /** @page code
 
@@ -615,32 +641,32 @@ Arguments: ->
 
 */
 // Spawned CGroupNpc not in a family behaviour
-void wander__(CStateInstance* entity, CScriptStack& stack)
+void wander__(CStateInstance *entity, CScriptStack &stack)
 {
 	if (!entity)
 	{
 		nlwarning("wander failed!");
 		return;
 	}
-	
-	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+
+	IManagerParent *const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (!aiInstance)
 		return;
-	
-	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
+
+	CGroupNpc *group = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!group)
 	{
 		nlwarning("wander failed: no NPC group");
 		return;
 	}
-	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
+	CSpawnGroupNpc *spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
 	{
 		nlwarning("wander failed: no spawned group");
 		return;
 	}
-	
+
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWander(spawnGroup));
 }
 
@@ -660,18 +686,18 @@ Arguments: f(Attackable) ->
 
 */
 // CGroupNpc
-void setAttackable_f_(CStateInstance* entity, CScriptStack& stack)
+void setAttackable_f_(CStateInstance *entity, CScriptStack &stack)
 {
-	bool const attackable = (float&)stack.top()!=0.0f;
+	bool const attackable = (float &)stack.top() != 0.0f;
 	stack.pop();
-	
-	CGroup* group = entity->getGroup();
-	
-	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
+	CGroup *group = entity->getGroup();
+
+	CGroupNpc *npcGroup = NLMISC::safe_cast<CGroupNpc *>(group);
+
 	npcGroup->setPlayerAttackable(attackable);
 	npcGroup->setBotAttackable(attackable);
-	
+
 	if (npcGroup->isSpawned())
 		npcGroup->getSpawnObj()->sendInfoToEGS();
 }
@@ -692,16 +718,16 @@ Arguments: f(Attackable) ->
 
 */
 // CGroupNpc
-void setPlayerAttackable_f_(CStateInstance* entity, CScriptStack& stack)
+void setPlayerAttackable_f_(CStateInstance *entity, CScriptStack &stack)
 {
-	bool attackable = (float&)stack.top()!=0.0f;
+	bool attackable = (float &)stack.top() != 0.0f;
 	stack.pop();
-	
-	CGroup* group = entity->getGroup();
-	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
+	CGroup *group = entity->getGroup();
+	CGroupNpc *npcGroup = NLMISC::safe_cast<CGroupNpc *>(group);
+
 	npcGroup->setPlayerAttackable(attackable);
-	
+
 	if (npcGroup->isSpawned())
 		npcGroup->getSpawnObj()->sendInfoToEGS();
 }
@@ -724,16 +750,16 @@ Arguments: f(Attackable) ->
 
 */
 // CGroupNpc
-void setBotAttackable_f_(CStateInstance* entity, CScriptStack& stack)
+void setBotAttackable_f_(CStateInstance *entity, CScriptStack &stack)
 {
-	bool attackable = (float&)stack.top()!=0.0f;
+	bool attackable = (float &)stack.top() != 0.0f;
 	stack.pop();
-	
-	CGroup* group = entity->getGroup();
-	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
+	CGroup *group = entity->getGroup();
+	CGroupNpc *npcGroup = NLMISC::safe_cast<CGroupNpc *>(group);
+
 	npcGroup->setBotAttackable(attackable);
-	
+
 	if (npcGroup->isSpawned())
 		npcGroup->getSpawnObj()->sendInfoToEGS();
 }
@@ -763,20 +789,20 @@ Arguments: s(Faction),f(Threshold),f(Attackable) ->
 
 */
 // CGroupNpc
-void setFactionAttackableAbove_sff_(CStateInstance* entity, CScriptStack& stack)
+void setFactionAttackableAbove_sff_(CStateInstance *entity, CScriptStack &stack)
 {
-	bool attackable = (float&)stack.top()!=0.0f;
+	bool attackable = (float &)stack.top() != 0.0f;
 	stack.pop();
-	sint32 threshold = (sint32)(float&)stack.top();
+	sint32 threshold = (sint32)(float &)stack.top();
 	stack.pop();
-	std::string faction = (std::string&)stack.top();
+	std::string faction = (std::string &)stack.top();
 	stack.pop();
-	
-	CGroup* group = entity->getGroup();
-	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
+	CGroup *group = entity->getGroup();
+	CGroupNpc *npcGroup = NLMISC::safe_cast<CGroupNpc *>(group);
+
 	npcGroup->setFactionAttackableAbove(faction, threshold, attackable);
-	
+
 	if (npcGroup->isSpawned())
 		npcGroup->getSpawnObj()->sendInfoToEGS();
 }
@@ -806,20 +832,20 @@ Arguments: s(Faction),f(Threshold),f(Attackable) ->
 
 */
 // CGroupNpc
-void setFactionAttackableBelow_sff_(CStateInstance* entity, CScriptStack& stack)
+void setFactionAttackableBelow_sff_(CStateInstance *entity, CScriptStack &stack)
 {
-	bool attackable = (float&)stack.top()!=0.0f;
+	bool attackable = (float &)stack.top() != 0.0f;
 	stack.pop();
-	sint32 threshold = (sint32)(float&)stack.top();
+	sint32 threshold = (sint32)(float &)stack.top();
 	stack.pop();
-	std::string faction = (std::string&)stack.top();
+	std::string faction = (std::string &)stack.top();
 	stack.pop();
-	
-	CGroup* group = entity->getGroup();
-	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
+	CGroup *group = entity->getGroup();
+	CGroupNpc *npcGroup = NLMISC::safe_cast<CGroupNpc *>(group);
+
 	npcGroup->setFactionAttackableBelow(faction, threshold, attackable);
-	
+
 	if (npcGroup->isSpawned())
 		npcGroup->getSpawnObj()->sendInfoToEGS();
 }
@@ -840,24 +866,24 @@ Arguments: s(BotChat) ->
 
 */
 // CGroupNpc
-void addBotChat_s_(CStateInstance* entity, CScriptStack& stack)
+void addBotChat_s_(CStateInstance *entity, CScriptStack &stack)
 {
 	string const botChat = (string)stack.top();
 	stack.pop();
-	
-	CGroup* group = entity->getGroup();
-	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
-	FOREACH(botIt, CCont<CBot>,	group->bots())
+
+	CGroup *group = entity->getGroup();
+	CGroupNpc *npcGroup = NLMISC::safe_cast<CGroupNpc *>(group);
+
+	FOREACH(botIt, CCont<CBot>, group->bots())
 	{
-		CBot* bot = *botIt;
-		CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
+		CBot *bot = *botIt;
+		CBotNpc *botNpc = NLMISC::safe_cast<CBotNpc *>(bot);
 		if (botNpc)
 		{
 			if (!botNpc->getChat())
 				botNpc->newChat();
 			botNpc->getChat()->add(botNpc->getAIInstance(), botChat);
-			CSpawnBotNpc* spawnBotNpc = botNpc->getSpawn();
+			CSpawnBotNpc *spawnBotNpc = botNpc->getSpawn();
 			if (spawnBotNpc)
 			{
 				spawnBotNpc->setCurrentChatProfile(botNpc->getChat());
@@ -882,21 +908,21 @@ Arguments: ->
 
 */
 // CGroupNpc
-void clearBotChat__(CStateInstance* entity, CScriptStack& stack)
+void clearBotChat__(CStateInstance *entity, CScriptStack &stack)
 {
-	CGroup* group = entity->getGroup();
-	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
-	FOREACH(botIt, CCont<CBot>,	group->bots())
+	CGroup *group = entity->getGroup();
+	CGroupNpc *npcGroup = NLMISC::safe_cast<CGroupNpc *>(group);
+
+	FOREACH(botIt, CCont<CBot>, group->bots())
 	{
-		CBot* bot = *botIt;
-		CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
+		CBot *bot = *botIt;
+		CBotNpc *botNpc = NLMISC::safe_cast<CBotNpc *>(bot);
 		if (botNpc)
 		{
 			if (!botNpc->getChat())
 				botNpc->newChat();
 			botNpc->getChat()->clear();
-			CSpawnBotNpc* spawnBotNpc = botNpc->getSpawn();
+			CSpawnBotNpc *spawnBotNpc = botNpc->getSpawn();
 			if (spawnBotNpc)
 			{
 				spawnBotNpc->setCurrentChatProfile(botNpc->getChat());
@@ -922,15 +948,15 @@ Arguments: f(IgnoreOffensiveActions) ->
 
 */
 // CGroup
-void ignoreOffensiveActions_f_(CStateInstance* entity, CScriptStack& stack)
+void ignoreOffensiveActions_f_(CStateInstance *entity, CScriptStack &stack)
 {
-	bool const ignoreOffensiveActions = ((float)stack.top())!=0.f;
+	bool const ignoreOffensiveActions = ((float)stack.top()) != 0.f;
 	stack.pop();
-	
-	CGroup* group = entity->getGroup();
-	FOREACH(botIt, CCont<CBot>,	group->bots())
+
+	CGroup *group = entity->getGroup();
+	FOREACH(botIt, CCont<CBot>, group->bots())
 	{
-		CBot* bot = *botIt;
+		CBot *bot = *botIt;
 		if (bot)
 			bot->setIgnoreOffensiveActions(ignoreOffensiveActions);
 	}
@@ -952,21 +978,20 @@ Arguments: f(DespawnTime) ->
 
 */
 // CGroupNpc
-void setDespawnTime_f_(CStateInstance* entity, CScriptStack& stack)
+void setDespawnTime_f_(CStateInstance *entity, CScriptStack &stack)
 {
 	float time = stack.top();
 	stack.pop();
-	
-	CGroup* group = entity->getGroup();
-	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
+	CGroup *group = entity->getGroup();
+	CGroupNpc *npcGroup = NLMISC::safe_cast<CGroupNpc *>(group);
+
 	uint32 despawntime = (uint32)(sint32)time; // -1 => ~0
 	// TODO:kxu: fix CAITimer!
 	if (despawntime > 0x7fffffff)
 		despawntime = 0x7fffffff; // AI timers do not treat properly delta times greater than the max signed int
 	npcGroup->despawnTime() = despawntime;
 }
-
 
 /** @page code
 
@@ -983,26 +1008,26 @@ Arguments:  f(alias), ->
 
 */
 // CGroup
-void despawnBotByAlias_s_(CStateInstance* entity, CScriptStack& stack)
+void despawnBotByAlias_s_(CStateInstance *entity, CScriptStack &stack)
 {
-	uint32 alias =  LigoConfig.aliasFromString((string)stack.top()); stack.pop();
-	CGroup* group = entity->getGroup();
-	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
-	FOREACH(botIt, CCont<CBot>,	group->bots())
+	uint32 alias = LigoConfig.aliasFromString((string)stack.top());
+	stack.pop();
+	CGroup *group = entity->getGroup();
+	CGroupNpc *npcGroup = NLMISC::safe_cast<CGroupNpc *>(group);
+
+	FOREACH(botIt, CCont<CBot>, group->bots())
 	{
 
-		CBot* bot = *botIt;
-		
+		CBot *bot = *botIt;
+
 		if (bot->getAlias() != alias) { continue; }
-		if (!bot->isSpawned()) return;	
+		if (!bot->isSpawned()) return;
 		if (bot->getRyzomType() == RYZOMID::npc)
 		{
-			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
-			CSpawnBotNpc* spawnBotNpc = botNpc->getSpawn();
-			spawnBotNpc->spawnGrp().addBotToDespawnAndRespawnTime(&spawnBotNpc->getPersistent(), 1, spawnBotNpc->spawnGrp().getPersistent().respawnTime());				
+			CBotNpc *botNpc = NLMISC::safe_cast<CBotNpc *>(bot);
+			CSpawnBotNpc *spawnBotNpc = botNpc->getSpawn();
+			spawnBotNpc->spawnGrp().addBotToDespawnAndRespawnTime(&spawnBotNpc->getPersistent(), 1, spawnBotNpc->spawnGrp().getPersistent().respawnTime());
 		}
-
 	}
 }
 
@@ -1022,13 +1047,13 @@ Arguments: f(RespawnTime) ->
 
 */
 // CGroupNpc
-void setRespawnTime_f_(CStateInstance* entity, CScriptStack& stack)
+void setRespawnTime_f_(CStateInstance *entity, CScriptStack &stack)
 {
 	float const time = stack.top();
 	stack.pop();
-	
-	CGroup* group = entity->getGroup();
-	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
+
+	CGroup *group = entity->getGroup();
+	CGroupNpc *npcGroup = NLMISC::safe_cast<CGroupNpc *>(group);
 
 	uint32 respawntime = (uint32)(sint32)time; // -1 => ~0
 	// TODO:kxu: fix CAITimer!
@@ -1055,13 +1080,13 @@ Arguments: f(threshold),f(user_event_n) ->
 
 */
 // CGroupNpc
-void addHpUpTrigger_ff_(CStateInstance* entity, CScriptStack& stack)
+void addHpUpTrigger_ff_(CStateInstance *entity, CScriptStack &stack)
 {
 	int eventId = (int)(float)stack.top();
 	stack.pop();
 	float threshold = (float)stack.top();
 	stack.pop();
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to add a hp up trigger (%f) listener (user event %d) in a group which is not an NPC group.", threshold, eventId);
@@ -1088,13 +1113,13 @@ Arguments: f(threshold),f(user_event_n) ->
 
 */
 // CGroupNpc
-void delHpUpTrigger_ff_(CStateInstance* entity, CScriptStack& stack)
+void delHpUpTrigger_ff_(CStateInstance *entity, CScriptStack &stack)
 {
 	int eventId = (int)(float)stack.top();
 	stack.pop();
 	float threshold = (float)stack.top();
 	stack.pop();
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to delete a hp up trigger (%f) listener (user event %d) in a group which is not an NPC group.", threshold, eventId);
@@ -1121,13 +1146,13 @@ Arguments: f(threshold),f(user_event_n) ->
 
 */
 // CGroupNpc
-void addHpDownTrigger_ff_(CStateInstance* entity, CScriptStack& stack)
+void addHpDownTrigger_ff_(CStateInstance *entity, CScriptStack &stack)
 {
 	int eventId = (int)(float)stack.top();
 	stack.pop();
 	float threshold = (float)stack.top();
 	stack.pop();
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to add a hp down trigger (%f) listener (user event %d) in a group which is not an NPC group.", threshold, eventId);
@@ -1154,13 +1179,13 @@ Arguments: f(threshold),f(user_event_n) ->
 
 */
 // CGroupNpc
-void delHpDownTrigger_ff_(CStateInstance* entity, CScriptStack& stack)
+void delHpDownTrigger_ff_(CStateInstance *entity, CScriptStack &stack)
 {
 	int eventId = (int)(float)stack.top();
 	stack.pop();
 	float threshold = (float)stack.top();
 	stack.pop();
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to delete a hp down trigger (%f) listener (user event %d) in a group which is not an NPC group.", threshold, eventId);
@@ -1187,13 +1212,13 @@ Arguments: f(threshold),s(callback) ->
 
 */
 // CGroupNpc
-void addHpUpTrigger_fs_(CStateInstance* entity, CScriptStack& stack)
+void addHpUpTrigger_fs_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string cbFunc = (std::string)stack.top();
 	stack.pop();
 	float threshold = (float)stack.top();
 	stack.pop();
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to add a hp up trigger (%f) listener (%s) in a group which is not an NPC group.", threshold, cbFunc.c_str());
@@ -1220,13 +1245,13 @@ Arguments: f(threshold),s(callback) ->
 
 */
 // CGroupNpc
-void delHpUpTrigger_fs_(CStateInstance* entity, CScriptStack& stack)
+void delHpUpTrigger_fs_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string cbFunc = (std::string)stack.top();
 	stack.pop();
 	float threshold = (float)stack.top();
 	stack.pop();
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to delete a hp up trigger (%f) listener (%s) in a group which is not an NPC group.", threshold, cbFunc.c_str());
@@ -1253,13 +1278,13 @@ Arguments: f(threshold),s(callback) ->
 
 */
 // CGroupNpc
-void addHpDownTrigger_fs_(CStateInstance* entity, CScriptStack& stack)
+void addHpDownTrigger_fs_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string cbFunc = (std::string)stack.top();
 	stack.pop();
 	float threshold = (float)stack.top();
 	stack.pop();
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to add a hp down trigger (%f) listener (%s) in a group which is not an NPC group.", threshold, cbFunc.c_str());
@@ -1286,13 +1311,13 @@ Arguments: f(threshold),s(callback) ->
 
 */
 // CGroupNpc
-void delHpDownTrigger_fs_(CStateInstance* entity, CScriptStack& stack)
+void delHpDownTrigger_fs_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string cbFunc = (std::string)stack.top();
 	stack.pop();
 	float threshold = (float)stack.top();
 	stack.pop();
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to delete a hp down trigger (%f) listener (%s) in a group which is not an NPC group.", threshold, cbFunc.c_str());
@@ -1324,7 +1349,7 @@ Arguments: s(name),s(prop),f(event) ->
 
 */
 // CGroupNpc
-void addNamedEntityListener_ssf_(CStateInstance* entity, CScriptStack& stack)
+void addNamedEntityListener_ssf_(CStateInstance *entity, CScriptStack &stack)
 {
 	int event = (int)(float)stack.top();
 	stack.pop();
@@ -1332,8 +1357,8 @@ void addNamedEntityListener_ssf_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to create a named entity (%s:%s) listener (user event %d) in a group which is not an NPC group.", name.c_str(), prop.c_str(), event);
@@ -1360,7 +1385,7 @@ Arguments: s(name),s(prop),f(event) ->
 
 */
 // CGroupNpc
-void delNamedEntityListener_ssf_(CStateInstance* entity, CScriptStack& stack)
+void delNamedEntityListener_ssf_(CStateInstance *entity, CScriptStack &stack)
 {
 	int event = (int)(float)stack.top();
 	stack.pop();
@@ -1368,8 +1393,8 @@ void delNamedEntityListener_ssf_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to delete a named entity (%s:%s) listener (user event %d) in a group which is not an NPC group.", name.c_str(), prop.c_str(), event);
@@ -1397,7 +1422,7 @@ Arguments: s(name),s(prop),s(cbFunc) ->
 
 */
 // CGroupNpc
-void addNamedEntityListener_sss_(CStateInstance* entity, CScriptStack& stack)
+void addNamedEntityListener_sss_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string cbFunc = (std::string)stack.top();
 	stack.pop();
@@ -1405,8 +1430,8 @@ void addNamedEntityListener_sss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to create a named entity (%s:%s) listener (%s) in a group which is not an NPC group.", name.c_str(), prop.c_str(), cbFunc.c_str());
@@ -1434,7 +1459,7 @@ Arguments: s(name),s(prop),s(cbFunc) ->
 
 */
 // CGroupNpc
-void delNamedEntityListener_sss_(CStateInstance* entity, CScriptStack& stack)
+void delNamedEntityListener_sss_(CStateInstance *entity, CScriptStack &stack)
 {
 	std::string cbFunc = (std::string)stack.top();
 	stack.pop();
@@ -1442,8 +1467,8 @@ void delNamedEntityListener_sss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	std::string name = (std::string)stack.top();
 	stack.pop();
-	
-	CGroupNpc* const grpNpc = dynamic_cast<CGroupNpc*>(entity->getGroup());
+
+	CGroupNpc *const grpNpc = dynamic_cast<CGroupNpc *>(entity->getGroup());
 	if (!grpNpc)
 	{
 		nlwarning("Trying to delete a named entity (%s:%s) listener (%s) in a group which is not an NPC group.", name.c_str(), prop.c_str(), cbFunc.c_str());
@@ -1469,7 +1494,7 @@ Arguments: s(botId),s(playerId) ->
 
 */
 // CSpawnBotNpc
-void setPlayerController_ss_(CStateInstance* entity, CScriptStack& stack)
+void setPlayerController_ss_(CStateInstance *entity, CScriptStack &stack)
 {
 	NLMISC::CEntityId playerId = NLMISC::CEntityId((std::string)stack.top());
 	stack.pop();
@@ -1477,21 +1502,21 @@ void setPlayerController_ss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	if (botId != NLMISC::CEntityId::Unknown)
 	{
-		CGroup* grp = NULL;
-		CSpawnBotNpc* bot = NULL;
+		CGroup *grp = NULL;
+		CSpawnBotNpc *bot = NULL;
 		CAIEntityPhysicalLocator *inst = CAIEntityPhysicalLocator::getInstance();
 		if (inst)
 		{
 			CAIEntityPhysical *botEntity = inst->getEntity(botId);
 			if (botEntity)
 			{
-				if ((bot = dynamic_cast<CSpawnBotNpc*>(botEntity)) && (&bot->getPersistent().getGroup())==entity->getGroup())
+				if ((bot = dynamic_cast<CSpawnBotNpc *>(botEntity)) && (&bot->getPersistent().getGroup()) == entity->getGroup())
 				{
 					if (playerId != NLMISC::CEntityId::Unknown)
 					{
 						CAIEntityPhysical *playerEntity = inst->getEntity(playerId);
-						CBotPlayer* player = NULL;
-						if (playerEntity && (player = dynamic_cast<CBotPlayer*>(playerEntity)))
+						CBotPlayer *player = NULL;
+						if (playerEntity && (player = dynamic_cast<CBotPlayer *>(playerEntity)))
 							bot->setPlayerController(player);
 					}
 					else
@@ -1522,16 +1547,16 @@ Arguments: s(botId) ->
 
 */
 // CSpawnBotNpc
-void clearPlayerController_s_(CStateInstance* entity, CScriptStack& stack)
+void clearPlayerController_s_(CStateInstance *entity, CScriptStack &stack)
 {
 	NLMISC::CEntityId botId = NLMISC::CEntityId((std::string)stack.top());
 	stack.pop();
-	if (botId!=NLMISC::CEntityId::Unknown)
+	if (botId != NLMISC::CEntityId::Unknown)
 	{
-		CGroup* grp = NULL;
-		CSpawnBotNpc* bot = NULL;
-		if ((bot = dynamic_cast<CSpawnBotNpc*>(CAIEntityPhysicalLocator::getInstance()->getEntity(botId)))
-			&& (&bot->getPersistent().getGroup())==entity->getGroup())
+		CGroup *grp = NULL;
+		CSpawnBotNpc *bot = NULL;
+		if ((bot = dynamic_cast<CSpawnBotNpc *>(CAIEntityPhysicalLocator::getInstance()->getEntity(botId)))
+		    && (&bot->getPersistent().getGroup()) == entity->getGroup())
 		{
 			bot->setPlayerController(NULL);
 		}
@@ -1553,20 +1578,31 @@ Arguments: f(easterEggId), f(scenarioId),  f(actId), s(items), f(x), f(y), f(z),
 @endcode
 
 */
-void activateEasterEgg_fffsffffsss_(CStateInstance* si, CScriptStack& stack)
+void activateEasterEgg_fffsffffsss_(CStateInstance *si, CScriptStack &stack)
 {
-	std::string clientSheet = (std::string)stack.top(); stack.pop();
-	std::string name = (std::string)stack.top(); stack.pop();
-	std::string grpCtrl = (std::string)stack.top(); stack.pop();
-	float heading = (float)stack.top(); stack.pop();
-	float z = (float)stack.top(); stack.pop();
-	float y = (float)stack.top(); stack.pop();
-	float x = (float)stack.top(); stack.pop();
-	
-	string items = (string)stack.top(); stack.pop();
-	uint32 actId = static_cast<uint32>( (float)stack.top()); stack.pop();
-	TSessionId scenarioId( static_cast<uint32>( (float)stack.top())); stack.pop();
-	uint32 easterEgg = static_cast<uint32>( (float)stack.top()); stack.pop();
+	std::string clientSheet = (std::string)stack.top();
+	stack.pop();
+	std::string name = (std::string)stack.top();
+	stack.pop();
+	std::string grpCtrl = (std::string)stack.top();
+	stack.pop();
+	float heading = (float)stack.top();
+	stack.pop();
+	float z = (float)stack.top();
+	stack.pop();
+	float y = (float)stack.top();
+	stack.pop();
+	float x = (float)stack.top();
+	stack.pop();
+
+	string items = (string)stack.top();
+	stack.pop();
+	uint32 actId = static_cast<uint32>((float)stack.top());
+	stack.pop();
+	TSessionId scenarioId(static_cast<uint32>((float)stack.top()));
+	stack.pop();
+	uint32 easterEgg = static_cast<uint32>((float)stack.top());
+	stack.pop();
 
 	IAisControl::getInstance()->activateEasterEgg(easterEgg, scenarioId, actId, items, x, y, z, heading, grpCtrl, name, clientSheet);
 }
@@ -1585,11 +1621,14 @@ Arguments: f(easterEggId), f(scenarioId), f(actId) ->
 @endcode
 
 */
-void deactivateEasterEgg_fff_(CStateInstance* si, CScriptStack& stack)
+void deactivateEasterEgg_fff_(CStateInstance *si, CScriptStack &stack)
 {
-	uint32 actId = static_cast<uint32>( (float)stack.top()); stack.pop();
-	TSessionId scenarioId( static_cast<uint32>( (float)stack.top())); stack.pop();
-	uint32 easterEgg = static_cast<uint32>( (float)stack.top()); stack.pop();
+	uint32 actId = static_cast<uint32>((float)stack.top());
+	stack.pop();
+	TSessionId scenarioId(static_cast<uint32>((float)stack.top()));
+	stack.pop();
+	uint32 easterEgg = static_cast<uint32>((float)stack.top());
+	stack.pop();
 
 	IAisControl::getInstance()->deactivateEasterEgg(easterEgg, scenarioId, actId);
 }
@@ -1624,9 +1663,9 @@ Arguments: s(missionItems), s(missionText), c(groupToNotify) ->
 
 */
 // CSpawnBotNpc
-void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
+void receiveMissionItems_ssc_(CStateInstance *entity, CScriptStack &stack)
 {
-	CGroupNpc* const groupToNotify = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() );
+	CGroupNpc *const groupToNotify = dynamic_cast<CGroupNpc *>((IScriptContext *)stack.top());
 	stack.pop();
 	string missionText = (string)stack.top();
 	stack.pop();
@@ -1648,9 +1687,9 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	nlassert(entity != NULL);
-	CGroup* const group = entity->getGroup();
-	IManagerParent* const managerParent = group->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	CGroup *const group = entity->getGroup();
+	IManagerParent *const managerParent = group->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (aiInstance == NULL)
 	{
 		nlwarning("receiveMissionItems failed: the AI instance of the entity is NULL");
@@ -1658,11 +1697,11 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 		return;
 	}
 
-	CBotPlayer* const talkingPlayer = TempPlayer;
-	CSpawnBotNpc* const talkingNpc = dynamic_cast<CSpawnBotNpc*>(TempSpeaker);
-	if	(	talkingPlayer == NULL
-		||	talkingNpc == NULL
-		||	talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group
+	CBotPlayer *const talkingPlayer = TempPlayer;
+	CSpawnBotNpc *const talkingNpc = dynamic_cast<CSpawnBotNpc *>(TempSpeaker);
+	if (talkingPlayer == NULL
+	    || talkingNpc == NULL
+	    || talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group
 	{
 		nlwarning("receiveMissionItems failed: invalid interlocutors");
 		DEBUG_STOP;
@@ -1760,9 +1799,9 @@ Arguments: s(missionItems), s(missionText), c(groupToNotify) ->
 
 */
 // CSpawnBotNpc
-void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
+void giveMissionItems_ssc_(CStateInstance *entity, CScriptStack &stack)
 {
-	CGroupNpc* const groupToNotify = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() );
+	CGroupNpc *const groupToNotify = dynamic_cast<CGroupNpc *>((IScriptContext *)stack.top());
 	stack.pop();
 	string missionText = (string)stack.top();
 	stack.pop();
@@ -1784,9 +1823,9 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	nlassert(entity != NULL);
-	CGroup* const group = entity->getGroup();
-	IManagerParent* const managerParent = group->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	CGroup *const group = entity->getGroup();
+	IManagerParent *const managerParent = group->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (aiInstance == NULL)
 	{
 		nlwarning("giveMissionItems failed: the AI instance of the entity is NULL");
@@ -1794,11 +1833,11 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 		return;
 	}
 
-	CBotPlayer* const talkingPlayer = TempPlayer;
-	CSpawnBotNpc* const talkingNpc = dynamic_cast<CSpawnBotNpc*>(TempSpeaker);
-	if	(	talkingPlayer == NULL
-		||	talkingNpc == NULL
-		||	talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group
+	CBotPlayer *const talkingPlayer = TempPlayer;
+	CSpawnBotNpc *const talkingNpc = dynamic_cast<CSpawnBotNpc *>(TempSpeaker);
+	if (talkingPlayer == NULL
+	    || talkingNpc == NULL
+	    || talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group
 	{
 		nlwarning("giveMissionItems failed: invalid interlocutors");
 		DEBUG_STOP;
@@ -1892,9 +1931,9 @@ Arguments: s(missionText), c(groupToNotify) ->
 
 */
 // CSpawnBotNpc
-void talkTo_sc_(CStateInstance* entity, CScriptStack& stack)
+void talkTo_sc_(CStateInstance *entity, CScriptStack &stack)
 {
-	CGroupNpc* const groupToNotify = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() );
+	CGroupNpc *const groupToNotify = dynamic_cast<CGroupNpc *>((IScriptContext *)stack.top());
 	stack.pop();
 	string missionText = (string)stack.top();
 	stack.pop();
@@ -1907,9 +1946,9 @@ void talkTo_sc_(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	nlassert(entity != NULL);
-	CGroup* const group = entity->getGroup();
-	IManagerParent* const managerParent = group->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	CGroup *const group = entity->getGroup();
+	IManagerParent *const managerParent = group->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (aiInstance == NULL)
 	{
 		nlwarning("talkTo failed: the AI instance of the entity is NULL");
@@ -1917,11 +1956,11 @@ void talkTo_sc_(CStateInstance* entity, CScriptStack& stack)
 		return;
 	}
 
-	CBotPlayer* const talkingPlayer = TempPlayer;
-	CSpawnBotNpc* const talkingNpc = dynamic_cast<CSpawnBotNpc*>(TempSpeaker);
-	if	(	talkingPlayer == NULL
-		||	talkingNpc == NULL
-		||	talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group
+	CBotPlayer *const talkingPlayer = TempPlayer;
+	CSpawnBotNpc *const talkingNpc = dynamic_cast<CSpawnBotNpc *>(TempSpeaker);
+	if (talkingPlayer == NULL
+	    || talkingNpc == NULL
+	    || talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group
 	{
 		nlwarning("talkTo failed: invalid interlocutors");
 		DEBUG_STOP;
@@ -1951,26 +1990,24 @@ void talkTo_sc_(CStateInstance* entity, CScriptStack& stack)
 	msg.send("EGS");
 }
 
-
-//give_reward
-void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
+// give_reward
+void giveReward_ssssc_(CStateInstance *entity, CScriptStack &stack)
 {
-	CGroupNpc* const groupToNotify = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() );
+	CGroupNpc *const groupToNotify = dynamic_cast<CGroupNpc *>((IScriptContext *)stack.top());
 	stack.pop();
-	
+
 	string notEnoughPointsText = (string)stack.top();
 	stack.pop();
-	
+
 	string inventoryFullText = (string)stack.top();
 	stack.pop();
-	
+
 	string rareRewardText = (string)stack.top();
 	stack.pop();
-	
+
 	string rewardText = (string)stack.top();
 	stack.pop();
-	
-	
+
 	if (groupToNotify == NULL)
 	{
 		nlwarning("giveReward failed: groupToNotify is NULL");
@@ -1979,9 +2016,9 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	nlassert(entity != NULL);
-	CGroup* const group = entity->getGroup();
-	IManagerParent* const managerParent = group->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	CGroup *const group = entity->getGroup();
+	IManagerParent *const managerParent = group->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (aiInstance == NULL)
 	{
 		nlwarning("giveReward failed: the AI instance of the entity is NULL");
@@ -2000,25 +2037,25 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	// retrieve the CBotPlayer
-	CAIEntityPhysical	*charEntity=CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(charEid));
-	if	(!charEntity)
+	CAIEntityPhysical *charEntity = CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(charEid));
+	if (!charEntity)
 		return;
-	CBotPlayer	*talkingPlayer=NLMISC::safe_cast<CBotPlayer*>(charEntity);
-	if	(!talkingPlayer)
+	CBotPlayer *talkingPlayer = NLMISC::safe_cast<CBotPlayer *>(charEntity);
+	if (!talkingPlayer)
 		return;
 
 	// retrieve the CSpawnBotNpcBotPlayer
-	CAIEntityPhysical	*npcEntity=CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(npcEid));
-	if	(!npcEntity)
+	CAIEntityPhysical *npcEntity = CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(npcEid));
+	if (!npcEntity)
 		return;
-	CSpawnBotNpc	*talkingNpc=NLMISC::safe_cast<CSpawnBotNpc*>(npcEntity);
-	if	(!talkingNpc)
+	CSpawnBotNpc *talkingNpc = NLMISC::safe_cast<CSpawnBotNpc *>(npcEntity);
+	if (!talkingNpc)
 		return;
 
-//	CBotPlayer* const talkingPlayer = TempPlayer;
-//	CSpawnBotNpc* const talkingNpc = dynamic_cast<CSpawnBotNpc*>(TempSpeaker);
-	if	(	talkingPlayer == NULL
-		||	talkingNpc == NULL)
+	//	CBotPlayer* const talkingPlayer = TempPlayer;
+	//	CSpawnBotNpc* const talkingNpc = dynamic_cast<CSpawnBotNpc*>(TempSpeaker);
+	if (talkingPlayer == NULL
+	    || talkingNpc == NULL)
 	{
 		nlwarning("giveReward failed: invalid interlocutors");
 		DEBUG_STOP;
@@ -2033,30 +2070,27 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 
 	// turn the npc to face the player
 	talkingNpc->setTheta(talkingNpc->pos().angleTo(talkingPlayer->pos()));
-	
-	TDataSetRow	CharacterRowId = talkingPlayer->dataSetRow();
-	TDataSetRow	CreatureRowId = talkingNpc->dataSetRow();
-	
-	IAisControl::getInstance()->giveRewardMessage(CharacterRowId, CreatureRowId, 
-		rewardText, rareRewardText, inventoryFullText, notEnoughPointsText);
-	
-	
+
+	TDataSetRow CharacterRowId = talkingPlayer->dataSetRow();
+	TDataSetRow CreatureRowId = talkingNpc->dataSetRow();
+
+	IAisControl::getInstance()->giveRewardMessage(CharacterRowId, CreatureRowId,
+	    rewardText, rareRewardText, inventoryFullText, notEnoughPointsText);
 }
 
-
-
-
-//give_reward
-void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
+// give_reward
+void teleportNear_fffc_(CStateInstance *entity, CScriptStack &stack)
 {
-	CGroupNpc* const groupToNotify = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() );
+	CGroupNpc *const groupToNotify = dynamic_cast<CGroupNpc *>((IScriptContext *)stack.top());
 	stack.pop();
-	
-	float z = (float)stack.top(); stack.pop();
-	float y = (float)stack.top(); stack.pop();
-	float x = (float)stack.top(); stack.pop();
-	
-	
+
+	float z = (float)stack.top();
+	stack.pop();
+	float y = (float)stack.top();
+	stack.pop();
+	float x = (float)stack.top();
+	stack.pop();
+
 	if (groupToNotify == NULL)
 	{
 		nlwarning("teleportNear failed: groupToNotify is NULL");
@@ -2065,9 +2099,9 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	nlassert(entity != NULL);
-	CGroup* const group = entity->getGroup();
-	IManagerParent* const managerParent = group->getOwner()->getOwner();
-	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	CGroup *const group = entity->getGroup();
+	IManagerParent *const managerParent = group->getOwner()->getOwner();
+	CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 	if (aiInstance == NULL)
 	{
 		nlwarning("giveReward failed: the AI instance of the entity is NULL");
@@ -2086,25 +2120,25 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	// retrieve the CBotPlayer
-	CAIEntityPhysical	*charEntity=CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(charEid));
-	if	(!charEntity)
+	CAIEntityPhysical *charEntity = CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(charEid));
+	if (!charEntity)
 		return;
-	CBotPlayer	*talkingPlayer=NLMISC::safe_cast<CBotPlayer*>(charEntity);
-	if	(!talkingPlayer)
+	CBotPlayer *talkingPlayer = NLMISC::safe_cast<CBotPlayer *>(charEntity);
+	if (!talkingPlayer)
 		return;
 
 	// retrieve the CSpawnBotNpcBotPlayer
-	CAIEntityPhysical	*npcEntity=CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(npcEid));
-	if	(!npcEntity)
+	CAIEntityPhysical *npcEntity = CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(npcEid));
+	if (!npcEntity)
 		return;
-	CSpawnBotNpc	*talkingNpc=NLMISC::safe_cast<CSpawnBotNpc*>(npcEntity);
-	if	(!talkingNpc)
+	CSpawnBotNpc *talkingNpc = NLMISC::safe_cast<CSpawnBotNpc *>(npcEntity);
+	if (!talkingNpc)
 		return;
 
-//	CBotPlayer* const talkingPlayer = TempPlayer;
-//	CSpawnBotNpc* const talkingNpc = dynamic_cast<CSpawnBotNpc*>(TempSpeaker);
-	if	(	talkingPlayer == NULL
-		||	talkingNpc == NULL)
+	//	CBotPlayer* const talkingPlayer = TempPlayer;
+	//	CSpawnBotNpc* const talkingNpc = dynamic_cast<CSpawnBotNpc*>(TempSpeaker);
+	if (talkingPlayer == NULL
+	    || talkingNpc == NULL)
 	{
 		nlwarning("giveReward failed: invalid interlocutors");
 		DEBUG_STOP;
@@ -2118,56 +2152,51 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	// turn the npc to face the player
-///	talkingNpc->setTheta(talkingNpc->pos().angleTo(talkingPlayer->pos()));
-	
-	TDataSetRow	CharacterRowId = talkingPlayer->dataSetRow();
-	TDataSetRow	CreatureRowId = talkingNpc->dataSetRow();
+	///	talkingNpc->setTheta(talkingNpc->pos().angleTo(talkingPlayer->pos()));
+
+	TDataSetRow CharacterRowId = talkingPlayer->dataSetRow();
+	TDataSetRow CreatureRowId = talkingNpc->dataSetRow();
 
 	NLMISC::CEntityId player = CMirrors::getEntityId(CharacterRowId);
 	if (player != NLMISC::CEntityId::Unknown)
-	{		
+	{
 		IAisControl::getInstance()->teleportNearMessage(player, x, y, z);
 	}
-
-	
 }
 
-
-
-
 // Return an "alive" bot from a group by the bot name
-static CSpawnBot* getSpawnBotFromGroupByName(CGroupNpc* const group, const std::string& botname)
+static CSpawnBot *getSpawnBotFromGroupByName(CGroupNpc *const group, const std::string &botname)
 {
 	// Group exist
 	if (!group) { return 0; }
 
 	// Group is in a valid AIInstance
-	{		
-		if (!group->getOwner())  { return 0;	}
-		IManagerParent* const managerParent = group->getOwner()->getOwner();
-		CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	{
+		if (!group->getOwner()) { return 0; }
+		IManagerParent *const managerParent = group->getOwner()->getOwner();
+		CAIInstance *const aiInstance = dynamic_cast<CAIInstance *>(managerParent);
 		if (!aiInstance) { return 0; }
 	}
 
 	// Bot is spawn and alive
 	{
-		
-		CSpawnBot* spawnBot=0;
-		CAliasCont<CBot> const& bots = group->bots();
-		CCont<CBot> & cc_bots = group->bots();
-		CBot* child;
+
+		CSpawnBot *spawnBot = 0;
+		CAliasCont<CBot> const &bots = group->bots();
+		CCont<CBot> &cc_bots = group->bots();
+		CBot *child;
 		if (botname == "")
 			child = bots.getFirstChild();
 		else
 			child = bots.getChildByName(botname);
-		if (!child)	{  return 0; }			
-		
+		if (!child) { return 0; }
+
 		spawnBot = child->getSpawnObj();
-		if (!spawnBot || !spawnBot->isAlive())	{ return 0; }
-		return spawnBot;		
+		if (!spawnBot || !spawnBot->isAlive()) { return 0; }
+		return spawnBot;
 	}
 
-	nlassert(0); //this path is never used
+	nlassert(0); // this path is never used
 	return 0;
 }
 
@@ -2195,21 +2224,23 @@ Arguments: c(group1), s(botname1), c(group2), s(botname2),  ->
 */
 // CSpawnBotNpc
 
-
-
-void facing_cscs_(CStateInstance* entity, CScriptStack& stack)
+void facing_cscs_(CStateInstance *entity, CScriptStack &stack)
 {
-	string botname2 = (string)stack.top(); stack.pop();	
-	CGroupNpc* const group2 = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();	
-	string botname1 = (string)stack.top(); stack.pop();	
-	CGroupNpc* const group1 = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();
-		
-	CSpawnBot* bot1 = getSpawnBotFromGroupByName(group1, botname1);
-	CSpawnBot* bot2 = getSpawnBotFromGroupByName(group2, botname2);
+	string botname2 = (string)stack.top();
+	stack.pop();
+	CGroupNpc *const group2 = dynamic_cast<CGroupNpc *>((IScriptContext *)stack.top());
+	stack.pop();
+	string botname1 = (string)stack.top();
+	stack.pop();
+	CGroupNpc *const group1 = dynamic_cast<CGroupNpc *>((IScriptContext *)stack.top());
+	stack.pop();
+
+	CSpawnBot *bot1 = getSpawnBotFromGroupByName(group1, botname1);
+	CSpawnBot *bot2 = getSpawnBotFromGroupByName(group2, botname2);
 
 	if (!bot1 || !bot2) { return; }
 
-	CSpawnBotNpc* bot = dynamic_cast<CSpawnBotNpc*>(bot1);
+	CSpawnBotNpc *bot = dynamic_cast<CSpawnBotNpc *>(bot1);
 	if (!bot) { return; }
 	// Same than setTheta but initial theta is restored few secondes later
 	bot->setFacing(bot1->pos().angleTo(bot2->pos()));
@@ -2253,36 +2284,39 @@ void execSayHelper(CSpawnBot *spawnBot, NLMISC::CSString text, CChatGroup::TGrou
 	if (spawnBot)
 	{
 		NLMISC::CSString prefix = text.left(4);
-		if (prefix=="DSS_")
+		if (prefix == "DSS_")
 		{
-			
+
 			NLMISC::CSString phrase = text.right(text.length() - 4);
-			NLMISC::CSString idStr = phrase.strtok(" ",false,false,false,false);
+			NLMISC::CSString idStr = phrase.strtok(" ", false, false, false, false);
 			uint32 scenarioId = atoi(idStr.c_str());
 			forwardToDss(spawnBot->dataSetRow(), mode, phrase, scenarioId);
 			return;
 		}
-		
-		if (prefix=="RAW ")
+
+		if (prefix == "RAW ")
 		{
-			std::string phrase = text.right(text.length()-4);
+			std::string phrase = text.right(text.length() - 4);
 			ucstring ucstr = phrase;
 			npcChatToChannelSentence(spawnBot->dataSetRow(), mode, ucstr);
 			return;
 		}
 
-		//Classic phrase ID
+		// Classic phrase ID
 		npcChatToChannel(spawnBot->dataSetRow(), mode, text);
 	}
 }
 
-void npcSay_css_(CStateInstance* entity, CScriptStack& stack)
+void npcSay_css_(CStateInstance *entity, CScriptStack &stack)
 {
-	string text = (string)stack.top(); stack.pop();	
-	string botname = (string)stack.top(); stack.pop();	
-	CGroupNpc* const group = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();	
-		
-	CSpawnBot* spawnBot = getSpawnBotFromGroupByName(group, botname);
+	string text = (string)stack.top();
+	stack.pop();
+	string botname = (string)stack.top();
+	stack.pop();
+	CGroupNpc *const group = dynamic_cast<CGroupNpc *>((IScriptContext *)stack.top());
+	stack.pop();
+
+	CSpawnBot *spawnBot = getSpawnBotFromGroupByName(group, botname);
 
 	if (!spawnBot) { return; }
 
@@ -2307,31 +2341,35 @@ Arguments: s(text), s(mode) ->
 
 */
 
-void npcSay_ss_(CStateInstance* entity, CScriptStack& stack)
+void npcSay_ss_(CStateInstance *entity, CScriptStack &stack)
 {
-	std::string sMode = (std::string)stack.top(); stack.pop();
-	std::string text = (std::string)stack.top(); stack.pop();
+	std::string sMode = (std::string)stack.top();
+	stack.pop();
+	std::string text = (std::string)stack.top();
+	stack.pop();
 
 	CChatGroup::TGroupType mode = CChatGroup::say;
 	mode = CChatGroup::stringToGroupType(sMode);
-	CGroup* group = entity->getGroup();
+	CGroup *group = entity->getGroup();
 
 	if (group->isSpawned())
 	{
 		FOREACH(itBot, CCont<CBot>, group->bots())
 		{
-			CBot* bot = *itBot;
+			CBot *bot = *itBot;
 			if (bot)
 			{
 				if (bot->isSpawned())
 				{
 					CSpawnBot *spawnBot = bot->getSpawnObj();
 					std::string prefix = NLMISC::CSString(text).left(3);
-					if (NLMISC::nlstricmp(prefix.c_str(), "id:") == 0) {
-						text = NLMISC::CSString(text).right(text.length()-3);
+					if (NLMISC::nlstricmp(prefix.c_str(), "id:") == 0)
+					{
+						text = NLMISC::CSString(text).right(text.length() - 3);
 						execSayHelper(spawnBot, text, mode);
 					}
-					else {
+					else
+					{
 						execSayHelper(spawnBot, "RAW " + text, mode);
 					}
 				}
@@ -2339,8 +2377,6 @@ void npcSay_ss_(CStateInstance* entity, CScriptStack& stack)
 		}
 	}
 }
-
-
 
 //----------------------------------------------------------------------------
 /** @page code
@@ -2357,17 +2393,20 @@ Arguments: f(easterEggId), f(scenarioId), f(actId) ->
 
 */
 
-void dssMessage_fsss_(CStateInstance* entity, CScriptStack& stack)
+void dssMessage_fsss_(CStateInstance *entity, CScriptStack &stack)
 {
-	string msg = (string)stack.top(); stack.pop();	
-	string who = (string)stack.top(); stack.pop();	
-	string mode = (string)stack.top(); stack.pop();	
-	float instance = (float)stack.top(); stack.pop();	
-	
+	string msg = (string)stack.top();
+	stack.pop();
+	string who = (string)stack.top();
+	stack.pop();
+	string mode = (string)stack.top();
+	stack.pop();
+	float instance = (float)stack.top();
+	stack.pop();
+
 	IAisControl::getInstance()->dssMessage(TSessionId(uint32(instance)), mode, who, msg);
 	return;
 }
-
 
 //----------------------------------------------------------------------------
 /** @page code
@@ -2384,11 +2423,13 @@ Arguments: f(scenarioInstance), f(scenarioPoints) ->
 
 */
 
-void setScenarioPoints_ff_(CStateInstance* entity, CScriptStack& stack)
+void setScenarioPoints_ff_(CStateInstance *entity, CScriptStack &stack)
 {
-	float scenarioPoints = (float)stack.top(); stack.pop();	
-	float instance = (float)stack.top(); stack.pop();	
-	
+	float scenarioPoints = (float)stack.top();
+	stack.pop();
+	float instance = (float)stack.top();
+	stack.pop();
+
 	IAisControl::getInstance()->setScenarioPoints(TSessionId(uint32(instance)), scenarioPoints);
 	return;
 }
@@ -2408,10 +2449,11 @@ Arguments: f(scenarioInstance),
 
 */
 
-void startScenarioTiming_f_(CStateInstance* entity, CScriptStack& stack)
-{	
-	float instance = (float)stack.top(); stack.pop();	
-	
+void startScenarioTiming_f_(CStateInstance *entity, CScriptStack &stack)
+{
+	float instance = (float)stack.top();
+	stack.pop();
+
 	IAisControl::getInstance()->startScenarioTiming(TSessionId(uint32(instance)));
 	return;
 }
@@ -2431,10 +2473,11 @@ Arguments: f(scenarioInstance),
 
 */
 
-void endScenarioTiming_f_(CStateInstance* entity, CScriptStack& stack)
-{	
-	float instance = (float)stack.top(); stack.pop();	
-	
+void endScenarioTiming_f_(CStateInstance *entity, CScriptStack &stack)
+{
+	float instance = (float)stack.top();
+	stack.pop();
+
 	IAisControl::getInstance()->endScenarioTiming(TSessionId(uint32(instance)));
 	return;
 }
@@ -2461,23 +2504,25 @@ Arguments: c(group1), s(botname1), c(group2), s(botname2),  ->
 */
 // CSpawnBotNpc
 
-
 /****************************************************************************/
 
-void emote_css_(CStateInstance* entity, CScriptStack& stack)
+void emote_css_(CStateInstance *entity, CScriptStack &stack)
 {
-	string emoteName = (string)stack.top(); stack.pop();	
-	string botname = (string)stack.top(); stack.pop();	
-	CGroupNpc* const group = dynamic_cast<CGroupNpc*>( (IScriptContext*)stack.top() ); stack.pop();	
-		
-	CSpawnBot* spawnBot = getSpawnBotFromGroupByName(group, botname);
+	string emoteName = (string)stack.top();
+	stack.pop();
+	string botname = (string)stack.top();
+	stack.pop();
+	CGroupNpc *const group = dynamic_cast<CGroupNpc *>((IScriptContext *)stack.top());
+	stack.pop();
+
+	CSpawnBot *spawnBot = getSpawnBotFromGroupByName(group, botname);
 
 	if (!spawnBot) { return; }
 
-	//CBot& bot = spawnBot->getPersistent();
-	
+	// CBot& bot = spawnBot->getPersistent();
+
 	// The entity Id must be valid (we know that the bot is alive so its entity Id must be ok)
-	NLMISC::CEntityId	entityId=spawnBot->getEntityId();
+	NLMISC::CEntityId entityId = spawnBot->getEntityId();
 	if (entityId == NLMISC::CEntityId::Unknown)
 	{
 		return;
@@ -2492,7 +2537,7 @@ void emote_css_(CStateInstance* entity, CScriptStack& stack)
 
 	// Get the behaviour Id
 	MBEHAV::EBehaviour behaviourId = (MBEHAV::EBehaviour)(emoteId + MBEHAV::EMOTE_BEGIN);
-	
+
 	// Change the behaviour
 	NLNET::CMessage msgout("SET_BEHAVIOUR");
 	msgout.serial(entityId);
@@ -2500,13 +2545,13 @@ void emote_css_(CStateInstance* entity, CScriptStack& stack)
 	bh.Data = (uint16)(CTimeInterface::gameCycle());
 	msgout.serial(bh);
 
-	NLNET::CUnifiedNetwork::getInstance()->send( "EGS", msgout );
+	NLNET::CUnifiedNetwork::getInstance()->send("EGS", msgout);
 }
 
-
-void emote_ss_(CStateInstance* entity, CScriptStack& stack)
+void emote_ss_(CStateInstance *entity, CScriptStack &stack)
 {
-	string emoteName = (string)stack.top(); stack.pop();	
+	string emoteName = (string)stack.top();
+	stack.pop();
 	NLMISC::CEntityId botId = NLMISC::CEntityId((std::string)stack.top());
 
 	if (botId == NLMISC::CEntityId::Unknown)
@@ -2523,7 +2568,7 @@ void emote_ss_(CStateInstance* entity, CScriptStack& stack)
 
 	// Get the behaviour Id
 	MBEHAV::EBehaviour behaviourId = (MBEHAV::EBehaviour)(emoteId + MBEHAV::EMOTE_BEGIN);
-	
+
 	// Change the behaviour
 	NLNET::CMessage msgout("SET_BEHAVIOUR");
 	msgout.serial(botId);
@@ -2531,14 +2576,13 @@ void emote_ss_(CStateInstance* entity, CScriptStack& stack)
 	bh.Data = (uint16)(CTimeInterface::gameCycle());
 	msgout.serial(bh);
 
-	NLNET::CUnifiedNetwork::getInstance()->send( "EGS", msgout );
+	NLNET::CUnifiedNetwork::getInstance()->send("EGS", msgout);
 }
 
-
-
-void emote_s_(CStateInstance* entity, CScriptStack& stack)
+void emote_s_(CStateInstance *entity, CScriptStack &stack)
 {
-	string emoteName = (string)stack.top(); stack.pop();
+	string emoteName = (string)stack.top();
+	stack.pop();
 
 	// Is the emote valid
 	uint32 emoteId = CAIS::instance().getEmotNumber(emoteName);
@@ -2547,15 +2591,14 @@ void emote_s_(CStateInstance* entity, CScriptStack& stack)
 
 	// Get the behaviour Id
 	MBEHAV::EBehaviour behaviourId = (MBEHAV::EBehaviour)(emoteId + MBEHAV::EMOTE_BEGIN);
-	
 
-	CGroup* group = entity->getGroup();
-	
+	CGroup *group = entity->getGroup();
+
 	if (group->isSpawned())
 	{
 		FOREACH(itBot, CCont<CBot>, group->bots())
 		{
-			CBot* bot = *itBot;
+			CBot *bot = *itBot;
 			if (bot)
 			{
 				// Change the behaviour
@@ -2564,44 +2607,44 @@ void emote_s_(CStateInstance* entity, CScriptStack& stack)
 					CSpawnBot *spawnBot = bot->getSpawnObj();
 					if (spawnBot)
 					{
-						CEntityId	botId = spawnBot->getEntityId();
+						CEntityId botId = spawnBot->getEntityId();
 						NLNET::CMessage msgout("SET_BEHAVIOUR");
 						msgout.serial(botId);
 						MBEHAV::CBehaviour bh(behaviourId);
 						bh.Data = (uint16)(CTimeInterface::gameCycle());
 						msgout.serial(bh);
 
-						NLNET::CUnifiedNetwork::getInstance()->send( "EGS", msgout );
+						NLNET::CUnifiedNetwork::getInstance()->send("EGS", msgout);
 					}
 				}
 			}
 		}
 	}
-	
 }
 
-void rename_s_(CStateInstance* entity, CScriptStack& stack)
+void rename_s_(CStateInstance *entity, CScriptStack &stack)
 {
-	string newName = (string)stack.top(); stack.pop();	
+	string newName = (string)stack.top();
+	stack.pop();
 
-	CGroup* group = entity->getGroup();
-	
+	CGroup *group = entity->getGroup();
+
 	if (group->isSpawned())
 	{
 		FOREACH(itBot, CCont<CBot>, group->bots())
 		{
-			CBot* bot = *itBot;
+			CBot *bot = *itBot;
 			if (bot)
 			{
 				if (bot->isSpawned())
 				{
-					CSpawnBot *spawnBot = bot->getSpawnObj(); 
+					CSpawnBot *spawnBot = bot->getSpawnObj();
 					if (spawnBot)
 					{
-						TDataSetRow	row = spawnBot->dataSetRow();
+						TDataSetRow row = spawnBot->dataSetRow();
 						ucstring name;
 						name.fromUtf8(newName);
-						NLNET::CMessage	msgout("CHARACTER_NAME");
+						NLNET::CMessage msgout("CHARACTER_NAME");
 						msgout.serial(row);
 						msgout.serial(name);
 						sendMessageViaMirror("IOS", msgout);
@@ -2611,27 +2654,27 @@ void rename_s_(CStateInstance* entity, CScriptStack& stack)
 			}
 		}
 	}
-	
 }
 
-void vpx_s_(CStateInstance* entity, CScriptStack& stack)
+void vpx_s_(CStateInstance *entity, CScriptStack &stack)
 {
-	string vpx = (string)stack.top(); stack.pop();	
+	string vpx = (string)stack.top();
+	stack.pop();
 
-	CGroup* group = entity->getGroup();
-	
+	CGroup *group = entity->getGroup();
+
 	if (group->isSpawned())
 	{
 		FOREACH(itBot, CCont<CBot>, group->bots())
 		{
-			CBotNpc* bot = NLMISC::safe_cast<CBotNpc*>(*itBot);
+			CBotNpc *bot = NLMISC::safe_cast<CBotNpc *>(*itBot);
 			if (bot)
 			{
 				bot->setVisualProperties(vpx);
 				bot->sendVisualProperties();
 			}
 		}
-	}	
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -2649,20 +2692,21 @@ Arguments: f(MaxHitRange) ->
 
 */
 // CBotNpc
-void maxHitRange_f_(CStateInstance* entity, CScriptStack& stack)
+void maxHitRange_f_(CStateInstance *entity, CScriptStack &stack)
 {
-	float maxHitRange = (float&)stack.top(); stack.pop();
-	CGroup* group = entity->getGroup();
-	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
-	FOREACH(botIt, CCont<CBot>,	group->bots())
+	float maxHitRange = (float &)stack.top();
+	stack.pop();
+	CGroup *group = entity->getGroup();
+	CGroupNpc *npcGroup = NLMISC::safe_cast<CGroupNpc *>(group);
+
+	FOREACH(botIt, CCont<CBot>, group->bots())
 	{
-		CBot* bot = *botIt;
-		
-		if (!bot->isSpawned()) return;	
+		CBot *bot = *botIt;
+
+		if (!bot->isSpawned()) return;
 		if (bot->getRyzomType() == RYZOMID::npc)
 		{
-			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
+			CBotNpc *botNpc = NLMISC::safe_cast<CBotNpc *>(bot);
 			botNpc->setMaxHitRangeForPlayer(maxHitRange);
 		}
 	}
@@ -2672,67 +2716,66 @@ void maxHitRange_f_(CStateInstance* entity, CScriptStack& stack)
 ///** @page code
 //
 //@subsection hideMissionStepIcon_b_
-//Allows to hide icons for current missions steps having interactions with this NPC (default: shown)
+// Allows to hide icons for current missions steps having interactions with this NPC (default: shown)
 //
-//Arguments: b(hide) ->
+// Arguments: b(hide) ->
 //@param[in] hide true to hide the icon for all mission steps relating to this NPC (default: false)
 //
 //*/
 //// CBotNpc
-//void hideMissionStepIcon_b_(CStateInstance* entity, CScriptStack& stack)
+// void hideMissionStepIcon_b_(CStateInstance* entity, CScriptStack& stack)
 //{
 //	bool b = (bool&)stack.top(); stack.pop();
 //	CGroup* group = entity->getGroup();
 //	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-//	
+//
 //	FOREACH(botIt, CCont<CBot>,	group->bots())
 //	{
 //		CBot* bot = *botIt;
-//		
-//		if (!bot->isSpawned()) return;	
+//
+//		if (!bot->isSpawned()) return;
 //		if (bot->getRyzomType() == RYZOMID::npc)
 //		{
 //			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
 //			botNpc->setMissionStepIconHidden(b);
 //		}
 //	}
-//}
+// }
 //
 ////----------------------------------------------------------------------------
 ///** @page code
 //
 //@subsection hideMissionGiverIcon_b_
-//Allows to hide icons for missions proposed by this NPC (default: shown)
+// Allows to hide icons for missions proposed by this NPC (default: shown)
 //
-//Arguments: b(hide) ->
+// Arguments: b(hide) ->
 //@param[in] hide true to hide the icon for all missions propsed by this NPC (default: false)
 //
 //*/
 //// CBotNpc
-//void hideMissionGiverIcon_b_(CStateInstance* entity, CScriptStack& stack)
+// void hideMissionGiverIcon_b_(CStateInstance* entity, CScriptStack& stack)
 //{
 //	bool b = (bool&)stack.top(); stack.pop();
 //	CGroup* group = entity->getGroup();
 //	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-//	
+//
 //	FOREACH(botIt, CCont<CBot>,	group->bots())
 //	{
 //		CBot* bot = *botIt;
-//		
-//		if (!bot->isSpawned()) return;	
+//
+//		if (!bot->isSpawned()) return;
 //		if (bot->getRyzomType() == RYZOMID::npc)
 //		{
 //			CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
 //			botNpc->setMissionGiverIconHidden(b);
 //		}
 //	}
-//}
-
+// }
 
 std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 {
 	std::map<std::string, FScrptNativeFunc> functions;
-	
+
 #define REGISTER_NATIVE_FUNC(cont, func) cont.insert(std::make_pair(std::string(#func), &func))
 
 	REGISTER_NATIVE_FUNC(functions, setFactionProp_ss_);
@@ -2783,7 +2826,7 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, npcSay_css_);
 	REGISTER_NATIVE_FUNC(functions, npcSay_ss_);
 	REGISTER_NATIVE_FUNC(functions, dssMessage_fsss_);
-	REGISTER_NATIVE_FUNC(functions, despawnBotByAlias_s_);	
+	REGISTER_NATIVE_FUNC(functions, despawnBotByAlias_s_);
 	REGISTER_NATIVE_FUNC(functions, giveReward_ssssc_);
 	REGISTER_NATIVE_FUNC(functions, teleportNear_fffc_);
 
@@ -2793,11 +2836,10 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 
 	REGISTER_NATIVE_FUNC(functions, maxHitRange_f_);
 
-//	REGISTER_NATIVE_FUNC(functions, hideMissionStepIcon_b_);
-//	REGISTER_NATIVE_FUNC(functions, hideMissionGiverIcon_b_);
-
+	//	REGISTER_NATIVE_FUNC(functions, hideMissionStepIcon_b_);
+	//	REGISTER_NATIVE_FUNC(functions, hideMissionGiverIcon_b_);
 
 #undef REGISTER_NATIVE_FUNC
-	
+
 	return functions;
 }

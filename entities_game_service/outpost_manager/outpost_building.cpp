@@ -39,8 +39,8 @@ using namespace std;
 
 //----------------------------------------------------------------------------
 
-CVariable<float>	OutpostDrillerTimeUnit("egs", "OutpostDrillerTimeUnit", "Production time of mp in the driller (in seconds)", 3600.0f, 0, true );
-CVariable<bool>		EnableOutpostDrillerMPGeneration("egs", "EnableOutpostDrillerMPGeneration", "Set if the outpost drillers generate mps or not", true, 0, true );
+CVariable<float> OutpostDrillerTimeUnit("egs", "OutpostDrillerTimeUnit", "Production time of mp in the driller (in seconds)", 3600.0f, 0, true);
+CVariable<bool> EnableOutpostDrillerMPGeneration("egs", "EnableOutpostDrillerMPGeneration", "Set if the outpost drillers generate mps or not", true, 0, true);
 extern NLMISC::CRandom RandomGenerator;
 
 //----------------------------------------------------------------------------
@@ -68,7 +68,7 @@ bool COutpostBuilding::construct(NLMISC::CSheetId sheetid)
 
 	if (_StaticData != NULL)
 	{
-		if ( ! _StaticData->CanBeDestroyedOrBuilt)
+		if (!_StaticData->CanBeDestroyedOrBuilt)
 			return false;
 	}
 
@@ -76,7 +76,7 @@ bool COutpostBuilding::construct(NLMISC::CSheetId sheetid)
 	_StaticData = CSheets::getOutpostBuildingForm(_CurrentSheet);
 	if (!_StaticData)
 		return false;
-	
+
 	_BuiltDate = CTime::getSecondsSince1970();
 
 	_Constructing = true;
@@ -89,14 +89,13 @@ bool COutpostBuilding::construct(NLMISC::CSheetId sheetid)
 	// Specific init
 	switch (_StaticData->Type)
 	{
-		case CStaticOutpostBuilding::TypeDriller:
-		{
-			_MPLeft = 0.0f;
-			_MPLastTime = ~0;
-		}
-		break;
+	case CStaticOutpostBuilding::TypeDriller: {
+		_MPLeft = 0.0f;
+		_MPLastTime = ~0;
+	}
+	break;
 
-		default:
+	default:
 		break;
 	}
 
@@ -150,69 +149,68 @@ void COutpostBuilding::update(uint32 nCurrentTime)
 	// Do the specific management for each type of building
 	switch (_StaticData->Type)
 	{
-		case CStaticOutpostBuilding::TypeDriller:
+	case CStaticOutpostBuilding::TypeDriller: {
+		if (!EnableOutpostDrillerMPGeneration.get())
+			break;
+		if (!_Parent->isBelongingToAGuild())
+			break;
+		if (nCurrentTime <= _MPLastTime)
+			break;
+
+		uint32 elapsedTime = nCurrentTime - _MPLastTime;
+		_MPLastTime = nCurrentTime;
+
+		// check that the elapsed time does not exceed 1 week to limit abnormal values
+		static const uint32 maxTime = 60 * 60 * 24 * 7; // 1 week in seconds
+		if (elapsedTime > maxTime)
+			elapsedTime = maxTime;
+
+		// speed of production in mp / second
+		float fSpeed = _StaticData->Driller.TotalMP / OutpostDrillerTimeUnit.get();
+		_MPLeft += elapsedTime * fSpeed;
+		while (_MPLeft > 1.0f)
 		{
-			if (!EnableOutpostDrillerMPGeneration.get())
-				break;
-			if (!_Parent->isBelongingToAGuild()) 
-				break;
-			if (nCurrentTime <= _MPLastTime)
-				break;
+			// Produce 1 MP
+			uint i, j;
+			float pos = RandomGenerator.frand(_StaticData->Driller.TotalMP);
+			float curpos = 0.0f;
 
-			uint32 elapsedTime = nCurrentTime - _MPLastTime;
-			_MPLastTime = nCurrentTime;
-
-			// check that the elapsed time does not exceed 1 week to limit abnormal values
-			static const uint32 maxTime = 60*60*24*7; // 1 week in seconds
-			if (elapsedTime > maxTime)
-				elapsedTime = maxTime;
-
-			// speed of production in mp / second
-			float fSpeed = _StaticData->Driller.TotalMP / OutpostDrillerTimeUnit.get();
-			_MPLeft += elapsedTime * fSpeed;
-			while (_MPLeft > 1.0f)
+			for (i = 0; i < _StaticData->Driller.MPQuantities.size(); ++i)
 			{
-				// Produce 1 MP
-				uint i, j;
-				float pos = RandomGenerator.frand(_StaticData->Driller.TotalMP);
-				float curpos = 0.0f;
-
-				for (i = 0; i < _StaticData->Driller.MPQuantities.size(); ++i)
+				for (j = 0; j < DRILLER_NB_LEVEL; ++j)
 				{
-					for (j = 0; j < DRILLER_NB_LEVEL; ++j)
-					{
-						curpos += _StaticData->Driller.QualityFactor[j] * _StaticData->Driller.MPQuantities[i];
-						if (pos <= curpos)
-							break;
-					}
+					curpos += _StaticData->Driller.QualityFactor[j] * _StaticData->Driller.MPQuantities[i];
 					if (pos <= curpos)
 						break;
 				}
-
-				nlassert(_StaticData->Driller.MPs.size() == _StaticData->Driller.MPQuantities.size());
-
-				if ((i < _StaticData->Driller.MPQuantities.size()) && (j < DRILLER_NB_LEVEL))
-				{
-					TLogContext_Item_OutpostDriller outpostContext(CEntityId::Unknown);
-					// 1 mp of type i and quality j is generated
-					EGSPD::TGuildId gid = _Parent->getOwnerGuild();
-					CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(gid);
-					if (pGuild != NULL)
-					{
-						CGameItemPtr item;
-						item = GameItemManager.createItem(	_StaticData->Driller.MPs[i], 
-															(j+1)*(250/DRILLER_NB_LEVEL), 
-															true, false);
-						if (item != NULL)
-							pGuild->putItem(item);
-					}
-				}
-
-				_MPLeft -= 1.0f;
+				if (pos <= curpos)
+					break;
 			}
+
+			nlassert(_StaticData->Driller.MPs.size() == _StaticData->Driller.MPQuantities.size());
+
+			if ((i < _StaticData->Driller.MPQuantities.size()) && (j < DRILLER_NB_LEVEL))
+			{
+				TLogContext_Item_OutpostDriller outpostContext(CEntityId::Unknown);
+				// 1 mp of type i and quality j is generated
+				EGSPD::TGuildId gid = _Parent->getOwnerGuild();
+				CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(gid);
+				if (pGuild != NULL)
+				{
+					CGameItemPtr item;
+					item = GameItemManager.createItem(_StaticData->Driller.MPs[i],
+					    (j + 1) * (250 / DRILLER_NB_LEVEL),
+					    true, false);
+					if (item != NULL)
+						pGuild->putItem(item);
+				}
+			}
+
+			_MPLeft -= 1.0f;
 		}
-		break;
-		default:
+	}
+	break;
+	default:
 		break;
 	}
 }
@@ -271,7 +269,7 @@ std::string COutpostBuilding::toString() const
 //----------------------------------------------------------------------------
 void COutpostBuilding::setConstructionTime(uint32 nNbSeconds, uint32 nCurrentTime)
 {
-	if (!_Constructing)	return;
+	if (!_Constructing) return;
 
 	if (_StaticData == NULL) return;
 
@@ -279,7 +277,7 @@ void COutpostBuilding::setConstructionTime(uint32 nNbSeconds, uint32 nCurrentTim
 }
 
 //----------------------------------------------------------------------------
-void COutpostBuilding::changeShape(const CSheetId &botId,const string& name)
+void COutpostBuilding::changeShape(const CSheetId &botId, const string &name)
 {
 	CMessage msgout("OUTPOST_SET_BUILDING_BOT_SHEET");
 	uint32 messageVersion = 1;
@@ -297,13 +295,13 @@ void COutpostBuilding::changeShape(const CSheetId &botId,const string& name)
 	msgout.serial(sLocalCustomName);
 	if (_BotObject == NULL)
 	{
-		CWorldInstances::instance().msgToAIInstance2( _Parent->getAIInstanceNumber(), msgout);
-		OUTPOST_INF("OUTPOST_SET_BUILDING_BOT_SHEET msg sent : ai instance %d, alias %s", _Parent->getAIInstanceNumber(), CPrimitivesParser::aliasToString( botAlias ).c_str());
+		CWorldInstances::instance().msgToAIInstance2(_Parent->getAIInstanceNumber(), msgout);
+		OUTPOST_INF("OUTPOST_SET_BUILDING_BOT_SHEET msg sent : ai instance %d, alias %s", _Parent->getAIInstanceNumber(), CPrimitivesParser::aliasToString(botAlias).c_str());
 	}
 	else
 	{
-		CWorldInstances::instance().msgToAIInstance2( _BotObject->getInstanceNumber(), msgout);
-		OUTPOST_INF("OUTPOST_SET_BUILDING_BOT_SHEET msg sent : ai instance %d, alias %s", _BotObject->getInstanceNumber(), CPrimitivesParser::aliasToString( botAlias ).c_str());
+		CWorldInstances::instance().msgToAIInstance2(_BotObject->getInstanceNumber(), msgout);
+		OUTPOST_INF("OUTPOST_SET_BUILDING_BOT_SHEET msg sent : ai instance %d, alias %s", _BotObject->getInstanceNumber(), CPrimitivesParser::aliasToString(botAlias).c_str());
 	}
 }
 
@@ -313,7 +311,6 @@ void COutpostBuilding::postLoad()
 	_StaticData = CSheets::getOutpostBuildingForm(_CurrentSheet);
 }
 
-
 #define PERSISTENT_MACROS_AUTO_UNDEF
 
 //----------------------------------------------------------------------------
@@ -322,25 +319,24 @@ void COutpostBuilding::postLoad()
 
 #define PERSISTENT_CLASS COutpostBuilding
 
-#define PERSISTENT_PRE_APPLY\
-	H_AUTO(COutpostBuildingApply);\
-	/*preApply();*/\
-	
-#define PERSISTENT_POST_APPLY\
-	postLoad();\
-	
+#define PERSISTENT_PRE_APPLY       \
+	H_AUTO(COutpostBuildingApply); \
+	/*preApply();*/
+
+#define PERSISTENT_POST_APPLY \
+	postLoad();
+
 //#define PERSISTENT_POST_STORE\
 //	postStore();
 
-#define PERSISTENT_DATA\
-	/*PROP2(VERSION, uint32, COutpostBuildingVersionAdapter::getInstance()->currentVersionNumber(), version = val)*/\
-	\
-	PROP(uint32, _BuiltDate)\
-	PROP(bool, _Constructing)\
-	PROP(CSheetId, _CurrentSheet)\
-	PROP(float, _MPLeft)\
-	PROP(uint32, _MPLastTime)\
-	
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
-#include "game_share/persistent_data_template.h"
+#define PERSISTENT_DATA                                                                                              \
+	/*PROP2(VERSION, uint32, COutpostBuildingVersionAdapter::getInstance()->currentVersionNumber(), version = val)*/ \
+                                                                                                                     \
+	PROP(uint32, _BuiltDate)                                                                                         \
+	PROP(bool, _Constructing)                                                                                        \
+	PROP(CSheetId, _CurrentSheet)                                                                                    \
+	PROP(float, _MPLeft)                                                                                             \
+	PROP(uint32, _MPLastTime)
 
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
+#include "game_share/persistent_data_template.h"

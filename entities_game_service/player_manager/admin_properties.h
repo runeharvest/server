@@ -31,10 +31,12 @@ class CCharacter;
 class CAdminProperties
 {
 	NL_INSTANCE_COUNTER_DECL(CAdminProperties);
-public:
 
+public:
 	CAdminProperties()
-		:_Data(NULL){}
+	    : _Data(NULL)
+	{
+	}
 	~CAdminProperties()
 	{
 		if (_Data)
@@ -49,21 +51,21 @@ public:
 		_Data = new CData;
 	}
 
-	void setMissionMonitoredUser(const TDataSetRow & row)
+	void setMissionMonitoredUser(const TDataSetRow &row)
 	{
-		if ( !_Data ) return;
+		if (!_Data) return;
 		_Data->MissionUser = row;
 	}
 
 	TDataSetRow getMissionMonitoredUser() const
 	{
-		if ( !_Data ) return TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW );
+		if (!_Data) return TDataSetRow::createFromRawIndex(INVALID_DATASET_ROW);
 		return _Data->MissionUser;
 	}
 
-	CMission * getMission( uint indexInJournal ) const;
+	CMission *getMission(uint indexInJournal) const;
 
-	static void updateCSRJournal( CCharacter * user, CMission * mission,uint8 idx );
+	static void updateCSRJournal(CCharacter *user, CMission *mission, uint8 idx);
 
 private:
 	struct CData
@@ -71,9 +73,8 @@ private:
 		TDataSetRow MissionUser;
 	};
 
-	CData * _Data;
+	CData *_Data;
 };
-
 
 #endif // RY_ADMIN_PROPERTIES_H
 

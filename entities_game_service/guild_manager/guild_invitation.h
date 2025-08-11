@@ -30,36 +30,39 @@ class CGuild;
 class CGuildInvitation : public IModuleCore
 {
 	NL_INSTANCE_COUNTER_DECL(CGuildInvitation);
+
 public:
 	/// ctor
-	inline CGuildInvitation(CGuild* guild, const TDataSetRow & invitor);
+	inline CGuildInvitation(CGuild *guild, const TDataSetRow &invitor);
 	/// get the guild concerned
-	inline CGuild * getGuild()const;
+	inline CGuild *getGuild() const;
 	/// get the invitor
-	inline const TDataSetRow & getInvitor()const;
+	inline const TDataSetRow &getInvitor() const;
+
 private:
 	/// guild concerned
-	NLMISC::CRefPtr<CGuild>			_Guild;
+	NLMISC::CRefPtr<CGuild> _Guild;
 	/// row of the player who invited
-	TDataSetRow						_Invitor;
-	
+	TDataSetRow _Invitor;
 };
 
 //----------------------------------------------------------------------------
-inline CGuildInvitation::CGuildInvitation(CGuild* guild, const TDataSetRow & invitor)
-:IModuleCore(),_Guild(guild),_Invitor(invitor)
+inline CGuildInvitation::CGuildInvitation(CGuild *guild, const TDataSetRow &invitor)
+    : IModuleCore()
+    , _Guild(guild)
+    , _Invitor(invitor)
 {
 	nlassert(guild);
 }
 
 //----------------------------------------------------------------------------
-inline CGuild * CGuildInvitation::getGuild()const
+inline CGuild *CGuildInvitation::getGuild() const
 {
 	return _Guild;
 }
 
 //----------------------------------------------------------------------------
-inline const TDataSetRow & CGuildInvitation::getInvitor()const
+inline const TDataSetRow &CGuildInvitation::getInvitor() const
 {
 	return _Invitor;
 }

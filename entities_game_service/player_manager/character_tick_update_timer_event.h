@@ -30,22 +30,25 @@ class CCharacter;
 class CCharacterTickUpdateTimerEvent : public CTimerEvent
 {
 	NL_INSTANCE_COUNTER_DECL(CCharacterTickUpdateTimerEvent);
-public:
 
+public:
 	CCharacterTickUpdateTimerEvent(CCharacter *parent);
 	void timerCallback(CTimer *owner);
+
 private:
 	CCharacter *_Parent;
 };
 
 // ***************************************************************************
 // frequent update of the database
-class CCharacterDbUpdateTimerEvent:public CTimerEvent
+class CCharacterDbUpdateTimerEvent : public CTimerEvent
 {
 	NL_INSTANCE_COUNTER_DECL(CCharacterDbUpdateTimerEvent);
+
 public:
 	CCharacterDbUpdateTimerEvent(CCharacter *parent);
 	void timerCallback(CTimer *owner);
+
 private:
 	CCharacter *_Parent;
 };
@@ -55,9 +58,11 @@ private:
 class CCharacterBarUpdateTimerEvent : public CTimerEvent
 {
 	NL_INSTANCE_COUNTER_DECL(CCharacterBarUpdateTimerEvent);
+
 public:
 	CCharacterBarUpdateTimerEvent(CCharacter *parent);
 	void timerCallback(CTimer *owner);
+
 private:
 	CCharacter *_Parent;
 };

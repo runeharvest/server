@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef FAMILY_PROFILE_H
 #define FAMILY_PROFILE_H
 
@@ -27,7 +25,7 @@
 #include "ai_factory.h"
 
 class CFamilyBehavior;
-//class IGroup;
+// class IGroup;
 
 class CGroupNpc;
 class CNpcZone;
@@ -37,88 +35,86 @@ template <class FamilyT>
 class CGroupDesc;
 
 /** Interface class for family profile
-*/
-class IFamilyProfile :
-	public NLMISC::CDbgRefCount<IFamilyProfile>,
-	public NLMISC::CRefCount
+ */
+class IFamilyProfile : public NLMISC::CDbgRefCount<IFamilyProfile>,
+                       public NLMISC::CRefCount
 {
 protected:
-	NLMISC::CDbgPtr<CFamilyBehavior>	_FamilyBehavior;
-public:
+	NLMISC::CDbgPtr<CFamilyBehavior> _FamilyBehavior;
 
+public:
 	class CtorParam
 	{
 	public:
 		CtorParam(CFamilyBehavior *familyBehavior)
-			:_familyBehavior(familyBehavior)
+		    : _familyBehavior(familyBehavior)
 		{
 #ifdef NL_DEBUG
 			nlassert(familyBehavior);
 #endif
 		}
 		virtual ~CtorParam()
-		{}
-		const	CFamilyBehavior *familyBehavior	()	const
 		{
-			return	_familyBehavior;
 		}
+		const CFamilyBehavior *familyBehavior() const
+		{
+			return _familyBehavior;
+		}
+
 	protected:
-		friend	class	IFamilyProfile;
+		friend class IFamilyProfile;
+
 	private:
 		CFamilyBehavior *_familyBehavior;
 	};
 
-
-	IFamilyProfile	(const	CtorParam	&ctorParam)
-		:_FamilyBehavior(ctorParam._familyBehavior)
+	IFamilyProfile(const CtorParam &ctorParam)
+	    : _FamilyBehavior(ctorParam._familyBehavior)
 	{
 	}
 
-	virtual	~IFamilyProfile	()
+	virtual ~IFamilyProfile()
 	{
 	}
-	
-	virtual	void	setDefaultProfile(const	CNpcZone	*const	zone, CGroupNpc	*grp)	{}
+
+	virtual void setDefaultProfile(const CNpcZone *const zone, CGroupNpc *grp) { }
 
 	/// Spawn group.
-	virtual void	spawnGroup() =0;
+	virtual void spawnGroup() = 0;
 
 	/// The main update for the profile. Called aprox every 10 s (100 ticks)
-	virtual void update() =0;
+	virtual void update() = 0;
 
 	/// Fill a vector of outpost id name assigned to tribe
-	virtual void fillOutpostNames(std::vector<NLMISC::TStringId> outpostNames)	{}
+	virtual void fillOutpostNames(std::vector<NLMISC::TStringId> outpostNames) { }
 	/// Add an outpost for the tribe (nb : the family must be a tribe)
-	virtual void outpostAdd(NLMISC::TStringId outpostName) {}
+	virtual void outpostAdd(NLMISC::TStringId outpostName) { }
 	/// Remove an from the tribe
-	virtual void outpostRemove(NLMISC::TStringId outpostName) {}
+	virtual void outpostRemove(NLMISC::TStringId outpostName) { }
 
-	virtual	void outpostEvent(NLMISC::TStringId outpostName, ZCSTATE::TZcState	state)	{}
+	virtual void outpostEvent(NLMISC::TStringId outpostName, ZCSTATE::TZcState state) { }
 
-	virtual	void spawnBoss(NLMISC::TStringId outpostName)	{}
+	virtual void spawnBoss(NLMISC::TStringId outpostName) { }
 
-	CGroupNpc	*createNpcGroup(const	CNpcZone	*const	zone, const	CGroupDesc<CGroupFamily>	*const	groupDesc);
+	CGroupNpc *createNpcGroup(const CNpcZone *const zone, const CGroupDesc<CGroupFamily> *const groupDesc);
 
 	/** Factory method to create profile instance.
 	 *	NB : you are responsible to delete the profile.
-	 */	
-	static	IFamilyProfile*	createFamilyProfile(const	NLMISC::TStringId	&profileNamer, const	IFamilyProfile::CtorParam&	ctorParam);
+	 */
+	static IFamilyProfile *createFamilyProfile(const NLMISC::TStringId &profileNamer, const IFamilyProfile::CtorParam &ctorParam);
 };
 
-
-class	CFamilyProfileFactory
-	:	public	CAiFactoryContainer<IFamilyProfile, NLMISC::TStringId>	//	TFamilyTag>
+class CFamilyProfileFactory
+    : public CAiFactoryContainer<IFamilyProfile, NLMISC::TStringId> //	TFamilyTag>
 {
 public:
 	CFamilyProfileFactory();
-	
+
 	static CAiFactoryContainer<IFamilyProfile, NLMISC::TStringId> &instance();
-	
-	virtual	~CFamilyProfileFactory();
 
-	static	IFamilyProfile*	createFamilyProfile(const NLMISC::TStringId	&keyWord, const	IFamilyProfile::CtorParam&	ctorParam);
+	virtual ~CFamilyProfileFactory();
+
+	static IFamilyProfile *createFamilyProfile(const NLMISC::TStringId &keyWord, const IFamilyProfile::CtorParam &ctorParam);
 };
-
-
 
 #endif // FAMILY_PROFILE_H

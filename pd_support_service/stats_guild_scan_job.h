@@ -26,12 +26,11 @@
 #include "stat_guild_container.h"
 #include "stat_job_manager.h"
 
-
 //-------------------------------------------------------------------------------------------------
 // class CGuildScanJob
 //-------------------------------------------------------------------------------------------------
 
-class CGuildScanJob: public CJobManager::IJob
+class CGuildScanJob : public CJobManager::IJob
 {
 public:
 	// inherited virtual interface
@@ -39,21 +38,27 @@ public:
 	virtual bool finished();
 	virtual std::string getShortStatus();
 	virtual std::string getStatus();
-	virtual void display(NLMISC::CLog* log=NLMISC::InfoLog);
+	virtual void display(NLMISC::CLog *log = NLMISC::InfoLog);
 	virtual void update();
 
 public:
 	// ctor / dtor
-	CGuildScanJob(CStatGuildContainer* guildContainer,const NLMISC::CSString& outputRoot="");
+	CGuildScanJob(CStatGuildContainer *guildContainer, const NLMISC::CSString &outputRoot = "");
 	~CGuildScanJob();
 
 public:
 	// interface for initialisation and configuration of the job
-	void addFileSpec(const NLMISC::CSString& fileSpec,bool recursive=false);
+	void addFileSpec(const NLMISC::CSString &fileSpec, bool recursive = false);
 
 private:
 	// private data - internal to job
-	enum TState { INIT, WORK, CLOSED, ERROR };
+	enum TState
+	{
+		INIT,
+		WORK,
+		CLOSED,
+		ERROR
+	};
 	TState _State;
 	uint32 _NextFile;
 	CFileDescriptionContainer _Files;
@@ -72,7 +77,6 @@ private:
 	// - for values like './abc/def' the output files take the form: './abc/def_xxx.csv'
 	NLMISC::CSString _OutputRoot;
 };
-
 
 //-------------------------------------------------------------------------------------------------
 #endif

@@ -17,7 +17,6 @@
 #include "stdpch.h"
 #include "projectile_stats.h"
 
-
 static NLMISC::TTime lastTime = 0;
 static bool firstSample = true;
 static uint numProjFired = 0;
@@ -33,20 +32,19 @@ void projStatsTime(NLMISC::TTime time)
 	else
 	{
 		if (time - lastTime > PROJ_STATS_REPORT_TIME)
-		{			
-// The following removed for now by Sadge because it causes spam!
-//			nlinfo("PROJECTILE_STATS : %d projectile fired in %.2f second -> %.2f projectile per second",
-//				   (int) numProjFired, 
-//				   (time - lastTime) / 1000.f,
-//				   (1000.f * numProjFired) / (time - lastTime));
+		{
+			// The following removed for now by Sadge because it causes spam!
+			//			nlinfo("PROJECTILE_STATS : %d projectile fired in %.2f second -> %.2f projectile per second",
+			//				   (int) numProjFired,
+			//				   (time - lastTime) / 1000.f,
+			//				   (1000.f * numProjFired) / (time - lastTime));
 			lastTime = time;
 			numProjFired = 0;
 		}
 	}
 }
 
-
 void projStatsIncrement()
 {
-	++ numProjFired;
+	++numProjFired;
 }

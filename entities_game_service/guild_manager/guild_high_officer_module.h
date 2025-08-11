@@ -27,17 +27,19 @@ class CStaticItem;
  * \author Nevrax France
  * \date 2004
  */
-class CGuildHighOfficerModule : public  CGuildOfficerModule
+class CGuildHighOfficerModule : public CGuildOfficerModule
 {
 	NL_INSTANCE_COUNTER_DECL(CGuildHighOfficerModule);
+
 public:
-	
-	CGuildHighOfficerModule( CGuildCharProxy & proxy, CGuildMember* guildMember)
-		:CGuildOfficerModule(proxy,guildMember){}	
-	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade grade)const;
-	virtual bool canInvite()const;
-	virtual void buyGuildOption( const CStaticItem * form );
-	virtual bool canTakeGuildItem()const;
+	CGuildHighOfficerModule(CGuildCharProxy &proxy, CGuildMember *guildMember)
+	    : CGuildOfficerModule(proxy, guildMember)
+	{
+	}
+	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade grade) const;
+	virtual bool canInvite() const;
+	virtual void buyGuildOption(const CStaticItem *form);
+	virtual bool canTakeGuildItem() const;
 	virtual bool canBuyOutpostBuilding() const;
 	virtual void buyOutpostBuilding(NLMISC::CSheetId sid);
 	virtual bool isOutpostAdmin() const;

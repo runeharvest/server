@@ -26,7 +26,6 @@
 #include "egs_sheets/egs_sheets.h"
 #include "primitives_parser.h"
 
-
 //////////////////////////////////////////////////////////////////////////////
 // namespaces
 //////////////////////////////////////////////////////////////////////////////
@@ -35,14 +34,11 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
-
 
 //////////////////////////////////////////////////////////////////////////////
 // config vars
 //////////////////////////////////////////////////////////////////////////////
-
 
 //////////////////////////////////////////////////////////////////////////////
 // methods COutpostSpawnZone
@@ -50,13 +46,17 @@ using namespace NLNET;
 
 //----------------------------------------------------------------------------
 COutpostSpawnZone::COutpostSpawnZone()
-: _Alias(0), _Center(CVector::Null), _Radius(0.f)
+    : _Alias(0)
+    , _Center(CVector::Null)
+    , _Radius(0.f)
 {
 }
 
 //----------------------------------------------------------------------------
-COutpostSpawnZone::COutpostSpawnZone(TAIAlias alias, const NLMISC::CVector & center, float radius)
-: _Alias(alias), _Center(center), _Radius(radius)
+COutpostSpawnZone::COutpostSpawnZone(TAIAlias alias, const NLMISC::CVector &center, float radius)
+    : _Alias(alias)
+    , _Center(center)
+    , _Radius(radius)
 {
 }
 
@@ -71,11 +71,10 @@ std::string COutpostSpawnZone::toString() const
 	else
 	{
 		desc = NLMISC::toString("Alias: %s, Center: (%d,%d), Radius: %g",
-			CPrimitivesParser::aliasToString(_Alias).c_str(),
-			sint32(_Center.x),
-			sint32(_Center.y),
-			_Radius
-			);
+		    CPrimitivesParser::aliasToString(_Alias).c_str(),
+		    sint32(_Center.x),
+		    sint32(_Center.y),
+		    _Radius);
 	}
 	return desc;
 }
@@ -86,38 +85,38 @@ std::string COutpostSpawnZone::toString() const
 
 //----------------------------------------------------------------------------
 COutpostSquadDescriptor::COutpostSquadDescriptor()
-: _Sheet(NLMISC::CSheetId::Unknown)
-, _Alias(0)
-, _Form(NULL)
+    : _Sheet(NLMISC::CSheetId::Unknown)
+    , _Alias(0)
+    , _Form(NULL)
 {
 }
 
 //----------------------------------------------------------------------------
-COutpostSquadDescriptor::COutpostSquadDescriptor(NLMISC::CSheetId sheet, TAIAlias alias, const std::string& name)
+COutpostSquadDescriptor::COutpostSquadDescriptor(NLMISC::CSheetId sheet, TAIAlias alias, const std::string &name)
 {
 	init(sheet, alias, name);
 }
 
 //----------------------------------------------------------------------------
-void COutpostSquadDescriptor::init(NLMISC::CSheetId sheet, TAIAlias alias, const std::string& name)
+void COutpostSquadDescriptor::init(NLMISC::CSheetId sheet, TAIAlias alias, const std::string &name)
 {
 	_Sheet = sheet;
 	_Alias = alias;
 	_Form = CSheets::getOutpostSquadForm(_Sheet);
 	nlassertex(_Form, ("Squad sheet %s not found", _Sheet.toString().c_str()));
-//	if (!(_Form))
-// {
-//		NLMISC::createDebug ();
-//		NLMISC::AssertLog->setPosition (__LINE__, __FILE__, __FUNCTION__);
-//		NLMISC::AssertLog->displayRawNL ("Squad sheet %s not found", _Sheet.toString().c_str());		// BUG with unsetPosition() called twice
-//		NLMISC_BREAKPOINT;
-//	}
+	//	if (!(_Form))
+	// {
+	//		NLMISC::createDebug ();
+	//		NLMISC::AssertLog->setPosition (__LINE__, __FILE__, __FUNCTION__);
+	//		NLMISC::AssertLog->displayRawNL ("Squad sheet %s not found", _Sheet.toString().c_str());		// BUG with unsetPosition() called twice
+	//		NLMISC_BREAKPOINT;
+	//	}
 }
 
 //----------------------------------------------------------------------------
 void COutpostSquadDescriptor::preStore() const
 {
-	CStaticOutpostSquad const* form = CSheets::getOutpostSquadForm(_Sheet);
+	CStaticOutpostSquad const *form = CSheets::getOutpostSquadForm(_Sheet);
 	nlassertex(form, ("Squad sheet %s not found", _Sheet.toString().c_str()));
 }
 
@@ -126,8 +125,8 @@ void COutpostSquadDescriptor::postLoad()
 {
 	_Form = CSheets::getOutpostSquadForm(_Sheet);
 	nlassertex(_Form, ("Squad sheet %s not found", _Sheet.toString().c_str()));
-//	if (!_Form)
-//		OUTPOST_WRN("Squad sheet %s not found", _Sheet.toString().c_str());
+	//	if (!_Form)
+	//		OUTPOST_WRN("Squad sheet %s not found", _Sheet.toString().c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -141,10 +140,9 @@ std::string COutpostSquadDescriptor::toString() const
 	else
 	{
 		desc = NLMISC::toString("Sheet: '%s', Alias: %s, BuyPrice: %u",
-			_Sheet.toString().c_str(),
-			CPrimitivesParser::aliasToString(_Alias).c_str(),
-			_Form->BuyPrice
-			);
+		    _Sheet.toString().c_str(),
+		    CPrimitivesParser::aliasToString(_Alias).c_str(),
+		    _Form->BuyPrice);
 	}
 	return desc;
 }
@@ -154,7 +152,7 @@ std::string COutpostSquadDescriptor::toString() const
 //////////////////////////////////////////////////////////////////////////////
 
 uint32 COutpostSquad::_LastCreateOrder = 0;
-std::map<uint32, NLMISC::CRefPtr<COutpostSquad> > COutpostSquad::_CreateOrders;
+std::map<uint32, NLMISC::CRefPtr<COutpostSquad>> COutpostSquad::_CreateOrders;
 
 //////////////////////////////////////////////////////////////////////////////
 // methods COutpostSquad
@@ -162,27 +160,27 @@ std::map<uint32, NLMISC::CRefPtr<COutpostSquad> > COutpostSquad::_CreateOrders;
 
 //----------------------------------------------------------------------------
 COutpostSquad::COutpostSquad()
-: _OwnerOutpostAlias(0)
-, _Desc()
-, _SpawnZone()
-, _State(OUTPOSTENUMS::NotCreated)
-, _CreateOrder(0)
-, _GroupId(0)
-, _Recreate(false)
+    : _OwnerOutpostAlias(0)
+    , _Desc()
+    , _SpawnZone()
+    , _State(OUTPOSTENUMS::NotCreated)
+    , _CreateOrder(0)
+    , _GroupId(0)
+    , _Recreate(false)
 {
 	// Do not create since _Outpost is not valid yet
 }
 
 //----------------------------------------------------------------------------
-COutpostSquad::COutpostSquad(TAIAlias outpost, const COutpostSquadDescriptor & desc, TAIAlias spawnZone, OUTPOSTENUMS::TPVPSide side)
-: _OwnerOutpostAlias(outpost)
-, _Desc(desc)
-, _SpawnZone(spawnZone)
-, _State(OUTPOSTENUMS::NotCreated)
-, _CreateOrder(0)
-, _GroupId(0)
-, _Recreate(false)
-, _Side(side)
+COutpostSquad::COutpostSquad(TAIAlias outpost, const COutpostSquadDescriptor &desc, TAIAlias spawnZone, OUTPOSTENUMS::TPVPSide side)
+    : _OwnerOutpostAlias(outpost)
+    , _Desc(desc)
+    , _SpawnZone(spawnZone)
+    , _State(OUTPOSTENUMS::NotCreated)
+    , _CreateOrder(0)
+    , _GroupId(0)
+    , _Recreate(false)
+    , _Side(side)
 {
 	create();
 }
@@ -198,7 +196,7 @@ COutpostSquad::~COutpostSquad()
 uint32 COutpostSquad::nextCreateOrder()
 {
 	uint32 order = _LastCreateOrder;
-	while (_CreateOrders.find(order)!=_CreateOrders.end() || order==0)
+	while (_CreateOrders.find(order) != _CreateOrders.end() || order == 0)
 		order = ++_LastCreateOrder;
 	return order;
 }
@@ -206,7 +204,7 @@ uint32 COutpostSquad::nextCreateOrder()
 //----------------------------------------------------------------------------
 NLMISC::CSmartPtr<COutpostSquad> COutpostSquad::getSquadFromCreateOrder(uint32 createOrder)
 {
-	map<uint32, NLMISC::CRefPtr<COutpostSquad> >::iterator it = _CreateOrders.find(createOrder);
+	map<uint32, NLMISC::CRefPtr<COutpostSquad>>::iterator it = _CreateOrders.find(createOrder);
 	if (it != _CreateOrders.end())
 		return (COutpostSquad *)it->second;
 
@@ -217,35 +215,35 @@ NLMISC::CSmartPtr<COutpostSquad> COutpostSquad::getSquadFromCreateOrder(uint32 c
 void COutpostSquad::create()
 {
 	OUTPOST_DBG("squad create asked");
-	nlassert(_State==OUTPOSTENUMS::NotCreated);
-	if (_CreateOrder==0)
+	nlassert(_State == OUTPOSTENUMS::NotCreated);
+	if (_CreateOrder == 0)
 	{
 		COutpost *outpost = COutpostManager::getInstance().getOutpostFromAlias(_OwnerOutpostAlias);
-		if ( outpost )
+		if (outpost)
 		{
-			if (outpost->getAISId().get()!=0)
+			if (outpost->getAISId().get() != 0)
 			{
 				_CreateOrder = nextCreateOrder();
 				_CreateOrders.insert(make_pair(_CreateOrder, this));
-				
+
 				COutpostCreateSquadMsg params;
 				params.Outpost = _OwnerOutpostAlias;
 				params.Group = _Desc.alias();
 				params.Zone = _SpawnZone;
 				params.CreateOrder = _CreateOrder;
-				params.RespawnTimeS = 24*60*60; // respawn time is 24 hours because squads must not respawn
+				params.RespawnTimeS = 24 * 60 * 60; // respawn time is 24 hours because squads must not respawn
 				params.Side = _Side;
 				outpost->sendOutpostMessage("OUTPOST_CREATE_SQUAD", params);
 				OUTPOST_DBG("A create order (%d) has been issued for this squad in outpost %s", _CreateOrder, CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str());
 			}
 			else
 			{
-				OUTPOST_DBG( "Outpost %s has no AIS Id", CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str() );
+				OUTPOST_DBG("Outpost %s has no AIS Id", CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str());
 			}
 		}
 		else
 		{
-			OUTPOST_WRN( "Outpost %s not found while creating squad", CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str() );
+			OUTPOST_WRN("Outpost %s not found while creating squad", CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str());
 		}
 	}
 	else
@@ -258,9 +256,9 @@ void COutpostSquad::create()
 void COutpostSquad::created(uint32 createOrder, uint32 groupId)
 {
 	OUTPOST_DBG("A creation confirmation (%d) has been received for this squad in outpost %s, group id is 0x%08x", _CreateOrder, CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str(), groupId);
-	nlassert(_State==OUTPOSTENUMS::NotCreated);
-	nlassert(_GroupId==0);
-	nlassert(_CreateOrder==createOrder);
+	nlassert(_State == OUTPOSTENUMS::NotCreated);
+	nlassert(_GroupId == 0);
+	nlassert(_CreateOrder == createOrder);
 	_State = OUTPOSTENUMS::NotReady;
 	_GroupId = groupId;
 	_CreateOrders.erase(_CreateOrder);
@@ -278,12 +276,12 @@ void COutpostSquad::created(uint32 createOrder, uint32 groupId)
 void COutpostSquad::spawn(TAIAlias outpostAlias)
 {
 	OUTPOST_DBG("squad spawn asked");
-	nlassert(_OwnerOutpostAlias==outpostAlias);
-	nlassert(_State==OUTPOSTENUMS::NotSpawned);
+	nlassert(_OwnerOutpostAlias == outpostAlias);
+	nlassert(_State == OUTPOSTENUMS::NotSpawned);
 	COutpostSpawnSquadMsg params;
 	params.Outpost = _OwnerOutpostAlias;
 	params.GroupId = _GroupId;
-	COutpost* outpost = COutpostManager::getInstance().getOutpostFromAlias(_OwnerOutpostAlias);
+	COutpost *outpost = COutpostManager::getInstance().getOutpostFromAlias(_OwnerOutpostAlias);
 	if (outpost)
 	{
 		outpost->sendOutpostMessage("OUTPOST_SPAWN_SQUAD", params);
@@ -300,7 +298,7 @@ void COutpostSquad::spawn(TAIAlias outpostAlias)
 void COutpostSquad::spawned()
 {
 	OUTPOST_DBG("A spawn confirmation has been received for this squad in outpost %s, group id is 0x%08x", CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str(), _GroupId);
-	nlassert(_State==OUTPOSTENUMS::Spawning);
+	nlassert(_State == OUTPOSTENUMS::Spawning);
 	_State = OUTPOSTENUMS::Spawned;
 }
 
@@ -308,11 +306,11 @@ void COutpostSquad::spawned()
 void COutpostSquad::despawn()
 {
 	OUTPOST_DBG("squad despawn asked");
-	nlassert(_State==OUTPOSTENUMS::Spawned || _State==OUTPOSTENUMS::Spawning); // :NOTE: If we are spawning AIS will spawn, then despawn, EGS will handle spawned, despawned
+	nlassert(_State == OUTPOSTENUMS::Spawned || _State == OUTPOSTENUMS::Spawning); // :NOTE: If we are spawning AIS will spawn, then despawn, EGS will handle spawned, despawned
 	COutpostDespawnSquadMsg params;
 	params.Outpost = _OwnerOutpostAlias;
 	params.GroupId = _GroupId;
-	COutpost* outpost = COutpostManager::getInstance().getOutpostFromAlias(_OwnerOutpostAlias);
+	COutpost *outpost = COutpostManager::getInstance().getOutpostFromAlias(_OwnerOutpostAlias);
 	if (outpost)
 	{
 		outpost->sendOutpostMessage("OUTPOST_DESPAWN_SQUAD", params);
@@ -328,7 +326,7 @@ void COutpostSquad::despawn()
 void COutpostSquad::despawned()
 {
 	OUTPOST_DBG("A despawn confirmation has been received for this squad in outpost %s, group id is 0x%08x", CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str(), _GroupId);
-	nlassert(_State==OUTPOSTENUMS::Spawned);
+	nlassert(_State == OUTPOSTENUMS::Spawned);
 	_State = OUTPOSTENUMS::NotSpawned;
 }
 
@@ -336,12 +334,12 @@ void COutpostSquad::despawned()
 void COutpostSquad::destroy()
 {
 	OUTPOST_DBG("squad destroy asked");
-	if (_OwnerOutpostAlias!=0 && _GroupId!=0)
+	if (_OwnerOutpostAlias != 0 && _GroupId != 0)
 	{
 		COutpostDeleteSquadMsg params;
 		params.Outpost = _OwnerOutpostAlias;
 		params.GroupId = _GroupId;
-		COutpost* outpost = COutpostManager::getInstance().getOutpostFromAlias(_OwnerOutpostAlias);
+		COutpost *outpost = COutpostManager::getInstance().getOutpostFromAlias(_OwnerOutpostAlias);
 		if (outpost)
 		{
 			outpost->sendOutpostMessage("OUTPOST_DELETE_SQUAD", params);
@@ -369,13 +367,13 @@ void COutpostSquad::recreate()
 //----------------------------------------------------------------------------
 bool COutpostSquad::isSpawned()
 {
-	return _State==OUTPOSTENUMS::Spawned || _State==OUTPOSTENUMS::Spawning;
+	return _State == OUTPOSTENUMS::Spawned || _State == OUTPOSTENUMS::Spawning;
 }
 
 //----------------------------------------------------------------------------
 bool COutpostSquad::isDead()
 {
-	return _State==OUTPOSTENUMS::Dead;
+	return _State == OUTPOSTENUMS::Dead;
 }
 
 //----------------------------------------------------------------------------
@@ -388,8 +386,8 @@ bool COutpostSquad::isReady()
 void COutpostSquad::died()
 {
 	OUTPOST_DBG("The squad with group id 0x%08x in outpost %s died", _GroupId, CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str());
-	nlassert(_State!=OUTPOSTENUMS::Dead);
-	nlassert(_GroupId!=0);
+	nlassert(_State != OUTPOSTENUMS::Dead);
+	nlassert(_GroupId != 0);
 	_State = OUTPOSTENUMS::Dead;
 }
 
@@ -397,8 +395,8 @@ void COutpostSquad::died()
 void COutpostSquad::leaderDied()
 {
 	OUTPOST_DBG("The leader of the squad with group id 0x%08x in outpost %s died", _GroupId, CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str());
-	nlassert(_State!=OUTPOSTENUMS::Dead);
-	nlassert(_GroupId!=0);
+	nlassert(_State != OUTPOSTENUMS::Dead);
+	nlassert(_GroupId != 0);
 	//_State = OUTPOSTENUMS::Zombie;
 }
 
@@ -431,7 +429,7 @@ void COutpostSquad::AISUp()
 	switch (_State)
 	{
 	case OUTPOSTENUMS::NotCreated:
-		if (_CreateOrder==0)
+		if (_CreateOrder == 0)
 			create();
 		break;
 	case OUTPOSTENUMS::NotReady:
@@ -483,7 +481,7 @@ bool COutpostSquad::updateSquad(uint32 currentTime)
 			nlerror("Undefined state in outpost squad");
 		}
 	}
-	
+
 	return true;
 }
 
@@ -518,12 +516,11 @@ std::string COutpostSquad::toString() const
 	else
 	{
 		desc = NLMISC::toString("OwnerOutpostAlias: %s, Desc: [%s], SpawnZone: %s, State: '%s', Side: '%s'",
-			CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str(),
-			_Desc.toString().c_str(),
-			CPrimitivesParser::aliasToString(_SpawnZone).c_str(),
-			OUTPOSTENUMS::toString(_State).c_str(),
-			OUTPOSTENUMS::toString(_Side).c_str()
-			);
+		    CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str(),
+		    _Desc.toString().c_str(),
+		    CPrimitivesParser::aliasToString(_SpawnZone).c_str(),
+		    OUTPOSTENUMS::toString(_State).c_str(),
+		    OUTPOSTENUMS::toString(_Side).c_str());
 	}
 	return desc;
 }
@@ -534,17 +531,17 @@ std::string COutpostSquad::toString() const
 
 //----------------------------------------------------------------------------
 COutpostSquadData::COutpostSquadData()
-: _OwnerOutpostAlias(0)
-, _Desc()
-, _SpawnZone()
+    : _OwnerOutpostAlias(0)
+    , _Desc()
+    , _SpawnZone()
 {
 }
 
 //----------------------------------------------------------------------------
-COutpostSquadData::COutpostSquadData(TAIAlias outpost, const COutpostSquadDescriptor & desc, TAIAlias spawnZone)
-: _OwnerOutpostAlias(outpost)
-, _Desc(desc)
-, _SpawnZone(spawnZone)
+COutpostSquadData::COutpostSquadData(TAIAlias outpost, const COutpostSquadDescriptor &desc, TAIAlias spawnZone)
+    : _OwnerOutpostAlias(outpost)
+    , _Desc(desc)
+    , _SpawnZone(spawnZone)
 {
 }
 
@@ -559,10 +556,9 @@ std::string COutpostSquadData::toString() const
 	else
 	{
 		desc = NLMISC::toString("OwnerOutpostAlias: %s, Desc: [%s], SpawnZone: %s",
-			CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str(),
-			_Desc.toString().c_str(),
-			CPrimitivesParser::aliasToString(_SpawnZone).c_str()
-			);
+		    CPrimitivesParser::aliasToString(_OwnerOutpostAlias).c_str(),
+		    _Desc.toString().c_str(),
+		    CPrimitivesParser::aliasToString(_SpawnZone).c_str());
 	}
 	return desc;
 }
@@ -577,20 +573,20 @@ std::string COutpostSquadData::toString() const
 
 #define PERSISTENT_CLASS COutpostSquadDescriptor
 
-#define PERSISTENT_PRE_APPLY\
-	H_AUTO(COutpostSquadDescriptorApply);\
+#define PERSISTENT_PRE_APPLY \
+	H_AUTO(COutpostSquadDescriptorApply);
 
-#define PERSISTENT_PRE_STORE\
-	preStore();\
-	
-#define PERSISTENT_POST_APPLY\
-	postLoad();\
+#define PERSISTENT_PRE_STORE \
+	preStore();
 
-#define PERSISTENT_DATA\
-	PROP(CSheetId,_Sheet)\
-	PROP(TAIAlias,_Alias)\
+#define PERSISTENT_POST_APPLY \
+	postLoad();
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+#define PERSISTENT_DATA    \
+	PROP(CSheetId, _Sheet) \
+	PROP(TAIAlias, _Alias)
+
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -599,13 +595,12 @@ std::string COutpostSquadData::toString() const
 
 #define PERSISTENT_CLASS COutpostSquadData
 
-#define PERSISTENT_PRE_APPLY\
-	H_AUTO(COutpostSquadDataApply);\
+#define PERSISTENT_PRE_APPLY \
+	H_AUTO(COutpostSquadDataApply);
 
-#define PERSISTENT_DATA\
-	STRUCT2(_Desc,_Desc.store(pdr),_Desc.apply(pdr))\
-	PROP(TAIAlias,_SpawnZone)\
+#define PERSISTENT_DATA                                \
+	STRUCT2(_Desc, _Desc.store(pdr), _Desc.apply(pdr)) \
+	PROP(TAIAlias, _SpawnZone)
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
-

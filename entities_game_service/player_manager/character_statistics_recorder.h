@@ -17,7 +17,6 @@
 #ifndef CHARACTER_STATISTICS_RECORDER_H
 #define CHARACTER_STATISTICS_RECORDER_H
 
-
 //-----------------------------------------------------------------------------
 // includes
 //-----------------------------------------------------------------------------
@@ -33,7 +32,6 @@
 //-----------------------------------------------------------------------------
 
 class CCharacter;
-
 
 //-----------------------------------------------------------------------------
 // class CCharaterStatisticsRecorderRecord
@@ -54,14 +52,13 @@ public:
 	~CCharaterStatisticsRecorderRecord();
 
 	void clear();
-	void build(const CCharaterStatisticsRecorderRecord& last, CCharacter* character);
-	
+	void build(const CCharaterStatisticsRecorderRecord &last, CCharacter *character);
+
 private:
 	uint32 _TicksInGame;
 	uint64 _TimeInGame;
 	uint32 _TotalXP;
 };
-
 
 //-----------------------------------------------------------------------------
 // class CCharaterStatisticsRecorderContainer
@@ -82,15 +79,14 @@ public:
 	~CCharaterStatisticsRecorderContainer();
 
 	void clear();
-	void add(CCharacter* character);
-	
+	void add(CCharacter *character);
+
 private:
 	uint32 _Counter;
 	std::vector<CCharaterStatisticsRecorderRecord> _Sessions1;
 	std::vector<CCharaterStatisticsRecorderRecord> _Sessions10;
 	std::vector<CCharaterStatisticsRecorderRecord> _Sessions100;
 };
-
 
 //-----------------------------------------------------------------------------
 #endif

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_AREA_EFFECT_H
 #define RY_AREA_EFFECT_H
 
@@ -27,11 +25,11 @@
 
 class CStaticAiAction;
 class CGameItemPtr;
-	
+
 /**
  * Area effect descriptor. The build function enables to build it from scripts
  * As it is a rather simple class, I used an union instead of a class hierarchy to avoid methods calls through the vftable
- * 
+ *
  * \author Nicolas Brigand
  * \author Nevrax France
  * \date 2003
@@ -40,8 +38,8 @@ class CAreaEffect
 {
 	CAreaEffect();
 	NL_INSTANCE_COUNTER_DECL(CAreaEffect);
-public:
 
+public:
 	CAreaEffect(const CAreaEffect &areaEffect);
 	~CAreaEffect();
 
@@ -66,35 +64,35 @@ public:
 	};
 	union
 	{
-		SBomb  Bomb;
+		SBomb Bomb;
 		SSpray Spray;
 		SChain Chain;
 	};
 
-	static CAreaEffect * buildArea( const TBrickParam::IId * param )
+	static CAreaEffect *buildArea(const TBrickParam::IId *param)
 	{
-	
-		CAreaEffect * area = NULL;
-		switch (param->id() )
+
+		CAreaEffect *area = NULL;
+		switch (param->id())
 		{
-			case TBrickParam::AREA_BOMB:
-				area = CAreaEffect::buildBomb(param);
-				break;
-			case TBrickParam::AREA_SPRAY:
-				area = CAreaEffect::buildSpray(param);
-				break;
-			case TBrickParam::AREA_CHAIN:
-				area = CAreaEffect::buildChain(param);
-				break;
-			default:
-				break;
+		case TBrickParam::AREA_BOMB:
+			area = CAreaEffect::buildBomb(param);
+			break;
+		case TBrickParam::AREA_SPRAY:
+			area = CAreaEffect::buildSpray(param);
+			break;
+		case TBrickParam::AREA_CHAIN:
+			area = CAreaEffect::buildChain(param);
+			break;
+		default:
+			break;
 		}
 		return area;
 	}
 
-	static CAreaEffect * buildArea( CGameItemPtr &itemPtr );
+	static CAreaEffect *buildArea(CGameItemPtr &itemPtr);
 
-	static CAreaEffect * buildArea( const CStaticAiAction *aiAction );
+	static CAreaEffect *buildArea(const CStaticAiAction *aiAction);
 
 	MAGICFX::TSpellMode Type;
 
@@ -102,7 +100,7 @@ public:
 	std::string toString() const
 	{
 		std::string str;
-		switch(Type)
+		switch (Type)
 		{
 		case MAGICFX::Bomb:
 			str = NLMISC::toString("Bomb, radius %f, Min factor %f", Bomb.Radius, Bomb.MinFactor);
@@ -121,50 +119,46 @@ public:
 	}
 
 protected:
-
-	static CAreaEffect * buildBomb( const TBrickParam::IId * param )
+	static CAreaEffect *buildBomb(const TBrickParam::IId *param)
 	{
-		CAreaEffect * effect = new CAreaEffect;
+		CAreaEffect *effect = new CAreaEffect;
 		effect->Type = MAGICFX::Bomb;
 		effect->Bomb.Radius = ((CSBrickParamAreaBomb *)param)->Radius;
 		effect->Bomb.MinFactor = ((CSBrickParamAreaBomb *)param)->MinFactor;
 		effect->Bomb.MaxTargets = ((CSBrickParamAreaBomb *)param)->MaxTarget;
 		return effect;
 	}
-	
-	static CAreaEffect * buildSpray( const TBrickParam::IId * param )
+
+	static CAreaEffect *buildSpray(const TBrickParam::IId *param)
 	{
-		CAreaEffect * effect = new CAreaEffect;
+		CAreaEffect *effect = new CAreaEffect;
 		effect->Type = MAGICFX::Spray;
 		effect->Spray.MinBase = ((CSBrickParamAreaSpray *)param)->Base;
 		effect->Spray.Height = ((CSBrickParamAreaSpray *)param)->Height;
 		effect->Spray.MaxTargets = ((CSBrickParamAreaSpray *)param)->MaxTarget;
-		if ( ((CSBrickParamAreaSpray *)param)->Angle >= 180 )
+		if (((CSBrickParamAreaSpray *)param)->Angle >= 180)
 		{
-			nlwarning("<CAreaEffect build>: spray angle is %u (0 < angle < 180 )",((CSBrickParamAreaSpray *)param)->Angle );
+			nlwarning("<CAreaEffect build>: spray angle is %u (0 < angle < 180 )", ((CSBrickParamAreaSpray *)param)->Angle);
 			delete effect;
 			return NULL;
 		}
 		// compute the spray demi-angle
-		float angle = float( NLMISC::Pi * ((CSBrickParamAreaSpray *)param)->Angle / 360.0 );
+		float angle = float(NLMISC::Pi * ((CSBrickParamAreaSpray *)param)->Angle / 360.0);
 		// get the max base from the angle
-		effect->Spray.MaxBase = float( 2 * tan( angle ) * effect->Spray.Height );
+		effect->Spray.MaxBase = float(2 * tan(angle) * effect->Spray.Height);
 		return effect;
 	}
-	
-	static CAreaEffect * buildChain( const TBrickParam::IId * param )
+
+	static CAreaEffect *buildChain(const TBrickParam::IId *param)
 	{
-		CAreaEffect * effect = new CAreaEffect;
+		CAreaEffect *effect = new CAreaEffect;
 		effect->Type = MAGICFX::Chain;
 		effect->Chain.MaxTargets = ((CSBrickParamAreaChain *)param)->MaxTargets;
 		effect->Chain.Range = ((CSBrickParamAreaChain *)param)->Range;
 		effect->Chain.Factor = ((CSBrickParamAreaChain *)param)->Factor;
 		return effect;
 	}
-
-
 };
-
 
 /**
  * Class used to select entities in the specified area
@@ -175,21 +169,22 @@ protected:
 class CEntityRangeSelector : public CRangeSelector
 {
 	NL_INSTANCE_COUNTER_DECL(CEntityRangeSelector);
-public:
 
-	CEntityRangeSelector() : _PrevFactor(1.0f), _Area(NULL)
+public:
+	CEntityRangeSelector()
+	    : _PrevFactor(1.0f)
+	    , _Area(NULL)
 	{
 	}
 
-	void buildTargetList(const TDataSetRow & actorRow, const TDataSetRow & mainTargetRow, const CAreaEffect * area, ACTNATURE::TActionNature nature, bool ignoreMainTarget = false);
+	void buildTargetList(const TDataSetRow &actorRow, const TDataSetRow &mainTargetRow, const CAreaEffect *area, ACTNATURE::TActionNature nature, bool ignoreMainTarget = false);
 
-	void clampTargetCount(uint32 maxTargetCount )
+	void clampTargetCount(uint32 maxTargetCount)
 	{
-		if ( _Area && _Entities.size() > maxTargetCount )
+		if (_Area && _Entities.size() > maxTargetCount)
 		{
-			_Entities.resize( maxTargetCount );
-			_Distances.resize( maxTargetCount );
-
+			_Entities.resize(maxTargetCount);
+			_Distances.resize(maxTargetCount);
 		}
 	}
 
@@ -197,47 +192,25 @@ public:
 
 private:
 	// NB : this object don't own this pointed object
-	const CAreaEffect *	 _Area;
-	mutable float		 _PrevFactor;
+	const CAreaEffect *_Area;
+	mutable float _PrevFactor;
 };
 
-
 /**
-* Class used to select entities in a disc centered on given entity (used by auras)
-* \author David Fleury
-* \author Nevrax France
-* \date 2003
-*/
+ * Class used to select entities in a disc centered on given entity (used by auras)
+ * \author David Fleury
+ * \author Nevrax France
+ * \date 2003
+ */
 class CAuraEntitySelector : public CRangeSelector
 {
 public:
-	inline void buildTargetList(CEntityBase * actor, sint32 x, sint32 y, float radius, bool offensiveAction, bool ignoreMainTarget)
+	inline void buildTargetList(CEntityBase *actor, sint32 x, sint32 y, float radius, bool offensiveAction, bool ignoreMainTarget)
 	{
-		buildDisc( actor, x, y, radius, EntityMatrix, offensiveAction, ignoreMainTarget);
+		buildDisc(actor, x, y, radius, EntityMatrix, offensiveAction, ignoreMainTarget);
 	}
 };
 
 #endif // RY_AREA_EFFECT_H
 
 /* End of area_effect.h */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

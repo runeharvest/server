@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef EGS_STATIC_TEXT_EMOTES_H
 #define EGS_STATIC_TEXT_EMOTES_H
 
-//Nel georges
+// Nel georges
 #include "nel/georges/u_form.h"
 #include "game_share/mode_and_behaviour.h"
 
@@ -45,14 +43,14 @@ public:
 		/// string for the target
 		std::string TargetTarget;
 		//@}
-		
+
 		///\name string ids of phrases that must be displayed when the actor has no target.
 		//@{
 		/// string for the crowd
 		std::string NoTargetCrowd;
 		/// string for the actor
 		std::string NoTargetActor;
-		
+
 		///\name string ids of phrases that must be displayed when the actor targets himshelf
 		//@{
 		/// string for the actor
@@ -60,7 +58,7 @@ public:
 		/// string for the crowd
 		std::string SelfCrowd;
 		//@}
-		
+
 		/// animation id
 		std::string Animation;
 		/// true if the emote is reserved for FBT
@@ -68,72 +66,70 @@ public:
 
 		/// true if this emote can be launched from client UI
 		bool UsableFromClientUI;
-		
+
 		void serial(NLMISC::IStream &f)
 		{
-			f.serial( EmoteId );
-			f.serial( TargetCrowd );
-			f.serial( TargetActor );
-			f.serial( TargetTarget );
-			f.serial( NoTargetCrowd );
-			f.serial( NoTargetActor );
-			f.serial( SelfActor );
-			f.serial( SelfCrowd );
-			f.serial( Animation );
-			f.serial( OnlyForFBT );
-			f.serial( UsableFromClientUI );
+			f.serial(EmoteId);
+			f.serial(TargetCrowd);
+			f.serial(TargetActor);
+			f.serial(TargetTarget);
+			f.serial(NoTargetCrowd);
+			f.serial(NoTargetActor);
+			f.serial(SelfActor);
+			f.serial(SelfCrowd);
+			f.serial(Animation);
+			f.serial(OnlyForFBT);
+			f.serial(UsableFromClientUI);
 		}
 	};
 	/// ctor
 	CStaticTextEmotes() { }
 
 	/// Read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 	/// Return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 2; }
+	inline static uint getVersion() { return 2; }
 	/// Serial
 	void serial(NLMISC::IStream &f)
 	{
-		f.serialCont( _Phrases );
+		f.serialCont(_Phrases);
 		if (f.isReading())
 			buildEmoteIdMap();
 	}
 
-	const CTextEmotePhrases * getPhrase(uint idx)const
+	const CTextEmotePhrases *getPhrase(uint idx) const
 	{
-		if ( idx < _Phrases.size() )
+		if (idx < _Phrases.size())
 			return &_Phrases[idx];
 		return NULL;
 	}
-	const CTextEmotePhrases * getPhrase(const std::string& emoteId)const
+	const CTextEmotePhrases *getPhrase(const std::string &emoteId) const
 	{
 		std::map<std::string, size_t>::const_iterator it = _EmoteIdMap.find(emoteId);
-		if (it!=_EmoteIdMap.end() && it->second<_Phrases.size())
+		if (it != _EmoteIdMap.end() && it->second < _Phrases.size())
 			return &_Phrases[it->second];
 		return NULL;
 	}
-	uint16 getEmoteIndex(const std::string& emoteId) const
+	uint16 getEmoteIndex(const std::string &emoteId) const
 	{
 		std::map<std::string, size_t>::const_iterator it = _EmoteIdMap.find(emoteId);
-		if (it!=_EmoteIdMap.end())
+		if (it != _EmoteIdMap.end())
 			return (uint16)it->second;
 		return std::numeric_limits<uint16>::max();
 	}
-	MBEHAV::EBehaviour getEmoteBehav(const std::string& emoteId) const;
-	
+	MBEHAV::EBehaviour getEmoteBehav(const std::string &emoteId) const;
+
 	/// Removed
 	void removed() { }
-	
+
 private:
 	void buildEmoteIdMap();
-	
-private:		
+
+private:
 	/// all emotes, ordered by integer id
-	std::vector< CTextEmotePhrases > _Phrases;
+	std::vector<CTextEmotePhrases> _Phrases;
 	/// mapping of string id to integer id (index in _Phrases)
 	std::map<std::string, size_t> _EmoteIdMap;
 };
-
-
 
 #endif

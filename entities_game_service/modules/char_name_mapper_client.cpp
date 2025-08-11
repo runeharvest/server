@@ -35,26 +35,25 @@ using namespace NLNET;
 using namespace CNM;
 using namespace EGSPD;
 
-
 class CCharNameMapperClient
-	:	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav <CModuleBase> > >,
-		public CCharNameMapperClientSkel,
-		public ICharNameMapperClient
+    : public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase>>>,
+      public CCharNameMapperClientSkel,
+      public ICharNameMapperClient
 {
 
 	struct TPendingCharName
 	{
-		CEntityId	CharEid;
-		ucstring	CharName;
+		CEntityId CharEid;
+		ucstring CharName;
 	};
 
-	typedef list<TPendingCharName>	TPendingcharNames;
+	typedef list<TPendingCharName> TPendingcharNames;
 
 	/// A list of character that need to be send to IOS for mapping.
-	TPendingcharNames	_PendingCharNames;
+	TPendingcharNames _PendingCharNames;
 
 	/// The IOS char name mapper module
-	TModuleProxyPtr		_CharNameMapper;
+	TModuleProxyPtr _CharNameMapper;
 
 	// Number of character mapped by tick
 	enum
@@ -63,10 +62,9 @@ class CCharNameMapperClient
 	};
 
 	// Received charNames changes from IOS, not still applied to update of contact list
-	std::vector<CEntityId>	_ReceivedCharNames;
+	std::vector<CEntityId> _ReceivedCharNames;
 
 public:
-
 	CCharNameMapperClient()
 	{
 		CCharNameMapperClientSkel::init(this);
@@ -79,7 +77,7 @@ public:
 			_CharNameMapper = module;
 
 			// we need to remap all character names
-			const CEntityIdTranslator::TEntityCont	&entities = CEntityIdTranslator::getInstance()->getRegisteredEntities();
+			const CEntityIdTranslator::TEntityCont &entities = CEntityIdTranslator::getInstance()->getRegisteredEntities();
 			CEntityIdTranslator::TEntityCont::const_iterator first(entities.begin()), last(entities.end());
 
 			for (; first != last; ++first)
@@ -105,10 +103,10 @@ public:
 		if (_CharNameMapper != NULL && !_PendingCharNames.empty())
 		{
 			// send a batch of name each frame
-			std::vector < TCharNameInfo > charNameInfos;
+			std::vector<TCharNameInfo> charNameInfos;
 			charNameInfos.reserve(NB_NAME_MAPPED_BY_TICK);
 
-			for (uint i=0; i<NB_NAME_MAPPED_BY_TICK && !_PendingCharNames.empty(); ++i)
+			for (uint i = 0; i < NB_NAME_MAPPED_BY_TICK && !_PendingCharNames.empty(); ++i)
 			{
 				const TPendingCharName &pcn = _PendingCharNames.front();
 				charNameInfos.push_back(TCharNameInfo());
@@ -143,16 +141,15 @@ public:
 	// Virtual from CCharNameMapperClientSkel
 	///////////////////////////////////////////////////////////////////////////
 
-	// 
-	virtual void charNamesMapped(NLNET::IModuleProxy *sender, const std::vector < TCharMappedInfo > &charMappedInfos)
+	//
+	virtual void charNamesMapped(NLNET::IModuleProxy *sender, const std::vector<TCharMappedInfo> &charMappedInfos)
 	{
 		nldebug("Receveived %u mapped names from IOS", charMappedInfos.size());
 
-
-		// ok, a series of name have been mapped, store the result in the 
+		// ok, a series of name have been mapped, store the result in the
 		// eid translator
 
-		for (uint i=0; i<charMappedInfos.size(); ++i)
+		for (uint i = 0; i < charMappedInfos.size(); ++i)
 		{
 			const TCharMappedInfo &cmi = charMappedInfos[i];
 			CEntityIdTranslator::getInstance()->setEntityNameStringId(cmi.getCharEid(), cmi.getStringId());
@@ -161,7 +158,6 @@ public:
 			_ReceivedCharNames.push_back(cmi.getCharEid());
 		}
 
-		
 		// When all name request sent, update guild and contact list
 		if (_PendingCharNames.empty())
 		{
@@ -174,12 +170,12 @@ public:
 				const EGSPD::CGuildContainerPD *guilds = IGuildManager::getInstance().getGuildContainer();
 				if (guilds != NULL)
 				{
-					std::map<TGuildId, CGuildPD*>::const_iterator first(guilds->getGuildsBegin()), last(guilds->getGuildsEnd());
+					std::map<TGuildId, CGuildPD *>::const_iterator first(guilds->getGuildsBegin()), last(guilds->getGuildsEnd());
 					for (; first != last; ++first)
 					{
 						IGuild *guild = IGuild::getGuildInterface(IGuildManager::getInstance().getGuildFromId(first->first));
-						BOMB_IF(guild == NULL, "CCharNameMapperClient::charNamesMapped : failed to retrieve guild "<<first->first, continue);
-						
+						BOMB_IF(guild == NULL, "CCharNameMapperClient::charNamesMapped : failed to retrieve guild " << first->first, continue);
+
 						// update the member list
 						guild->updateMembersStringIds();
 					}
@@ -187,7 +183,7 @@ public:
 			}
 
 			// update the character contact list
-			if(!_ReceivedCharNames.empty())
+			if (!_ReceivedCharNames.empty())
 			{
 				const IPlayerManager::TMapPlayers &players = IPlayerManager::getInstance().getPlayers();
 
@@ -217,9 +213,6 @@ public:
 			IService::getInstance()->clearCurrentStatus("Mapping names");
 		}
 	}
-
 };
 
-
 NLNET_REGISTER_MODULE_FACTORY(CCharNameMapperClient, "CharNameMapperClient");
-

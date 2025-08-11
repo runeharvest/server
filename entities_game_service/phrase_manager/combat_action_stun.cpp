@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -34,38 +31,37 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
 //--------------------------------------------------------------
-//					initFromAiAction()  
+//					initFromAiAction()
 //--------------------------------------------------------------
-bool CCombatActionStun::initFromAiAction( const CStaticAiAction *aiAction, CCombatPhrase *phrase )
+bool CCombatActionStun::initFromAiAction(const CStaticAiAction *aiAction, CCombatPhrase *phrase)
 {
 #ifdef NL_DEBUG
 	nlassert(phrase);
 	nlassert(aiAction);
 #endif
-	
+
 	if (aiAction->getType() != AI_ACTION::Range && aiAction->getType() != AI_ACTION::Melee)
 		return false;
-	
+
 	_ActorRowId = phrase->getAttacker()->getEntityRowId();
-	
+
 	// read parameters
 	const CCombatParams &data = aiAction->getData().Combat;
 	_StunDuration = data.EffectTime;
-	
-	//DEBUG
+
+	// DEBUG
 	if (_StunDuration > 300) // 30s
 	{
 		nlwarning("COMBAT : found a stun duration of %u ticks for ai action, set it to 30s instead", _StunDuration);
 		_StunDuration = 300;
 	}
-	
+
 	return true;
 } // initFromAiAction //
 
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CCombatActionStun::apply(CCombatPhrase *phrase)
 {
@@ -79,9 +75,9 @@ void CCombatActionStun::apply(CCombatPhrase *phrase)
 	if (_ApplyOnTargets)
 	{
 		const std::vector<CCombatPhrase::TTargetInfos> &targets = phrase->getTargets();
-		for (uint i = 0; i < targets.size() ; ++i)
+		for (uint i = 0; i < targets.size(); ++i)
 		{
-			if ( phrase->getTargetDodgeFactor(i) == 0.0f )
+			if (phrase->getTargetDodgeFactor(i) == 0.0f)
 			{
 				if (targets[i].Target != NULL)
 				{
@@ -102,11 +98,10 @@ void CCombatActionStun::apply(CCombatPhrase *phrase)
 	}
 } // apply //
 
-
 //--------------------------------------------------------------
-//					applyOnEntity()  
+//					applyOnEntity()
 //--------------------------------------------------------------
-void CCombatActionStun::applyOnEntity( CEntityBase *entity, float successFactor )
+void CCombatActionStun::applyOnEntity(CEntityBase *entity, float successFactor)
 {
 	H_AUTO(CCombatActionStun_applyOnEntity);
 
@@ -124,11 +119,11 @@ void CCombatActionStun::applyOnEntity( CEntityBase *entity, float successFactor 
 		nlwarning("COMBAT : found a stun duration of %u ticks for entity %s, set it to 3s instead", _StunDuration, entity->getId().toString().c_str());
 		_StunDuration = 30;
 	}
-	
-	TGameCycle endDate = TGameCycle(_StunDuration*successFactor) + CTickEventHandler::getGameCycle();
+
+	TGameCycle endDate = TGameCycle(_StunDuration * successFactor) + CTickEventHandler::getGameCycle();
 	DEBUGLOG("EFFECT : stun entity %s for %u ticks", entity->getId().toString().c_str(), _StunDuration);
 
-	CStunEffect *effect = new CStunEffect( _ActorRowId, entity->getEntityRowId(), EFFECT_FAMILIES::CombatStun, (uint8)_StunDuration, endDate);
+	CStunEffect *effect = new CStunEffect(_ActorRowId, entity->getEntityRowId(), EFFECT_FAMILIES::CombatStun, (uint8)_StunDuration, endDate);
 	if (!effect)
 	{
 		nlwarning("COMBAT : <CCombatActionStun::apply> Failed to allocate new CCombatStunEffect object !");

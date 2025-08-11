@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #include "role_persistant_data.h"
@@ -23,12 +21,11 @@
 // Fix the stupid Visual 6 Warning
 void foo_role_persistant_data_cpp() {};
 
-
 ///////////
 // USING //
 ///////////
-//using namespace std;
-//using namespace NLMISC;
+// using namespace std;
+// using namespace NLMISC;
 //
 //	// Constructor
 //	CRolePersistantData::CRolePersistantData()

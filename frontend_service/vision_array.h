@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_VISION_ARRAY_H
 #define NL_VISION_ARRAY_H
 
@@ -24,15 +22,12 @@
 #include "fe_types.h"
 #include "client_host.h"
 
-
 /*
  * Constants and basic types definitions
  */
 typedef float TPriority;
 
-
 const CLFECOMMON::TCoord UNSET_DISTANCE = 99999999;
-
 
 /**
  * Vision array item union.
@@ -43,42 +38,42 @@ const CLFECOMMON::TCoord UNSET_DISTANCE = 99999999;
 struct TPairState
 {
 	/// Absolute distance between client and entity (in mm)
-	CLFECOMMON::TCoord				DistanceCE;
+	CLFECOMMON::TCoord DistanceCE;
 
-//private:
+	// private:
 	/// Current priority
-	TPriority						Priority;
-//public:
+	TPriority Priority;
+	// public:
 
 	/// Entity index, to reference the seen entity in the entity container
-	TEntityIndex					EntityIndex;
+	TEntityIndex EntityIndex;
 
 	/// Last priority before resetting
-	TPriority						LastPriority;
+	TPriority LastPriority;
 
 	enum TAssociationState
 	{
-		UnusedAssociation = 0,			// Pair is not used
-		AwaitingAssAck = 1,				// Association was sent to the client
-		NormalAssociation = 2,			// Pair is used
-		AwaitingDisAck = 3,				// Disassociation was sent to the client
-		//SubstitutionBeforeDisAck = 4,	// Disassociation then association were sent to the client
-		//SubstitutionAfterDisAck = 5,	// The client acknowledged disassociation of substitution
-		//CancelledSubstitution = 6		// A disassociation occurs before the client acknowledges the disassociation of substitution
+		UnusedAssociation = 0, // Pair is not used
+		AwaitingAssAck = 1, // Association was sent to the client
+		NormalAssociation = 2, // Pair is used
+		AwaitingDisAck = 3, // Disassociation was sent to the client
+		// SubstitutionBeforeDisAck = 4,	// Disassociation then association were sent to the client
+		// SubstitutionAfterDisAck = 5,	// The client acknowledged disassociation of substitution
+		// CancelledSubstitution = 6		// A disassociation occurs before the client acknowledges the disassociation of substitution
 	};
 
-//#ifdef NL_DEBUG
-	uint32							PrevAssociationBits;
-//#endif
+	// #ifdef NL_DEBUG
+	uint32 PrevAssociationBits;
+	// #endif
 
 	/// Association State
-	uint8							AssociationState;
+	uint8 AssociationState;
 
 	/// Association changebits (2 LSBits serialized)
-	uint8							AssociationChangeBits;
+	uint8 AssociationChangeBits;
 
 	/// Association used
-	bool							SlotUsed;
+	bool SlotUsed;
 
 	///
 	TPairState()
@@ -88,7 +83,7 @@ struct TPairState
 	}
 
 	///
-	void							resetItem()
+	void resetItem()
 	{
 		DistanceCE = UNSET_DISTANCE;
 		Priority = 0;
@@ -97,36 +92,36 @@ struct TPairState
 		SlotUsed = false;
 	}
 
-	TPriority						getPrio() const
+	TPriority getPrio() const
 	{
 		return Priority;
 	}
 
 	/// Used for slot 0, instead of updatePrio()...
-	void							setSteadyPrio( TPriority prio )
+	void setSteadyPrio(TPriority prio)
 	{
 		LastPriority = prio;
 		Priority = prio;
 	}
 
-	/// 
-	void							resetPrio()
+	///
+	void resetPrio()
 	{
 		LastPriority = Priority;
 		Priority = 0;
 	}
 
 	///
-	void							revertPrio()
+	void revertPrio()
 	{
 		// Not a problem if this is done several times for the same pair
 		Priority = LastPriority;
 	}
 
 	///
-	void							updatePrio()
+	void updatePrio()
 	{
-		if ( DistanceCE < 100.0f )
+		if (DistanceCE < 100.0f)
 		{
 			// < 0.1 m : prio += 100.0
 			Priority += 100.0f;
@@ -142,41 +137,40 @@ struct TPairState
 	}
 
 	///
-	void							changeAssociation()
+	void changeAssociation()
 	{
 		++AssociationChangeBits; // increment counter
 	}
 
 	/// Return true if the association was suppressed (using unassociate()) and no new association was done yet
-	bool							associationSuppressed() const
+	bool associationSuppressed() const
 	{
 		return !SlotUsed;
 	}
 
 	///
-	void							associate()
+	void associate()
 	{
 		SlotUsed = true;
 	}
-	
+
 	///
-	void							unassociate()
+	void unassociate()
 	{
 		changeAssociation();
 		SlotUsed = false;
 	}
 
 	///
-	void							resetAssociation()
+	void resetAssociation()
 	{
 		AssociationState = UnusedAssociation;
 		AssociationChangeBits = 0;
-//#ifdef NL_DEBUG
+		// #ifdef NL_DEBUG
 		PrevAssociationBits = 0;
-//#endif
+		// #endif
 	}
 };
-
 
 /**
  * Vision Array.
@@ -190,45 +184,47 @@ struct TPairState
 class CVisionArray
 {
 public:
-
 	/// Constructor
 	CVisionArray();
 
 	/// Initialization
-	void				init() {}
+	void init() { }
 
 	/// Return the status of an item (see enum in TBKEntityInfo in client_entity_id_translator.h)
-	uint8				getAssociationState( TClientId clientid, CLFECOMMON::TCLEntityId ceid ) const
+	uint8 getAssociationState(TClientId clientid, CLFECOMMON::TCLEntityId ceid) const
 	{
 		return _Array[clientid][ceid].AssociationState;
 
-/*
-		return client->IdTranslator.isUsed(ceid) ?
-					client->IdTranslator.getInfo(ceid).AssociationState :
-					CClientEntityIdTranslator::CEntityInfo::UnusedAssociation;
-*/
+		/*
+		        return client->IdTranslator.isUsed(ceid) ?
+		                    client->IdTranslator.getInfo(ceid).AssociationState :
+		                    CClientEntityIdTranslator::CEntityInfo::UnusedAssociation;
+		*/
 	}
 
 	/// Set the status of an item (see enum in TBKEntityInfo in client_entity_id_translator.h)
-	void				setAssociationState(TClientId clientid, CLFECOMMON::TCLEntityId ceid, uint8 state )
+	void setAssociationState(TClientId clientid, CLFECOMMON::TCLEntityId ceid, uint8 state)
 	{
 		_Array[clientid][ceid].AssociationState = state;
-/*
-		client->IdTranslator.getInfo(ceid).AssociationState = state;
-*/
+		/*
+		        client->IdTranslator.getInfo(ceid).AssociationState = state;
+		*/
 	}
 
+	/// Return the Entity Index of an entity
+	void setEntityIndex(TClientId clientid, CLFECOMMON::TCLEntityId slot, TEntityIndex entityindex)
+	{
+		_Array[clientid][slot].EntityIndex = entityindex;
+	}
 
 	/// Return the Entity Index of an entity
-	void				setEntityIndex( TClientId clientid, CLFECOMMON::TCLEntityId slot, TEntityIndex entityindex )
-						{ _Array[clientid][slot].EntityIndex = entityindex; }
-
-	/// Return the Entity Index of an entity
-	TEntityIndex		getEntityIndex( TClientId clientid, CLFECOMMON::TCLEntityId slot ) const
-						{ return _Array[clientid][slot].EntityIndex; }
+	TEntityIndex getEntityIndex(TClientId clientid, CLFECOMMON::TCLEntityId slot) const
+	{
+		return _Array[clientid][slot].EntityIndex;
+	}
 
 	/// Print the contents of an item, except the properties (debugging)
-	//void				printItem( TClientId clientid, CLFECOMMON::TCLEntityId ceid ) const;
+	// void				printItem( TClientId clientid, CLFECOMMON::TCLEntityId ceid ) const;
 
 	/// Access
 
@@ -236,36 +232,31 @@ public:
 	 * entity id as an out argument, or NULL if there is no visible entity at all.
 	 * Takes into account the entites in NormalState or PendingAssociation.
 	 */
-	//TVAItem				*currentFurthestSeenEntity( TClientId clientid, TCLEntityId& resultceid );
+	// TVAItem				*currentFurthestSeenEntity( TClientId clientid, TCLEntityId& resultceid );
 
 	// Set new priority
-	//void				setPriority( TClientId clientid, CLFECOMMON::TCLEntityId ceid, CLFECOMMON::TPropIndex propindex, TPriority newprio );
-
+	// void				setPriority( TClientId clientid, CLFECOMMON::TCLEntityId ceid, CLFECOMMON::TPropIndex propindex, TPriority newprio );
 
 	///
-	TPairState&			getPairState( TClientId clientId, CLFECOMMON::TCLEntityId slot )
+	TPairState &getPairState(TClientId clientId, CLFECOMMON::TCLEntityId slot)
 	{
 		return _Array[clientId][slot];
 	}
 
 	///
-	TPairState*			getClientStateArray(TClientId clientId)
+	TPairState *getClientStateArray(TClientId clientId)
 	{
 		return _Array[clientId];
 	}
 
 protected:
-
 	/// Easy and safe access to the client host object
-	static CClientHost	*clientHost( TClientId clientid );
+	static CClientHost *clientHost(TClientId clientid);
 
 private:
-
 	/// The array
-	TPairState				_Array [MAX_NB_CLIENTS+1] [256];
-
+	TPairState _Array[MAX_NB_CLIENTS + 1][256];
 };
-
 
 #endif // NL_VISION_ARRAY_H
 

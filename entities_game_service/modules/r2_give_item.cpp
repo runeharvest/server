@@ -25,7 +25,6 @@
 #include "egs_mirror.h"
 #include "egs_sheets/egs_sheets.h"
 
-
 #include "game_share/bot_chat_types.h"
 
 #include "player_manager/player_manager.h"
@@ -38,34 +37,34 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-uint32	CR2GiveItem::_NextActionId = 0;
+uint32 CR2GiveItem::_NextActionId = 0;
 
 // CGiveItemRequestMsg Transport class callback implementation
-void CGiveItemRequestMsgImp::callback (const std::string &name, NLNET::TServiceId id)
+void CGiveItemRequestMsgImp::callback(const std::string &name, NLNET::TServiceId id)
 {
-	CR2GiveItem::getInstance().giveItemRequest( *this );
+	CR2GiveItem::getInstance().giveItemRequest(*this);
 }
 
 // CReceiveItemRequestMsg transport class callback implementation
-void CReceiveItemRequestMsgImp::callback (const std::string &name, NLNET::TServiceId id)
+void CReceiveItemRequestMsgImp::callback(const std::string &name, NLNET::TServiceId id)
 {
-	CR2GiveItem::getInstance().receiveItemRequest( *this ); 
+	CR2GiveItem::getInstance().receiveItemRequest(*this);
 }
 
 //----------------------------------------------------------------------------
-void CR2GiveItem::giveItemRequest( const CGiveItemRequestMsg &msg )
+void CR2GiveItem::giveItemRequest(const CGiveItemRequestMsg &msg)
 {
 	TItemRequest req;
-	req = (const CItemRequestMsgItf&)msg;
-	if( _ValidateGiveItemRequest( req ) )
+	req = (const CItemRequestMsgItf &)msg;
+	if (_ValidateGiveItemRequest(req))
 	{
-		TPendingRequest::iterator it = _PendingRequest.find( req.CreatureRowId );
-		if( it == _PendingRequest.end() )
+		TPendingRequest::iterator it = _PendingRequest.find(req.CreatureRowId);
+		if (it == _PendingRequest.end())
 		{
-			pair< TPendingRequest::iterator, bool > res = _PendingRequest.insert( make_pair(req.CreatureRowId, TCreatureItemRequest() ) );
-			if( res.second == false )
+			pair<TPendingRequest::iterator, bool> res = _PendingRequest.insert(make_pair(req.CreatureRowId, TCreatureItemRequest()));
+			if (res.second == false)
 			{
-				_SendAckToAIS( false, req );
+				_SendAckToAIS(false, req);
 				return;
 			}
 			it = res.first;
@@ -74,48 +73,48 @@ void CR2GiveItem::giveItemRequest( const CGiveItemRequestMsg &msg )
 		TCreatureItemRequest &vec = (*it).second;
 
 		uint32 i;
-		for( i = 0; i < vec.size(); ++i )
-			if( vec[i] == msg )
-				break;				
-		if( i == vec.size() )
-			vec.push_back( TItemRequest() );
+		for (i = 0; i < vec.size(); ++i)
+			if (vec[i] == msg)
+				break;
+		if (i == vec.size())
+			vec.push_back(TItemRequest());
 		vec[i] = msg;
 		vec[i].ActionId = ++_NextActionId;
 		vec[i].IsGiveItem = true;
 		_SetClientDB(vec[i], i);
-		_SendAckToAIS( true, req );
+		_SendAckToAIS(true, req);
 	}
 	else
 	{
-		_SendAckToAIS( false, req );
+		_SendAckToAIS(false, req);
 	}
 }
 
 //----------------------------------------------------------------------------
-void CR2GiveItem::receiveItemRequest( const CReceiveItemRequestMsg &msg )
+void CR2GiveItem::receiveItemRequest(const CReceiveItemRequestMsg &msg)
 {
 	TItemRequest req;
-	req = (const CItemRequestMsgItf&)msg;
+	req = (const CItemRequestMsgItf &)msg;
 
-	TPendingRequest::iterator it = _PendingRequest.find( req.CreatureRowId );
-	if( it == _PendingRequest.end() )
+	TPendingRequest::iterator it = _PendingRequest.find(req.CreatureRowId);
+	if (it == _PendingRequest.end())
 	{
-		pair< TPendingRequest::iterator, bool > res = _PendingRequest.insert( make_pair(req.CreatureRowId, TCreatureItemRequest() ) );
-		if( res.second == false )
+		pair<TPendingRequest::iterator, bool> res = _PendingRequest.insert(make_pair(req.CreatureRowId, TCreatureItemRequest()));
+		if (res.second == false)
 		{
 			return;
 		}
 		it = res.first;
 	}
-	
+
 	TCreatureItemRequest &vec = (*it).second;
-	
+
 	uint32 i;
-	for( i = 0; i < vec.size(); ++i )
-		if( vec[i] == msg )
-			break;				
-	if( i == vec.size() )
-		vec.push_back( TItemRequest() );
+	for (i = 0; i < vec.size(); ++i)
+		if (vec[i] == msg)
+			break;
+	if (i == vec.size())
+		vec.push_back(TItemRequest());
 	vec[i] = msg;
 	vec[i].ActionId = ++_NextActionId;
 	vec[i].IsGiveItem = false;
@@ -123,90 +122,89 @@ void CR2GiveItem::receiveItemRequest( const CReceiveItemRequestMsg &msg )
 }
 
 //----------------------------------------------------------------------------
-void CR2GiveItem::_SetClientDB( const TItemRequest & req, uint32 index)
+void CR2GiveItem::_SetClientDB(const TItemRequest &req, uint32 index)
 {
-	if( index < BOTCHATTYPE::MaxR2MissionEntryDatabase )
+	if (index < BOTCHATTYPE::MaxR2MissionEntryDatabase)
 	{
-		CCharacter *c = PlayerManager.getChar( req.CharacterRowId );
-		if( c )
+		CCharacter *c = PlayerManager.getChar(req.CharacterRowId);
+		if (c)
 		{
 			ucstring ucstr;
-			ucstr.fromUtf8( req.MissionText );
-//			c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", index), _regiserLiteralString( req.CharacterRowId, ucstr ) );
-			CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(index).setTITLE(c->_PropertyDatabase, _regiserLiteralString( req.CharacterRowId, ucstr ) );
-//			c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:ID", index), req.ActionId );
-			CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(index).setID(c->_PropertyDatabase, req.ActionId );
+			ucstr.fromUtf8(req.MissionText);
+			//			c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", index), _regiserLiteralString( req.CharacterRowId, ucstr ) );
+			CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(index).setTITLE(c->_PropertyDatabase, _regiserLiteralString(req.CharacterRowId, ucstr));
+			//			c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:ID", index), req.ActionId );
+			CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(index).setID(c->_PropertyDatabase, req.ActionId);
 			c->updateTargetingChars();
 		}
 	}
 }
 
 //----------------------------------------------------------------------------
-void CR2GiveItem::_SetClientDBAll( CCharacter *c, const TCreatureItemRequest & req )
+void CR2GiveItem::_SetClientDBAll(CCharacter *c, const TCreatureItemRequest &req)
 {
 	nlassert(c);
 
-	for( uint32 i = 0; i < BOTCHATTYPE::MaxR2MissionEntryDatabase; ++i )
+	for (uint32 i = 0; i < BOTCHATTYPE::MaxR2MissionEntryDatabase; ++i)
 	{
-		if( i < req.size() )
+		if (i < req.size())
 		{
-			_SetClientDB( req[i], i );
+			_SetClientDB(req[i], i);
 		}
 		else
 		{
-//			c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", i), 0 );
-			CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(i).setTITLE(c->_PropertyDatabase, 0 );
-//			c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:ID", i), 0 );
-			CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(i).setID(c->_PropertyDatabase, 0 );
+			//			c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", i), 0 );
+			CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(i).setTITLE(c->_PropertyDatabase, 0);
+			//			c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:ID", i), 0 );
+			CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(i).setID(c->_PropertyDatabase, 0);
 		}
 	}
 	c->updateTargetingChars();
 }
 
-
 //----------------------------------------------------------------------------
-void CR2GiveItem::onUntarget( CCharacter *c, TDataSetRow oldTarget )
+void CR2GiveItem::onUntarget(CCharacter *c, TDataSetRow oldTarget)
 {
-	for( uint32 i = 0; i < BOTCHATTYPE::MaxR2MissionEntryDatabase; ++i )
+	for (uint32 i = 0; i < BOTCHATTYPE::MaxR2MissionEntryDatabase; ++i)
 	{
-//		c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", i), 0 );
-		CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(i).setTITLE(c->_PropertyDatabase, 0 );
-//		c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:ID", i), 0 );
-		CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(i).setID(c->_PropertyDatabase, 0 );
+		//		c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", i), 0 );
+		CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(i).setTITLE(c->_PropertyDatabase, 0);
+		//		c->_PropertyDatabase.setProp( NLMISC::toString("TARGET:CONTEXT_MENU:MISSION_RING:%d:ID", i), 0 );
+		CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSION_RING().getArray(i).setID(c->_PropertyDatabase, 0);
 	}
 
-	TPendingRequest::iterator it = _PendingRequest.find( oldTarget );
-	if( it != _PendingRequest.end() )
+	TPendingRequest::iterator it = _PendingRequest.find(oldTarget);
+	if (it != _PendingRequest.end())
 	{
 		(*it).second.clear();
-		_PendingRequest.erase( it );
+		_PendingRequest.erase(it);
 	}
 }
 
 //----------------------------------------------------------------------------
-bool CR2GiveItem::_ValidateGiveItemRequest( const TItemRequest &req )
+bool CR2GiveItem::_ValidateGiveItemRequest(const TItemRequest &req)
 {
-	CCharacter *c = PlayerManager.getChar( req.CharacterRowId );
-	if( c == 0 )
+	CCharacter *c = PlayerManager.getChar(req.CharacterRowId);
+	if (c == 0)
 		return false;
 
-	CCreature *bot = CreatureManager.getCreature( req.CreatureRowId );
-	if( bot == 0)
+	CCreature *bot = CreatureManager.getCreature(req.CreatureRowId);
+	if (bot == 0)
 		return false;
 
-	if( bot->isDead() || c->isDead() )
+	if (bot->isDead() || c->isDead())
 		return false;
 
-	for( uint i = 0; i < req.ItemsRequest.size(); ++i )
+	for (uint i = 0; i < req.ItemsRequest.size(); ++i)
 	{
-		if( req.ItemsRequest[i].Quantity > CR2MissionItem::getInstance().getNumberMissionItem(c->getId(), req.ItemsRequest[i].SheetId ) )
+		if (req.ItemsRequest[i].Quantity > CR2MissionItem::getInstance().getNumberMissionItem(c->getId(), req.ItemsRequest[i].SheetId))
 			return false;
 	}
 	return true;
 }
 
 //----------------------------------------------------------------------------
-void CR2GiveItem::_SendAckToAIS( bool ok, const TItemRequest &req )
+void CR2GiveItem::_SendAckToAIS(bool ok, const TItemRequest &req)
 {
 	CUserEventMsg eventMsg;
 	eventMsg.InstanceNumber = req.InstanceId;
@@ -216,44 +214,44 @@ void CR2GiveItem::_SendAckToAIS( bool ok, const TItemRequest &req )
 }
 
 //----------------------------------------------------------------------------
-uint32 CR2GiveItem::_regiserLiteralString( TDataSetRow userRowId, const ucstring &litStr )
+uint32 CR2GiveItem::_regiserLiteralString(TDataSetRow userRowId, const ucstring &litStr)
 {
-	SM_STATIC_PARAMS_1(params,STRING_MANAGER::literal);
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
 	params[0].Literal = litStr;
-	return STRING_MANAGER::sendStringToClient( userRowId,"LITERAL", params );
+	return STRING_MANAGER::sendStringToClient(userRowId, "LITERAL", params);
 }
 
 //----------------------------------------------------------------------------
- void CR2GiveItem::giveItemGranted( TDataSetRow creatureRowId, uint32 actionId )
+void CR2GiveItem::giveItemGranted(TDataSetRow creatureRowId, uint32 actionId)
 {
-	TPendingRequest::iterator it = _PendingRequest.find( creatureRowId );
-	if( it != _PendingRequest.end() )
+	TPendingRequest::iterator it = _PendingRequest.find(creatureRowId);
+	if (it != _PendingRequest.end())
 	{
 		TCreatureItemRequest &vec = (*it).second;
-		for( uint32 i = 0; i < vec.size(); ++ i)
+		for (uint32 i = 0; i < vec.size(); ++i)
 		{
-			if( vec[i].ActionId == actionId )
+			if (vec[i].ActionId == actionId)
 			{
-				CCharacter *c = PlayerManager.getChar( vec[i].CharacterRowId );
+				CCharacter *c = PlayerManager.getChar(vec[i].CharacterRowId);
 				nlassert(c);
 				CCreature *e = CreatureManager.getCreature(creatureRowId);
-				CMirrorPropValueRO<TYPE_SHEET> sheetInMirror( TheDataset, creatureRowId, DSPropertySHEET );
+				CMirrorPropValueRO<TYPE_SHEET> sheetInMirror(TheDataset, creatureRowId, DSPropertySHEET);
 				NLMISC::CSheetId sheetId(sheetInMirror());
-				const CStaticCreatures *clientCreatureForm = CSheets::getCreaturesForm( sheetId );
-				if(e == NULL) return; 
+				const CStaticCreatures *clientCreatureForm = CSheets::getCreaturesForm(sheetId);
+				if (e == NULL) return;
 				sint32 dx = c->getX() - e->getX();
 				sint32 dy = c->getY() - e->getY();
-				sint32 sqrDist = dx*dx + dy*dy;
+				sint32 sqrDist = dx * dx + dy * dy;
 				sint32 squareCreatureColRadius = 0;
-				if(clientCreatureForm != 0)
+				if (clientCreatureForm != 0)
 				{
-					squareCreatureColRadius = (sint32)(1000.0f * max(clientCreatureForm->getColRadius(), max(clientCreatureForm->getColWidth(),clientCreatureForm->getColLength())));
-					squareCreatureColRadius= squareCreatureColRadius * squareCreatureColRadius;
+					squareCreatureColRadius = (sint32)(1000.0f * max(clientCreatureForm->getColRadius(), max(clientCreatureForm->getColWidth(), clientCreatureForm->getColLength())));
+					squareCreatureColRadius = squareCreatureColRadius * squareCreatureColRadius;
 				}
 
 				if (sqrDist > (MaxTalkingDistSquare * 1000 * 1000 + squareCreatureColRadius))
 				{
-					CCharacter::sendDynamicSystemMessage( vec[i].CharacterRowId, "BS_TARGET_TOO_FAR");
+					CCharacter::sendDynamicSystemMessage(vec[i].CharacterRowId, "BS_TARGET_TOO_FAR");
 					return;
 				}
 
@@ -264,11 +262,11 @@ uint32 CR2GiveItem::_regiserLiteralString( TDataSetRow userRowId, const ucstring
 				eventMsg.Params.push_back(c->getId().toString());
 				eventMsg.Params.push_back(e->getId().toString());
 
-				if( vec[i].IsGiveItem )
+				if (vec[i].IsGiveItem)
 				{
-					if( _ValidateGiveItemRequest( vec[i] ) )
+					if (_ValidateGiveItemRequest(vec[i]))
 					{
-						CR2MissionItem::getInstance().destroyMissionItem( c->getId(), vec[i].ItemsRequest );
+						CR2MissionItem::getInstance().destroyMissionItem(c->getId(), vec[i].ItemsRequest);
 
 						eventMsg.EventId = 3;
 						CWorldInstances::instance().msgToAIInstance(eventMsg.InstanceNumber, eventMsg);
@@ -276,19 +274,19 @@ uint32 CR2GiveItem::_regiserLiteralString( TDataSetRow userRowId, const ucstring
 				}
 				else
 				{
-					CR2MissionItem::getInstance().giveMissionItem( c->getId(), c->currentSessionId(), vec[i].ItemsRequest );
-					
+					CR2MissionItem::getInstance().giveMissionItem(c->getId(), c->currentSessionId(), vec[i].ItemsRequest);
+
 					eventMsg.EventId = 1;
 					CWorldInstances::instance().msgToAIInstance(eventMsg.InstanceNumber, eventMsg);
 				}
 
 				vec[i] = vec.back();
 				vec.pop_back();
-				
-				_SetClientDBAll( c, vec );
-				
-				if( vec.size() == 0 )
-					_PendingRequest.erase( it );
+
+				_SetClientDBAll(c, vec);
+
+				if (vec.size() == 0)
+					_PendingRequest.erase(it);
 				return;
 			}
 		}
@@ -296,19 +294,19 @@ uint32 CR2GiveItem::_regiserLiteralString( TDataSetRow userRowId, const ucstring
 }
 
 //----------------------------------------------------------------------------
-void CR2GiveItem::onUnspawn( TDataSetRow creatureRowId )
+void CR2GiveItem::onUnspawn(TDataSetRow creatureRowId)
 {
-	TPendingRequest::iterator it = _PendingRequest.find( creatureRowId );
-	if( it != _PendingRequest.end() )
+	TPendingRequest::iterator it = _PendingRequest.find(creatureRowId);
+	if (it != _PendingRequest.end())
 	{
-		_PendingRequest.erase( it );
+		_PendingRequest.erase(it);
 	}
 }
 
 //============================================================================
 NLMISC_COMMAND(giveItemRequest, "test command for give item R2 feature", "<Character eid><Creature eid><GroupAlias><InstanceId><Item SheetId><Item quantity><Mission text>")
 {
-	if( args.size() != 7 )
+	if (args.size() != 7)
 		return false;
 
 	CGiveItemRequestMsg msg;
@@ -316,28 +314,28 @@ NLMISC_COMMAND(giveItemRequest, "test command for give item R2 feature", "<Chara
 
 	eid.fromString(args[0].c_str());
 	CCharacter *ch = PlayerManager.getChar(eid);
-	if(ch) msg.CharacterRowId = ch->getEntityRowId();
+	if (ch) msg.CharacterRowId = ch->getEntityRowId();
 	else return false;
 
 	eid.fromString(args[1].c_str());
 	CCreature *c = CreatureManager.getCreature(eid);
-	if(c) msg.CreatureRowId = c->getEntityRowId();
+	if (c) msg.CreatureRowId = c->getEntityRowId();
 	else return false;
 
 	NLMISC::fromString(args[2], msg.GroupAlias);
 	NLMISC::fromString(args[3], msg.InstanceId);
-	msg.Items.push_back( CSheetId(args[4]));
+	msg.Items.push_back(CSheetId(args[4]));
 	uint32 quantity;
 	NLMISC::fromString(args[5], quantity);
 	msg.Quantities.push_back(quantity);
 	msg.MissionText = args[6];
-	CR2GiveItem::getInstance().giveItemRequest( msg );
+	CR2GiveItem::getInstance().giveItemRequest(msg);
 	return true;
 }
 
 NLMISC_COMMAND(giveItemGranted, "test command for give item R2 features", "<CreatureId><ActionId>")
 {
-	if( args.size() != 2 )
+	if (args.size() != 2)
 		return false;
 
 	CEntityId eid;
@@ -345,41 +343,41 @@ NLMISC_COMMAND(giveItemGranted, "test command for give item R2 features", "<Crea
 
 	eid.fromString(args[0].c_str());
 	CCreature *c = CreatureManager.getCreature(eid);
-	if(c) creatureRowId = c->getEntityRowId();
+	if (c) creatureRowId = c->getEntityRowId();
 	else return false;
 	uint32 actionId;
 	NLMISC::fromString(args[1], actionId);
-	CR2GiveItem::getInstance().giveItemGranted( creatureRowId, actionId );
+	CR2GiveItem::getInstance().giveItemGranted(creatureRowId, actionId);
 	return true;
 }
 
 NLMISC_COMMAND(unTarget, "test command for give item R2 features", "<CreatureId>")
 {
-	if( args.size() != 2 )
+	if (args.size() != 2)
 		return false;
-	
+
 	CEntityId eid;
 
 	eid.fromString(args[0].c_str());
 	CCharacter *ch = PlayerManager.getChar(eid);
-	if( ch == 0 ) return false;
+	if (ch == 0) return false;
 
 	eid.fromString(args[1].c_str());
 	CCreature *c = CreatureManager.getCreature(eid);
-	if(c) CR2GiveItem::getInstance().onUntarget(ch, c->getEntityRowId());
+	if (c) CR2GiveItem::getInstance().onUntarget(ch, c->getEntityRowId());
 	else return false;
 	return true;
 }
 
 NLMISC_COMMAND(unSpawn, "test command for give item R2 features", "<CharacterId><CreatureId>")
 {
-	if( args.size() != 1 )
+	if (args.size() != 1)
 		return false;
-	
+
 	CEntityId eid;
 	eid.fromString(args[0].c_str());
 	CCreature *c = CreatureManager.getCreature(eid);
-	if(c) CR2GiveItem::getInstance().onUnspawn(c->getEntityRowId());
+	if (c) CR2GiveItem::getInstance().onUnspawn(c->getEntityRowId());
 	else return false;
 	return true;
 }

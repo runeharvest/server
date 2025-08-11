@@ -41,32 +41,28 @@ using namespace NLNET;
 using namespace MSW;
 using namespace CHARSYNC;
 
-CVariable<bool> NameManagerCheckOnStatup("name_mgr", "NameManagerCheckOnStatup", "If true name manager will do a complete check on character name and rename any invalid one", true, 0, true );
+CVariable<bool> NameManagerCheckOnStatup("name_mgr", "NameManagerCheckOnStatup", "If true name manager will do a complete check on character name and rename any invalid one", true, 0, true);
 
 NLMISC::CRandom RandomGenerator;
 
-
 const char *GUILD_NAME_FILE = "guild_names.txt";
 
-
 //-----------------------------------------------------------------------------
-bool CNameManager::assignName(uint32 charId, const ucstring & ucName, uint32 homeSessionId, bool skipTest)
+bool CNameManager::assignName(uint32 charId, const ucstring &ucName, uint32 homeSessionId, bool skipTest)
 {
-//	if (eId == NLMISC::CEntityId::Unknown)
-//		return false;
+	//	if (eId == NLMISC::CEntityId::Unknown)
+	//		return false;
 
-
-	const TCharSlot charSlot( charId );
+	const TCharSlot charSlot(charId);
 	const uint32 playerId = charSlot.UserId;
 	const uint8 charIndex = charSlot.CharIndex;
 
 	// check that name is usable
-	if (!skipTest && isNameUsable( ucName, playerId, charIndex, homeSessionId ) != TCharacterNameResult::cnr_ok)
+	if (!skipTest && isNameUsable(ucName, playerId, charIndex, homeSessionId) != TCharacterNameResult::cnr_ok)
 		return false;
 
 	// assign name and save
-	const string name = toLower( ucName.toUtf8() );
-
+	const string name = toLower(ucName.toUtf8());
 
 	// remove any temporary reserve for this name
 	_TemporaryReservedNames.erase(name);
@@ -81,7 +77,7 @@ bool CNameManager::assignName(uint32 charId, const ucstring & ucName, uint32 hom
 	{
 		// we need to remove this assoc
 		_Names.removeWithA(fullname);
-		_ReleasedNames.insert((owner->UserId<<4)+owner->CharIndex);
+		_ReleasedNames.insert((owner->UserId << 4) + owner->CharIndex);
 	}
 
 	if (_Names.getBToAMap().find(charSlot) != _Names.getBToAMap().end())
@@ -94,18 +90,18 @@ bool CNameManager::assignName(uint32 charId, const ucstring & ucName, uint32 hom
 	_Names.add(fullname, charSlot);
 	_ChangedNames.insert(charId);
 
-//	saveCharacterNames();
+	//	saveCharacterNames();
 
-	nlinfo("NAMEMGR: assigned name '%s' to char %u", name.c_str(), charId );
+	nlinfo("NAMEMGR: assigned name '%s' to char %u", name.c_str(), charId);
 
 	return true;
 }
 
 //-----------------------------------------------------------------------------
-void CNameManager::liberateName(uint32 charId, const ucstring & ucName)
+void CNameManager::liberateName(uint32 charId, const ucstring &ucName)
 {
-	const TCharSlot charSlot( charId );
-	const string name = toLower( ucName.toUtf8() );
+	const TCharSlot charSlot(charId);
+	const string name = toLower(ucName.toUtf8());
 
 	// remove the name from the reservation if it belong to the specified user
 	{
@@ -119,37 +115,36 @@ void CNameManager::liberateName(uint32 charId, const ucstring & ucName)
 	const TFullName *fullname = _Names.getA(charId);
 	if (fullname == NULL || fullname->Name != ucName.toUtf8())
 	{
-		nlwarning("NAMEMGR: char %u is trying to liberate a name he does not own: '%s'", charId, name.c_str() );
+		nlwarning("NAMEMGR: char %u is trying to liberate a name he does not own: '%s'", charId, name.c_str());
 		return;
 	}
 
-	_Names.removeWithB( charSlot );
+	_Names.removeWithB(charSlot);
 	_ReleasedNames.insert(charId);
-//	saveCharacterNames();
-	nlinfo("NAMEMGR: char %u liberated his name '%s'", charId, name.c_str() );
+	//	saveCharacterNames();
+	nlinfo("NAMEMGR: char %u liberated his name '%s'", charId, name.c_str());
 }
 
 //-----------------------------------------------------------------------------
 // liberate any name associated to a character
 void CNameManager::liberateName(uint32 charId)
 {
-	const TCharSlot charSlot( charId );
+	const TCharSlot charSlot(charId);
 
-	TNamesIndex::TBToAMap::const_iterator it = _Names.getBToAMap().find( charSlot );
-	if ( it == _Names.getBToAMap().end() )
+	TNamesIndex::TBToAMap::const_iterator it = _Names.getBToAMap().find(charSlot);
+	if (it == _Names.getBToAMap().end())
 		return;
 
-	nlinfo("NAMEMGR: char %u liberated his name '%s'", charId, it->second.Name.c_str() );
+	nlinfo("NAMEMGR: char %u liberated his name '%s'", charId, it->second.Name.c_str());
 	// ok, association found, remove it
 	_Names.removeWithB(charSlot);
 	_ReleasedNames.insert(charId);
-	
-//	saveCharacterNames();
+
+	//	saveCharacterNames();
 }
 
-
 //-----------------------------------------------------------------------------
-//void CNameManager::checkCharacterSlot(uint32 charId, const ucstring & ucName)
+// void CNameManager::checkCharacterSlot(uint32 charId, const ucstring & ucName)
 //{
 ////	if (eId == CEntityId::Unknown)
 ////		return;
@@ -232,11 +227,11 @@ ucstring CNameManager::generateDefaultName(uint32 charId, uint32 homeSessionId)
 	{
 		for (uint i = 0; i < randomLetters.size(); i++)
 		{
-			randomLetters[i] = 'a' + (char)RandomGenerator.rand(uint16('z'-'a'));
+			randomLetters[i] = 'a' + (char)RandomGenerator.rand(uint16('z' - 'a'));
 		}
 		defaultName = "Default" + randomLetters;
 
-		if ( isNameUsable(defaultName, charSlot.UserId, charSlot.CharIndex, homeSessionId) == TCharacterNameResult::cnr_ok)
+		if (isNameUsable(defaultName, charSlot.UserId, charSlot.CharIndex, homeSessionId) == TCharacterNameResult::cnr_ok)
 			break;
 
 		// anti freeze
@@ -258,11 +253,11 @@ ucstring CNameManager::generateDefaultGuildName(uint32 guildId)
 	{
 		for (uint i = 0; i < randomLetters.size(); i++)
 		{
-			randomLetters[i] = 'a' + (char)RandomGenerator.rand(uint16('z'-'a'));
+			randomLetters[i] = 'a' + (char)RandomGenerator.rand(uint16('z' - 'a'));
 		}
 		defaultName = "DefaultGuild" + randomLetters;
 
-		if ( isGuildNameUsable(defaultName, guildId) == TCharacterNameResult::cnr_ok)
+		if (isGuildNameUsable(defaultName, guildId) == TCharacterNameResult::cnr_ok)
 			break;
 
 		// anti freeze
@@ -274,7 +269,7 @@ ucstring CNameManager::generateDefaultGuildName(uint32 guildId)
 }
 
 //-----------------------------------------------------------------------------
-/** This methods implemented by CCommandHandler is used by the 
+/** This methods implemented by CCommandHandler is used by the
  *	command registry to retrieve the name of the object instance.
  */
 const std::string &CNameManager::getCommandHandlerName() const
@@ -284,7 +279,7 @@ const std::string &CNameManager::getCommandHandlerName() const
 }
 
 //-----------------------------------------------------------------------------
-CHARSYNC::TCharacterNameResult CNameManager::isNameUsable(const ucstring & ucNameIn, uint32 userId, uint8 charIndex, uint32 homeSessionId)
+CHARSYNC::TCharacterNameResult CNameManager::isNameUsable(const ucstring &ucNameIn, uint32 userId, uint8 charIndex, uint32 homeSessionId)
 {
 	// WARNING: if you change validity checks here,
 	// please also change them in CEntityIdTranslator::isValidEntityName() (nel/misc/eid_translator.cpp)
@@ -294,7 +289,7 @@ CHARSYNC::TCharacterNameResult CNameManager::isNameUsable(const ucstring & ucNam
 	ucstring::size_type pos = ucNameIn.find('(');
 	if (pos != ucstring::npos)
 	{
-		//only keep the simple name for the test
+		// only keep the simple name for the test
 		ucName = ucNameIn.substr(0, pos);
 	}
 	else
@@ -302,7 +297,6 @@ CHARSYNC::TCharacterNameResult CNameManager::isNameUsable(const ucstring & ucNam
 		// test the whole input name
 		ucName = ucNameIn;
 	}
-		
 
 	// perform a first validity check on the name length
 	if (ucName.size() < 3)
@@ -321,7 +315,7 @@ CHARSYNC::TCharacterNameResult CNameManager::isNameUsable(const ucstring & ucNam
 	// make sure the name is only composed of valid characters
 	for (uint32 i = 0; i < ucName.size(); ++i)
 	{
-		if ( (ucName[i] < (uint16)'A' || ucName[i] > (uint16)'Z') && (ucName[i] < (uint16)'a' || ucName[i] > (uint16)'z') )
+		if ((ucName[i] < (uint16)'A' || ucName[i] > (uint16)'Z') && (ucName[i] < (uint16)'a' || ucName[i] > (uint16)'z'))
 		{
 			nldebug("VALID_NAME::CNameManager::isNameUsable name '%s' rejected because it contains invalid character", ucName.toString().c_str());
 			return TCharacterNameResult::cnr_invalid_name;
@@ -329,50 +323,50 @@ CHARSYNC::TCharacterNameResult CNameManager::isNameUsable(const ucstring & ucNam
 	}
 
 	// it's now safe to convert the name to 8 bit lower case
-	const string name = toLower( ucName.toUtf8() );
+	const string name = toLower(ucName.toUtf8());
 
 	// make sure the name isn't forbidden
 	for (uint32 i = 0; i < _ForbiddenNames.size(); ++i)
 	{
-		if ( NLMISC::testWildCard( name, _ForbiddenNames[i] ) )
+		if (NLMISC::testWildCard(name, _ForbiddenNames[i]))
 		{
-			nldebug("VALID_NAME::CNameManager::isNameUsable name '%s' rejected because it contains the forbidden string '%s'", 
-				ucName.toString().c_str(),
-				_ForbiddenNames[i].c_str());
+			nldebug("VALID_NAME::CNameManager::isNameUsable name '%s' rejected because it contains the forbidden string '%s'",
+			    ucName.toString().c_str(),
+			    _ForbiddenNames[i].c_str());
 			return TCharacterNameResult::cnr_invalid_name;
 		}
 	}
 
 	// make sure the name isn't reserved
-	TReservedNames::iterator rit = _ReservedNames.find( name );
-	if ( rit != _ReservedNames.end() )
+	TReservedNames::iterator rit = _ReservedNames.find(name);
+	if (rit != _ReservedNames.end())
 	{
-		if ( (*rit).second != userId )
+		if ((*rit).second != userId)
 		{
 			nldebug("VALID_NAME::CNameManager::isNameUsable name '%s' rejected because it's reserved", ucName.toString().c_str());
 			return TCharacterNameResult::cnr_already_exist;
 		}
 	}
-	
+
 	// make sure the name isn't temporary reserved
 	{
-		TTempReservedNames::iterator rit = _TemporaryReservedNames.find( name );
-		if ( rit != _TemporaryReservedNames.end() )
+		TTempReservedNames::iterator rit = _TemporaryReservedNames.find(name);
+		if (rit != _TemporaryReservedNames.end())
 		{
-			if ( rit->second.UserId != userId && rit->second.UserId == homeSessionId)
+			if (rit->second.UserId != userId && rit->second.UserId == homeSessionId)
 			{
 				nldebug("VALID_NAME::CNameManager::isNameUsable name '%s' rejected because it's temporary reserved", ucName.toString().c_str());
 				return TCharacterNameResult::cnr_already_exist;
 			}
 		}
 	}
-	
+
 	TFullName fullname(name, homeSessionId);
 	// make sure the name isn't used by another character
-	TNamesIndex::TAToBMap::const_iterator it = _Names.getAToBMap().find( fullname );
-	if ( it != _Names.getAToBMap().end())
+	TNamesIndex::TAToBMap::const_iterator it = _Names.getAToBMap().find(fullname);
+	if (it != _Names.getAToBMap().end())
 	{
-		if( it->second.UserId != userId || it->second.CharIndex != charIndex )
+		if (it->second.UserId != userId || it->second.CharIndex != charIndex)
 		{
 			nldebug("VALID_NAME::CNameManager::isNameUsable name '%s' rejected because it's already used", ucName.toString().c_str());
 			return TCharacterNameResult::cnr_already_exist;
@@ -403,7 +397,7 @@ CHARSYNC::TCharacterNameResult CNameManager::isNameUsable(const ucstring & ucNam
 }
 
 //-----------------------------------------------------------------------------
-TCharacterNameResult CNameManager::isGuildNameUsable(const ucstring & ucName, uint32 guildId)
+TCharacterNameResult CNameManager::isGuildNameUsable(const ucstring &ucName, uint32 guildId)
 {
 	// perform a first validity check on the name length
 	if (ucName.size() < 3)
@@ -417,54 +411,53 @@ TCharacterNameResult CNameManager::isGuildNameUsable(const ucstring & ucName, ui
 	bool prevBlank = false;
 	for (uint i = 0; i < ucName.size(); i++)
 	{
-		if ( ucName[i] == ucchar(' ') )
+		if (ucName[i] == ucchar(' '))
 		{
-			if ( prevBlank )
+			if (prevBlank)
 			{
 				return TCharacterNameResult::cnr_invalid_name;
-			}	
+			}
 			prevBlank = true;
 		}
 		else
 		{
 			prevBlank = false;
-			if (!isalpha (ucName[i]))
+			if (!isalpha(ucName[i]))
 			{
 				return TCharacterNameResult::cnr_invalid_name;
 			}
 		}
 	}
 
-
 	// it's now safe to convert the name to 8 bit lower case
-	const string name = toLower( ucName.toUtf8() );
+	const string name = toLower(ucName.toUtf8());
 
 	// make sure the name isn't forbidden
 	for (uint32 i = 0; i < _ForbiddenNames.size(); ++i)
 	{
-		if ( NLMISC::testWildCard( name, _ForbiddenNames[i] ) )
+		if (NLMISC::testWildCard(name, _ForbiddenNames[i]))
 			return TCharacterNameResult::cnr_invalid_name;
 	}
 
 	// make sure the name isn't reserved
-	TReservedNames::iterator rit = _ReservedNames.find( name );
-	if ( rit != _ReservedNames.end() )
+	TReservedNames::iterator rit = _ReservedNames.find(name);
+	if (rit != _ReservedNames.end())
 	{
 		return TCharacterNameResult::cnr_already_exist;
 	}
-	
+
 	// make sure the name isn't temporary reserved
 	{
-		TTempReservedNames::iterator rit = _TemporaryReservedNames.find( name );
-		if ( rit != _TemporaryReservedNames.end() )
+		TTempReservedNames::iterator rit = _TemporaryReservedNames.find(name);
+		if (rit != _TemporaryReservedNames.end())
 		{
 			return TCharacterNameResult::cnr_already_exist;
 		}
 	}
-	
+
 	// make sure the name isn't used by a character
-	TNamesIndex::TAToBMap::const_iterator it = _Names.getAToBMap().lower_bound( TFullName(name, 0) );
-	if ( it != _Names.getAToBMap().end()  && it->first.Name == name)
+	TNamesIndex::TAToBMap::const_iterator it = _Names.getAToBMap().lower_bound(TFullName(name, 0));
+	if (it != _Names.getAToBMap().end() && it->first.Name == name)
 	{
 		return TCharacterNameResult::cnr_already_exist;
 	}
@@ -479,7 +472,6 @@ TCharacterNameResult CNameManager::isGuildNameUsable(const ucstring & ucName, ui
 	// the name is valid
 	return TCharacterNameResult::cnr_ok;
 }
-
 
 //-----------------------------------------------------------------------------
 void CNameManager::registerLoadedGuildNames(uint32 shardId, const std::map<uint32, ucstring> &guilds, vector<uint32> &renamedGuildIds)
@@ -509,8 +501,8 @@ void CNameManager::registerLoadedGuildNames(uint32 shardId, const std::map<uint3
 			}
 			else
 			{
-				BOMB_IF(it->second.GuildId != guildId, "Guild "<<guildId<<" is just loaded by shard "<<shardId<<" but name already in use by guild "<<it->second.GuildId, continue);
-				BOMB_IF(it->second.ShardId != shardId, "Guild "<<guildId<<" is just loaded by shard "<<shardId<<" but already registered by shard "<<it->second.ShardId, continue);
+				BOMB_IF(it->second.GuildId != guildId, "Guild " << guildId << " is just loaded by shard " << shardId << " but name already in use by guild " << it->second.GuildId, continue);
+				BOMB_IF(it->second.ShardId != shardId, "Guild " << guildId << " is just loaded by shard " << shardId << " but already registered by shard " << it->second.ShardId, continue);
 			}
 		}
 		else
@@ -518,11 +510,11 @@ void CNameManager::registerLoadedGuildNames(uint32 shardId, const std::map<uint3
 			// we need to rename the guild
 			ucstring newName = generateDefaultGuildName(guildId);
 
-			nlinfo("NM:registerLoadedGuildNames : Guild %u has a conflicting name '%s', renamed to '%s'", 
-				guildId, 
-				guildName.toUtf8().c_str(),
-				newName.toUtf8().c_str());
-			
+			nlinfo("NM:registerLoadedGuildNames : Guild %u has a conflicting name '%s', renamed to '%s'",
+			    guildId,
+			    guildName.toUtf8().c_str(),
+			    newName.toUtf8().c_str());
+
 			// save it in the container
 			std::string name = toLower(newName.toUtf8());
 			_GuildNames.insert(make_pair(name, TGuildSlot(shardId, guildId)));
@@ -591,26 +583,25 @@ void CNameManager::releaseGuildName(uint32 shardId, uint32 guildId)
 	saveGuildNames();
 }
 
-
 //-----------------------------------------------------------------------------
-//void CNameManager::saveCharacterNames()
+// void CNameManager::saveCharacterNames()
 //{
 //	// save the character names
 //	{
 //		string fileName = "character_names.txt";
-//		
+//
 //		CSString s;
 //		nlinfo("NAMEMGR::save: building file content: %s",fileName.c_str());
 //		for (TNamesIndex::TAToBMap::const_iterator it=_Names.getAToBMap().begin(); it!=_Names.getAToBMap().end(); ++it)
 //		{
 //			s << it->first.Name << " " << it->second.UserId << " " << it->second.CharIndex << "  " << it->first.HomeSessionId << "\n";
 //		}
-//		
+//
 //		if( s.empty() )
 //			return;
 //
 //		nlinfo("NAMEMGR::save: send message to BS");
-//		
+//
 //		CBackupMsgSaveFile msg( fileName, CBackupMsgSaveFile::SaveFile, BsiGlobal );
 //		msg.DataMsg.serialBuffer((uint8*)s.c_str(), s.size());
 //		BsiGlobal.sendFile(msg);
@@ -619,19 +610,19 @@ void CNameManager::releaseGuildName(uint32 shardId, uint32 guildId)
 //	// save account names
 //	{
 //		string fileName = "account_names.txt";
-//		
+//
 //		string s;
 //		nlinfo("NAMEMGR::save: building file content: %s",fileName.c_str());
 //		for (TAccountNames::iterator it=_AccountNames.begin();it!=_AccountNames.end();++it)
 //		{
 //			s+=NLMISC::toString("%s %i\n",(*it).second.c_str(),(*it).first);
 //		}
-//		
+//
 //		if( s.empty() )
 //			return;
 //
 //		nlinfo("NAMEMGR::save: send message to BS");
-//		
+//
 //		CBackupMsgSaveFile msg( fileName, CBackupMsgSaveFile::SaveFile, BsiGlobal );
 //		msg.DataMsg.serialBuffer((uint8*)s.c_str(), s.size());
 //		BsiGlobal.sendFile(msg);
@@ -644,24 +635,23 @@ void CNameManager::saveGuildNames()
 	// save the guild names
 	{
 		string fileName = GUILD_NAME_FILE;
-		
+
 		string s;
-		nlinfo("NAMEMGR::save: building file content: %s",fileName.c_str());
-		for (TGuildNames::const_iterator it=_GuildNames.begin(); it!=_GuildNames.end(); ++it)
+		nlinfo("NAMEMGR::save: building file content: %s", fileName.c_str());
+		for (TGuildNames::const_iterator it = _GuildNames.begin(); it != _GuildNames.end(); ++it)
 		{
-			s+=NLMISC::toString("%s %i %i\n", it->first.c_str(), it->second.ShardId, it->second.GuildId);
+			s += NLMISC::toString("%s %i %i\n", it->first.c_str(), it->second.ShardId, it->second.GuildId);
 		}
-		
-		if( s.empty() )
+
+		if (s.empty())
 			return;
 
 		nlinfo("NAMEMGR::save: send message to BS");
-		
-		CBackupMsgSaveFile msg( fileName, CBackupMsgSaveFile::SaveFile, Bsi );
-		msg.DataMsg.serialBuffer((uint8*)s.c_str(), (uint)s.size());
+
+		CBackupMsgSaveFile msg(fileName, CBackupMsgSaveFile::SaveFile, Bsi);
+		msg.DataMsg.serialBuffer((uint8 *)s.c_str(), (uint)s.size());
 		Bsi.sendFile(msg);
 	}
-
 }
 //-----------------------------------------------------------------------------
 void CNameManager::loadAllNames()
@@ -669,46 +659,46 @@ void CNameManager::loadAllNames()
 	bool result;
 
 	// load account names
-	result=loadAccountNamesFromDatabase();
-	if (result==false)
-		result=loadAccountNamesFromTxt();
-	if (result==false)
+	result = loadAccountNamesFromDatabase();
+	if (result == false)
+		result = loadAccountNamesFromTxt();
+	if (result == false)
 		nlinfo("NAMEMGR::load: Failed to load account names from txt file");
 
 	// load character names
-	result=loadCharacterNamesFromDatabase();
-	if (result==false)
-		result=loadCharacterNamesFromTxt();
-//	if (result==false)
-//		result=loadCharacterNamesFromXML();
-	if (result==false)
+	result = loadCharacterNamesFromDatabase();
+	if (result == false)
+		result = loadCharacterNamesFromTxt();
+	//	if (result==false)
+	//		result=loadCharacterNamesFromXML();
+	if (result == false)
 		nlinfo("NAMEMGR::load: Failed to load character names from txt file");
 
 	// load character names
-	result=loadGuildsNamesFromTxt();
-	if (result==false)
+	result = loadGuildsNamesFromTxt();
+	if (result == false)
 		nlinfo("NAMEMGR::load: Failed to load guilds names from txt file");
 
 	// load forbidden names
-	result=loadForbiddenNames();
-	if (result==false)
+	result = loadForbiddenNames();
+	if (result == false)
 		nlwarning("NAMEMGR::load: Failed to load forbidden name file");
 
 	// load reserved names
-	result=loadReservedNames("reserved_names.xml");
-	if (result==false)
+	result = loadReservedNames("reserved_names.xml");
+	if (result == false)
 		nlwarning("NAMEMGR::load: Failed to load reserved player name file");
 
 	// load dev and gm names
-	result=loadReservedNames("dev_gm_names.xml");
-	if (result==false)
+	result = loadReservedNames("dev_gm_names.xml");
+	if (result == false)
 		nlwarning("NAMEMGR::load: Failed to load reserved dev and gm name file");
 
 	nlinfo("NameManager : checking %u loaded names...", _Names.getAToBMap().size());
 
 	// revalidate all character names
 	TNamesIndex::TAToBMap::const_iterator first(_Names.getAToBMap().begin()), last(_Names.getAToBMap().end());
-	for (uint i=0; first != last; ++i)
+	for (uint i = 0; first != last; ++i)
 	{
 		TNamesIndex::TAToBMap::const_iterator next(first);
 		++next;
@@ -735,47 +725,46 @@ void CNameManager::loadAllNames()
 
 		first = next;
 
-		if (i%1000 == 0)
+		if (i % 1000 == 0)
 		{
-			nldebug("NameManager : checking name advance %u/%u", i,  _Names.getAToBMap().size());
+			nldebug("NameManager : checking name advance %u/%u", i, _Names.getAToBMap().size());
 		}
-
 	}
 }
 
 //-----------------------------------------------------------------------------
 bool CNameManager::loadAccountNamesFromTxt()
 {
-	FILE* f;
+	FILE *f;
 	string fileName;
 
 	// open the file
 	fileName = BsiGlobal.getLocalPath() + "account_names.txt";
-	f=fopen(fileName.c_str(),"rb");
+	f = fopen(fileName.c_str(), "rb");
 	if (f == NULL)
 	{
-		nlwarning("Failed to open file for reading: %s", fileName.c_str() );
+		nlwarning("Failed to open file for reading: %s", fileName.c_str());
 		return false;
 	}
 
 	CSString input;
 
 	// read the file content into a buffer
-	uint32 size=NLMISC::CFile::getFileSize(f);
+	uint32 size = NLMISC::CFile::getFileSize(f);
 	input.resize(size);
-	uint32 readSize= (uint32)fread(&input[0],1,size,f);
+	uint32 readSize = (uint32)fread(&input[0], 1, size, f);
 	fclose(f);
-	BOMB_IF(readSize!=size,"Failed to read file content for file: "+fileName,return false);
+	BOMB_IF(readSize != size, "Failed to read file content for file: " + fileName, return false);
 
 	// scan the content
 	while (!input.empty())
 	{
-		CSString line=input.firstLine(true);
+		CSString line = input.firstLine(true);
 		if (line.strip().empty())
 			continue;
-		DROP_IF (line.countWords()!=2,"Invalid line found in account names file: "+line,continue);
-		DROP_IF (line.word(1).atoi()==0,"Invalid user id in account names file line: "+line,continue);
-		_AccountNames[line.word(1).atoi()]=line.word(0);
+		DROP_IF(line.countWords() != 2, "Invalid line found in account names file: " + line, continue);
+		DROP_IF(line.word(1).atoi() == 0, "Invalid user id in account names file line: " + line, continue);
+		_AccountNames[line.word(1).atoi()] = line.word(0);
 	}
 
 	return true;
@@ -801,14 +790,14 @@ bool CNameManager::loadAccountNamesFromDatabase()
 		result->getField(0, userId);
 		result->getField(1, accountName);
 
-		_AccountNames[userId]=accountName;
+		_AccountNames[userId] = accountName;
 	}
 
 	return true;
 }
 
 //-----------------------------------------------------------------------------
-//bool CNameManager::loadAccountNamesFromXML()
+// bool CNameManager::loadAccountNamesFromXML()
 //{
 //	CIFile f;
 //	string fileName;
@@ -832,7 +821,7 @@ bool CNameManager::loadAccountNamesFromDatabase()
 //}
 
 //-----------------------------------------------------------------------------
-//bool CNameManager::loadAccountNamesFromEIDTranslator()
+// bool CNameManager::loadAccountNamesFromEIDTranslator()
 //{
 //	nlinfo("NAMEMGR: Build account names from EIDTranslator");
 //
@@ -859,26 +848,26 @@ bool CNameManager::loadAccountNamesFromDatabase()
 //-----------------------------------------------------------------------------
 bool CNameManager::loadCharacterNamesFromTxt()
 {
-	FILE* f;
+	FILE *f;
 	string fileName;
 
 	// open the file
 	fileName = BsiGlobal.getLocalPath() + "character_names.txt";
-	f=fopen(fileName.c_str(),"rb");
+	f = fopen(fileName.c_str(), "rb");
 	if (f == NULL)
 	{
-		nlwarning("Failed to open file for reading: %s", fileName.c_str() );
+		nlwarning("Failed to open file for reading: %s", fileName.c_str());
 		return false;
 	}
 
 	CSString input;
 
 	// read the file content into a buffer
-	uint32 size=NLMISC::CFile::getFileSize(f);
+	uint32 size = NLMISC::CFile::getFileSize(f);
 	input.resize(size);
-	uint32 readSize= (uint32)fread(&input[0],1,size,f);
+	uint32 readSize = (uint32)fread(&input[0], 1, size, f);
 	fclose(f);
-	BOMB_IF(readSize!=size,"Failed to read file content for file: "+fileName,return false);
+	BOMB_IF(readSize != size, "Failed to read file content for file: " + fileName, return false);
 
 	_Names.clear();
 	_DuplicatedSlots.clear();
@@ -889,33 +878,33 @@ bool CNameManager::loadCharacterNamesFromTxt()
 	NLMISC::explode(string(input), string("\n"), lines, true);
 
 	// scan the content
-//	while (!input.empty())
+	//	while (!input.empty())
 
-//	bool mustSaveFile = false;
-	for (uint i=0; i<lines.size(); ++i)
+	//	bool mustSaveFile = false;
+	for (uint i = 0; i < lines.size(); ++i)
 	{
-		if (i > 0 && (i%100 == 0))
-			nldebug("Loading character names : %u/%u (%.2f%%)", i, lines.size(), float(i)/float(lines.size())*100.0f);
-//		CSString line=input.firstLine(true);
+		if (i > 0 && (i % 100 == 0))
+			nldebug("Loading character names : %u/%u (%.2f%%)", i, lines.size(), float(i) / float(lines.size()) * 100.0f);
+		//		CSString line=input.firstLine(true);
 		CSString line = lines[i];
 		vector<string> words;
 		NLMISC::explode(string(line), string(" "), words, true);
 
 		if (words.empty())
 			continue;
-//		if (line.strip().empty())
-//			continue;
-//		BOMB_IF (line.countWords()!=3,"Invalid line found in character names file: "+line,continue);
-		BOMB_IF (words.size()!=3 && words.size()!=4,"Invalid line found in character names file: "+line,continue);
+		//		if (line.strip().empty())
+		//			continue;
+		//		BOMB_IF (line.countWords()!=3,"Invalid line found in character names file: "+line,continue);
+		BOMB_IF(words.size() != 3 && words.size() != 4, "Invalid line found in character names file: " + line, continue);
 
 		sint i1, i2;
 		NLMISC::fromString(words[1], i1);
 		NLMISC::fromString(words[2], i2);
 
-		BOMB_IF (i1==0,"Invalid user id in character names file line: "+line,continue);
-		BOMB_IF (i2>15 || (i2==0 && words[2] != "0"),"Invalid slot id in character names file line: "+line,continue);
+		BOMB_IF(i1 == 0, "Invalid user id in character names file line: " + line, continue);
+		BOMB_IF(i2 > 15 || (i2 == 0 && words[2] != "0"), "Invalid slot id in character names file line: " + line, continue);
 
-		sint sessionId =0;
+		sint sessionId = 0;
 		if (words.size() > 3)
 			NLMISC::fromString(words[3], sessionId);
 
@@ -924,58 +913,57 @@ bool CNameManager::loadCharacterNamesFromTxt()
 		TFullName fullname(name, sessionId);
 
 		// Check the name is usable, otherwise skip (to resolve corrupted names)
-		if ( isNameUsable( ucstring(name), charSlot.UserId, charSlot.CharIndex, sessionId ) != TCharacterNameResult::cnr_ok)
+		if (isNameUsable(ucstring(name), charSlot.UserId, charSlot.CharIndex, sessionId) != TCharacterNameResult::cnr_ok)
 		{
-			nlwarning( "Invalid character name '%s' for user %u char slot %u in %s, will be reset to default", name.c_str(), charSlot.UserId, (uint)charSlot.CharIndex, fileName.c_str() );
-//			mustSaveFile = true;
+			nlwarning("Invalid character name '%s' for user %u char slot %u in %s, will be reset to default", name.c_str(), charSlot.UserId, (uint)charSlot.CharIndex, fileName.c_str());
+			//			mustSaveFile = true;
 			continue;
 		}
-		
+
 		if (_Names.getAToBMap().find(fullname) != _Names.getAToBMap().end())
 			_Names.removeWithA(fullname);
 		if (_Names.getBToAMap().find(charSlot) != _Names.getBToAMap().end())
 			_Names.removeWithB(charSlot);
 
 		_Names.add(fullname, charSlot);
-//		TNames::const_iterator it = _Names.find( name );
-//		nlassert(it != _Names.end());
+		//		TNames::const_iterator it = _Names.find( name );
+		//		nlassert(it != _Names.end());
 
 		// check duplicated character slots
-		TCharSlotToName::iterator itSlot = charSlotToName.find( charSlot );
-		if ( itSlot != charSlotToName.end() )
+		TCharSlotToName::iterator itSlot = charSlotToName.find(charSlot);
+		if (itSlot != charSlotToName.end())
 		{
-			_DuplicatedSlots[charSlot].insert( (*itSlot).second );
-			_DuplicatedSlots[charSlot].insert( name );
+			_DuplicatedSlots[charSlot].insert((*itSlot).second);
+			_DuplicatedSlots[charSlot].insert(name);
 		}
 		else
 		{
 			charSlotToName[charSlot] = name;
 		}
 
-//		// update the EID translator
-//		uint64 lid = ( (*it).second.UserId<<4 ) | (*it).second.CharId;
-//		CEntityId id( RYZOMID::player, lid );
-//		id.setDynamicId( 0 );
-//		id.setCreatorId( 0 );
-//
-//		if (CEntityIdTranslator::getInstance()->isEntityRegistered(id))
-//			CEntityIdTranslator::getInstance()->unregisterEntity( id );
-//		CEntityIdTranslator::getInstance()->registerEntity( id, capitalize( (*it).first ), (*it).second.CharId, (*it).second.UserId, _AccountNames[(*it).second.UserId] );
+		//		// update the EID translator
+		//		uint64 lid = ( (*it).second.UserId<<4 ) | (*it).second.CharId;
+		//		CEntityId id( RYZOMID::player, lid );
+		//		id.setDynamicId( 0 );
+		//		id.setCreatorId( 0 );
+		//
+		//		if (CEntityIdTranslator::getInstance()->isEntityRegistered(id))
+		//			CEntityIdTranslator::getInstance()->unregisterEntity( id );
+		//		CEntityIdTranslator::getInstance()->registerEntity( id, capitalize( (*it).first ), (*it).second.CharId, (*it).second.UserId, _AccountNames[(*it).second.UserId] );
 	}
 
-	if ( !_DuplicatedSlots.empty() )
+	if (!_DuplicatedSlots.empty())
 	{
-		nlwarning("NAMEMGR: file '%s' contains %u duplicated character slots", fileName.c_str(), _DuplicatedSlots.size() );
+		nlwarning("NAMEMGR: file '%s' contains %u duplicated character slots", fileName.c_str(), _DuplicatedSlots.size());
 	}
 
-//	if ( mustSaveFile )
-//	{
-//		saveCharacterNames();
-//	}
+	//	if ( mustSaveFile )
+	//	{
+	//		saveCharacterNames();
+	//	}
 
 	return true;
 }
-
 
 bool CNameManager::loadCharacterNamesFromDatabase()
 {
@@ -1000,18 +988,17 @@ bool CNameManager::loadCharacterNamesFromDatabase()
 		result->getField(1, charName);
 		result->getField(2, sessionNum);
 
-//		uint32 userId = charId >> 4;
-//		uint8 charSlot = uint8(charId & 0xf);
+		//		uint32 userId = charId >> 4;
+		//		uint8 charSlot = uint8(charId & 0xf);
 
 		_Names.add(TFullName(charName, sessionNum), TCharSlot(charId));
 	}
 
 	return true;
-
 }
 
 //-----------------------------------------------------------------------------
-//bool CNameManager::loadCharacterNamesFromXML()
+// bool CNameManager::loadCharacterNamesFromXML()
 //{
 //	CIFile f;
 //	string fileName;
@@ -1049,7 +1036,7 @@ bool CNameManager::loadCharacterNamesFromDatabase()
 //			mustSaveFile = true;
 //			continue;
 //		}
-//		
+//
 //		if (_Names.getAToBMap().find(it->first) != _Names.getAToBMap().end())
 //			_Names.removeWithA(it->first);
 //		if (_Names.getBToAMap().find(it->second) != _Names.getBToAMap().end())
@@ -1095,26 +1082,26 @@ bool CNameManager::loadCharacterNamesFromDatabase()
 //-----------------------------------------------------------------------------
 bool CNameManager::loadGuildsNamesFromTxt()
 {
-	FILE* f;
+	FILE *f;
 	string fileName;
 
 	// open the file
 	fileName = Bsi.getLocalPath() + GUILD_NAME_FILE;
-	f=fopen(fileName.c_str(),"rb");
+	f = fopen(fileName.c_str(), "rb");
 	if (f == NULL)
 	{
-		nlinfo("Failed to open file for reading: %s", fileName.c_str() );
+		nlinfo("Failed to open file for reading: %s", fileName.c_str());
 		return false;
 	}
 
 	CSString input;
 
 	// read the file content into a buffer
-	uint32 size=NLMISC::CFile::getFileSize(f);
+	uint32 size = NLMISC::CFile::getFileSize(f);
 	input.resize(size);
-	uint32 readSize= (uint32)fread(&input[0],1,size,f);
+	uint32 readSize = (uint32)fread(&input[0], 1, size, f);
 	fclose(f);
-	BOMB_IF(readSize!=size,"Failed to read file content for file: "+fileName,return false);
+	BOMB_IF(readSize != size, "Failed to read file content for file: " + fileName, return false);
 
 	_GuildNames.clear();
 	_GuildIndex.clear();
@@ -1125,13 +1112,13 @@ bool CNameManager::loadGuildsNamesFromTxt()
 	NLMISC::explode(string(input), string("\n"), lines, true);
 
 	// scan the content
-//	while (!input.empty())
+	//	while (!input.empty())
 
-//	bool mustSaveFile = false;
-	for (uint i=0; i<lines.size(); ++i)
+	//	bool mustSaveFile = false;
+	for (uint i = 0; i < lines.size(); ++i)
 	{
-		if (i > 0 && (i%100 == 0))
-			nldebug("Loading guild names : %u/%u (%.2f%%)", i+1, lines.size(), float(i+1)/float(lines.size())*100.0f);
+		if (i > 0 && (i % 100 == 0))
+			nldebug("Loading guild names : %u/%u (%.2f%%)", i + 1, lines.size(), float(i + 1) / float(lines.size()) * 100.0f);
 		CSString line = lines[i];
 		vector<string> words;
 		NLMISC::explode(string(line), string(" "), words, true);
@@ -1142,37 +1129,36 @@ bool CNameManager::loadGuildsNamesFromTxt()
 		while (words.size() > 3)
 		{
 			words[0] += " " + words[1];
-			words.erase(words.begin()+1);
+			words.erase(words.begin() + 1);
 		}
-		BOMB_IF (words.size()!=3,"Invalid line "<<i+1<<" found in guild names file : '"<<line<<"'", continue);
+		BOMB_IF(words.size() != 3, "Invalid line " << i + 1 << " found in guild names file : '" << line << "'", continue);
 
 		sint i1, i2;
 		NLMISC::fromString(words[1], i1);
 		NLMISC::fromString(words[2], i2);
 
-		BOMB_IF (i1==0, "Invalid shardId in guild names file line "<<i+1<<" : '"<<line<<"'", continue);
-		BOMB_IF (i2==0, "Invalid guildId in guild names file line "<<i+1<<" : '"<<line<<"'", continue);
+		BOMB_IF(i1 == 0, "Invalid shardId in guild names file line " << i + 1 << " : '" << line << "'", continue);
+		BOMB_IF(i2 == 0, "Invalid guildId in guild names file line " << i + 1 << " : '" << line << "'", continue);
 		TName name = words[0];
 		const TGuildSlot guildSlot = TGuildSlot(i1, i2);
 
 		// Check the name is usable, i.e valid regarding guild name rules AND not already used
-		if ( isGuildNameUsable( ucstring(name), guildSlot.GuildId) != TCharacterNameResult::cnr_ok)
+		if (isGuildNameUsable(ucstring(name), guildSlot.GuildId) != TCharacterNameResult::cnr_ok)
 		{
-			nlwarning( "Invalid guild name '%s' for guild %u on from shard %u will be reset to default", name.c_str(), guildSlot.GuildId, guildSlot.ShardId);
-		
+			nlwarning("Invalid guild name '%s' for guild %u on from shard %u will be reset to default", name.c_str(), guildSlot.GuildId, guildSlot.ShardId);
+
 			name = toLower(generateDefaultGuildName(guildSlot.GuildId).toUtf8());
 		}
-		
+
 		_GuildNames.insert(make_pair(name, guildSlot));
 		_GuildIndex.insert(make_pair(guildSlot.GuildId, name));
 	}
 
-//	if (mustSaveFile)
-//	{
-//		saveGuildNames();
-//	}
+	//	if (mustSaveFile)
+	//	{
+	//		saveGuildNames();
+	//	}
 	return true;
-
 }
 
 //-----------------------------------------------------------------------------
@@ -1182,16 +1168,16 @@ bool CNameManager::loadForbiddenNames()
 
 	// read the invalid entity name list
 	fileName = IService::getInstance()->WriteFilesDirectory.toString() + "invalid_entity_names.txt";
-	FILE *fp = fopen (fileName.c_str(), "r");
+	FILE *fp = fopen(fileName.c_str(), "r");
 	if (fp == NULL)
 		return false;
 
-	nlinfo("NAMEMGR: Loading file: %s",fileName.c_str());
+	nlinfo("NAMEMGR: Loading file: %s", fileName.c_str());
 	while (true)
 	{
 		char str[512];
 		char *fgres = fgets(str, 511, fp);
-		if(feof(fp))
+		if (feof(fp))
 			break;
 		if (fgres == NULL)
 		{
@@ -1200,47 +1186,46 @@ bool CNameManager::loadForbiddenNames()
 		}
 		if (strlen(str) > 0)
 		{
-			str[strlen(str)-1] = '\0';
-			toLower( str );
+			str[strlen(str) - 1] = '\0';
+			toLower(str);
 			_ForbiddenNames.push_back(string());
 			_ForbiddenNames.back() = str;
 		}
 	}
-	fclose (fp);
+	fclose(fp);
 
 	return true;
 }
 
 //-----------------------------------------------------------------------------
-bool CNameManager::loadReservedNames(const char* fileNameWithoutPath)
+bool CNameManager::loadReservedNames(const char *fileNameWithoutPath)
 {
 	CIFile f;
 	string fileName;
 
 	// read the reserved name list
 	fileName = IService::getInstance()->WriteFilesDirectory.toString() + fileNameWithoutPath;
-	if( !f.open( fileName ) )
+	if (!f.open(fileName))
 		return false;
 
-	nlinfo("NAMEMGR: Loading file: %s",fileName.c_str());
+	nlinfo("NAMEMGR: Loading file: %s", fileName.c_str());
 	CIXml input;
-	if(!input.init( f ))
+	if (!input.init(f))
 	{
 		nlwarning("<NAMEMGR::loadReservedNames>Can't init xml input for file %s", fileName.c_str());
 		return false;
 	}
 	TReservedNames reservedName;
-	input.serialCont( reservedName );
+	input.serialCont(reservedName);
 	f.close();
 
-	for( TReservedNames::iterator it = reservedName.begin(); it != reservedName.end(); ++it )
+	for (TReservedNames::iterator it = reservedName.begin(); it != reservedName.end(); ++it)
 	{
-		_ReservedNames[ toLower( (*it).first ) ] = (*it).second;
+		_ReservedNames[toLower((*it).first)] = (*it).second;
 	}
 
 	return true;
 }
-
 
 void CNameManager::update()
 {
@@ -1250,7 +1235,7 @@ void CNameManager::update()
 
 	for (; first != last; ++first)
 	{
-		if (first->second.ReserveDate+TEMPORARY_RESERVED_NAME_EXPIRATION > now)
+		if (first->second.ReserveDate + TEMPORARY_RESERVED_NAME_EXPIRATION > now)
 		{
 			// this reservation has expired, release it
 			_TemporaryReservedNames.erase(first);
@@ -1259,7 +1244,6 @@ void CNameManager::update()
 		}
 	}
 }
-
 
 const CNameManager::TName &CNameManager::getGuildName(uint32 guildId) const
 {
@@ -1273,7 +1257,6 @@ const CNameManager::TName &CNameManager::getGuildName(uint32 guildId) const
 	else
 		return it->second;
 }
-
 
 uint32 CNameManager::findCharId(const std::string &charName, uint32 homeSessionId)
 {
@@ -1317,10 +1300,7 @@ uint32 CNameManager::findCharId(const std::string &charName)
 
 	// not found 0
 	return 0;
-
 }
-
-
 
 NLMISC_CLASS_COMMAND_IMPL(CNameManager, dump)
 {
@@ -1338,11 +1318,11 @@ NLMISC_CLASS_COMMAND_IMPL(CNameManager, dump)
 			const TFullName &fullName = first->second;
 
 			log.displayNL("  User %u, Slot %u (char_id %u) : Name '%s' on session %u",
-				charSlot.UserId,
-				charSlot.CharIndex,
-				charSlot.UserId*16+charSlot.CharIndex,
-				fullName.Name.c_str(),
-				fullName.HomeSessionId.asInt());
+			    charSlot.UserId,
+			    charSlot.CharIndex,
+			    charSlot.UserId * 16 + charSlot.CharIndex,
+			    fullName.Name.c_str(),
+			    fullName.HomeSessionId.asInt());
 		}
 
 		return true;
@@ -1381,7 +1361,7 @@ NLMISC_CLASS_COMMAND_IMPL(CNameManager, releaseGuildNamesForShard)
 
 	log.displayNL("Releasing %u guild name for shard %u", guildNameToRemove.size(), shardId);
 
-	for (uint i=0; i<guildNameToRemove.size(); ++i)
+	for (uint i = 0; i < guildNameToRemove.size(); ++i)
 	{
 		uint32 guildId = guildNameToRemove[i];
 		TGuildIndex::iterator it(_GuildIndex.find(guildId));

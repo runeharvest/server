@@ -29,32 +29,31 @@ CDeltaBuilder::CDeltaBuilder()
 {
 }
 
-
 /*
  * Build delta
  */
-bool	CDeltaBuilder::build(const std::string& outputPath,
-							 const std::string& hoursUpdatePath,
-							 const std::string& minutesUpdatePath,
-							 const std::string& secondsUpdatePath,
-							 const std::string& mintimestamp,
-							 const std::string& maxtimestamp,
-							 TDelta deltaType)
+bool CDeltaBuilder::build(const std::string &outputPath,
+    const std::string &hoursUpdatePath,
+    const std::string &minutesUpdatePath,
+    const std::string &secondsUpdatePath,
+    const std::string &mintimestamp,
+    const std::string &maxtimestamp,
+    TDelta deltaType)
 {
-	vector<string>	files;
+	vector<string> files;
 
-	if (!internalBuild(	outputPath,
-						hoursUpdatePath,
-						minutesUpdatePath,
-						secondsUpdatePath,
-						mintimestamp,
-						maxtimestamp,
-						deltaType,
-						files) )
+	if (!internalBuild(outputPath,
+	        hoursUpdatePath,
+	        minutesUpdatePath,
+	        secondsUpdatePath,
+	        mintimestamp,
+	        maxtimestamp,
+	        deltaType,
+	        files))
 	{
 		// if failed, delete generated files
-		uint	i;
-		for (i=0; i<files.size(); ++i)
+		uint i;
+		for (i = 0; i < files.size(); ++i)
 			if (!CFile::deleteFile(files[i]))
 				nlwarning("CDeltaBuilder::build(): after failure, failed to delete generated file '%s'", files[i].c_str());
 
@@ -67,51 +66,51 @@ bool	CDeltaBuilder::build(const std::string& outputPath,
 /*
  * Build delta
  */
-bool	CDeltaBuilder::internalBuild(	const std::string& outputPath,
-										const std::string& hoursUpdatePath,
-										const std::string& minutesUpdatePath,
-										const std::string& secondsUpdatePath,
-										const std::string& mintimestamp,
-										const std::string& maxtimestamp,
-										TDelta deltaType,
-										std::vector<std::string>& generatedFiles)
+bool CDeltaBuilder::internalBuild(const std::string &outputPath,
+    const std::string &hoursUpdatePath,
+    const std::string &minutesUpdatePath,
+    const std::string &secondsUpdatePath,
+    const std::string &mintimestamp,
+    const std::string &maxtimestamp,
+    TDelta deltaType,
+    std::vector<std::string> &generatedFiles)
 {
-	string	output = NLMISC::CPath::standardizePath(outputPath);
-	string	hourspath = NLMISC::CPath::standardizePath(hoursUpdatePath);
-	string	minutespath = NLMISC::CPath::standardizePath(minutesUpdatePath);
-	string	secondspath = NLMISC::CPath::standardizePath(secondsUpdatePath);
+	string output = NLMISC::CPath::standardizePath(outputPath);
+	string hourspath = NLMISC::CPath::standardizePath(hoursUpdatePath);
+	string minutespath = NLMISC::CPath::standardizePath(minutesUpdatePath);
+	string secondspath = NLMISC::CPath::standardizePath(secondsUpdatePath);
 
-	vector<string>	hours;
-	vector<string>	minutes;
-	vector<string>	seconds;
+	vector<string> hours;
+	vector<string> minutes;
+	vector<string> seconds;
 
 	// get delta in all directories
 	NLMISC::CPath::getPathContent(hourspath, false, false, true, hours);
 	NLMISC::CPath::getPathContent(minutespath, false, false, true, minutes);
 	NLMISC::CPath::getPathContent(secondspath, false, false, true, seconds);
 
-	vector<vector<string> >		tableUpdates;
+	vector<vector<string>> tableUpdates;
 
-	CTimestamp	minstamp(mintimestamp);
-	CTimestamp	maxstamp(maxtimestamp);
+	CTimestamp minstamp(mintimestamp);
+	CTimestamp maxstamp(maxtimestamp);
 
 	updateFilesList(tableUpdates, hours, minstamp, maxstamp);
 	updateFilesList(tableUpdates, minutes, minstamp, maxstamp);
 	updateFilesList(tableUpdates, seconds, minstamp, maxstamp);
 
-	uint	i;
-	for (i=0; i<tableUpdates.size(); ++i)
+	uint i;
+	for (i = 0; i < tableUpdates.size(); ++i)
 	{
 		if (tableUpdates[i].empty())
 			continue;
 
-		string	deltaFilename;
+		string deltaFilename;
 		if (deltaType == Hour)
-			deltaFilename = output+CDBDeltaFile::getHourDeltaFileName(i, maxstamp);
+			deltaFilename = output + CDBDeltaFile::getHourDeltaFileName(i, maxstamp);
 		else if (deltaType == Minute)
-			deltaFilename = output+CDBDeltaFile::getMinuteDeltaFileName(i, maxstamp);
+			deltaFilename = output + CDBDeltaFile::getMinuteDeltaFileName(i, maxstamp);
 		else
-			deltaFilename = output+CDBDeltaFile::getDeltaFileName(i, maxstamp);
+			deltaFilename = output + CDBDeltaFile::getDeltaFileName(i, maxstamp);
 
 		// add filename to list of generated files
 		generatedFiles.push_back(deltaFilename);
@@ -126,24 +125,23 @@ bool	CDeltaBuilder::internalBuild(	const std::string& outputPath,
 	return true;
 }
 
-
 /*
  * Build update files list
  */
-bool	CDeltaBuilder::updateFilesList(std::vector<std::vector<std::string> >& fileLists,
-									   std::vector<std::string>& files,
-									   const CTimestamp& minstamp,
-									   const CTimestamp& maxstamp)
+bool CDeltaBuilder::updateFilesList(std::vector<std::vector<std::string>> &fileLists,
+    std::vector<std::string> &files,
+    const CTimestamp &minstamp,
+    const CTimestamp &maxstamp)
 {
 	sort(files.begin(), files.end());
 
-	uint	i;
-	for (i=0; i<files.size(); ++i)
+	uint i;
+	for (i = 0; i < files.size(); ++i)
 	{
 		nlinfo("updateFilesList: found file '%s'", files[i].c_str());
 
-		uint32		tableId;
-		CTimestamp	stamp;
+		uint32 tableId;
+		CTimestamp stamp;
 
 		if (!CDBDeltaFile::isDeltaFileName(files[i], tableId, stamp))
 			continue;
@@ -153,7 +151,7 @@ bool	CDeltaBuilder::updateFilesList(std::vector<std::vector<std::string> >& file
 			continue;
 
 		if (fileLists.size() <= tableId)
-			fileLists.resize(tableId+1);
+			fileLists.resize(tableId + 1);
 
 		if (fileLists[tableId].empty())
 		{
@@ -161,8 +159,8 @@ bool	CDeltaBuilder::updateFilesList(std::vector<std::vector<std::string> >& file
 			continue;
 		}
 
-		string	lastupdate = CFile::getFilenameWithoutExtension(fileLists[tableId].back());
-		string	thisupdate = CFile::getFilenameWithoutExtension(files[i]);
+		string lastupdate = CFile::getFilenameWithoutExtension(fileLists[tableId].back());
+		string thisupdate = CFile::getFilenameWithoutExtension(files[i]);
 
 		// is this update newer than last update?
 		if (thisupdate > lastupdate)
@@ -172,23 +170,22 @@ bool	CDeltaBuilder::updateFilesList(std::vector<std::vector<std::string> >& file
 	return true;
 }
 
-
 /*
  * Generate Delta update file
  */
-bool	CDeltaBuilder::generateDeltaFile(const std::string& outputPath,
-										 const std::vector<std::string>& updateFiles,
-										 const CTimestamp& starttime,
-										 const CTimestamp& endtime)
+bool CDeltaBuilder::generateDeltaFile(const std::string &outputPath,
+    const std::vector<std::string> &updateFiles,
+    const CTimestamp &starttime,
+    const CTimestamp &endtime)
 {
-	CDBDeltaFile		output;
+	CDBDeltaFile output;
 	output.setup(outputPath, 0, starttime, endtime);
 
-	uint	i;
-	for (i=0; i<updateFiles.size(); ++i)
+	uint i;
+	for (i = 0; i < updateFiles.size(); ++i)
 	{
-		CDBDeltaFile	delta;
-		const std::string&	file = updateFiles[i];
+		CDBDeltaFile delta;
+		const std::string &file = updateFiles[i];
 
 		// load delta file, so we can get row size, if needed
 		delta.setup(file, 0, CTimestamp(), CTimestamp());
@@ -200,7 +197,8 @@ bool	CDeltaBuilder::generateDeltaFile(const std::string& outputPath,
 		}
 		else if (RY_PDS::PDVerbose)
 		{
-			PDS_LOG_DEBUG(1)("CDeltaBuilder::generateDeltaFile(): concatted '%s' into '%s'", file.c_str(), outputPath.c_str());
+			PDS_LOG_DEBUG(1)
+			("CDeltaBuilder::generateDeltaFile(): concatted '%s' into '%s'", file.c_str(), outputPath.c_str());
 		}
 	}
 
@@ -210,19 +208,19 @@ bool	CDeltaBuilder::generateDeltaFile(const std::string& outputPath,
 /*
  * Remove older files in update path
  */
-bool	CDeltaBuilder::removeOlderDeltaInPath(const std::string& keeptimestamp,
-											  const std::string& path)
+bool CDeltaBuilder::removeOlderDeltaInPath(const std::string &keeptimestamp,
+    const std::string &path)
 {
-	vector<string>	files;
+	vector<string> files;
 	NLMISC::CPath::getPathContent(path, false, false, true, files);
 
-	CTimestamp	keepstamp(keeptimestamp);
+	CTimestamp keepstamp(keeptimestamp);
 
-	uint	i, n=0;
-	for (i=0; i<files.size(); ++i)
+	uint i, n = 0;
+	for (i = 0; i < files.size(); ++i)
 	{
-		uint32		tableId;
-		CTimestamp	stamp;
+		uint32 tableId;
+		CTimestamp stamp;
 
 		if (!CDBDeltaFile::isDeltaFileName(files[i], tableId, stamp) || keepstamp <= stamp)
 			continue;
@@ -236,6 +234,7 @@ bool	CDeltaBuilder::removeOlderDeltaInPath(const std::string& keeptimestamp,
 			++n;
 		}
 	}
-	PDS_LOG_DEBUG(1)("CDeltaBuilder::removeOlderDeltaInPath(): deleted %d files in directory '%s'", n, path.c_str());
+	PDS_LOG_DEBUG(1)
+	("CDeltaBuilder::removeOlderDeltaInPath(): deleted %d files in directory '%s'", n, path.c_str());
 	return true;
 }

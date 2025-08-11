@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef PLAYER_INV_BAG_H
 #define PLAYER_INV_BAG_H
 
@@ -25,7 +24,6 @@
 class CBagInventory : public CInventoryBase
 {
 public:
-	
 	//@{
 	//@name Overloads from inventory base
 	/// Return the max bulk according to player capacity

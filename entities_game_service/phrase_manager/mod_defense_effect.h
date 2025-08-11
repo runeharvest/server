@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_MOD_DEFENSE_EFFECT_H
 #define RY_MOD_DEFENSE_EFFECT_H
 
@@ -33,15 +31,18 @@ class CModDefenseEffect : public CSTimedEffect
 {
 public:
 	NLMISC_DECLARE_CLASS(CModDefenseEffect)
-		
+
 	DECLARE_PERSISTENCE_METHODS
 
 	/// default ctor
-	CModDefenseEffect() : CSTimedEffect() {}
+	CModDefenseEffect()
+	    : CSTimedEffect()
+	{
+	}
 
 	///\ctor
-	CModDefenseEffect( const TDataSetRow & creatorRowId, uint32 endDate, EFFECT_FAMILIES::TEffectFamily effectFamily, std::string& defenseMode, float modifier1, float modifier2)
-		:CSTimedEffect(creatorRowId, creatorRowId, effectFamily, true, 0/*paramvalue*/, 0/*power*/, endDate)
+	CModDefenseEffect(const TDataSetRow &creatorRowId, uint32 endDate, EFFECT_FAMILIES::TEffectFamily effectFamily, std::string &defenseMode, float modifier1, float modifier2)
+	    : CSTimedEffect(creatorRowId, creatorRowId, effectFamily, true, 0 /*paramvalue*/, 0 /*power*/, endDate)
 	{
 #ifdef NL_DEBUG
 		_LastUpdateDate = CTickEventHandler::getGameCycle();
@@ -51,11 +52,11 @@ public:
 		_DefenseMode = defenseMode;
 		_Family = effectFamily;
 	}
-	
+
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent *event, bool applyEffect);
 
 	/// callback called when the effect is actually removed
 	virtual void removed();
@@ -68,22 +69,21 @@ public:
 
 private:
 	// disableTime for targets
-	NLMISC::TGameCycle		_TargetDisableTime;
-	
+	NLMISC::TGameCycle _TargetDisableTime;
+
 	/// Dodge or parry ?
 	std::string _DefenseMode;
 
 	/// characteristics modifiers
-	float			_Modifier1;
-	float			_Modifier2;
+	float _Modifier1;
+	float _Modifier2;
 
-	NLMISC::CEntityId	_CreatorEntityId;
-			
+	NLMISC::CEntityId _CreatorEntityId;
+
 #ifdef NL_DEBUG
-	NLMISC::TGameCycle		_LastUpdateDate;
+	NLMISC::TGameCycle _LastUpdateDate;
 #endif
 };
-
 
 #endif // RY_MOD_DEFENSE_EFFECT_H
 

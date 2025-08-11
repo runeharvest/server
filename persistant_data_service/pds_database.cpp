@@ -42,12 +42,13 @@ using namespace NLMISC;
 using namespace NLNET;
 
 // Hosted by db_manager.cpp
-extern NLMISC::CVariable<uint>	DeltaUpdateRate;
+extern NLMISC::CVariable<uint> DeltaUpdateRate;
 
 /*
  * Constructor
  */
-CDatabase::CDatabase(uint32 id) : _Reference(id)
+CDatabase::CDatabase(uint32 id)
+    : _Reference(id)
 {
 	clear();
 
@@ -64,15 +65,14 @@ CDatabase::~CDatabase()
 	clear();
 }
 
-
 /*
  * Massive Database clear
  */
-void	CDatabase::clear()
+void CDatabase::clear()
 {
-	uint	i;
+	uint i;
 
-	for (i=0; i<_Types.size(); ++i)
+	for (i = 0; i < _Types.size(); ++i)
 	{
 		if (_Types[i] != NULL)
 			delete _Types[i];
@@ -81,7 +81,7 @@ void	CDatabase::clear()
 
 	_Types.clear();
 
-	for (i=0; i<_Tables.size(); ++i)
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (_Tables[i] != NULL)
 			delete _Tables[i];
@@ -97,26 +97,25 @@ void	CDatabase::clear()
 	_ServiceId.set(0xffff);
 }
 
-
 /*
  * Init database
  * \param xmlStream is the xml description of the database
  */
-bool	CDatabase::init()
+bool CDatabase::init()
 {
 	PDS_DEBUG("init()");
 
 	// clear all before doing anything
 	clear();
 
-	const CDatabaseNode&	db = _Description.getDatabaseNode();
+	const CDatabaseNode &db = _Description.getDatabaseNode();
 
 	_State.Name = db.Name;
 
-	uint	i;
-	for (i=0; i<db.Types.size(); ++i)
+	uint i;
+	for (i = 0; i < db.Types.size(); ++i)
 	{
-		CType*	type = new CType;
+		CType *type = new CType;
 
 		if (!type->init(this, db.Types[i]))
 		{
@@ -133,9 +132,9 @@ bool	CDatabase::init()
 		_Types.push_back(type);
 	}
 
-	for (i=0; i<db.Tables.size(); ++i)
+	for (i = 0; i < db.Tables.size(); ++i)
 	{
-		CTable*	table = new CTable();
+		CTable *table = new CTable();
 
 		if (!table->init(this, db.Tables[i]) || table->getId() != i)
 		{
@@ -146,9 +145,9 @@ bool	CDatabase::init()
 		_Tables.push_back(table);
 	}
 
-	for (i=0; i<_Tables.size(); ++i)
+	for (i = 0; i < _Tables.size(); ++i)
 	{
-		CTable*	table = _Tables[i];
+		CTable *table = _Tables[i];
 
 		if (!table->buildColumns())
 		{
@@ -157,7 +156,7 @@ bool	CDatabase::init()
 		}
 	}
 
-	for (i=0; i<_Tables.size(); ++i)
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		_Tables[i]->postInit();
 	}
@@ -171,7 +170,7 @@ bool	CDatabase::init()
 	}
 
 	// save description in log dir
-	std::string	logDir = RY_PDS::CPDSLib::getLogDirectory(_State.Id);
+	std::string logDir = RY_PDS::CPDSLib::getLogDirectory(_State.Id);
 	if (!CFile::isExists(logDir) || !CFile::isDirectory(logDir))
 	{
 		if (!CFile::createDirectoryTree(logDir))
@@ -185,22 +184,19 @@ bool	CDatabase::init()
 		}
 	}
 
-//	CTimestamp	initDate;
-//	initDate.setToCurrent();
-//	_Description.saveDescription(logDir + initDate.toString() + ".description");
+	//	CTimestamp	initDate;
+	//	initDate.setToCurrent();
+	//	_Description.saveDescription(logDir + initDate.toString() + ".description");
 
 	PDS_DEBUG("init() successful");
 
 	return true;
 }
 
-
-
-
 /*
  * Checkup database
  */
-bool	CDatabase::checkup()
+bool CDatabase::checkup()
 {
 	PDS_DEBUG("checkup()");
 
@@ -210,10 +206,10 @@ bool	CDatabase::checkup()
 		return false;
 	}
 
-	uint	i;
-	bool	dbOk = true;
+	uint i;
+	bool dbOk = true;
 
-	for (i=0; i<_Types.size(); ++i)
+	for (i = 0; i < _Types.size(); ++i)
 	{
 		if (_Types[i] == NULL || !_Types[i]->initialised())
 		{
@@ -222,7 +218,7 @@ bool	CDatabase::checkup()
 		}
 	}
 
-	for (i=0; i<_Tables.size(); ++i)
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (_Tables[i] == NULL || !_Tables[i]->initialised())
 		{
@@ -230,15 +226,15 @@ bool	CDatabase::checkup()
 			continue;
 		}
 
-		CTable*	table = _Tables[i];
+		CTable *table = _Tables[i];
 
-		const std::vector<CColumn>		&columns = table->getColumns();
-		const std::vector<CAttribute*>	&attributes = table->getAttributes();
+		const std::vector<CColumn> &columns = table->getColumns();
+		const std::vector<CAttribute *> &attributes = table->getAttributes();
 
-		uint	j;
+		uint j;
 
 		// walk through attributes
-		for (j=0; j<attributes.size(); ++j)
+		for (j = 0; j < attributes.size(); ++j)
 		{
 			if (attributes[j] == NULL || !attributes[j]->initialised())
 			{
@@ -247,7 +243,7 @@ bool	CDatabase::checkup()
 				continue;
 			}
 
-			const CAttribute*	attribute = attributes[j];
+			const CAttribute *attribute = attributes[j];
 
 			if (attribute->getParent() != table)
 			{
@@ -255,9 +251,9 @@ bool	CDatabase::checkup()
 				dbOk = false;
 			}
 
-			uint	k;
+			uint k;
 
-			for (k=attribute->getOffset(); k<attribute->getOffset()+attribute->getColumns(); ++k)
+			for (k = attribute->getOffset(); k < attribute->getOffset() + attribute->getColumns(); ++k)
 			{
 				if (k >= columns.size() || !columns[k].initialised())
 				{
@@ -271,14 +267,13 @@ bool	CDatabase::checkup()
 				}
 				else
 				{
-					const CColumn	&column = columns[k];
-
+					const CColumn &column = columns[k];
 				}
 			}
 		}
 
 		// walk through columns
-		for (j=0; j<columns.size(); ++j)
+		for (j = 0; j < columns.size(); ++j)
 		{
 			if (!columns[j].initialised())
 			{
@@ -302,7 +297,7 @@ bool	CDatabase::checkup()
 /*
  * Initialise internal timestamps
  */
-void	CDatabase::initTimestamps()
+void CDatabase::initTimestamps()
 {
 	// initialise update and creation timestamps to now
 	_CreationTimestamp.setToCurrent();
@@ -311,13 +306,11 @@ void	CDatabase::initTimestamps()
 	_DayUpdateTimestamp = _CreationTimestamp;
 }
 
-
-
 /*
  * Get value as a string
  * \param path is of the form '[tableindex|tablename].[$key|index].attrib1.attrib2'
  */
-string	CDatabase::getValue(const CLocatePath::TLocatePath &path)
+string CDatabase::getValue(const CLocatePath::TLocatePath &path)
 {
 	if (path.size() < 3)
 	{
@@ -325,11 +318,11 @@ string	CDatabase::getValue(const CLocatePath::TLocatePath &path)
 		return "";
 	}
 
-	uint	node = 0;
+	uint node = 0;
 
 	// select table
-	const CTable*	table;
-	uint			tableId;
+	const CTable *table;
+	uint tableId;
 	if (sscanf(path[node].Name.c_str(), "%d", &tableId) == 1)
 		table = getTable(tableId);
 	else
@@ -344,12 +337,12 @@ string	CDatabase::getValue(const CLocatePath::TLocatePath &path)
 	++node;
 
 	// select row
-	RY_PDS::CObjectIndex	object;
+	RY_PDS::CObjectIndex object;
 
 	if (path[node].Name[0] == '$')
 	{
-		uint64	key;
-		if (sscanf(path[node].Name.c_str()+1, "%" NL_I64 "X", &key) != 1)
+		uint64 key;
+		if (sscanf(path[node].Name.c_str() + 1, "%" NL_I64 "X", &key) != 1)
 		{
 			PDS_WARNING("getValue(): unable to select mapped row '%s'", path[node].Name.c_str());
 			return "";
@@ -359,7 +352,7 @@ string	CDatabase::getValue(const CLocatePath::TLocatePath &path)
 	}
 	else
 	{
-		RY_PDS::TRowIndex	row;
+		RY_PDS::TRowIndex row;
 
 		if (sscanf(path[node].Name.c_str(), "%u", &row) != 1)
 		{
@@ -378,12 +371,12 @@ string	CDatabase::getValue(const CLocatePath::TLocatePath &path)
 
 	++node;
 
-	const CTable*	subTable = table;
+	const CTable *subTable = table;
 
 	// browse through row
 	while (node < path.size())
 	{
-		const CAttribute*	attribute = subTable->getAttribute(path[node].Name);
+		const CAttribute *attribute = subTable->getAttribute(path[node].Name);
 
 		if (attribute == NULL)
 		{
@@ -397,18 +390,13 @@ string	CDatabase::getValue(const CLocatePath::TLocatePath &path)
 	return "";
 }
 
-
-
-
-
-
 /*
  * Get Table
  */
-const CTable*	CDatabase::getTable(const std::string &name) const
+const CTable *CDatabase::getTable(const std::string &name) const
 {
-	uint	i;
-	for (i=0; i<_Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Tables.size(); ++i)
 		if (_Tables[i] != NULL && _Tables[i]->getName() == name)
 			return _Tables[i];
 
@@ -418,23 +406,22 @@ const CTable*	CDatabase::getTable(const std::string &name) const
 /*
  * Get Type
  */
-const CType*	CDatabase::getType(const std::string &name) const
+const CType *CDatabase::getType(const std::string &name) const
 {
-	uint	i;
-	for (i=0; i<_Types.size(); ++i)
+	uint i;
+	for (i = 0; i < _Types.size(); ++i)
 		if (_Types[i] != NULL && _Types[i]->getName() == name)
 			return _Types[i];
 
 	return NULL;
 }
 
-
 /*
  * Get Attribute
  */
-const CAttribute*	CDatabase::getAttribute(uint32 tableId, uint32 attributeId) const
+const CAttribute *CDatabase::getAttribute(uint32 tableId, uint32 attributeId) const
 {
-	const CTable*	table = getTable(tableId);
+	const CTable *table = getTable(tableId);
 
 	if (table == NULL)
 		return NULL;
@@ -445,9 +432,9 @@ const CAttribute*	CDatabase::getAttribute(uint32 tableId, uint32 attributeId) co
 /*
  * Get Column
  */
-const CColumn*	CDatabase::getColumn(uint32 tableId, uint32 columnId) const
+const CColumn *CDatabase::getColumn(uint32 tableId, uint32 columnId) const
 {
-	const CTable*	table = getTable(tableId);
+	const CTable *table = getTable(tableId);
 
 	if (table == NULL)
 		return NULL;
@@ -455,15 +442,12 @@ const CColumn*	CDatabase::getColumn(uint32 tableId, uint32 columnId) const
 	return table->getColumn(columnId);
 }
 
-
-
-
 /*
  * Allocate a row in a table
  * \param index is the table/row to allocate
  * Return true if succeded
  */
-bool	CDatabase::allocate(const RY_PDS::CObjectIndex &index)
+bool CDatabase::allocate(const RY_PDS::CObjectIndex &index)
 {
 	H_AUTO(PDS_Database_allocate);
 
@@ -479,7 +463,7 @@ bool	CDatabase::allocate(const RY_PDS::CObjectIndex &index)
 		return false;
 	}
 
-	CTable	*table = getNonConstTable(index.table());
+	CTable *table = getNonConstTable(index.table());
 
 	if (table == NULL || !table->initialised())
 	{
@@ -487,7 +471,7 @@ bool	CDatabase::allocate(const RY_PDS::CObjectIndex &index)
 		return false;
 	}
 
-	bool	success = table->allocate(index.row());
+	bool success = table->allocate(index.row());
 
 	if (success)
 		PDS_FULL_DEBUG("allocated '%s' successfully", index.toString().c_str());
@@ -500,7 +484,7 @@ bool	CDatabase::allocate(const RY_PDS::CObjectIndex &index)
  * \param index is the table/row to deallocate
  * Return true if succeded
  */
-bool	CDatabase::deallocate(const RY_PDS::CObjectIndex &index)
+bool CDatabase::deallocate(const RY_PDS::CObjectIndex &index)
 {
 	H_AUTO(PDS_Database_deallocate);
 
@@ -516,7 +500,7 @@ bool	CDatabase::deallocate(const RY_PDS::CObjectIndex &index)
 		return false;
 	}
 
-	CTable	*table = getNonConstTable(index.table());
+	CTable *table = getNonConstTable(index.table());
 
 	if (table == NULL || !table->initialised())
 	{
@@ -524,7 +508,7 @@ bool	CDatabase::deallocate(const RY_PDS::CObjectIndex &index)
 		return false;
 	}
 
-	bool	success = table->deallocate(index.row());
+	bool success = table->deallocate(index.row());
 
 	if (success)
 		PDS_FULL_DEBUG("deallocated '%s' successfully", index.toString().c_str());
@@ -536,13 +520,12 @@ bool	CDatabase::deallocate(const RY_PDS::CObjectIndex &index)
  * Tells if an object is allocated
  * \param object is the object index to test
  */
-bool	CDatabase::isAllocated(const RY_PDS::CObjectIndex &index) const
+bool CDatabase::isAllocated(const RY_PDS::CObjectIndex &index) const
 {
-	const CTable*	table = getTable(index.table());
+	const CTable *table = getTable(index.table());
 
 	return table != NULL && table->isAllocated(index.row());
 }
-
 
 /*
  * Map a row in a table
@@ -550,7 +533,7 @@ bool	CDatabase::isAllocated(const RY_PDS::CObjectIndex &index) const
  * \param key is the 64 bits row key
  * Return true if succeded
  */
-bool	CDatabase::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
+bool CDatabase::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 {
 	if (!initialised())
 	{
@@ -564,7 +547,7 @@ bool	CDatabase::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 		return false;
 	}
 
-	CTable	*table = getNonConstTable(index.table());
+	CTable *table = getNonConstTable(index.table());
 
 	if (table == NULL || !table->initialised())
 	{
@@ -572,7 +555,7 @@ bool	CDatabase::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 		return false;
 	}
 
-	bool	success = table->mapRow(index, key);
+	bool success = table->mapRow(index, key);
 
 	if (success)
 		PDS_FULL_DEBUG("mapped '%016" NL_I64 "X' to '%s' successfully", key, index.toString().c_str());
@@ -586,7 +569,7 @@ bool	CDatabase::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
  * \param key is the 64 bits row key
  * Return true if succeded
  */
-bool	CDatabase::unmapRow(RY_PDS::TTableIndex tableIndex, uint64 key)
+bool CDatabase::unmapRow(RY_PDS::TTableIndex tableIndex, uint64 key)
 {
 	if (!initialised())
 	{
@@ -594,7 +577,7 @@ bool	CDatabase::unmapRow(RY_PDS::TTableIndex tableIndex, uint64 key)
 		return false;
 	}
 
-	CTable	*table = getNonConstTable(tableIndex);
+	CTable *table = getNonConstTable(tableIndex);
 
 	if (table == NULL || !table->initialised())
 	{
@@ -602,7 +585,7 @@ bool	CDatabase::unmapRow(RY_PDS::TTableIndex tableIndex, uint64 key)
 		return false;
 	}
 
-	bool	success = table->unmapRow(key);
+	bool success = table->unmapRow(key);
 
 	if (success)
 		PDS_FULL_DEBUG("unmapped '%016" NL_I64 "X' successfully", key);
@@ -616,7 +599,7 @@ bool	CDatabase::unmapRow(RY_PDS::TTableIndex tableIndex, uint64 key)
  * \param key is the 64 bits row key
  * Return a valid CObjectIndex if success
  */
-RY_PDS::CObjectIndex	CDatabase::getMappedRow(RY_PDS::TTableIndex tableIndex, uint64 key) const
+RY_PDS::CObjectIndex CDatabase::getMappedRow(RY_PDS::TTableIndex tableIndex, uint64 key) const
 {
 	if (!initialised())
 	{
@@ -624,7 +607,7 @@ RY_PDS::CObjectIndex	CDatabase::getMappedRow(RY_PDS::TTableIndex tableIndex, uin
 		return RY_PDS::CObjectIndex();
 	}
 
-	const CTable	*table = getTable(tableIndex);
+	const CTable *table = getTable(tableIndex);
 
 	if (table == NULL || !table->initialised())
 	{
@@ -640,7 +623,7 @@ RY_PDS::CObjectIndex	CDatabase::getMappedRow(RY_PDS::TTableIndex tableIndex, uin
  * \param index is the table/row to release
  * Return true if succeded
  */
-bool	CDatabase::release(const RY_PDS::CObjectIndex &index)
+bool CDatabase::release(const RY_PDS::CObjectIndex &index)
 {
 	if (!initialised())
 	{
@@ -654,7 +637,7 @@ bool	CDatabase::release(const RY_PDS::CObjectIndex &index)
 		return false;
 	}
 
-	CTable	*table = getNonConstTable(index.table());
+	CTable *table = getNonConstTable(index.table());
 
 	if (table == NULL || !table->initialised())
 	{
@@ -662,7 +645,7 @@ bool	CDatabase::release(const RY_PDS::CObjectIndex &index)
 		return false;
 	}
 
-	bool	success = table->release(index.row());
+	bool success = table->release(index.row());
 
 	if (success)
 		PDS_FULL_DEBUG("released '%s' successfully", index.toString().c_str());
@@ -674,7 +657,7 @@ bool	CDatabase::release(const RY_PDS::CObjectIndex &index)
  * Release all rows in all table
  * Typically, the client disconnected, there is no need to keep rows
  */
-bool	CDatabase::releaseAll()
+bool CDatabase::releaseAll()
 {
 	if (!initialised())
 	{
@@ -682,8 +665,8 @@ bool	CDatabase::releaseAll()
 		return false;
 	}
 
-	uint	i;
-	for (i=0; i<_Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (_Tables[i] != NULL && _Tables[i]->initialised())
 		{
@@ -694,11 +677,10 @@ bool	CDatabase::releaseAll()
 	return true;
 }
 
-
 //
 // Set method
 //
-bool	CDatabase::set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void* dataptr)
+bool CDatabase::set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void *dataptr)
 {
 	H_AUTO(PDS_Database_set);
 
@@ -708,7 +690,7 @@ bool	CDatabase::set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TC
 		return false;
 	}
 
-	CTable*		_table = getNonConstTable(table);
+	CTable *_table = getNonConstTable(table);
 
 	if (_table == NULL)
 	{
@@ -716,7 +698,7 @@ bool	CDatabase::set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TC
 		return false;
 	}
 
-	bool	success = _table->set(row, column, datasize, dataptr);
+	bool success = _table->set(row, column, datasize, dataptr);
 
 	if (success)
 		PDS_FULL_DEBUG("set '%s' column '%d' successfully", RY_PDS::CObjectIndex(table, row).toString().c_str(), column);
@@ -724,11 +706,10 @@ bool	CDatabase::set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TC
 	return success;
 }
 
-
 /*
  * Set an object parent
  */
-bool	CDatabase::setParent(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const RY_PDS::CObjectIndex &parent)
+bool CDatabase::setParent(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const RY_PDS::CObjectIndex &parent)
 {
 	H_AUTO(PDS_Database_setParent);
 
@@ -738,7 +719,7 @@ bool	CDatabase::setParent(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_P
 		return false;
 	}
 
-	CTable*		_table = getNonConstTable(table);
+	CTable *_table = getNonConstTable(table);
 
 	if (_table == NULL)
 	{
@@ -746,7 +727,7 @@ bool	CDatabase::setParent(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_P
 		return false;
 	}
 
-	bool	success = _table->setParent(row, column, parent);
+	bool success = _table->setParent(row, column, parent);
 
 	if (success)
 		PDS_FULL_DEBUG("set '%s' column '%d' successfully", RY_PDS::CObjectIndex(table, row).toString().c_str(), column);
@@ -754,11 +735,10 @@ bool	CDatabase::setParent(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_P
 	return success;
 }
 
-
 //
 // Get method
 //
-bool	CDatabase::get(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint& datasize, void* dataptr, TDataType &type)
+bool CDatabase::get(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint &datasize, void *dataptr, TDataType &type)
 {
 	if (!initialised())
 	{
@@ -766,7 +746,7 @@ bool	CDatabase::get(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TC
 		return false;
 	}
 
-	CTable*		_table = getNonConstTable(table);
+	CTable *_table = getNonConstTable(table);
 
 	if (_table == NULL)
 	{
@@ -774,7 +754,7 @@ bool	CDatabase::get(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TC
 		return false;
 	}
 
-	bool	success = _table->get(row, column, datasize, dataptr, type);
+	bool success = _table->get(row, column, datasize, dataptr, type);
 
 	if (success)
 		PDS_FULL_DEBUG("get '%s' column '%d' successfully", RY_PDS::CObjectIndex(table, row).toString().c_str(), column);
@@ -782,13 +762,10 @@ bool	CDatabase::get(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TC
 	return success;
 }
 
-
-
-
 /*
  * Display database
  */
-void	CDatabase::display(NLMISC::CLog* log, bool displayHeader) const
+void CDatabase::display(NLMISC::CLog *log, bool displayHeader) const
 {
 	if (!initialised())
 	{
@@ -798,10 +775,10 @@ void	CDatabase::display(NLMISC::CLog* log, bool displayHeader) const
 	log->displayNL("Database '%s'", _State.Name.c_str());
 	log->displayNL("%d types, %d tables", _Types.size(), _Tables.size());
 
-	uint	i;
+	uint i;
 
 	log->displayNL("     %-36s | %-15s | %-2s | %s", "TypeId/Name", "DataTypeId/Name", "Sz", "IsIndex");
-	for (i=0; i<_Types.size(); ++i)
+	for (i = 0; i < _Types.size(); ++i)
 	{
 		if (_Types[i] == NULL)
 			log->display("** Type %d not initialised", i);
@@ -809,9 +786,9 @@ void	CDatabase::display(NLMISC::CLog* log, bool displayHeader) const
 			_Types[i]->display(log);
 	}
 
-	bool	first = true;
+	bool first = true;
 
-	for (i=0; i<_Tables.size(); ++i)
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (_Tables[i] == NULL)
 		{
@@ -828,25 +805,23 @@ void	CDatabase::display(NLMISC::CLog* log, bool displayHeader) const
 /*
  * Dump database content and info of an object to xml
  */
-void	CDatabase::dumpToXml(const RY_PDS::CObjectIndex& index, NLMISC::IStream& xml, sint expandDepth)
+void CDatabase::dumpToXml(const RY_PDS::CObjectIndex &index, NLMISC::IStream &xml, sint expandDepth)
 {
 	if (xml.isReading() || !initialised())
 		return;
 
-	CTable*	table = getNonConstTable(index.table());
+	CTable *table = getNonConstTable(index.table());
 
 	if (table != NULL)
 		table->dumpToXml(index.row(), xml, expandDepth);
 }
 
-
-
 /*
  * Set value with human readable parameters
  */
-bool	CDatabase::set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const std::string& type, const std::string &value)
+bool CDatabase::set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const std::string &type, const std::string &value)
 {
-	TDataType	datatype = getDataTypeFromName(type);
+	TDataType datatype = getDataTypeFromName(type);
 
 	if (!checkDataType(datatype))
 		return false;
@@ -856,94 +831,84 @@ bool	CDatabase::set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TC
 	case PDS_bool:
 	case PDS_char:
 	case PDS_uint8:
-	case PDS_sint8:
-		{
-			uint8	data;
-			NLMISC::fromString(value, data);
-			return set(table, row, column, sizeof(data), &data);
-		}
-		break;
+	case PDS_sint8: {
+		uint8 data;
+		NLMISC::fromString(value, data);
+		return set(table, row, column, sizeof(data), &data);
+	}
+	break;
 
 	case PDS_ucchar:
 	case PDS_uint16:
-	case PDS_sint16:
-		{
-			uint16	data;
-			NLMISC::fromString(value, data);
-			return set(table, row, column, sizeof(data), &data);
-		}
-		break;
+	case PDS_sint16: {
+		uint16 data;
+		NLMISC::fromString(value, data);
+		return set(table, row, column, sizeof(data), &data);
+	}
+	break;
 
 	case PDS_uint32:
 	case PDS_sint32:
 	case PDS_enum:
 	case PDS_CSheetId:
-	case PDS_CNodeId:
-		{
-			uint32	data;
-			NLMISC::fromString(value, data);
-			return set(table, row, column, sizeof(data), &data);
-		}
-		break;
+	case PDS_CNodeId: {
+		uint32 data;
+		NLMISC::fromString(value, data);
+		return set(table, row, column, sizeof(data), &data);
+	}
+	break;
 
 	case PDS_uint64:
-	case PDS_sint64:
-		{
-			uint64	data;
-			sscanf(value.c_str(), "%016" NL_I64 "d", &data);
-			return set(table, row, column, sizeof(data), &data);
-		}
-		break;
+	case PDS_sint64: {
+		uint64 data;
+		sscanf(value.c_str(), "%016" NL_I64 "d", &data);
+		return set(table, row, column, sizeof(data), &data);
+	}
+	break;
 
-	case PDS_CEntityId:
-		{
-			CEntityId	data;
-			data.fromString(value.c_str());
-			return set(table, row, column, sizeof(data), &data);
-		}
-		break;
+	case PDS_CEntityId: {
+		CEntityId data;
+		data.fromString(value.c_str());
+		return set(table, row, column, sizeof(data), &data);
+	}
+	break;
 
-	case PDS_float:
-		{
-			float data;
-			NLMISC::fromString(value, data);
-			return set(table, row, column, sizeof(data), &data);
-		}
-		break;
+	case PDS_float: {
+		float data;
+		NLMISC::fromString(value, data);
+		return set(table, row, column, sizeof(data), &data);
+	}
+	break;
 
-	case PDS_double:
-		{
-			double data;
-			NLMISC::fromString(value, data);
-			return set(table, row, column, sizeof(data), &data);
-		}
-		break;
+	case PDS_double: {
+		double data;
+		NLMISC::fromString(value, data);
+		return set(table, row, column, sizeof(data), &data);
+	}
+	break;
 
-	case PDS_Index:
-		{
-			RY_PDS::CObjectIndex	data;
-			data.fromString(value.c_str());
-			return set(table, row, column, sizeof(data), &data);
-		}
-		break;
+	case PDS_Index: {
+		RY_PDS::CObjectIndex data;
+		data.fromString(value.c_str());
+		return set(table, row, column, sizeof(data), &data);
+	}
+	break;
 
-	case PDS_dimension:
-		{
-			uint32	data;
-			NLMISC::fromString(value, data);
-			return set(table, row, column, sizeof(data), &data);
-		}
-		break;
+	case PDS_dimension: {
+		uint32 data;
+		NLMISC::fromString(value, data);
+		return set(table, row, column, sizeof(data), &data);
+	}
+	break;
 	}
 
 	return false;
 }
 
-
 /*
  * Fetch data
  */
-bool	CDatabase::fetch(const RY_PDS::CObjectIndex& index, RY_PDS::CPData &data, bool fetchIndex)
+bool CDatabase::fetch(const RY_PDS::CObjectIndex &index, RY_PDS::CPData &data, bool fetchIndex)
 {
 	H_AUTO(PDS_Database_fetch);
 
@@ -953,7 +918,7 @@ bool	CDatabase::fetch(const RY_PDS::CObjectIndex& index, RY_PDS::CPData &data, b
 		return false;
 	}
 
-	CTable*		table = getNonConstTable(index.table());
+	CTable *table = getNonConstTable(index.table());
 
 	if (table == NULL)
 	{
@@ -961,7 +926,7 @@ bool	CDatabase::fetch(const RY_PDS::CObjectIndex& index, RY_PDS::CPData &data, b
 		return false;
 	}
 
-	bool	success = table->fetch(index.row(), data, fetchIndex);
+	bool success = table->fetch(index.row(), data, fetchIndex);
 
 	if (success)
 		PDS_FULL_DEBUG("fetch '%s' successfully", index.toString().c_str());
@@ -969,14 +934,11 @@ bool	CDatabase::fetch(const RY_PDS::CObjectIndex& index, RY_PDS::CPData &data, b
 	return success;
 }
 
-
-
-
 /*
  * Build index allocators
  * One per table
  */
-bool	CDatabase::buildIndexAllocators(std::vector<RY_PDS::CIndexAllocator> &allocators)
+bool CDatabase::buildIndexAllocators(std::vector<RY_PDS::CIndexAllocator> &allocators)
 {
 	PDS_DEBUG("buildIndexAllocators()");
 
@@ -989,23 +951,18 @@ bool	CDatabase::buildIndexAllocators(std::vector<RY_PDS::CIndexAllocator> &alloc
 	allocators.clear();
 	allocators.resize(_Tables.size());
 
-	uint	i;
-	for (i=0; i<_Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Tables.size(); ++i)
 		if (_Tables[i] != NULL && _Tables[i]->initialised())
 			_Tables[i]->buildIndexAllocator(allocators[i]);
 
 	return true;
 }
 
-
-
-
-
-
 /*
  * Rebuild forwardrefs from backrefs
  */
-bool	CDatabase::rebuildForwardRefs()
+bool CDatabase::rebuildForwardRefs()
 {
 	if (!initialised())
 	{
@@ -1017,8 +974,8 @@ bool	CDatabase::rebuildForwardRefs()
 	_SetMap.clear();
 
 	// the rebuild forwardrefs
-	uint	i;
-	for (i=0; i<_Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (_Tables[i] != NULL && _Tables[i]->initialised())
 		{
@@ -1030,7 +987,7 @@ bool	CDatabase::rebuildForwardRefs()
 		}
 	}
 
-	for (i=0; i<_Tables.size(); ++i)
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (_Tables[i] != NULL && _Tables[i]->initialised())
 		{
@@ -1042,7 +999,7 @@ bool	CDatabase::rebuildForwardRefs()
 		}
 	}
 
-	for (i=0; i<_Tables.size(); ++i)
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (_Tables[i] != NULL && _Tables[i]->initialised())
 		{
@@ -1057,11 +1014,10 @@ bool	CDatabase::rebuildForwardRefs()
 	return true;
 }
 
-
 /*
  * Rebuild table maps
  */
-bool	CDatabase::rebuildTableMaps()
+bool CDatabase::rebuildTableMaps()
 {
 	if (!initialised())
 	{
@@ -1069,8 +1025,8 @@ bool	CDatabase::rebuildTableMaps()
 		return false;
 	}
 
-	uint	i;
-	for (i=0; i<_Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (_Tables[i] != NULL && _Tables[i]->initialised())
 		{
@@ -1084,7 +1040,7 @@ bool	CDatabase::rebuildTableMaps()
 /*
  * Reset dirty lists
  */
-bool	CDatabase::resetDirtyTags()
+bool CDatabase::resetDirtyTags()
 {
 	if (!initialised())
 	{
@@ -1092,8 +1048,8 @@ bool	CDatabase::resetDirtyTags()
 		return false;
 	}
 
-	uint	i;
-	for (i=0; i<_Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (_Tables[i] != NULL && _Tables[i]->initialised())
 		{
@@ -1107,7 +1063,7 @@ bool	CDatabase::resetDirtyTags()
 /*
  * Reset and rebuild all maps, references, lists...
  */
-bool	CDatabase::rebuildVolatileData()
+bool CDatabase::rebuildVolatileData()
 {
 	PDS_DEBUG("rebuildVolatileData()");
 
@@ -1135,14 +1091,14 @@ bool	CDatabase::rebuildVolatileData()
 	/*
 	if (!resetDirtyTags())
 	{
-		PDS_WARNING("rebuildVolatileData(): failed to resetDirtyTags()");
-		return false;
+	    PDS_WARNING("rebuildVolatileData(): failed to resetDirtyTags()");
+	    return false;
 	}
 	*/
 
 	// preload data from reference files
-	uint	i;
-	for (i=0; i<_Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (_Tables[i] != NULL && _Tables[i]->initialised())
 		{
@@ -1155,24 +1111,20 @@ bool	CDatabase::rebuildVolatileData()
 	}
 
 	// load string manager
-//	if (!_StringManager.load(_Reference.getPath()))
-//	{
-//		PDS_WARNING("rebuildVolatileData(): failed to load string manager");
-//	}
+	//	if (!_StringManager.load(_Reference.getPath()))
+	//	{
+	//		PDS_WARNING("rebuildVolatileData(): failed to load string manager");
+	//	}
 
 	return true;
 }
-
-
-
-
 
 /*
  * Adapt database to new description
  * \param description is the latest xml description of the database
  * \returns true is adaptation succeded
  */
-CDatabase*	CDatabase::adapt(const string& description)
+CDatabase *CDatabase::adapt(const string &description)
 {
 	PDS_DEBUG("adapt()");
 
@@ -1183,9 +1135,9 @@ CDatabase*	CDatabase::adapt(const string& description)
 	}
 
 	// get 'From' HashKey
-	CHashKey	hash1 = _Description.getHashKey();
+	CHashKey hash1 = _Description.getHashKey();
 	// get 'Into' HashKey
-	CHashKey	hash2 = getSHA1((const uint8*)(description.c_str()), (uint32)description.size());
+	CHashKey hash2 = getSHA1((const uint8 *)(description.c_str()), (uint32)description.size());
 
 	// same hash, ok go on
 	if (hash1 == hash2)
@@ -1202,13 +1154,13 @@ CDatabase*	CDatabase::adapt(const string& description)
 	}
 
 	// backup old reference
-	if (!_Reference.save(_Reference.getPath()+"ref"))
+	if (!_Reference.save(_Reference.getPath() + "ref"))
 	{
 		PDS_WARNING("adapt(): failed to backup reference index");
 	}
 
 	// create a new destination database
-	CDatabase*	into = new CDatabase(_State.Id);
+	CDatabase *into = new CDatabase(_State.Id);
 
 	if (!into->createFromScratch(description))
 	{
@@ -1217,7 +1169,7 @@ CDatabase*	CDatabase::adapt(const string& description)
 		return NULL;
 	}
 
-	CDatabaseAdapter	adapter;
+	CDatabaseAdapter adapter;
 
 	if (!adapter.build(this, into))
 	{
@@ -1248,21 +1200,10 @@ CDatabase*	CDatabase::adapt(const string& description)
 	return into;
 }
 
-
-
-
-
-
-
-
-
-
-
-
 /*
  * Load previous database state
  */
-bool	CDatabase::loadState()
+bool CDatabase::loadState()
 {
 	PDS_DEBUG("loadState()");
 
@@ -1273,7 +1214,7 @@ bool	CDatabase::loadState()
 	}
 
 	// check directory exists
-	std::string	directory = _Reference.getNominalRootPath();
+	std::string directory = _Reference.getNominalRootPath();
 	if (!CFile::isExists(directory) || !CFile::isDirectory(directory))
 	{
 		return false;
@@ -1293,14 +1234,14 @@ bool	CDatabase::loadState()
 
 	if (_Reference.Index != _State.CurrentIndex)
 	{
-		PDS_WARNING("loadState(): failed, Reference and State files have different current index", (_Reference.getPath()+"description.xml").c_str());
+		PDS_WARNING("loadState(): failed, Reference and State files have different current index", (_Reference.getPath() + "description.xml").c_str());
 		return false;
 	}
 
 	// load description
-	if (!_Description.loadDescriptionFile(_Reference.getPath()+"description.xml"))
+	if (!_Description.loadDescriptionFile(_Reference.getPath() + "description.xml"))
 	{
-		PDS_WARNING("loadState(): failed to load description file '%s'", (_Reference.getPath()+"description.xml").c_str());
+		PDS_WARNING("loadState(): failed to load description file '%s'", (_Reference.getPath() + "description.xml").c_str());
 		return false;
 	}
 
@@ -1337,14 +1278,13 @@ bool	CDatabase::loadState()
 	return true;
 }
 
-
 /*
  * Check if reference is still the same
  * Reinit reference if reference changed
  */
-bool	CDatabase::checkReferenceChange()
+bool CDatabase::checkReferenceChange()
 {
-	CRefIndex	ref(_State.Id);
+	CRefIndex ref(_State.Id);
 
 	// load current reference
 	if (!ref.load())
@@ -1373,12 +1313,11 @@ bool	CDatabase::checkReferenceChange()
 	return false;
 }
 
-
 /*
  * Check if reference is up to date
  * Returns true if reference is the latest valid database image
  */
-bool	CDatabase::isReferenceUpToDate()
+bool CDatabase::isReferenceUpToDate()
 {
 	PDS_DEBUG("isReferenceUpToDate()");
 
@@ -1388,28 +1327,28 @@ bool	CDatabase::isReferenceUpToDate()
 		return false;
 	}
 
-	vector<string>	files;
+	vector<string> files;
 
-	NLMISC::CPath::getPathContent(_Reference.getRootPath()+"hours", false, false, true, files);
-	NLMISC::CPath::getPathContent(_Reference.getRootPath()+"minutes", false, false, true, files);
-	NLMISC::CPath::getPathContent(_Reference.getRootPath()+"seconds", false, false, true, files);
+	NLMISC::CPath::getPathContent(_Reference.getRootPath() + "hours", false, false, true, files);
+	NLMISC::CPath::getPathContent(_Reference.getRootPath() + "minutes", false, false, true, files);
+	NLMISC::CPath::getPathContent(_Reference.getRootPath() + "seconds", false, false, true, files);
 
-	bool	upToDate = true;
+	bool upToDate = true;
 
-	uint	i;
-	for (i=0; i<files.size(); ++i)
+	uint i;
+	for (i = 0; i < files.size(); ++i)
 	{
-		uint32		tableId;
-		CTimestamp	timestamp;
+		uint32 tableId;
+		CTimestamp timestamp;
 
-		bool		deltaFile = CDBDeltaFile::isDeltaFileName(files[i], tableId, timestamp);
-//		bool		stringLogFile = RY_PDS::CPDStringManager::isLogFileName(files[i], timestamp);
+		bool deltaFile = CDBDeltaFile::isDeltaFileName(files[i], tableId, timestamp);
+		//		bool		stringLogFile = RY_PDS::CPDStringManager::isLogFileName(files[i], timestamp);
 
 		if (deltaFile /*|| stringLogFile*/)
 		{
 			if (timestamp > _State.EndTimestamp)
 			{
-				CFile::moveFile(files[i]+".disabled", files[i]);
+				CFile::moveFile(files[i] + ".disabled", files[i]);
 				continue;
 			}
 
@@ -1428,12 +1367,12 @@ bool	CDatabase::isReferenceUpToDate()
 /*
  * Build a up to date reference
  */
-bool	CDatabase::buildReference()
+bool CDatabase::buildReference()
 {
 	PDS_DEBUG("buildReference()");
 
-	CRefIndex	prev = _Reference;
-	CRefIndex	next(_State.Id);
+	CRefIndex prev = _Reference;
+	CRefIndex next(_State.Id);
 
 	if (!next.buildNext())
 	{
@@ -1465,15 +1404,11 @@ bool	CDatabase::buildReference()
 	return true;
 }
 
-
-
-
-
 /*
  * Create new database from scratch, setup everything needed (references, etc.)
  * \param description is the xml database description
  */
-bool	CDatabase::createFromScratch(const string& description)
+bool CDatabase::createFromScratch(const string &description)
 {
 	PDS_DEBUG("createFromScratch()");
 
@@ -1497,7 +1432,7 @@ bool	CDatabase::createFromScratch(const string& description)
 		return false;
 	}
 
-	if (!_Description.loadDescription((uint8*)description.c_str()))
+	if (!_Description.loadDescription((uint8 *)description.c_str()))
 	{
 		PDS_WARNING("createFromScratch(): failed to load description");
 		return false;
@@ -1509,12 +1444,12 @@ bool	CDatabase::createFromScratch(const string& description)
 		return false;
 	}
 
-//	// save description
-//	if (!_Description.saveDescription(_Reference.getPath() + "description.xml"))
-//	{
-//		PDS_WARNING("createFromScratch(): failed to save description");
-//		return false;
-//	}
+	//	// save description
+	//	if (!_Description.saveDescription(_Reference.getPath() + "description.xml"))
+	//	{
+	//		PDS_WARNING("createFromScratch(): failed to save description");
+	//		return false;
+	//	}
 
 	// init timestamps as database is ready to run
 	initTimestamps();
@@ -1528,7 +1463,7 @@ bool	CDatabase::createFromScratch(const string& description)
 /*
  * Build the delta files and purge all dirty rows in tables
  */
-bool	CDatabase::buildDelta(const CTimestamp& starttime, const CTimestamp& endtime)
+bool CDatabase::buildDelta(const CTimestamp &starttime, const CTimestamp &endtime)
 {
 	H_AUTO(PDS_Database_buildDelta);
 
@@ -1538,8 +1473,8 @@ bool	CDatabase::buildDelta(const CTimestamp& starttime, const CTimestamp& endtim
 		return false;
 	}
 
-	uint	i;
-	for (i=0; i<_Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (!_Tables[i]->buildDelta(starttime, endtime))
 		{
@@ -1548,61 +1483,60 @@ bool	CDatabase::buildDelta(const CTimestamp& starttime, const CTimestamp& endtim
 		}
 	}
 
-//	std::string	logDir = RY_PDS::CPDSLib::getLogDirectory(_State.Id);
-//	if (!CFile::isExists(logDir) || !CFile::isDirectory(logDir))
-//	{
-//		if (!CFile::createDirectoryTree(logDir))
-//		{
-//			PDS_WARNING("buildDelta(): failed to create log root directory '%s'", logDir.c_str());
-//		}
-//
-//		if (!CFile::setRWAccess(logDir))
-//		{
-//			PDS_WARNING("buildDelta(): failed, can't set RW access to directory '%s'", logDir.c_str());
-//		}
-//	}
+	//	std::string	logDir = RY_PDS::CPDSLib::getLogDirectory(_State.Id);
+	//	if (!CFile::isExists(logDir) || !CFile::isDirectory(logDir))
+	//	{
+	//		if (!CFile::createDirectoryTree(logDir))
+	//		{
+	//			PDS_WARNING("buildDelta(): failed to create log root directory '%s'", logDir.c_str());
+	//		}
+	//
+	//		if (!CFile::setRWAccess(logDir))
+	//		{
+	//			PDS_WARNING("buildDelta(): failed, can't set RW access to directory '%s'", logDir.c_str());
+	//		}
+	//	}
 
-//	// save string manager logs
-//	if (!_StringManager.logEmpty())
-//	{
-//		COFile		smf;
-//		COXml		smxml;
-//		std::string	smfilename = logDir + endtime.toString()+".string_log";
-//		if (!smf.open(smfilename) || !smxml.init(&smf) || !_StringManager.storeLog(smxml))
-//		{
-//			PDS_WARNING("buildDelta(): failed to build string manager log file '%s'", smfilename.c_str());
-//		}
-//	}
+	//	// save string manager logs
+	//	if (!_StringManager.logEmpty())
+	//	{
+	//		COFile		smf;
+	//		COXml		smxml;
+	//		std::string	smfilename = logDir + endtime.toString()+".string_log";
+	//		if (!smf.open(smfilename) || !smxml.init(&smf) || !_StringManager.storeLog(smxml))
+	//		{
+	//			PDS_WARNING("buildDelta(): failed to build string manager log file '%s'", smfilename.c_str());
+	//		}
+	//	}
 
 	// save straight logs
 	if (!_LogQueue.empty())
 	{
-//		std::string	logfilename = logDir + endtime.toString()+"_0000.pd_log";
-//		COFile		logf;
-//		if (logf.open(logfilename))
-//		{
-//			try
-//			{
-//				logf.serialCont(_LogQueue);
-//			}
-//			catch (const Exception& e)
-//			{
-//				PDS_WARNING("buildDelta(): exception occurred while saving straight log : %s", e.what());
-//			}
-//		}
-//		else
-//		{
-//			PDS_WARNING("buildDelta(): failed to build log file '%s'", logfilename.c_str());
-//		}
-//
+		//		std::string	logfilename = logDir + endtime.toString()+"_0000.pd_log";
+		//		COFile		logf;
+		//		if (logf.open(logfilename))
+		//		{
+		//			try
+		//			{
+		//				logf.serialCont(_LogQueue);
+		//			}
+		//			catch (const Exception& e)
+		//			{
+		//				PDS_WARNING("buildDelta(): exception occurred while saving straight log : %s", e.what());
+		//			}
+		//		}
+		//		else
+		//		{
+		//			PDS_WARNING("buildDelta(): failed to build log file '%s'", logfilename.c_str());
+		//		}
+		//
 		_LogQueue.clear();
 	}
 
 	// State file swapping
-	std::string	statePath = _Reference.getRootPath();
-	std::string	stateName = CDatabaseState::fileName();
-	if (CFile::fileExists(statePath+stateName) &&
-		!CFile::copyFile(statePath+"previous_"+stateName, statePath+stateName, false))
+	std::string statePath = _Reference.getRootPath();
+	std::string stateName = CDatabaseState::fileName();
+	if (CFile::fileExists(statePath + stateName) && !CFile::copyFile(statePath + "previous_" + stateName, statePath + stateName, false))
 	{
 		PDS_WARNING("buildDelta(): failed copy state file to backup previous_state");
 	}
@@ -1618,7 +1552,7 @@ bool	CDatabase::buildDelta(const CTimestamp& starttime, const CTimestamp& endtim
 /*
  * Flush database from released rows
  */
-bool	CDatabase::flushReleased()
+bool CDatabase::flushReleased()
 {
 	if (!initialised())
 	{
@@ -1626,8 +1560,8 @@ bool	CDatabase::flushReleased()
 		return false;
 	}
 
-	uint	i;
-	for (i=0; i<_Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (!_Tables[i]->flushReleased())
 		{
@@ -1639,12 +1573,10 @@ bool	CDatabase::flushReleased()
 	return true;
 }
 
-
-
 /*
  * Notify a new reference is ready
  */
-bool	CDatabase::notifyNewReference(bool validateRef)
+bool CDatabase::notifyNewReference(bool validateRef)
 {
 	if (!initialised())
 	{
@@ -1657,20 +1589,17 @@ bool	CDatabase::notifyNewReference(bool validateRef)
 
 	_State.CurrentIndex = _Reference.Index;
 
-	uint	i;
-	for (i=0; i<_Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Tables.size(); ++i)
 		_Tables[i]->notifyNewReference(_Reference);
 
 	return true;
 }
 
-
-
-
 /*
  * Receive update
  */
-void	CDatabase::receiveUpdate(uint32 id)
+void CDatabase::receiveUpdate(uint32 id)
 {
 	// add to acknowledged updates
 	_ReceivedUpdates.push_back(id);
@@ -1681,26 +1610,25 @@ void	CDatabase::receiveUpdate(uint32 id)
 /*
  * Flush updates
  */
-void	CDatabase::flushUpdates(std::vector<uint32>& acknowledged)
+void CDatabase::flushUpdates(std::vector<uint32> &acknowledged)
 {
 	// copy acknowledge and flush
 	acknowledged = _ReceivedUpdates;
 	_ReceivedUpdates.clear();
 }
 
-
 /**
  * Get Update Queue for id
  * May return NULL if message was already received
  */
-RY_PDS::CDbMessageQueue*	CDatabase::getUpdateMessageQueue(uint32 updateId)
+RY_PDS::CDbMessageQueue *CDatabase::getUpdateMessageQueue(uint32 updateId)
 {
 	if (updateId != 0 && updateId <= _State.LastUpdateId)
 		return NULL;
 
 	_LogQueue.push_back(RY_PDS::CUpdateLog());
 
-	RY_PDS::CUpdateLog&	ulog = _LogQueue.back();
+	RY_PDS::CUpdateLog &ulog = _LogQueue.back();
 
 	ulog.UpdateId = updateId;
 	ulog.createUpdates();
@@ -1710,41 +1638,37 @@ RY_PDS::CDbMessageQueue*	CDatabase::getUpdateMessageQueue(uint32 updateId)
 	return ulog.getUpdates();
 }
 
+CVariable<uint> MinuteUpdateRate("pds", "MinuteUpdateRate", "Number of seconds between two minute updates", 60, 0, true);
+CVariable<uint> HourUpdateRate("pds", "HourUpdateRate", "Number of seconds between two hour updates", 3600, 0, true);
+CVariable<uint> ReferenceUpdateRate("pds", "ReferenceUpdateRate", "Number of seconds between two reference builds", 86400, 0, true);
 
-
-
-CVariable<uint>	MinuteUpdateRate("pds", "MinuteUpdateRate", "Number of seconds between two minute updates", 60, 0, true);
-CVariable<uint>	HourUpdateRate("pds", "HourUpdateRate", "Number of seconds between two hour updates", 3600, 0, true);
-CVariable<uint>	ReferenceUpdateRate("pds", "ReferenceUpdateRate", "Number of seconds between two reference builds", 86400, 0, true);
-
-CVariable<uint>	KeepSecondsAtMinuteUpdate("pds", "KeepSecondsAtMinuteUpdate", "Number of seconds to keep (in number of minute updates)", 2, 0, true);
-CVariable<uint>	KeepMinutesAtHourUpdate("pds", "KeepMinutesAtHourUpdate", "Number of minutes to keep (in number of hours updates)", 2, 0, true);
-CVariable<uint>	KeepHoursAtReferenceUpdate("pds", "KeepHoursAtReferenceUpdate", "Number of hours to keep (in number of daily updates)", 2, 0, true);
-
+CVariable<uint> KeepSecondsAtMinuteUpdate("pds", "KeepSecondsAtMinuteUpdate", "Number of seconds to keep (in number of minute updates)", 2, 0, true);
+CVariable<uint> KeepMinutesAtHourUpdate("pds", "KeepMinutesAtHourUpdate", "Number of minutes to keep (in number of hours updates)", 2, 0, true);
+CVariable<uint> KeepHoursAtReferenceUpdate("pds", "KeepHoursAtReferenceUpdate", "Number of hours to keep (in number of daily updates)", 2, 0, true);
 
 /*
  * Send Delta/Reference build commands
  */
-bool	CDatabase::sendBuildCommands(const CTimestamp& current)
+bool CDatabase::sendBuildCommands(const CTimestamp &current)
 {
 	checkUpdateRates();
 
 	while (current - _MinuteUpdateTimestamp >= MinuteUpdateRate)
 	{
-		CTimestamp	start = _MinuteUpdateTimestamp;
-		CTimestamp	end = start + MinuteUpdateRate;
-		CTimestamp	keep = end - MinuteUpdateRate*KeepSecondsAtMinuteUpdate;
+		CTimestamp start = _MinuteUpdateTimestamp;
+		CTimestamp end = start + MinuteUpdateRate;
+		CTimestamp keep = end - MinuteUpdateRate * KeepSecondsAtMinuteUpdate;
 
-		string					outputPath = _Reference.getMinutesUpdatePath();
-		string					hoursUpdatePath = _Reference.getHoursUpdatePath();
-		string					minutesUpdatePath = _Reference.getMinutesUpdatePath();
-		string					secondsUpdatePath = _Reference.getSecondsUpdatePath();
-		string					mintimestamp = start.toString();
-		string					maxtimestamp = end.toString();
-		CDeltaBuilder::TDelta	type = CDeltaBuilder::Minute;
-		string					keeptimestamp = keep.toString();
+		string outputPath = _Reference.getMinutesUpdatePath();
+		string hoursUpdatePath = _Reference.getHoursUpdatePath();
+		string minutesUpdatePath = _Reference.getMinutesUpdatePath();
+		string secondsUpdatePath = _Reference.getSecondsUpdatePath();
+		string mintimestamp = start.toString();
+		string maxtimestamp = end.toString();
+		CDeltaBuilder::TDelta type = CDeltaBuilder::Minute;
+		string keeptimestamp = keep.toString();
 
-		CMessage&				msgdelta = CDbManager::addTask("RB_GEN_DELTA", NULL, NULL);
+		CMessage &msgdelta = CDbManager::addTask("RB_GEN_DELTA", NULL, NULL);
 		msgdelta.serial(outputPath);
 		msgdelta.serial(hoursUpdatePath);
 		msgdelta.serial(minutesUpdatePath);
@@ -1757,23 +1681,22 @@ bool	CDatabase::sendBuildCommands(const CTimestamp& current)
 		_MinuteUpdateTimestamp = end;
 	}
 
-
 	while (current - _HourUpdateTimestamp >= HourUpdateRate)
 	{
-		CTimestamp	start = _HourUpdateTimestamp;
-		CTimestamp	end = start + HourUpdateRate;
-		CTimestamp	keep = end - HourUpdateRate*KeepMinutesAtHourUpdate;
+		CTimestamp start = _HourUpdateTimestamp;
+		CTimestamp end = start + HourUpdateRate;
+		CTimestamp keep = end - HourUpdateRate * KeepMinutesAtHourUpdate;
 
-		string					outputPath = _Reference.getHoursUpdatePath();
-		string					hoursUpdatePath = _Reference.getHoursUpdatePath();
-		string					minutesUpdatePath = _Reference.getMinutesUpdatePath();
-		string					secondsUpdatePath = _Reference.getSecondsUpdatePath();
-		string					mintimestamp = start.toString();
-		string					maxtimestamp = end.toString();
-		CDeltaBuilder::TDelta	type = CDeltaBuilder::Hour;
-		string					keeptimestamp = keep.toString();
+		string outputPath = _Reference.getHoursUpdatePath();
+		string hoursUpdatePath = _Reference.getHoursUpdatePath();
+		string minutesUpdatePath = _Reference.getMinutesUpdatePath();
+		string secondsUpdatePath = _Reference.getSecondsUpdatePath();
+		string mintimestamp = start.toString();
+		string maxtimestamp = end.toString();
+		CDeltaBuilder::TDelta type = CDeltaBuilder::Hour;
+		string keeptimestamp = keep.toString();
 
-		CMessage&				msgdelta = CDbManager::addTask("RB_GEN_DELTA", NULL, NULL);
+		CMessage &msgdelta = CDbManager::addTask("RB_GEN_DELTA", NULL, NULL);
 		msgdelta.serial(outputPath);
 		msgdelta.serial(hoursUpdatePath);
 		msgdelta.serial(minutesUpdatePath);
@@ -1788,28 +1711,28 @@ bool	CDatabase::sendBuildCommands(const CTimestamp& current)
 
 	while (current - _DayUpdateTimestamp >= ReferenceUpdateRate)
 	{
-		CTimestamp	start = _DayUpdateTimestamp;
-		CTimestamp	end = start + ReferenceUpdateRate;
-		CTimestamp	keep = end - ReferenceUpdateRate*KeepHoursAtReferenceUpdate;
+		CTimestamp start = _DayUpdateTimestamp;
+		CTimestamp end = start + ReferenceUpdateRate;
+		CTimestamp keep = end - ReferenceUpdateRate * KeepHoursAtReferenceUpdate;
 
-		CRefIndex*	next = new CRefIndex(_State.Id);
+		CRefIndex *next = new CRefIndex(_State.Id);
 		*next = _Reference;
 		next->buildNext();
 
-		string		rootRefPath = _Reference.getRootPath();
-		string		previousReferencePath = _Reference.getPath();
-		string		nextReferencePath = next->getPath();
+		string rootRefPath = _Reference.getRootPath();
+		string previousReferencePath = _Reference.getPath();
+		string nextReferencePath = next->getPath();
 
-		string		logUpdatePath = _Reference.getLogPath();
-		string		hoursUpdatePath = _Reference.getHoursUpdatePath();
-		string		minutesUpdatePath = _Reference.getMinutesUpdatePath();
-		string		secondsUpdatePath = _Reference.getSecondsUpdatePath();
+		string logUpdatePath = _Reference.getLogPath();
+		string hoursUpdatePath = _Reference.getHoursUpdatePath();
+		string minutesUpdatePath = _Reference.getMinutesUpdatePath();
+		string secondsUpdatePath = _Reference.getSecondsUpdatePath();
 
-		string		mintimestamp = start.toString();
-		string		maxtimestamp = end.toString();
-		string		keeptimestamp = keep.toString();
+		string mintimestamp = start.toString();
+		string maxtimestamp = end.toString();
+		string keeptimestamp = keep.toString();
 
-		CMessage&	msgref = CDbManager::addTask("RB_GEN_REF", this, (void*)next);
+		CMessage &msgref = CDbManager::addTask("RB_GEN_REF", this, (void *)next);
 		msgref.serial(rootRefPath);
 		msgref.serial(previousReferencePath);
 		msgref.serial(nextReferencePath);
@@ -1830,10 +1753,10 @@ bool	CDatabase::sendBuildCommands(const CTimestamp& current)
 /*
  * Task ran successfully
  */
-void	CDatabase::taskSuccessful(void* arg)
+void CDatabase::taskSuccessful(void *arg)
 {
 	// when reference is up to date, notify new reference
-	CRefIndex*	ref = (CRefIndex*)arg;
+	CRefIndex *ref = (CRefIndex *)arg;
 
 	_Reference = *ref;
 	notifyNewReference(true);
@@ -1844,7 +1767,7 @@ void	CDatabase::taskSuccessful(void* arg)
 /*
  * Task failed!
  */
-void	CDatabase::taskFailed(void* arg)
+void CDatabase::taskFailed(void *arg)
 {
 	// ok, nothing to do in this case...
 }
@@ -1852,46 +1775,44 @@ void	CDatabase::taskFailed(void* arg)
 /*
  * Static Check for update rates
  */
-void	CDatabase::checkUpdateRates()
+void CDatabase::checkUpdateRates()
 {
-	uint	deltaRate = DeltaUpdateRate;
-	uint	minuteRate = MinuteUpdateRate;
+	uint deltaRate = DeltaUpdateRate;
+	uint minuteRate = MinuteUpdateRate;
 
 	// minute rate must be a multiple of delta rate
 	if ((minuteRate % deltaRate) != 0)
 	{
-		minuteRate = deltaRate*(minuteRate/deltaRate + 1);
+		minuteRate = deltaRate * (minuteRate / deltaRate + 1);
 		nlwarning("CDatabase::checkUpdateRate(): MinuteUpdateRate is not a multiple of DeltaUpdateRate! Rounded to %d seconds", minuteRate);
 		MinuteUpdateRate = minuteRate;
 	}
 
-	uint	hourRate = HourUpdateRate;
+	uint hourRate = HourUpdateRate;
 
 	// hour rate must be a multiple of minute rate
 	if ((hourRate % minuteRate) != 0)
 	{
-		hourRate = minuteRate*(hourRate/minuteRate + 1);
+		hourRate = minuteRate * (hourRate / minuteRate + 1);
 		nlwarning("CDatabase::checkUpdateRate(): HourUpdateRate is not a multiple of MinuteUpdateRate! Rounded to %d seconds", hourRate);
 		HourUpdateRate = hourRate;
 	}
 
-	uint	referenceRate = ReferenceUpdateRate;
+	uint referenceRate = ReferenceUpdateRate;
 
 	// reference rate must be a multiple of hour rate
 	if ((referenceRate % hourRate) != 0)
 	{
-		referenceRate = hourRate*(referenceRate/hourRate + 1);
+		referenceRate = hourRate * (referenceRate / hourRate + 1);
 		nlwarning("CDatabase::checkUpdateRate(): ReferenceUpdateRate is not a multiple of HourUpdateRate! Rounded to %d seconds", referenceRate);
 		ReferenceUpdateRate = referenceRate;
 	}
 }
 
-
-
 /*
  * Serialise SheetId String Mapper
  */
-void	CDatabase::serialSheetIdStringMapper(NLMISC::IStream& f)
+void CDatabase::serialSheetIdStringMapper(NLMISC::IStream &f)
 {
 	// serial mapper
 	_SheetIdStringMapper.serial(f);
@@ -1899,12 +1820,12 @@ void	CDatabase::serialSheetIdStringMapper(NLMISC::IStream& f)
 	if (f.isReading())
 	{
 		// if mapper is read, save it now in reference path
-		std::string		refPath = _Reference.getPath();
+		std::string refPath = _Reference.getPath();
 
-		COFile	ofile;
-		if (!ofile.open(refPath+"sheetid_map.bin"))
+		COFile ofile;
+		if (!ofile.open(refPath + "sheetid_map.bin"))
 		{
-			PDS_WARNING("serialSheetIdStringMapper(): failed to open reference sheetid_map file '%s' for save", (refPath+"sheetid_map.bin").c_str());
+			PDS_WARNING("serialSheetIdStringMapper(): failed to open reference sheetid_map file '%s' for save", (refPath + "sheetid_map.bin").c_str());
 			return;
 		}
 
@@ -1912,21 +1833,19 @@ void	CDatabase::serialSheetIdStringMapper(NLMISC::IStream& f)
 	}
 }
 
-
-
 /*
  * Get Table Index from name
  */
-RY_PDS::TTableIndex	CDatabase::getTableIndex(const std::string& tableName) const
+RY_PDS::TTableIndex CDatabase::getTableIndex(const std::string &tableName) const
 {
-	const CTable*	table = getTable(tableName);
+	const CTable *table = getTable(tableName);
 	return (table == NULL) ? RY_PDS::INVALID_TABLE_INDEX : (RY_PDS::TTableIndex)table->getId();
 }
 
 /*
  * Get Table Index from name
  */
-std::string	CDatabase::getTableName(RY_PDS::TTableIndex index) const
+std::string CDatabase::getTableName(RY_PDS::TTableIndex index) const
 {
 	if (index >= _Tables.size() || _Tables[index] == NULL)
 		return "invalid";
@@ -1934,24 +1853,21 @@ std::string	CDatabase::getTableName(RY_PDS::TTableIndex index) const
 	return _Tables[index]->getName();
 }
 
-
-
-
 /*
  * Search object in database using its key
  * \param key is the 64 bits row key to search through all tables
  */
-bool	CDatabase::searchObjectIndex(uint64 key, std::set<RY_PDS::CObjectIndex>& indexes) const
+bool CDatabase::searchObjectIndex(uint64 key, std::set<RY_PDS::CObjectIndex> &indexes) const
 {
 	indexes.clear();
 
-	uint	i;
-	for (i=0; i<_Tables.size(); ++i)
+	uint i;
+	for (i = 0; i < _Tables.size(); ++i)
 	{
 		if (_Tables[i] == NULL || !_Tables[i]->initialised() || !_Tables[i]->isMapped())
 			continue;
 
-		RY_PDS::CObjectIndex	index = _Tables[i]->getMappedRow(key);
+		RY_PDS::CObjectIndex index = _Tables[i]->getMappedRow(key);
 
 		if (index.isValid())
 			indexes.insert(index);

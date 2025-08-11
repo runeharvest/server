@@ -14,15 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
-
 #include "stdpch.h"
 #include "magic_action_ai_toxic_cloud.h"
 #include "phrase_manager/magic_phrase.h"
 #include "phrase_manager/toxic_cloud.h"
 #include "creature_manager/creature_manager.h"
 #include "egs_sheets/egs_static_ai_action.h"
-
 
 using namespace NLMISC;
 using namespace std;
@@ -32,30 +29,30 @@ extern CCreatureManager CreatureManager;
 //--------------------------------------------------------------
 //					initFromAiAction
 //--------------------------------------------------------------
-bool CMagicAiActionToxicCloud::initFromAiAction( const CStaticAiAction *aiAction, CMagicPhrase *phrase )
+bool CMagicAiActionToxicCloud::initFromAiAction(const CStaticAiAction *aiAction, CMagicPhrase *phrase)
 {
 #ifdef NL_DEBUG
 	nlassert(phrase);
 	nlassert(aiAction);
 #endif
-	
-	if (aiAction->getType() != AI_ACTION::ToxicCloud )
+
+	if (aiAction->getType() != AI_ACTION::ToxicCloud)
 		return false;
-	
+
 	// read parameters
 	const COTSpellParams &data = aiAction->getData().OTSpell;
 
-	CCreature *creature = CreatureManager.getCreature( phrase->getActor() );
+	CCreature *creature = CreatureManager.getCreature(phrase->getActor());
 	if (creature && creature->getForm())
 		_Damage = (uint16)(data.SpellParamValue + data.SpellPowerFactor * creature->getForm()->getAttackLevel());
 	else
 		_Damage = (uint16)data.SpellParamValue;
-	
+
 	_EffectDuration = data.Duration;
 	_UpdateFrequency = data.UpdateFrequency;
 	_AffectedScore = data.AffectedScore;
 	_DamageType = data.DamageType;
-	
+
 	// get effect radius
 	const TAiArea &areaData = aiAction->getAreaData();
 	_Radius = areaData.AreaRange;
@@ -66,25 +63,25 @@ bool CMagicAiActionToxicCloud::initFromAiAction( const CStaticAiAction *aiAction
 //--------------------------------------------------------------
 //					launch
 //--------------------------------------------------------------
-void CMagicAiActionToxicCloud::launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-									   const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-									   const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
+void CMagicAiActionToxicCloud::launch(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport)
 {
 } // launch //
 
 //--------------------------------------------------------------
-//					apply  
+//					apply
 //--------------------------------------------------------------
-void CMagicAiActionToxicCloud::apply( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-									  const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-									  const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport,
-									  sint32 vamp, float vampRatio, bool reportXp )
+void CMagicAiActionToxicCloud::apply(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport,
+    sint32 vamp, float vampRatio, bool reportXp)
 {
 	H_AUTO(CMagicAiActionToxicCloud_apply);
 
 	if (!phrase || !_EffectDuration)
 		return;
-	
+
 	// get acting entity position
 	const TDataSetRow actorRowId = phrase->getActor();
 	CEntityBase *actor = CEntityBaseManager::getEntityBasePtr(actorRowId);
@@ -121,14 +118,14 @@ void CMagicAiActionToxicCloud::apply( CMagicPhrase * phrase, sint deltaLevel, si
 	}
 
 	// spawn toxic cloud and add it to manager
-	CSheetId sheet( toString( "toxic_cloud_%d.fx", fxRadius ));
-	if ( cloud->spawn( sheet ) )
+	CSheetId sheet(toString("toxic_cloud_%d.fx", fxRadius));
+	if (cloud->spawn(sheet))
 	{
-		CEnvironmentalEffectManager::getInstance()->addEntity( cloud );
+		CEnvironmentalEffectManager::getInstance()->addEntity(cloud);
 	}
 	else
 	{
-		nlwarning( "MAGIC: Unable to spawn toxic cloud sheet %s", sheet.toString().c_str() );
+		nlwarning("MAGIC: Unable to spawn toxic cloud sheet %s", sheet.toString().c_str());
 		delete cloud;
 	}
 } // apply //

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_PROGRESSION_PVE_H
 #define RYZOM_PROGRESSION_PVE_H
 
@@ -29,7 +27,6 @@
 class CCharacter;
 class CEntityBase;
 
-
 //---------------------------------------------------
 // Implementation of CAILostAggroMsgImp
 //
@@ -37,13 +34,10 @@ class CEntityBase;
 class CAILostAggroMsgImp : public CAILostAggroMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 };
 
-
-namespace PROGRESSIONPVE
-{
-
+namespace PROGRESSIONPVE {
 
 /**
  * CSkillProgress
@@ -55,31 +49,31 @@ namespace PROGRESSIONPVE
 class CSkillProgress
 {
 	NL_INSTANCE_COUNTER_DECL(CSkillProgress);
-public:
 
+public:
 	struct TSkillProgress
 	{
 		SKILLS::ESkills Skill;
-		uint16			NbActions;
+		uint16 NbActions;
 	};
 
 	/// ctor
-	CSkillProgress() {}
+	CSkillProgress() { }
 
 	/// dtor
 	virtual ~CSkillProgress() { _SkillsProgress.clear(); }
 
 	/// inc action counter
-	void incNbAction( SKILLS::ESkills skill );
-	
+	void incNbAction(SKILLS::ESkills skill);
+
 	/// apply xp to skill
-	bool applyXp( CCharacter * c, float xpGainPerOpponent );
-	
+	bool applyXp(CCharacter *c, float xpGainPerOpponent);
+
 	/// return reference on __SkillsProgress
-	std::vector< TSkillProgress >& getSkillsProgress() { return _SkillsProgress; }
+	std::vector<TSkillProgress> &getSkillsProgress() { return _SkillsProgress; }
 
 private:
-	std::vector< TSkillProgress > _SkillsProgress;
+	std::vector<TSkillProgress> _SkillsProgress;
 };
 
 /**
@@ -92,37 +86,36 @@ private:
 class CCharacterActions
 {
 	NL_INSTANCE_COUNTER_DECL(CCharacterActions);
-public:
 
-	typedef std::map< TDataSetRow, CSkillProgress * > TSkillProgressPerOpponentContainer;
-	
+public:
+	typedef std::map<TDataSetRow, CSkillProgress *> TSkillProgressPerOpponentContainer;
+
 	/// ctor
-	CCharacterActions() {}
+	CCharacterActions() { }
 
 	/// dtor+
 	virtual ~CCharacterActions();
 
 	// add player action
-	void addAction( const TDataSetRow& target, SKILLS::ESkills skill, bool incActionCounter);
+	void addAction(const TDataSetRow &target, SKILLS::ESkills skill, bool incActionCounter);
 
 	// a creature dead and have offensive character for it, dispatch xp gain
-	bool dispatchXpGain( TDataSetRow actor, TDataSetRow creature, float equivalentXpMembers, float xpFactor, const std::list<NLMISC::CEntityId> &allowedChar );
-	
+	bool dispatchXpGain(TDataSetRow actor, TDataSetRow creature, float equivalentXpMembers, float xpFactor, const std::list<NLMISC::CEntityId> &allowedChar);
+
 	// forget xp gain of one creature
-	bool forgetXpGain( TDataSetRow creature );
-	
+	bool forgetXpGain(TDataSetRow creature);
+
 private:
 	// TOffensiveCharacter struct per creature
 	TSkillProgressPerOpponentContainer _SkillProgressPerOpponent;
 };
 
-
 struct CTeamMember
 {
 	CTeamMember() { GainXp = false; }
-	
-	NLMISC::CEntityId	Id;
-	bool				GainXp;
+
+	NLMISC::CEntityId Id;
+	bool GainXp;
 };
 
 /**
@@ -135,22 +128,38 @@ struct CTeamMember
 class CTeamDamage
 {
 public:
-	inline CTeamDamage() : TeamId(CTEAM::InvalidTeamId), MaxSkillValue(0), TotalDamage(0.0f) {}
-	explicit inline CTeamDamage(const NLMISC::CEntityId &playerId) : PlayerId(playerId), TeamId(CTEAM::InvalidTeamId), MaxSkillValue(0), TotalDamage(0.0f) {}
-	explicit inline CTeamDamage(uint16 teamId) : TeamId(teamId), MaxSkillValue(0), TotalDamage(0.0f) {}
+	inline CTeamDamage()
+	    : TeamId(CTEAM::InvalidTeamId)
+	    , MaxSkillValue(0)
+	    , TotalDamage(0.0f)
+	{
+	}
+	explicit inline CTeamDamage(const NLMISC::CEntityId &playerId)
+	    : PlayerId(playerId)
+	    , TeamId(CTEAM::InvalidTeamId)
+	    , MaxSkillValue(0)
+	    , TotalDamage(0.0f)
+	{
+	}
+	explicit inline CTeamDamage(uint16 teamId)
+	    : TeamId(teamId)
+	    , MaxSkillValue(0)
+	    , TotalDamage(0.0f)
+	{
+	}
 
 	/// single player Id if not a team
-	NLMISC::CEntityId	PlayerId;
+	NLMISC::CEntityId PlayerId;
 	/// team Id if not a single player
-	uint16				TeamId;
+	uint16 TeamId;
 	/// total damage
-	float				TotalDamage;
+	float TotalDamage;
 
 	/// team members
 	std::vector<CTeamMember> TeamMembers;
 
 	/// min delta level between players and creature
-	uint16				MaxSkillValue;
+	uint16 MaxSkillValue;
 
 	/// enable xp for member
 	void enableXP(const NLMISC::CEntityId &playerId, uint16 skillValue)
@@ -159,7 +168,7 @@ public:
 			MaxSkillValue = skillValue;
 
 		const uint size = (uint)TeamMembers.size();
-		for (uint i = 0 ; i < size ; ++i)
+		for (uint i = 0; i < size; ++i)
 		{
 			if (TeamMembers[i].Id == playerId)
 			{
@@ -168,16 +177,16 @@ public:
 			}
 		}
 
-		TeamMembers.resize(TeamMembers.size()+1);
-		TeamMembers[TeamMembers.size()-1].Id = playerId;
-		TeamMembers[TeamMembers.size()-1].GainXp = true;
+		TeamMembers.resize(TeamMembers.size() + 1);
+		TeamMembers[TeamMembers.size() - 1].Id = playerId;
+		TeamMembers[TeamMembers.size() - 1].GainXp = true;
 	}
 
 	/// remove a team member
 	void removeMember(const NLMISC::CEntityId &playerId)
 	{
 		const uint size = (uint)TeamMembers.size();
-		for (uint i = 0 ; i < size ; ++i)
+		for (uint i = 0; i < size; ++i)
 		{
 			if (TeamMembers[i].Id == playerId)
 			{
@@ -199,14 +208,21 @@ public:
 class CCreatureInflictedDamage
 {
 public:
-	inline CCreatureInflictedDamage() : TotalDamage(0.0f) {}
-	explicit inline CCreatureInflictedDamage(const NLMISC::CEntityId &creatureId) : CreatureId(creatureId), TotalDamage(0.0f) {}
+	inline CCreatureInflictedDamage()
+	    : TotalDamage(0.0f)
+	{
+	}
+	explicit inline CCreatureInflictedDamage(const NLMISC::CEntityId &creatureId)
+	    : CreatureId(creatureId)
+	    , TotalDamage(0.0f)
+	{
+	}
 
 	/// creature id
-	NLMISC::CEntityId	CreatureId;
-	
+	NLMISC::CEntityId CreatureId;
+
 	/// damage inflicted
-	float				TotalDamage;
+	float TotalDamage;
 };
 
 /**
@@ -220,22 +236,25 @@ struct CCreatureTakenDamage
 {
 	/// damage inflicted by players
 	std::vector<CTeamDamage> PlayerInflictedDamage;
-	
+
 	/// damage inflicted by npcs (guards...) or other creatures
 	std::vector<CCreatureInflictedDamage> CreatureInflictedDamage;
 
 	/// total damage inflicted by npcs (guards...) or other creatures
-	float					 TotalCreatureInflictedDamage;
+	float TotalCreatureInflictedDamage;
 
 	/// constructor
-	inline CCreatureTakenDamage() : TotalCreatureInflictedDamage(0) {}
+	inline CCreatureTakenDamage()
+	    : TotalCreatureInflictedDamage(0)
+	{
+	}
 
 	sint16 getIndexForTeam(uint16 teamId)
 	{
 		const uint size = (uint)PlayerInflictedDamage.size();
-		for ( uint i = 0 ; i < size ; ++i)
+		for (uint i = 0; i < size; ++i)
 		{
-			if ( PlayerInflictedDamage[i].TeamId == teamId )
+			if (PlayerInflictedDamage[i].TeamId == teamId)
 			{
 				return (sint16)i;
 			}
@@ -246,9 +265,9 @@ struct CCreatureTakenDamage
 	sint16 getIndexForPlayer(const NLMISC::CEntityId &id)
 	{
 		const uint size = (uint)PlayerInflictedDamage.size();
-		for ( uint i = 0 ; i < size ; ++i)
+		for (uint i = 0; i < size; ++i)
 		{
-			if ( PlayerInflictedDamage[i].PlayerId == id )
+			if (PlayerInflictedDamage[i].PlayerId == id)
 			{
 				return (sint16)i;
 			}
@@ -259,9 +278,9 @@ struct CCreatureTakenDamage
 	sint16 getIndexForCreature(const NLMISC::CEntityId &id)
 	{
 		const uint size = (uint)CreatureInflictedDamage.size();
-		for ( uint i = 0 ; i < size ; ++i)
+		for (uint i = 0; i < size; ++i)
 		{
-			if ( CreatureInflictedDamage[i].CreatureId == id )
+			if (CreatureInflictedDamage[i].CreatureId == id)
 			{
 				return (sint16)i;
 			}
@@ -272,42 +291,42 @@ struct CCreatureTakenDamage
 	/// return index of the team which has inflicted the most damage, returns -1 if most damage have been made by other creatures
 	sint16 getMaxInflictedDamageTeamIndex()
 	{
-		float maxDmg = 0;//TotalCreatureInflictedDamage;
+		float maxDmg = 0; // TotalCreatureInflictedDamage;
 		sint16 index = -1;
 		const uint size = (uint)PlayerInflictedDamage.size();
-		for ( uint i = 0 ; i < size ; ++i)
+		for (uint i = 0; i < size; ++i)
 		{
-			if ( PlayerInflictedDamage[i].TotalDamage > maxDmg )
+			if (PlayerInflictedDamage[i].TotalDamage > maxDmg)
 			{
 				maxDmg = PlayerInflictedDamage[i].TotalDamage;
 				index = (sint16)i;
 			}
 		}
-		
+
 		return index;
 	}
-	
+
 	/// get all the players that have contributed to creature death
 	std::set<NLMISC::CEntityId> getAllPlayers()
 	{
 		std::set<NLMISC::CEntityId> players;
-		std::vector<CTeamDamage>::const_iterator itPlayer, itPlayerEnd=PlayerInflictedDamage.end();
-		for (itPlayer=PlayerInflictedDamage.begin(); itPlayer!=itPlayerEnd; ++itPlayer)
+		std::vector<CTeamDamage>::const_iterator itPlayer, itPlayerEnd = PlayerInflictedDamage.end();
+		for (itPlayer = PlayerInflictedDamage.begin(); itPlayer != itPlayerEnd; ++itPlayer)
 		{
-			if (itPlayer->PlayerId!=NLMISC::CEntityId::Unknown)
+			if (itPlayer->PlayerId != NLMISC::CEntityId::Unknown)
 				players.insert(itPlayer->PlayerId);
-			if (itPlayer->TeamId!=CTEAM::InvalidTeamId)
+			if (itPlayer->TeamId != CTEAM::InvalidTeamId)
 			{
-				std::vector<CTeamMember> const& members = itPlayer->TeamMembers;
+				std::vector<CTeamMember> const &members = itPlayer->TeamMembers;
 				std::vector<CTeamMember>::const_iterator itMember, itMemberEnd = members.end();
-				for (itMember=members.begin(); itMember!=itMemberEnd; ++itMember)
-					if (itMember->Id!=NLMISC::CEntityId::Unknown)
+				for (itMember = members.begin(); itMember != itMemberEnd; ++itMember)
+					if (itMember->Id != NLMISC::CEntityId::Unknown)
 						players.insert(itMember->Id);
 			}
 		}
 		return players;
 	}
-	
+
 	/// return true if the max damages were inflicted by the fictitious creature
 	bool isMaxCreatureInflictedDamageTransfered()
 	{
@@ -315,57 +334,57 @@ struct CCreatureTakenDamage
 		sint16 index = -1;
 		NLMISC::CEntityId maxCreatureId = NLMISC::CEntityId::Unknown;
 		float maxDamage = 0;
-		std::vector<CCreatureInflictedDamage>::const_iterator it, itEnd=CreatureInflictedDamage.end();
-		for (it=CreatureInflictedDamage.begin(); it!=itEnd; ++it)
+		std::vector<CCreatureInflictedDamage>::const_iterator it, itEnd = CreatureInflictedDamage.end();
+		for (it = CreatureInflictedDamage.begin(); it != itEnd; ++it)
 		{
-			if ( it->TotalDamage > maxDamage )
+			if (it->TotalDamage > maxDamage)
 			{
 				maxDamage = it->TotalDamage;
 				maxCreatureId = it->CreatureId;
 			}
 		}
-		return maxCreatureId==NLMISC::CEntityId::Unknown;
+		return maxCreatureId == NLMISC::CEntityId::Unknown;
 	}
 
 	/// apply regen, remove an equal part of damage on each registered entity
 	void applyRegenHP(sint32 regenHP)
 	{
-		if (regenHP == 0 || (PlayerInflictedDamage.size() + CreatureInflictedDamage.size() == 0) )
+		if (regenHP == 0 || (PlayerInflictedDamage.size() + CreatureInflictedDamage.size() == 0))
 			return;
-		
+
 		const float damageLoss = (float)regenHP / float(PlayerInflictedDamage.size() + CreatureInflictedDamage.size());
 
 		// remove damage for teams
-		for ( uint i = 0 ; i < PlayerInflictedDamage.size() ; ++i)
+		for (uint i = 0; i < PlayerInflictedDamage.size(); ++i)
 		{
-			if ( PlayerInflictedDamage[i].TotalDamage > damageLoss)
+			if (PlayerInflictedDamage[i].TotalDamage > damageLoss)
 			{
 				PlayerInflictedDamage[i].TotalDamage -= damageLoss;
 			}
 			else
 			{
 				PlayerInflictedDamage[i].TotalDamage = 0.0f;
-//				PlayerInflictedDamage[i] = PlayerInflictedDamage.back();
-//				PlayerInflictedDamage.pop_back();
+				//				PlayerInflictedDamage[i] = PlayerInflictedDamage.back();
+				//				PlayerInflictedDamage.pop_back();
 			}
 		}
 
 		// remove damage for creatures
-		for ( uint i = 0 ; i < CreatureInflictedDamage.size() ; ++i)
+		for (uint i = 0; i < CreatureInflictedDamage.size(); ++i)
 		{
-			if ( CreatureInflictedDamage[i].TotalDamage > damageLoss)
+			if (CreatureInflictedDamage[i].TotalDamage > damageLoss)
 			{
 				CreatureInflictedDamage[i].TotalDamage -= damageLoss;
 				TotalCreatureInflictedDamage -= damageLoss;
 			}
-			else //if (CreatureInflictedDamage[i].TotalDamage > 0.0f)
+			else // if (CreatureInflictedDamage[i].TotalDamage > 0.0f)
 			{
 				TotalCreatureInflictedDamage -= CreatureInflictedDamage[i].TotalDamage;
-				//CreatureInflictedDamage[i] = CreatureInflictedDamage.back();
-				//CreatureInflictedDamage.pop_back();
+				// CreatureInflictedDamage[i] = CreatureInflictedDamage.back();
+				// CreatureInflictedDamage.pop_back();
 				CreatureInflictedDamage[i].TotalDamage = 0.0f;
 			}
-		}		
+		}
 	}
 
 	/// tranfer player damage on a fictious creature (when player enters water), return true if entry hve been erased
@@ -376,10 +395,10 @@ struct CCreatureTakenDamage
 
 private:
 	/// attribute kill to an entity for mission system
-	static void attributeKill( TDataSetRow killerRowId, TDataSetRow victimRowId);
-	
+	static void attributeKill(TDataSetRow killerRowId, TDataSetRow victimRowId);
+
 	/// attribute kill to all team members for mission system
-	static void attributeKill( uint16 teamId, TDataSetRow victimRowId);
+	static void attributeKill(uint16 teamId, TDataSetRow victimRowId);
 };
 
 /**
@@ -392,21 +411,21 @@ private:
 class CCharacterProgressionPVE
 {
 	NL_INSTANCE_COUNTER_DECL(CCharacterProgressionPVE);
+
 public:
-	
 	friend class CSkillProgress;
 
-	//typedef std::map< TDataSetRow, COffensiveCharacter * > TOffensiveCharacterContainer;
-	typedef std::map< TDataSetRow, CCharacterActions* > TCharacterActionsContainer;
+	// typedef std::map< TDataSetRow, COffensiveCharacter * > TOffensiveCharacterContainer;
+	typedef std::map<TDataSetRow, CCharacterActions *> TCharacterActionsContainer;
 
-	typedef std::map< TDataSetRow, CCreatureTakenDamage > TCreatureTakenDamageContainer;
-	typedef std::map< uint16, std::vector<TDataSetRow> >	TTeamsAttackedCreature;
-	typedef std::map< NLMISC::CEntityId, std::vector<TDataSetRow> >	TEntityAttackedCreature;
-	
-	// initialize 
-	static CCharacterProgressionPVE* getInstance() 
+	typedef std::map<TDataSetRow, CCreatureTakenDamage> TCreatureTakenDamageContainer;
+	typedef std::map<uint16, std::vector<TDataSetRow>> TTeamsAttackedCreature;
+	typedef std::map<NLMISC::CEntityId, std::vector<TDataSetRow>> TEntityAttackedCreature;
+
+	// initialize
+	static CCharacterProgressionPVE *getInstance()
 	{
-		if(_Instance == NULL)
+		if (_Instance == NULL)
 		{
 			_Instance = new CCharacterProgressionPVE();
 		}
@@ -414,25 +433,25 @@ public:
 	}
 
 	/// constructor
-	CCharacterProgressionPVE() {}
+	CCharacterProgressionPVE() { }
 
 	/// destructor
 	virtual ~CCharacterProgressionPVE();
 
 	// game system report an action
-	void actionReport( TReportAction& reportAction, bool incActionCounter = true, bool scaleForNewbies = true );
+	void actionReport(TReportAction &reportAction, bool incActionCounter = true, bool scaleForNewbies = true);
 
 	// get progression factor
-	double getProgressionFactor( CEntityBase * actor, sint32 deltaLvl, SKILLS::ESkills skill, SUCCESS_TABLE_TYPE::TSuccessTableType tableType, bool scaleForNewbies = true );
+	double getProgressionFactor(CEntityBase *actor, sint32 deltaLvl, SKILLS::ESkills skill, SUCCESS_TABLE_TYPE::TSuccessTableType tableType, bool scaleForNewbies = true);
 
 	// forget xp gain (after creature lost agro on character)
-	void forgetXpGain( TDataSetRow creature, TDataSetRow offensiveCharacter );
+	void forgetXpGain(TDataSetRow creature, TDataSetRow offensiveCharacter);
 
 	// report creature death with character perform offensive action against
-	void creatureDeath( TDataSetRow creature );
-		
+	void creatureDeath(TDataSetRow creature);
+
 	// character disconnect
-	void clearAllXpForPlayer( TDataSetRow character, uint16 teamId, bool removeDamageFromTeam );
+	void clearAllXpForPlayer(TDataSetRow character, uint16 teamId, bool removeDamageFromTeam);
 
 	/// a player joins given team
 	void playerJoinsTeam(const NLMISC::CEntityId &playerId, uint16 teamId);
@@ -463,43 +482,41 @@ public:
 
 private:
 	// return xp gain depend on skill and delta level * factor * SkillProgressionFactor
-	double getXpGain( CEntityBase * actor, sint32 deltaLvl, SKILLS::ESkills skill, float factor, SUCCESS_TABLE_TYPE::TSuccessTableType tableType, bool scaleForNewbies = true );
-		
+	double getXpGain(CEntityBase *actor, sint32 deltaLvl, SKILLS::ESkills skill, float factor, SUCCESS_TABLE_TYPE::TSuccessTableType tableType, bool scaleForNewbies = true);
+
 	// process report for a fight action (melee and range combat, all spells makes damage, all spells makes disease and curse)
-	void offensiveActionReported( const TReportAction& reportAction, CEntityBase * actor, CEntityBase * target, bool incActionCounter );
+	void offensiveActionReported(const TReportAction &reportAction, CEntityBase *actor, CEntityBase *target, bool incActionCounter);
 
 	// process report for a curative magic action (all spells make benefic effects has heal, remove curse or disease, restore any energy)
-	void curativeActionReported( const TReportAction& reportAction, CEntityBase * actor, CEntityBase * target, bool incActionCounter );
+	void curativeActionReported(const TReportAction &reportAction, CEntityBase *actor, CEntityBase *target, bool incActionCounter);
 
 	// process report for a simple action (ie action with immediat xp gain directly depends on delta level reported)
-	void simpleActionReported( const TReportAction& reportAction, CEntityBase * actor, bool scaleForNewbies = true );
+	void simpleActionReported(const TReportAction &reportAction, CEntityBase *actor, bool scaleForNewbies = true);
 
 	/// check at least a team member has aggro with given creature, return true if aggro exists
-	bool checkAggroForTeam( uint16 teamId, TDataSetRow creatureRowId );
+	bool checkAggroForTeam(uint16 teamId, TDataSetRow creatureRowId);
 
-private:	
+private:
 	// singleton instance
-	static CCharacterProgressionPVE *	_Instance;
+	static CCharacterProgressionPVE *_Instance;
 
 	// COffensiveCharacter instance per character actor
-	TCharacterActionsContainer		_CharacterActions;
+	TCharacterActionsContainer _CharacterActions;
 
 	/// creatures wounded by teams
-	TTeamsAttackedCreature			_TeamsWoundedCreatures;	
-	
+	TTeamsAttackedCreature _TeamsWoundedCreatures;
+
 	/// creatures wounded by single players
-	TEntityAttackedCreature			_PlayersWoundedCreatures;
+	TEntityAttackedCreature _PlayersWoundedCreatures;
 
 	/// creatures wounded by other creatures
-	TEntityAttackedCreature			_CreaturesWoundedCreatures;
+	TEntityAttackedCreature _CreaturesWoundedCreatures;
 
 	/// damage inflicted on creatures
-	TCreatureTakenDamageContainer	_CreatureTakenDamage;
+	TCreatureTakenDamageContainer _CreatureTakenDamage;
 };
 
-
 } // namespace PROGRESSIONPVE
-
 
 #endif // RYZOM_PROGRESSION_PVE_H
 

@@ -40,16 +40,14 @@
 #include "pds_database.h"
 #include "pds_table.h"
 
-
-
 //
 // basic typedefs
 //
 
-typedef uint32		TDatabaseId;
-const TDatabaseId	INVALID_DATABASE_ID = 0xffffffff;
+typedef uint32 TDatabaseId;
+const TDatabaseId INVALID_DATABASE_ID = 0xffffffff;
 
-extern NLMISC::CVariable<uint>	DeltaUpdateRate;
+extern NLMISC::CVariable<uint> DeltaUpdateRate;
 
 /**
  * Handle management of multiple databases
@@ -60,7 +58,6 @@ extern NLMISC::CVariable<uint>	DeltaUpdateRate;
 class CDbManager
 {
 public:
-
 	/// \name Basic manager implementation
 	// @{
 
@@ -68,27 +65,24 @@ public:
 	 * Init manager
 	 * Load all previously loaded databases
 	 */
-	static bool				init();
+	static bool init();
 
 	/**
 	 * Initialised yet?
 	 */
-	static bool				initialised();
+	static bool initialised();
 
 	/**
 	 * Update manager
 	 */
-	static bool				update();
+	static bool update();
 
 	/**
 	 * Release manager
 	 */
-	static bool				release();
+	static bool release();
 
 	// @}
-
-
-
 
 	/// \name User Database manipulation
 	// @{
@@ -96,41 +90,37 @@ public:
 	/**
 	 * Remap ServiceId to DatabaseId
 	 */
-	static TDatabaseId		getDatabaseId(NLNET::TServiceId serviceId)	
-	{ 
-		if (serviceId.get() > 256) 
-			return INVALID_DATABASE_ID; 
+	static TDatabaseId getDatabaseId(NLNET::TServiceId serviceId)
+	{
+		if (serviceId.get() > 256)
+			return INVALID_DATABASE_ID;
 		return _ServiceMap[serviceId.get()];
 	}
 
 	/**
 	 * Create a database entry
 	 */
-	static CDatabase*		createDatabase(TDatabaseId id, NLMISC::CLog* log = NLMISC::InfoLog);
+	static CDatabase *createDatabase(TDatabaseId id, NLMISC::CLog *log = NLMISC::InfoLog);
 
 	/**
 	 * Delete a database entry
 	 */
-	static bool				deleteDatabase(TDatabaseId id, NLMISC::CLog* log = NLMISC::InfoLog);
-
-
+	static bool deleteDatabase(TDatabaseId id, NLMISC::CLog *log = NLMISC::InfoLog);
 
 	/**
 	 * Load a database and adapt to the description if needed
 	 */
-	static CDatabase*		loadDatabase(TDatabaseId id, const std::string& description, NLMISC::CLog* log = NLMISC::InfoLog);
-
-
+	static CDatabase *loadDatabase(TDatabaseId id, const std::string &description, NLMISC::CLog *log = NLMISC::InfoLog);
 
 	/**
 	 * load a database
 	 */
-	static bool				loadDatabase(TDatabaseId id, NLMISC::CLog* log = NLMISC::InfoLog);
+	static bool loadDatabase(TDatabaseId id, NLMISC::CLog *log = NLMISC::InfoLog);
 
 	/**
 	 * load a database entry
 	 */
-	static CDatabase*		getDatabase(TDatabaseId id);
+	static CDatabase *getDatabase(TDatabaseId id);
 
 	/**
 	 * Allocate a row in a database
@@ -138,7 +128,7 @@ public:
 	 * \param table is the specified table
 	 * \param row is the specified row in table
 	 */
-	static bool				allocRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row);
+	static bool allocRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row);
 
 	/**
 	 * Deallocate a row in a database
@@ -146,7 +136,7 @@ public:
 	 * \param table is the specified table
 	 * \param row is the specified row in table
 	 */
-	static bool				deallocRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row);
+	static bool deallocRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row);
 
 	/**
 	 * Map a row in a table
@@ -154,7 +144,7 @@ public:
 	 * \param key is the 64 bits row key
 	 * Return true if succeded
 	 */
-	static bool				mapRow(TDatabaseId id, const RY_PDS::CObjectIndex &index, uint64 key);
+	static bool mapRow(TDatabaseId id, const RY_PDS::CObjectIndex &index, uint64 key);
 
 	/**
 	 * Unmap a row in a table
@@ -162,7 +152,7 @@ public:
 	 * \param key is the 64 bits row key
 	 * Return true if succeded
 	 */
-	static bool				unmapRow(TDatabaseId id, RY_PDS::TTableIndex tableIndex, uint64 key);
+	static bool unmapRow(TDatabaseId id, RY_PDS::TTableIndex tableIndex, uint64 key);
 
 	/**
 	 * Release a row in a database
@@ -170,30 +160,26 @@ public:
 	 * \param table is the specified table
 	 * \param row is the specified row in table
 	 */
-	static bool				releaseRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row);
+	static bool releaseRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row);
 
 	/**
 	 * Set an item in database, located by its table, row and column.
 	 * \param datasize is provided for validation check (1, 2, 4 or 8 bytes)
-	 * \param dataptr points to raw data, which may be 1, 2, 4 or 8 bytes, as indicated by datasize 
+	 * \param dataptr points to raw data, which may be 1, 2, 4 or 8 bytes, as indicated by datasize
 	 */
-	static bool				set(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void* dataptr);
+	static bool set(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void *dataptr);
 
 	/**
 	 * Fetch data
 	 */
-	static bool				fetch(TDatabaseId id, RY_PDS::TTableIndex tableIndex, uint64 key, RY_PDS::CPData &data);
-
+	static bool fetch(TDatabaseId id, RY_PDS::TTableIndex tableIndex, uint64 key, RY_PDS::CPData &data);
 
 	/**
 	 * Add String in Database' string manager
 	 */
-	//static bool				addString(TDatabaseId id, const NLMISC::CEntityId& eId, RY_PDS::CPDStringManager::TEntryId pdId, const ucstring& str);
+	// static bool				addString(TDatabaseId id, const NLMISC::CEntityId& eId, RY_PDS::CPDStringManager::TEntryId pdId, const ucstring& str);
 
 	// @}
-
-
-
 
 	/// \name System Database manipulation
 	// @{
@@ -201,36 +187,29 @@ public:
 	/**
 	 * Delete all database entries
 	 */
-	static bool				deleteAllDatabases(NLMISC::CLog* log = NLMISC::InfoLog);
+	static bool deleteAllDatabases(NLMISC::CLog *log = NLMISC::InfoLog);
 
 	// @}
-
-
-
 
 	/**
 	 * Parse path into TLocatePath
 	 */
-	static bool				parsePath(const std::string &strPath, CLocatePath &path);
+	static bool parsePath(const std::string &strPath, CLocatePath &path);
 
 	/**
 	 * Locate a column using a path
 	 */
-	static CTable::CDataAccessor	locate(CLocatePath &path);
-
-
+	static CTable::CDataAccessor locate(CLocatePath &path);
 
 	/**
 	 * Map Service Id
 	 */
-	static bool				mapService(NLNET::TServiceId serviceId, TDatabaseId databaseId);
+	static bool mapService(NLNET::TServiceId serviceId, TDatabaseId databaseId);
 
 	/**
 	 * Unmap Service Id
 	 */
-	static bool				unmapService(NLNET::TServiceId serviceId);
-
-
+	static bool unmapService(NLNET::TServiceId serviceId);
 
 	/// \name RBS Connection Management
 	// @{
@@ -239,22 +218,22 @@ public:
 	 * Add RBS Task
 	 * TaskId is automatically added to the message to be sent
 	 */
-	static NLNET::CMessage&	addTask(const std::string& msg, ITaskEventListener* listener, void* arg);
+	static NLNET::CMessage &addTask(const std::string &msg, ITaskEventListener *listener, void *arg);
 
 	/**
 	 * Notify RBS task success report
 	 */
-	static void				notifyRBSSuccess(uint32 taskId);
+	static void notifyRBSSuccess(uint32 taskId);
 
 	/**
 	 * Notify RBS task failure report
 	 */
-	static void				notifyRBSFailure(uint32 taskId);
+	static void notifyRBSFailure(uint32 taskId);
 
 	/**
 	 * Set RBS Up
 	 */
-	static void				RBSUp()
+	static void RBSUp()
 	{
 		_RBSUp = true;
 	}
@@ -262,7 +241,7 @@ public:
 	/**
 	 * Set RBS Down
 	 */
-	static void				RBSDown()
+	static void RBSDown()
 	{
 		_RBSUp = false;
 		nlwarning("CDbManager::RBSDown(): RBS down, please call maintenance. Data corruption may appear.");
@@ -271,54 +250,47 @@ public:
 	/**
 	 * Get Next RBS Task Id
 	 */
-	static uint32			nextTaskId()			{ return _TaskId++; }
+	static uint32 nextTaskId() { return _TaskId++; }
 
 	// @}
 
-
 private:
-
 	/// Is manager initialised
-	static bool										_Initialised;
-
+	static bool _Initialised;
 
 	/// Type Map of database
-	typedef std::map<TDatabaseId, CDatabase*>		TDatabaseMap;
+	typedef std::map<TDatabaseId, CDatabase *> TDatabaseMap;
 
 	/// Map of database
-	static TDatabaseMap								_DatabaseMap;
+	static TDatabaseMap _DatabaseMap;
 
 	/// Map from service to database
-	typedef TDatabaseId								TServiceMap[256];
+	typedef TDatabaseId TServiceMap[256];
 
 	/// Map of services
-	static TServiceMap								_ServiceMap;
+	static TServiceMap _ServiceMap;
 
 	/// Next time to build delta
-	static NLMISC::TTime							_NextTimeDelta;
+	static NLMISC::TTime _NextTimeDelta;
 
 	/// Last Update timestamp
-	static CTimestamp								_LastUpdateTime;
+	static CTimestamp _LastUpdateTime;
 
 	/// Next task
-	static uint32									_TaskId;
+	static uint32 _TaskId;
 
 	/// Messages to send to RBS
-	static std::deque<NLNET::CMessage*>				_RBSMessages;
+	static std::deque<NLNET::CMessage *> _RBSMessages;
 
 	/// Acknowledge to wake
-	static std::map<uint32, std::pair<ITaskEventListener*, void*> >	_TaskListeners;
+	static std::map<uint32, std::pair<ITaskEventListener *, void *>> _TaskListeners;
 
 	/// RBS state
-	static bool										_RBSUp;
-
-
+	static bool _RBSUp;
 
 	/// Private constructor, class is singleton
 	CDbManager();
-
 };
-
 
 #endif // NL_DB_MANAGER_H
 

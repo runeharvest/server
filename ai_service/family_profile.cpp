@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "family_profile.h"
 #include "continent.h"
@@ -30,8 +28,8 @@
 
 #include "continent_inline.h"
 
-//extern bool LogOutpostDebug;
-extern NLMISC::CVariable<bool>	LogOutpostDebug;
+// extern bool LogOutpostDebug;
+extern NLMISC::CVariable<bool> LogOutpostDebug;
 
 #include "dyn_grp_inline.h"
 
@@ -39,40 +37,38 @@ using namespace std;
 using namespace NLMISC;
 using namespace AITYPES;
 
-
-CGroupNpc	*IFamilyProfile::createNpcGroup(const CNpcZone	*const	zone, const	CGroupDesc<CGroupFamily>	*const	groupDesc)
+CGroupNpc *IFamilyProfile::createNpcGroup(const CNpcZone *const zone, const CGroupDesc<CGroupFamily> *const groupDesc)
 {
-	CGroupNpc	*grp=_FamilyBehavior->createNpcGroup(zone, groupDesc);
+	CGroupNpc *grp = _FamilyBehavior->createNpcGroup(zone, groupDesc);
 	if (grp)
 		setDefaultProfile(zone, grp);
-	return	grp;
+	return grp;
 }
 
-
-class	CFamilyProfileKitin : public IFamilyProfile
+class CFamilyProfileKitin : public IFamilyProfile
 {
 public:
-	CFamilyProfileKitin	(const	IFamilyProfile::CtorParam	&ctorParam)
-		:IFamilyProfile(ctorParam)
+	CFamilyProfileKitin(const IFamilyProfile::CtorParam &ctorParam)
+	    : IFamilyProfile(ctorParam)
 	{
 	}
-	virtual	~CFamilyProfileKitin()
+	virtual ~CFamilyProfileKitin()
 	{
 	}
 
-	void	spawnGroup()
+	void spawnGroup()
 	{
 		H_AUTO(FamilySpawnKitin)
 
-		const	CGroupDesc<CGroupFamily> *gd = _FamilyBehavior->grpFamily()->getProportionalGroupDesc(_FamilyBehavior, CPropertySet(), CPropertySet());
-		if	(!gd)
+		const CGroupDesc<CGroupFamily> *gd = _FamilyBehavior->grpFamily()->getProportionalGroupDesc(_FamilyBehavior, CPropertySet(), CPropertySet());
+		if (!gd)
 			return;
 
 		CGrpFauna *grp = gd->createFaunaGroup(_FamilyBehavior);
-		if	(!grp)
+		if (!grp)
 			return;
 
-//		nldebug("DYN: Grp '%p' spawned for fauna", grp);
+		//		nldebug("DYN: Grp '%p' spawned for fauna", grp);
 		grp->getSpawnObj()->spawnBotOfGroup();
 	}
 
@@ -80,34 +76,32 @@ public:
 	void update()
 	{
 	}
-
 };
-
 
 class CFamilyProfileFauna : public IFamilyProfile
 {
 public:
-	CFamilyProfileFauna	(const	IFamilyProfile::CtorParam	&ctorParam)
-		:IFamilyProfile(ctorParam)
+	CFamilyProfileFauna(const IFamilyProfile::CtorParam &ctorParam)
+	    : IFamilyProfile(ctorParam)
 	{
 	}
-	virtual	~CFamilyProfileFauna()
+	virtual ~CFamilyProfileFauna()
 	{
 	}
 
-	void	spawnGroup()
+	void spawnGroup()
 	{
 		H_AUTO(FamilySpawnFauna)
 
-		const	CGroupDesc<CGroupFamily> *const	gd = _FamilyBehavior->grpFamily()->getProportionalGroupDesc(_FamilyBehavior, CPropertySet(), CPropertySet());
-		if	(!gd)
+		const CGroupDesc<CGroupFamily> *const gd = _FamilyBehavior->grpFamily()->getProportionalGroupDesc(_FamilyBehavior, CPropertySet(), CPropertySet());
+		if (!gd)
 			return;
 
-		CGrpFauna *const	grp = gd->createFaunaGroup(_FamilyBehavior);
-		if	(!grp)
+		CGrpFauna *const grp = gd->createFaunaGroup(_FamilyBehavior);
+		if (!grp)
 			return;
 
-//		nldebug("DYN: Grp '%p' spawned for fauna", grp);
+		//		nldebug("DYN: Grp '%p' spawned for fauna", grp);
 		grp->getSpawnObj()->spawnBotOfGroup();
 	}
 
@@ -115,39 +109,37 @@ public:
 	void update()
 	{
 	}
-
 };
-
 
 class CFamilyProfileNpc : public IFamilyProfile
 {
 public:
-	CFamilyProfileNpc(const	IFamilyProfile::CtorParam	&ctorParam)
-		:IFamilyProfile(ctorParam)
+	CFamilyProfileNpc(const IFamilyProfile::CtorParam &ctorParam)
+	    : IFamilyProfile(ctorParam)
 	{
 	}
-	virtual	~CFamilyProfileNpc()
+	virtual ~CFamilyProfileNpc()
 	{
 	}
 
-	void	spawnGroup()
+	void spawnGroup()
 	{
-		H_AUTO(FamilySpawnNpc)	
-		
-		AITYPES::CPropertySet	flags;
-		_FamilyBehavior->getNpcFlags(flags);		
+		H_AUTO(FamilySpawnNpc)
 
-		const CNpcZone	*spawn = _FamilyBehavior->getOwner()->lookupNpcZone(flags, _FamilyBehavior->grpFamily()->getSubstitutionId());
-		if	(!spawn)
-			return;					
-		const	CGroupDesc<CGroupFamily>	*const	gd = _FamilyBehavior->grpFamily()->getProportionalGroupDesc(_FamilyBehavior, CPropertySet(), CPropertySet());
+		AITYPES::CPropertySet flags;
+		_FamilyBehavior->getNpcFlags(flags);
 
-		if	(!gd)
-			return;		
+		const CNpcZone *spawn = _FamilyBehavior->getOwner()->lookupNpcZone(flags, _FamilyBehavior->grpFamily()->getSubstitutionId());
+		if (!spawn)
+			return;
+		const CGroupDesc<CGroupFamily> *const gd = _FamilyBehavior->grpFamily()->getProportionalGroupDesc(_FamilyBehavior, CPropertySet(), CPropertySet());
 
-		const	CGroupNpc	*const	grp=createNpcGroup(spawn, gd);
+		if (!gd)
+			return;
 
-		if	(!grp)
+		const CGroupNpc *const grp = createNpcGroup(spawn, gd);
+
+		if (!grp)
 			return;
 
 		grp->getSpawnObj()->spawnBotOfGroup();
@@ -157,36 +149,32 @@ public:
 	void update()
 	{
 	}
-
 };
 
-CAiFactory<IFamilyProfile, CFamilyProfileFauna>	_singleProfileFauna;
-IAiFactory<IFamilyProfile>	*_ProfileFauna=&_singleProfileFauna;
+CAiFactory<IFamilyProfile, CFamilyProfileFauna> _singleProfileFauna;
+IAiFactory<IFamilyProfile> *_ProfileFauna = &_singleProfileFauna;
 
-CAiFactory<IFamilyProfile, CFamilyProfileKitin>	_singleProfileKitin;
-IAiFactory<IFamilyProfile>	*_ProfileKitin=&_singleProfileKitin;
+CAiFactory<IFamilyProfile, CFamilyProfileKitin> _singleProfileKitin;
+IAiFactory<IFamilyProfile> *_ProfileKitin = &_singleProfileKitin;
 
-CAiFactory<IFamilyProfile, CFamilyProfileNpc>	    _singleProfileNpc;
-IAiFactory<IFamilyProfile>	*_ProfileNpc=&_singleProfileNpc;
+CAiFactory<IFamilyProfile, CFamilyProfileNpc> _singleProfileNpc;
+IAiFactory<IFamilyProfile> *_ProfileNpc = &_singleProfileNpc;
 
-
-extern	IAiFactory<IFamilyProfile>	*_ProfileTribe;	//	in another cpp.
+extern IAiFactory<IFamilyProfile> *_ProfileTribe; //	in another cpp.
 
 NL_ISO_TEMPLATE_SPEC CAiFactoryContainer<IFamilyProfile, TStringId> *CAiFactoryContainer<IFamilyProfile, TStringId>::_Instance = NULL;
 
 CFamilyProfileFactory::CFamilyProfileFactory()
 {
-	registerFactory(CStringMapper::map("groupFamilyProfileFauna"),	_ProfileFauna);
-	registerFactory(CStringMapper::map("groupFamilyProfileKitin"),	_ProfileKitin);
-	registerFactory(CStringMapper::map("groupFamilyProfileTribe"),	_ProfileTribe);
-	registerFactory(CStringMapper::map("groupFamilyProfileNpc"),	_ProfileNpc);
+	registerFactory(CStringMapper::map("groupFamilyProfileFauna"), _ProfileFauna);
+	registerFactory(CStringMapper::map("groupFamilyProfileKitin"), _ProfileKitin);
+	registerFactory(CStringMapper::map("groupFamilyProfileTribe"), _ProfileTribe);
+	registerFactory(CStringMapper::map("groupFamilyProfileNpc"), _ProfileNpc);
 }
 
 CFamilyProfileFactory::~CFamilyProfileFactory()
 {
 }
-
-
 
 CAiFactoryContainer<IFamilyProfile, TStringId> &CFamilyProfileFactory::instance()
 {
@@ -197,29 +185,28 @@ CAiFactoryContainer<IFamilyProfile, TStringId> &CFamilyProfileFactory::instance(
 	return *_Instance;
 }
 
-IFamilyProfile*	CFamilyProfileFactory::createFamilyProfile(const	TStringId	&keyWord, const	IFamilyProfile::CtorParam&	ctorParam)
+IFamilyProfile *CFamilyProfileFactory::createFamilyProfile(const TStringId &keyWord, const IFamilyProfile::CtorParam &ctorParam)
 {
 
 	breakable
 	{
-		IAiFactory<IFamilyProfile>	*const	familyProfile=instance().getFactory(keyWord);
-		
-		if	(!familyProfile)
+		IAiFactory<IFamilyProfile> *const familyProfile = instance().getFactory(keyWord);
+
+		if (!familyProfile)
 			break;
-		
-		IFamilyProfile	*const	profile=familyProfile->createObject(ctorParam);
-		
-		if	(!profile)
+
+		IFamilyProfile *const profile = familyProfile->createObject(ctorParam);
+
+		if (!profile)
 			break;
-		
-		return	profile;
+
+		return profile;
 	}
 	nlwarning("DYN: createProfile no profile available for %s", NLMISC::CStringMapper::unmap(keyWord).c_str());
-	return	NULL;
-}	
-
-IFamilyProfile*	IFamilyProfile::createFamilyProfile(const	TStringId	&profileName, const	IFamilyProfile::CtorParam&	ctorParam)
-{
-	return	CFamilyProfileFactory::createFamilyProfile(profileName, ctorParam);
+	return NULL;
 }
 
+IFamilyProfile *IFamilyProfile::createFamilyProfile(const TStringId &profileName, const IFamilyProfile::CtorParam &ctorParam)
+{
+	return CFamilyProfileFactory::createFamilyProfile(profileName, ctorParam);
+}

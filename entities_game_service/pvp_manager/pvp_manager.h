@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_PVP_MANAGER_H
 #define RY_PVP_MANAGER_H
 
@@ -26,10 +24,9 @@
 
 class CTpSpawnZone;
 
-namespace NLMISC
-{
+namespace NLMISC {
 
-	class CLog;
+class CLog;
 
 } // namespace NLMISC
 
@@ -52,7 +49,7 @@ public:
 	/// singleton release
 	static void release();
 	/// instance accessor
-	static CPVPManager* getInstance()
+	static CPVPManager *getInstance()
 	{
 		nlassert(_Instance);
 		return _Instance;
@@ -66,33 +63,33 @@ public:
 	///\name PVP CHALLENGE
 	//@{
 	/// player ask target in duel
-	void askForPVPChallenge( const NLMISC::CEntityId & userId );
+	void askForPVPChallenge(const NLMISC::CEntityId &userId);
 	/// player accept a duel
-	void acceptPVPChallenge( const NLMISC::CEntityId & userId );
+	void acceptPVPChallenge(const NLMISC::CEntityId &userId);
 	/// player refuses a duel
-	void refusePVPChallenge( const NLMISC::CEntityId & userId );
+	void refusePVPChallenge(const NLMISC::CEntityId &userId);
 	/// remove a user from the duel invitations
-	void removePVPChallengeInvitor( const NLMISC::CEntityId & userId );
+	void removePVPChallengeInvitor(const NLMISC::CEntityId &userId);
 	//@}
-	
+
 	///\name PVP ZONE
 	//@{
 	/// add a PVP zone in the manager
-	void addPVPZone( NLMISC::CSmartPtr<IPVPZone> pvpZone );
+	void addPVPZone(NLMISC::CSmartPtr<IPVPZone> pvpZone);
 	/// add a PVP safe zone in the manager
-	void addPVPSafeZone( NLMISC::CSmartPtr<CPVPSafeZone> safeZone );
+	void addPVPSafeZone(NLMISC::CSmartPtr<CPVPSafeZone> safeZone);
 	/// apply configuration to PVP zones
 	void applyConfigToPVPZones();
 	/// get an active PVP zone alias from a position (if user is in conflict). Precondition: user not null
-	TAIAlias getPVPZoneFromUserPosition( CCharacter *user ) const;
+	TAIAlias getPVPZoneFromUserPosition(CCharacter *user) const;
 	/// user leaves a PVP zone
-	void leavePVPZone( CCharacter * user );
+	void leavePVPZone(CCharacter *user);
 	/// user enters a PVP zone
-	void enterPVPZone( CCharacter * user, TAIAlias pvpZoneAlias );
+	void enterPVPZone(CCharacter *user, TAIAlias pvpZoneAlias);
 	/// remove someone from leaving users
-	bool removeFromLeavingPVPZoneUsers( TDataSetRow rowId );
+	bool removeFromLeavingPVPZoneUsers(TDataSetRow rowId);
 	//@}
-	
+
 	///\name HELPERS
 	//@{
 	/*
@@ -104,22 +101,22 @@ public:
 	bool canApplyAreaEffect(CCharacter* actor, CEntityBase * areaTarget, bool offensive, bool ignoreMainTarget) const;
 	*/
 	/// return an appropriate challenges spawn zone
-	const CTpSpawnZone* getChallengeSpawnZone(uint idx)const
+	const CTpSpawnZone *getChallengeSpawnZone(uint idx) const
 	{
-		nlassert(idx < _ChallengeZones.size() );
+		nlassert(idx < _ChallengeZones.size());
 		return _ChallengeZones[idx];
 	}
 	/// allocate a new PVP island and return its cellId
-	sint32 allocatePVPIsland(CPVPChallenge* challenge);
+	sint32 allocatePVPIsland(CPVPChallenge *challenge);
 	/// free a PVP island
 	void freePVPIsland(sint32 cellId);
 	/// handle player disconnection
-	void playerDisconnects(CCharacter * user);
+	void playerDisconnects(CCharacter *user);
 
 	/// get a PVP zone from alias
-	IPVPZone * getPVPZone(TAIAlias alias);	
+	IPVPZone *getPVPZone(TAIAlias alias);
 	/// get a PVP zone from name
-	IPVPZone * getPVPZone(const std::string & name);	
+	IPVPZone *getPVPZone(const std::string &name);
 	//@}
 
 private:
@@ -128,69 +125,68 @@ private:
 	NLMISC_COMMAND_FRIEND(dumpUsersEnteringLeavingPVPZones);
 
 	/// dump a PVP zone
-	void dumpPVPZone(NLMISC::CLog * log, IPVPZone * pvpZone, bool dumpUsers);
+	void dumpPVPZone(NLMISC::CLog *log, IPVPZone *pvpZone, bool dumpUsers);
 
 	/// return an island index from its cell
 	uint getIslandIdxFromCell(sint32 cell)
 	{
-		return uint(  ( -(cell+3) ) >> 1);
+		return uint((-(cell + 3)) >> 1);
 	}
 
 	/// return an island cell from its index
 	sint32 getIslandCellFromIdx(uint idx)
 	{
-		return ( -3 - sint32( idx << 1 ) );
+		return (-3 - sint32(idx << 1));
 	}
 
 	/// remove someone from entering users
 	bool removeFromEnteringPVPZoneUsers(TDataSetRow rowId);
 
 	/// user really enters PVP zone, after enter buffer time is elapsed
-	void doEnterPVPZone(CCharacter * user, TAIAlias pvpZoneAlias);
+	void doEnterPVPZone(CCharacter *user, TAIAlias pvpZoneAlias);
 
 	/// ctor
-	CPVPManager(){}
+	CPVPManager() { }
 	/// dtor
-	~CPVPManager(){}
+	~CPVPManager() { }
 	/// unique instance
-	static CPVPManager * _Instance;
+	static CPVPManager *_Instance;
 
 	/// PVP challenge propositions ( pair invitor-invited )
 	struct CPVPChallengeAsked
 	{
 		/// invitor of the challenge
-		TDataSetRow			Invitor;
-		TDataSetRow			InvitedUser;
-		uint16				InvitedTeam;
-		NLMISC::TGameCycle	ExpirationDate;
+		TDataSetRow Invitor;
+		TDataSetRow InvitedUser;
+		uint16 InvitedTeam;
+		NLMISC::TGameCycle ExpirationDate;
 	};
 
 	/// PVP zones
-	typedef std::vector<NLMISC::CSmartPtr<IPVPZone> >	TPVPZones;
-	TPVPZones	_PVPZones;
+	typedef std::vector<NLMISC::CSmartPtr<IPVPZone>> TPVPZones;
+	TPVPZones _PVPZones;
 
 	struct CPVPZonePendingUser
 	{
-		TDataSetRow	RowId;
-		TAIAlias	ZoneAlias;
+		TDataSetRow RowId;
+		TAIAlias ZoneAlias;
 	};
 
 	/// users entering a PVP zone
-	std::list<std::pair<NLMISC::TGameCycle,CPVPZonePendingUser> >	_UsersEnteringPVPZone;
+	std::list<std::pair<NLMISC::TGameCycle, CPVPZonePendingUser>> _UsersEnteringPVPZone;
 
 	/// users leaving a PVP zone
-	std::list<std::pair<NLMISC::TGameCycle,TDataSetRow> >			_UsersLeavingPVPZone;
+	std::list<std::pair<NLMISC::TGameCycle, TDataSetRow>> _UsersLeavingPVPZone;
 
 	/// pvp challenges invitations
-	std::list< CPVPChallengeAsked >								_PVPChallengesAsked;
+	std::list<CPVPChallengeAsked> _PVPChallengesAsked;
 
 	/// challenge zones
-	std::vector<const CTpSpawnZone*>							_ChallengeZones;
+	std::vector<const CTpSpawnZone *> _ChallengeZones;
 
 	/// pvp challenge islands, paired with an int storing the index of the next free id in the vector
-	std::vector< std::pair< uint, CPVPChallenge* > >			_ChallengeIslands;
-	uint														_FirstFreeIslandIdx;
+	std::vector<std::pair<uint, CPVPChallenge *>> _ChallengeIslands;
+	uint _FirstFreeIslandIdx;
 };
 
 #endif // RY_PVP_MANAGER_H
-

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_VISION_RECEIVER_H
 #define NL_VISION_RECEIVER_H
 
@@ -23,7 +21,6 @@
 #include "game_share/player_vision_delta.h"
 #include "entity_container.h"
 #include <queue>
-
 
 /**
  * <Class description>
@@ -34,56 +31,52 @@
 class CVisionReceiver
 {
 public:
-
 	/// Constructor
 	CVisionReceiver();
 
 	/// Initialisation
-	void					init();
+	void init();
 
 	/// Vision management : Get the first modified vision since the last EndUpdatedVision
-	inline TEntityIndex		getFirstUpdatedVision()
+	inline TEntityIndex getFirstUpdatedVision()
 	{
-		return( _FirstUpdatedEntityVision );
+		return (_FirstUpdatedEntityVision);
 	}
 
 	/// Vision management : Get the next modified vision
-	inline TEntityIndex		getNextUpdatedVision( const TEntityIndex& entityIndex )
+	inline TEntityIndex getNextUpdatedVision(const TEntityIndex &entityIndex)
 	{
-		return( TheEntityContainer->getEntity(entityIndex)->NextUpdatedEntityVision );
+		return (TheEntityContainer->getEntity(entityIndex)->NextUpdatedEntityVision);
 	}
 
 	/// Vision management : Allow to loop on vision updates
-	inline bool				visionChanged()
+	inline bool visionChanged()
 	{
 		return _HasPendingDelta;
 	}
 
 	/// End an updating session
-	void					endUpdatedVision();
+	void endUpdatedVision();
 
 protected:
-
 	/// Apply a new delta of vision
-	bool					setVision( const CPlayerVisionDelta &visionDelta );
+	bool setVision(const CPlayerVisionDelta &visionDelta);
 
 	/// UpdateVision, unserial update vision message and process it
-	void					updateNewVision( NLNET::CMessage& msgin );
+	void updateNewVision(NLNET::CMessage &msgin);
 
-	friend void cbDeltaNewVision( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
+	friend void cbDeltaNewVision(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
 private:
-
-	TEntityIndex										_FirstUpdatedEntityVision;
+	TEntityIndex _FirstUpdatedEntityVision;
 
 	// Queue to allow merging of several vision updates receives within the same cycle
-	bool												_HasPendingDelta;
-	std::queue< std::list<CPlayerVisionDelta> >			_NextDeltas;
+	bool _HasPendingDelta;
+	std::queue<std::list<CPlayerVisionDelta>> _NextDeltas;
 };
 
-
 // Callback for delta vision update received
-void cbDeltaNewVision( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
+void cbDeltaNewVision(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
 #endif // NL_VISION_RECEIVER_H
 

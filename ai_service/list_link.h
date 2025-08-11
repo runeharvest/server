@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYAI_LIST_LINK_H
 #define RYAI_LIST_LINK_H
 
@@ -27,14 +25,17 @@
 // list link represents
 
 #ifdef NL_OS_WINDOWS
-#pragma warning (disable : 4355)
+#pragma warning(disable : 4355)
 #endif // NL_OS_WINDOWS
 
 template <class C>
 class CListLink
 {
 public:
-	inline CListLink(C *parent) : _next(this), _prev(this), _parent(parent)
+	inline CListLink(C *parent)
+	    : _next(this)
+	    , _prev(this)
+	    , _parent(parent)
 	{
 	}
 
@@ -42,20 +43,20 @@ public:
 	{
 		unlink();
 	}
-	
+
 	inline void linkAfter(CListLink<C> *other)
 	{
-		#ifdef NL_DEBUG
-			nlassert(_next==this);
-			nlassert(_prev==this);
-//			nlassert(other->_next->_prev==other->_prev);
-//			nlassert(other->_prev->_next==other->_next);
-		#endif
-		_next=other->_next;
-		_prev=other;
+#ifdef NL_DEBUG
+		nlassert(_next == this);
+		nlassert(_prev == this);
+		//			nlassert(other->_next->_prev==other->_prev);
+		//			nlassert(other->_prev->_next==other->_next);
+#endif
+		_next = other->_next;
+		_prev = other;
 
-		_prev->_next=this;
-		_next->_prev=this;
+		_prev->_next = this;
+		_next->_prev = this;
 	}
 
 	inline void linkBefore(CListLink<C> *other)
@@ -65,20 +66,20 @@ public:
 
 	inline void unlink()
 	{
-		#ifdef NL_DEBUG
-//			if (_next==this)
-//				nlerror("unlink() called for object that is not linked");
-//			nlassert (_next->_prev==_prev);
-//			nlassert (_prev->_next==_next);
-		#endif
+#ifdef NL_DEBUG
+		//			if (_next==this)
+		//				nlerror("unlink() called for object that is not linked");
+		//			nlassert (_next->_prev==_prev);
+		//			nlassert (_prev->_next==_next);
+#endif
 
-		_next->_prev=_prev;
-		_prev->_next=_next;
+		_next->_prev = _prev;
+		_prev->_next = _next;
 
-		#ifdef NL_DEBUG
-			_next=this;
-			_prev=this;
-		#endif
+#ifdef NL_DEBUG
+		_next = this;
+		_prev = this;
+#endif
 	}
 
 	inline C *next()

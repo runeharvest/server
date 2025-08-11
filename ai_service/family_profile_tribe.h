@@ -14,59 +14,56 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef FAMILY_PROFILE_TRIBE_H
 #define FAMILY_PROFILE_TRIBE_H
 
-extern NLMISC::CVariable<bool>	LogOutpostDebug;
+extern NLMISC::CVariable<bool> LogOutpostDebug;
 
-class	CFamilyProfileTribe;
+class CFamilyProfileTribe;
 
 /// outpost information
-class	COutpostInfo
-	:public	NLMISC::CRefCount
+class COutpostInfo
+    : public NLMISC::CRefCount
 {
-	COutpostInfo	(CFamilyBehavior	*const	familyBehavior, const	CFamilyProfileTribe	*const	familyProfileTribe, const	CNpcZone*const	zoneNpc)
-		:_State(ZCSTATE::Tribe)
-		,_FamilyBehavior(familyBehavior)
-		,_FamilyProfileTribe(familyProfileTribe)
-		,_ZoneNpc(zoneNpc)
-		,_FightGroupExist(false)
-		,_BossGroupExist(false)
-		,_ContactGroupExist(false)
+	COutpostInfo(CFamilyBehavior *const familyBehavior, const CFamilyProfileTribe *const familyProfileTribe, const CNpcZone *const zoneNpc)
+	    : _State(ZCSTATE::Tribe)
+	    , _FamilyBehavior(familyBehavior)
+	    , _FamilyProfileTribe(familyProfileTribe)
+	    , _ZoneNpc(zoneNpc)
+	    , _FightGroupExist(false)
+	    , _BossGroupExist(false)
+	    , _ContactGroupExist(false)
 	{
 	}
 
 public:
-
-	static	NLMISC::CSmartPtr<COutpostInfo>	createOutpost	(CFamilyBehavior	*const	familyBehavior,	const	CFamilyProfileTribe	*const	familyProfileTribe, const	NLMISC::TStringId &outpostName)
+	static NLMISC::CSmartPtr<COutpostInfo> createOutpost(CFamilyBehavior *const familyBehavior, const CFamilyProfileTribe *const familyProfileTribe, const NLMISC::TStringId &outpostName)
 	{
-		const	CNpcZone	*const	zoneNpc=familyBehavior->getOwner()->lookupNpcZoneByName(/*familyBehavior->getFamily(), */NLMISC::CStringMapper::unmap(outpostName));
+		const CNpcZone *const zoneNpc = familyBehavior->getOwner()->lookupNpcZoneByName(/*familyBehavior->getFamily(), */ NLMISC::CStringMapper::unmap(outpostName));
 
-		if (	!zoneNpc
-			||	!familyProfileTribe
-			||	!familyBehavior)
-			return	NULL;
+		if (!zoneNpc
+		    || !familyProfileTribe
+		    || !familyBehavior)
+			return NULL;
 
-		return	new	COutpostInfo(familyBehavior, familyProfileTribe, zoneNpc);
+		return new COutpostInfo(familyBehavior, familyProfileTribe, zoneNpc);
 	}
 
-	typedef	std::vector<NLMISC::CDbgPtr<CGroupNpc> >	TGroupList;
+	typedef std::vector<NLMISC::CDbgPtr<CGroupNpc>> TGroupList;
 
-	virtual	~COutpostInfo()
+	virtual ~COutpostInfo()
 	{
-		for	(TGroupList::iterator	it=_FightGroup.begin(), itEnd=_FightGroup.end();it!=itEnd;++it)
+		for (TGroupList::iterator it = _FightGroup.begin(), itEnd = _FightGroup.end(); it != itEnd; ++it)
 		{
-			NLMISC::CDbgPtr<CGroupNpc>	&dbgPtr=*it;
-			if	(!dbgPtr.isNULL())
+			NLMISC::CDbgPtr<CGroupNpc> &dbgPtr = *it;
+			if (!dbgPtr.isNULL())
 				dbgPtr->despawnGrp();
 		}
 
-		for	(TGroupList::iterator	it=_ContactGroups.begin(), itEnd=_ContactGroups.end();it!=itEnd;++it)
+		for (TGroupList::iterator it = _ContactGroups.begin(), itEnd = _ContactGroups.end(); it != itEnd; ++it)
 		{
-			NLMISC::CDbgPtr<CGroupNpc>	&dbgPtr=*it;
-			if	(!dbgPtr.isNULL())
+			NLMISC::CDbgPtr<CGroupNpc> &dbgPtr = *it;
+			if (!dbgPtr.isNULL())
 				dbgPtr->despawnGrp();
 		}
 
@@ -74,122 +71,118 @@ public:
 		{
 			_BossGroup->despawnGrp();
 		}
-
 	}
 
-	void	spawnBoss	();
+	void spawnBoss();
 
-	void	outpostEvent	(ZCSTATE::TZcState	state);
+	void outpostEvent(ZCSTATE::TZcState state);
 
-	void	updateOutPostInfo	();	
+	void updateOutPostInfo();
 
-	void	fightGroups(bool	exist);
-	void	bossGroups(bool	exist);
-	void	contactGroups(bool	exist);
+	void fightGroups(bool exist);
+	void bossGroups(bool exist);
+	void contactGroups(bool exist);
 
-	void	addToDespawnGroupList	(CSpawnGroupNpc	*grpNpc)
+	void addToDespawnGroupList(CSpawnGroupNpc *grpNpc)
 	{
-		grpNpc->activityProfile().setAIProfile(NULL);	//	remove comportment.
+		grpNpc->activityProfile().setAIProfile(NULL); //	remove comportment.
 		_DespawnList.push_back(&grpNpc->getPersistent());
 	}
 
-	void	checkDespawnGroupList	();
+	void checkDespawnGroupList();
 
 private:
 	/// The npc zone for the outpost
-	NLMISC::CstCDbgPtr<CNpcZone>	_ZoneNpc;
+	NLMISC::CstCDbgPtr<CNpcZone> _ZoneNpc;
 
 	/// The current outpost state.
-	ZCSTATE::TZcState	_State;
-	
-	TGroupList		_ContactGroups;
-	/// Fight Groups.
-	TGroupList		_FightGroup;
+	ZCSTATE::TZcState _State;
 
-	TGroupList	_DespawnList;
+	TGroupList _ContactGroups;
+	/// Fight Groups.
+	TGroupList _FightGroup;
+
+	TGroupList _DespawnList;
 
 	/// Pointer on the boss group when present.
-	NLMISC::CDbgPtr<CGroupNpc>	_BossGroup;
+	NLMISC::CDbgPtr<CGroupNpc> _BossGroup;
 
-	NLMISC::CDbgPtr<CFamilyBehavior>		_FamilyBehavior;
-	NLMISC::CDbgPtr<CFamilyProfileTribe>	_FamilyProfileTribe;
-	
+	NLMISC::CDbgPtr<CFamilyBehavior> _FamilyBehavior;
+	NLMISC::CDbgPtr<CFamilyProfileTribe> _FamilyProfileTribe;
+
 public:
-	bool	_FightGroupExist;
-	bool	_BossGroupExist;
-	bool	_ContactGroupExist;
+	bool _FightGroupExist;
+	bool _BossGroupExist;
+	bool _ContactGroupExist;
 };
 
-class	CFamilyProfileTribe
-		:public	NLMISC::CDbgRefCount<CFamilyProfileTribe>
-		,public	IFamilyProfile
+class CFamilyProfileTribe
+    : public NLMISC::CDbgRefCount<CFamilyProfileTribe>,
+      public IFamilyProfile
 {
 	/// The zone that is used as camp for the tribe.
-	NLMISC::CSmartPtr<const CNpcZone>	_CampZone;	//	smart to have a counter on NpcZone. (Bad but no time to do better).
+	NLMISC::CSmartPtr<const CNpcZone> _CampZone; //	smart to have a counter on NpcZone. (Bad but no time to do better).
 
 	/// The contact group in the camp
-	NLMISC::CstCDbgPtr<CGroupNpc>		_CampContact;
+	NLMISC::CstCDbgPtr<CGroupNpc> _CampContact;
+
 public:
-	std::vector<uint32>	_AggroGroupIds;
+	std::vector<uint32> _AggroGroupIds;
 
+	CFamilyProfileTribe(const CtorParam &ctorParam);
 
-	CFamilyProfileTribe	(const	CtorParam	&ctorParam);
-	
-	virtual	~CFamilyProfileTribe	()
+	virtual ~CFamilyProfileTribe()
 	{
 	}
 
-	CFamilyBehavior	*getFamilyBehavior	()
+	CFamilyBehavior *getFamilyBehavior()
 	{
-		return	_FamilyBehavior;
+		return _FamilyBehavior;
 	}
 
-		/// The zone that is used as camp for the tribe.
-	const	NLMISC::CSmartPtr<const CNpcZone>	&getCampZone()	const
+	/// The zone that is used as camp for the tribe.
+	const NLMISC::CSmartPtr<const CNpcZone> &getCampZone() const
 	{
-		return	_CampZone;
+		return _CampZone;
 	}
-	void	setCampZone	(const	CNpcZone	*campZone)
+	void setCampZone(const CNpcZone *campZone)
 	{
-		_CampZone=campZone;
+		_CampZone = campZone;
 	}
 
-	void	spawnBoss(NLMISC::TStringId outpostName);
+	void spawnBoss(NLMISC::TStringId outpostName);
 
-	void	setDefaultProfile(const	CNpcZone	*const	zone, CGroupNpc	*grp);
+	void setDefaultProfile(const CNpcZone *const zone, CGroupNpc *grp);
 
-	typedef std::map<NLMISC::TStringId, NLMISC::CSmartPtr<COutpostInfo> >	TOutpostContainer;
-	TOutpostContainer	_OutpostInfos;
+	typedef std::map<NLMISC::TStringId, NLMISC::CSmartPtr<COutpostInfo>> TOutpostContainer;
+	TOutpostContainer _OutpostInfos;
 
-	void	fillOutpostNames(std::vector<NLMISC::TStringId> outpostNames)
+	void fillOutpostNames(std::vector<NLMISC::TStringId> outpostNames)
 	{
 		outpostNames.clear();
 		for (TOutpostContainer::const_iterator first(_OutpostInfos.begin()), last(_OutpostInfos.end()); first != last; ++first)
 			outpostNames.push_back(first->first);
 	}
 
+	void outpostAdd(NLMISC::TStringId outpostName);
+	void outpostRemove(NLMISC::TStringId outpostName);
 
-	void	outpostAdd(NLMISC::TStringId outpostName);
-	void	outpostRemove(NLMISC::TStringId outpostName);
-
-	void	outpostEvent(NLMISC::TStringId outpostName, ZCSTATE::TZcState	state)
+	void outpostEvent(NLMISC::TStringId outpostName, ZCSTATE::TZcState state)
 	{
 		TOutpostContainer::iterator it(_OutpostInfos.find(outpostName));
-		if	(it==_OutpostInfos.end())
+		if (it == _OutpostInfos.end())
 			return;
 
-//		nlassert(it != _OutpostInfos.end());		
+		//		nlassert(it != _OutpostInfos.end());
 		it->second->outpostEvent(state);
 	};
-			
-	void	spawnGroup();
+
+	void spawnGroup();
 
 	/// The main update for the profile. Called aprox every 10 s (100 ticks)
-	void	update();
-
+	void update();
 };
-extern	IAiFactory<IFamilyProfile>	*_ProfileTribe;
-
+extern IAiFactory<IFamilyProfile> *_ProfileTribe;
 
 //---------------------------------------------------------------------------------
 // CGrpProfileDynContact
@@ -198,16 +191,16 @@ extern	IAiFactory<IFamilyProfile>	*_ProfileTribe;
 //
 
 class CGrpProfileDynContact
-: public CGrpProfileNormal
+    : public CGrpProfileNormal
 {
 public:
-		CGrpProfileDynContact(CProfileOwner *const	owner,	CFamilyProfileTribe	*const	familyProfile, COutpostInfo	*const	outPostInfo,	bool isTheContactGroup=false) 
-		:CGrpProfileNormal(owner)
-		,_FamilyProfile(familyProfile)
-		,_isTheContactGroup(isTheContactGroup)
-		,_OutPostInfo(outPostInfo)
+	CGrpProfileDynContact(CProfileOwner *const owner, CFamilyProfileTribe *const familyProfile, COutpostInfo *const outPostInfo, bool isTheContactGroup = false)
+	    : CGrpProfileNormal(owner)
+	    , _FamilyProfile(familyProfile)
+	    , _isTheContactGroup(isTheContactGroup)
+	    , _OutPostInfo(outPostInfo)
 	{
-		_CurrentZone=_FamilyProfile->getCampZone();
+		_CurrentZone = _FamilyProfile->getCampZone();
 		// this group can't be despawnded
 		_Grp->getPersistent().setDiscardable(!isTheContactGroup);
 	}
@@ -215,17 +208,17 @@ public:
 	virtual ~CGrpProfileDynContact()
 	{
 	}
-			
+
 	//---------------------------------------------------------------------------------------------------------
 	// virtual routines used to mange behaviour of bot
-	// note that this code is responsible for setting the 'nextActivity' bot property and may modify 
+	// note that this code is responsible for setting the 'nextActivity' bot property and may modify
 	// the 'activityTimer' property - may also set the 'nextTarget' property
-	
+
 	// routine called when a bot starts to use a given profile
 	// note that bots have a data member called 'void *aiProfileData' reserved for the use of the profile code
 	// this data member should be setup here if it is to be used by the profile
 	virtual void beginProfile();
-	
+
 	// routine called just before bot starts to use a new profile or when a bot dies
 	virtual void endProfile();
 	// routine called every time the bot is updated (frequency depends on player proximity, etc)
@@ -233,84 +226,76 @@ public:
 
 	// routine used to build a debug string for detailed information on a bot's status (with respect to their aiProfile)
 	virtual std::string buildDebugString() const;
-	
-	virtual	AITYPES::TProfiles getAIProfileType () const
+
+	virtual AITYPES::TProfiles getAIProfileType() const
 	{
-		return	AITYPES::ACTIVITY_CONTACT;
+		return AITYPES::ACTIVITY_CONTACT;
 	}
 
-	void	gotoZone(const	CNpcZone	*const	zone, const	AITYPES::CPropertySet	&flags);
-	
+	void gotoZone(const CNpcZone *const zone, const AITYPES::CPropertySet &flags);
+
 private:
-	COutpostInfo	*const			_OutPostInfo;
-	CFamilyProfileTribe	*const		_FamilyProfile;
-	NLMISC::CstCDbgPtr<CNpcZone>	_CurrentZone;
-	const	bool	_isTheContactGroup;
+	COutpostInfo *const _OutPostInfo;
+	CFamilyProfileTribe *const _FamilyProfile;
+	NLMISC::CstCDbgPtr<CNpcZone> _CurrentZone;
+	const bool _isTheContactGroup;
 };
-
-
-
-
-
 
 //---------------------------------------------------------------------------------
 // CGrpProfileDynHarvest
 //---------------------------------------------------------------------------------
 
-
-class CGrpProfileDynHarvest: public CGrpProfileNormal
+class CGrpProfileDynHarvest : public CGrpProfileNormal
 {
 public:
-		CGrpProfileDynHarvest(CProfileOwner *const	owner,	CFamilyProfileTribe	*const	familyProfile, const	CNpcZone	*const	harvestZone, const	CNpcZone	*const	currentZone)
-		:CGrpProfileNormal(owner)
-		,_FamilyProfile(familyProfile)
-		,_HarvestZone(harvestZone)
+	CGrpProfileDynHarvest(CProfileOwner *const owner, CFamilyProfileTribe *const familyProfile, const CNpcZone *const harvestZone, const CNpcZone *const currentZone)
+	    : CGrpProfileNormal(owner)
+	    , _FamilyProfile(familyProfile)
+	    , _HarvestZone(harvestZone)
 	{
-		_CurrentZone=currentZone;
+		_CurrentZone = currentZone;
 	}
 
 	virtual ~CGrpProfileDynHarvest()
 	{
 	}
-			
+
 	//---------------------------------------------------------------------------------------------------------
 	// virtual routines used to mange behaviour of bot
-	// note that this code is responsible for setting the 'nextActivity' bot property and may modify 
+	// note that this code is responsible for setting the 'nextActivity' bot property and may modify
 	// the 'activityTimer' property - may also set the 'nextTarget' property
-	
+
 	// routine called when a bot starts to use a given profile
 	// note that bots have a data member called 'void *aiProfileData' reserved for the use of the profile code
 	// this data member should be setup here if it is to be used by the profile
 	virtual void beginProfile();
-	
+
 	// routine called just before bot starts to use a new profile or when a bot dies
 	virtual void endProfile();
 	// routine called every time the bot is updated (frequency depends on player proximity, etc)
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 
-	void	checkTargetsAround	();
-		
+	void checkTargetsAround();
+
 	// routine used to build a debug string for detailed information on a bot's status (with respect to their aiProfile)
 	virtual std::string buildDebugString() const;
-	
-	virtual	AITYPES::TProfiles getAIProfileType () const
+
+	virtual AITYPES::TProfiles getAIProfileType() const
 	{
-		return	AITYPES::ACTIVITY_HARVEST;
+		return AITYPES::ACTIVITY_HARVEST;
 	}
-	
+
 private:
-	CAITimer	_checkTargetTimer;
+	CAITimer _checkTargetTimer;
 
-	CFamilyProfileTribe	*const		_FamilyProfile;
-	NLMISC::CstCDbgPtr<CNpcZone>	_CurrentZone;
-	NLMISC::CstCDbgPtr<CNpcZone>	const	_HarvestZone;
+	CFamilyProfileTribe *const _FamilyProfile;
+	NLMISC::CstCDbgPtr<CNpcZone> _CurrentZone;
+	NLMISC::CstCDbgPtr<CNpcZone> const _HarvestZone;
 };
-
 
 //---------------------------------------------------------------------------------
 // CGrpProfileDynHarvest
 //---------------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------------
 // CGrpProfileDynFight
@@ -318,31 +303,31 @@ private:
 //
 //
 
-class CGrpProfileDynFight: public CGrpProfileNormal
+class CGrpProfileDynFight : public CGrpProfileNormal
 {
 public:
-		CGrpProfileDynFight(CProfileOwner *const	owner,	CFamilyProfileTribe	*const	familyProfile, const	CNpcZone*const	zone, COutpostInfo	*const	outPostInfo)
-		:CGrpProfileNormal(owner)
-		,_FamilyProfile(familyProfile)
-		,_CurrentZone(zone)
-		,_OutPostInfo(outPostInfo)
+	CGrpProfileDynFight(CProfileOwner *const owner, CFamilyProfileTribe *const familyProfile, const CNpcZone *const zone, COutpostInfo *const outPostInfo)
+	    : CGrpProfileNormal(owner)
+	    , _FamilyProfile(familyProfile)
+	    , _CurrentZone(zone)
+	    , _OutPostInfo(outPostInfo)
 	{
 	}
 
 	virtual ~CGrpProfileDynFight()
 	{
 	}
-			
+
 	//---------------------------------------------------------------------------------------------------------
 	// virtual routines used to mange behaviour of bot
-	// note that this code is responsible for setting the 'nextActivity' bot property and may modify 
+	// note that this code is responsible for setting the 'nextActivity' bot property and may modify
 	// the 'activityTimer' property - may also set the 'nextTarget' property
-	
+
 	// routine called when a bot starts to use a given profile
 	// note that bots have a data member called 'void *aiProfileData' reserved for the use of the profile code
 	// this data member should be setup here if it is to be used by the profile
 	virtual void beginProfile();
-	
+
 	// routine called just before bot starts to use a new profile or when a bot dies
 	virtual void endProfile();
 	// routine called every time the bot is updated (frequency depends on player proximity, etc)
@@ -350,18 +335,18 @@ public:
 
 	// routine used to build a debug string for detailed information on a bot's status (with respect to their aiProfile)
 	virtual std::string buildDebugString() const;
-	
-	virtual	AITYPES::TProfiles getAIProfileType () const
+
+	virtual AITYPES::TProfiles getAIProfileType() const
 	{
-		return	AITYPES::ACTIVITY_FIGHT;
+		return AITYPES::ACTIVITY_FIGHT;
 	}
 
-	void	gotoZone(const	CNpcZone	*const	zone, const	AITYPES::CPropertySet	&flags);
-	
+	void gotoZone(const CNpcZone *const zone, const AITYPES::CPropertySet &flags);
+
 private:
-	COutpostInfo	*const			_OutPostInfo;
-	CFamilyProfileTribe	*const		_FamilyProfile;
-	NLMISC::CstCDbgPtr<CNpcZone>	_CurrentZone;
+	COutpostInfo *const _OutPostInfo;
+	CFamilyProfileTribe *const _FamilyProfile;
+	NLMISC::CstCDbgPtr<CNpcZone> _CurrentZone;
 };
 
 #endif

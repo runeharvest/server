@@ -37,12 +37,11 @@
 #include "service_main.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
-
 
 //-----------------------------------------------------------------------------
 // namespaces
@@ -52,20 +51,19 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
 //-----------------------------------------------------------------------------
 // methods CServiceClass
 //-----------------------------------------------------------------------------
 
 void CServiceClass::init()
 {
-	setVersion (RYZOM_PRODUCT_VERSION);
+	setVersion(RYZOM_PRODUCT_VERSION);
 
 	// if we are connecting to a shard then start by initializing the tick interface
-	if (IService::getInstance()->ConfigFile.getVarPtr("DontUseTS")==NULL || IService::getInstance()->ConfigFile.getVarPtr("DontUseTS")->asInt()==0)
+	if (IService::getInstance()->ConfigFile.getVarPtr("DontUseTS") == NULL || IService::getInstance()->ConfigFile.getVarPtr("DontUseTS")->asInt() == 0)
 	{
-		bool useMirror = (IService::getInstance()->ConfigFile.getVarPtr("UseMirror")!=NULL && IService::getInstance()->ConfigFile.getVarPtr("UseMirror")->asBool());
-		if(useMirror)
+		bool useMirror = (IService::getInstance()->ConfigFile.getVarPtr("UseMirror") != NULL && IService::getInstance()->ConfigFile.getVarPtr("UseMirror")->asBool());
+		if (useMirror)
 		{
 			nlwarning("Using the mirror to provide ticks to the service - ignoring state of the DontUseTS variable");
 		}
@@ -73,7 +71,7 @@ void CServiceClass::init()
 		{
 			CTickEventHandler::init(CServiceClass::tickUpdate);
 		}
-}
+	}
 
 	CSingletonRegistry::getInstance()->init();
 }
@@ -94,41 +92,39 @@ void CServiceClass::release()
 	CSingletonRegistry::getInstance()->release();
 }
 
-
 //-----------------------------------------------
 //	NLNET_SERVICE_MAIN
 //-----------------------------------------------
 
-static const char* getCompleteServiceName(const IService* theService)
+static const char *getCompleteServiceName(const IService *theService)
 {
 	static std::string s;
-	s= "pd_support_service";
+	s = "pd_support_service";
 
 	if (theService->haveLongArg("name"))
 	{
-		s+= "_"+theService->getLongArg("name");
+		s += "_" + theService->getLongArg("name");
 	}
 
 	if (theService->haveLongArg("fullname"))
 	{
-		s= theService->getLongArg("fullname");
+		s = theService->getLongArg("fullname");
 	}
 
 	return s.c_str();
 }
 
-static const char* getShortServiceName(const IService* theService)
+static const char *getShortServiceName(const IService *theService)
 {
 	static std::string s;
-	s= "PDSS";
+	s = "PDSS";
 
 	if (theService->haveLongArg("shortname"))
 	{
-		s= theService->getLongArg("shortname");
+		s = theService->getLongArg("shortname");
 	}
 
 	return s.c_str();
 }
 
-NLNET_SERVICE_MAIN( CServiceClass, getShortServiceName(scn), getCompleteServiceName(scn), 0, EmptyCallbackArray, "", "" );
-
+NLNET_SERVICE_MAIN(CServiceClass, getShortServiceName(scn), getCompleteServiceName(scn), 0, EmptyCallbackArray, "", "");

@@ -14,15 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "combat_action.h"
 
 NL_INSTANCE_COUNTER_IMPL(CCombatAction);
 NL_INSTANCE_COUNTER_IMPL(CCombatAIActionFactory);
 
-CCombatAction * CCombatAIActionFactory::buildAiAction(const CStaticAiAction *aiAction, CCombatPhrase * phrase )
+CCombatAction *CCombatAIActionFactory::buildAiAction(const CStaticAiAction *aiAction, CCombatPhrase *phrase)
 {
 #ifdef NL_DEBUG
 	nlassert(aiAction);
@@ -32,15 +30,15 @@ CCombatAction * CCombatAIActionFactory::buildAiAction(const CStaticAiAction *aiA
 	if (actionType != AI_ACTION::Melee && actionType != AI_ACTION::Range) return NULL;
 
 	AI_ACTION::TAiEffectType effectType = aiAction->getData().Combat.EffectFamily;
-	
-	//get appropriate factory
-	for ( uint i = 0; i < Factories->size(); i++ )
+
+	// get appropriate factory
+	for (uint i = 0; i < Factories->size(); i++)
 	{
-		if ( (*Factories)[i].first == effectType )
+		if ((*Factories)[i].first == effectType)
 		{
-			return (*Factories)[i].second->build(aiAction,phrase);
+			return (*Factories)[i].second->build(aiAction, phrase);
 		}
 	}
-	nlwarning( "<CCombatActionFactory buildAction> the AIEffect type %s has no corresponding combat action class", AI_ACTION::toString(effectType).c_str() );
+	nlwarning("<CCombatActionFactory buildAction> the AIEffect type %s has no corresponding combat action class", AI_ACTION::toString(effectType).c_str());
 	return NULL;
 }

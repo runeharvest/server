@@ -28,13 +28,12 @@
 #include "player_manager/character.h"
 #include "player_manager/player.h"
 
-
 using namespace std;
 using namespace NLMISC;
 
 extern CVariable<bool> EGSLight;
 
-CNamedItems * CNamedItems::_Instance = NULL;
+CNamedItems *CNamedItems::_Instance = NULL;
 
 //-----------------------------------------------------------------------------
 CNamedItems::CNamedItems()
@@ -46,7 +45,7 @@ CNamedItems::CNamedItems()
 }
 
 //-----------------------------------------------------------------------------
-void CNamedItems::loadNamedItemsFromFile(const std::string & fileName)
+void CNamedItems::loadNamedItemsFromFile(const std::string &fileName)
 {
 	CHashMap<std::string, CGameItemPtr>::iterator it;
 	for (it = _NamedItems.begin(); it != _NamedItems.end(); ++it)
@@ -106,28 +105,28 @@ void CNamedItems::loadNamedItemsFromFile(const std::string & fileName)
 
 			// Yoyo: force this item to work with the new form requirement system.
 			// BUT: do it only if _UseNewSystemRequirement==false (if LDs put true, we suppose that the named item has special req value)
-			if(item->getUseNewSystemRequirement()==false)
+			if (item->getUseNewSystemRequirement() == false)
 				item->computeRequirementFromForm();
 
-			nldebug("<NAMED_ITEMS> creating named item '%s'",item->getPhraseId().c_str());
+			nldebug("<NAMED_ITEMS> creating named item '%s'", item->getPhraseId().c_str());
 			_NamedItems.insert(make_pair(item->getPhraseId(), item));
 		}
 	}
 }
 
 //-----------------------------------------------------------------------------
-CGameItemPtr CNamedItems::createNamedItem(const std::string & name, uint32 quantity)
+CGameItemPtr CNamedItems::createNamedItem(const std::string &name, uint32 quantity)
 {
 	if (quantity == 0)
 		return NULL;
 	CGameItemPtr itemSrc = getNamedItemRef(name);
-	if( itemSrc == NULL ) 
+	if (itemSrc == NULL)
 		return NULL;
 	CGameItemPtr item = itemSrc->getItemCopy();
 
 	quantity = min(quantity, item->getMaxStackSize());
 	item->setStackSize(quantity);
-	
+
 	return item;
 }
 
@@ -150,7 +149,7 @@ CGameItemPtr CNamedItems::getNamedItemRef(const std::string &name)
 }
 
 //-----------------------------------------------------------------------------
-CInventoryPtr CNamedItems::loadFromPdr(CPersistentDataRecord & pdr)
+CInventoryPtr CNamedItems::loadFromPdr(CPersistentDataRecord &pdr)
 {
 	CInventoryPtr namedItemsInv = new CAutoResizeInventory;
 	namedItemsInv->apply(pdr, NULL);
@@ -158,7 +157,7 @@ CInventoryPtr CNamedItems::loadFromPdr(CPersistentDataRecord & pdr)
 }
 
 //-----------------------------------------------------------------------------
-void CNamedItems::saveIntoPdr(CPersistentDataRecord & pdr, CInventoryPtr namedItemsInv)
+void CNamedItems::saveIntoPdr(CPersistentDataRecord &pdr, CInventoryPtr namedItemsInv)
 {
 	if (namedItemsInv == NULL)
 	{
@@ -185,4 +184,3 @@ NLMISC_COMMAND(reloadNamedItems, "reload named items", "[<filename>]")
 
 	return true;
 }
-

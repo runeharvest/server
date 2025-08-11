@@ -14,19 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-const uint32 MaxSimultaneousPlayers=5000;
-const uint32 MaxPetsPerPlayer=4;
+const uint32 MaxSimultaneousPlayers = 5000;
+const uint32 MaxPetsPerPlayer = 4;
 
 class CPetInterface
 {
 public:
-
 	// VERY IMPORTANT COMMAND FOR KEEPING AI INFORMED OF PLAYER WHEREABOUTS
 	static void setPlayerLandmap(uint32 playerMirrorRow, uint32 landmap);
 
 	// spawn commands
 	static void spawnAtStable(uint32 playerMirrorRow, uint32 petIdx, NLMISC::CSheetId sheet, uint32 stableId);
-	static void spawnNearPlayer(uint32 playerMirrorRow,uint32 petIdx, NLMISC::CSheetId sheet);
+	static void spawnNearPlayer(uint32 playerMirrorRow, uint32 petIdx, NLMISC::CSheetId sheet);
 	static void spawnNearPoint(uint32 playerMirrorRow, uint32 petIdx, NLMISC::CSheetId sheet, uint32 x, uint32 y, uint32 h);
 
 	// despawn commands
@@ -50,7 +49,6 @@ public:
 
 private:
 	static uint32 _petMirrorRow[MaxSimultaneousPlayers][MaxPetsPerPlayer];
-
 };
 
 // need to think to migrate entitiies as AI landmap managers change
@@ -64,4 +62,3 @@ private:
 // - 8 bits dynamic id = AIS id (defines map) ???
 
 // 20 bits: 16 plr id/ 4 botid
-

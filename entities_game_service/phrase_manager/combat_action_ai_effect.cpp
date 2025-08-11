@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
-
 #include "stdpch.h"
 #include "combat_action_ai_effect.h"
 #include "combat_phrase.h"
@@ -26,58 +24,58 @@
 using namespace NLMISC;
 using namespace std;
 
-extern SKILLS::ESkills		BarehandCombatSkill;
+extern SKILLS::ESkills BarehandCombatSkill;
 
-vector< pair< AI_ACTION::TAiEffectType, CCombatAIActionFactory* > >* CCombatAIActionFactory::Factories;
+vector<pair<AI_ACTION::TAiEffectType, CCombatAIActionFactory *>> *CCombatAIActionFactory::Factories;
 
 //--------------------------------------------------------------
-//					apply  
+//					apply
 //--------------------------------------------------------------
-bool CCombatAiActionEffect::initFromAiAction( const CStaticAiAction *aiAction, CCombatPhrase *phrase )
+bool CCombatAiActionEffect::initFromAiAction(const CStaticAiAction *aiAction, CCombatPhrase *phrase)
 {
 #ifdef NL_DEBUG
 	nlassert(phrase);
 	nlassert(aiAction);
 #endif
-	
+
 	if (aiAction->getType() != AI_ACTION::Range && aiAction->getType() != AI_ACTION::Melee)
 		return false;
-	
+
 	_ActorRowId = phrase->getAttacker()->getEntityRowId();
-	
+
 	// read parameters
 	const CCombatParams &data = aiAction->getData().Combat;
-	
+
 	_EffectFamily = AI_ACTION::toEffectFamily(data.EffectFamily, aiAction->getType());
 	_EffectDuration = data.EffectTime;
 	_ParamValue = (sint32)data.EffectValue;
-	
+
 	return true;
 } // initFromAiAction //
 
 //--------------------------------------------------------------
-//					apply  
+//					apply
 //--------------------------------------------------------------
-void CCombatAiActionEffect::apply( CCombatPhrase *phrase )
+void CCombatAiActionEffect::apply(CCombatPhrase *phrase)
 {
 #if !FINAL_VERSION
 	nlassert(phrase);
 #endif
-	
+
 	H_AUTO(CCombatAiActionEffect_apply);
-		
-	const vector<CCombatPhrase::TTargetInfos> & targets = phrase->getTargets();
+
+	const vector<CCombatPhrase::TTargetInfos> &targets = phrase->getTargets();
 	const uint nbTargets = (uint)targets.size();
-	for (uint i = 0 ; i < nbTargets ; ++i)
+	for (uint i = 0; i < nbTargets; ++i)
 	{
-		//if ( !phrase->hasTargetDodged(i) )
-		if ( phrase->getTargetDodgeFactor(i) == 0.0f )
-			applyOnTarget(i,phrase);
+		// if ( !phrase->hasTargetDodged(i) )
+		if (phrase->getTargetDodgeFactor(i) == 0.0f)
+			applyOnTarget(i, phrase);
 	}
 
 	// change behaviour
 	MBEHAV::CBehaviour &behav = phrase->getExecutionBehaviour();
-	if ( behav.isCreatureAttack() )
+	if (behav.isCreatureAttack())
 	{
 		// get creature level
 		const CCombatAttacker *attacker = phrase->getAttacker();
@@ -87,41 +85,40 @@ void CCombatAiActionEffect::apply( CCombatPhrase *phrase )
 } // apply //
 
 //--------------------------------------------------------------
-//					applyOnTarget()  
+//					applyOnTarget()
 //--------------------------------------------------------------
 void CCombatAiActionEffect::applyOnTarget(uint8 targetIndex, CCombatPhrase *phrase)
 {
 #if !FINAL_VERSION
 	nlassert(phrase);
 #endif
-	
+
 	const CCombatDefenderPtr &targetDefender = phrase->getTarget(targetIndex);
-	if(!targetDefender) return;
-	
+	if (!targetDefender) return;
+
 	CEntityBase *entity = targetDefender->getEntity();
 	if (!entity)
 	{
 		nlwarning("COMBAT : <CCombatAiActionEffect::applyOnTarget> Cannot find the target entity, cancel");
 		return;
 	}
-	
-//	applyOnEntity(entity, phrase->getPhraseSuccessDamageFactor());
-	applyOnEntity(entity, 1.0f-phrase->getTargetDodgeFactor(targetIndex));
-	
+
+	//	applyOnEntity(entity, phrase->getPhraseSuccessDamageFactor());
+	applyOnEntity(entity, 1.0f - phrase->getTargetDodgeFactor(targetIndex));
+
 } // applyOnTarget //
 
-
 //--------------------------------------------------------------
-//					applyOnEntity()  
+//					applyOnEntity()
 //--------------------------------------------------------------
-void CCombatAiActionEffect::applyOnEntity( CEntityBase *entity, float successFactor )
+void CCombatAiActionEffect::applyOnEntity(CEntityBase *entity, float successFactor)
 {
 	if (!entity || !_EffectDuration) return;
-	
+
 	// if entity is already dead, return
 	if (entity->isDead())
 		return;
-	
+
 	const TGameCycle endDate = TGameCycle(_EffectDuration * successFactor) + CTickEventHandler::getGameCycle();
 
 	CSTimedEffect *effect = IEffectFactory::buildEffect(_EffectFamily);
@@ -134,12 +131,11 @@ void CCombatAiActionEffect::applyOnEntity( CEntityBase *entity, float successFac
 		effect->setPower((uint32)_ParamValue);
 		effect->setEndDate(endDate);
 		effect->isStackable(false);
-		
+
 		entity->addSabrinaEffect(effect);
 	}
-	
-} // applyOnEntity //
 
+} // applyOnEntity //
 
 CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiBlindFactoryInstance = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::Blind);
 CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiFearFactoryInstance = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::Fear);
@@ -153,8 +149,8 @@ CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiMeleeMadnessFactoryInst
 CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiRangeMadnessFactoryInstance = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::RangeMadness);
 CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiMagicMadnessFactoryInstance = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::MagicMadness);
 
-CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiDebuffMeleeFactoryInstance = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::SkillDebufMelee );
-CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiDebuffRangeFactoryInstance = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::SkillDebufRange );
+CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiDebuffMeleeFactoryInstance = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::SkillDebufMelee);
+CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiDebuffRangeFactoryInstance = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::SkillDebufRange);
 CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiDebuffMagicFactoryInstance = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::SkillDebufMagic);
 
 CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiDebuffAcidResistFactory = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::ResistDebufAcid);
@@ -166,5 +162,3 @@ CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiDebuffPoisonResistFacto
 CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiDebuffShockResistFactory = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::ResistDebufShockwave);
 
 CCombatAIActionTFactory<CCombatAiActionEffect> *CCombatAiReverseDamageFactory = new CCombatAIActionTFactory<CCombatAiActionEffect>(AI_ACTION::ReverseDamage);
-
-

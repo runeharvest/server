@@ -34,24 +34,25 @@
 using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
-using	namespace	EFFECT_FAMILIES;
+using namespace EFFECT_FAMILIES;
 
 // GLOBALS
-std::list <CCombatInterface::CEvent> CCombatInterface::_events;
+std::list<CCombatInterface::CEvent> CCombatInterface::_events;
 
-static bool verboseLog=false;
-
+static bool verboseLog = false;
 
 // MACROS
-#define LOG if (!verboseLog) {} else nlinfo
+#define LOG              \
+	if (!verboseLog) { } \
+	else nlinfo
 
-static void cbServiceUpEGS( const string& serviceName, NLNET::TServiceId serviceId, void * )
+static void cbServiceUpEGS(const string &serviceName, NLNET::TServiceId serviceId, void *)
 {
 	LOG("Combat Interface: EGS service mirror up");
 
 	// ask the brick service to give me event reports
 	CMessage msgRegister("REGISTER_AI_EVENT_REPORTS");
-	sendMessageViaMirror ("EGS", msgRegister);
+	sendMessageViaMirror("EGS", msgRegister);
 }
 
 void CCombatInterface::init()
@@ -65,7 +66,7 @@ void CCombatInterface::init()
 	CSheetId::init();
 
 	// setup service up callbacks
-	CMirrors::Mirror.setServiceMirrorUpCallback( "EGS", cbServiceUpEGS, 0);
+	CMirrors::Mirror.setServiceMirrorUpCallback("EGS", cbServiceUpEGS, 0);
 }
 
 void CCombatInterface::release()
@@ -73,40 +74,38 @@ void CCombatInterface::release()
 	LOG("Combat Interface: release()");
 }
 
-
-void CBSAIEventReportMsg::callback(const std::string &name, NLNET::TServiceId id) 
+void CBSAIEventReportMsg::callback(const std::string &name, NLNET::TServiceId id)
 {
-	CCombatInterface::CEvent	event;
-	
-	for (uint i=0;i<Originator.size();i++)
-	{
-		uint8	actionType=ActionType[i];
-		if (	(	actionType!=ACTNATURE::FIGHT
-				&&	actionType!=ACTNATURE::OFFENSIVE_MAGIC
-				&&	actionType!=ACTNATURE::CURATIVE_MAGIC	)
-			&&	AggroAdd[i]==0	)
-			continue; 
+	CCombatInterface::CEvent event;
 
-		event._originatorRow	=	Originator[i];
-		event._targetRow		=	Target[i];
-		event._weight			=	AggroAdd[i];
-		clamp(event._weight,-1,+1);
-		event._nature			=	(ACTNATURE::TActionNature)actionType;
+	for (uint i = 0; i < Originator.size(); i++)
+	{
+		uint8 actionType = ActionType[i];
+		if ((actionType != ACTNATURE::FIGHT
+		        && actionType != ACTNATURE::OFFENSIVE_MAGIC
+		        && actionType != ACTNATURE::CURATIVE_MAGIC)
+		    && AggroAdd[i] == 0)
+			continue;
+
+		event._originatorRow = Originator[i];
+		event._targetRow = Target[i];
+		event._weight = AggroAdd[i];
+		clamp(event._weight, -1, +1);
+		event._nature = (ACTNATURE::TActionNature)actionType;
 
 		CCombatInterface::_events.push_back(event);
 	}
-
 }
 
-NLMISC_COMMAND(verboseCombatLog,"Turn on or off or check the state of verbose combat logging","")
+NLMISC_COMMAND(verboseCombatLog, "Turn on or off or check the state of verbose combat logging", "")
 {
-	if(args.size()>1)
+	if (args.size() > 1)
 		return false;
 
-	if(args.size()==1)
-		StrToBool	(verboseLog, args[0]);
+	if (args.size() == 1)
+		StrToBool(verboseLog, args[0]);
 
-	log.displayNL("verboseCombatLogging is %s",verboseLog?"ON":"OFF");
+	log.displayNL("verboseCombatLogging is %s", verboseLog ? "ON" : "OFF");
 	return true;
 }
 
@@ -114,7 +113,7 @@ NLMISC_COMMAND(verboseCombatLog,"Turn on or off or check the state of verbose co
 // cbChangeMode :
 //-----------------------------------------------
 
-//void cbChangeMode( CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+// void cbChangeMode( CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
 //{
 //	TDataSetRow row;
 //	msgin.serial( row );
@@ -132,17 +131,17 @@ NLMISC_COMMAND(verboseCombatLog,"Turn on or off or check the state of verbose co
 //		static_cast<CModEntityPhysical*>(phys)->setModeStruct(mode);
 //	}
 //
-//} // cbChangeMode //
+// } // cbChangeMode //
 
-void	CAddEffectsMessage::callback	(const std::string &name, NLNET::TServiceId id)
+void CAddEffectsMessage::callback(const std::string &name, NLNET::TServiceId id)
 {
-	for (uint32	i=0;i<Entities.size();i++)
+	for (uint32 i = 0; i < Entities.size(); i++)
 	{
-		CAIEntityPhysical	*phys=CAIS::instance().getEntityPhysical(Entities[i]);
-		if	(!phys)
+		CAIEntityPhysical *phys = CAIS::instance().getEntityPhysical(Entities[i]);
+		if (!phys)
 			continue;
-		
-		switch	((TEffectFamily)Families[i])
+
+		switch ((TEffectFamily)Families[i])
 		{
 		case Stun:
 		case CombatStun:
@@ -165,59 +164,55 @@ void	CAddEffectsMessage::callback	(const std::string &name, NLNET::TServiceId id
 		default:
 			break;
 		}
-		
 	}
-	
 }
 
-void	CRemoveEffectsMessage::callback	(const std::string &name, NLNET::TServiceId id)
+void CRemoveEffectsMessage::callback(const std::string &name, NLNET::TServiceId id)
 {
-	for (uint32	i=0;i<Entities.size();i++)
+	for (uint32 i = 0; i < Entities.size(); i++)
 	{
-		CAIEntityPhysical	*phys=CAIS::instance().getEntityPhysical(Entities[i]);
-		if	(!phys)
+		CAIEntityPhysical *phys = CAIS::instance().getEntityPhysical(Entities[i]);
+		if (!phys)
 			continue;
-		
-		switch	((TEffectFamily)Families[i])
+
+		switch ((TEffectFamily)Families[i])
 		{
 		case Stun:
 		case CombatStun:
 		case Mezz:
 			phys->stun()--;
-			if(!phys->isStuned())
+			if (!phys->isStuned())
 			{
-				CSpawnBot * spawnBot = dynamic_cast<CSpawnBot*>(phys);
-				if(spawnBot)
+				CSpawnBot *spawnBot = dynamic_cast<CSpawnBot *>(phys);
+				if (spawnBot)
 				{
 					spawnBot->updateProfile(10);
 				}
 			}
 			break;
-		
+
 		case Root:
 			phys->root()--;
-			if(!phys->isRooted())
+			if (!phys->isRooted())
 			{
-				CSpawnBot * spawnBot = dynamic_cast<CSpawnBot*>(phys);
-				if(spawnBot)
+				CSpawnBot *spawnBot = dynamic_cast<CSpawnBot *>(phys);
+				if (spawnBot)
 				{
 					spawnBot->updateProfile(10);
 				}
 			}
 			break;
-		
+
 		case Blind:
 			phys->blind()--;
 			break;
-		
+
 		case Fear:
 			phys->fear()--;
 			break;
-		
+
 		default:
 			break;
 		}
-		
 	}
-	
 }

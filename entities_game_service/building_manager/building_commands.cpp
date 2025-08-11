@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "guild_manager/fame_manager.h"
 #include "egs_mirror.h"
@@ -33,56 +31,54 @@
 #include "guild_manager/guild_manager.h"
 #include "building_manager/building_physical.h"
 
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
-NLMISC_COMMAND(simGpmsTriggerIn,"simulate the buying of a guild building","<userId><lift id>")
+NLMISC_COMMAND(simGpmsTriggerIn, "simulate the buying of a guild building", "<userId><lift id>")
 {
-	if ( args.size() != 2 )
+	if (args.size() != 2)
 		return false;
 	CEntityId id;
-	id.fromString( args[0].c_str() );
-	TDataSetRow rowId = TheDataset.getDataSetRow( id );
+	id.fromString(args[0].c_str());
+	TDataSetRow rowId = TheDataset.getDataSetRow(id);
 	uint32 liftId;
 	NLMISC::fromString(args[1], liftId);
-	CBuildingManager::getInstance()->addTriggerRequest( rowId, (uint32)liftId );
+	CBuildingManager::getInstance()->addTriggerRequest(rowId, (uint32)liftId);
 	return true;
 }
 
-NLMISC_COMMAND(simGpmsTriggerOut,"simulate the buying of a guild building","<userId>")
+NLMISC_COMMAND(simGpmsTriggerOut, "simulate the buying of a guild building", "<userId>")
 {
-	if ( args.size() != 1 )
+	if (args.size() != 1)
 		return false;
 	CEntityId id;
-	id.fromString( args[0].c_str() );
-	TDataSetRow rowId = TheDataset.getDataSetRow( id );
-	CBuildingManager::getInstance()->removeTriggerRequest( rowId );
+	id.fromString(args[0].c_str());
+	TDataSetRow rowId = TheDataset.getDataSetRow(id);
+	CBuildingManager::getInstance()->removeTriggerRequest(rowId);
 	return true;
 }
 
 /*NLMISC_COMMAND(resetBuildings,"Reload lift/building data. WARNING : debug use only ( wipes lift dynamic data )","")
 {
-	if ( args.size() != 0 )
-		return false;
+    if ( args.size() != 0 )
+        return false;
 
-	
-	CPVPManager::release();
-	CGuildManager::release();
-	CBuildingManager::release();
-	CZoneManager::release();
-	CPrimitivesParser::release();
 
-	CPVPManager::init();
-	CPrimitivesParser::init();
-	CZoneManager::init();
-	CBuildingManager::init();
-	CGuildManager::init();
+    CPVPManager::release();
+    CGuildManager::release();
+    CBuildingManager::release();
+    CZoneManager::release();
+    CPrimitivesParser::release();
 
-	log.displayNL("lift data reloaded");
-	return true;
+    CPVPManager::init();
+    CPrimitivesParser::init();
+    CZoneManager::init();
+    CBuildingManager::init();
+    CGuildManager::init();
+
+    log.displayNL("lift data reloaded");
+    return true;
 }*/
 
 NLMISC_COMMAND(dumpBuilding, "dump building infos", "<building_name = building_instance_galemus_trainer/building_instance_kaemon_trainer/... | building_alias>")
@@ -90,9 +86,9 @@ NLMISC_COMMAND(dumpBuilding, "dump building infos", "<building_name = building_i
 	if (args.size() != 1)
 		return false;
 
-	IBuildingPhysical * building = NULL;
+	IBuildingPhysical *building = NULL;
 
-	const string & buildingId = args[0];
+	const string &buildingId = args[0];
 	if (buildingId.size() > 0 && isdigit(buildingId[0]))
 	{
 		TAIAlias alias;
@@ -105,7 +101,7 @@ NLMISC_COMMAND(dumpBuilding, "dump building infos", "<building_name = building_i
 	}
 
 	if (building)
-		building->dumpBuilding( log );
+		building->dumpBuilding(log);
 
 	return true;
 }

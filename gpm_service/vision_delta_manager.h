@@ -20,12 +20,11 @@
 #include "nel/net/message.h"
 #include "server_share/r2_vision.h"
 
-
-class CVisionDeltaManager: public R2_VISION::IVisionDeltaManager
+class CVisionDeltaManager : public R2_VISION::IVisionDeltaManager
 {
 public:
 	// inherited interface
-	void addVisionDelta(const CPlayerVisionDelta& visionDelta);
+	void addVisionDelta(const CPlayerVisionDelta &visionDelta);
 
 	// regular update call - used to dispatch messages and clear out buffers
 	void update();

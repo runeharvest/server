@@ -30,31 +30,27 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace CHATUNI;
 
-extern CVariable<bool>		ForceFarChat;
+extern CVariable<bool> ForceFarChat;
 
-
-class CChatUnifierClient : 
-	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
-	public IChatUnifierClient,
-	public CChatUnifierClientSkel
+class CChatUnifierClient : public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase>>>,
+                           public IChatUnifierClient,
+                           public CChatUnifierClientSkel
 {
 public:
 	/// The module manifest, include the shard id
-	mutable string		_Manifest;
+	mutable string _Manifest;
 
 	/// The chat unifier server (for tell message routing)
-	TModuleProxyPtr		_ChatUnifierServer;
+	TModuleProxyPtr _ChatUnifierServer;
 
 	/// The peer chat unifier clients (other IOS) for guild chat forwarding
-	set<TModuleProxyPtr>	_Peers;
-	
+	set<TModuleProxyPtr> _Peers;
 
 	CChatUnifierClient()
 	{
 		CChatUnifierClientSkel::init(this);
 	}
 
-	
 	void onModuleUp(IModuleProxy *proxy)
 	{
 		if (proxy->getModuleClassName() == "ChatUnifierServer")
@@ -84,13 +80,13 @@ public:
 		}
 	}
 
-//	void onProcessModuleMessage(IModuleProxy *proxy, const CMessage &message)
-//	{
-//		if (CChatUnifierClientSkel::onDispatchMessage(proxy, message))
-//			return;
-//
-//		nlwarning("CChatUnifierClient : failed to dispatch message '%s'", message.getName().c_str());
-//	}
+	//	void onProcessModuleMessage(IModuleProxy *proxy, const CMessage &message)
+	//	{
+	//		if (CChatUnifierClientSkel::onDispatchMessage(proxy, message))
+	//			return;
+	//
+	//		nlwarning("CChatUnifierClient : failed to dispatch message '%s'", message.getName().c_str());
+	//	}
 
 	std::string buildModuleManifest() const
 	{
@@ -140,7 +136,7 @@ public:
 			CChatManager &cm = IOS->getChatManager();
 
 			// rebuild a the universe group id and fake the creator and dynamic id
-			TGroupId grpId(RYZOMID::chatGroup,0);
+			TGroupId grpId(RYZOMID::chatGroup, 0);
 			cm.farChatInGroup(grpId, homeSessionId, text, senderName);
 		}
 	}
@@ -148,12 +144,10 @@ public:
 	void sendUnifiedDynChat(const NLMISC::CEntityId &dynCharId, const ucstring &senderName, const ucstring &text)
 	{
 #ifdef NL_OS_WINDOWS
-#	pragma message (NL_LOC_WRN "Add the message in the interface")
+#pragma message(NL_LOC_WRN "Add the message in the interface")
 #endif
 		CChatUnifierClientProxy::broadcast_dynChanBroadcast(_Peers.begin(), _Peers.end(), this, dynCharId, senderName, text);
 	}
-
-
 
 	/******************************************/
 	/** CChatUnifierClientSkel implementation */
@@ -175,31 +169,29 @@ public:
 		CChatManager &cm = IOS->getChatManager();
 		if (!cm.checkClient(dsr))
 		{
-			// the client is not in the chat manager! 
+			// the client is not in the chat manager!
 			nldebug("IOSCU: recvFarTellFail : can't found client data in chat manager for sender character %s)", senderCharId.toString().c_str());
 			// nothing more to do
 			return;
 		}
 
-//		CChatClient &cc = cm.getClient(dsr);
+		//		CChatClient &cc = cm.getClient(dsr);
 
-		switch(failInfo.getValue())
+		switch (failInfo.getValue())
 		{
 		case TFailInfo::fi_no_entity_locator:
 		case TFailInfo::fi_no_ios_module:
 		case TFailInfo::fi_no_char_sync:
 		case TFailInfo::fi_sender_char_unknown:
 		case TFailInfo::fi_dest_char_unknown:
-		case TFailInfo::fi_char_offline:
-			{
-				SM_STATIC_PARAMS_1( vect, STRING_MANAGER::literal );
-				vect[0].Literal = destName;
-				uint32 phraseId = STRING_MANAGER::sendStringToClient( dsr, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
-				cm.sendChat2Ex( CChatGroup::tell, dsr, phraseId );
-			}
-			break;
+		case TFailInfo::fi_char_offline: {
+			SM_STATIC_PARAMS_1(vect, STRING_MANAGER::literal);
+			vect[0].Literal = destName;
+			uint32 phraseId = STRING_MANAGER::sendStringToClient(dsr, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender);
+			cm.sendChat2Ex(CChatGroup::tell, dsr, phraseId);
 		}
-
+		break;
+		}
 	}
 
 	// SU send a far tell to the IOS hosting the addressee character
@@ -235,14 +227,14 @@ public:
 	{
 		CChatManager &cm = IOS->getChatManager();
 
-//		if (!IsRingShard)
-//		{
-//			// universe broadcast is allowed on on ring shard
-//			return;
-//		}
+		//		if (!IsRingShard)
+		//		{
+		//			// universe broadcast is allowed on on ring shard
+		//			return;
+		//		}
 
 		// rebuild a the universe group id
-		TGroupId grpId(RYZOMID::chatGroup,0);
+		TGroupId grpId(RYZOMID::chatGroup, 0);
 		cm.farChatInGroup(grpId, senderHomeSession, text, senderName);
 	}
 
@@ -252,9 +244,9 @@ public:
 		CChatManager &cm = IOS->getChatManager();
 
 		// retreive the dyn chat (is it exist here)
-		CDynChatChan *chan =  cm.getDynChat().getChan(chanId);
+		CDynChatChan *chan = cm.getDynChat().getChan(chanId);
 
-		if (chan ==  NULL)
+		if (chan == NULL)
 		{
 			nldebug("IOSCU : universeBroadcast : cannot find dynamic channel %s to broadcast chat", chanId.toString().c_str());
 			return;
@@ -266,7 +258,7 @@ public:
 		{
 			cm.sendChat(CChatGroup::dyn_chat, dcc->getClient()->getID(), text, TDataSetRow(), chanId, senderName);
 			dcc = dcc->getNextChannelSession(); // next session in this channel
-		}						
+		}
 	}
 
 	// SU send a broadcast message to the IOS
@@ -278,7 +270,7 @@ public:
 	/* Commands handler														 */
 	/*************************************************************************/
 	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CChatUnifierClient, CModuleBase)
-		NLMISC_COMMAND_HANDLER_ADD(CChatUnifierClient, dump, "Dump the module internal state", "no param");
+	NLMISC_COMMAND_HANDLER_ADD(CChatUnifierClient, dump, "Dump the module internal state", "no param");
 	NLMISC_COMMAND_HANDLER_TABLE_END
 
 	NLMISC_CLASS_COMMAND_DECL(dump)
@@ -289,22 +281,19 @@ public:
 		log.displayNL("Dumping Chat unifier client state :");
 		log.displayNL("-----------------------------------");
 
-		log.displayNL("  Chat Unifier client have %u known peer modules", 
-			_Peers.size());
+		log.displayNL("  Chat Unifier client have %u known peer modules",
+		    _Peers.size());
 
 		set<TModuleProxyPtr>::iterator first(_Peers.begin()), last(_Peers.end());
 		for (; first != last; ++first)
 		{
-			log.displayNL("   + Peer module '%s' with manifest '%s'", 
-				(*first)->getModuleName().c_str(),
-				(*first)->getModuleManifest().c_str());
+			log.displayNL("   + Peer module '%s' with manifest '%s'",
+			    (*first)->getModuleName().c_str(),
+			    (*first)->getModuleManifest().c_str());
 		}
 
 		return true;
-
 	}
-
-
 };
 
 NLNET_REGISTER_MODULE_FACTORY(CChatUnifierClient, "ChatUnifierClient");

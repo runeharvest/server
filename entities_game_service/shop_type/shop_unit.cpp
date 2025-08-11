@@ -27,11 +27,11 @@ void CShopUnitStatic::releaseShopUnit()
 }
 
 //-----------------------------------------------------------------------------
-void CShopUnitStatic::addContent( const TItemTradePtr& item )
+void CShopUnitStatic::addContent(const TItemTradePtr &item)
 {
-	if( dynamic_cast<CTradeBase *>( (IItemTrade*)item ) != 0 )
+	if (dynamic_cast<CTradeBase *>((IItemTrade *)item) != 0)
 	{
-		_ShopContent.push_back( item );
+		_ShopContent.push_back(item);
 	}
 }
 
@@ -42,33 +42,33 @@ void CShopUnitDynamic::releaseShopUnit()
 }
 
 //-----------------------------------------------------------------------------
-void CShopUnitDynamic::addContent( const TItemTradePtr& item )
+void CShopUnitDynamic::addContent(const TItemTradePtr &item)
 {
-	if( dynamic_cast<CItemForSale *>( (IItemTrade*)item ) != 0 )
+	if (dynamic_cast<CItemForSale *>((IItemTrade *)item) != 0)
 	{
-		//todo: check if item are already in shop
-		_ShopContent[ item->getContinent() ].push_back( item ); 
+		// todo: check if item are already in shop
+		_ShopContent[item->getContinent()].push_back(item);
 		_CycleContentChange = CTickEventHandler::getGameCycle();
-		item->setAvailable( true );
+		item->setAvailable(true);
 	}
 }
 
 //-----------------------------------------------------------------------------
-bool CShopUnitDynamic::removeContent( const TItemTradePtr& item, bool updateQuantity )
+bool CShopUnitDynamic::removeContent(const TItemTradePtr &item, bool updateQuantity)
 {
-	if( dynamic_cast<CItemForSale *>( (IItemTrade*)item ) != 0 )
+	if (dynamic_cast<CItemForSale *>((IItemTrade *)item) != 0)
 	{
-		for( uint32 i = 0; i < _ShopContent[ item->getContinent() ].size(); ++i )
+		for (uint32 i = 0; i < _ShopContent[item->getContinent()].size(); ++i)
 		{
-			if( (IItemTrade*)item == (IItemTrade*)_ShopContent[ item->getContinent() ] [ i ] )
+			if ((IItemTrade *)item == (IItemTrade *)_ShopContent[item->getContinent()][i])
 			{
 				// RM are in mutlitple shop unit (one per item part, and we must update quantity one time par Rm (and not one time per item part)
-				if( updateQuantity )
-					item->setAvailable( false );
-				if( item->isAvailable( 1 ) == false )
+				if (updateQuantity)
+					item->setAvailable(false);
+				if (item->isAvailable(1) == false)
 				{
-					_ShopContent[ item->getContinent() ] [ i ] = _ShopContent[ item->getContinent() ].back();
-					_ShopContent[ item->getContinent() ].pop_back();
+					_ShopContent[item->getContinent()][i] = _ShopContent[item->getContinent()].back();
+					_ShopContent[item->getContinent()].pop_back();
 					return true;
 				}
 				return false;

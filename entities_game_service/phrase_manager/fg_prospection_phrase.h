@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_FG_PROSPECTION_PHRASE_H
 #define NL_FG_PROSPECTION_PHRASE_H
 
@@ -23,28 +21,26 @@
 #include "game_share/ecosystem.h"
 #include "game_share/time_weather_season/time_and_season.h"
 
-
 /// Possible reasons for not finding anything
 enum TNothingFoundReason
 {
 	NFUnknown,
-	NFNoDepositHere,					//
-	NFInvalidCurrentSeason,				//
-	NFInvalidCurrentTimeOfDay,			//
-	NFInvalidCurrentWeather,			//
-	NFInvalidEcotype,					//
-	NFNoDepositForFilter,				//
-	NFNoLocalMaterialForFilter,			//
-	NFStatEnergyTooHigh,				//
-	NFStatEnergyTooHighLocal,			//
-	NFStatEnergyDifferent,				//
-	NFStatEnergyDifferentLocal,			//
-	NFSiteDepleted,						//
-	NFDepositDepleted,					//
-	NFCantSpawnSource,					//
+	NFNoDepositHere, //
+	NFInvalidCurrentSeason, //
+	NFInvalidCurrentTimeOfDay, //
+	NFInvalidCurrentWeather, //
+	NFInvalidEcotype, //
+	NFNoDepositForFilter, //
+	NFNoLocalMaterialForFilter, //
+	NFStatEnergyTooHigh, //
+	NFStatEnergyTooHighLocal, //
+	NFStatEnergyDifferent, //
+	NFStatEnergyDifferentLocal, //
+	NFSiteDepleted, //
+	NFDepositDepleted, //
+	NFCantSpawnSource, //
 	NFNbReasons // if you change this enum, change NothingFoundReasonStrs in .cpp!
 };
-
 
 class CDeposit;
 
@@ -57,13 +53,12 @@ class CDeposit;
 class CFgSearchPhrase : public CForagePhrase
 {
 public:
-
 	/// Constructor
 	CFgSearchPhrase();
 
 	/// \name Override methods from CSPhrase
 	//@{
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true );
+	virtual bool build(const TDataSetRow &actorRowId, const std::vector<const CStaticBrick *> &bricks, bool buildToExecute = true);
 
 	/**
 	 * evaluate phrase
@@ -71,7 +66,7 @@ public:
 	 * \return true if eval has been made without errors
 	 */
 	virtual bool evaluate();
-	
+
 	/**
 	 * validate phrase
 	 * \return true if phrase is valide
@@ -82,12 +77,12 @@ public:
 	virtual bool launch() = 0;
 	virtual void apply() = 0;
 	//@}
-	
+
 	/**
 	 * set the actor
 	 */
-	virtual void setActor( const TDataSetRow &entityRowId ){}
-	
+	virtual void setActor(const TDataSetRow &entityRowId) { }
+
 	//@}
 
 	/**
@@ -98,54 +93,52 @@ public:
 
 	///\unused basic methods from CSPhrase
 	//@{
-	virtual void setPrimaryTarget( const TDataSetRow& ) {}
+	virtual void setPrimaryTarget(const TDataSetRow &) { }
 	//@}
 
 protected: // because CSearchPhrase is a common trunc
-
 	/// Terrain specialization
-	TEcotype					_EcotypeSpec;
+	TEcotype _EcotypeSpec;
 
 	/// Material specialization (group)
-	RM_GROUP::TRMGroup			_MaterialGroupFilter;
+	RM_GROUP::TRMGroup _MaterialGroupFilter;
 
 	/// Material specialization (family)
-	RM_FAMILY::TRMFamily		_MaterialFamilyFilter;
+	RM_FAMILY::TRMFamily _MaterialFamilyFilter;
 
 	/// Craftable item part index specialization
-	uint						_CraftableItemPartFilter;
+	uint _CraftableItemPartFilter;
 
 	/// Range (radius in m)
-	float						_ForageRange;
+	float _ForageRange;
 
 	/// Angle (in radian)
-	float						_ForageAngle;
+	float _ForageAngle;
 
 	/// Multi spot limit
-	uint16						_MultiSpotLimit;
+	uint16 _MultiSpotLimit;
 
 	/// Number of attempts (when filtered)
-	uint16						_NbAttempts;
+	uint16 _NbAttempts;
 
 	/// Initial source properties
-	CHarvestSource				_SourceIniProperties;
+	CHarvestSource _SourceIniProperties;
 
 	/// Skill value of the skill used
-	sint32						_UsedSkillValue;
+	sint32 _UsedSkillValue;
 
 	/// Knowledge precision
-	uint8						_KnowledgePrecision;
+	uint8 _KnowledgePrecision;
 
 	/// Max or exact RM energy searched
-	uint8						_MaterialEnergy;
+	uint8 _MaterialEnergy;
 
 	/// True if _MaterialEnergy is the exact searched, false if max searched
-	bool						_FindExactMaterialEnergy;
+	bool _FindExactMaterialEnergy;
 
 	/// Locator enabled
-	bool						_IsLocateDepositProspection;
+	bool _IsLocateDepositProspection;
 };
-
 
 class CDeposit;
 
@@ -158,33 +151,35 @@ class CDeposit;
 class CFgProspectionPhrase : public CFgSearchPhrase
 {
 public:
-
 	/// Constructor
-	CFgProspectionPhrase() : CFgSearchPhrase() {}
+	CFgProspectionPhrase()
+	    : CFgSearchPhrase()
+	{
+	}
 
 	/// Launch the action
-	virtual bool	launch();
+	virtual bool launch();
 
 	/// Apply the action
-	virtual void	apply();
+	virtual void apply();
 
 	/// Called at the end of the latency time
-	virtual void	end();
+	virtual void end();
 
 	/// Generate one or more sources when applying the action. Return the number of sources spawned.
-	uint			generateSources( CCharacter *player );
+	uint generateSources(CCharacter *player);
 
 	///
-	void			startLocateDeposit( CCharacter *player );
+	void startLocateDeposit(CCharacter *player);
 
 	///
-	void			stopLocateDeposit( CCharacter *player );
+	void stopLocateDeposit(CCharacter *player);
 
 	/**
 	 * Display forageable raw materials near by or at the exact position of a player
 	 * (extendedInfo is for non-exactPos mode only).
 	 */
-	static void		displayRMNearBy( CCharacter *player, bool onlyAtExactPos, bool extendedInfo, NLMISC::CLog *log = NLMISC::InfoLog );
+	static void displayRMNearBy(CCharacter *player, bool onlyAtExactPos, bool extendedInfo, NLMISC::CLog *log = NLMISC::InfoLog);
 
 	/**
 	 * Select a raw material that can be found at the specified position. (static)
@@ -196,7 +191,7 @@ public:
 	 * \param groupFilter If not Unknown, searches only a RM from the group (ignored if familyFilter is not Unknown)
 	 * \param familyFilter If not Unknown, searches only a RM from the family
 	 * \param craftableItemPartFilter If not ~0, searches only a RM useful to craft the specified item part
-	 * \param maxStatEnergy Discards RM that have a higher energy than specified 
+	 * \param maxStatEnergy Discards RM that have a higher energy than specified
 	 * \param fromNeighboorhood If true, selects randomly a RM from a small area, otherwise returns only a RM at the exact pos
 	 * \param testIfSiteDepleted Set it to false for map generation.
 	 * \param ignoreContextMatch If true, the season/time/weather will not be checked (useful for maps)
@@ -210,44 +205,41 @@ public:
 	 * \return If a RM is found, returns it, otherwise NULL.
 	 */
 	static const CStaticDepositRawMaterial *selectRMAtPos(
-		const NLMISC::CVector& sourcePos,
-		const CRyzomTime::EWeather& weather,
-		const TEcotype& ecotypeSpec,
-		const RM_GROUP::TRMGroup& groupFilter,
-		const RM_FAMILY::TRMFamily& familyFilter,
-		uint craftableItemPartFilter,
-		uint8 statEnergy,
-		bool findExactStatEnergy,
-		bool fromNeighbourHood,
-		bool testIfSiteDepleted,
-		CDeposit **deposit,
-		CDeposit **depositForK,
-		TNothingFoundReason& reason,
-		bool ignoreContextMatch=false );
+	    const NLMISC::CVector &sourcePos,
+	    const CRyzomTime::EWeather &weather,
+	    const TEcotype &ecotypeSpec,
+	    const RM_GROUP::TRMGroup &groupFilter,
+	    const RM_FAMILY::TRMFamily &familyFilter,
+	    uint craftableItemPartFilter,
+	    uint8 statEnergy,
+	    bool findExactStatEnergy,
+	    bool fromNeighbourHood,
+	    bool testIfSiteDepleted,
+	    CDeposit **deposit,
+	    CDeposit **depositForK,
+	    TNothingFoundReason &reason,
+	    bool ignoreContextMatch = false);
 
 	/// Spawn a source automatically from the deposit, if it matches the current context
-	static bool		autoSpawnSource( const NLMISC::CVector& pos, CDeposit *deposit );
+	static bool autoSpawnSource(const NLMISC::CVector &pos, CDeposit *deposit);
 
 private:
-
 	/**
 	 * Reorder matchingDeposits so that [begin(), matchingEnd] is the range matching the filters.
 	 * If no deposit matches the filter, return a reason different from NFUnknown.
 	 */
 	static void filterDeposits(
-		std::vector<CDeposit*>& matchingDeposits,
-		const CRyzomTime::EWeather& weather,
-		const TEcotype& ecotypeSpec,
-		const RM_GROUP::TRMGroup& groupFilter,
-		const RM_FAMILY::TRMFamily& familyFilter,
-		uint craftableItemPartFilter,
-		uint8 statEnergy,
-		bool findExactStatEnergy,
-		std::vector<CDeposit*>::iterator& matchingEnd,
-		TNothingFoundReason& reason );
-
+	    std::vector<CDeposit *> &matchingDeposits,
+	    const CRyzomTime::EWeather &weather,
+	    const TEcotype &ecotypeSpec,
+	    const RM_GROUP::TRMGroup &groupFilter,
+	    const RM_FAMILY::TRMFamily &familyFilter,
+	    uint craftableItemPartFilter,
+	    uint8 statEnergy,
+	    bool findExactStatEnergy,
+	    std::vector<CDeposit *>::iterator &matchingEnd,
+	    TNothingFoundReason &reason);
 };
-
 
 #endif // NL_FG_PROSPECTION_PHRASE_H
 

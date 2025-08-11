@@ -29,58 +29,57 @@
 class CGuildMember : public IModuleCore, public EGSPD::CGuildMemberPD
 {
 	NL_INSTANCE_COUNTER_DECL(CGuildMember);
-public:
 
+public:
 	/// set the index of the member in the guild
-	inline void setMemberIndex(uint16 idx );
-	/// get the index of the member in the guild 
-	inline uint16 getMemberIndex()const;
+	inline void setMemberIndex(uint16 idx);
+	/// get the index of the member in the guild
+	inline uint16 getMemberIndex() const;
 	/// set the grade of the member
-	inline void setMemberGrade( EGSPD::CGuildGrade::TGuildGrade grade );
+	inline void setMemberGrade(EGSPD::CGuildGrade::TGuildGrade grade);
 	/// return the dynamic (ingame id of the member )
 	NLMISC::CEntityId getIngameEId() const
 	{
-		if ( _IngameEId == NLMISC::CEntityId::Unknown )
+		if (_IngameEId == NLMISC::CEntityId::Unknown)
 			return getId();
 		return _IngameEId;
 	}
 	/// set the dynamic (ingame id of the member )
-	void setDynamicId(uint8 id) 
+	void setDynamicId(uint8 id)
 	{
 		_IngameEId = getId();
-		_IngameEId.setDynamicId( id );
+		_IngameEId.setDynamicId(id);
 	}
 
 private:
 	/// index of the player in the guild ( in fact, it is its database entry )
-	uint16				_MemberIndex;
+	uint16 _MemberIndex;
 	/// dynamic (ingame) id of the member ( frontend id is setup )
-	NLMISC::CEntityId	_IngameEId;
+	NLMISC::CEntityId _IngameEId;
 };
-
 
 #include "guild_manager/guild.h"
 #include "egs_utils.h"
 
 //----------------------------------------------------------------------------
-inline void CGuildMember::setMemberIndex(uint16 idx )
+inline void CGuildMember::setMemberIndex(uint16 idx)
 {
 	_MemberIndex = idx;
 }
 
 //----------------------------------------------------------------------------
-inline uint16 CGuildMember::getMemberIndex()const
+inline uint16 CGuildMember::getMemberIndex() const
 {
 	return _MemberIndex;
 }
 
 //----------------------------------------------------------------------------
-inline void CGuildMember::setMemberGrade( EGSPD::CGuildGrade::TGuildGrade grade )
+inline void CGuildMember::setMemberGrade(EGSPD::CGuildGrade::TGuildGrade grade)
 {
-	setGrade( grade );
-	CGuild * guild = EGS_PD_CAST<CGuild*> ( _Guild );
+	setGrade(grade);
+	CGuild *guild = EGS_PD_CAST<CGuild *>(_Guild);
 	EGS_PD_AST(guild);
-	guild->setMemberClientDB( this );
+	guild->setMemberClientDB(this);
 }
 
 #endif // RY_GUILD_MEMBER_H

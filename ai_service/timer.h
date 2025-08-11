@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_TIMER_H
 #define RY_TIMER_H
 
@@ -23,7 +21,6 @@
 #include "nel/misc/common.h"
 
 #include "time_interface.h"
-
 
 extern NLMISC::CVariable<int> TimerSpeedUp;
 
@@ -48,10 +45,9 @@ public:
 	// sub dt to timer's current value (in ticks)
 	void sub(uint32 dt);
 
-
 	// TEST TIMER
 	// return true if the timer expired at or before time
-	bool test(uint32 time=CTimeInterface::gameCycle()) const;
+	bool test(uint32 time = CTimeInterface::gameCycle()) const;
 
 	// GET TICK COUNT CAPPED BY TIMER
 	// if test() then return (timer strat time + dt) - oldTime (in ticks)
@@ -60,30 +56,29 @@ public:
 
 	// Returns the time spend since we start the Timer.
 	sint32 timeSinceStart() const;
-		
+
 	// GET TIME REMAINING
 	// if test() then return 0
 	// else return time remaining
-	sint32 timeRemaining() const; 
+	sint32 timeRemaining() const;
 
 	// GET TOTAL TIME
 	// return total time
 	sint32 totalTime() const;
-	
+
 	// TIME REMAINING AS STRING FOR DEBUG
-	std::string toString(uint padding=0) const; 
+	std::string toString(uint padding = 0) const;
 
 protected:
 	uint32 _start;
 	uint32 _dt;
 };
 
-
 //--------------------------------------------------------------------------
 // CAITimerWithEnable class
 //--------------------------------------------------------------------------
 
-class CAITimerExtended: public CAITimer
+class CAITimerExtended : public CAITimer
 {
 public:
 	CAITimerExtended(uint32 dt);
@@ -103,7 +98,6 @@ public:
 	// if suspended remove to suspended dt (but don't resume)
 	void sub(uint32 dt);
 
-
 	// DISABLE
 	// clear the '_enabled' flag
 	void disable();
@@ -119,14 +113,14 @@ public:
 
 	// TEST TIMER ONCE
 	// return true if enabled() and not suspended() set and the timer expired at or before time
-	// if test result is true '_enabled' flag is cleared before the routine returns 
-	bool testOnce(uint32 time=CTimeInterface::gameCycle());
+	// if test result is true '_enabled' flag is cleared before the routine returns
+	bool testOnce(uint32 time = CTimeInterface::gameCycle());
 
 	// GET TIME REMAINING
 	// if test() then return 0
-	// else if suspended() return suspended dt 
+	// else if suspended() return suspended dt
 	// else return time remaining
-	sint32 timeRemaining() const; 
+	sint32 timeRemaining() const;
 
 	// ENABLED
 	// return state of '_enabled' flag
@@ -135,15 +129,14 @@ public:
 	// SUSPENDED
 	// return the state of the '_suspend' flag
 	bool isSuspended() const;
-		
+
 	// TIME REMAINING AS STRING FOR DEBUG
-	std::string toString(uint padding=0) const; 
+	std::string toString(uint padding = 0) const;
 
 protected:
-	bool	_enabled;
-	uint32	_suspendRemainingTime;
+	bool _enabled;
+	uint32 _suspendRemainingTime;
 };
-
 
 //--------------------------------------------------------------------------
 // CAITimer Inlines
@@ -177,51 +170,47 @@ inline void CAITimer::sub(uint32 dt)
 	{
 		_start = 0;
 	}
-	
 }
-
-
 
 inline bool CAITimer::test(uint32 time) const
 {
-	return ((sint32)(time - _start-(_dt/TimerSpeedUp))>=0);
+	return ((sint32)(time - _start - (_dt / TimerSpeedUp)) >= 0);
 }
 
 inline uint32 CAITimer::ticksSince(uint32 oldTime) const
 {
-	const	uint32	curent = CTimeInterface::gameCycle();
-	if (_dt>=(curent-_start))
-		return curent-oldTime;
-	if ( (sint32)(_start+_dt-oldTime) > 0 )
-		return _start+_dt-oldTime;
+	const uint32 curent = CTimeInterface::gameCycle();
+	if (_dt >= (curent - _start))
+		return curent - oldTime;
+	if ((sint32)(_start + _dt - oldTime) > 0)
+		return _start + _dt - oldTime;
 	return 0;
 }
 
-inline sint32 CAITimer::timeRemaining() const 
+inline sint32 CAITimer::timeRemaining() const
 {
-	const	uint32 curent = CTimeInterface::gameCycle();
-	const	uint32 elapsed = curent - _start;
-	if (elapsed >= (_dt/TimerSpeedUp))
+	const uint32 curent = CTimeInterface::gameCycle();
+	const uint32 elapsed = curent - _start;
+	if (elapsed >= (_dt / TimerSpeedUp))
 		return 0;
-	return (_dt/TimerSpeedUp)-elapsed;
+	return (_dt / TimerSpeedUp) - elapsed;
 }
 
-inline sint32 CAITimer::timeSinceStart() const 
+inline sint32 CAITimer::timeSinceStart() const
 {
-	return	CTimeInterface::gameCycle()-_start;
+	return CTimeInterface::gameCycle() - _start;
 }
 
-inline sint32 CAITimer::totalTime() const 
+inline sint32 CAITimer::totalTime() const
 {
-	return	_dt;
+	return _dt;
 }
-
 
 inline std::string CAITimer::toString(uint padding) const
 {
-	std::string s=NLMISC::toString(timeRemaining());
-	while (s.size()<padding)
-		s=std::string()+' '+s;
+	std::string s = NLMISC::toString(timeRemaining());
+	while (s.size() < padding)
+		s = std::string() + ' ' + s;
 	return s;
 }
 
@@ -242,8 +231,8 @@ inline CAITimerExtended::CAITimerExtended()
 inline void CAITimerExtended::set(uint32 dt)
 {
 	CAITimer::set(dt);
-	_enabled=true;
-	_suspendRemainingTime=0;
+	_enabled = true;
+	_suspendRemainingTime = 0;
 
 	if (dt == 0)
 		disable();
@@ -252,14 +241,13 @@ inline void CAITimerExtended::set(uint32 dt)
 inline void CAITimerExtended::add(uint32 dt)
 {
 	if (isSuspended())
-		_suspendRemainingTime+=dt;
+		_suspendRemainingTime += dt;
 	else
 	{
 		CAITimer::add(dt);
-		_enabled=true;
+		_enabled = true;
 	}
 }
-
 
 inline void CAITimerExtended::sub(uint32 dt)
 {
@@ -271,37 +259,33 @@ inline void CAITimerExtended::sub(uint32 dt)
 		}
 		else
 		{
-			_suspendRemainingTime=0;
+			_suspendRemainingTime = 0;
 		}
-		
 	}
 	else
 	{
 		CAITimer::sub(dt);
-		_enabled=true;
+		_enabled = true;
 	}
 }
 
-
-
-
 inline void CAITimerExtended::disable()
 {
-	_enabled=false;
-	_suspendRemainingTime=0;
+	_enabled = false;
+	_suspendRemainingTime = 0;
 }
 
 inline void CAITimerExtended::suspend()
 {
 	if (isEnabled() && !isSuspended())
-		_suspendRemainingTime=CAITimer::timeRemaining();
+		_suspendRemainingTime = CAITimer::timeRemaining();
 }
 
 inline void CAITimerExtended::resume()
 {
 	if (isEnabled() && isSuspended())
 		set(_suspendRemainingTime);
-	_suspendRemainingTime=0;
+	_suspendRemainingTime = 0;
 }
 
 inline bool CAITimerExtended::testOnce(uint32 time)
@@ -309,15 +293,15 @@ inline bool CAITimerExtended::testOnce(uint32 time)
 	if (!isEnabled() || isSuspended() || !test())
 		return false;
 
-	_enabled=false;
+	_enabled = false;
 	return true;
 }
 
 inline sint32 CAITimerExtended::timeRemaining() const
 {
-	if (isSuspended())		return _suspendRemainingTime;
-	else if (isEnabled())	return CAITimer::timeRemaining();
-	else				 	return 0;
+	if (isSuspended()) return _suspendRemainingTime;
+	else if (isEnabled()) return CAITimer::timeRemaining();
+	else return 0;
 }
 
 inline bool CAITimerExtended::isEnabled() const
@@ -327,16 +311,15 @@ inline bool CAITimerExtended::isEnabled() const
 
 inline bool CAITimerExtended::isSuspended() const
 {
-	return _suspendRemainingTime!=0;
+	return _suspendRemainingTime != 0;
 }
-
 
 inline std::string CAITimerExtended::toString(uint padding) const
 {
 	if (!isEnabled())
-		return NLMISC::toString("%*s",padding,"DISABLED");
+		return NLMISC::toString("%*s", padding, "DISABLED");
 	if (isSuspended())
-		return NLMISC::toString("HOLD:%*i",padding-5>0?padding-5:1,_suspendRemainingTime);
+		return NLMISC::toString("HOLD:%*i", padding - 5 > 0 ? padding - 5 : 1, _suspendRemainingTime);
 	return CAITimer::toString(padding);
 }
 

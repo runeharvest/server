@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_PVP_DUEL_H
 #define RY_PVP_DUEL_H
-
 
 #include "pvp_interface.h"
 
@@ -35,23 +32,21 @@ class CPVPDuel : public IPVPInterface
 {
 public:
 	/// return pvp relation between the two players
-	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * actor, CEntityBase * target, bool curative = false ) const;
-	
+	PVP_RELATION::TPVPRelation getPVPRelation(CCharacter *actor, CEntityBase *target, bool curative = false) const;
+
 	///\name PVP MODE FEATURES DEPENDANTS
 	//@{
 	/// return true if actor can use gived teleport point
-	bool isTPValid( CCharacter* actor, CGameItemPtr TeleportTicket ) const;
+	bool isTPValid(CCharacter *actor, CGameItemPtr TeleportTicket) const;
 	/// return true is respawn point is valid (use the same continent than character)
-	bool isRespawnValid( CCharacter* actor, CCharacterRespawnPoints::TRespawnPoint respawnPoint ) const { return true; }
+	bool isRespawnValid(CCharacter *actor, CCharacterRespawnPoints::TRespawnPoint respawnPoint) const { return true; }
 	/// final blower killer in pvp faction
-	void finalBlowerKillerInPvPFaction( CCharacter * killer, PVP_CLAN::TPVPClan finalBlowerFaction, CCharacter * victimChar ) const {}
+	void finalBlowerKillerInPvPFaction(CCharacter *killer, PVP_CLAN::TPVPClan finalBlowerFaction, CCharacter *victimChar) const { }
 	/// killer in PvP faction
-	void characterKillerInPvPFaction( CCharacter * character, PVP_CLAN::TPVPClan winnerFaction, sint32 factionPoint ) const {}
+	void characterKillerInPvPFaction(CCharacter *character, PVP_CLAN::TPVPClan winnerFaction, sint32 factionPoint) const { }
 	/// killed character in PvP faction
-	void characterKilledInPvPFaction( CCharacter * character, PVP_CLAN::TPVPClan looserFaction, sint32 factionPoint ) const {}
+	void characterKilledInPvPFaction(CCharacter *character, PVP_CLAN::TPVPClan looserFaction, sint32 factionPoint) const { }
 	//@}
-
 };
 
 #endif // RY_PVP_DUEL_H
-

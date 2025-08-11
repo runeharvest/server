@@ -30,18 +30,18 @@
 //-----------------------------------------------------------------------------
 void CPowerActivationDate::serial(NLMISC::IStream &f)
 {
-	f.serial( DeactivationDate );
-	f.serial( ActivationDate );
+	f.serial(DeactivationDate);
+	f.serial(ActivationDate);
 	if (f.isReading())
 	{
 		std::string tmp;
-		f.serial( tmp);
+		f.serial(tmp);
 		PowerType = POWERS::toPowerType(tmp);
 	}
 	else
 	{
 		std::string tmp = POWERS::toString(PowerType);
-		f.serial( tmp);
+		f.serial(tmp);
 	}
 }
 
@@ -58,11 +58,11 @@ void CPowerActivationDateVector::clear()
 //-----------------------------------------------------------------------------
 void CPowerActivationDateVector::clearConsumable()
 {
-	for(sint32 i = (sint32)PowerActivationDates.size()-1; i >= 0; --i )
+	for (sint32 i = (sint32)PowerActivationDates.size() - 1; i >= 0; --i)
 	{
 		if (PowerActivationDates[i].ConsumableFamilyId != std::numeric_limits<uint16>::max())
 		{
-			PowerActivationDates[i] = PowerActivationDates[PowerActivationDates.size()-1];
+			PowerActivationDates[i] = PowerActivationDates[PowerActivationDates.size() - 1];
 			PowerActivationDates.pop_back();
 		}
 	}
@@ -87,7 +87,7 @@ void CPowerActivationDateVector::serial(NLMISC::IStream &f)
 void CPowerActivationDateVector::cleanVector()
 {
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	std::vector <CPowerActivationDate>::iterator it = PowerActivationDates.begin();
+	std::vector<CPowerActivationDate>::iterator it = PowerActivationDates.begin();
 
 	while (it != PowerActivationDates.end())
 	{
@@ -106,18 +106,18 @@ bool CPowerActivationDateVector::isPowerAllowed(POWERS::TPowerType type, uint16 
 {
 	bool result = true;
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	std::vector <CPowerActivationDate>::iterator it = PowerActivationDates.begin();
-	
+	std::vector<CPowerActivationDate>::iterator it = PowerActivationDates.begin();
+
 	while (it != PowerActivationDates.end())
 	{
-		if ( (*it).ActivationDate <= time )
+		if ((*it).ActivationDate <= time)
 		{
 			// erase returns an iterator that designates the first element remaining beyond any elements removed, or end() if no such element exists.
 			it = PowerActivationDates.erase(it);
 		}
 		else
 		{
-			if ( (*it).PowerType == type || ((*it).ConsumableFamilyId != std::numeric_limits<uint16>::max() && (*it).ConsumableFamilyId == consumableFamilyId))
+			if ((*it).PowerType == type || ((*it).ConsumableFamilyId != std::numeric_limits<uint16>::max() && (*it).ConsumableFamilyId == consumableFamilyId))
 			{
 				endDate = (*it).ActivationDate;
 				result = false;
@@ -130,21 +130,21 @@ bool CPowerActivationDateVector::isPowerAllowed(POWERS::TPowerType type, uint16 
 }
 
 //-----------------------------------------------------------------------------
-void CPowerActivationDateVector::writeUsablePowerFlags( uint32 &usablePowerFlags)
+void CPowerActivationDateVector::writeUsablePowerFlags(uint32 &usablePowerFlags)
 {
 	usablePowerFlags = 0xffffffff;
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	std::vector <CPowerActivationDate>::iterator it = PowerActivationDates.begin();
+	std::vector<CPowerActivationDate>::iterator it = PowerActivationDates.begin();
 	while (it != PowerActivationDates.end())
 	{
-		if ( (*it).ActivationDate <= time && doNotClear == false )
+		if ((*it).ActivationDate <= time && doNotClear == false)
 		{
 			// erase returns an iterator that designates the first element remaining beyond any elements removed, or end() if no such element exists.
 			it = PowerActivationDates.erase(it);
 		}
 		else
 		{
-			usablePowerFlags &= ~(1 << (BRICK_FLAGS::powerTypeToFlag((*it).PowerType) - BRICK_FLAGS::BeginPowerFlags) );
+			usablePowerFlags &= ~(1 << (BRICK_FLAGS::powerTypeToFlag((*it).PowerType) - BRICK_FLAGS::BeginPowerFlags));
 			++it;
 		}
 	}
@@ -154,11 +154,11 @@ void CPowerActivationDateVector::writeUsablePowerFlags( uint32 &usablePowerFlags
 void CPowerActivationDateVector::activate()
 {
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	std::vector <CPowerActivationDate>::iterator it = PowerActivationDates.begin();
-	
+	std::vector<CPowerActivationDate>::iterator it = PowerActivationDates.begin();
+
 	while (it != PowerActivationDates.end())
 	{
-		if ( ((*it).DeactivationDate >= 0) && ((*it).DeactivationDate < MAX_DEACTIVATION_DATE) )
+		if (((*it).DeactivationDate >= 0) && ((*it).DeactivationDate < MAX_DEACTIVATION_DATE))
 		{
 			(*it).DeactivationDate = time - (*it).DeactivationDate; // the value saved is time length since deactivation, here we transform length into a date
 		}
@@ -195,7 +195,7 @@ void CAuraActivationDateVector::clear()
 //-----------------------------------------------------------------------------
 void CAuraActivationDateVector::disableAura(POWERS::TPowerType type, NLMISC::TGameCycle startDate, NLMISC::TGameCycle endDate, const NLMISC::CEntityId &userId)
 {
-	_AuraActivationDates.push_back( CPowerActivationDate(type, std::numeric_limits<uint16>::max(), startDate, endDate) );
+	_AuraActivationDates.push_back(CPowerActivationDate(type, std::numeric_limits<uint16>::max(), startDate, endDate));
 	_AuraUsers.push_back(userId);
 }
 
@@ -204,7 +204,7 @@ void CAuraActivationDateVector::serial(NLMISC::IStream &f)
 {
 	if (f.isReading())
 	{
-		f.serialCont(_AuraActivationDates);						
+		f.serialCont(_AuraActivationDates);
 		_AuraUsers.resize(_AuraActivationDates.size(), NLMISC::CEntityId::Unknown);
 		cleanVector();
 	}
@@ -219,9 +219,9 @@ void CAuraActivationDateVector::serial(NLMISC::IStream &f)
 void CAuraActivationDateVector::cleanVector()
 {
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	std::vector <CPowerActivationDate>::iterator it = _AuraActivationDates.begin();
-	std::vector <NLMISC::CEntityId>::iterator itUser = _AuraUsers.begin();
-	
+	std::vector<CPowerActivationDate>::iterator it = _AuraActivationDates.begin();
+	std::vector<NLMISC::CEntityId>::iterator itUser = _AuraUsers.begin();
+
 	while (it != _AuraActivationDates.end())
 	{
 		if ((*it).ActivationDate <= time)
@@ -243,12 +243,12 @@ bool CAuraActivationDateVector::isAuraEffective(POWERS::TPowerType type, const N
 {
 	bool result = true;
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	std::vector <CPowerActivationDate>::iterator it = _AuraActivationDates.begin();
-	std::vector <NLMISC::CEntityId>::iterator itUser = _AuraUsers.begin();
+	std::vector<CPowerActivationDate>::iterator it = _AuraActivationDates.begin();
+	std::vector<NLMISC::CEntityId>::iterator itUser = _AuraUsers.begin();
 
 	while (it != _AuraActivationDates.end())
 	{
-		if ( (*it).ActivationDate <= time )
+		if ((*it).ActivationDate <= time)
 		{
 			// erase returns an iterator that designates the first element remaining beyond any elements removed, or end() if no such element exists.
 			it = _AuraActivationDates.erase(it);
@@ -272,8 +272,8 @@ bool CAuraActivationDateVector::isAuraEffective(POWERS::TPowerType type, const N
 void CAuraActivationDateVector::activate()
 {
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	std::vector <CPowerActivationDate>::iterator it = _AuraActivationDates.begin();
-	
+	std::vector<CPowerActivationDate>::iterator it = _AuraActivationDates.begin();
+
 	while (it != _AuraActivationDates.end())
 	{
 		(*it).DeactivationDate = time - (*it).DeactivationDate; // the value saved is time length since deactivation, here we transform length into a date
@@ -299,7 +299,7 @@ void CAuraActivationDateVector::activate()
 bool CConsumableOverdoseTimerVector::cleanVector()
 {
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	std::vector <CConsumableOverdoseTimer>::iterator it = Dates.begin();
+	std::vector<CConsumableOverdoseTimer>::iterator it = Dates.begin();
 
 	bool entryRemoved = false;
 
@@ -321,11 +321,11 @@ bool CConsumableOverdoseTimerVector::canConsume(uint16 family, NLMISC::TGameCycl
 {
 	bool result = true;
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	std::vector <CConsumableOverdoseTimer>::iterator it = Dates.begin();
-	
+	std::vector<CConsumableOverdoseTimer>::iterator it = Dates.begin();
+
 	while (it != Dates.end())
 	{
-		if ( (*it).ActivationDate <= time )
+		if ((*it).ActivationDate <= time)
 			it = Dates.erase(it);
 		else
 		{
@@ -337,7 +337,7 @@ bool CConsumableOverdoseTimerVector::canConsume(uint16 family, NLMISC::TGameCycl
 			++it;
 		}
 	}
-	
+
 	return result;
 }
 
@@ -345,8 +345,8 @@ bool CConsumableOverdoseTimerVector::canConsume(uint16 family, NLMISC::TGameCycl
 void CConsumableOverdoseTimerVector::activate()
 {
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	std::vector <CConsumableOverdoseTimer>::iterator it = Dates.begin();
-	
+	std::vector<CConsumableOverdoseTimer>::iterator it = Dates.begin();
+
 	while (it != Dates.end())
 	{
 		if ((*it).ActivationDate < MAX_ACTIVATION_DATE)

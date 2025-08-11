@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef TICK_S_H
 #define TICK_S_H
 
@@ -27,7 +25,6 @@
 #include "range_mirror_manager.h"
 #include "game_share/tick_proxy_time_measure.h"
 
-
 /**
  * CClientInfos
  *
@@ -37,8 +34,7 @@
  */
 class CClientInfos
 {
-public :
-	
+public:
 	/// true if the tock has been received since the last tick
 	bool TockReceived;
 
@@ -51,34 +47,44 @@ public :
 	/// number of non received tock from this client allowed before freezing time service
 	uint16 Threshold;
 
-	/// count of missing tocks 
+	/// count of missing tocks
 	uint16 TockMissingCount;
-	
+
 	/**
 	 * default constructor
 	 */
-	CClientInfos() : TockReceived(true),Registered(false),Tocking(true),Threshold(0),TockMissingCount(0)
-	{}
+	CClientInfos()
+	    : TockReceived(true)
+	    , Registered(false)
+	    , Tocking(true)
+	    , Threshold(0)
+	    , TockMissingCount(0)
+	{
+	}
 };
-
-
-
 
 ///
 class CMirrorGameCycleTimeMeasureMS : public CMirrorGameCycleTimeMeasure
 {
 public:
-
-	NLNET::TServiceId	MSId;	// not serialised
+	NLNET::TServiceId MSId; // not serialised
 };
 
-
-enum TTickServiceTimeMeasureType { PrevTotalTickDuration, NbTickServiceTimeMeasureTypes };
+enum TTickServiceTimeMeasureType
+{
+	PrevTotalTickDuration,
+	NbTickServiceTimeMeasureTypes
+};
 
 typedef CTimeMeasure<NbTickServiceTimeMeasureTypes> CTickServiceTimeMeasure;
 
-
-enum TTimeMeasureHistoryStat { MHTSum, MHTMin, MHTMax, NbTimeMeasureHistoryStats };
+enum TTimeMeasureHistoryStat
+{
+	MHTSum,
+	MHTMin,
+	MHTMax,
+	NbTimeMeasureHistoryStats
+};
 
 /*
  *
@@ -87,31 +93,31 @@ template <class T>
 class CTimeMeasureHistory
 {
 public:
-	NLNET::TServiceId	ServiceId;
-	NLNET::TServiceId	ParentServiceId;
-	uint16				NbMeasures;
-	std::vector< T >	Stats; // indexed by NbTimeMeasureHistoryTypes
+	NLNET::TServiceId ServiceId;
+	NLNET::TServiceId ParentServiceId;
+	uint16 NbMeasures;
+	std::vector<T> Stats; // indexed by NbTimeMeasureHistoryTypes
 
 	///
-	CTimeMeasureHistory( NLNET::TServiceId serviceId, NLNET::TServiceId parentServiceId, bool setFirst, const T *newMeasure=NULL )
+	CTimeMeasureHistory(NLNET::TServiceId serviceId, NLNET::TServiceId parentServiceId, bool setFirst, const T *newMeasure = NULL)
 	{
 		ServiceId = serviceId;
 		ParentServiceId = parentServiceId;
-		reset( setFirst, newMeasure );
+		reset(setFirst, newMeasure);
 	}
 
 	///
-	void	reset( bool setFirst, const T *newMeasure=NULL )
+	void reset(bool setFirst, const T *newMeasure = NULL)
 	{
-		if ( setFirst )
+		if (setFirst)
 		{
 			NbMeasures = 1;
-			Stats.resize( NbTimeMeasureHistoryStats, *newMeasure );
+			Stats.resize(NbTimeMeasureHistoryStats, *newMeasure);
 		}
 		else
 		{
 			NbMeasures = 0;
-			Stats.resize( NbTimeMeasureHistoryStats );
+			Stats.resize(NbTimeMeasureHistoryStats);
 			Stats[MHTSum] = 0;
 			Stats[MHTMin] = std::numeric_limits<T>::max();
 			Stats[MHTMax] = 0;
@@ -119,17 +125,17 @@ public:
 	}
 
 	///
-	void	updateStats( const T& newMeasure )
+	void updateStats(const T &newMeasure)
 	{
 		++NbMeasures;
-		for ( uint i=0; i!=newMeasure.size(); ++i )
+		for (uint i = 0; i != newMeasure.size(); ++i)
 		{
 			Stats[MHTSum][i] += newMeasure[i];
-			if ( newMeasure[i] < Stats[MHTMin][i] ) Stats[MHTMin][i] = newMeasure[i];
+			if (newMeasure[i] < Stats[MHTMin][i]) Stats[MHTMin][i] = newMeasure[i];
 
-			//ldebug( "1. NEW: %hu MAX: %hu", newMeasure[i], Stats[MHTMax][i] );
-			if ( newMeasure[i] > Stats[MHTMax][i] ) Stats[MHTMax][i] = newMeasure[i];
-			//nldebug( "2. NEW: %hu MAX: %hu", newMeasure[i], Stats[MHTMax][i] );
+			// ldebug( "1. NEW: %hu MAX: %hu", newMeasure[i], Stats[MHTMax][i] );
+			if (newMeasure[i] > Stats[MHTMax][i]) Stats[MHTMax][i] = newMeasure[i];
+			// nldebug( "2. NEW: %hu MAX: %hu", newMeasure[i], Stats[MHTMax][i] );
 		}
 	}
 };
@@ -144,57 +150,54 @@ typedef CTimeMeasureHistory<CTickServiceTimeMeasure> CTickServiceMeasureHistory;
 class CTickServiceGameCycleTimeMeasure
 {
 public:
+	typedef std::vector<CMirrorGameCycleTimeMeasureMS> TMirrorMeasures;
+	TMirrorMeasures CurrentMirrorMeasures;
+	CTickServiceTimeMeasure CurrentTickServiceMeasure;
 
-	typedef std::vector<CMirrorGameCycleTimeMeasureMS>	TMirrorMeasures;
-	TMirrorMeasures				CurrentMirrorMeasures;
-	CTickServiceTimeMeasure		CurrentTickServiceMeasure;
-
-	std::vector< CMirrorTimeMeasureHistory >	HistoryByMirror;
-	std::vector< CServiceTimeMeasureHistory >	HistoryByService;
-	CTickServiceMeasureHistory					HistoryMain;
+	std::vector<CMirrorTimeMeasureHistory> HistoryByMirror;
+	std::vector<CServiceTimeMeasureHistory> HistoryByService;
+	CTickServiceMeasureHistory HistoryMain;
 
 	///
 	CTickServiceGameCycleTimeMeasure();
 
 	///
-	void			beginNewCycle();
+	void beginNewCycle();
 
 	///
-	void			resetMeasures();
+	void resetMeasures();
 
 	///
-	void			displayStats( NLMISC::CLog *log );
+	void displayStats(NLMISC::CLog *log);
 
 	///
-	void			displayStat( NLMISC::CLog *log, TTimeMeasureHistoryStat stat );
+	void displayStat(NLMISC::CLog *log, TTimeMeasureHistoryStat stat);
 
 protected:
-
 	template <class HistoryItem, class Measure>
-	void storeMeasureToHistory( std::vector<HistoryItem>& history, const Measure& newMeasure, NLNET::TServiceId serviceId, NLNET::TServiceId parentServiceId )
+	void storeMeasureToHistory(std::vector<HistoryItem> &history, const Measure &newMeasure, NLNET::TServiceId serviceId, NLNET::TServiceId parentServiceId)
 	{
 		typename std::vector<HistoryItem>::iterator ihm;
 
 		// Find the right history item
-		for ( ihm=history.begin(); ihm!=history.end(); ++ihm )
+		for (ihm = history.begin(); ihm != history.end(); ++ihm)
 		{
-			if ( (*ihm).ServiceId == serviceId )
+			if ((*ihm).ServiceId == serviceId)
 				break;
 		}
-		if ( ihm == history.end() )
+		if (ihm == history.end())
 		{
 			// New in history => add it
-			HistoryItem hist( serviceId, parentServiceId, true, &newMeasure );
-			history.push_back( hist );
+			HistoryItem hist(serviceId, parentServiceId, true, &newMeasure);
+			history.push_back(hist);
 		}
 		else
 		{
 			// Already in history => update stats
-			(*ihm).updateStats( newMeasure );
+			(*ihm).updateStats(newMeasure);
 		}
 	}
 };
-
 
 /**
  * CTickService
@@ -205,18 +208,26 @@ protected:
  */
 class CTickService : public NLNET::IService
 {
-public :
-
+public:
 	/**
 	 * Execution mode : continuous or step by step(user chooses when to send a tick)
 	 */
-	enum TTickSendingMode	{ Continuous = 0, StepByStep, Fastest };
+	enum TTickSendingMode
+	{
+		Continuous = 0,
+		StepByStep,
+		Fastest
+	};
 
 	/**
 	 * State Mode
 	 */
-	enum TTickStateMode		{ TickRunning = 0, TickHalted };
-	
+	enum TTickStateMode
+	{
+		TickRunning = 0,
+		TickHalted
+	};
+
 	/// Initialise the service
 	void init();
 
@@ -232,23 +243,23 @@ public :
 	 * \param tocking true if we have to wait a tock from this client before to send another tick
 	 * \param threshold is the max missing tock allowed
 	 */
-	void registerClient( NLNET::TServiceId serviceId, bool tocking, uint16 threshold );
+	void registerClient(NLNET::TServiceId serviceId, bool tocking, uint16 threshold);
 
 	/**
 	 * Unregister a client
 	 * \param serviceId is the unique id of the client service
 	 */
-	void unregisterClient( NLNET::TServiceId serviceId );
+	void unregisterClient(NLNET::TServiceId serviceId);
 
 	/**
 	 * halt ticking
 	 */
-	void	haltTick(const std::string& reason);
+	void haltTick(const std::string &reason);
 
 	/**
 	 * resume ticking
 	 */
-	void	resumeTick();
+	void resumeTick();
 
 	/**
 	 * broadcastTick
@@ -258,7 +269,7 @@ public :
 	/**
 	 * A registered service sent a tock
 	 */
-	void addTock( NLNET::TServiceId serviceId );
+	void addTock(NLNET::TServiceId serviceId);
 
 	/**
 	 *	Check if all tock have been received, broadcast a new tick if yes
@@ -279,7 +290,7 @@ public :
 	 *	set the game time step
 	 * \param gameTimeStep is the game time step
 	 */
-	inline void setGameTimeStep( NLMISC::TGameTime gameTimeStep ) { _GameTimeStep = gameTimeStep; }
+	inline void setGameTimeStep(NLMISC::TGameTime gameTimeStep) { _GameTimeStep = gameTimeStep; }
 
 	/**
 	 *	Get the time step between two ticks
@@ -291,7 +302,7 @@ public :
 	 *	set the time step between two ticks
 	 * \param timeStep is the time step between 2 ticks
 	 */
-	inline void setTickTimeStep( NLMISC::TLocalTime timeStep ) { _TickTimeStep = timeStep; }
+	inline void setTickTimeStep(NLMISC::TLocalTime timeStep) { _TickTimeStep = timeStep; }
 
 	/**
 	 * Get the current game time
@@ -320,23 +331,22 @@ public :
 
 	/// Load from file
 	bool loadGameCycle();
-	void tickFileCallback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream);
+	void tickFileCallback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream);
 
-	bool								FirstTime;
+	bool FirstTime;
 
-	TTickStateMode						CurrentMode;
-	std::string							HaltedReason;
+	TTickStateMode CurrentMode;
+	std::string HaltedReason;
 
 	/// Displayer of recent history
-	NLMISC::CLightMemDisplayer			RecentHistory;
+	NLMISC::CLightMemDisplayer RecentHistory;
 
 	/// Shard timings
-	CTickServiceGameCycleTimeMeasure	MainTimeMeasures;
+	CTickServiceGameCycleTimeMeasure MainTimeMeasures;
 
-private :
-
+private:
 	/// infos about the connected clients
-	std::vector< CClientInfos > _ClientInfos;
+	std::vector<CClientInfos> _ClientInfos;
 
 	/// different from 0 if the service is allowed to send one or multiple ticks ( note : used in step by step only )
 	uint16 _StepCount;
@@ -366,11 +376,10 @@ private :
 	NLMISC::TLocalTime _TickSendTime;
 
 	/// Log to recent history
-	NLMISC::CLog		_QuickLog;
+	NLMISC::CLog _QuickLog;
 
 	/// Row range manager for mirror system
-	CRangeMirrorManager	_RangeMirrorManager;
+	CRangeMirrorManager _RangeMirrorManager;
 };
 
-
-#endif //TICK_S_H
+#endif // TICK_S_H

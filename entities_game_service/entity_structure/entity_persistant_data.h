@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_ENTITY_PERSISTANT_DATA_H
 #define RY_ENTITY_PERSISTANT_DATA_H
 
@@ -43,8 +41,10 @@
 class CEntityBasePersistantData
 {
 public:
-	CEntityBasePersistantData( bool noSkills )
-		:_Skills( noSkills ){}
+	CEntityBasePersistantData(bool noSkills)
+	    : _Skills(noSkills)
+	{
+	}
 
 	// Version History
 	// 2 : added _DodgeAsDefense and _ProtectedSlot
@@ -54,46 +54,43 @@ public:
 	 * \return the current version of the class. Useful for managing old versions of saved players
 	 * WARNING : the version number should be incremented when the serial method is modified
 	 */
-	static inline uint16 getCurrentVersion(){ return 6; }
+	static inline uint16 getCurrentVersion() { return 6; }
 
 	// serial: reading off-mirror, writing from mirror
 	void serial(NLMISC::IStream &f);
 	void serialXml(NLMISC::IStream &f);
-	
 
 	// Entity state ( X, Y, Z,T )
-	CEntityState							_EntityState;
+	CEntityState _EntityState;
 	/// Fiche ID
-	CMirrorPropValueAlice< TYPE_SHEET, CPropLocationPacked<2> >	_SheetId;
+	CMirrorPropValueAlice<TYPE_SHEET, CPropLocationPacked<2>> _SheetId;
 	/// name
-	ucstring								_Name;
-	/// name (family)	
-//	ucstring								_Surname;
-	/// Race of entity 
-	EGSPD::CPeople::TPeople					_Race;
+	ucstring _Name;
+	/// name (family)
+	//	ucstring								_Surname;
+	/// Race of entity
+	EGSPD::CPeople::TPeople _Race;
 	/// Gender
-	uint8									_Gender;
+	uint8 _Gender;
 	/// Size
-	uint8									_Size;
+	uint8 _Size;
 	/// physical characteristics
-	CPhysicalCharacteristics				_PhysCharacs;
+	CPhysicalCharacteristics _PhysCharacs;
 	/// physical scores
-	CPhysicalScores							_PhysScores;
+	CPhysicalScores _PhysScores;
 	/// nb bags
-	uint8									_NbBag;
+	uint8 _NbBag;
 	// special modifiers
-	CSpecialModifiers						_SpecialModifiers;
+	CSpecialModifiers _SpecialModifiers;
 
 	/// location protected by the entity
-	SLOT_EQUIPMENT::TSlotEquipment			_ProtectedSlot;
+	SLOT_EQUIPMENT::TSlotEquipment _ProtectedSlot;
 	/// use dogde instead of parry for defense
-	bool									_DodgeAsDefense;
-
+	bool _DodgeAsDefense;
 
 protected:
 	/// skills
-	CSkills					_Skills;
-	
+	CSkills _Skills;
 };
 
 #endif // RY_ENTITY_PERSISTANT_DATA_H

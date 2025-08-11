@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "nel/net/unified_network.h"
 #include "nel/net/service.h"
@@ -32,16 +30,16 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-CFameManager	*CFameManager::_Instance = NULL;
+CFameManager *CFameManager::_Instance = NULL;
 
-extern			CMirror						Mirror;
+extern CMirror Mirror;
 
 NLMISC::TInstanceCounterData CFameManager::TFameOwnerWrite::TFameOwnerWriteInstanceCounter::_InstanceCounterData("TFameOwnerWrite");
 
-sint16	CFameManager::TFameOwnerWrite::CivilisationPropIndex = 0;
-sint16	CFameManager::TFameOwnerWrite::GuildPropIndex = 0;
-sint16	CFameManager::TFameOwnerWrite::FameMemoryPropIndex = 0;
-sint16	CFameManager::TFameOwnerWrite::FirstFamePropIndex = 0;
+sint16 CFameManager::TFameOwnerWrite::CivilisationPropIndex = 0;
+sint16 CFameManager::TFameOwnerWrite::GuildPropIndex = 0;
+sint16 CFameManager::TFameOwnerWrite::FameMemoryPropIndex = 0;
+sint16 CFameManager::TFameOwnerWrite::FirstFamePropIndex = 0;
 
 // Definitions for Fame lookup arrays.
 // Neutrals are always row 0
@@ -54,111 +52,110 @@ sint16	CFameManager::TFameOwnerWrite::FirstFamePropIndex = 0;
 /*
 void CFameContainer::serial(NLMISC::IStream &f)
 {
-	CStaticFames &sf = CStaticFames::getInstance();
+    CStaticFames &sf = CStaticFames::getInstance();
 
-	uint version = f.serialVersion(getCurrentVersion());
+    uint version = f.serialVersion(getCurrentVersion());
 
-	if (version >= 2)
-	{
-		f.serial(_LastGuildStatusChange);
-		f.serial(_LastFameChangeDate);
+    if (version >= 2)
+    {
+        f.serial(_LastGuildStatusChange);
+        f.serial(_LastFameChangeDate);
 
-		if (f.isReading())
-		{
-			uint32 size;
-			f.serial(size);
-			for (uint i=0; i<size; ++i)
-			{
-				string factionName;
-				f.serial(factionName);
-				if (!factionName.empty())
-				{
-					uint32 factionIndex = sf.getFactionIndex(factionName);
-					if( factionIndex != CStaticFames::INVALID_FACTION_INDEX)
-					{
-						_FactionInfos[factionIndex].serial(f);
-					}
-					else
-					{
-						TFameContainerEntry foo;
-						foo.serial(f);
-					}
-				}
-			}
-		}
-		else
-		{
-			uint32 size = _FactionInfos.size();
-			f.serial(size);
-			
-			std::map<uint32, TFameContainerEntry>::iterator first(_FactionInfos.begin()), last(_FactionInfos.end());
-			for (; first != last; ++first)
-			{
-				string factionName;
-				factionName = sf.getFactionName(first->first);
-				f.serial(factionName);
-				if (!factionName.empty())
-				{
-					f.serial(first->second);
-				}
-			}
-		}
-	}
-	else
-	{	
-		// serial old fame save
-		vector<sint32>		fames;
-		vector<sint32>		memories;
-		vector<EGSPD::CFameTrend::TFameTrend>	trends;
-		f.serialCont(fames);
-		f.serialCont(memories);
-		f.serial(_LastGuildStatusChange);
+        if (f.isReading())
+        {
+            uint32 size;
+            f.serial(size);
+            for (uint i=0; i<size; ++i)
+            {
+                string factionName;
+                f.serial(factionName);
+                if (!factionName.empty())
+                {
+                    uint32 factionIndex = sf.getFactionIndex(factionName);
+                    if( factionIndex != CStaticFames::INVALID_FACTION_INDEX)
+                    {
+                        _FactionInfos[factionIndex].serial(f);
+                    }
+                    else
+                    {
+                        TFameContainerEntry foo;
+                        foo.serial(f);
+                    }
+                }
+            }
+        }
+        else
+        {
+            uint32 size = _FactionInfos.size();
+            f.serial(size);
 
-		if (version >= 1)
-		{
-			f.serial(_LastFameChangeDate);
-			uint32 size = trends.size();
-			f.serial(size);
-			trends.resize(size);
-			for (uint i=0; i<size; ++i)
-				f.serialEnum(trends[i]);
-		}
+            std::map<uint32, TFameContainerEntry>::iterator first(_FactionInfos.begin()), last(_FactionInfos.end());
+            for (; first != last; ++first)
+            {
+                string factionName;
+                factionName = sf.getFactionName(first->first);
+                f.serial(factionName);
+                if (!factionName.empty())
+                {
+                    f.serial(first->second);
+                }
+            }
+        }
+    }
+    else
+    {
+        // serial old fame save
+        vector<sint32>		fames;
+        vector<sint32>		memories;
+        vector<EGSPD::CFameTrend::TFameTrend>	trends;
+        f.serialCont(fames);
+        f.serialCont(memories);
+        f.serial(_LastGuildStatusChange);
 
-		// rebuild the new data structures
-		_FactionInfos.clear();
-		uint32 size = max(trends.size(), max(fames.size(), memories.size()));
+        if (version >= 1)
+        {
+            f.serial(_LastFameChangeDate);
+            uint32 size = trends.size();
+            f.serial(size);
+            trends.resize(size);
+            for (uint i=0; i<size; ++i)
+                f.serialEnum(trends[i]);
+        }
 
-		for (uint i=0; i<size; ++i)
-		{
-			TFameContainerEntry entry;
-			if (i < fames.size())
-				entry.Fame = fames[i];
-			if (i < memories.size())
-				entry.FameMemory = memories[i];
-			if (i< trends.size())
-				entry.LastFameChangeTrend = trends[i];
+        // rebuild the new data structures
+        _FactionInfos.clear();
+        uint32 size = max(trends.size(), max(fames.size(), memories.size()));
 
-			_FactionInfos.insert(make_pair(i, entry));
-		}
-	}
+        for (uint i=0; i<size; ++i)
+        {
+            TFameContainerEntry entry;
+            if (i < fames.size())
+                entry.Fame = fames[i];
+            if (i < memories.size())
+                entry.FameMemory = memories[i];
+            if (i< trends.size())
+                entry.LastFameChangeTrend = trends[i];
+
+            _FactionInfos.insert(make_pair(i, entry));
+        }
+    }
 }
 
 uint32 CFameContainer::getCurrentVersion()
 {
-	return 2;
+    return 2;
 }
 */
 
 CFameManager::CFameManager()
 {
-	//array of callback items
-	NLNET::TUnifiedCallbackItem _cbArray[] =
-	{
-		{ "FAME_DELTA",				cbFameDelta		}, 
+	// array of callback items
+	NLNET::TUnifiedCallbackItem _cbArray[] = {
+		{ "FAME_DELTA", cbFameDelta },
 	};
-	
+
 	// register call back for fame manager
-	CUnifiedNetwork::getInstance()->addCallbackArray( _cbArray, sizeof(_cbArray) / sizeof(_cbArray[0]) );
+	CUnifiedNetwork::getInstance()->addCallbackArray(_cbArray, sizeof(_cbArray) / sizeof(_cbArray[0]));
 
 	{
 		// Restrict namespace use to this block.
@@ -167,63 +164,63 @@ CFameManager::CFameManager()
 		// Initialize our tables that store fame values, references to the CVariables in egs_variables.h.
 		// - Initialize starting values.
 		//   "None" and "neutral" factions are impossible, not part of the table.
-		FameStart[Fyros-BeginCivs][Kami-BeginClans] = &FameStartFyrosvKami;
-		FameStart[Fyros-BeginCivs][Karavan-BeginClans] = &FameStartFyrosvKaravan;
-		FameStart[Fyros-BeginCivs][Fyros-BeginClans] = &FameStartFyrosvFyros;
-		FameStart[Fyros-BeginCivs][Matis-BeginClans] = &FameStartFyrosvMatis;
-		FameStart[Fyros-BeginCivs][Tryker-BeginClans] = &FameStartFyrosvTryker;
-		FameStart[Fyros-BeginCivs][Zorai-BeginClans] = &FameStartFyrosvZorai;
-		FameStart[Matis-BeginCivs][Kami-BeginClans] = &FameStartMatisvKami;
-		FameStart[Matis-BeginCivs][Karavan-BeginClans] = &FameStartMatisvKaravan;
-		FameStart[Matis-BeginCivs][Fyros-BeginClans] = &FameStartMatisvFyros;
-		FameStart[Matis-BeginCivs][Matis-BeginClans] = &FameStartMatisvMatis;
-		FameStart[Matis-BeginCivs][Tryker-BeginClans] = &FameStartMatisvTryker;
-		FameStart[Matis-BeginCivs][Zorai-BeginClans] = &FameStartMatisvZorai;
-		FameStart[Tryker-BeginCivs][Kami-BeginClans] = &FameStartTrykervKami;
-		FameStart[Tryker-BeginCivs][Karavan-BeginClans] = &FameStartTrykervKaravan;
-		FameStart[Tryker-BeginCivs][Fyros-BeginClans] = &FameStartTrykervFyros;
-		FameStart[Tryker-BeginCivs][Matis-BeginClans] = &FameStartTrykervMatis;
-		FameStart[Tryker-BeginCivs][Tryker-BeginClans] = &FameStartTrykervTryker;
-		FameStart[Tryker-BeginCivs][Zorai-BeginClans] = &FameStartTrykervZorai;
-		FameStart[Zorai-BeginCivs][Kami-BeginClans] = &FameStartZoraivKami;
-		FameStart[Zorai-BeginCivs][Karavan-BeginClans] = &FameStartZoraivKaravan;
-		FameStart[Zorai-BeginCivs][Fyros-BeginClans] = &FameStartZoraivFyros;
-		FameStart[Zorai-BeginCivs][Matis-BeginClans] = &FameStartZoraivMatis;
-		FameStart[Zorai-BeginCivs][Tryker-BeginClans] = &FameStartZoraivTryker;
-		FameStart[Zorai-BeginCivs][Zorai-BeginClans] = &FameStartZoraivZorai;
+		FameStart[Fyros - BeginCivs][Kami - BeginClans] = &FameStartFyrosvKami;
+		FameStart[Fyros - BeginCivs][Karavan - BeginClans] = &FameStartFyrosvKaravan;
+		FameStart[Fyros - BeginCivs][Fyros - BeginClans] = &FameStartFyrosvFyros;
+		FameStart[Fyros - BeginCivs][Matis - BeginClans] = &FameStartFyrosvMatis;
+		FameStart[Fyros - BeginCivs][Tryker - BeginClans] = &FameStartFyrosvTryker;
+		FameStart[Fyros - BeginCivs][Zorai - BeginClans] = &FameStartFyrosvZorai;
+		FameStart[Matis - BeginCivs][Kami - BeginClans] = &FameStartMatisvKami;
+		FameStart[Matis - BeginCivs][Karavan - BeginClans] = &FameStartMatisvKaravan;
+		FameStart[Matis - BeginCivs][Fyros - BeginClans] = &FameStartMatisvFyros;
+		FameStart[Matis - BeginCivs][Matis - BeginClans] = &FameStartMatisvMatis;
+		FameStart[Matis - BeginCivs][Tryker - BeginClans] = &FameStartMatisvTryker;
+		FameStart[Matis - BeginCivs][Zorai - BeginClans] = &FameStartMatisvZorai;
+		FameStart[Tryker - BeginCivs][Kami - BeginClans] = &FameStartTrykervKami;
+		FameStart[Tryker - BeginCivs][Karavan - BeginClans] = &FameStartTrykervKaravan;
+		FameStart[Tryker - BeginCivs][Fyros - BeginClans] = &FameStartTrykervFyros;
+		FameStart[Tryker - BeginCivs][Matis - BeginClans] = &FameStartTrykervMatis;
+		FameStart[Tryker - BeginCivs][Tryker - BeginClans] = &FameStartTrykervTryker;
+		FameStart[Tryker - BeginCivs][Zorai - BeginClans] = &FameStartTrykervZorai;
+		FameStart[Zorai - BeginCivs][Kami - BeginClans] = &FameStartZoraivKami;
+		FameStart[Zorai - BeginCivs][Karavan - BeginClans] = &FameStartZoraivKaravan;
+		FameStart[Zorai - BeginCivs][Fyros - BeginClans] = &FameStartZoraivFyros;
+		FameStart[Zorai - BeginCivs][Matis - BeginClans] = &FameStartZoraivMatis;
+		FameStart[Zorai - BeginCivs][Tryker - BeginClans] = &FameStartZoraivTryker;
+		FameStart[Zorai - BeginCivs][Zorai - BeginClans] = &FameStartZoraivZorai;
 
 		// Initialize Max values.
 		// - Cults
 		// NOTE: Row 0 is for Neutral, so cults for rows start at 1, but start at 0 for columns.
-		FameMaxCults[kNeutral][Kami-BeginCults] = &FameMaxNeutralvKami;
-		FameMaxCults[kNeutral][Karavan-BeginCults] = &FameMaxNeutralvKaravan;
-		FameMaxCults[Kami-kBeginCults1][Kami-BeginCults] = &FameMaxKamivKami;
-		FameMaxCults[Kami-kBeginCults1][Karavan-BeginCults] = &FameMaxKamivKaravan;
-		FameMaxCults[Karavan-kBeginCults1][Kami-BeginCults] = &FameMaxKaravanvKami;
-		FameMaxCults[Karavan-kBeginCults1][Karavan-BeginCults] = &FameMaxKaravanvKaravan;
+		FameMaxCults[kNeutral][Kami - BeginCults] = &FameMaxNeutralvKami;
+		FameMaxCults[kNeutral][Karavan - BeginCults] = &FameMaxNeutralvKaravan;
+		FameMaxCults[Kami - kBeginCults1][Kami - BeginCults] = &FameMaxKamivKami;
+		FameMaxCults[Kami - kBeginCults1][Karavan - BeginCults] = &FameMaxKamivKaravan;
+		FameMaxCults[Karavan - kBeginCults1][Kami - BeginCults] = &FameMaxKaravanvKami;
+		FameMaxCults[Karavan - kBeginCults1][Karavan - BeginCults] = &FameMaxKaravanvKaravan;
 
 		// - Civilisations
 		// NOTE: Row 0 is for Neutral, so civss for rows start at 1, but start at 0 for columns.
-		FameMaxCivs[kNeutral][Fyros-BeginCivs] = &FameMaxNeutralvFyros;
-		FameMaxCivs[kNeutral][Matis-BeginCivs] = &FameMaxNeutralvMatis;
-		FameMaxCivs[kNeutral][Tryker-BeginCivs] = &FameMaxNeutralvTryker;
-		FameMaxCivs[kNeutral][Zorai-BeginCivs] = &FameMaxNeutralvZorai;
-		FameMaxCivs[Fyros-kBeginCivs1][Fyros-BeginCivs] = &FameMaxFyrosvFyros;
-		FameMaxCivs[Fyros-kBeginCivs1][Matis-BeginCivs] = &FameMaxFyrosvMatis;
-		FameMaxCivs[Fyros-kBeginCivs1][Tryker-BeginCivs] = &FameMaxFyrosvTryker;
-		FameMaxCivs[Fyros-kBeginCivs1][Zorai-BeginCivs] = &FameMaxFyrosvZorai;
-		FameMaxCivs[Matis-kBeginCivs1][Fyros-BeginCivs] = &FameMaxMatisvFyros;
-		FameMaxCivs[Matis-kBeginCivs1][Matis-BeginCivs] = &FameMaxMatisvMatis;
-		FameMaxCivs[Matis-kBeginCivs1][Tryker-BeginCivs] = &FameMaxMatisvTryker;
-		FameMaxCivs[Matis-kBeginCivs1][Zorai-BeginCivs] = &FameMaxMatisvZorai;
-		FameMaxCivs[Tryker-kBeginCivs1][Fyros-BeginCivs] = &FameMaxTrykervFyros;
-		FameMaxCivs[Tryker-kBeginCivs1][Matis-BeginCivs] = &FameMaxTrykervMatis;
-		FameMaxCivs[Tryker-kBeginCivs1][Tryker-BeginCivs] = &FameMaxTrykervTryker;
-		FameMaxCivs[Tryker-kBeginCivs1][Zorai-BeginCivs] = &FameMaxTrykervZorai;
-		FameMaxCivs[Zorai-kBeginCivs1][Fyros-BeginCivs] = &FameMaxZoraivFyros;
-		FameMaxCivs[Zorai-kBeginCivs1][Matis-BeginCivs] = &FameMaxZoraivMatis;
-		FameMaxCivs[Zorai-kBeginCivs1][Tryker-BeginCivs] = &FameMaxZoraivTryker;
-		FameMaxCivs[Zorai-kBeginCivs1][Zorai-BeginCivs] = &FameMaxZoraivZorai;
+		FameMaxCivs[kNeutral][Fyros - BeginCivs] = &FameMaxNeutralvFyros;
+		FameMaxCivs[kNeutral][Matis - BeginCivs] = &FameMaxNeutralvMatis;
+		FameMaxCivs[kNeutral][Tryker - BeginCivs] = &FameMaxNeutralvTryker;
+		FameMaxCivs[kNeutral][Zorai - BeginCivs] = &FameMaxNeutralvZorai;
+		FameMaxCivs[Fyros - kBeginCivs1][Fyros - BeginCivs] = &FameMaxFyrosvFyros;
+		FameMaxCivs[Fyros - kBeginCivs1][Matis - BeginCivs] = &FameMaxFyrosvMatis;
+		FameMaxCivs[Fyros - kBeginCivs1][Tryker - BeginCivs] = &FameMaxFyrosvTryker;
+		FameMaxCivs[Fyros - kBeginCivs1][Zorai - BeginCivs] = &FameMaxFyrosvZorai;
+		FameMaxCivs[Matis - kBeginCivs1][Fyros - BeginCivs] = &FameMaxMatisvFyros;
+		FameMaxCivs[Matis - kBeginCivs1][Matis - BeginCivs] = &FameMaxMatisvMatis;
+		FameMaxCivs[Matis - kBeginCivs1][Tryker - BeginCivs] = &FameMaxMatisvTryker;
+		FameMaxCivs[Matis - kBeginCivs1][Zorai - BeginCivs] = &FameMaxMatisvZorai;
+		FameMaxCivs[Tryker - kBeginCivs1][Fyros - BeginCivs] = &FameMaxTrykervFyros;
+		FameMaxCivs[Tryker - kBeginCivs1][Matis - BeginCivs] = &FameMaxTrykervMatis;
+		FameMaxCivs[Tryker - kBeginCivs1][Tryker - BeginCivs] = &FameMaxTrykervTryker;
+		FameMaxCivs[Tryker - kBeginCivs1][Zorai - BeginCivs] = &FameMaxTrykervZorai;
+		FameMaxCivs[Zorai - kBeginCivs1][Fyros - BeginCivs] = &FameMaxZoraivFyros;
+		FameMaxCivs[Zorai - kBeginCivs1][Matis - BeginCivs] = &FameMaxZoraivMatis;
+		FameMaxCivs[Zorai - kBeginCivs1][Tryker - BeginCivs] = &FameMaxZoraivTryker;
+		FameMaxCivs[Zorai - kBeginCivs1][Zorai - BeginCivs] = &FameMaxZoraivZorai;
 	} // End of block for using namespace
 }
 
@@ -234,22 +231,20 @@ void CFameManager::mirrorIsReady()
 	const static std::string fameMemory("FameMemory");
 	const static std::string firstFame("Fame_0");
 
-	
-//	Mirror.declareEntityTypeOwner( RYZOMID::guild,		5000	);		// max number of guild
-//	Mirror.declareEntityTypeOwner( RYZOMID::civilisation,		10	);	// max number of civilisation
-
+	//	Mirror.declareEntityTypeOwner( RYZOMID::guild,		5000	);		// max number of guild
+	//	Mirror.declareEntityTypeOwner( RYZOMID::civilisation,		10	);	// max number of civilisation
 
 	CStaticFames &staticFame = CStaticFames::getInstance();
 
 	// declare the fame properties
-	TheFameDataset.declareProperty( civilisation, PSOReadWrite );
-	TheFameDataset.declareProperty( guild,		PSOReadWrite );
-	TheFameDataset.declareProperty( fameMemory,		PSOReadWrite );
-	
-	for (uint i=0; i<MAX_FACTION; ++i)
+	TheFameDataset.declareProperty(civilisation, PSOReadWrite);
+	TheFameDataset.declareProperty(guild, PSOReadWrite);
+	TheFameDataset.declareProperty(fameMemory, PSOReadWrite);
+
+	for (uint i = 0; i < MAX_FACTION; ++i)
 	{
 		string propName = toString("Fame_%u", i);
-		TheFameDataset.declareProperty( propName,		PSOReadWrite );
+		TheFameDataset.declareProperty(propName, PSOReadWrite);
 	}
 
 	// init the property index for fast access
@@ -265,20 +260,20 @@ void CFameManager::mirrorIsReady()
 void CFameManager::mirrorReadyToAdd()
 {
 	// create the civilisation record in the dataset
-	for (uint i=EGSPD::CPeople::Playable; i<EGSPD::CPeople::EndPlayable; ++i)
+	for (uint i = EGSPD::CPeople::Playable; i < EGSPD::CPeople::EndPlayable; ++i)
 	{
 		CEntityId civId(RYZOMID::civilisation, i);
 		Mirror.createAndDeclareEntity(civId);
-		TDataSetRow	entityIndex = TheFameDataset.getDataSetRow(civId);
+		TDataSetRow entityIndex = TheFameDataset.getDataSetRow(civId);
 
-		TFameOwnerWrite	*fow = new TFameOwnerWrite(TheFameDataset, entityIndex);
+		TFameOwnerWrite *fow = new TFameOwnerWrite(TheFameDataset, entityIndex);
 
 		// restaure static fame
 		CStaticFames &sf = CStaticFames::getInstance();
 
 		uint factionIndex = sf.getFactionIndex(EGSPD::CPeople::toString(EGSPD::CPeople::TPeople(i)));
 		const vector<TStringId> &names = sf.getFactionNames();
-		for (uint j=0; j<names.size() && names[i] != CStringMapper::emptyId(); ++j)
+		for (uint j = 0; j < names.size() && names[i] != CStringMapper::emptyId(); ++j)
 		{
 			fow->Fames[j] = sf.getStaticFameIndexed(factionIndex, j);
 		}
@@ -297,20 +292,20 @@ void CFameManager::addPlayer(const CEntityId &playerId, const EGSPD::CFameContai
 		// 1st, create the fame memory record
 		CEntityId memoryId(RYZOMID::fame_memory, playerId.getShortId(), playerId.getCreatorId(), playerId.getDynamicId());
 		Mirror.createAndDeclareEntity(memoryId);
-		TDataSetRow	memoryIndex = TheFameDataset.getDataSetRow(memoryId);
-		TFameOwnerWrite	*fowmem = new TFameOwnerWrite(TheFameDataset, memoryIndex);
+		TDataSetRow memoryIndex = TheFameDataset.getDataSetRow(memoryId);
+		TFameOwnerWrite *fowmem = new TFameOwnerWrite(TheFameDataset, memoryIndex);
 		_FamesOwners.insert(make_pair(memoryIndex, fowmem));
 
 		// 2nd, create the player record
 		TFameOwnerWrite *fow = new TFameOwnerWrite(TheFameDataset, entityIndex);
 		_FamesOwners.insert(make_pair(entityIndex, fow));
 		fow->FameMemory = memoryIndex;
-		
+
 		// restore the fame value
-		for ( map<CSheetId,EGSPD::CFameContainerEntryPD>::const_iterator it = fameContainer.getEntriesBegin(); it != fameContainer.getEntriesEnd(); ++it )
+		for (map<CSheetId, EGSPD::CFameContainerEntryPD>::const_iterator it = fameContainer.getEntriesBegin(); it != fameContainer.getEntriesEnd(); ++it)
 		{
-			uint idx = CStaticFames::getInstance().getFactionIndexFromSheet( (*it).second.getSheet() );
-			if ( idx == CStaticFames::INVALID_FACTION_INDEX )
+			uint idx = CStaticFames::getInstance().getFactionIndexFromSheet((*it).second.getSheet());
+			if (idx == CStaticFames::INVALID_FACTION_INDEX)
 				continue;
 			fow->Fames[idx] = (*it).second.getFame();
 			fowmem->Fames[idx] = (*it).second.getFameMemory();
@@ -321,17 +316,17 @@ void CFameManager::addPlayer(const CEntityId &playerId, const EGSPD::CFameContai
 		PVP_CLAN::TPVPClan playerRace = PVP_CLAN::getClanFromPeople(civilisation);
 
 		uint32 nbFame = CStaticFames::getInstance().getNbFame();
-		for (uint32 faction=0; faction<nbFame; ++faction)
+		for (uint32 faction = 0; faction < nbFame; ++faction)
 		{
 			if (fow->Fames[faction] == NO_FAME)
 			{
 				if (faction < CStaticFames::getInstance().getFirstTribeFameIndex())
 					fow->Fames[faction] = getStartFame(playerRace, PVP_CLAN::getClanFromIndex(faction));
-			//	else
-			//		fow->Fames[faction] = CStaticFames::getInstance().getStaticFameIndexed(PVP_CLAN::getFactionIndex(playerRace), faction);
+				//	else
+				//		fow->Fames[faction] = CStaticFames::getInstance().getStaticFameIndexed(PVP_CLAN::getFactionIndex(playerRace), faction);
 			}
 		}
-		
+
 		fow->LastGuildStatusChange = fameContainer.getLastGuildStatusChange();
 		/// update the guild memory
 		updatePlayerFame(entityIndex);
@@ -345,10 +340,10 @@ void CFameManager::addPlayer(const CEntityId &playerId, const EGSPD::CFameContai
 		if (character)
 		{
 			// Send the threshold information
-//			character->_PropertyDatabase.setProp("FAME:THRESHOLD_TRADE", FameMinToTrade/kFameMultipler );
-			CBankAccessor_PLR::getFAME().setTHRESHOLD_TRADE(character->_PropertyDatabase, FameMinToTrade/kFameMultipler );
-//			character->_PropertyDatabase.setProp("FAME:THRESHOLD_KOS", FameMinToKOS/kFameMultipler );
-			CBankAccessor_PLR::getFAME().setTHRESHOLD_KOS(character->_PropertyDatabase, FameMinToKOS/kFameMultipler );
+			//			character->_PropertyDatabase.setProp("FAME:THRESHOLD_TRADE", FameMinToTrade/kFameMultipler );
+			CBankAccessor_PLR::getFAME().setTHRESHOLD_TRADE(character->_PropertyDatabase, FameMinToTrade / kFameMultipler);
+			//			character->_PropertyDatabase.setProp("FAME:THRESHOLD_KOS", FameMinToKOS/kFameMultipler );
+			CBankAccessor_PLR::getFAME().setTHRESHOLD_KOS(character->_PropertyDatabase, FameMinToKOS / kFameMultipler);
 			character->resetFameDatabase();
 
 			// Make sure they belong to a guild.
@@ -382,46 +377,46 @@ void CFameManager::savePlayerFame(const NLMISC::CEntityId &playerId, EGSPD::CFam
 				if (it != _FamesOwners.end())
 				{
 					// save the fame memory
-					for (uint i= 0; i<MAX_FACTION; ++i)
+					for (uint i = 0; i < MAX_FACTION; ++i)
 					{
-						CSheetId id  = CStaticFames::getInstance().getFactionSheet( i );
-						if ( id == CSheetId::Unknown )
+						CSheetId id = CStaticFames::getInstance().getFactionSheet(i);
+						if (id == CSheetId::Unknown)
 							continue;
-						EGSPD::CFameContainerEntryPD* entry = fameContainer.getEntries( id );
-						if( entry == NULL )
-							entry = fameContainer.addToEntries( id );
+						EGSPD::CFameContainerEntryPD *entry = fameContainer.getEntries(id);
+						if (entry == NULL)
+							entry = fameContainer.addToEntries(id);
 						EGS_PD_AST(entry);
-						entry->setFameMemory( it->second->Fames[i] );
+						entry->setFameMemory(it->second->Fames[i]);
 					}
-					
-//					fameContainer._FamesMemory.resize(MAX_FACTION);
-//					for (uint i=0; i<MAX_FACTION; ++i)
-//						fameContainer._FamesMemory[i] = it->second->Fames[i];
+
+					//					fameContainer._FamesMemory.resize(MAX_FACTION);
+					//					for (uint i=0; i<MAX_FACTION; ++i)
+					//						fameContainer._FamesMemory[i] = it->second->Fames[i];
 				}
 			}
 
 			// save the fame
-//			fameContainer._Fames.resize(MAX_FACTION);
-			for (uint i= 0; i<MAX_FACTION; ++i)
+			//			fameContainer._Fames.resize(MAX_FACTION);
+			for (uint i = 0; i < MAX_FACTION; ++i)
 			{
-				CSheetId id  = CStaticFames::getInstance().getFactionSheet( i );
-				if ( id == CSheetId::Unknown )
+				CSheetId id = CStaticFames::getInstance().getFactionSheet(i);
+				if (id == CSheetId::Unknown)
 					continue;
-				EGSPD::CFameContainerEntryPD* entry = fameContainer.getEntries( id );
-				nlassert( entry );
-				if( entry == NULL )
-					entry = fameContainer.addToEntries( id );
+				EGSPD::CFameContainerEntryPD *entry = fameContainer.getEntries(id);
+				nlassert(entry);
+				if (entry == NULL)
+					entry = fameContainer.addToEntries(id);
 				EGS_PD_AST(entry);
-				entry->setFame( it->second->Fames[i] );
-				entry->setLastFameChangeTrend( fow->LastFameChangeTrends[i] );
+				entry->setFame(it->second->Fames[i]);
+				entry->setLastFameChangeTrend(fow->LastFameChangeTrends[i]);
 			}
 
 			// save the last guild change.
-			fameContainer.setLastGuildStatusChange( it->second->LastGuildStatusChange );
+			fameContainer.setLastGuildStatusChange(it->second->LastGuildStatusChange);
 
 			// save the fame trend
-			fameContainer.setLastFameChangeDate( fow->LastFameChangeDate );
-//			fameContainer._LastFameChangeTrends.resize(MAX_FACTION);
+			fameContainer.setLastFameChangeDate(fow->LastFameChangeDate);
+			//			fameContainer._LastFameChangeTrends.resize(MAX_FACTION);
 		}
 		else
 		{
@@ -497,61 +492,59 @@ void CFameManager::addGuild(const CEntityId &guildId, const EGSPD::CFameContaine
 {
 	H_AUTO(FMaddGuild);
 	Mirror.createAndDeclareEntity(guildId);
-	TDataSetRow	entityIndex = TheFameDataset.getDataSetRow(guildId);
+	TDataSetRow entityIndex = TheFameDataset.getDataSetRow(guildId);
 
-	TFameOwnerWrite	*fow = new TFameOwnerWrite(TheFameDataset, entityIndex);
+	TFameOwnerWrite *fow = new TFameOwnerWrite(TheFameDataset, entityIndex);
 
 	_FamesOwners.insert(make_pair(entityIndex, fow));
 
 	updateGuildFame(guildId, fameContainer);
 
 	// restore the fame value
-	for ( map<CSheetId,EGSPD::CFameContainerEntryPD>::const_iterator it = fameContainer.getEntriesBegin(); it != fameContainer.getEntriesEnd(); ++it )
+	for (map<CSheetId, EGSPD::CFameContainerEntryPD>::const_iterator it = fameContainer.getEntriesBegin(); it != fameContainer.getEntriesEnd(); ++it)
 	{
-		uint idx = CStaticFames::getInstance().getFactionIndexFromSheet( (*it).second.getSheet() );
-		if ( idx == CStaticFames::INVALID_FACTION_INDEX )
+		uint idx = CStaticFames::getInstance().getFactionIndexFromSheet((*it).second.getSheet());
+		if (idx == CStaticFames::INVALID_FACTION_INDEX)
 			continue;
 		fow->Fames[idx] = (*it).second.getFame();
 		fow->LastFameChangeTrends[idx] = (*it).second.getLastFameChangeTrend();
 	}
-//	for (uint i=0; i<fameContainer._Fames.size(); ++i)
-//		fow->Fames[i] = fameContainer._Fames[i];
-
+	//	for (uint i=0; i<fameContainer._Fames.size(); ++i)
+	//		fow->Fames[i] = fameContainer._Fames[i];
 }
 
 void CFameManager::updateGuildFame(const CEntityId &guildId, const EGSPD::CFameContainerPD &fameContainer)
 {
-	TDataSetRow	entityIndex = TheFameDataset.getDataSetRow(guildId);
+	TDataSetRow entityIndex = TheFameDataset.getDataSetRow(guildId);
 
 	TFameContainer::iterator it(_FamesOwners.find(entityIndex));
-	BOMB_IF(it == _FamesOwners.end(), "Failed to find the fame owner zriter for guild "<<guildId, return);
+	BOMB_IF(it == _FamesOwners.end(), "Failed to find the fame owner zriter for guild " << guildId, return);
 
-	TFameOwnerWrite	*fow = it->second;
+	TFameOwnerWrite *fow = it->second;
 
 	// cleanup the fames
-	for (uint i=0; i<MAX_FACTION; ++i)
+	for (uint i = 0; i < MAX_FACTION; ++i)
 	{
 		fow->Fames[i] = NO_FAME;
 		fow->LastFameChangeTrends[i] = EGSPD::CFameTrend::FameSteady;
 	}
 
 	// update the fame values
-	for ( map<CSheetId,EGSPD::CFameContainerEntryPD>::const_iterator it = fameContainer.getEntriesBegin(); it != fameContainer.getEntriesEnd(); ++it )
+	for (map<CSheetId, EGSPD::CFameContainerEntryPD>::const_iterator it = fameContainer.getEntriesBegin(); it != fameContainer.getEntriesEnd(); ++it)
 	{
-		uint idx = CStaticFames::getInstance().getFactionIndexFromSheet( (*it).second.getSheet() );
-		if ( idx == CStaticFames::INVALID_FACTION_INDEX )
+		uint idx = CStaticFames::getInstance().getFactionIndexFromSheet((*it).second.getSheet());
+		if (idx == CStaticFames::INVALID_FACTION_INDEX)
 			continue;
 		fow->Fames[idx] = (*it).second.getFame();
 		fow->LastFameChangeTrends[idx] = (*it).second.getLastFameChangeTrend();
 	}
-//	for (uint i=0; i<fameContainer._Fames.size(); ++i)
-//		fow->Fames[i] = fameContainer._Fames[i];
-
+	//	for (uint i=0; i<fameContainer._Fames.size(); ++i)
+	//		fow->Fames[i] = fameContainer._Fames[i];
 }
 
 void CFameManager::saveGuildFame(const NLMISC::CEntityId &guildId, EGSPD::CFameContainerPD &fameContainer)
 {
-	H_AUTO( CFameManager_saveGuildFame )
+	H_AUTO(CFameManager_saveGuildFame)
 	TDataSetRow entityIndex = TheFameDataset.getDataSetRow(guildId);
 	if (TheFameDataset.isAccessible(entityIndex))
 	{
@@ -559,28 +552,28 @@ void CFameManager::saveGuildFame(const NLMISC::CEntityId &guildId, EGSPD::CFameC
 		if (it != _FamesOwners.end())
 		{
 			// save the fame
-			for (uint i= 0; i<MAX_FACTION; ++i)
+			for (uint i = 0; i < MAX_FACTION; ++i)
 			{
-				CSheetId id  = CStaticFames::getInstance().getFactionSheet( i );
-				if ( id == CSheetId::Unknown )
+				CSheetId id = CStaticFames::getInstance().getFactionSheet(i);
+				if (id == CSheetId::Unknown)
 					continue;
-				EGSPD::CFameContainerEntryPD* entry = fameContainer.getEntries( id );
-				if( entry == NULL )
-					entry = fameContainer.addToEntries( id );
+				EGSPD::CFameContainerEntryPD *entry = fameContainer.getEntries(id);
+				if (entry == NULL)
+					entry = fameContainer.addToEntries(id);
 				EGS_PD_AST(entry);
-				nlassert( entry );
+				nlassert(entry);
 				{
-					H_AUTO( CFameManager_entry_setFame )
-					entry->setFame( it->second->Fames[i] );
+					H_AUTO(CFameManager_entry_setFame)
+					entry->setFame(it->second->Fames[i]);
 				}
 				{
-					H_AUTO( CFameManager_entry_setLastFameChangeTrend )
-					entry->setLastFameChangeTrend( it->second->LastFameChangeTrends[i] );
+					H_AUTO(CFameManager_entry_setLastFameChangeTrend)
+					entry->setLastFameChangeTrend(it->second->LastFameChangeTrends[i]);
 				}
 			}
-			
-//			fameContainer._Fames.resize(MAX_FACTION);
-//				fameContainer._Fames[i] = it->second->Fames[i];
+
+			//			fameContainer._Fames.resize(MAX_FACTION);
+			//				fameContainer._Fames[i] = it->second->Fames[i];
 		}
 		else
 		{
@@ -618,7 +611,7 @@ void CFameManager::removeGuild(const CEntityId &guildId)
 		{
 			nlwarning("FAME: Can't find entity %u into fame container !", entityIndex.getIndex());
 		}
-		Mirror.removeEntity( guildId );
+		Mirror.removeEntity(guildId);
 	}
 	else
 	{
@@ -626,79 +619,79 @@ void CFameManager::removeGuild(const CEntityId &guildId)
 	}
 }
 
-void CFameManager::setGuildCivilisation( const NLMISC::CEntityId & guildId, EGSPD::CPeople::TPeople civilisation )
+void CFameManager::setGuildCivilisation(const NLMISC::CEntityId &guildId, EGSPD::CPeople::TPeople civilisation)
 {
 	TDataSetRow guildIndex = TheFameDataset.getDataSetRow(guildId);
-	
+
 	// check if the civ exists
-	uint8 id = EGSPD::getCivilisationId( civilisation );
-	if ( id == 0xFF )
+	uint8 id = EGSPD::getCivilisationId(civilisation);
+	if (id == 0xFF)
 	{
-		nlwarning("FAME :setGuildCivilisation-> guild %s, civ %u is invalid",guildId.toString().c_str(),civilisation );
+		nlwarning("FAME :setGuildCivilisation-> guild %s, civ %u is invalid", guildId.toString().c_str(), civilisation);
 		return;
 	}
 	CEntityId civId(RYZOMID::civilisation, id);
 	TDataSetRow civIndex = TheFameDataset.getDataSetRow(civId);
-	
-	TFameContainer::iterator it = _FamesOwners.find( civIndex );
-	if ( it == _FamesOwners.end() )
+
+	TFameContainer::iterator it = _FamesOwners.find(civIndex);
+	if (it == _FamesOwners.end())
 	{
-		nlwarning("FAME:setPlayerCivilisation-> unknown civ eId %s", civId.toString().c_str(), id );
+		nlwarning("FAME:setPlayerCivilisation-> unknown civ eId %s", civId.toString().c_str(), id);
 		return;
 	}
-	
+
 	// check if the player exists
-	it = _FamesOwners.find( guildIndex );
-	if ( it == _FamesOwners.end() )
+	it = _FamesOwners.find(guildIndex);
+	if (it == _FamesOwners.end())
 	{
-		nlwarning("FAME:setPlayerCivilisation-> unknown guild eId %s", guildId.toString().c_str() );
+		nlwarning("FAME:setPlayerCivilisation-> unknown guild eId %s", guildId.toString().c_str());
 		return;
 	}
-	if ( (*it).second == NULL )
+	if ((*it).second == NULL)
 	{
-		nlwarning("FAME:setPlayerCivilisation-> guild eId %s has a NULL entry", guildId.toString().c_str() );
+		nlwarning("FAME:setPlayerCivilisation-> guild eId %s has a NULL entry", guildId.toString().c_str());
 		return;
 	}
 	(*it).second->Civilisation = civIndex;
 }
 
-void CFameManager::setPlayerCivilisation( const NLMISC::CEntityId & playerId, EGSPD::CPeople::TPeople civilisation )
+void CFameManager::setPlayerCivilisation(const NLMISC::CEntityId &playerId, EGSPD::CPeople::TPeople civilisation)
 {
 	TDataSetRow playerIndex = TheFameDataset.getDataSetRow(playerId);
 
 	// check if the civ exists
-	uint8 id = EGSPD::getCivilisationId( civilisation );
-	if ( id == 0xFF )
+	uint8 id = EGSPD::getCivilisationId(civilisation);
+	if (id == 0xFF)
 	{
-		nlwarning("FAME :setPlayerCivilisation-> user %s, civ %u is invalid",playerId.toString().c_str(),civilisation );
+		nlwarning("FAME :setPlayerCivilisation-> user %s, civ %u is invalid", playerId.toString().c_str(), civilisation);
 		return;
 	}
 	CEntityId civId(RYZOMID::civilisation, id);
 	TDataSetRow civIndex = TheFameDataset.getDataSetRow(civId);
-	
-	TFameContainer::iterator it = _FamesOwners.find( civIndex );
-	if ( it == _FamesOwners.end() )
+
+	TFameContainer::iterator it = _FamesOwners.find(civIndex);
+	if (it == _FamesOwners.end())
 	{
-		nlwarning("FAME:setPlayerCivilisation-> unknown civ eId %s  ( id = %u) ", playerId.toString().c_str(), id );
+		nlwarning("FAME:setPlayerCivilisation-> unknown civ eId %s  ( id = %u) ", playerId.toString().c_str(), id);
 		return;
 	}
 
 	// check if the player exists
-	it = _FamesOwners.find( playerIndex );
-	if ( it == _FamesOwners.end() )
+	it = _FamesOwners.find(playerIndex);
+	if (it == _FamesOwners.end())
 	{
-		nlwarning("FAME:setPlayerCivilisation-> unknown player eId %s", playerId.toString().c_str() );
+		nlwarning("FAME:setPlayerCivilisation-> unknown player eId %s", playerId.toString().c_str());
 		return;
 	}
-	if ( (*it).second == NULL )
+	if ((*it).second == NULL)
 	{
-		nlwarning("FAME:setPlayerCivilisation-> player eId %s has a NULL entry", playerId.toString().c_str() );
+		nlwarning("FAME:setPlayerCivilisation-> player eId %s has a NULL entry", playerId.toString().c_str());
 		return;
 	}
 	(*it).second->Civilisation = civIndex;
 }
 
-void CFameManager::setPlayerGuild( const NLMISC::CEntityId & playerId, const NLMISC::CEntityId & guildId, bool resetLastGuildStatusChange )
+void CFameManager::setPlayerGuild(const NLMISC::CEntityId &playerId, const NLMISC::CEntityId &guildId, bool resetLastGuildStatusChange)
 {
 	TDataSetRow playerIndex = TheFameDataset.getDataSetRow(playerId);
 	TDataSetRow GuildIndex = TheFameDataset.getDataSetRow(guildId);
@@ -710,22 +703,22 @@ void CFameManager::setPlayerGuild( const NLMISC::CEntityId & playerId, const NLM
 	}
 
 	// check if the guild exists
-	TFameContainer::iterator it = _FamesOwners.find( GuildIndex );
-	if ( it == _FamesOwners.end() )
+	TFameContainer::iterator it = _FamesOwners.find(GuildIndex);
+	if (it == _FamesOwners.end())
 	{
-		nlwarning("FAME: unknown guild eId %s  ( id = %u) ", guildId.toString().c_str(), (uint32)guildId.getShortId() );
+		nlwarning("FAME: unknown guild eId %s  ( id = %u) ", guildId.toString().c_str(), (uint32)guildId.getShortId());
 		return;
 	}
 	TFameOwnerWrite &guildFow = *(it->second);
-	it = _FamesOwners.find( playerIndex );
-	if ( it == _FamesOwners.end() )
+	it = _FamesOwners.find(playerIndex);
+	if (it == _FamesOwners.end())
 	{
-		nlwarning("FAME: unknown player eId %s", playerId.toString().c_str() );
+		nlwarning("FAME: unknown player eId %s", playerId.toString().c_str());
 		return;
 	}
-	if (  it->second == NULL )
+	if (it->second == NULL)
 	{
-		nlwarning("FAME: player eId %s has a NULL entry", playerId.toString().c_str() );
+		nlwarning("FAME: player eId %s has a NULL entry", playerId.toString().c_str());
 		return;
 	}
 	TFameOwnerWrite &fow = *(it->second);
@@ -735,14 +728,14 @@ void CFameManager::setPlayerGuild( const NLMISC::CEntityId & playerId, const NLM
 	it = _FamesOwners.find(fow.FameMemory);
 	if (it == _FamesOwners.end())
 	{
-		nlwarning("FAME: player eId %s has no fame memory record !", playerId.toString().c_str() );
+		nlwarning("FAME: player eId %s has no fame memory record !", playerId.toString().c_str());
 		return;
 	}
 
 	if (resetLastGuildStatusChange)
 	{
 		// set the guild fame memory
-		for (uint i=0; i<MAX_FACTION; ++i)
+		for (uint i = 0; i < MAX_FACTION; ++i)
 		{
 			fow.LastGuildFame[i] = it->second->Fames[i];
 		}
@@ -750,13 +743,13 @@ void CFameManager::setPlayerGuild( const NLMISC::CEntityId & playerId, const NLM
 	}
 }
 
-void CFameManager::clearPlayerGuild( const NLMISC::CEntityId & playerId )
+void CFameManager::clearPlayerGuild(const NLMISC::CEntityId &playerId)
 {
 	TDataSetRow playerIndex = TheFameDataset.getDataSetRow(playerId);
-	TFameContainer::iterator it = _FamesOwners.find( playerIndex );
-	if ( it == _FamesOwners.end() )
+	TFameContainer::iterator it = _FamesOwners.find(playerIndex);
+	if (it == _FamesOwners.end())
 	{
-		nlwarning("FAME: unknown player eId %s", playerId.toString().c_str() );
+		nlwarning("FAME: unknown player eId %s", playerId.toString().c_str());
 		return;
 	}
 
@@ -768,23 +761,23 @@ void CFameManager::clearPlayerGuild( const NLMISC::CEntityId & playerId )
 	it = _FamesOwners.find(fow.FameMemory);
 	if (it == _FamesOwners.end())
 	{
-		nlwarning("FAME: player eId %s has no fame memory record !", playerId.toString().c_str() );
+		nlwarning("FAME: player eId %s has no fame memory record !", playerId.toString().c_str());
 		return;
 	}
 	// set the guild fame memory
-	for (uint i=0; i<MAX_FACTION; ++i)
+	for (uint i = 0; i < MAX_FACTION; ++i)
 	{
 		fow.LastGuildFame[i] = it->second->Fames[i];
 	}
 	fow.LastGuildStatusChange = CTickEventHandler::getGameCycle();
 }
 
-void CFameManager::cbFameDelta( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void CFameManager::cbFameDelta(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
-	CEntityId	entityId;
-	uint32		faction;
-	sint32		deltaFame;
-	bool		propagate;
+	CEntityId entityId;
+	uint32 faction;
+	sint32 deltaFame;
+	bool propagate;
 
 	// entity index in fame dataset
 	msgin.serial(entityId);
@@ -795,9 +788,9 @@ void CFameManager::cbFameDelta( NLNET::CMessage& msgin, const std::string &servi
 	msgin.serial(propagate);
 
 	getInstance().addFameIndexed(entityId, faction, deltaFame, serviceName, propagate);
-	
+
 	// We don't inform the client right now, the timer will take care of this
-	//character->sendEventForMissionAvailabilityCheck();
+	// character->sendEventForMissionAvailabilityCheck();
 }
 
 void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sint32 deltaFame, const std::string &serviceName, bool propagate, TFamePropagation propagationType)
@@ -806,16 +799,16 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 	SM_STATIC_PARAMS_2(fameMsgParams, STRING_MANAGER::faction, STRING_MANAGER::integer);
 
 	const TDataSetRow entityIndex = TheFameDataset.getDataSetRow(entityId);
-	TFameContainer::iterator	it(_FamesOwners.find(entityIndex));
+	TFameContainer::iterator it(_FamesOwners.find(entityIndex));
 
 	CStaticFames &sf = CStaticFames::getInstance();
 
 	if (it == _FamesOwners.end())
 	{
 		nlwarning("FAME: Receiving fame value for an unknow entityIndex %s from service '%s' (delta = %d)",
-			entityId.toString().c_str(),
-			serviceName.c_str(),
-			deltaFame);
+		    entityId.toString().c_str(),
+		    serviceName.c_str(),
+		    deltaFame);
 
 		return;
 	}
@@ -823,10 +816,10 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 	if (faction >= MAX_FACTION)
 	{
 		nlwarning("FAME: addFameIndexed: trying to add fame to invalid faction %u (max of %u faction) for player %s, from service %s",
-			faction,
-			MAX_FACTION,
-			entityId.toString().c_str(),
-			serviceName.c_str());
+		    faction,
+		    MAX_FACTION,
+		    entityId.toString().c_str(),
+		    serviceName.c_str());
 
 		return;
 	}
@@ -840,25 +833,25 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 	double fame = fow.Fames[faction];
 	if (fame == NO_FAME)
 	{
-		CCharacter* character = PlayerManager.getChar( entityId );
+		CCharacter *character = PlayerManager.getChar(entityId);
 		if (character)
 			fame = CStaticFames::getInstance().getStaticFameIndexed(PVP_CLAN::getFactionIndex(PVP_CLAN::getClanFromPeople(character->getRace())), faction);
 		else
 			fame = 0;
 	}
 
-	const double FAME_GAIN_FACTOR = (FameAbsoluteMax/25.0)+FameAbsoluteMax;
+	const double FAME_GAIN_FACTOR = (FameAbsoluteMax / 25.0) + FameAbsoluteMax;
 	double realDeltaFame = 0.;
 	// Non linear fame gain
-    if (deltaFame > 1)
+	if (deltaFame > 1)
 	{
-        // gain de fame : toujours log
-        if (fame > 0)
-            realDeltaFame = ((FAME_GAIN_FACTOR - fame) / FameAbsoluteMax) * deltaFame;
-        else
-            realDeltaFame = ((-FAME_GAIN_FACTOR - fame) / - FameAbsoluteMax) * deltaFame;
+		// gain de fame : toujours log
+		if (fame > 0)
+			realDeltaFame = ((FAME_GAIN_FACTOR - fame) / FameAbsoluteMax) * deltaFame;
+		else
+			realDeltaFame = ((-FAME_GAIN_FACTOR - fame) / -FameAbsoluteMax) * deltaFame;
 	}
-    else
+	else
 	{
 		if (fame < 0)
 			realDeltaFame = ((-FAME_GAIN_FACTOR - fame) / -FameAbsoluteMax) * deltaFame;
@@ -877,48 +870,48 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 	if (entityId.getType() == RYZOMID::player)
 	{
 		nldebug("FAME: Updating fame for character %s as P:%d",
-			entityId.toString().c_str(),
-			sint32(fame));
+		    entityId.toString().c_str(),
+		    sint32(fame));
 		// just update one player DB
-		// retreive the char info 
-		CCharacter *c =  PlayerManager.getChar(entityId);
+		// retreive the char info
+		CCharacter *c = PlayerManager.getChar(entityId);
 		// See if still qualify to have declaration
-		if ( c )
+		if (c)
 		{
 			// Bound the fame based on current allegiance.
 			sint32 maxFame = getMaxFameByFactionIndex(c->getAllegiance(), faction);
-			clamp(fame,FameAbsoluteMin,maxFame);
+			clamp(fame, FameAbsoluteMin, maxFame);
 			// Check to make sure player still qualifies to be in declared allegiances.
 			c->verifyClanAllegiance(PVP_CLAN::getClanFromIndex(faction), sint32(fame));
 			c->setFameValuePlayer(faction, sint32(fame), maxFame, fow.LastFameChangeTrends[faction]);
 			if (deltaFame > 0)
-				CCharacter::sendDynamicSystemMessage( c->getEntityRowId(), "FAME_GAIN_CHAR", fameMsgParams );
+				CCharacter::sendDynamicSystemMessage(c->getEntityRowId(), "FAME_GAIN_CHAR", fameMsgParams);
 			else
-				CCharacter::sendDynamicSystemMessage( c->getEntityRowId(), "FAME_LOST_CHAR", fameMsgParams );
+				CCharacter::sendDynamicSystemMessage(c->getEntityRowId(), "FAME_LOST_CHAR", fameMsgParams);
 
 			// if character is in guild, guild win fame too
 			CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
-			if( pGuild != 0 )
+			if (pGuild != 0)
 			{
-				if( pGuild->getMemberCount() > 0 ) // guild with zero members must never occurs
-					addFameIndexed( pGuild->getEId(), faction, deltaFame / pGuild->getMemberCount(), serviceName, propagate, propagationType );
+				if (pGuild->getMemberCount() > 0) // guild with zero members must never occurs
+					addFameIndexed(pGuild->getEId(), faction, deltaFame / pGuild->getMemberCount(), serviceName, propagate, propagationType);
 				else
 					nlwarning("Guild %d have no member (getMemberCount() return 0)", c->getGuildId());
 			}
 		}
 		else
-			nlwarning("addFameIndexed for a player : invalid user %s",entityId.toString().c_str());
+			nlwarning("addFameIndexed for a player : invalid user %s", entityId.toString().c_str());
 	}
 	else if (entityId.getType() == RYZOMID::guild)
 	{
 		nldebug("FAME: updating fame for guild %s...", entityId.toString().c_str());
 
 		CGuild *g = CGuildManager::getInstance()->getGuildFromId((uint32)(entityId.getShortId()));
-		if ( g )
+		if (g)
 		{
 			// Bound the fame based on current allegiance.
 			sint32 maxFame = getMaxFameByFactionIndex(g->getAllegiance(), faction);
-			clamp(fame,FameAbsoluteMin,maxFame);
+			clamp(fame, FameAbsoluteMin, maxFame);
 			g->verifyClanAllegiance(PVP_CLAN::getClanFromIndex(faction), sint32(fame));
 			g->setFameValueGuild(faction, sint32(fame), maxFame, fow.LastFameChangeTrends[faction]);
 		}
@@ -942,10 +935,10 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 				{
 					gf = fi.getFameIndexed(TheFameDataset.getEntityId(fow->Guild()), faction, false, true);
 				}
-				
+
 				nldebug("FAME: Updating guild fame for entityId %s as G:%d",
-					entityId.toString().c_str(),
-					sint32(fame));
+				    entityId.toString().c_str(),
+				    sint32(fame));
 			}
 		}
 	}
@@ -967,17 +960,17 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint32 faction, sin
 		// kami/karavan fame. This is a normal case in asymmetric fame.
 		NLMISC::TStringId factionKaravan = NLMISC::CStringMapper::map("karavan");
 		NLMISC::TStringId factionKami = NLMISC::CStringMapper::map("kami");
-		if (UseAsymmetricStaticFames || (faction!=CStaticFames::getInstance().getFactionIndex(factionKaravan) && faction!=CStaticFames::getInstance().getFactionIndex(factionKami)))
+		if (UseAsymmetricStaticFames || (faction != CStaticFames::getInstance().getFactionIndex(factionKaravan) && faction != CStaticFames::getInstance().getFactionIndex(factionKami)))
 		{
 			// Propagate to each fame
 			int nbFame = CStaticFames::getInstance().getNbFame();
-			for (int iFaction=0; iFaction<nbFame; ++iFaction)
+			for (int iFaction = 0; iFaction < nbFame; ++iFaction)
 			{
 				float propagation = CStaticFames::getInstance().getPropagationFactorIndexed(faction, iFaction);
 				// Skip propagation if factor is null
-				if (propagation!=0.f)
+				if (propagation != 0.f)
 				{
-					sint32 propagatedFame = (sint32)(realDeltaFame*propagation);
+					sint32 propagatedFame = (sint32)(realDeltaFame * propagation);
 					addFameIndexed(entityId, iFaction, propagatedFame, serviceName, false, propagationType);
 				}
 			}
@@ -990,7 +983,7 @@ void CFameManager::addFameIndexed(const CEntityId &entityId, uint factionIndex, 
 	addFameIndexed(entityId, factionIndex, deltaFame, NLNET::IService::getInstance()->getServiceShortName(), propagate);
 }
 
-EGSPD::CFameTrend::TFameTrend	CFameManager::getFameTrendIndexed(const TDataSetRow &entityIndex, uint32 factionIndex)
+EGSPD::CFameTrend::TFameTrend CFameManager::getFameTrendIndexed(const TDataSetRow &entityIndex, uint32 factionIndex)
 {
 	// retrieve the fame owner
 	TFameContainer::iterator it(_FamesOwners.find(entityIndex));
@@ -1000,7 +993,7 @@ EGSPD::CFameTrend::TFameTrend	CFameManager::getFameTrendIndexed(const TDataSetRo
 		return EGSPD::CFameTrend::FameSteady;
 	}
 
-	return  it->second->LastFameChangeTrends[factionIndex];
+	return it->second->LastFameChangeTrends[factionIndex];
 }
 
 float CFameManager::getPlayerMemoryBlendIndexed(const TDataSetRow &entityIndex)
@@ -1039,8 +1032,7 @@ float CFameManager::getPlayerMemoryBlendIndexed(const TDataSetRow &entityIndex)
 		return 1.0f;
 }
 
-
-sint32	CFameManager::getFameIndexed(const CEntityId &entityId, uint32 factionIndex, bool modulated, bool returnUnknownValue)
+sint32 CFameManager::getFameIndexed(const CEntityId &entityId, uint32 factionIndex, bool modulated, bool returnUnknownValue)
 {
 	// retrieve the fame owner
 	const TDataSetRow entityIndex = TheFameDataset.getDataSetRow(entityId);
@@ -1051,21 +1043,21 @@ sint32	CFameManager::getFameIndexed(const CEntityId &entityId, uint32 factionInd
 		return 0;
 	}
 
-	CStaticFames	&staticFame = CStaticFames::getInstance();
-	if (factionIndex >=  MAX_FACTION)
+	CStaticFames &staticFame = CStaticFames::getInstance();
+	if (factionIndex >= MAX_FACTION)
 	{
-		if( factionIndex != 0xffffffff && factionIndex != NO_FAME )
+		if (factionIndex != 0xffffffff && factionIndex != NO_FAME)
 			nlwarning("FAME: entity %s : factionIndex %u is out of limit (%u)", entityId.toString().c_str(), factionIndex, MAX_FACTION);
 		return 0;
 	}
 
-	TFameOwnerWrite	*fo = it->second;
-	const CEntityId	&id = TheFameDataset.getEntityId(entityIndex);
+	TFameOwnerWrite *fo = it->second;
+	const CEntityId &id = TheFameDataset.getEntityId(entityIndex);
 
 	// return direct entity fame
 	sint32 fame = fo->Fames[factionIndex]();
 
-	CCharacter* character = PlayerManager.getChar( entityId );
+	CCharacter *character = PlayerManager.getChar(entityId);
 	if (!returnUnknownValue && fame == NO_FAME)
 	{
 		if (character)
@@ -1073,24 +1065,24 @@ sint32	CFameManager::getFameIndexed(const CEntityId &entityId, uint32 factionInd
 		else
 			fame = 0;
 	}
-	
+
 	// clamp fame upper bound to neutral max if entity is declared as "None"
-	if( character)
+	if (character)
 	{
 		pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegience = character->getAllegiance();
 
-		if( allegience.first == PVP_CLAN::None )
+		if (allegience.first == PVP_CLAN::None)
 		{
-			if( PVP_CLAN::getClanFromIndex(factionIndex) >= PVP_CLAN::BeginCults && PVP_CLAN::getClanFromIndex(factionIndex) <= PVP_CLAN::EndCults )
+			if (PVP_CLAN::getClanFromIndex(factionIndex) >= PVP_CLAN::BeginCults && PVP_CLAN::getClanFromIndex(factionIndex) <= PVP_CLAN::EndCults)
 			{
-				fame = min(fame, FameMaxCults[kNeutral][PVP_CLAN::getClanFromIndex(factionIndex)-PVP_CLAN::BeginCults]->get());
+				fame = min(fame, FameMaxCults[kNeutral][PVP_CLAN::getClanFromIndex(factionIndex) - PVP_CLAN::BeginCults]->get());
 			}
 		}
-		else if( allegience.second == PVP_CLAN::None )
+		else if (allegience.second == PVP_CLAN::None)
 		{
-			if( PVP_CLAN::getClanFromIndex(factionIndex) >= PVP_CLAN::BeginCivs && PVP_CLAN::getClanFromIndex(factionIndex) <= PVP_CLAN::EndCivs )
+			if (PVP_CLAN::getClanFromIndex(factionIndex) >= PVP_CLAN::BeginCivs && PVP_CLAN::getClanFromIndex(factionIndex) <= PVP_CLAN::EndCivs)
 			{
-				fame = min(fame, FameMaxCivs[kNeutral][PVP_CLAN::getClanFromIndex(factionIndex)-PVP_CLAN::BeginCivs]->get());
+				fame = min(fame, FameMaxCivs[kNeutral][PVP_CLAN::getClanFromIndex(factionIndex) - PVP_CLAN::BeginCivs]->get());
 			}
 		}
 	}
@@ -1143,16 +1135,16 @@ const TDataSetRow &CFameManager::getFameMemoryIndex(const CEntityId &entityId)
 	}
 }
 
-void CFameManager::setEntityFame(const NLMISC::CEntityId & entityId, uint32 faction, sint32 fame, bool setDirectValue)
+void CFameManager::setEntityFame(const NLMISC::CEntityId &entityId, uint32 faction, sint32 fame, bool setDirectValue)
 {
 	if (entityId.getType() != RYZOMID::player && entityId.getType() != RYZOMID::guild)
 		return;
 
-	CCharacter* ch = NULL;
-	CGuild* gu = NULL;
+	CCharacter *ch = NULL;
+	CGuild *gu = NULL;
 	if (entityId.getType() == RYZOMID::player)
 	{
-		ch =  PlayerManager.getChar(entityId);
+		ch = PlayerManager.getChar(entityId);
 	}
 	else
 	{
@@ -1161,7 +1153,6 @@ void CFameManager::setEntityFame(const NLMISC::CEntityId & entityId, uint32 fact
 			gu = CGuildManager::getInstance()->getGuildFromId((uint32)(entityId.getShortId()));
 		}
 	}
-
 
 	const TDataSetRow rowId = TheFameDataset.getDataSetRow(entityId);
 	TFameContainer::iterator it = _FamesOwners.find(rowId);
@@ -1177,17 +1168,17 @@ void CFameManager::setEntityFame(const NLMISC::CEntityId & entityId, uint32 fact
 		return;
 	}
 
-	TFameOwnerWrite & fow = *(it->second);
+	TFameOwnerWrite &fow = *(it->second);
 
-	if( setDirectValue )
+	if (setDirectValue)
 	{
 		// change the scale( because this value comes from a user command)
-		fame = fame*(FameAbsoluteMax/100);
+		fame = fame * (FameAbsoluteMax / 100);
 	}
 
 	if (fame == NO_FAME)
 	{
-		CCharacter* character = PlayerManager.getChar( entityId );
+		CCharacter *character = PlayerManager.getChar(entityId);
 		if (character)
 			fame = CStaticFames::getInstance().getStaticFameIndexed(PVP_CLAN::getFactionIndex(PVP_CLAN::getClanFromPeople(character->getRace())), faction);
 		else
@@ -1199,7 +1190,7 @@ void CFameManager::setEntityFame(const NLMISC::CEntityId & entityId, uint32 fact
 	sint32 oldFame = fow.Fames[faction];
 	if (oldFame == NO_FAME)
 	{
-		CCharacter* character = PlayerManager.getChar( entityId );
+		CCharacter *character = PlayerManager.getChar(entityId);
 		if (character)
 			oldFame = CStaticFames::getInstance().getStaticFameIndexed(PVP_CLAN::getFactionIndex(PVP_CLAN::getClanFromPeople(character->getRace())), faction);
 		else
@@ -1208,7 +1199,7 @@ void CFameManager::setEntityFame(const NLMISC::CEntityId & entityId, uint32 fact
 	clamp(oldFame, FameAbsoluteMin, FameAbsoluteMax);
 
 	const sint32 deltaFame = fame - oldFame;
-	if (deltaFame == 0 && fow.Fames[faction] != NO_FAME )
+	if (deltaFame == 0 && fow.Fames[faction] != NO_FAME)
 		return;
 
 	// set fame
@@ -1219,7 +1210,7 @@ void CFameManager::setEntityFame(const NLMISC::CEntityId & entityId, uint32 fact
 	fow.LastFameChangeTrends[faction] = deltaFame > 0 ? EGSPD::CFameTrend::FameUpward : EGSPD::CFameTrend::FameDownward;
 
 	// update database and send message
-	if(ch)
+	if (ch)
 	{
 		nldebug("FAME: set fame for character %s as P:%d", entityId.toString().c_str(), fame);
 
@@ -1230,17 +1221,17 @@ void CFameManager::setEntityFame(const NLMISC::CEntityId & entityId, uint32 fact
 		params[0].Enum = faction;
 
 		if (deltaFame > 0)
-			CCharacter::sendDynamicSystemMessage( ch->getEntityRowId(), "FAME_GAIN_CHAR", params );
+			CCharacter::sendDynamicSystemMessage(ch->getEntityRowId(), "FAME_GAIN_CHAR", params);
 		else
-			CCharacter::sendDynamicSystemMessage( ch->getEntityRowId(), "FAME_LOST_CHAR", params );
-	} 
-	else if(gu)
+			CCharacter::sendDynamicSystemMessage(ch->getEntityRowId(), "FAME_LOST_CHAR", params);
+	}
+	else if (gu)
 	{
 		sint32 maxFame = getMaxFameByFactionIndex(gu->getAllegiance(), faction);
 		gu->setFameValueGuild(faction, fame, maxFame, fow.LastFameChangeTrends[faction]);
 	}
 	else
-		nlwarning("FAME: unknown/invalid entity %s",entityId.toString().c_str());
+		nlwarning("FAME: unknown/invalid entity %s", entityId.toString().c_str());
 }
 
 // - GetStartFame: playerClan must be a Civilization, targetClan must be any non-neutral clan
@@ -1249,14 +1240,14 @@ sint32 CFameManager::getStartFame(PVP_CLAN::TPVPClan playerClan, PVP_CLAN::TPVPC
 	// Make sure our parameters are correct.  Player clan must be one of the civilizations,
 	//  and target clan can be any of the clans.
 	if (playerClan < PVP_CLAN::BeginCivs || playerClan > PVP_CLAN::EndCivs
-		|| targetClan < PVP_CLAN::BeginClans || targetClan > PVP_CLAN::EndClans)
+	    || targetClan < PVP_CLAN::BeginClans || targetClan > PVP_CLAN::EndClans)
 	{
 		// Bad parameters, return error.
 		return NO_FAME;
 	}
 
 	// Parameters are within values, so return the lookup.
-	return *FameStart[playerClan-PVP_CLAN::BeginCivs][targetClan-PVP_CLAN::BeginClans];
+	return *FameStart[playerClan - PVP_CLAN::BeginCivs][targetClan - PVP_CLAN::BeginClans];
 }
 
 // - getMaxFameByClan: playerClan must be Neutral or the same type (Cult or Clan) as targetClan, targetClan must be any non-neutral clan.
@@ -1278,7 +1269,7 @@ sint32 CFameManager::getMaxFameByClan(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TP
 		}
 		// Make sure the player clan falls within our expected values.
 		if (playerLookup == PVP_CLAN::Neutral
-			|| (playerLookup >= PVP_CLAN::BeginCults && playerLookup <= PVP_CLAN::EndCults))
+		    || (playerLookup >= PVP_CLAN::BeginCults && playerLookup <= PVP_CLAN::EndCults))
 		{
 			// Adjust values for lookup
 			// - Turn the parameters into a base 1 lookup.  That is, the first Cult is 1, etc.
@@ -1304,7 +1295,7 @@ sint32 CFameManager::getMaxFameByClan(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TP
 			}
 			// Make sure the player clan falls within our expected values.
 			if (playerLookup == PVP_CLAN::Neutral
-				|| (playerLookup >= PVP_CLAN::BeginCivs && playerLookup <= PVP_CLAN::EndCivs))
+			    || (playerLookup >= PVP_CLAN::BeginCivs && playerLookup <= PVP_CLAN::EndCivs))
 			{
 				// Adjust values for lookup
 				// - Turn the parameters into a base 1 lookup.  That is, the first Civ is 1, etc.
@@ -1324,37 +1315,37 @@ sint32 CFameManager::getMaxFameByClan(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TP
 
 sint32 CFameManager::getMaxFameByFactionIndex(std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance, uint32 factionIndex)
 {
-	PVP_CLAN::TPVPClan	pvpClan;
+	PVP_CLAN::TPVPClan pvpClan;
 
 	// try first with a clan
-	pvpClan= PVP_CLAN::getClanFromIndex(factionIndex);
-	if(pvpClan != PVP_CLAN::Unknown)
+	pvpClan = PVP_CLAN::getClanFromIndex(factionIndex);
+	if (pvpClan != PVP_CLAN::Unknown)
 		return getMaxFameByClan(allegiance, pvpClan);
 	// search for tribe
 	else
 	{
 		// No allegiance? => Max
-		if( allegiance.first == PVP_CLAN::None || allegiance.second == PVP_CLAN::None )
+		if (allegiance.first == PVP_CLAN::None || allegiance.second == PVP_CLAN::None)
 			return FameAbsoluteMax;
-		
+
 		// look up in the tribe threshold clamp array
-		const vector<CStaticFames::CTribeCultThresholdPerCiv> &tribeThres= CStaticFames::getInstance().getTribeThresholdVector();
-		if(tribeThres.empty())
+		const vector<CStaticFames::CTribeCultThresholdPerCiv> &tribeThres = CStaticFames::getInstance().getTribeThresholdVector();
+		if (tribeThres.empty())
 			return FameMaxDefault;
 		else
 		{
 			// get correct index in tribe list
 			initTribeThresholdIndex();
-			uint32	ttIndex= ~0;
-			if(factionIndex<_FactionIndexToTribeThresholdIndex.size())
-				ttIndex= _FactionIndexToTribeThresholdIndex[factionIndex];
-			if(ttIndex>=tribeThres.size())
+			uint32 ttIndex = ~0;
+			if (factionIndex < _FactionIndexToTribeThresholdIndex.size())
+				ttIndex = _FactionIndexToTribeThresholdIndex[factionIndex];
+			if (ttIndex >= tribeThres.size())
 				return FameMaxDefault;
 
-			// get the 
-			const CStaticFames::CTribeCultThreshold * tc = 0;
-			
-			switch( allegiance.second )
+			// get the
+			const CStaticFames::CTribeCultThreshold *tc = 0;
+
+			switch (allegiance.second)
 			{
 			case PVP_CLAN::Matis:
 				tc = &tribeThres[ttIndex].Matis;
@@ -1372,11 +1363,11 @@ sint32 CFameManager::getMaxFameByFactionIndex(std::pair<PVP_CLAN::TPVPClan, PVP_
 				tc = &tribeThres[ttIndex].Neutral;
 				break;
 			default:
-				//nlwarning("Character %s have bad civilization allegiance...'%d/%s' !", entityId.toString().c_str(), allegiance.second, PVP_CLAN::toString(allegiance.second).c_str());
+				// nlwarning("Character %s have bad civilization allegiance...'%d/%s' !", entityId.toString().c_str(), allegiance.second, PVP_CLAN::toString(allegiance.second).c_str());
 				return FameMaxDefault;
 			}
-			
-			switch(allegiance.first)
+
+			switch (allegiance.first)
 			{
 			case PVP_CLAN::Kami:
 				return tc->getKami();
@@ -1388,7 +1379,7 @@ sint32 CFameManager::getMaxFameByFactionIndex(std::pair<PVP_CLAN::TPVPClan, PVP_
 				return tc->getNeutral();
 				break;
 			default:
-				//nlwarning("Character %s have bad cult allegiance...'%d/%s' !", entityId.toString().c_str(), allegiance.first, PVP_CLAN::toString(allegiance.first).c_str());
+				// nlwarning("Character %s have bad cult allegiance...'%d/%s' !", entityId.toString().c_str(), allegiance.first, PVP_CLAN::toString(allegiance.first).c_str());
 				return FameMaxDefault;
 			}
 		}
@@ -1397,22 +1388,21 @@ sint32 CFameManager::getMaxFameByFactionIndex(std::pair<PVP_CLAN::TPVPClan, PVP_
 
 void CFameManager::doInitTribeThresholdIndex()
 {
-	CStaticFames	&sf= CStaticFames::getInstance();
+	CStaticFames &sf = CStaticFames::getInstance();
 	_FactionIndexToTribeThresholdIndex.clear();
 	_FactionIndexToTribeThresholdIndex.resize(sf.getNbFame(), ~0);
 	// For All Tribe thresold index
-	const vector<CStaticFames::CTribeCultThresholdPerCiv> &tribeThres= CStaticFames::getInstance().getTribeThresholdVector();
-	for(uint i=0;i<tribeThres.size();i++)
+	const vector<CStaticFames::CTribeCultThresholdPerCiv> &tribeThres = CStaticFames::getInstance().getTribeThresholdVector();
+	for (uint i = 0; i < tribeThres.size(); i++)
 	{
 		// get the faction index
-		uint32	factionIndex= tribeThres[i].FameIndex;
+		uint32 factionIndex = tribeThres[i].FameIndex;
 		// add in the remap table
-		if(factionIndex>=_FactionIndexToTribeThresholdIndex.size())
-			_FactionIndexToTribeThresholdIndex.resize(factionIndex+1, ~0);
-		_FactionIndexToTribeThresholdIndex[factionIndex]= i;
+		if (factionIndex >= _FactionIndexToTribeThresholdIndex.size())
+			_FactionIndexToTribeThresholdIndex.resize(factionIndex + 1, ~0);
+		_FactionIndexToTribeThresholdIndex[factionIndex] = i;
 	}
 }
-
 
 void CFameManager::enforceFameCaps(const NLMISC::CEntityId &entityId, std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance)
 {
@@ -1420,17 +1410,17 @@ void CFameManager::enforceFameCaps(const NLMISC::CEntityId &entityId, std::pair<
 	TFameContainer::iterator it = _FamesOwners.find(rowId);
 	if (it == _FamesOwners.end())
 	{
-		nlwarning("FAME: unknown entity index %s",entityId.toString().c_str());
+		nlwarning("FAME: unknown entity index %s", entityId.toString().c_str());
 		return;
 	}
 
-	TFameOwnerWrite & fow = *(it->second);
+	TFameOwnerWrite &fow = *(it->second);
 
-	CCharacter* ch = NULL;
-	CGuild* gu = NULL;
+	CCharacter *ch = NULL;
+	CGuild *gu = NULL;
 	if (entityId.getType() == RYZOMID::player)
 	{
-		ch =  PlayerManager.getChar(entityId);
+		ch = PlayerManager.getChar(entityId);
 	}
 	else
 	{
@@ -1453,10 +1443,10 @@ void CFameManager::enforceFameCaps(const NLMISC::CEntityId &entityId, std::pair<
 		{
 			theFactionIndex = PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)looper);
 			fame = fow.Fames[theFactionIndex];
-			maxFame = getMaxFameByClan(allegiance,(PVP_CLAN::TPVPClan)looper);
-			if( fame != NO_FAME)
+			maxFame = getMaxFameByClan(allegiance, (PVP_CLAN::TPVPClan)looper);
+			if (fame != NO_FAME)
 			{
-				clamp(fame,FameAbsoluteMin,maxFame);
+				clamp(fame, FameAbsoluteMin, maxFame);
 				fow.Fames[theFactionIndex] = fame;
 			}
 			if (ch)
@@ -1477,12 +1467,12 @@ void CFameManager::enforceFameCaps(const NLMISC::CEntityId &entityId, std::pair<
 		{
 			theFactionIndex = PVP_CLAN::getFactionIndex((PVP_CLAN::TPVPClan)looper);
 			fame = fow.Fames[theFactionIndex];
-			maxFame = getMaxFameByClan(allegiance,(PVP_CLAN::TPVPClan)looper);
-			if( fame != NO_FAME)
+			maxFame = getMaxFameByClan(allegiance, (PVP_CLAN::TPVPClan)looper);
+			if (fame != NO_FAME)
 			{
-				clamp(fame,FameAbsoluteMin,maxFame);
+				clamp(fame, FameAbsoluteMin, maxFame);
 				fow.Fames[theFactionIndex] = fame;
-			}	
+			}
 			if (ch)
 			{
 				ch->setFameValuePlayer(theFactionIndex, fame, maxFame, fow.LastFameChangeTrends[theFactionIndex]);
@@ -1501,16 +1491,16 @@ void CFameManager::setAndEnforceTribeFameCap(const NLMISC::CEntityId &entityId, 
 	TFameContainer::iterator it = _FamesOwners.find(rowId);
 	if (it == _FamesOwners.end())
 	{
-		nlwarning("FAME: unknown entity index %s",entityId.toString().c_str());
+		nlwarning("FAME: unknown entity index %s", entityId.toString().c_str());
 		return;
 	}
 
-	TFameOwnerWrite & fow = *(it->second);
+	TFameOwnerWrite &fow = *(it->second);
 
-	CCharacter* ch = NULL;
+	CCharacter *ch = NULL;
 	if (entityId.getType() == RYZOMID::player)
 	{
-		ch =  PlayerManager.getChar(entityId);
+		ch = PlayerManager.getChar(entityId);
 		nlassert(ch != 0);
 	}
 	else
@@ -1520,19 +1510,19 @@ void CFameManager::setAndEnforceTribeFameCap(const NLMISC::CEntityId &entityId, 
 	}
 
 	// if the player is undefined, no need to warning
-	if( allegiance.first == PVP_CLAN::None || allegiance.second == PVP_CLAN::None )
+	if (allegiance.first == PVP_CLAN::None || allegiance.second == PVP_CLAN::None)
 		return;
 
 	uint32 theFactionIndex;
 	sint32 fame;
 	sint32 threshold;
-	const CStaticFames::CTribeCultThreshold * tc = 0;
+	const CStaticFames::CTribeCultThreshold *tc = 0;
 
-	for( vector<CStaticFames::CTribeCultThresholdPerCiv>::const_iterator it = CStaticFames::getInstance().getTribeThresholdVector().begin(); it != CStaticFames::getInstance().getTribeThresholdVector().end(); ++it )
+	for (vector<CStaticFames::CTribeCultThresholdPerCiv>::const_iterator it = CStaticFames::getInstance().getTribeThresholdVector().begin(); it != CStaticFames::getInstance().getTribeThresholdVector().end(); ++it)
 	{
 		theFactionIndex = (*it).FameIndex;
-	
-		switch( allegiance.second )
+
+		switch (allegiance.second)
 		{
 		case PVP_CLAN::Matis:
 			tc = &(*it).Matis;
@@ -1554,7 +1544,7 @@ void CFameManager::setAndEnforceTribeFameCap(const NLMISC::CEntityId &entityId, 
 			return;
 		}
 
-		switch(allegiance.first)
+		switch (allegiance.first)
 		{
 		case PVP_CLAN::Kami:
 			threshold = tc->getKami();
@@ -1569,11 +1559,11 @@ void CFameManager::setAndEnforceTribeFameCap(const NLMISC::CEntityId &entityId, 
 			nlwarning("Character %s have bad cult allegiance...'%d/%s' !", entityId.toString().c_str(), allegiance.first, PVP_CLAN::toString(allegiance.first).c_str());
 			return;
 		}
-	
+
 		fame = fow.Fames[theFactionIndex];
-		if( fame != NO_FAME )
+		if (fame != NO_FAME)
 		{
-			clamp(fame,FameAbsoluteMin,threshold);
+			clamp(fame, FameAbsoluteMin, threshold);
 			fow.Fames[theFactionIndex] = fame;
 		}
 		ch->setFameValuePlayer(theFactionIndex, fame, threshold, fow.LastFameChangeTrends[theFactionIndex]);
@@ -1583,26 +1573,26 @@ void CFameManager::setAndEnforceTribeFameCap(const NLMISC::CEntityId &entityId, 
 void CFameManager::thresholdChanged(NLMISC::IVariable &var)
 {
 	// Send new thresholds to all players online.
-	const CPlayerManager::TMapPlayers& player = PlayerManager.getPlayers();
-	for( CPlayerManager::TMapPlayers::const_iterator it = player.begin(); it != player.end(); ++it )
+	const CPlayerManager::TMapPlayers &player = PlayerManager.getPlayers();
+	for (CPlayerManager::TMapPlayers::const_iterator it = player.begin(); it != player.end(); ++it)
 	{
-		CCharacter* character = it->second.Player->getActiveCharacter();
-		if( character )
+		CCharacter *character = it->second.Player->getActiveCharacter();
+		if (character)
 		{
 			character->setFameBoundaries();
 		}
 	}
 }
 
-//void CFameManager::serialFames( const NLMISC::CEntityId & eId, NLMISC::IStream & f)
+// void CFameManager::serialFames( const NLMISC::CEntityId & eId, NLMISC::IStream & f)
 //{
 //	TDataSetRow index;
 //	if ( Mirror.mirrorIsReady() )
 //		index = TheFameDataset.getDataSetRow(eId);
-//	
+//
 //	std::string name;
 //	uint32 value;
-//	
+//
 //	f.xmlPush("fames");
 //
 //	if ( f.isReading() )
@@ -1625,13 +1615,13 @@ void CFameManager::thresholdChanged(NLMISC::IVariable &var)
 //	}
 //	else
 //	{
-//		const std::vector<NLMISC::TStringId> & fameIds = CStaticFames::getInstance().getFactionNames();		
+//		const std::vector<NLMISC::TStringId> & fameIds = CStaticFames::getInstance().getFactionNames();
 //		uint32 size = fameIds.size();
 //
 //		f.xmlPush("size");
 //			f.serial(size);
 //		f.xmlPop();
-//		
+//
 //		for (uint i = 0; i < size; i++ )
 //		{
 //			std::string name = CStringMapper::unmap( fameIds[i] );
@@ -1645,8 +1635,7 @@ void CFameManager::thresholdChanged(NLMISC::IVariable &var)
 //		}
 //	}
 //	f.xmlPop();
-//}
-
+// }
 
 void CFameManager::tickUpdate()
 {
@@ -1683,7 +1672,6 @@ void CFameManager::tickUpdate()
 			// the last row have been removed ? restart next tick
 			_LastUpdatedRow = TDataSetRow();
 	}
-
 
 	if (_LastUpdatedRow.isValid())
 	{
@@ -1743,7 +1731,7 @@ void CFameManager::updateFameTrend(const TDataSetRow &entityIndex)
 			// clean the date
 			fow->LastFameChangeDate = 0;
 			// reset all the trends
-			for (uint i=0; i<MAX_FACTION; ++i)
+			for (uint i = 0; i < MAX_FACTION; ++i)
 			{
 				fow->LastFameChangeTrends[i] = EGSPD::CFameTrend::FameSteady;
 			}
@@ -1758,9 +1746,9 @@ void CFameManager::updateFameTrend(const TDataSetRow &entityIndex)
 				CCharacter *character = PlayerManager.getChar(eid);
 				if (character == NULL)
 				{
-					nlwarning("Can't find character '%s' (from fame row index %u) in player manager !", 
-						eid.toString().c_str(), 
-						entityIndex.toString().c_str());
+					nlwarning("Can't find character '%s' (from fame row index %u) in player manager !",
+					    eid.toString().c_str(),
+					    entityIndex.toString().c_str());
 					return;
 				}
 			}
@@ -1769,9 +1757,9 @@ void CFameManager::updateFameTrend(const TDataSetRow &entityIndex)
 				CGuild *guild = CGuildManager::getInstance()->getGuildFromId((uint32)(eid.getShortId()));
 				if (guild == NULL)
 				{
-					nlwarning("Can't find guild '%s' (from fame row index %u) in guild manager !", 
-						eid.toString().c_str(), 
-						entityIndex.toString().c_str());
+					nlwarning("Can't find guild '%s' (from fame row index %u) in guild manager !",
+					    eid.toString().c_str(),
+					    entityIndex.toString().c_str());
 					return;
 				}
 			}
@@ -1783,8 +1771,7 @@ void CFameManager::updatePlayerFame(const TDataSetRow &playerIndex)
 {
 	CCharacter *character = NULL;
 	TFameContainer::iterator it(_FamesOwners.find(playerIndex));
-	double		alpha = 1.0f;
-	
+	double alpha = 1.0f;
 
 	if (it == _FamesOwners.end())
 	{
@@ -1798,8 +1785,8 @@ void CFameManager::updatePlayerFame(const TDataSetRow &playerIndex)
 
 	if (fow->LastGuildStatusChange != 0)
 	{
-		EGSPD::CFameTrend::TFameTrend	trends[MAX_FACTION];
-		for (uint i=0; i<MAX_FACTION; ++i)
+		EGSPD::CFameTrend::TFameTrend trends[MAX_FACTION];
+		for (uint i = 0; i < MAX_FACTION; ++i)
 		{
 			trends[i] = EGSPD::CFameTrend::FameSteady;
 		}
@@ -1808,8 +1795,8 @@ void CFameManager::updatePlayerFame(const TDataSetRow &playerIndex)
 		if (it == _FamesOwners.end())
 		{
 			nlwarning("FAME: updatePlayerFame: Cannot find fame memory record %x for player %s",
-				fow->FameMemory().getIndex(),
-				TheFameDataset.getEntityId(playerIndex).toString().c_str());
+			    fow->FameMemory().getIndex(),
+			    TheFameDataset.getEntityId(playerIndex).toString().c_str());
 			return;
 		}
 		TFameOwnerWrite *memory = it->second;
@@ -1820,17 +1807,17 @@ void CFameManager::updatePlayerFame(const TDataSetRow &playerIndex)
 			if (it == _FamesOwners.end())
 			{
 				nlwarning("FAME: updatePlayerFame: Cannot find guild fame record %x for player %s",
-					fow->Guild().getIndex(),
-					TheFameDataset.getEntityId(playerIndex).toString().c_str());
+				    fow->Guild().getIndex(),
+				    TheFameDataset.getEntityId(playerIndex).toString().c_str());
 				return;
 			}
-			
+
 			TFameOwnerWrite *guildFame = it->second;
 
 			if (now - fow->LastGuildStatusChange > FameMemoryInterpolation)
 			{
 				// interpolation end, just fill the guild value inside the memory
-				for (uint i=0; i<MAX_FACTION; ++i)
+				for (uint i = 0; i < MAX_FACTION; ++i)
 				{
 					memory->Fames[i] = guildFame->Fames[i];
 				}
@@ -1844,9 +1831,9 @@ void CFameManager::updatePlayerFame(const TDataSetRow &playerIndex)
 				// need to interpolate : 0 : last guild fame, 1 : new guild fame
 				alpha = (now - fow->LastGuildStatusChange) / double(FameMemoryInterpolation);
 
-				for (uint i=0; i<MAX_FACTION; ++i)
+				for (uint i = 0; i < MAX_FACTION; ++i)
 				{
-					sint32 gf = guildFame->Fames[i]; 
+					sint32 gf = guildFame->Fames[i];
 					sint32 hf = fow->LastGuildFame[i];
 
 					if (gf == NO_FAME && hf == NO_FAME)
@@ -1860,7 +1847,7 @@ void CFameManager::updatePlayerFame(const TDataSetRow &playerIndex)
 							gf = 0;
 						if (hf == NO_FAME)
 							hf = 0;
-						memory->Fames[i] = sint32(hf*(1-alpha) + gf*alpha);
+						memory->Fames[i] = sint32(hf * (1 - alpha) + gf * alpha);
 
 						trends[i] = gf < hf ? EGSPD::CFameTrend::FameDownward : EGSPD::CFameTrend::FameUpward;
 					}
@@ -1873,7 +1860,7 @@ void CFameManager::updatePlayerFame(const TDataSetRow &playerIndex)
 			if (now - fow->LastGuildStatusChange > FameMemoryInterpolation)
 			{
 				// interpolation end, just fill the guild value inside the memory
-				for (uint i=0; i<MAX_FACTION; ++i)
+				for (uint i = 0; i < MAX_FACTION; ++i)
 				{
 					memory->Fames[i] = NO_FAME;
 				}
@@ -1887,21 +1874,20 @@ void CFameManager::updatePlayerFame(const TDataSetRow &playerIndex)
 				// need to interpolate : 0 : last guild fame (memory), 1 : new guild fame
 				alpha = (now - fow->LastGuildStatusChange) / double(FameMemoryInterpolation);
 
-				for (uint i=0; i<MAX_FACTION; ++i)
+				for (uint i = 0; i < MAX_FACTION; ++i)
 				{
 					sint32 hf = fow->LastGuildFame[i];
 
 					if (hf == NO_FAME)
 					{
 						// no need to interpolate
-						memory->Fames[i]  = NO_FAME;
+						memory->Fames[i] = NO_FAME;
 					}
 					else
 					{
-						memory->Fames[i] = sint32(hf*(1-alpha));
+						memory->Fames[i] = sint32(hf * (1 - alpha));
 
 						trends[i] = memory->Fames[i] < 0 ? EGSPD::CFameTrend::FameDownward : EGSPD::CFameTrend::FameUpward;
-
 					}
 				}
 			}
@@ -1909,28 +1895,27 @@ void CFameManager::updatePlayerFame(const TDataSetRow &playerIndex)
 	}
 }
 
-#define GET_GUILD(onlyLocal) \
-	CGuild * guild = CGuildManager::getInstance()->getGuildByName( args[0] );\
-	if ( guild == NULL )\
-	{\
-		/* try to find the guild with an id*/ \
-		uint32 shardId =0; \
-		uint32 guildId =0; \
-		sscanf(args[0].c_str(), "%u:%u", &shardId, &guildId); \
-		guild = CGuildManager::getInstance()->getGuildFromId((shardId<<20)+guildId); \
-		\
-		if (guild == NULL) \
-		{ \
-			log.displayNL("Invalid guild '%s'",args[0].c_str());\
-			return true;\
-		} \
-	} \
-	if (onlyLocal && guild->isProxy())\
-	{\
-		log.displayNL("The guild '%s' is a foreign guild, operation forbidden", guild->getName().toString().c_str());\
-		return true;\
-	} \
-
+#define GET_GUILD(onlyLocal)                                                                                          \
+	CGuild *guild = CGuildManager::getInstance()->getGuildByName(args[0]);                                            \
+	if (guild == NULL)                                                                                                \
+	{                                                                                                                 \
+		/* try to find the guild with an id*/                                                                         \
+		uint32 shardId = 0;                                                                                           \
+		uint32 guildId = 0;                                                                                           \
+		sscanf(args[0].c_str(), "%u:%u", &shardId, &guildId);                                                         \
+		guild = CGuildManager::getInstance()->getGuildFromId((shardId << 20) + guildId);                              \
+                                                                                                                      \
+		if (guild == NULL)                                                                                            \
+		{                                                                                                             \
+			log.displayNL("Invalid guild '%s'", args[0].c_str());                                                     \
+			return true;                                                                                              \
+		}                                                                                                             \
+	}                                                                                                                 \
+	if (onlyLocal && guild->isProxy())                                                                                \
+	{                                                                                                                 \
+		log.displayNL("The guild '%s' is a foreign guild, operation forbidden", guild->getName().toString().c_str()); \
+		return true;                                                                                                  \
+	}
 
 NLMISC_COMMAND(setFameMemory, "set a value in the fame history, reset the fame interpolation timer", "<character eid> <factionName> [-]<fameValue>")
 {
@@ -1985,14 +1970,14 @@ NLMISC_COMMAND(setFameMemory, "set a value in the fame history, reset the fame i
 	return true;
 }
 
-NLMISC_COMMAND (declareCharacterCult, "Make character declare a specific cult.", "<Eid> <Faction>")
+NLMISC_COMMAND(declareCharacterCult, "Make character declare a specific cult.", "<Eid> <Faction>")
 {
 	if (args.size() != 2)
 		return false;
 
 	// First argument is a player ID.
 	CEntityId id;
-	id.fromString( args[0].c_str() );
+	id.fromString(args[0].c_str());
 	CCharacter *c = PlayerManager.getChar(id);
 
 	if (!c)
@@ -2003,7 +1988,7 @@ NLMISC_COMMAND (declareCharacterCult, "Make character declare a specific cult.",
 
 	// Second argument is a clan.
 	PVP_CLAN::TPVPClan theClan = PVP_CLAN::fromString(args[1]);
-	
+
 	if (theClan == PVP_CLAN::Unknown)
 	{
 		log.displayNL("Invalid clan name specified.");
@@ -2022,14 +2007,14 @@ NLMISC_COMMAND (declareCharacterCult, "Make character declare a specific cult.",
 	return true;
 }
 
-NLMISC_COMMAND (declareCharacterCiv, "Make character declare a specific civilization.", "<Eid> <Faction>")
+NLMISC_COMMAND(declareCharacterCiv, "Make character declare a specific civilization.", "<Eid> <Faction>")
 {
 	if (args.size() != 2)
 		return false;
 
 	// First argument is a player ID.
 	CEntityId id;
-	id.fromString( args[0].c_str() );
+	id.fromString(args[0].c_str());
 	CCharacter *c = PlayerManager.getChar(id);
 
 	if (!c)
@@ -2040,7 +2025,7 @@ NLMISC_COMMAND (declareCharacterCiv, "Make character declare a specific civiliza
 
 	// Second argument is a clan.
 	PVP_CLAN::TPVPClan theClan = PVP_CLAN::fromString(args[1]);
-	
+
 	if (theClan == PVP_CLAN::Unknown)
 	{
 		log.displayNL("Invalid clan name specified.");
@@ -2059,25 +2044,25 @@ NLMISC_COMMAND (declareCharacterCiv, "Make character declare a specific civiliza
 	return true;
 }
 
-NLMISC_COMMAND (adjustCharacterFame, "For a character, adjust a specific clan by indicated fame value.", "<Eid> <Faction> <[-]deltaFameChangeValue>")
+NLMISC_COMMAND(adjustCharacterFame, "For a character, adjust a specific clan by indicated fame value.", "<Eid> <Faction> <[-]deltaFameChangeValue>")
 {
 	if (args.size() != 3)
 		return false;
 
 	// First argument is a player ID.
 	CEntityId id;
-	id.fromString( args[0].c_str() );
+	id.fromString(args[0].c_str());
 
 	// Second argument is a clan.
 	PVP_CLAN::TPVPClan theClan = PVP_CLAN::fromString(args[1]);
-	
+
 	uint32 factionIndex;
 
 	if (theClan == PVP_CLAN::Unknown)
 	{
 		// Command may contains a faction name
 		factionIndex = CStaticFames::getInstance().getFactionIndex(args[1]);
-		if( factionIndex == CStaticFames::INVALID_FACTION_INDEX )
+		if (factionIndex == CStaticFames::INVALID_FACTION_INDEX)
 		{
 			log.displayNL("Invalid clan or faction name specified.");
 			return false;
@@ -2093,38 +2078,38 @@ NLMISC_COMMAND (adjustCharacterFame, "For a character, adjust a specific clan by
 	NLMISC::fromString(args[2], fameAdjustment);
 
 	CFameInterface::getInstance().addFameIndexed(id, factionIndex, fameAdjustment);
-	log.displayNL("Character's new fame value: %d",CFameInterface::getInstance().getFameIndexed(id,factionIndex));
+	log.displayNL("Character's new fame value: %d", CFameInterface::getInstance().getFameIndexed(id, factionIndex));
 
 	// We don't inform the client right now, the timer will take care of this
-	//character->sendEventForMissionAvailabilityCheck();
+	// character->sendEventForMissionAvailabilityCheck();
 
 	return true;
 }
 
-NLMISC_COMMAND (declareGuildCult, "Make guild declare a specific cult", "<Guild Name> <Faction>")
+NLMISC_COMMAND(declareGuildCult, "Make guild declare a specific cult", "<Guild Name> <Faction>")
 {
 	if (args.size() != 2)
 		return false;
 
 	GET_GUILD(true);
-//	// First argument is a guild .
-//	CGuild *g = CGuildManager::getInstance()->getGuildByName( args[0] );
-//
-//	if (!g)
-//	{
-//		log.displayNL("Invalid guild ID specified.");
-//		return false;
-//	}
-//
-//	if (g->isProxy())
-//	{
-//		log.displayNL("Guild is a foreign guild, forbidden.");
-//		return false;
-//	}
+	//	// First argument is a guild .
+	//	CGuild *g = CGuildManager::getInstance()->getGuildByName( args[0] );
+	//
+	//	if (!g)
+	//	{
+	//		log.displayNL("Invalid guild ID specified.");
+	//		return false;
+	//	}
+	//
+	//	if (g->isProxy())
+	//	{
+	//		log.displayNL("Guild is a foreign guild, forbidden.");
+	//		return false;
+	//	}
 
 	// Second argument is a clan.
 	PVP_CLAN::TPVPClan theClan = PVP_CLAN::fromString(args[1]);
-	
+
 	if (theClan == PVP_CLAN::Unknown)
 	{
 		log.displayNL("Invalid clan name specified.");
@@ -2143,24 +2128,24 @@ NLMISC_COMMAND (declareGuildCult, "Make guild declare a specific cult", "<Guild 
 	return true;
 }
 
-NLMISC_COMMAND (declareGuildCiv, "Make guild declare a specific civilization", "<Guild Name> <Faction>")
+NLMISC_COMMAND(declareGuildCiv, "Make guild declare a specific civilization", "<Guild Name> <Faction>")
 {
 	if (args.size() != 2)
 		return false;
 
 	// First argument is a guild .
 	GET_GUILD(true);
-//	CGuild *g = CGuildManager::getInstance()->getGuildByName( args[0] );
-//
-//	if (!g)
-//	{
-//		log.displayNL("Invalid guild ID specified.");
-//		return false;
-//	}
+	//	CGuild *g = CGuildManager::getInstance()->getGuildByName( args[0] );
+	//
+	//	if (!g)
+	//	{
+	//		log.displayNL("Invalid guild ID specified.");
+	//		return false;
+	//	}
 
 	// Second argument is a clan.
 	PVP_CLAN::TPVPClan theClan = PVP_CLAN::fromString(args[1]);
-	
+
 	if (theClan == PVP_CLAN::Unknown)
 	{
 		log.displayNL("Invalid clan name specified.");
@@ -2179,25 +2164,24 @@ NLMISC_COMMAND (declareGuildCiv, "Make guild declare a specific civilization", "
 	return true;
 }
 
-NLMISC_COMMAND (adjustGuildFame, "For a guild, adjust a specific clan by indicated fame value.", "<Guild Name> <Faction> <[-]deltaFameValue")
+NLMISC_COMMAND(adjustGuildFame, "For a guild, adjust a specific clan by indicated fame value.", "<Guild Name> <Faction> <[-]deltaFameValue")
 {
 	if (args.size() != 3)
 		return false;
 
 	// First argument is a guild name.
 	GET_GUILD(true);
-//	CGuild *g = CGuildManager::getInstance()->getGuildByName(args[0]);
-//	if( g == 0)
-//	{
-//		log.displayNL("Invalid guild name specified.");
-//		return false;
-//	}
+	//	CGuild *g = CGuildManager::getInstance()->getGuildByName(args[0]);
+	//	if( g == 0)
+	//	{
+	//		log.displayNL("Invalid guild name specified.");
+	//		return false;
+	//	}
 	CEntityId id = guild->getEId();
-
 
 	// Second argument is a clan.
 	PVP_CLAN::TPVPClan theClan = PVP_CLAN::fromString(args[1]);
-	
+
 	if (theClan == PVP_CLAN::Unknown)
 	{
 		log.displayNL("Invalid clan name specified.");
@@ -2209,12 +2193,12 @@ NLMISC_COMMAND (adjustGuildFame, "For a guild, adjust a specific clan by indicat
 	NLMISC::fromString(args[2], fameAdjustment);
 
 	CFameInterface::getInstance().addFameIndexed(id, PVP_CLAN::getFactionIndex(theClan), fameAdjustment);
-	log.displayNL("Guild's new fame value: %d",CFameInterface::getInstance().getFameIndexed(id,PVP_CLAN::getFactionIndex(theClan)));
+	log.displayNL("Guild's new fame value: %d", CFameInterface::getInstance().getFameIndexed(id, PVP_CLAN::getFactionIndex(theClan)));
 
 	return true;
 }
 
-NLMISC_COMMAND (testit, "testit", "")
+NLMISC_COMMAND(testit, "testit", "")
 {
 	PVP_CLAN::TPVPClan pCult, pCiv, tClan;
 
@@ -2231,8 +2215,8 @@ NLMISC_COMMAND (testit, "testit", "")
 		tClan = PVP_CLAN::fromString(args[2]);
 	}
 
-	//int retval = CFameManager::getInstance().getStartFame(pCiv,tClan);
-	int retval = CFameManager::getInstance().getMaxFameByClan(std::make_pair(pCult,pCiv),tClan);
+	// int retval = CFameManager::getInstance().getStartFame(pCiv,tClan);
+	int retval = CFameManager::getInstance().getMaxFameByClan(std::make_pair(pCult, pCiv), tClan);
 	log.displayNL("Fame value = %d.", retval);
 
 	return true;

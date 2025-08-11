@@ -178,12 +178,13 @@ static void initLinearMatrixIteratorTables(std::vector<CAIEntityMatrixIteratorTb
 	// setup the tables ...
 	ADD_TBL(16)
 	ADD_TBL(23)
-	    ADD_TBL(32) ADD_TBL(36) ADD_TBL(46)
-	        ADD_TBL(48) ADD_TBL(51) ADD_TBL(58)
-	            ADD_TBL(64) ADD_TBL(66) ADD_TBL(68) ADD_TBL(72)
-	                ADD_TBL(80) ADD_TBL(82) ADD_TBL(87) ADD_TBL(91) ADD_TBL(94)
-	                    ADD_TBL(96) ADD_TBL(98) ADD_TBL(102) ADD_TBL(103) ADD_TBL(108)
-	                        ADD_TBL(112) ADD_TBL(114) ADD_TBL(116) ADD_TBL(117) ADD_TBL(122) ADD_TBL(125)
+	ADD_TBL(32)
+	ADD_TBL(36) ADD_TBL(46)
+	    ADD_TBL(48) ADD_TBL(51) ADD_TBL(58)
+	        ADD_TBL(64) ADD_TBL(66) ADD_TBL(68) ADD_TBL(72)
+	            ADD_TBL(80) ADD_TBL(82) ADD_TBL(87) ADD_TBL(91) ADD_TBL(94)
+	                ADD_TBL(96) ADD_TBL(98) ADD_TBL(102) ADD_TBL(103) ADD_TBL(108)
+	                    ADD_TBL(112) ADD_TBL(114) ADD_TBL(116) ADD_TBL(117) ADD_TBL(122) ADD_TBL(125)
 
 #undef ADD_TBL
 }

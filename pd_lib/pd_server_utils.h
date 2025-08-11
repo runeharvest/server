@@ -36,7 +36,6 @@
 #include "pd_utils.h"
 #include "timestamp.h"
 
-
 /**
  * CRefIndex, permanent info about the database
  * This class is not intended to be modified, only create when a valid
@@ -46,26 +45,25 @@
 class CRefIndex
 {
 public:
-
 	/// Database Id
-	uint32		DatabaseId;
+	uint32 DatabaseId;
 
 	/// Numeral index of the reference
-	uint32		Index;
+	uint32 Index;
 
 	/// Directory path of the reference, this MUST local path from root database path
-	std::string	Path;
+	std::string Path;
 
 	/// Timestamp, in the form 'YYYY.MM.DD.hh.mm.ss'
-	//std::string	Timestamp;
-	CTimestamp	Timestamp;
+	// std::string	Timestamp;
+	CTimestamp Timestamp;
 
-	void		serial(NLMISC::IStream& s)
+	void serial(NLMISC::IStream &s)
 	{
 		s.xmlPush("reference");
 
 		s.serialCheck(NELID("RIDX"));
-		uint	version = s.serialVersion(0);
+		uint version = s.serialVersion(0);
 
 		s.xmlPush("database");
 		s.serial(DatabaseId);
@@ -82,126 +80,122 @@ public:
 		s.xmlPush("timestamp");
 		if (s.isReading())
 		{
-			std::string	ts;
+			std::string ts;
 			s.serial(ts);
 			Timestamp.fromString(ts.c_str());
 		}
 		else
 		{
-			std::string	ts = Timestamp.toString();
+			std::string ts = Timestamp.toString();
 			s.serial(ts);
 		}
-		//s.serial(Timestamp);
+		// s.serial(Timestamp);
 		s.xmlPop();
 
 		s.xmlPop();
 	}
 
 	/// Constructor
-	CRefIndex(uint32 databaseId) : DatabaseId(databaseId), Index(0)
+	CRefIndex(uint32 databaseId)
+	    : DatabaseId(databaseId)
+	    , Index(0)
 	{
 		setup();
 	}
 
 	/// Setup
-	void	setup()
+	void setup()
 	{
-		Path = "ref."+NLMISC::toString("%08X", Index);
+		Path = "ref." + NLMISC::toString("%08X", Index);
 		setTimestamp();
 	}
 
 	/**
 	 * Set Time stamp
 	 */
-	void			setTimestamp();
-
-
-	/**
-	 * Load a Reference index file
-	 */
-	bool			load(const std::string& filename);
+	void setTimestamp();
 
 	/**
 	 * Load a Reference index file
 	 */
-	bool			load();
+	bool load(const std::string &filename);
+
+	/**
+	 * Load a Reference index file
+	 */
+	bool load();
 
 	/**
 	 * Save a Reference index file
 	 */
-	bool			save();
+	bool save();
 
 	/**
 	 * Save a Reference index file
 	 */
-	bool			save(const std::string& filename);
+	bool save(const std::string &filename);
 
 	/**
 	 * Build next Reference index file
 	 */
-	bool			buildNext();
+	bool buildNext();
 
 	/**
 	 * Get next Reference index file
 	 */
-	void			getNext();
+	void getNext();
 
 	/**
 	 * Get (and setup if needed) database root path
 	 */
-	std::string		getRootPath();
+	std::string getRootPath();
 
 	/**
 	 * Get reference path
 	 */
-	std::string		getPath();
+	std::string getPath();
 
 	/**
 	 * Set As Valid Reference
 	 */
-	bool			setAsValidRef();
+	bool setAsValidRef();
 
 	/**
 	 * Get Nominal Root Path
 	 */
-	std::string		getNominalRootPath();
-
+	std::string getNominalRootPath();
 
 	/**
 	 * Get Seconds update path
 	 */
-	std::string		getSecondsUpdatePath();
+	std::string getSecondsUpdatePath();
 
 	/**
 	 * Get Minutes update path
 	 */
-	std::string		getMinutesUpdatePath();
+	std::string getMinutesUpdatePath();
 
 	/**
 	 * Get Hours update path
 	 */
-	std::string		getHoursUpdatePath();
+	std::string getHoursUpdatePath();
 
 	/**
 	 * Get Log path
 	 */
-	std::string		getLogPath();
+	std::string getLogPath();
 
 private:
-
 	/**
 	 * Setup reference directory
 	 */
-	bool			setupDirectory();
+	bool setupDirectory();
 
 	/**
 	 * Check directory
 	 */
-	bool			checkDirectory(const std::string& path);
+	bool checkDirectory(const std::string &path);
 };
-
-
-
 
 /**
  * CDatabaseState
@@ -213,65 +207,55 @@ private:
 class CDatabaseState
 {
 public:
-
 	/// Constructor
 	CDatabaseState();
 
 	/// Database Name
-	std::string			Name;
+	std::string Name;
 
 	/// Database Id
-	uint32				Id;
+	uint32 Id;
 
 	/// Last Update Id
-	uint32				LastUpdateId;
+	uint32 LastUpdateId;
 
 	/// Current Valid Index
-	uint32				CurrentIndex;
+	uint32 CurrentIndex;
 
 	/// End Database Update Timestamp
-	CTimestamp			EndTimestamp;
-
+	CTimestamp EndTimestamp;
 
 	/// Serial method
-	void				serial(NLMISC::IStream& s);
+	void serial(NLMISC::IStream &s);
 
 	/// Save State
-	bool				save(CRefIndex& ref);
+	bool save(CRefIndex &ref);
 
 	/// Load State
-	bool				load(CRefIndex& ref, bool usePrevious = false);
+	bool load(CRefIndex &ref, bool usePrevious = false);
 
 	/// Load State
-	bool				load(const std::string& rootpath, bool usePrevious = false);
+	bool load(const std::string &rootpath, bool usePrevious = false);
 
 	/// State exists in path
-	static bool			exists(const std::string& rootpath);
-
-
-	/// Get state filename
-	static std::string	fileName()					{ return "state"; }
+	static bool exists(const std::string &rootpath);
 
 	/// Get state filename
-	static std::string	fileName(CRefIndex& ref)	{ return ref.getRootPath()+"state"; }
+	static std::string fileName() { return "state"; }
 
+	/// Get state filename
+	static std::string fileName(CRefIndex &ref) { return ref.getRootPath() + "state"; }
 
 private:
-
 };
-
-
-
-
-
-
 
 class CMixedStreamFile : public NLMISC::IStream
 {
 public:
-
 	/// Constructor
-	CMixedStreamFile() : NLMISC::IStream(false), _File(NULL)
+	CMixedStreamFile()
+	    : NLMISC::IStream(false)
+	    , _File(NULL)
 	{
 	}
 
@@ -281,7 +265,7 @@ public:
 		close();
 	}
 
-	bool				open(const char* filename, const char* mode = "rb")
+	bool open(const char *filename, const char *mode = "rb")
 	{
 		if (_File != NULL)
 			return false;
@@ -293,40 +277,55 @@ public:
 		return true;
 	}
 
-	virtual void		close()
+	virtual void close()
 	{
 		if (_File != NULL)
 			fclose(_File);
 		_File = NULL;
 	}
 
-	void				flush()
+	void flush()
 	{
 		if (_File != NULL)
 			fflush(_File);
 	}
 
 protected:
-
 	/// standard FILE handler
-	FILE*				_File;
+	FILE *_File;
 
-	bool				readBuffer(void* buf, uint len)					{ if (_File == NULL) return false; uint32 rb = (uint32)fread(buf, 1, len, _File); _ReadBytes += rb; return rb == len; }
-	bool				writeBuffer(const void* buf, uint len)			{ if (_File == NULL) return false; uint32 wb = (uint32)fwrite(buf, 1, len, _File); _WrittenBytes += wb; return wb == len; }
-	bool				readBuffer(void* buf, uint len, uint& readlen)	{ if (_File == NULL) return false; readlen = (uint)fread(buf, 1, len, _File); return readlen == len; }
+	bool readBuffer(void *buf, uint len)
+	{
+		if (_File == NULL) return false;
+		uint32 rb = (uint32)fread(buf, 1, len, _File);
+		_ReadBytes += rb;
+		return rb == len;
+	}
+	bool writeBuffer(const void *buf, uint len)
+	{
+		if (_File == NULL) return false;
+		uint32 wb = (uint32)fwrite(buf, 1, len, _File);
+		_WrittenBytes += wb;
+		return wb == len;
+	}
+	bool readBuffer(void *buf, uint len, uint &readlen)
+	{
+		if (_File == NULL) return false;
+		readlen = (uint)fread(buf, 1, len, _File);
+		return readlen == len;
+	}
 
-	static uint64		_ReadBytes;
-	static uint64		_WrittenBytes;
+	static uint64 _ReadBytes;
+	static uint64 _WrittenBytes;
 
-	template<typename T>
-	bool				readValue(T& v)									{ return readBuffer(&v, sizeof(v)); }
+	template <typename T>
+	bool readValue(T &v) { return readBuffer(&v, sizeof(v)); }
 
-	template<typename T>
-	bool				writeValue(const T& v)							{ return writeBuffer(&v, sizeof(v)); }
+	template <typename T>
+	bool writeValue(const T &v) { return writeBuffer(&v, sizeof(v)); }
 
 public:
-
-	virtual void		serialBuffer(uint8 *buf, uint len)
+	virtual void serialBuffer(uint8 *buf, uint len)
 	{
 		if (_File == NULL)
 			throw NLMISC::EStream("CMixedStreamFile not opened");
@@ -334,139 +333,124 @@ public:
 		if (isReading())
 		{
 			if (!readBuffer(buf, len))
-				throw NLMISC::EStream("file error "+NLMISC::toString(ferror(_File)));
+				throw NLMISC::EStream("file error " + NLMISC::toString(ferror(_File)));
 		}
 		else
 		{
 			if (!writeBuffer(buf, len))
-				throw NLMISC::EStream("file error "+NLMISC::toString(ferror(_File)));
+				throw NLMISC::EStream("file error " + NLMISC::toString(ferror(_File)));
 		}
 	}
 
-	virtual void		serialBit(bool &bit)
+	virtual void serialBit(bool &bit)
 	{
 		if (isReading())
 		{
-			uint8	b;
+			uint8 b;
 			serial(b);
 			bit = (b != 0);
 		}
 		else
 		{
-			uint8	b = bit;
+			uint8 b = bit;
 			serial(b);
 		}
 	}
 };
 
-
-
-
 class CRowMapper
 {
 public:
-
 	/// Constructor
 	CRowMapper();
 
 	/// Clear up mapper
-	void					clear();
+	void clear();
 
 	/// Set link
-	void					link(CRowMapper* link)				{ _Link = link; }
-
+	void link(CRowMapper *link) { _Link = link; }
 
 	/// Key
-	typedef uint64	TKey;
-
-
+	typedef uint64 TKey;
 
 	/**
 	 * Declares a row as allocated
 	 */
-	bool					allocate(RY_PDS::TRowIndex row);
+	bool allocate(RY_PDS::TRowIndex row);
 
 	/**
 	 * Declares a row as deallocated
 	 */
-	bool					deallocate(RY_PDS::TRowIndex row);
+	bool deallocate(RY_PDS::TRowIndex row);
 
 	/**
 	 * Checks if a row is allocated
 	 */
-	bool					allocated(RY_PDS::TRowIndex row) const;
+	bool allocated(RY_PDS::TRowIndex row) const;
 
 	/**
 	 * Get Number of Allocated rows
 	 */
-	uint32					numAllocated() const			{ return _AllocatedRows; }
+	uint32 numAllocated() const { return _AllocatedRows; }
 
 	/**
 	 * Get Max row index used
 	 */
-	RY_PDS::TRowIndex		maxRowIndex() const				{ return _RowState.size(); }
+	RY_PDS::TRowIndex maxRowIndex() const { return _RowState.size(); }
 
 	/**
 	 * Get Next Unalloocated row
 	 */
-	RY_PDS::TRowIndex		nextUnallocatedRow() const;
-
-
+	RY_PDS::TRowIndex nextUnallocatedRow() const;
 
 	/**
 	 * Map a key to an Row
 	 */
-	bool					map(TKey key, const RY_PDS::CObjectIndex& index);
+	bool map(TKey key, const RY_PDS::CObjectIndex &index);
 
 	/**
 	 * Is Row Mapped
 	 */
-	bool					isMapped(TKey key);
+	bool isMapped(TKey key);
 
 	/**
 	 * Get Row from key
 	 */
-	RY_PDS::CObjectIndex	get(TKey key) const;
+	RY_PDS::CObjectIndex get(TKey key) const;
 
 	/**
 	 * Unmap a key of an Row
 	 */
-	bool					unmap(TKey key);
+	bool unmap(TKey key);
 
 	/**
 	 * Get Number of Mapped rows
 	 */
-	uint32					numMapped() const				{ return (uint32)_KeyMap.size(); }
-
-
+	uint32 numMapped() const { return (uint32)_KeyMap.size(); }
 
 private:
-
 	/**
 	 * Bitset of allocated rows, each bit indicates if corresponding row is allocated
 	 */
-	typedef NLMISC::CBitSet							TRowState;
-	TRowState		_RowState;
+	typedef NLMISC::CBitSet TRowState;
+	TRowState _RowState;
 
 	/// Total number of allocated rows
-	uint32			_AllocatedRows;
+	uint32 _AllocatedRows;
 
 	/// Key Hash
 	class CKeyHash
 	{
 	public:
-		size_t	operator() (const TKey& key) const	{ return ((uint32)key) ^ ((uint32)(key >> 32)); }
+		size_t operator()(const TKey &key) const { return ((uint32)key) ^ ((uint32)(key >> 32)); }
 	};
 
-	typedef CHashMap<TKey, RY_PDS::CObjectIndex>	TKeyMap;
-	TKeyMap			_KeyMap;
+	typedef CHashMap<TKey, RY_PDS::CObjectIndex> TKeyMap;
+	TKeyMap _KeyMap;
 
 	/// Row Mapper link, in case of mapped table that inherit from another
-	CRowMapper*		_Link;
+	CRowMapper *_Link;
 };
-
-
-
 
 /**
  * Debug/Log Interface
@@ -474,31 +458,29 @@ private:
 class CPDSLogger
 {
 public:
+	CPDSLogger()
+	    : _ParentLogger(NULL)
+	{
+	}
 
-	CPDSLogger() : _ParentLogger(NULL)					{ }
-
-	void	setParentLogger(const CPDSLogger* parent)	{ _ParentLogger = parent; }
-
+	void setParentLogger(const CPDSLogger *parent) { _ParentLogger = parent; }
 
 	/**
 	 * Get Contextual Identifier String
 	 */
-	std::string	getContextualIndentifier() const;
+	std::string getContextualIndentifier() const;
 
 protected:
-
 	/**
 	 * Get Internal Logger Identifier
 	 * An identifier should ressemble like 'type:id', where type is the 'class'
 	 * of the logger, and id is a unique identifier of the instanciated object of 'class'
 	 */
-	virtual std::string	getLoggerIdentifier() const = 0;
+	virtual std::string getLoggerIdentifier() const = 0;
 
 private:
-
 	/// Parent Logger
-	const CPDSLogger*		_ParentLogger;
-
+	const CPDSLogger *_ParentLogger;
 };
 
 class CPDSLogDisplay
@@ -519,54 +501,50 @@ public:
 	}
 };
 
-#define	PDS_FULL_DEBUG_LEVEL	3
-#define	PDS_NORMAL_DEBUG_LEVEL	2
-#define	PDS_MINIMAL_DEBUG_LEVEL	1
-#define	PDS_NO_DEBUG_LEVEL		0
+#define PDS_FULL_DEBUG_LEVEL 3
+#define PDS_NORMAL_DEBUG_LEVEL 2
+#define PDS_MINIMAL_DEBUG_LEVEL 1
+#define PDS_NO_DEBUG_LEVEL 0
 
+#define PDS_DEBUG_LEVEL PDS_FULL_DEBUG_LEVEL
 
-#define	PDS_DEBUG_LEVEL			PDS_FULL_DEBUG_LEVEL
+#define PDS_DEBUG_IN_L(obj, level)                                              \
+	if (level <= 0 || !RY_PDS::PDVerbose || level > RY_PDS::PDVerboseLevel) { } \
+	else (NLMISC::createDebug(), CPDSLogDisplay(NLMISC::CSetLogPosition(NLMISC::DebugLog, __LINE__, __FILE__).log()).display("%s:", obj->getContextualIndentifier().c_str()))->displayNL
 
+#define PDS_DEBUG_IN(obj) PDS_DEBUG_IN_L(obj, PDS_DEBUG_LEVEL)
+#define PDS_INFO_IN(obj) (NLMISC::createDebug(), CPDSLogDisplay(NLMISC::CSetLogPosition(NLMISC::InfoLog, __LINE__, __FILE__).log()).display("%s:", obj->getContextualIndentifier().c_str()))->displayNL
+#define PDS_WARNING_IN(obj) (NLMISC::createDebug(), CPDSLogDisplay(NLMISC::CSetLogPosition(NLMISC::WarningLog, __LINE__, __FILE__).log()).display("%s:", obj->getContextualIndentifier().c_str()))->displayNL
 
-#define PDS_DEBUG_IN_L(obj, level)							if (level <= 0 || !RY_PDS::PDVerbose || level > RY_PDS::PDVerboseLevel) {} else (NLMISC::createDebug (), CPDSLogDisplay(NLMISC::CSetLogPosition(NLMISC::DebugLog, __LINE__, __FILE__ ).log()).display("%s:", obj->getContextualIndentifier().c_str()))->displayNL
+#define PDS_DEBUG_L(level) PDS_DEBUG_IN_L(this, level)
 
-#define PDS_DEBUG_IN(obj)									PDS_DEBUG_IN_L(obj, PDS_DEBUG_LEVEL)
-#define PDS_INFO_IN(obj)									(NLMISC::createDebug (), CPDSLogDisplay(NLMISC::CSetLogPosition(NLMISC::InfoLog,  __LINE__, __FILE__ ).log()).display("%s:", obj->getContextualIndentifier().c_str()))->displayNL
-#define PDS_WARNING_IN(obj)									(NLMISC::createDebug (), CPDSLogDisplay(NLMISC::CSetLogPosition(NLMISC::WarningLog,  __LINE__, __FILE__ ).log()).display("%s:", obj->getContextualIndentifier().c_str()))->displayNL
+#define PDS_FULL_DEBUG PDS_DEBUG_L(PDS_FULL_DEBUG_LEVEL)
+#define PDS_DEBUG PDS_DEBUG_L(PDS_DEBUG_LEVEL)
+#define PDS_INFO PDS_INFO_IN(this)
+#define PDS_WARNING PDS_WARNING_IN(this)
 
-#define	PDS_DEBUG_L(level)	PDS_DEBUG_IN_L(this, level)
-
-#define	PDS_FULL_DEBUG		PDS_DEBUG_L(PDS_FULL_DEBUG_LEVEL)
-#define PDS_DEBUG			PDS_DEBUG_L(PDS_DEBUG_LEVEL)
-#define PDS_INFO			PDS_INFO_IN(this)
-#define PDS_WARNING			PDS_WARNING_IN(this)
-
-#define	PDS_LOG_DEBUG(level)	if (level <= 0 || !RY_PDS::PDVerbose || level > RY_PDS::PDVerboseLevel) {} else nldebug
-
-
+#define PDS_LOG_DEBUG(level)                                                    \
+	if (level <= 0 || !RY_PDS::PDVerbose || level > RY_PDS::PDVerboseLevel) { } \
+	else nldebug
 
 /*
  *
  */
 
-
 /*
  * Inlines
  */
 
-
 /*
  * Get Contextual Identifier String
  */
-inline std::string	CPDSLogger::getContextualIndentifier() const
+inline std::string CPDSLogger::getContextualIndentifier() const
 {
 	if (_ParentLogger != NULL)
-		return _ParentLogger->getContextualIndentifier()+"|"+getLoggerIdentifier();
+		return _ParentLogger->getContextualIndentifier() + "|" + getLoggerIdentifier();
 	else
 		return getLoggerIdentifier();
 }
-
-
 
 /*
  * Constructor
@@ -579,7 +557,7 @@ inline CRowMapper::CRowMapper()
 /*
  * Clear up mapper
  */
-inline void	CRowMapper::clear()
+inline void CRowMapper::clear()
 {
 	_Link = NULL;
 	_AllocatedRows = 0;
@@ -590,11 +568,11 @@ inline void	CRowMapper::clear()
 /*
  * Declares a row as allocated
  */
-inline bool	CRowMapper::allocate(RY_PDS::TRowIndex row)
+inline bool CRowMapper::allocate(RY_PDS::TRowIndex row)
 {
 	// check for room
 	if (row >= _RowState.size())
-		_RowState.resizeNoReset(row+1);
+		_RowState.resizeNoReset(row + 1);
 
 	// row already allocated?
 	if (_RowState.get(row))
@@ -609,7 +587,7 @@ inline bool	CRowMapper::allocate(RY_PDS::TRowIndex row)
 /*
  * Declares a row as deallocated
  */
-inline bool	CRowMapper::deallocate(RY_PDS::TRowIndex row)
+inline bool CRowMapper::deallocate(RY_PDS::TRowIndex row)
 {
 	// check bit not outside bitset
 	if (row >= _RowState.size())
@@ -628,33 +606,28 @@ inline bool	CRowMapper::deallocate(RY_PDS::TRowIndex row)
 /*
  * Checks if a row is allocated
  */
-inline bool	CRowMapper::allocated(RY_PDS::TRowIndex row) const
+inline bool CRowMapper::allocated(RY_PDS::TRowIndex row) const
 {
 	return row < _RowState.size() && _RowState.get(row);
 }
 
-
 /*
  * Get Next Unalloocated row
  */
-inline RY_PDS::TRowIndex	CRowMapper::nextUnallocatedRow() const
+inline RY_PDS::TRowIndex CRowMapper::nextUnallocatedRow() const
 {
-	RY_PDS::TRowIndex	row;
+	RY_PDS::TRowIndex row;
 
 	// go through all rows till found a free row
-	for (row=0; allocated(row); ++row)
-		;
+	for (row = 0; allocated(row); ++row);
 
 	return row;
 }
 
-
-
-
 /*
  * Map a key to an Row
  */
-inline bool	CRowMapper::map(TKey key, const RY_PDS::CObjectIndex& index)
+inline bool CRowMapper::map(TKey key, const RY_PDS::CObjectIndex &index)
 {
 	if (_Link != NULL)
 	{
@@ -675,7 +648,7 @@ inline bool	CRowMapper::map(TKey key, const RY_PDS::CObjectIndex& index)
 /*
  * Is Row Mapped
  */
-inline bool	CRowMapper::isMapped(TKey key)
+inline bool CRowMapper::isMapped(TKey key)
 {
 	if (_Link != NULL)
 	{
@@ -688,18 +661,19 @@ inline bool	CRowMapper::isMapped(TKey key)
 /*
  * Get Row from key
  */
-inline RY_PDS::CObjectIndex	CRowMapper::get(TKey key) const
+inline RY_PDS::CObjectIndex CRowMapper::get(TKey key) const
 {
 	if (_Link != NULL)
 	{
 		return _Link->get(key);
 	}
 
-	TKeyMap::const_iterator	it = _KeyMap.find(key);
+	TKeyMap::const_iterator it = _KeyMap.find(key);
 
 	if (it == _KeyMap.end())
 	{
-		PDS_LOG_DEBUG(1)("CRowMapper::get(): key '%016" NL_I64 "X' not mapped", key);
+		PDS_LOG_DEBUG(1)
+		("CRowMapper::get(): key '%016" NL_I64 "X' not mapped", key);
 		return RY_PDS::CObjectIndex::null();
 	}
 
@@ -709,14 +683,14 @@ inline RY_PDS::CObjectIndex	CRowMapper::get(TKey key) const
 /*
  * Unmap a key of an Row
  */
-inline bool	CRowMapper::unmap(TKey key)
+inline bool CRowMapper::unmap(TKey key)
 {
 	if (_Link != NULL)
 	{
 		return _Link->unmap(key);
 	}
 
-	TKeyMap::iterator	it = _KeyMap.find(key);
+	TKeyMap::iterator it = _KeyMap.find(key);
 
 	if (it == _KeyMap.end())
 	{
@@ -729,8 +703,4 @@ inline bool	CRowMapper::unmap(TKey key)
 	return true;
 }
 
-
-#endif //RY_PDS_LIB_H
-
-
-
+#endif // RY_PDS_LIB_H

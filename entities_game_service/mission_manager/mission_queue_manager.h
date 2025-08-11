@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef EGS_MISSION_QUEUE_MANAGER_H
 #define EGS_MISSION_QUEUE_MANAGER_H
 
@@ -37,19 +35,19 @@ class CQueueVect
 public:
 	std::vector<uint32> QueueIds;
 
-	void addQueue(uint32 id) 
-	{ 
+	void addQueue(uint32 id)
+	{
 		if (find(id) == false)
 			QueueIds.push_back(id);
 	}
 
-	void removeQueue(uint32 id) 
-	{ 
+	void removeQueue(uint32 id)
+	{
 #ifdef NL_DEBUG
 		nlassert(find(id) == true);
 #endif
 		const uint size = (uint)QueueIds.size();
-		for ( uint i = 0 ; i < size ; ++i )
+		for (uint i = 0; i < size; ++i)
 		{
 			if (QueueIds[i] == id)
 			{
@@ -61,9 +59,9 @@ public:
 	}
 
 	bool find(uint32 id) const
-	{ 
+	{
 		const uint size = (uint)QueueIds.size();
-		for ( uint i = 0 ; i < size ; ++i )
+		for (uint i = 0; i < size; ++i)
 		{
 			if (QueueIds[i] == id)
 			{
@@ -85,9 +83,9 @@ public:
  */
 class CMissionQueueManager
 {
-	typedef std::map< NLMISC::CEntityId, CQueueVect> TPlayerQueues;
-public:
+	typedef std::map<NLMISC::CEntityId, CQueueVect> TPlayerQueues;
 
+public:
 	static CMissionQueueManager *getInstance()
 	{
 		if (_Instance == NULL)
@@ -120,13 +118,13 @@ public:
 	void playerWakesUp(const NLMISC::CEntityId &id, TAIAlias missionAlias);
 
 	/// player wakes up for queueId
-	//void playerWakesUp(const NLMISC::CEntityId &id, uint32 queueId);
+	// void playerWakesUp(const NLMISC::CEntityId &id, uint32 queueId);
 
 	/// disconnect player
 	void disconnectPlayer(const CCharacter *c);
 
 	/// get queue If from it's name
-	uint32 getQueueId( const std::string &name ) const;
+	uint32 getQueueId(const std::string &name) const;
 
 	/// get player position in given queue, return false if player isn't in queue or queue not found
 	bool getPlayerPositions(uint32 queueId, const NLMISC::CEntityId &id, uint16 &position, uint16 &positionOnline, bool &hasPlayerInCritZone) const;
@@ -147,20 +145,19 @@ private:
 	static CMissionQueueManager *_Instance;
 
 	/// map queue from their Id
-	std::map< uint32, CMissionQueue >	_Queues;
+	std::map<uint32, CMissionQueue> _Queues;
 
 	/// var used to attribute an id number to queues. Invalid ID = 0
-	uint32									_QueueIdCounter;
+	uint32 _QueueIdCounter;
 
 	/// map queue name to id
-	std::map< std::string, uint32 >	_QueueNamesToIds;
+	std::map<std::string, uint32> _QueueNamesToIds;
 
 	/// Map here player to the queues in which they are referenced (for faster finds and coherency checks at character loading)
-	TPlayerQueues					_PlayerQueues;
+	TPlayerQueues _PlayerQueues;
 
 	// flag at true if init done
-	bool							_InitOk;
+	bool _InitOk;
 };
 
 #endif // EGS_MISSION_QUEUE_MANAGER_H
-

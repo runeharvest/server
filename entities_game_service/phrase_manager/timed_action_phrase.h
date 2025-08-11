@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_TIMED_ACTION_PHRASE_H
 #define RYZOM_TIMED_ACTION_PHRASE_H
 
@@ -23,7 +21,6 @@
 #include "timed_actions.h"
 //
 #include "game_share/client_action_type.h"
-
 
 /**
  * This class represents a sabrina phrase used for special powers such as auras
@@ -34,7 +31,6 @@
 class CTimedActionPhrase : public CSPhrase
 {
 public:
-
 	/// ctor
 	CTimedActionPhrase();
 
@@ -43,14 +39,14 @@ public:
 
 	/// \name Override methods from CSPhrase
 	//@{
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true );
+	virtual bool build(const TDataSetRow &actorRowId, const std::vector<const CStaticBrick *> &bricks, bool buildToExecute = true);
 
 	/**
 	 * evaluate phrase
 	 * \return true if eval has been made without errors
 	 */
 	virtual bool evaluate();
-	
+
 	/**
 	 * validate phrase
 	 * \return true if phrase is valid
@@ -60,7 +56,7 @@ public:
 	virtual void execute();
 	virtual bool launch();
 	virtual void apply();
-	
+
 	/**
 	 * called at the end of the latency time
 	 */
@@ -78,35 +74,35 @@ public:
 	//@}
 
 	/// test if action is canceled when actor is being hit, return true if canceled
-	bool testCancelOnHit( sint32 attackSkillValue, CEntityBase * entity, CEntityBase * defender);
+	bool testCancelOnHit(sint32 attackSkillValue, CEntityBase *entity, CEntityBase *defender);
 
 	/**
 	 * set the primary target
 	 * \param entityId id of the primary target
 	 */
-	virtual void setPrimaryTarget( const TDataSetRow &entityRowId ) { _TargetRowId = entityRowId; }
+	virtual void setPrimaryTarget(const TDataSetRow &entityRowId) { _TargetRowId = entityRowId; }
 
 	/// get target
 	inline const TDataSetRow &getTarget() const { return _TargetRowId; }
 
 private:
 	/// acting entity
-	TDataSetRow				_ActorRowId;
+	TDataSetRow _ActorRowId;
 
 	/// target id
-	TDataSetRow				_TargetRowId;
+	TDataSetRow _TargetRowId;
 
 	/// a pointer to the action to execute
-	CTimedAction *			_TimedAction;
+	CTimedAction *_TimedAction;
 
 	/// execution duration
-	NLMISC::TGameCycle		_ExecutionDuration;
+	NLMISC::TGameCycle _ExecutionDuration;
 
 	/// client action type
 	CLIENT_ACTION_TYPE::TClientActionType _ActionType;
 
 	/// root sheet id
-	NLMISC::CSheetId		_RootSheetId;
+	NLMISC::CSheetId _RootSheetId;
 };
 
 #endif // RYZOM_TIMED_ACTION_PHRASE_H

@@ -14,15 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYAI_KEYWORD_H
 #define RYAI_KEYWORD_H
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/common.h"
 #include "nel/misc/debug.h"
-
 
 //---------------------------------------------------------------------------------
 // CKeywordMask
@@ -32,14 +29,14 @@
 class CKeywordMask
 {
 public:
-	inline CKeywordMask(uint32 mask=0)
+	inline CKeywordMask(uint32 mask = 0)
 	{
-		_mask=mask;
+		_mask = mask;
 	}
 
 	inline CKeywordMask(const CKeywordMask &other)
 	{
-		_mask=other._mask;
+		_mask = other._mask;
 	}
 
 	// equivalence operators: == !=
@@ -55,15 +52,15 @@ public:
 	// basic bitwise operators: & |	~
 	inline CKeywordMask operator&(const CKeywordMask &other) const
 	{
-		return CKeywordMask( _mask & other._mask );
+		return CKeywordMask(_mask & other._mask);
 	}
 	inline CKeywordMask operator|(const CKeywordMask &other) const
 	{
-		return CKeywordMask( _mask | other._mask );
+		return CKeywordMask(_mask | other._mask);
 	}
-	inline CKeywordMask operator~()	const
+	inline CKeywordMask operator~() const
 	{
-		return CKeywordMask( ~_mask );
+		return CKeywordMask(~_mask);
 	}
 
 	// basic bitwise operators with assignment: &= |= =
@@ -93,7 +90,7 @@ public:
 		return _mask == 0;
 	}
 
-	uint32  asUint() const { return _mask; }
+	uint32 asUint() const { return _mask; }
 
 private:
 	uint32 _mask;
@@ -113,53 +110,51 @@ private:
 class CKeywordFilter
 {
 public:
-	inline CKeywordFilter()	{}
+	inline CKeywordFilter() { }
 	inline CKeywordFilter(const CKeywordFilter &other)
-	{	 
-		*this=other;
+	{
+		*this = other;
 	}
 
 	inline bool test(const CKeywordMask &mask) const
 	{
-		return 
-			(mask & (_includeAll|_notInclude) ) == _includeAll &&
-			( _includeAny.isEmpty() || !(mask & _includeAny).isEmpty() );
+		return (mask & (_includeAll | _notInclude)) == _includeAll && (_includeAny.isEmpty() || !(mask & _includeAny).isEmpty());
 	}
 
 	inline const CKeywordFilter &operator=(const CKeywordFilter &other)
 	{
-		_includeAll=other._includeAll;
-		_includeAny=other._includeAny;
-		_notInclude=other._notInclude;
+		_includeAll = other._includeAll;
+		_includeAny = other._includeAny;
+		_notInclude = other._notInclude;
 		return *this;
 	}
 
 	inline const CKeywordFilter &operator+=(const CKeywordFilter &other)
 	{
-		_includeAll|=other._includeAll;
-		_includeAny|=other._includeAny;
-		_notInclude|=other._notInclude;
+		_includeAll |= other._includeAll;
+		_includeAny |= other._includeAny;
+		_notInclude |= other._notInclude;
 		return *this;
 	}
 
 	inline const CKeywordFilter &operator-=(const CKeywordFilter &other)
 	{
-		_includeAll&=~other._includeAll;
-		_includeAny&=~other._includeAny;
-		_notInclude&=~other._notInclude;
+		_includeAll &= ~other._includeAll;
+		_includeAny &= ~other._includeAny;
+		_notInclude &= ~other._notInclude;
 		return *this;
 	}
 
 	// handy utility methods: clear() isEmpty()
 	inline void clear()
 	{
-		_includeAll.clear();	
+		_includeAll.clear();
 		_includeAny.clear();
 		_notInclude.clear();
 	}
 	inline bool isEmpty() const
 	{
-		return (_includeAll|_includeAny|_notInclude).isEmpty();
+		return (_includeAll | _includeAny | _notInclude).isEmpty();
 	}
 
 private:
@@ -173,7 +168,7 @@ private:
 //---------------------------------------------------------------------------------
 // CKeywordSet
 //---------------------------------------------------------------------------------
-// A set of keywords 
+// A set of keywords
 // - a vector of keyword names (limited to 32)
 // - methods for generating keyword masks and filters from strings
 // - methods for converting masks and filters back to strings (for debug)
@@ -184,17 +179,17 @@ public:
 	void clear();
 	void addKeywords(const std::string &keywords);
 
-	bool	stringToMask(std::string s, CKeywordMask &result) const;
-	bool	stringToFilter(std::string s, CKeywordFilter &result) const ;
+	bool stringToMask(std::string s, CKeywordMask &result) const;
+	bool stringToFilter(std::string s, CKeywordFilter &result) const;
 
-	std::string		maskToString(CKeywordMask mask) const;
-	std::string		filterToString(CKeywordFilter filter) const;
+	std::string maskToString(CKeywordMask mask) const;
+	std::string filterToString(CKeywordFilter filter) const;
 
-	std::string		toString();	// build the valid wor list into a blank-separated string
+	std::string toString(); // build the valid wor list into a blank-separated string
 
 private:
 	std::vector<std::string> _words;
 };
- 
+
 //---------------------------------------------------------------------------------
 #endif

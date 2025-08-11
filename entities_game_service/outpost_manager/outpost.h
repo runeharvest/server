@@ -31,7 +31,7 @@
 #include "database_outpost.h"
 
 /**
- * All classes in this file : 
+ * All classes in this file :
  * \author Nicolas Brigand
  * \author Olivier Cado
  * \author Sebastien Guignot
@@ -40,16 +40,14 @@
  * \date 2005
  */
 
-
 /// forward declarations
 class CGuild;
 class COutpost;
 class CStaticOutpost;
 class CGuildCharProxy;
 
-namespace NLLIGO
-{
-	class IPrimitive;
+namespace NLLIGO {
+class IPrimitive;
 }
 
 /**
@@ -57,18 +55,18 @@ namespace NLLIGO
  * Contains data read from primitive ( static data ) and persistent dynamic data
  */
 class COutpost
-: public CPVPOutpostZone
+    : public CPVPOutpostZone
 {
 	friend class COutpostGuildDBUpdater;
 	NLMISC_COMMAND_FRIEND(outpostSetFightData);
 
 public:
-	
 	/// outposts are persistent and stored through PDR
 	DECLARE_PERSISTENCE_METHODS
-	
+
 public:
-	enum TChallengeOutpostErrors {
+	enum TChallengeOutpostErrors
+	{
 		NoError = 0,
 		InvalidUser,
 		InvalidOutpost,
@@ -82,7 +80,7 @@ public:
 		TooManyGuildOutposts,
 		UnknownError,
 	};
-	
+
 	enum TEditingAccessType
 	{
 		EditSquads,
@@ -91,14 +89,14 @@ public:
 
 		NbEditingAccessType
 	};
-	
+
 	enum TBroadcastAudience
 	{
 		OwnerGuild,
 		AttackerGuild,
 		OwnerFighters,
 		AttackerFighters,
-		
+
 		NbBroadcastAudience
 	};
 	enum TBroadcastMessage
@@ -115,16 +113,16 @@ public:
 		AttackRounds,
 		DefenseRounds,
 		WarDeclared,
-		
+
 		NbBroadcastMessage
 	};
-	
+
 public:
 	COutpost();
-	
+
 	/// build an outpost from a primitive
-	bool build(const NLLIGO::IPrimitive* prim,const std::string &filename,const std::string &dynSystem, CONTINENT::TContinent continent);
-	
+	bool build(const NLLIGO::IPrimitive *prim, const std::string &filename, const std::string &dynSystem, CONTINENT::TContinent continent);
+
 	/// return true if this building was awaited to be built
 	bool onBuildingSpawned(CCreature *pBuilding);
 
@@ -137,8 +135,8 @@ public:
 	/// accessors
 	//@{
 	TAIAlias getAlias() const { return _Alias; }
-	const std::string& getName() const { return _Name; }
-	const NLMISC::CSheetId& getSheet() const { return _Sheet; }
+	const std::string &getName() const { return _Name; }
+	const NLMISC::CSheetId &getSheet() const { return _Sheet; }
 	/// returns the state of the outpost
 	OUTPOSTENUMS::TOutpostState getState() const { return _State; }
 	std::string getStateName() const;
@@ -146,14 +144,14 @@ public:
 	void setOutpostCurrentLevel(uint32 level) { _CurrentOutpostLevel = level; }
 
 	/// returns the sheet of the outpost
-	const CStaticOutpost* getStaticForm() const { return _Form; }
+	const CStaticOutpost *getStaticForm() const { return _Form; }
 
 	/// return true if the owner of the outpost is a guild (not a tribe)
 	bool isBelongingToAGuild() const;
 
 	/// get challenge cost (price to attack this outpost)
 	uint32 getChallengeCost() const;
-	
+
 	/// get a random spawn zone of the outpost
 	TAIAlias getRandomSpawnZone() const;
 	//@}
@@ -168,18 +166,18 @@ public:
 	EGSPD::TGuildId getOwnerGuild() const { return _OwnerGuildId; }
 	/// return the id of the guild attacking the outpost (opponent), or 0 in peace time
 	EGSPD::TGuildId getAttackerGuild() const { return _AttackerGuildId; }
-	
+
 	/// challenges the outpost (war declaration). attackerGuild must be non-null.
-	TChallengeOutpostErrors challengeOutpost(CGuild* attackerGuild, bool simulate = false);
-	
+	TChallengeOutpostErrors challengeOutpost(CGuild *attackerGuild, bool simulate = false);
+
 	/// if the attacking guild want to stop the attack (or counter attack)
 	void giveupAttack();
 	/// if the attacking guild want to stop the attack (or counter attack)
 	void giveupOwnership();
-	
+
 	void ownerGuildVanished();
 	void attackerGuildVanished();
-	
+
 	/// set a squad in the given slot
 	bool setSquad(OUTPOSTENUMS::TPVPSide side, uint32 squadSlot, uint32 shopSquadIndex);
 	/// set the spawn zone of a squad
@@ -195,24 +193,24 @@ public:
 	void setAttackerExpenseLimit(uint32 expenseLimit);
 
 	/// dump outpost
-	void dumpOutpost(NLMISC::CLog & log) const;
+	void dumpOutpost(NLMISC::CLog &log) const;
 	/// get a one line description string (for debug)
 	std::string toString() const;
 	//@}
-	
+
 	/// PVP zone management (IPVPZone implementation)
 	//@{
-	virtual bool leavePVP(CCharacter * user, IPVP::TEndType type);
-	virtual void addPlayer(CCharacter * user);
+	virtual bool leavePVP(CCharacter *user, IPVP::TEndType type);
+	virtual void addPlayer(CCharacter *user);
 	virtual bool isCharacterInConflict(CCharacter *user) const;
-	virtual PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
+	virtual PVP_RELATION::TPVPRelation getPVPRelation(CCharacter *user, CEntityBase *target) const;
 	//@}
-	
+
 	/// get PVP mode to send to the client (IPVP implementation)
 	//@{
 	virtual PVP_MODE::TPVPMode getPVPMode() const { return PVP_MODE::PvpZoneOutpost; }
 	//@}
-	
+
 	/// Init
 	//@{
 	/// called on outposts that have never been saved before
@@ -220,12 +218,12 @@ public:
 	/// register outpost in its owner/attacker guilds if any
 	void registerOutpostInGuilds();
 	//@}
-	
+
 	/// @name Manager used methods
 	//@{
 	/// return the AI instance number of the continent of the outpost
 	uint32 getAIInstanceNumber() const;
-	
+
 	/// send dynamic data to the corresponding AIS, when restarting EGS or
 	/// AIS. aisUp() and aisDown() must be called alternatively (not two
 	/// aisUp() between two aisDown()).
@@ -234,11 +232,11 @@ public:
 	void aisDown();
 
 	bool isAISUp() const { return _AISUp; }
-	
+
 	/// update the outpost state depending on the elapsing time
 	/// \param currentTime : seconds since 1970
 	void updateOutpost(uint32 currentTime);
-	
+
 	/// simulate a timer end
 	void simulateTimer0End(uint32 endTime = 1);
 	/// simulate a timer end
@@ -246,7 +244,7 @@ public:
 	/// simulate a timer end
 	void simulateTimer2End(uint32 endTime = 1);
 	//@}
-	
+
 	/// @name AIS events
 	//@{
 	/// called when a squad was created
@@ -260,26 +258,26 @@ public:
 	/// called when a squad leader died
 	void aieventSquadLeaderDied(uint32 groupId);
 	//@}
-	
+
 	/// @name Squad used methods
 	//@{
 	/// return the AIS Id corresponding to the instance of the continent of the outpost, or 0 (with a nlwarning) if not found (AIS not online...)
 	NLNET::TServiceId getAISId() const;
-	
+
 	/// send a message to the AIS hosting the outpost
 	template <class T>
-		void sendOutpostMessage(const std::string& msgName, T& paramStruct)
+	void sendOutpostMessage(const std::string &msgName, T &paramStruct)
 	{
 		NLNET::TServiceId aisId = getAISId();
-		if ( aisId.get() != 0 )
+		if (aisId.get() != 0)
 		{
-			NLNET::CMessage msgout( msgName );
-			msgout.serial( paramStruct );
-			sendMessageViaMirror( aisId, msgout );
+			NLNET::CMessage msgout(msgName);
+			msgout.serial(paramStruct);
+			sendMessageViaMirror(aisId, msgout);
 		}
 	}
 	//@}
-	
+
 	/// @name AIS interface
 	//@{
 	/// initialize default squads
@@ -288,22 +286,21 @@ public:
 	void resetDefaultDefenseSquads();
 	//@}
 
-
-	/// Banishment management	
-	bool isPlayerBanishedForAttack( NLMISC::CEntityId& id ) const;
-	bool isPlayerBanishedForDefense( NLMISC::CEntityId& id ) const;
-	bool isGuildBanishedForAttack( uint32 guildId ) const;
-	bool isGuildBanishedForDefense( uint32 guildId ) const;
-	void banishPlayerForAttack( NLMISC::CEntityId& id );
-	void banishPlayerForDefense( NLMISC::CEntityId& id );
-	void banishGuildForAttack( uint32 guildId );
-	void banishGuildForDefense( uint32 guildId );
-	void unBanishPlayerForAttack( NLMISC::CEntityId& id );
-	void unBanishPlayerForDefense( NLMISC::CEntityId& id );
-	void unBanishGuildForAttack( uint32 guildId );
-	void unBanishGuildForDefense( uint32 guildId );
+	/// Banishment management
+	bool isPlayerBanishedForAttack(NLMISC::CEntityId &id) const;
+	bool isPlayerBanishedForDefense(NLMISC::CEntityId &id) const;
+	bool isGuildBanishedForAttack(uint32 guildId) const;
+	bool isGuildBanishedForDefense(uint32 guildId) const;
+	void banishPlayerForAttack(NLMISC::CEntityId &id);
+	void banishPlayerForDefense(NLMISC::CEntityId &id);
+	void banishGuildForAttack(uint32 guildId);
+	void banishGuildForDefense(uint32 guildId);
+	void unBanishPlayerForAttack(NLMISC::CEntityId &id);
+	void unBanishPlayerForDefense(NLMISC::CEntityId &id);
+	void unBanishGuildForAttack(uint32 guildId);
+	void unBanishGuildForDefense(uint32 guildId);
 	void clearBanishment();
-	
+
 	/// Time
 	void timeSetAttackHour(uint32 val);
 	void timeSetDefenseHour(uint32 val);
@@ -314,15 +311,13 @@ public:
 
 	static std::string getErrorString(TChallengeOutpostErrors error);
 
-	
-
 private:
 	/// an event affecting outpost state occurred
-	void eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventParams = NULL);
+	void eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void *eventParams = NULL);
 	/// an event affecting outpost state occurred and has not been handled
 	/// WARNING: it should only be called from eventTriggered
-	void eventException(OUTPOSTENUMS::TOutpostEvent event, void* eventParams);
-	
+	void eventException(OUTPOSTENUMS::TOutpostEvent event, void *eventParams);
+
 	// State machine parameters
 	uint32 computeRoundCount() const;
 	uint32 computeRoundTime() const;
@@ -348,9 +343,10 @@ private:
 	uint32 computeTimeRangeLengthForClient() const;
 	uint32 computeTribeOutpostLevel() const;
 	uint32 computeGuildMinimumOutpostLevel() const;
-	
+
 public:
 	static uint32 s_computeEstimatedAttackTimeForClient(uint32 hour);
+
 private:
 	// Actions
 	void actionPostNextState(OUTPOSTENUMS::TOutpostState state);
@@ -379,14 +375,15 @@ private:
 	struct SFightData
 	{
 		SFightData()
-		: _SpawnedSquadsA(0)
-		, _SpawnedSquadsB(0)
-		, _KilledSquads(0)
-		, _CurrentCombatLevel(0)
-		, _CurrentCombatRound(0)
-		, _MaxAttackLevel(0)
-		, _MaxDefenseLevel(0)
-		{ }
+		    : _SpawnedSquadsA(0)
+		    , _SpawnedSquadsB(0)
+		    , _KilledSquads(0)
+		    , _CurrentCombatLevel(0)
+		    , _CurrentCombatRound(0)
+		    , _MaxAttackLevel(0)
+		    , _MaxDefenseLevel(0)
+		{
+		}
 		uint32 _SpawnedSquadsA;
 		uint32 _SpawnedSquadsB;
 		uint32 _KilledSquads;
@@ -395,7 +392,7 @@ private:
 		uint32 _MaxAttackLevel;
 		uint32 _MaxDefenseLevel;
 	} _FightData;
-	
+
 private:
 	/// called before storing a pdr save record
 	void preStore() const;
@@ -403,37 +400,37 @@ private:
 	void preLoad();
 	/// called after applying a pdr save record for all generic processing work
 	void postLoad();
-	void postLoadSquad(COutpostSquadData & squadData);
+	void postLoadSquad(COutpostSquadData &squadData);
 
-	void setNextAttackSquadA(uint32 index, COutpostSquadData const& squadData);
-	void setNextAttackSquadB(uint32 index, COutpostSquadData const& squadData);
-	void setNextDefenseSquadA(uint32 index, COutpostSquadData const& squadData);
-	void setNextDefenseSquadB(uint32 index, COutpostSquadData const& squadData);
-	
-	bool createSquad(COutpostSquadPtr& squad, COutpostSquadData const& squadData, CGuildCharProxy* leader, CGuild* originGuild, OUTPOSTENUMS::TPVPSide side);
-	
-public: //for commands
+	void setNextAttackSquadA(uint32 index, COutpostSquadData const &squadData);
+	void setNextAttackSquadB(uint32 index, COutpostSquadData const &squadData);
+	void setNextDefenseSquadA(uint32 index, COutpostSquadData const &squadData);
+	void setNextDefenseSquadB(uint32 index, COutpostSquadData const &squadData);
+
+	bool createSquad(COutpostSquadPtr &squad, COutpostSquadData const &squadData, CGuildCharProxy *leader, CGuild *originGuild, OUTPOSTENUMS::TPVPSide side);
+
+public: // for commands
 	/// changes the state of the outpost
 	void setState(OUTPOSTENUMS::TOutpostState state);
-private:
 
+private:
 	/// get an attack/defense squad from slot
-	bool getSquadFromSlot(OUTPOSTENUMS::TPVPSide side, uint32 squadSlot, std::vector<COutpostSquadData> * &squads, uint32 & squadIndex);
-	COutpostSquadData * getSquadFromSlot(OUTPOSTENUMS::TPVPSide side, uint32 squadSlot);
+	bool getSquadFromSlot(OUTPOSTENUMS::TPVPSide side, uint32 squadSlot, std::vector<COutpostSquadData> *&squads, uint32 &squadIndex);
+	COutpostSquadData *getSquadFromSlot(OUTPOSTENUMS::TPVPSide side, uint32 squadSlot);
 
 	/// get the index of the spawn zone (for client database)
-	bool getSpawnZoneIndex(TAIAlias spawnZoneAlias, uint32 & spawnZoneIndex) const;
+	bool getSpawnZoneIndex(TAIAlias spawnZoneAlias, uint32 &spawnZoneIndex) const;
 
 	/// convert shop squad index to squad alias
 	/// \param shopSquadIndex : index of the squad in the squad shop
 	/// \param squadDesc : return the squad descriptor
 	/// \return false if index cannot be converted
-	bool convertShopSquadIndex(uint32 shopSquadIndex, COutpostSquadDescriptor & squadDesc) const;
+	bool convertShopSquadIndex(uint32 shopSquadIndex, COutpostSquadDescriptor &squadDesc) const;
 	/// convert spawn zone index to spawn zone alias
 	/// \param spawnZoneIndex : index of the spawn zone
 	/// \param spawnZoneAlias : return the alias of the spawn zone
 	/// \return false if index cannot be converted
-	bool convertSpawnZoneIndex(uint32 spawnZoneIndex, TAIAlias & spawnZoneAlias) const;
+	bool convertSpawnZoneIndex(uint32 spawnZoneIndex, TAIAlias &spawnZoneAlias) const;
 
 	/// ask an update in the guild database for this outpost
 	void askGuildDBUpdate(COutpostGuildDBUpdater::TDBPropSet dbPropSet) const;
@@ -448,86 +445,86 @@ private:
 	void updateTimersForClient();
 
 	std::string getBroadcastString(TBroadcastMessage message) const;
-	void broadcastMessageMsg(std::vector<TDataSetRow> const& audience, std::string const& message, TVectorParamCheck const& params=TVectorParamCheck()) const;
-	void broadcastMessagePopup(std::vector<TDataSetRow> const& audience, std::string const& message, TVectorParamCheck const& params=TVectorParamCheck(), TVectorParamCheck const& paramsTitle=TVectorParamCheck()) const;
+	void broadcastMessageMsg(std::vector<TDataSetRow> const &audience, std::string const &message, TVectorParamCheck const &params = TVectorParamCheck()) const;
+	void broadcastMessagePopup(std::vector<TDataSetRow> const &audience, std::string const &message, TVectorParamCheck const &params = TVectorParamCheck(), TVectorParamCheck const &paramsTitle = TVectorParamCheck()) const;
 	void broadcastMessage(TBroadcastAudience audience, TBroadcastMessage message) const;
-	
+
 private:
 	/// @name Static data read from primitive
 	//@{
 	/// alias of the outpost
-	TAIAlias								_Alias;
+	TAIAlias _Alias;
 	/// name of the outpost
-	std::string								_Name;
+	std::string _Name;
 	/// Georges sheet id of the outpost, read from an outpost sheet
-	NLMISC::CSheetId						_Sheet;
+	NLMISC::CSheetId _Sheet;
 	/// continent of the outpost
-	CONTINENT::TContinent					_Continent;
-	
+	CONTINENT::TContinent _Continent;
+
 	/// current buildings
-	std::vector< COutpostBuilding >			_Buildings;
+	std::vector<COutpostBuilding> _Buildings;
 
 	/// squads to give to a tribe owner (initial squads)
-	std::vector<COutpostSquadDescriptor>	_TribeSquadsA;
+	std::vector<COutpostSquadDescriptor> _TribeSquadsA;
 	/// squads to give to a tribe owner (following squads)
-	std::vector<COutpostSquadDescriptor>	_TribeSquadsB;
+	std::vector<COutpostSquadDescriptor> _TribeSquadsB;
 	/// default squads to give to outpost owners (ie these squads are free), the first one is the default one
-	std::vector<COutpostSquadDescriptor>	_DefaultSquads;
+	std::vector<COutpostSquadDescriptor> _DefaultSquads;
 	/// squads that can be bought
-	std::vector<COutpostSquadDescriptor>	_BuyableSquads;
+	std::vector<COutpostSquadDescriptor> _BuyableSquads;
 	/// spawn zones of the outpost
-	std::vector<COutpostSpawnZone>			_SpawnZones;
-	
+	std::vector<COutpostSpawnZone> _SpawnZones;
+
 	/// PVP type allowed in the outpost
-	OUTPOSTENUMS::TPVPType					_PVPType;
-	
+	OUTPOSTENUMS::TPVPType _PVPType;
+
 	/// outpost sheet
-	const CStaticOutpost*					_Form;
+	const CStaticOutpost *_Form;
 	//@}
-	
+
 	/// @name Dynamic persistent data
 	//@{
 	/// current state of the outpost
-	OUTPOSTENUMS::TOutpostState				_State;
+	OUTPOSTENUMS::TOutpostState _State;
 	/// the id of the guild owning the outpost (defender), or 0 if a tribe owns the outpost
-	EGSPD::TGuildId							_OwnerGuildId;
+	EGSPD::TGuildId _OwnerGuildId;
 	/// the id of the guild attacking the outpost (opponent), or 0 in peace time
-	EGSPD::TGuildId							_AttackerGuildId;
+	EGSPD::TGuildId _AttackerGuildId;
 	/// squads to use in next attack round (initial squads), they belong to outpost owner
-	std::vector<COutpostSquadData>			_NextAttackSquadsA;
+	std::vector<COutpostSquadData> _NextAttackSquadsA;
 	/// squads to use in next attack round (following squads), they belong to outpost owner
-	std::vector<COutpostSquadData>			_NextAttackSquadsB;
+	std::vector<COutpostSquadData> _NextAttackSquadsB;
 	/// squads to use in next defense round (initial squads), they belong to outpost attacker
-	std::vector<COutpostSquadData>			_NextDefenseSquadsA;
+	std::vector<COutpostSquadData> _NextDefenseSquadsA;
 	/// squads to use in next defense round (following squads), they belong to outpost attacker
-	std::vector<COutpostSquadData>			_NextDefenseSquadsB;
+	std::vector<COutpostSquadData> _NextDefenseSquadsB;
 	/// date of the end of timer 0
-	uint32									_Timer0EndTime;
+	uint32 _Timer0EndTime;
 	/// date of the end of timer 1
-	uint32									_Timer1EndTime;
+	uint32 _Timer1EndTime;
 	/// date of the end of timer 2
-	uint32									_Timer2EndTime;
+	uint32 _Timer2EndTime;
 	/// status of the AIS
-	bool									_AISUp;
+	bool _AISUp;
 	/// level to reach in next outpost attack
-	uint32									_CurrentOutpostLevel;
+	uint32 _CurrentOutpostLevel;
 	/// squads to use in current round (initial squads, to spawn)
-	std::vector<COutpostSquadData>			_CurrentSquadsAQueue;
+	std::vector<COutpostSquadData> _CurrentSquadsAQueue;
 	/// squads to use in current round (following squads, spawned)
-	std::vector<COutpostSquadData>			_CurrentSquadsBQueue;
+	std::vector<COutpostSquadData> _CurrentSquadsBQueue;
 
 	/// expense limit allowed by owner
-	uint32									_OwnerExpenseLimit;
+	uint32 _OwnerExpenseLimit;
 	/// expense limit allowed by attacker
-	uint32									_AttackerExpenseLimit;
+	uint32 _AttackerExpenseLimit;
 	/// money spent by owner for the current battle
-	uint32									_MoneySpentByOwner;
+	uint32 _MoneySpentByOwner;
 	/// money spent by attacker for the current battle
-	uint32									_MoneySpentByAttacker;
+	uint32 _MoneySpentByAttacker;
 
 	/// tells if last outpost challenge ended in a server crash
-	bool									_CrashHappened;
-	
+	bool _CrashHappened;
+
 	/// Timings
 	///
 	/// Challenge starts at _ChallengeHour on day D (or _ChallengeTime since 1970)
@@ -536,82 +533,84 @@ private:
 	/// Defense starts at _ChallengeHour+24*hours
 	/// Attack fight starts at (_ChallengeTime-_ChallengeHour)+48*hours+_DefenseHour + (_DefenseHour<_ChallengeHour?24*hours:0)
 	//@{
-	uint32	_RealChallengeTime;	///< Absolute time of challenge start (when challenge is declared), in seconds since 1970 (UTC)
-	uint32	_ChallengeTime;	///< Absolute time of challenge start (aligned on hour boundary), in seconds since 1970 (UTC)
-	uint32	_ChallengeHour;	///< Hour in the day, starting at UTC midnight, from 0 to 23
-	uint32	_AttackHour;	///< Hour in the day, starting at UTC midnight, from 0 to 23
-	uint32	_DefenseHour;	///< Hour in the day, starting at UTC midnight, from 0 to 23
+	uint32 _RealChallengeTime; ///< Absolute time of challenge start (when challenge is declared), in seconds since 1970 (UTC)
+	uint32 _ChallengeTime; ///< Absolute time of challenge start (aligned on hour boundary), in seconds since 1970 (UTC)
+	uint32 _ChallengeHour; ///< Hour in the day, starting at UTC midnight, from 0 to 23
+	uint32 _AttackHour; ///< Hour in the day, starting at UTC midnight, from 0 to 23
+	uint32 _DefenseHour; ///< Hour in the day, starting at UTC midnight, from 0 to 23
 	//@}
 	//@}
-	
+
 	/// \name Temporary data
 	//@{
 	/// next state of the outpost
-	OUTPOSTENUMS::TOutpostState				_NextState;
+	OUTPOSTENUMS::TOutpostState _NextState;
 	/// squads used in current round (initial squads)
-	std::vector<COutpostSquadPtr>			_CurrentSquadsA;
+	std::vector<COutpostSquadPtr> _CurrentSquadsA;
 	/// squads used in current round (following squads, spawned)
-	std::vector<COutpostSquadPtr>			_CurrentSquadsB;
+	std::vector<COutpostSquadPtr> _CurrentSquadsB;
 
 	/// outpost editing access (used for managing concurrency in outpost editing)
 	struct CEditingAccess
 	{
-		CEditingAccess() : PlayerId(NLMISC::CEntityId::Unknown), Tick(0) {}
+		CEditingAccess()
+		    : PlayerId(NLMISC::CEntityId::Unknown)
+		    , Tick(0)
+		{
+		}
 
-		NLMISC::CEntityId	PlayerId;
-		NLMISC::TGameCycle	Tick;
+		NLMISC::CEntityId PlayerId;
+		NLMISC::TGameCycle Tick;
 	};
 	/// last editing accesses
-	CEditingAccess	_LastOwnerEditingAccess[NbEditingAccessType];
-	CEditingAccess	_LastAttackerEditingAccess[NbEditingAccessType];
+	CEditingAccess _LastOwnerEditingAccess[NbEditingAccessType];
+	CEditingAccess _LastAttackerEditingAccess[NbEditingAccessType];
 	//@}
 
 	/// guilds banished for this outpost
-	std::set<uint32>		_DefenseBanishedGuilds;
-	std::set<uint32>		_AttackBanishedGuilds;
+	std::set<uint32> _DefenseBanishedGuilds;
+	std::set<uint32> _AttackBanishedGuilds;
 
 	/// players banished for this outpost
-	std::set<NLMISC::CEntityId>		_DefenseBanishedPlayers;
-	std::set<NLMISC::CEntityId>		_AttackBanishedPlayers;
+	std::set<NLMISC::CEntityId> _DefenseBanishedPlayers;
+	std::set<NLMISC::CEntityId> _AttackBanishedPlayers;
 
-	
 	/// @name CDB stuff
 	//@{
 public:
-	void addOutpostDBRecipient(NLMISC::CEntityId const& player);
-	void removeOutpostDBRecipient(NLMISC::CEntityId const& player);
-	void fillCharacterOutpostDB( CCharacter * user );
+	void addOutpostDBRecipient(NLMISC::CEntityId const &player);
+	void removeOutpostDBRecipient(NLMISC::CEntityId const &player);
+	void fillCharacterOutpostDB(CCharacter *user);
 
 private:
-//	void setClientDBProp(std::string const& prop, sint64 value );
-//	void setClientDBPropString(std::string const& prop, const ucstring &value );
-//	sint64 getClientDBProp(std::string const& prop);
+	//	void setClientDBProp(std::string const& prop, sint64 value );
+	//	void setClientDBPropString(std::string const& prop, const ucstring &value );
+	//	sint64 getClientDBProp(std::string const& prop);
 	void fillOutpostDB();
 	void sendOutpostDBDeltas();
 
 private:
 	/// CDB group for outpost state
-//	CCDBGroup	_DbGroup;	
-	CBankAccessor_OUTPOST	_DbGroup;
+	//	CCDBGroup	_DbGroup;
+	CBankAccessor_OUTPOST _DbGroup;
 
-	bool		_NeedOutpostDBUpdate;
+	bool _NeedOutpostDBUpdate;
 
 	/// last update of timers for client (cf. STATE_END_DATE and ROUND_END_DATE)
-	uint32		_LastUpdateOfTimersForClient;
-	uint32		_StateEndDateTickForClient;
-	uint32		_RoundEndDateTickForClient;
+	uint32 _LastUpdateOfTimersForClient;
+	uint32 _StateEndDateTickForClient;
+	uint32 _RoundEndDateTickForClient;
 	//@}
 
 	/// @command accessors, must not be used elsewhere
 	//@{
 public:
-	uint32	getRealChallengeTime() const { return _RealChallengeTime; }
-	uint32	getChallengeTime() const { return _ChallengeTime; }
-	uint32	getChallengeHour() const { return _ChallengeHour; }
-	void	setRealChallengeTime(uint32 t) { _RealChallengeTime = t; }
-	void	setChallengeTime(uint32 t) { _ChallengeTime = t; }
-	void	setChallengeHour(uint32 t) { _ChallengeHour = t; }
+	uint32 getRealChallengeTime() const { return _RealChallengeTime; }
+	uint32 getChallengeTime() const { return _ChallengeTime; }
+	uint32 getChallengeHour() const { return _ChallengeHour; }
+	void setRealChallengeTime(uint32 t) { _RealChallengeTime = t; }
+	void setChallengeTime(uint32 t) { _ChallengeTime = t; }
+	void setChallengeHour(uint32 t) { _ChallengeHour = t; }
 };
-
 
 #endif

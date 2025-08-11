@@ -17,7 +17,6 @@
 #ifndef RY_TELEPORT_EFFECT_H
 #define RY_TELEPORT_EFFECT_H
 
-
 //
 #include "entity_manager/entity_base.h"
 #include "phrase_manager/s_effect.h"
@@ -35,22 +34,20 @@ class CTeleportEffect : public CSTimedEffect
 {
 public:
 	///\ctor
-	CTeleportEffect( const TDataSetRow & creatorRowId, 
-						const TDataSetRow & targetRowId, 
-						EFFECT_FAMILIES::TEffectFamily family, 
-						sint32 effectValue, 
-						NLMISC::TGameCycle endDate,
-						const CStaticItem & form
-						);
+	CTeleportEffect(const TDataSetRow &creatorRowId,
+	    const TDataSetRow &targetRowId,
+	    EFFECT_FAMILIES::TEffectFamily family,
+	    sint32 effectValue,
+	    NLMISC::TGameCycle endDate,
+	    const CStaticItem &form);
 
-	virtual bool update(CTimerEvent * event, bool applyEffect){ return false; }
+	virtual bool update(CTimerEvent *event, bool applyEffect) { return false; }
 	/// callback called when the effect is actually removed
 	virtual void removed();
 
 private:
-	const CStaticItem & _Form;
+	const CStaticItem &_Form;
 };
-
 
 #endif // RY_TELEPORT_EFFECT_H
 

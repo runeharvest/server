@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_SPECIAL_POWER_PHRASE_H
 #define RYZOM_SPECIAL_POWER_PHRASE_H
 
@@ -24,7 +22,6 @@
 #include "phrase_manager/s_phrase.h"
 #include "entity_manager/bypass_check_flags.h"
 #include "egs_sheets/egs_static_brick.h"
-
 
 class CGameItem;
 
@@ -37,7 +34,6 @@ class CGameItem;
 class CSpecialPowerPhrase : public CSPhrase
 {
 public:
-
 	/// ctor
 	CSpecialPowerPhrase();
 
@@ -46,14 +42,14 @@ public:
 
 	/// \name Override methods from CSPhrase
 	//@{
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true );
+	virtual bool build(const TDataSetRow &actorRowId, const std::vector<const CStaticBrick *> &bricks, bool buildToExecute = true);
 
 	/**
 	 * evaluate phrase
 	 * \return true if eval has been made without errors
 	 */
 	virtual bool evaluate();
-	
+
 	/**
 	 * validate phrase
 	 * \return true if phrase is valid
@@ -63,7 +59,7 @@ public:
 	virtual void execute();
 	virtual bool launch();
 	virtual void apply();
-	
+
 	/**
 	 * called at the end of the latency time
 	 */
@@ -76,10 +72,10 @@ public:
 	//@}
 
 	/// init phrase from a consumbale item
-	bool buildFromConsumable(const TDataSetRow & actorRowId, const CStaticItem *itemForm, uint16 quality);
+	bool buildFromConsumable(const TDataSetRow &actorRowId, const CStaticItem *itemForm, uint16 quality);
 
 	/// get actor
-	inline const TDataSetRow &getActor() const { return _ActorRowId;}
+	inline const TDataSetRow &getActor() const { return _ActorRowId; }
 	/// get targets
 	const std::vector<TDataSetRow> &getTargets() const { return _Targets; }
 	/// get additional recast time
@@ -95,22 +91,22 @@ private:
 	void applyPowers();
 
 	/// acting entity
-	TDataSetRow					_ActorRowId;	
+	TDataSetRow _ActorRowId;
 
 	/// special power object
-	std::vector<CSpecialPower*>	_Powers;
+	std::vector<CSpecialPower *> _Powers;
 
 	/// affected entities
-	std::vector<TDataSetRow>	_Targets;
+	std::vector<TDataSetRow> _Targets;
 
 	/// additional recast time
-	NLMISC::TGameCycle			_AddRecastTime;
+	NLMISC::TGameCycle _AddRecastTime;
 
 	/// flags to bypass some checks
-	CBypassCheckFlags			_BypassCheckFlags;
+	CBypassCheckFlags _BypassCheckFlags;
 
 	// consumable family Id
-	uint16						_ConsumableFamilyId;
+	uint16 _ConsumableFamilyId;
 };
 
 #endif // RYZOM_SPECIAL_POWER_PHRASE_H

@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #ifndef RY_EGS_STATIC_BRICK_H
 #define RY_EGS_STATIC_BRICK_H
 
@@ -38,19 +35,17 @@
 //
 #include "egs_static_brick.cpp.h"
 
-
 /**
  * Structure to handle a player skill (generally within a skill list)
  */
 class CPlayerSkill
 {
 public:
-
 	/// Constructor (nothing done; use as a struct)
-	CPlayerSkill() {}
+	CPlayerSkill() { }
 
 	/// Init from a string such as "SFM 50". If skill unknown, return false.
-	bool		initFromString( const std::string& skillAndValue );
+	bool initFromString(const std::string &skillAndValue);
 
 	/* Return true if the current skill is the same as other or more skilled
 	 * Ex: (SFM1SG 160, SFM1SG 150) -> true
@@ -58,29 +53,29 @@ public:
 	 */
 	/*bool		isAsSkilledAs( const CPlayerSkill& other ) const
 	{
-		// To make it work again, convert Code and other.Code to string
-		if ( Code.substr( 0, other.Code.size() ) == other.Code )
-			return ( MaxChildrenValue >= other.Value );
-		else
-			return false;
+	    // To make it work again, convert Code and other.Code to string
+	    if ( Code.substr( 0, other.Code.size() ) == other.Code )
+	        return ( MaxChildrenValue >= other.Value );
+	    else
+	        return false;
 	}*/
 
 	/// Return true if Value <= valueLimit
-	bool		isSkillValueLowerThan( sint valueLimit ) const
+	bool isSkillValueLowerThan(sint valueLimit) const
 	{
 		return (Value <= valueLimit);
 	}
 
 	/// Serial
-	void		serial( NLMISC::IStream& s )
+	void serial(NLMISC::IStream &s)
 	{
-		s.serialEnum( Code );
-		s.serial( Value );
+		s.serialEnum(Code);
+		s.serial(Value);
 	}
 
-	//std::string	Code;
-	SKILLS::ESkills	Code;
-	sint32		Value;
+	// std::string	Code;
+	SKILLS::ESkills Code;
+	sint32 Value;
 };
 
 // add params to brick (input for code generator)
@@ -95,33 +90,33 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &par
 struct CFaber : public NLMISC::CRefCount
 {
 	NL_INSTANCE_COUNTER_DECL(CFaber);
+
 public:
-	
-	struct TRawMaterial 
+	struct TRawMaterial
 	{
-		// Needed Rm faber part of item 
-		RM_FABER_TYPE::TRMFType	MpType;
+		// Needed Rm faber part of item
+		RM_FABER_TYPE::TRMFType MpType;
 		// Quantity of this Mp needed
-		uint16	Quantity;
-		
+		uint16 Quantity;
+
 		void serial(NLMISC::IStream &f)
 		{
-			f.serialEnum( MpType );
-			f.serial( Quantity );
+			f.serialEnum(MpType);
+			f.serial(Quantity);
 		}
 	};
 
 	struct TRawMaterialFormula
 	{
-		// Needed Rm formula faber part of item 
+		// Needed Rm formula faber part of item
 		NLMISC::CSheetId MpType;
 		// Quantity of this Mp needed
-		uint16	Quantity;
-		
+		uint16 Quantity;
+
 		void serial(NLMISC::IStream &f)
 		{
-			f.serial( MpType );
-			f.serial( Quantity );
+			f.serial(MpType);
+			f.serial(Quantity);
 		}
 	};
 
@@ -135,17 +130,17 @@ public:
 		Speed = 1.0f;
 		SapLoad = 1.0f;
 		Range = 1.0f;
-		
+
 		DodgeModifier = 1.0f;
 		ParryModifier = 1.0f;
 		AdversaryDodgeModifier = 1.0f;
 		AdversaryParryModifier = 1.0f;
-		
+
 		ProtectionFactor = 1.0f;
 		MaxSlashingProtection = 1.0f;
 		MaxBluntProtection = 1.0f;
 		MaxPiercingProtection = 1.0f;
-		
+
 		AcidProtectionFactor = 1.0f;
 		ColdProtectionFactor = 1.0f;
 		FireProtectionFactor = 1.0f;
@@ -173,153 +168,153 @@ public:
 		SapBonusPerLevel = 0.0f;
 		StaBonusPerLevel = 0.0f;
 		FocusBonusPerLevel = 0.0f;
-		AllowPartialSuccess= true;
+		AllowPartialSuccess = true;
 	}
-	
+
 	void serial(NLMISC::IStream &f)
 	{
-		f.serial( CraftedItem );
-		f.serial( NbItemsPerUnit );
-		
-		f.serial( Durability );
-		f.serial( Weight );
-		f.serial( Dmg );
-		f.serial( Speed );
-		f.serial( SapLoad );
-		f.serial( Range );
-		
-		f.serial( DodgeModifier );
-		f.serial( ParryModifier );
-		f.serial( AdversaryDodgeModifier );
-		f.serial( AdversaryParryModifier );
-		
-		f.serial( ProtectionFactor );
-		f.serial( MaxSlashingProtection );
-		f.serial( MaxBluntProtection );
-		f.serial( MaxPiercingProtection );
-		
-		f.serial( AcidProtectionFactor );
-		f.serial( ColdProtectionFactor );
-		f.serial( FireProtectionFactor );
-		f.serial( RotProtectionFactor );
-		f.serial( ShockWaveProtectionFactor );
-		f.serial( PoisonProtectionFactor );
-		f.serial( ElectricityProtectionFactor );
+		f.serial(CraftedItem);
+		f.serial(NbItemsPerUnit);
 
-		f.serial( DesertResistanceFactor );
-		f.serial( ForestResistanceFactor );
-		f.serial( LacustreResistanceFactor );
-		f.serial( JungleResistanceFactor );
-		f.serial( PrimaryRootResistanceFactor );
+		f.serial(Durability);
+		f.serial(Weight);
+		f.serial(Dmg);
+		f.serial(Speed);
+		f.serial(SapLoad);
+		f.serial(Range);
 
-		f.serial( ElementalCastingTimeFactor );
-		f.serial( ElementalPowerFactor );
-		f.serial( OffensiveAfflictionCastingTimeFactor );
-		f.serial( OffensiveAfflictionPowerFactor );
-		f.serial( HealCastingTimeFactor );
-		f.serial( HealPowerFactor );
-		f.serial( DefensiveAfflictionCastingTimeFactor );
-		f.serial( DefensiveAfflictionPowerFactor );
+		f.serial(DodgeModifier);
+		f.serial(ParryModifier);
+		f.serial(AdversaryDodgeModifier);
+		f.serial(AdversaryParryModifier);
 
-		f.serial( HpBonusPerLevel );
-		f.serial( SapBonusPerLevel );
-		f.serial( StaBonusPerLevel );
-		f.serial( FocusBonusPerLevel );
+		f.serial(ProtectionFactor);
+		f.serial(MaxSlashingProtection);
+		f.serial(MaxBluntProtection);
+		f.serial(MaxPiercingProtection);
 
-		f.serial( AllowPartialSuccess );
-		
+		f.serial(AcidProtectionFactor);
+		f.serial(ColdProtectionFactor);
+		f.serial(FireProtectionFactor);
+		f.serial(RotProtectionFactor);
+		f.serial(ShockWaveProtectionFactor);
+		f.serial(PoisonProtectionFactor);
+		f.serial(ElectricityProtectionFactor);
+
+		f.serial(DesertResistanceFactor);
+		f.serial(ForestResistanceFactor);
+		f.serial(LacustreResistanceFactor);
+		f.serial(JungleResistanceFactor);
+		f.serial(PrimaryRootResistanceFactor);
+
+		f.serial(ElementalCastingTimeFactor);
+		f.serial(ElementalPowerFactor);
+		f.serial(OffensiveAfflictionCastingTimeFactor);
+		f.serial(OffensiveAfflictionPowerFactor);
+		f.serial(HealCastingTimeFactor);
+		f.serial(HealPowerFactor);
+		f.serial(DefensiveAfflictionCastingTimeFactor);
+		f.serial(DefensiveAfflictionPowerFactor);
+
+		f.serial(HpBonusPerLevel);
+		f.serial(SapBonusPerLevel);
+		f.serial(StaBonusPerLevel);
+		f.serial(FocusBonusPerLevel);
+
+		f.serial(AllowPartialSuccess);
+
 		if (f.isReading())
 		{
 			uint8 size;
 			f.serial(size);
 			NeededMps.resize(size);
-			for (uint8 i = 0; i < size ; ++i)
+			for (uint8 i = 0; i < size; ++i)
 			{
-				f.serial( NeededMps[i]);
+				f.serial(NeededMps[i]);
 			}
 
 			f.serial(size);
 			NeededMpsFormula.resize(size);
-			for (uint8 i = 0; i < size ; ++i)
+			for (uint8 i = 0; i < size; ++i)
 			{
-				f.serial( NeededMpsFormula[i]);
+				f.serial(NeededMpsFormula[i]);
 			}
 		}
 		else
 		{
 			uint8 size = (uint8)NeededMps.size();
 			f.serial(size);
-			for (uint8 i = 0; i < size ; ++i)
+			for (uint8 i = 0; i < size; ++i)
 			{
-				f.serial( NeededMps[i] ); 
+				f.serial(NeededMps[i]);
 			}
 
 			size = (uint8)NeededMpsFormula.size();
 			f.serial(size);
-			for (uint8 i = 0; i < size ; ++i)
+			for (uint8 i = 0; i < size; ++i)
 			{
-				f.serial( NeededMpsFormula[i] ); 
+				f.serial(NeededMpsFormula[i]);
 			}
-		}		
+		}
 	}
-	
+
 	// Crafted item
-	NLMISC::CSheetId				CraftedItem;
+	NLMISC::CSheetId CraftedItem;
 	/// number of items built with a single 'pass' (eg. with 1 wood I can make 2 arrows, so i'll never make 1 arrow but at least 2)
-	uint8							NbItemsPerUnit;	
+	uint8 NbItemsPerUnit;
 	/// creation specific
-	std::vector< TRawMaterial >		NeededMps;
+	std::vector<TRawMaterial> NeededMps;
 	/// creation specific (formula part)
-	std::vector< TRawMaterialFormula >		NeededMpsFormula;
+	std::vector<TRawMaterialFormula> NeededMpsFormula;
 	/// stats plan factors
-	float	Durability;
-	float	Weight;
-	float	Dmg;
-	float	Speed;
-	float	SapLoad;
-	float	Range;
+	float Durability;
+	float Weight;
+	float Dmg;
+	float Speed;
+	float SapLoad;
+	float Range;
 
-	float	DodgeModifier;
-	float	ParryModifier;
-	float	AdversaryDodgeModifier;
-	float	AdversaryParryModifier;
+	float DodgeModifier;
+	float ParryModifier;
+	float AdversaryDodgeModifier;
+	float AdversaryParryModifier;
 
-	float	ProtectionFactor;
-	float	MaxSlashingProtection;
-	float	MaxBluntProtection;
-	float	MaxPiercingProtection;
+	float ProtectionFactor;
+	float MaxSlashingProtection;
+	float MaxBluntProtection;
+	float MaxPiercingProtection;
 
-	float	AcidProtectionFactor;
-	float	ColdProtectionFactor;
-	float	FireProtectionFactor;
-	float	RotProtectionFactor;
-	float	ShockWaveProtectionFactor;
-	float	PoisonProtectionFactor;
-	float	ElectricityProtectionFactor;
+	float AcidProtectionFactor;
+	float ColdProtectionFactor;
+	float FireProtectionFactor;
+	float RotProtectionFactor;
+	float ShockWaveProtectionFactor;
+	float PoisonProtectionFactor;
+	float ElectricityProtectionFactor;
 
-	float	DesertResistanceFactor;
-	float	ForestResistanceFactor;
-	float	LacustreResistanceFactor;
-	float	JungleResistanceFactor;
-	float	PrimaryRootResistanceFactor;
+	float DesertResistanceFactor;
+	float ForestResistanceFactor;
+	float LacustreResistanceFactor;
+	float JungleResistanceFactor;
+	float PrimaryRootResistanceFactor;
 
-	float	ElementalCastingTimeFactor;
-	float	ElementalPowerFactor;
-	float	OffensiveAfflictionCastingTimeFactor;
-	float	OffensiveAfflictionPowerFactor;
-	float	HealCastingTimeFactor;
-	float	HealPowerFactor;
-	float	DefensiveAfflictionCastingTimeFactor;
-	float	DefensiveAfflictionPowerFactor;
+	float ElementalCastingTimeFactor;
+	float ElementalPowerFactor;
+	float OffensiveAfflictionCastingTimeFactor;
+	float OffensiveAfflictionPowerFactor;
+	float HealCastingTimeFactor;
+	float HealPowerFactor;
+	float DefensiveAfflictionCastingTimeFactor;
+	float DefensiveAfflictionPowerFactor;
 
 	/// stats factor
-	float	HpBonusPerLevel;
-	float	SapBonusPerLevel;
-	float	StaBonusPerLevel;
-	float	FocusBonusPerLevel;
+	float HpBonusPerLevel;
+	float SapBonusPerLevel;
+	float StaBonusPerLevel;
+	float FocusBonusPerLevel;
 
 	/// Some Plans can Force no Partial Success (instead replace full success)
-	bool	AllowPartialSuccess;
+	bool AllowPartialSuccess;
 };
 
 typedef NLMISC::CSmartPtr<CFaber> CFaberPtr;
@@ -332,139 +327,138 @@ typedef NLMISC::CSmartPtr<CFaber> CFaberPtr;
  */
 class CStaticBrick
 {
-public:	
+public:
 	// Target Restrictions
 	TARGET::TTargetRestriction TargetRestriction;
 
 	/// name of the brick
-	std::string					Name;
+	std::string Name;
 
 	/// the brick family
 	BRICK_FAMILIES::TBrickFamily Family;
 
-	///type of the action of the brick
-	ACTNATURE::TActionNature	Nature;
+	/// type of the action of the brick
+	ACTNATURE::TActionNature Nature;
 
-	///skills linked with the brick
+	/// skills linked with the brick
 	std::vector<SKILLS::ESkills> Skills;
 
 	/// index in family
-	uint8						IndexInFamily;
+	uint8 IndexInFamily;
 
 	/// the brick sheet id
-	NLMISC::CSheetId			SheetId;
+	NLMISC::CSheetId SheetId;
 
 	/// Cost (>0) or credit (<0) (sabrina)
-	sint16						SabrinaValue;
+	sint16 SabrinaValue;
 
 	/// relative Cost (>0.0f) or relative credit (<0.0f), 0.0 if not used
-	float						SabrinaRelativeValue;
+	float SabrinaRelativeValue;
 
 	/// power value of the brick (used for fight modifiers for instance, to compare with weapon required skill value)
-	uint16						PowerValue;
+	uint16 PowerValue;
 
-	/// params 
+	/// params
 	std::vector<TBrickParam::IIdPtr> Params;
 
 	/// params as strings
-	std::vector<std::string>	StringParams;
+	std::vector<std::string> StringParams;
 
 	/// skill points price
-	uint32						SkillPointPrice;
+	uint32 SkillPointPrice;
 
 	/// localisation forced by this brick if any,a phrase cannot have more than one brick setting the localisation (unless they set the same one)
-	SLOT_EQUIPMENT::TSlotEquipment	ForcedLocalisation;
+	SLOT_EQUIPMENT::TSlotEquipment ForcedLocalisation;
 
 	/// mandatory families
-	std::set<BRICK_FAMILIES::TBrickFamily>	MandatoryFamilies;
+	std::set<BRICK_FAMILIES::TBrickFamily> MandatoryFamilies;
 	/// optional families
-	std::set<BRICK_FAMILIES::TBrickFamily>	OptionalFamilies;
+	std::set<BRICK_FAMILIES::TBrickFamily> OptionalFamilies;
 	/// credit families
-	std::set<BRICK_FAMILIES::TBrickFamily>	CreditFamilies;
+	std::set<BRICK_FAMILIES::TBrickFamily> CreditFamilies;
 
 	/// defines flag
-	std::string					ForbiddenDef;
+	std::string ForbiddenDef;
 	/// forbidden flag
-	std::string					ForbiddenExclude;
+	std::string ForbiddenExclude;
 
 	/// range table used
-//	NLMISC::CSheetId						RangeTable;
+	//	NLMISC::CSheetId						RangeTable;
 
 	/// Skills required to learn the brick (OR)
-	std::vector<CPlayerSkill>				LearnRequiresOneOfSkills;
+	std::vector<CPlayerSkill> LearnRequiresOneOfSkills;
 
 	/// Bricks required to learn the brick (AND: all of them are required)
-	std::vector<NLMISC::CSheetId>			LearnRequiresBricks;
+	std::vector<NLMISC::CSheetId> LearnRequiresBricks;
 
 	/// Civilisation restriction
-	EGSPD::CPeople::TPeople					CivRestriction;
+	EGSPD::CPeople::TPeople CivRestriction;
 
 	/// Crafting tool
-	TOOL_TYPE::TCraftingToolType			ToolType;
+	TOOL_TYPE::TCraftingToolType ToolType;
 	/// Crafting duration
-	float									CraftingDuration;
+	float CraftingDuration;
 	/// Faber plan
-	CFaberPtr								Faber;
+	CFaberPtr Faber;
 	/// Min Casting Time (1/10sec).
-	uint8									MinCastTime;
+	uint8 MinCastTime;
 	/// Max Casting Time (1/10sec).
-	uint8									MaxCastTime;
+	uint8 MaxCastTime;
 	/// Min Range (meters).
-	uint8									MinRange;
+	uint8 MinRange;
 	/// Max Range (meters).
-	uint8									MaxRange;
+	uint8 MaxRange;
 	/// faction
-	std::string								Faction;
+	std::string Faction;
 	/// minimum fame value to get this brick
-	sint32									MinFameValue;
+	sint32 MinFameValue;
 	/// when false the brick can't be used when player has no item in hand
-	bool									UsableWithEmptyHands;
-	
-public:	
+	bool UsableWithEmptyHands;
+
+public:
 	/// Constructor
 	CStaticBrick();
 
 	/// Destructor
 	virtual ~CStaticBrick();
-	
+
 	/// Serialisation
 	virtual void serial(NLMISC::IStream &f);
 
 	/// read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 
 	// read static bricks from gived root
-	void readStaticBrick ( const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId );
-		
+	void readStaticBrick(const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId);
+
 	// return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 34 + ( SKILLS::NUM_SKILLS << 16 ); } 
+	inline static uint getVersion() { return 34 + (SKILLS::NUM_SKILLS << 16); }
 
 	/// called when the sheet is removed
-	void removed() {}
+	void removed() { }
 
 	// Load faber
-	void loadFaber( const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId );
+	void loadFaber(const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId);
 
 	// get skill from index
-	inline SKILLS::ESkills getSkill(uint8 i) const 
-	{ 
-		if (i<Skills.size())
-			return Skills[i]; 
+	inline SKILLS::ESkills getSkill(uint8 i) const
+	{
+		if (i < Skills.size())
+			return Skills[i];
 		else
 			return SKILLS::unknown;
 	}
 
 	// get brick from family/index
 	static const CStaticBrick *getBrickFromFamilyIndex(uint16 family, uint16 index);
-			
+
 	/// called to copy from another sheet (operator= + care ptrs)
 	void reloadSheet(const CStaticBrick &o);
-	
+
 private:
 	/// map the pair (family, indexInFamily) to the CStaticGameBrick object
-	static std::map< std::pair<uint16, uint16>, NLMISC::CSheetId> _Bricks;
+	static std::map<std::pair<uint16, uint16>, NLMISC::CSheetId> _Bricks;
 };
-
 
 #endif // RY_EGS_STATIC_BRICK_H
 

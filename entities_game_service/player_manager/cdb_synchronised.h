@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef CDB_SYNCHRONISED_H
 #define CDB_SYNCHRONISED_H
-
 
 #include "cdb_data_instance_container.h"
 #include "cdb_struct_banks.h"
@@ -26,16 +23,13 @@
 class CCDBStructNodeBranch;
 class CCDBStructNodeLeaf;
 
-namespace NLMISC
-{
-	class CBitMemStream;
+namespace NLMISC {
+class CBitMemStream;
 }
 
 struct TPushAtomChangeStruct;
 
-
 const uint CDBChangedPropertyCountBitSize = 16;
-
 
 /**
  * Class to manage a database of properties
@@ -46,25 +40,30 @@ const uint CDBChangedPropertyCountBitSize = 16;
 class CCDBSynchronised
 {
 public:
-
 	/// exception thrown when database is not initialized
 	struct EDBNotInit : public NLMISC::Exception
 	{
-		EDBNotInit() : Exception("CDB: Property Database not initialized") {}
+		EDBNotInit()
+		    : Exception("CDB: Property Database not initialized")
+		{
+		}
 	};
 
 	struct ECDBNotFound : public NLMISC::Exception
 	{
-		ECDBNotFound() : Exception("CDB: Property not found") {}
+		ECDBNotFound()
+		    : Exception("CDB: Property not found")
+		{
+		}
 	};
 
 	/*struct CPropForClientOnly
 	{
-		CPropForClientOnly( const std::string& propName, sint64 value )
-			: PropName(propName), Value(value) {}
+	    CPropForClientOnly( const std::string& propName, sint64 value )
+	        : PropName(propName), Value(value) {}
 
-		std::string	PropName;
-		sint64		Value;
+	    std::string	PropName;
+	    sint64		Value;
 	};*/
 
 	/**
@@ -80,20 +79,20 @@ public:
 	 * \param usePermanentTracker True if you want to be able to get delta of all
 	 * changes done since the beginning (using writePermanentDelta()), otherwise false.
 	 */
-	void init( TCDBBank bank, bool usePermanentTracker=false );
+	void init(TCDBBank bank, bool usePermanentTracker = false);
 
 	/**
 	 * Load a backup of the database
 	 * \param fileName is the name of the backup file
 	 */
-	void read( const std::string& fileName );
+	void read(const std::string &fileName);
 
 	/**
 	 * Save a backup of the database
 	 * \param fileName is the name of the backup file
 	 */
-//	void write( const std::string& fileName ); 	
-	
+	//	void write( const std::string& fileName );
+
 	/**
 	 * Build the bitstream with new changes to send to the recipient
 	 * \param s the stream
@@ -101,7 +100,7 @@ public:
 	 * (may be overtaken).
 	 * \return True if something was written, false if there was nothing to write.
 	 */
-	bool writeDelta( NLMISC::CBitMemStream& s, uint32 maxBitSize );
+	bool writeDelta(NLMISC::CBitMemStream &s, uint32 maxBitSize);
 
 	/**
 	 * Build the bitstream with all changes since the beginning to send to the recipient.
@@ -112,52 +111,52 @@ public:
 	 * \param s the stream
 	 * \return True if something was written, false if there was nothing to write.
 	 */
-	bool writePermanentDelta( NLMISC::CBitMemStream& s );
+	bool writePermanentDelta(NLMISC::CBitMemStream &s);
 
 	// Return true if there are pending property changes pushed using setPropIntoClientonlyDB().
-	//bool hasClientonlyPropertyChanges() const { return ! _PropsForClientOnly.empty(); }
+	// bool hasClientonlyPropertyChanges() const { return ! _PropsForClientOnly.empty(); }
 
 	/**
 	 * Fill the bitstream with the property changes that were pushed using setPropIntoClientonlyDB().
 	 * Empty the list of pending property changes.
 	 * Call only if hasClientonlyPropertyChanges() returned true.
 	 */
-	//void writeClientonlyPropertyChanges( NLMISC::CBitMemStream& s );
+	// void writeClientonlyPropertyChanges( NLMISC::CBitMemStream& s );
 
 	// :KLUDGE: ICDBStructNode non-const 'coz getName and getParent are not
 	// const methods. See implementation for more info.
-	ICDBStructNode * getICDBStructNodeFromName(const std::string& name) const;
-	
-	/**
-	 * Return the value of a property. If not found, throws ECDBNotFound().
-	 * \param name is the name of the property
-	 * \return the value of the property
-	 */
-	sint64 x_getProp( const std::string& name ) const;
-	
-	/**
-	 * Return the value of a property
-	 * Use getICDBStructNodeFromName() to store the node pointer.
-	 * If not found, throws ECDBNotFound().
-	 * Precondition: node not null.
-	 */
-	sint64 x_getProp( ICDBStructNode *node ) const;
+	ICDBStructNode *getICDBStructNodeFromName(const std::string &name) const;
 
 	/**
 	 * Return the value of a property. If not found, throws ECDBNotFound().
 	 * \param name is the name of the property
 	 * \return the value of the property
 	 */
-//	const ucstring &getPropString( const std::string& name ) const;
-	
+	sint64 x_getProp(const std::string &name) const;
+
 	/**
 	 * Return the value of a property
 	 * Use getICDBStructNodeFromName() to store the node pointer.
 	 * If not found, throws ECDBNotFound().
 	 * Precondition: node not null.
 	 */
-	ucstring x_getPropUcstring( ICDBStructNode *node ) const;
-	const std::string &x_getPropString( ICDBStructNode *node ) const;
+	sint64 x_getProp(ICDBStructNode *node) const;
+
+	/**
+	 * Return the value of a property. If not found, throws ECDBNotFound().
+	 * \param name is the name of the property
+	 * \return the value of the property
+	 */
+	//	const ucstring &getPropString( const std::string& name ) const;
+
+	/**
+	 * Return the value of a property
+	 * Use getICDBStructNodeFromName() to store the node pointer.
+	 * If not found, throws ECDBNotFound().
+	 * Precondition: node not null.
+	 */
+	ucstring x_getPropUcstring(ICDBStructNode *node) const;
+	const std::string &x_getPropString(ICDBStructNode *node) const;
 
 	/**
 	 * Set the value of a property if it is not the same as the current one (the update flag is set to true)
@@ -166,20 +165,20 @@ public:
 	 * \param forceSending is a flag to force to send the update even if the value has not changed
 	 * \return bool : 'true' if the property was found.
 	 */
-	bool x_setProp( const std::string& name, sint64 value, bool forceSending=false );
+	bool x_setProp(const std::string &name, sint64 value, bool forceSending = false);
 
 	/**
 	 * Same as setProp(string,sint64,bool) but much faster version.
 	 * Use getICDBStructNodeFromName() to store the node pointer.
 	 */
-	bool x_setProp( ICDBStructNode *node, sint64 value, bool forceSending=false );
+	bool x_setProp(ICDBStructNode *node, sint64 value, bool forceSending = false);
 
 	/**
 	 * Same as setProp(ICDBStructNode*,sint64,bool) but one level below.
 	 * If the child is not found, returns false.
 	 * Use getICDBStructNodeFromName() to store the node pointer.
 	 */
-	bool x_setProp( ICDBStructNode *node, const char *childName, sint64 value, bool forceSending=false );
+	bool x_setProp(ICDBStructNode *node, const char *childName, sint64 value, bool forceSending = false);
 
 	/**
 	 * Set the value of a property if it is not the same as the current one (the update flag is set to true)
@@ -188,27 +187,27 @@ public:
 	 * \param forceSending is a flag to force to send the update even if the value has not changed
 	 * \return bool : 'true' if the property was found.
 	 */
-	bool x_setPropString( const std::string& name, const ucstring &value, bool forceSending=false );
+	bool x_setPropString(const std::string &name, const ucstring &value, bool forceSending = false);
 
 	/**
 	 * Same as setProp(string,sint64,bool) but much faster version.
 	 * Use getICDBStructNodeFromName() to store the node pointer.
 	 */
-	bool x_setPropString( ICDBStructNode *node, const ucstring &value, bool forceSending=false );
-	bool x_setPropString( ICDBStructNode *node, const std::string &value, bool forceSending=false );
+	bool x_setPropString(ICDBStructNode *node, const ucstring &value, bool forceSending = false);
+	bool x_setPropString(ICDBStructNode *node, const std::string &value, bool forceSending = false);
 
 	/**
 	 * Same as setProp(ICDBStructNode*,sint64,bool) but one level below.
 	 * If the child is not found, returns false.
 	 * Use getICDBStructNodeFromName() to store the node pointer.
 	 */
-	bool x_setPropString( ICDBStructNode *node, const char *childName, const ucstring &value, bool forceSending=false );
+	bool x_setPropString(ICDBStructNode *node, const char *childName, const ucstring &value, bool forceSending = false);
 
 	/**
 	 * Same as setProp(ICDBStructNode*,const char*,sint64,bool) but increment the current value
 	 * Precondition: the child MUST be a leaf
 	 */
-	bool x_incProp( ICDBStructNode *node, const char *childName );
+	bool x_incProp(ICDBStructNode *node, const char *childName);
 
 	/**
 	 * Set the value of a property (but the update flag is NOT changed)
@@ -216,7 +215,7 @@ public:
 	 * \param value is the value of the property
 	 * \return bool : 'true' if the property was found.
 	 */
-	bool x_setPropButDontSend( const std::string& name, sint64 value );
+	bool x_setPropButDontSend(const std::string &name, sint64 value);
 
 	/**
 	 * Set the value of a property that is not in the server database tree.
@@ -224,12 +223,12 @@ public:
 	 * Then it will be applied to the client database.
 	 * Do not use too frequently (no bandwidth regulation).
 	 */
-	//bool setPropIntoClientonlyDB( const std::string& name, sint64 value );
+	// bool setPropIntoClientonlyDB( const std::string& name, sint64 value );
 
 	/**
 	 * Return true if the specified property has been modified and will be sent to the client
 	 */
-	bool isModified(  const std::string& name ) const;
+	bool isModified(const std::string &name) const;
 
 	/**
 	 * Return the count of property which have been modified
@@ -244,68 +243,59 @@ public:
 	void setAsSent() { _NotSentYet = false; }
 
 	/// Return the bank
-	TCDBBank	bank() const { return _Bank; }
+	TCDBBank bank() const { return _Bank; }
 
 	/// Number of database changes pushed to packets for the client
-	uint32		NbDatabaseChanges;
+	uint32 NbDatabaseChanges;
 
 	/**
 	 * Return the string associated with id
 	 * \param id is the string id
 	 * \return the string
 	 */
-	//std::string getString( uint32 id );
+	// std::string getString( uint32 id );
 
 	/**
 	 * Set a new string association
 	 * \param id is the string id
 	 * \param str is the new string
 	 */
-	//void setString( uint32 id, std::string );
+	// void setString( uint32 id, std::string );
 
 	/// tests
 	void test();
 
 protected:
-
 	/// Push one change to the stream
-	void	pushDelta( NLMISC::CBitMemStream& s, CCDBStructNodeLeaf *node, uint32& bitsize );
+	void pushDelta(NLMISC::CBitMemStream &s, CCDBStructNodeLeaf *node, uint32 &bitsize);
 
 	/// Push one change to the stream (permanent mode)
-	void	pushDeltaPermanent( NLMISC::CBitMemStream& s, CCDBStructNodeLeaf *node, uint32& bitsize );
+	void pushDeltaPermanent(NLMISC::CBitMemStream &s, CCDBStructNodeLeaf *node, uint32 &bitsize);
 
 	/// Push one change in an atom if the leaf needs it
-	void	pushDeltaOfLeafInAtomIfChanged( TPushAtomChangeStruct *arg, CCDBStructNodeLeaf *node, uint indexInAtom );
+	void pushDeltaOfLeafInAtomIfChanged(TPushAtomChangeStruct *arg, CCDBStructNodeLeaf *node, uint indexInAtom);
 
 	/// Push one change in an atom if the leaf needs it (permanent mode)
-	void	pushDeltaOfLeafInAtomIfChangedPermanent( TPushAtomChangeStruct *arg, CCDBStructNodeLeaf *node, uint indexInAtom );
+	void pushDeltaOfLeafInAtomIfChangedPermanent(TPushAtomChangeStruct *arg, CCDBStructNodeLeaf *node, uint indexInAtom);
 
-	friend void cbPushDeltaOfLeafInAtomIfChanged( void* arg, CCDBStructNodeLeaf *node, uint& indexInAtom );
-	friend void cbPushDeltaOfLeafInAtomIfChangedPermanent( void* arg, CCDBStructNodeLeaf *node, uint& indexInAtom );
+	friend void cbPushDeltaOfLeafInAtomIfChanged(void *arg, CCDBStructNodeLeaf *node, uint &indexInAtom);
+	friend void cbPushDeltaOfLeafInAtomIfChangedPermanent(void *arg, CCDBStructNodeLeaf *node, uint &indexInAtom);
 
 private:
-
 	/// Data instance
-	CCDBDataInstanceContainer	_DataContainer;
+	CCDBDataInstanceContainer _DataContainer;
 
 	/// Pointer on data structure
-	CCDBStructNodeBranch		*_DataStructRoot;
+	CCDBStructNodeBranch *_DataStructRoot;
 
 	// Property changes to send to client for "client only" database
-	//std::vector<CPropForClientOnly> _PropsForClientOnly;
+	// std::vector<CPropForClientOnly> _PropsForClientOnly;
 
 	/// Bank
-	TCDBBank					_Bank;
+	TCDBBank _Bank;
 
 	/// Becomes false at the first time writeDelta() is called
-	bool						_NotSentYet;
+	bool _NotSentYet;
 };
 
-
 #endif // CDB_SYNCHRONISED_H
-
-
-
-
-
-

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 using namespace NLMISC;
@@ -26,9 +24,9 @@ extern bool EmulateShard;
 
 // ***************************************************************************
 
-NLMISC_COMMAND(emulate,"Toggle emulate shard function","")
+NLMISC_COMMAND(emulate, "Toggle emulate shard function", "")
 {
 	EmulateShard ^= true;
-	nlinfo ("Emulate shard mode %s", EmulateShard?"ON":"OFF");
+	nlinfo("Emulate shard mode %s", EmulateShard ? "ON" : "OFF");
 	return true;
 }

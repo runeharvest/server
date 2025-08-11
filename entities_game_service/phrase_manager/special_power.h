@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_SPECIAL_POWER_H
 #define RYZOM_SPECIAL_POWER_H
 
@@ -26,7 +24,6 @@
 
 class CSpecialPowerPhrase;
 
-
 /**
  * Base class for special powers
  * \author David Fleury
@@ -36,16 +33,23 @@ class CSpecialPowerPhrase;
 class CSpecialPower
 {
 	NL_INSTANCE_COUNTER_DECL(CSpecialPower);
+
 public:
 	/// Constructor
-	CSpecialPower() : _Phrase(NULL), _ApplyOnTargets(true), _PowerType(POWERS::UnknownType), _DisablePowerTime(0), _ByPassDisablePowerTimer(false)
-	{}
+	CSpecialPower()
+	    : _Phrase(NULL)
+	    , _ApplyOnTargets(true)
+	    , _PowerType(POWERS::UnknownType)
+	    , _DisablePowerTime(0)
+	    , _ByPassDisablePowerTimer(false)
+	{
+	}
 
 	/// validate the power utilisation
 	virtual bool validate(std::string &errorCode);
 
 	/// apply effects
-	virtual void apply() {}
+	virtual void apply() { }
 
 	/// apply on targets or on actor
 	inline bool applyOnTargets() const { return _ApplyOnTargets; }
@@ -56,21 +60,21 @@ public:
 
 protected:
 	/// actor
-	TDataSetRow			_ActorRowId;
+	TDataSetRow _ActorRowId;
 
 	/// flag indicating if the action is done on the combat phrase targets or actor
-	bool				_ApplyOnTargets;
+	bool _ApplyOnTargets;
 
 	/// special power type
-	POWERS::TPowerType	_PowerType;
+	POWERS::TPowerType _PowerType;
 
 	// disable power for x ticks
-	NLMISC::TGameCycle	_DisablePowerTime;
+	NLMISC::TGameCycle _DisablePowerTime;
 
 	/// related phrase
-	CSpecialPowerPhrase	*_Phrase;
+	CSpecialPowerPhrase *_Phrase;
 
-	bool				_ByPassDisablePowerTimer;
+	bool _ByPassDisablePowerTimer;
 };
 
 /**
@@ -83,7 +87,8 @@ class CSpecialPowerAuras : public CSpecialPower
 {
 public:
 	/// Constructor
-	CSpecialPowerAuras() : CSpecialPower()
+	CSpecialPowerAuras()
+	    : CSpecialPower()
 	{
 		_TargetsDisableAuraTime = 0;
 		_AuraRadius = 0.0f;
@@ -105,17 +110,16 @@ public:
 
 	/// set ByPass TargetsDisableAuraTime
 	inline void setByPass(bool flag) { _ByPassTargetsDisableAuraTime = flag; }
-	
+
 protected:
 	// disable this aura on targets for x ticks
-	NLMISC::TGameCycle	_TargetsDisableAuraTime;
+	NLMISC::TGameCycle _TargetsDisableAuraTime;
 	// radius of the aura
-	float				_AuraRadius;
+	float _AuraRadius;
 	/// affect guild members ? (always affect teammates)
-	bool				_AffectGuild;
+	bool _AffectGuild;
 
-	bool				_ByPassTargetsDisableAuraTime;
-
+	bool _ByPassTargetsDisableAuraTime;
 };
 
 #endif // RYZOM_SPECIAL_POWER_H

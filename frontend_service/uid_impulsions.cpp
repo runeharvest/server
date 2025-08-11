@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #include "uid_impulsions.h"
@@ -31,13 +29,11 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
-extern CGenericXmlMsgHeaderManager	GenericXmlMsgHeaderMngr;
+extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
 void cbImpulsionUidGatewayOpen(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::TGameCycle gameCycle);
 void cbImpulsionUidGatewayMessage(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::TGameCycle gameCycle);
 void cbImpulsionUidGatewayClose(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::TGameCycle gameCycle);
-
 
 /*
  * Callbacks of messages with special data handling
@@ -46,12 +42,12 @@ void cbImpulsionUidGatewayClose(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::
 //-----------------------------------------------
 //	impulsionSelectChar :
 //-----------------------------------------------
-static void	impulsionSelectChar(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::TGameCycle gameCycle)
+static void impulsionSelectChar(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::TGameCycle gameCycle)
 {
-//	uint64 longUid = uid;
+	//	uint64 longUid = uid;
 
 	CSelectCharMsg selectCharMsg;
-	selectCharMsg.serial( bms );
+	selectCharMsg.serial(bms);
 
 	// look for the user datas
 	CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
@@ -64,77 +60,73 @@ static void	impulsionSelectChar(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::
 	}
 
 	// TODO : ring : add character/role checking
-//#pragma message (NL_LOC_MSG "Ring TODO : add R2 character/role checking")
+	// #pragma message (NL_LOC_MSG "Ring TODO : add R2 character/role checking")
 
 	// Check authorized character slot
-	if (((ch->AuthorizedCharSlot != 0xF) && (selectCharMsg.c != ch->AuthorizedCharSlot)) &&
-		(!CLoginServer::acceptsInvalidCookie()))
+	if (((ch->AuthorizedCharSlot != 0xF) && (selectCharMsg.c != ch->AuthorizedCharSlot)) && (!CLoginServer::acceptsInvalidCookie()))
 	{
-		frs->rejectReceivedMessage( UnauthorizedCharacterSlot, uid );
-		cbDisconnectClient( uid , "FS impulsionSelectChar");
+		frs->rejectReceivedMessage(UnauthorizedCharacterSlot, uid);
+		cbDisconnectClient(uid, "FS impulsionSelectChar");
 		return;
 	}
 
 	CMessage msgout("SELECT_CHAR");
-//	msgout.serial( longUid );
-	msgout.serial( uid );
-	msgout.serial( selectCharMsg.c );
-	msgout.serial( ch->InstanceId );
+	//	msgout.serial( longUid );
+	msgout.serial(uid);
+	msgout.serial(selectCharMsg.c);
+	msgout.serial(ch->InstanceId);
 	CUnifiedNetwork::getInstance()->send("EGS", msgout);
-	nldebug( "User %u: SELECT_CHAR %u", uid, selectCharMsg.c );
+	nldebug("User %u: SELECT_CHAR %u", uid, selectCharMsg.c);
 }
-
 
 //-----------------------------------------------
 //	impulsionRetMainland :
 //-----------------------------------------------
-static void	impulsionRetMainland(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::TGameCycle gameCycle)
+static void impulsionRetMainland(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::TGameCycle gameCycle)
 {
 	uint8 charIndex;
-	bms.serial( charIndex );
+	bms.serial(charIndex);
 	TSessionId rejectedSessionId;
-	bms.serial( rejectedSessionId );
+	bms.serial(rejectedSessionId);
 
-	CMessage msgout("RET_MAINLAND" ); // always userId and index, never CEntityId even if client has is ingame
-	msgout.serial( uid );
-	msgout.serial( charIndex );
-	msgout.serial( rejectedSessionId );
+	CMessage msgout("RET_MAINLAND"); // always userId and index, never CEntityId even if client has is ingame
+	msgout.serial(uid);
+	msgout.serial(charIndex);
+	msgout.serial(rejectedSessionId);
 	CUnifiedNetwork::getInstance()->send("EGS", msgout);
 }
 
 //-----------------------------------------------
 //	impulsionAskChar :
 //-----------------------------------------------
-static void	impulsionAskChar(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::TGameCycle gameCycle)
+static void impulsionAskChar(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::TGameCycle gameCycle)
 {
 	uint64 longUid = uid;
-	
+
 	CCheckNameMsg checkNameMsg;
-	checkNameMsg.serialBitMemStream( bms );
-	
+	checkNameMsg.serialBitMemStream(bms);
+
 	CMessage msgout("CHECK_NAME");
-	msgout.serial( longUid );
-	msgout.serial( checkNameMsg );
+	msgout.serial(longUid);
+	msgout.serial(checkNameMsg);
 	CUnifiedNetwork::getInstance()->send("EGS", msgout);
 }
-
 
 //-----------------------------------------------
 //	impulsionCreateChar :
 //-----------------------------------------------
-static void	impulsionCreateChar(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::TGameCycle gameCycle)
+static void impulsionCreateChar(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::TGameCycle gameCycle)
 {
 	uint64 longUid = uid;
 
 	CCreateCharMsg createCharMsg;
-	createCharMsg.serialBitMemStream( bms );
+	createCharMsg.serialBitMemStream(bms);
 
 	CMessage msgout("CREATE_CHAR");
-	msgout.serial( longUid );
-	msgout.serial( createCharMsg );
+	msgout.serial(longUid);
+	msgout.serial(createCharMsg);
 	CUnifiedNetwork::getInstance()->send("EGS", msgout);
 }
-
 
 //-----------------------------------------------
 //	impulsionStringRequestUid
@@ -147,30 +139,28 @@ static void impulsionStringRequestUid(uint32 uid, CBitMemStream &bms, TGameCycle
 	{
 		bms.serial(stringId);
 	}
-	catch(const Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning("<impulsionStringRequestUid> %s", e.what());
 		return;
 	}
 
-	CMessage msgout( "STRING_RQ_UID" );
-	msgout.serial( uid );
-	msgout.serial( stringId );
+	CMessage msgout("STRING_RQ_UID");
+	msgout.serial(uid);
+	msgout.serial(stringId);
 	CUnifiedNetwork::getInstance()->send("IOS", msgout);
-
 }
-
 
 /*
  * General receiving function for impulsions by Uid from client to server
  */
-void routeImpulsionUidFromClient( NLMISC::CBitMemStream& bms, const uint32& userId, const NLMISC::TGameCycle& gamecycle )
+void routeImpulsionUidFromClient(NLMISC::CBitMemStream &bms, const uint32 &userId, const NLMISC::TGameCycle &gamecycle)
 {
 	string msgName;
 	try
 	{
 		// Decode XML header
-		CGenericXmlMsgHeaderManager::CNodeId	msgNodeId = GenericXmlMsgHeaderMngr.getNodeId(bms, msgName);
+		CGenericXmlMsgHeaderManager::CNodeId msgNodeId = GenericXmlMsgHeaderMngr.getNodeId(bms, msgName);
 
 		// check if message decoded safely
 		if (!msgNodeId.isValid())
@@ -180,51 +170,51 @@ void routeImpulsionUidFromClient( NLMISC::CBitMemStream& bms, const uint32& user
 		else
 		{
 			// get format and sendto of message
-			const CGenericXmlMsgHeaderManager::TMessageFormat	&format = GenericXmlMsgHeaderMngr.getNodeFormat(msgNodeId);
-			const string										&sendto = GenericXmlMsgHeaderMngr.getNodeSendTo(msgNodeId);
+			const CGenericXmlMsgHeaderManager::TMessageFormat &format = GenericXmlMsgHeaderMngr.getNodeFormat(msgNodeId);
+			const string &sendto = GenericXmlMsgHeaderMngr.getNodeSendTo(msgNodeId);
 
 			// check sendto
 			if (sendto == "")
 			{
-				TImpulsionUidCb	cb = (TImpulsionUidCb)(GenericXmlMsgHeaderMngr.getNodeUserData(msgNodeId, 1));
+				TImpulsionUidCb cb = (TImpulsionUidCb)(GenericXmlMsgHeaderMngr.getNodeUserData(msgNodeId, 1));
 				if (cb == NULL)
 				{
-					nlwarning( "RTG: Can't route impulsion %s [uid %u], no 'sendto' nor user callback", msgName.c_str(), userId );
+					nlwarning("RTG: Can't route impulsion %s [uid %u], no 'sendto' nor user callback", msgName.c_str(), userId);
 				}
 				else
 				{
 					cb(userId, bms, gamecycle);
-					//nldebug( "RTG: Routed impulsion %s via user callback [uid %u]", msgName.c_str(), userId );
+					// nldebug( "RTG: Routed impulsion %s via user callback [uid %u]", msgName.c_str(), userId );
 				}
 			}
 			else
 			{
 				// create forward message
-				CMessage	msgout("CLIENT:"+msgName);
+				CMessage msgout("CLIENT:" + msgName);
 
 				uint64 longUserId = userId;
 				msgout.serial(longUserId);
 
 				union
 				{
-					bool	b;
-					uint8	u8;
-					uint16	u16;
-					uint32	u32;
-					uint64	u64;
-					sint8	s8;
-					sint16	s16;
-					sint32	s32;
-					sint64	s64;
-					float	f;
-					double	d;
+					bool b;
+					uint8 u8;
+					uint16 u16;
+					uint32 u32;
+					uint64 u64;
+					sint8 s8;
+					sint16 s16;
+					sint32 s32;
+					sint64 s64;
+					float f;
+					double d;
 				} store;
-				CEntityId	e;
-				string		s;
+				CEntityId e;
+				string s;
 
-				uint	i;
+				uint i;
 				// for each message field, serial in and serial out
-				for (i=0; i<format.size(); ++i)
+				for (i = 0; i < format.size(); ++i)
 				{
 
 					switch (format[i].Type)
@@ -302,32 +292,30 @@ void routeImpulsionUidFromClient( NLMISC::CBitMemStream& bms, const uint32& user
 				}
 
 				// send message to concerned service
-				sendMessageViaMirror( sendto, msgout ); // because of guild management (ex: cbDeleteChar)
-				//nldebug( "RTG: Routed impulsion %s to %s [uid %u]", msgName.c_str(), sendto.c_str(), userId );
+				sendMessageViaMirror(sendto, msgout); // because of guild management (ex: cbDeleteChar)
+				// nldebug( "RTG: Routed impulsion %s to %s [uid %u]", msgName.c_str(), sendto.c_str(), userId );
 			}
 		}
 	}
-	catch(const Exception &e)
+	catch (const Exception &e)
 	{
-		nlwarning("<routeImpulsionUidFromClient> %s %s", msgName.c_str(), e.what() );
+		nlwarning("<routeImpulsionUidFromClient> %s %s", msgName.c_str(), e.what());
 		return;
 	}
 
 } // cbImpulsionUid //
 
-
 /*
  * Map the callbacks for messages with special data handling
  */
-void	initImpulsionUid()
+void initImpulsionUid()
 {
-	GenericXmlMsgHeaderMngr.setUserData("CONNECTION:SELECT_CHAR",	(uint64)impulsionSelectChar, 1);
-	GenericXmlMsgHeaderMngr.setUserData("CONNECTION:CREATE_CHAR",	(uint64)impulsionCreateChar, 1);
-	GenericXmlMsgHeaderMngr.setUserData("STRING_MANAGER:STRING_RQ",	(uint64)impulsionStringRequestUid, 1);
-	GenericXmlMsgHeaderMngr.setUserData("CONNECTION:ASK_NAME",		(uint64)impulsionAskChar, 1);
-	GenericXmlMsgHeaderMngr.setUserData("CONNECTION:RET_MAINLAND",		(uint64)impulsionRetMainland, 1);
-	GenericXmlMsgHeaderMngr.setUserData("MODULE_GATEWAY:FEOPEN",		(uint64)cbImpulsionUidGatewayOpen, 1);	
-	GenericXmlMsgHeaderMngr.setUserData("MODULE_GATEWAY:GATEWAY_MSG",	(uint64)cbImpulsionUidGatewayMessage, 1);	
-	GenericXmlMsgHeaderMngr.setUserData("MODULE_GATEWAY:FECLOSE",		(uint64)cbImpulsionUidGatewayClose, 1);	
+	GenericXmlMsgHeaderMngr.setUserData("CONNECTION:SELECT_CHAR", (uint64)impulsionSelectChar, 1);
+	GenericXmlMsgHeaderMngr.setUserData("CONNECTION:CREATE_CHAR", (uint64)impulsionCreateChar, 1);
+	GenericXmlMsgHeaderMngr.setUserData("STRING_MANAGER:STRING_RQ", (uint64)impulsionStringRequestUid, 1);
+	GenericXmlMsgHeaderMngr.setUserData("CONNECTION:ASK_NAME", (uint64)impulsionAskChar, 1);
+	GenericXmlMsgHeaderMngr.setUserData("CONNECTION:RET_MAINLAND", (uint64)impulsionRetMainland, 1);
+	GenericXmlMsgHeaderMngr.setUserData("MODULE_GATEWAY:FEOPEN", (uint64)cbImpulsionUidGatewayOpen, 1);
+	GenericXmlMsgHeaderMngr.setUserData("MODULE_GATEWAY:GATEWAY_MSG", (uint64)cbImpulsionUidGatewayMessage, 1);
+	GenericXmlMsgHeaderMngr.setUserData("MODULE_GATEWAY:FECLOSE", (uint64)cbImpulsionUidGatewayClose, 1);
 }
-

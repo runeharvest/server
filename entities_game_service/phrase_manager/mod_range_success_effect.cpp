@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -32,11 +30,10 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
 //		update
 //--------------------------------------------------------------
-bool CModRangeSuccessEffect::update(CTimerEvent * event, bool applyEffect)
+bool CModRangeSuccessEffect::update(CTimerEvent *event, bool applyEffect)
 {
 	if (!TheDataset.isAccessible(_TargetRowId))
 	{
@@ -51,8 +48,8 @@ bool CModRangeSuccessEffect::update(CTimerEvent * event, bool applyEffect)
 		return true;
 	}
 
-	player->rangeSuccessModifier( (sint32)(_Modifier1 + _Modifier2) );
-	
+	player->rangeSuccessModifier((sint32)(_Modifier1 + _Modifier2));
+
 	return false;
 } // update //
 
@@ -69,9 +66,8 @@ void CModRangeSuccessEffect::removed()
 		return;
 	}
 
-	player->rangeSuccessModifier( 0 );
+	player->rangeSuccessModifier(0);
 }
-
 
 //--------------------------------------------------------------
 //		activate
@@ -84,13 +80,13 @@ void CModRangeSuccessEffect::activate()
 		nlwarning("<CModRangeSuccessEffect::activate> Cannot find actor entity or not a player");
 		return;
 	}
-	
-	CModRangeSuccessEffect *effect = new CModRangeSuccessEffect(actor->getEntityRowId(), 
-		getEndDate()+CTickEventHandler::getGameCycle(), 
-		EFFECT_FAMILIES::PowerModRangeSkill,
-		_Modifier1,
-		_Modifier2);
-	
+
+	CModRangeSuccessEffect *effect = new CModRangeSuccessEffect(actor->getEntityRowId(),
+	    getEndDate() + CTickEventHandler::getGameCycle(),
+	    EFFECT_FAMILIES::PowerModRangeSkill,
+	    _Modifier1,
+	    _Modifier2);
+
 	if (!effect)
 	{
 		nlwarning("<CModRangeSuccessEffect::activate> Failed to allocate new CModRangeSuccessEffect");
@@ -106,13 +102,12 @@ void CModRangeSuccessEffect::activate()
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
 #define PERSISTENT_CLASS CModRangeSuccessEffect
 
-#define PERSISTENT_DATA\
-	STRUCT2(STimedEffect,					CSTimedEffect::store(pdr),						CSTimedEffect::apply(pdr))\
-	PROP2(_CreatorEntityId,		CEntityId,	TheDataset.getEntityId(getCreatorRowId()),		_CreatorEntityId = val)\
-	PROP2(_TargetDisableTime,	TGameCycle,	_TargetDisableTime>CTickEventHandler::getGameCycle()?_TargetDisableTime-CTickEventHandler::getGameCycle():0,	_TargetDisableTime=val)\
-	PROP(float,_Modifier1)\
-	PROP(float,_Modifier2)\
+#define PERSISTENT_DATA                                                                                                                                                                  \
+	STRUCT2(STimedEffect, CSTimedEffect::store(pdr), CSTimedEffect::apply(pdr))                                                                                                          \
+	PROP2(_CreatorEntityId, CEntityId, TheDataset.getEntityId(getCreatorRowId()), _CreatorEntityId = val)                                                                                \
+	PROP2(_TargetDisableTime, TGameCycle, _TargetDisableTime > CTickEventHandler::getGameCycle() ? _TargetDisableTime - CTickEventHandler::getGameCycle() : 0, _TargetDisableTime = val) \
+	PROP(float, _Modifier1)                                                                                                                                                              \
+	PROP(float, _Modifier2)
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
-

@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_STATIC_DEPOSIT_H
 #define RYZOM_STATIC_DEPOSIT_H
 
-//Nel georges
+// Nel georges
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/load_form.h"
@@ -29,23 +27,21 @@
 // TEMP
 typedef uint32 TTerrain;
 
-
 /*
  * Struct deposit parameters
  */
 class CStaticDepositRawMaterial
 {
 public:
-	NLMISC::CSheetId	MaterialSheet;
-	//uint16				MaxAmount;
+	NLMISC::CSheetId MaterialSheet;
+	// uint16				MaxAmount;
 
 	void serial(NLMISC::IStream &f)
 	{
-		f.serial( MaterialSheet );
-		//f.serial( MaxAmount );
+		f.serial(MaterialSheet);
+		// f.serial( MaxAmount );
 	}
 };
-
 
 /**
  * CStaticDeposit
@@ -57,22 +53,22 @@ public:
 /*class CStaticDeposit
 {
 public :
-		
-	/// read sheet
-	virtual void readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId );
-	
-	// return the version of this class, increments this value when the content of this class changed
-	static uint getVersion () { return 3; }
-	
-	/// destructor
-	virtual ~CStaticDeposit() {}
-	
-	/// called when the sheet is removed
-	void removed() {}
-	
-	/// Serialize deposit
-	void serial(NLMISC::IStream &f)
-	{}		
+
+    /// read sheet
+    virtual void readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId );
+
+    // return the version of this class, increments this value when the content of this class changed
+    static uint getVersion () { return 3; }
+
+    /// destructor
+    virtual ~CStaticDeposit() {}
+
+    /// called when the sheet is removed
+    void removed() {}
+
+    /// Serialize deposit
+    void serial(NLMISC::IStream &f)
+    {}
 };*/
 
 #endif // RYZOM_STATIC_DEPOSIT_H

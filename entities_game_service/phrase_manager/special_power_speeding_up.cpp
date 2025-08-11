@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -39,9 +36,8 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CSpecialPowerSpeedingUp::apply()
 {
@@ -59,9 +55,9 @@ void CSpecialPowerSpeedingUp::apply()
 	actor->forbidPower(_PowerType, _Phrase->getConsumableFamilyId(), CTickEventHandler::getGameCycle() + _DisablePowerTime + _Duration);
 
 	const TGameCycle endDate = _Duration + CTickEventHandler::getGameCycle();
-	
+
 	// create effect and apply it on target
-	CChangeMoveSpeedEffect *effect = new CChangeMoveSpeedEffect(_ActorRowId, _ActorRowId, EFFECT_FAMILIES::PowerSpeedingUp, _SpeedMod,  endDate, actor);
+	CChangeMoveSpeedEffect *effect = new CChangeMoveSpeedEffect(_ActorRowId, _ActorRowId, EFFECT_FAMILIES::PowerSpeedingUp, _SpeedMod, endDate, actor);
 	if (!effect)
 	{
 		nlwarning("<CSpecialPowerSpeedingUp::apply> Failed to allocate new CChangeMoveSpeedEffect");
@@ -72,7 +68,7 @@ void CSpecialPowerSpeedingUp::apply()
 
 	// send messages
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::power_type);
-//	TVectorParamCheck params;
+	//	TVectorParamCheck params;
 	// for actor
 	if (actor->getId().getType() == RYZOMID::player)
 	{

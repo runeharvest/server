@@ -21,63 +21,53 @@
 #include "nel/net/service.h"
 #include "game_share/dyn_chat.h"
 
-
-namespace NLNET
-{
-	class IModuleSocket;
+namespace NLNET {
+class IModuleSocket;
 }
-namespace NLMISC
-{
-	class CConfigFile;
-	struct CEntityId;
+namespace NLMISC {
+class CConfigFile;
+struct CEntityId;
 }
-namespace R2
-{
+namespace R2 {
 class CDynamicMapService;
 
 class CDynamicScenarioService : public NLNET::IService
 {
 
 public:
-	//CDynamicScenarioService();
+	// CDynamicScenarioService();
 	//~CDynamicScenarioService();
-	// Initialisation of service
-	void init ();
+	//  Initialisation of service
+	void init();
 
-	// Update net processing 
-	bool update ();
+	// Update net processing
+	bool update();
 
 	// Update service processing
 	static void serviceUpdate();
 
 	// Release the service
-	void release ();
+	void release();
 
-	void addTestClient(const std::string & clientId);
+	void addTestClient(const std::string &clientId);
 
-	void removeTestClient(const std::string & clientId);
+	void removeTestClient(const std::string &clientId);
 
 	void listTestClient() const;
 
-	void runTestClientLuaScript(const std::string & clientId, const std::string & cmd);
-	
+	void runTestClientLuaScript(const std::string &clientId, const std::string &cmd);
 
-	static R2::CDynamicScenarioService & instance()  { return (CDynamicScenarioService&)*IService::getInstance(); }
+	static R2::CDynamicScenarioService &instance() { return (CDynamicScenarioService &)*IService::getInstance(); }
 
-	R2::CDynamicMapService & getDynamicMapService() const { return *_Dms; }
-	
-	void forwardToStringManagerModule (NLNET::CMessage &msgin);
-	
+	R2::CDynamicMapService &getDynamicMapService() const { return *_Dms; }
 
-	void forwardIncarnChat(TChanID id,TDataSetRow senderId,ucstring sentence);
-	
+	void forwardToStringManagerModule(NLNET::CMessage &msgin);
+
+	void forwardIncarnChat(TChanID id, TDataSetRow senderId, ucstring sentence);
 
 private:
-	R2::CDynamicMapService* _Dms;
+	R2::CDynamicMapService *_Dms;
+};
+} // namespace R2
 
-
-};	
-} //namespace R2
-
-#endif //R2_SERVICE_H
-
+#endif // R2_SERVICE_H

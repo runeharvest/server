@@ -33,10 +33,7 @@ using namespace NLMISC;
 using namespace std;
 using namespace NLNET;
 
-
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
-
-
 
 // ****************************************************************************
 // CInventoryBase
@@ -84,7 +81,7 @@ void CInventoryBase::setSlotCount(uint size)
 	_FreeSlotCount = 0;
 	_InventoryWeight = 0;
 	_InventoryBulk = 0;
-	for (uint i=0; i<_Items.size(); ++i)
+	for (uint i = 0; i < _Items.size(); ++i)
 	{
 		if (_Items[i] != NULL)
 		{
@@ -93,7 +90,7 @@ void CInventoryBase::setSlotCount(uint size)
 		}
 		else
 		{
-			_FreeSlotCount++;	
+			_FreeSlotCount++;
 		}
 	}
 }
@@ -156,7 +153,7 @@ void CInventoryBase::forceLoadItem(CGameItemPtr &item, uint32 slot)
 CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &item, uint32 slot, bool autoStack, bool ignoreWeightAndBulk)
 {
 	H_AUTO(doInsertItem);
-	
+
 	nlassert(item != NULL);
 	nlassert(item->getInventory() == NULL);
 	nlassert(slot < _Items.size() || slot == INVENTORIES::INSERT_IN_FIRST_FREE_SLOT);
@@ -186,7 +183,7 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 			slotBegin = 0;
 		slotSearch = slotBegin;
 		// Modification to do : (slot to put item, stack size to put)
-		vector< pair<uint32,uint32> > Modifs;
+		vector<pair<uint32, uint32>> Modifs;
 
 		// If slot provided is NULL directly insert item in it
 		if (_Items[slotBegin] == NULL && slot != INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
@@ -202,9 +199,9 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 				bool bFound = false;
 				do
 				{
-					if (   (_Items[slotSearch] != NULL)
-						&& (_Items[slotSearch]->getStackSize() < _Items[slotSearch]->getMaxStackSize())
-						&& (CGameItem::areStackable(item, _Items[slotSearch]))) // no check on stack size here
+					if ((_Items[slotSearch] != NULL)
+					    && (_Items[slotSearch]->getStackSize() < _Items[slotSearch]->getMaxStackSize())
+					    && (CGameItem::areStackable(item, _Items[slotSearch]))) // no check on stack size here
 					{
 						bFound = true;
 						break;
@@ -212,8 +209,7 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 
 					slotSearch++;
 					if (slotSearch == getSlotCount()) slotSearch = 0;
-				}
-				while (slotSearch != slotBegin);
+				} while (slotSearch != slotBegin);
 
 				if (bFound)
 				{
@@ -244,7 +240,7 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 				break; // finished
 			}
 		}
-		
+
 		// Apply all modifs to the inventory
 		bool bInserted = false;
 		for (uint32 i = 0; i < Modifs.size(); ++i)
@@ -271,7 +267,7 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 			else
 			{
 				// callbacks are called in setStackSize (inventory onItemStackSizeChanged)
-				_Items[slotModif]->setStackSize(_Items[slotModif]->getStackSize()+sizeModif);
+				_Items[slotModif]->setStackSize(_Items[slotModif]->getStackSize() + sizeModif);
 			}
 		}
 		INVENTORIES::TInventoryChangeFlags flagInvChg(INVENTORIES::ic_total_bulk);
@@ -295,30 +291,30 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 
 		if (slot == INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
 			slot = getFirstFreeSlot();
-		
+
 		// delete any item on this slot
 		if (_Items[slot] != NULL)
 		{
 			deleteItem(slot);
 		}
-		
+
 		_Items[slot] = item;
 		item->setInventory(CInventoryPtr(this), slot);
 		updateWeightAndBulk(item, item->getStackSize());
 		--_FreeSlotCount;
-		
-		// callback all the views : 2 messages : 
-		// * item inserted 
+
+		// callback all the views : 2 messages :
+		// * item inserted
 		// * inventory change bulk, weight and list
 		INVENTORIES::TInventoryChangeFlags flagInvChg(INVENTORIES::ic_total_bulk);
 		flagInvChg.setEnumValue(INVENTORIES::ic_total_weight);
 		flagInvChg.setEnumValue(INVENTORIES::ic_item_list);
 		INVENTORIES::TItemChangeFlags flagItemChg(INVENTORIES::itc_inserted);
 		TViewCont::iterator first(_InventoryViews.begin()), last(_InventoryViews.end());
-		for (; first!= last; ++first)
+		for (; first != last; ++first)
 		{
 			CInventoryViewPtr view = *first;
-			
+
 			view->onInventoryChanged(flagInvChg);
 			view->onItemChanged(slot, flagItemChg);
 		}
@@ -335,7 +331,7 @@ void CInventoryBase::deleteItem(uint32 slot)
 	if (_Items[slot] != NULL)
 	{
 		// unlink the item
-		CGameItemPtr item = removeItem(slot,_Items[slot]->getStackSize());
+		CGameItemPtr item = removeItem(slot, _Items[slot]->getStackSize());
 		// delete it
 		item.deleteItem();
 	}
@@ -343,7 +339,7 @@ void CInventoryBase::deleteItem(uint32 slot)
 
 /// Remove the nth item from this inventory
 // ****************************************************************************
-CGameItemPtr CInventoryBase::removeItem(uint32 slot, uint32 quantity, TInventoryOpResult * res)
+CGameItemPtr CInventoryBase::removeItem(uint32 slot, uint32 quantity, TInventoryOpResult *res)
 {
 	nlassert(slot < _Items.size());
 
@@ -376,7 +372,7 @@ CGameItemPtr CInventoryBase::removeItem(uint32 slot, uint32 quantity, TInventory
 		// If we want to remove the whole stack
 		if (quantity == _Items[slot]->getStackSize())
 		{
-			// callback all the views : 2 messages : 
+			// callback all the views : 2 messages :
 			// * item removed
 			// * inventory change bulk, weight and list
 			INVENTORIES::TItemChangeFlags flagItemChg(INVENTORIES::itc_removed);
@@ -384,7 +380,7 @@ CGameItemPtr CInventoryBase::removeItem(uint32 slot, uint32 quantity, TInventory
 			for (; first != last; ++first)
 			{
 				CInventoryViewPtr view = *first;
-				
+
 				view->onInventoryChanged(flagInvChg);
 				view->onItemChanged(slot, flagItemChg);
 			}
@@ -405,7 +401,7 @@ CGameItemPtr CInventoryBase::removeItem(uint32 slot, uint32 quantity, TInventory
 			// create a new item
 			ret = _Items[slot]->getItemCopy();
 			ret->setStackSize(quantity);
-			_Items[slot]->setStackSize(_Items[slot]->getStackSize()-quantity);
+			_Items[slot]->setStackSize(_Items[slot]->getStackSize() - quantity);
 
 			// Done at the end because the item is not completly removed
 			// callback all the views : 1 message :
@@ -414,10 +410,10 @@ CGameItemPtr CInventoryBase::removeItem(uint32 slot, uint32 quantity, TInventory
 			for (; first != last; ++first)
 			{
 				CInventoryViewPtr view = *first;
-				
+
 				view->onInventoryChanged(flagInvChg);
 			}
-			
+
 			// update ref inventory if some
 			if (_Items[slot]->getRefInventory() != NULL)
 			{
@@ -434,28 +430,28 @@ CGameItemPtr CInventoryBase::removeItem(uint32 slot, uint32 quantity, TInventory
 }
 
 // ****************************************************************************
-uint32 CInventoryBase::deleteStackItem(uint32 slot, uint32 quantity, TInventoryOpResult * res)
+uint32 CInventoryBase::deleteStackItem(uint32 slot, uint32 quantity, TInventoryOpResult *res)
 {
 	nlassert(slot < _Items.size());
-	
+
 	uint32 nbDeletedItem = 0;
 
 	CGameItemPtr item = getItem(slot);
-	if(item->getStackSize() > quantity)
+	if (item->getStackSize() > quantity)
 	{
 		nbDeletedItem = quantity;
-		item->setStackSize( item->getStackSize() - quantity );
-//		log_Item_UpdateQuantity(item->getItemId(), item->getStackSize(), item->getStackSize() - quantity);
-		if( res != NULL )
+		item->setStackSize(item->getStackSize() - quantity);
+		//		log_Item_UpdateQuantity(item->getItemId(), item->getStackSize(), item->getStackSize() - quantity);
+		if (res != NULL)
 			*res = ior_ok;
 	}
 	else
 	{
 		nbDeletedItem = item->getStackSize();
 		deleteItem(slot);
-		if( res != NULL )
+		if (res != NULL)
 		{
-			if( quantity == nbDeletedItem )
+			if (quantity == nbDeletedItem)
 				*res = ior_ok;
 			else
 				*res = ior_stack_undersize;
@@ -466,22 +462,22 @@ uint32 CInventoryBase::deleteStackItem(uint32 slot, uint32 quantity, TInventoryO
 
 // ****************************************************************************
 CInventoryBase::TInventoryOpResult CInventoryBase::moveItem(
-	CInventoryBase* srcInv, uint32 srcSlot,
-	CInventoryBase* dstInv, uint32 dstSlot,
-	uint32 quantity, bool bestEffort )
+    CInventoryBase *srcInv, uint32 srcSlot,
+    CInventoryBase *dstInv, uint32 dstSlot,
+    uint32 quantity, bool bestEffort)
 {
-	
-	CGameItemPtr srcItem = srcInv->getItem( srcSlot );
+
+	CGameItemPtr srcItem = srcInv->getItem(srcSlot);
 	if (srcItem == NULL)
 		return ior_error;
 
 	log_Item_Move(srcItem->getItemId(), srcInv->getInventoryId(), dstInv->getInventoryId());
 
 	// Try to move it
-	nlctassert( INVENTORIES::REMOVE_MAX_STACK_QUANTITY == UINT_MAX ); // default arg must be compatible
+	nlctassert(INVENTORIES::REMOVE_MAX_STACK_QUANTITY == UINT_MAX); // default arg must be compatible
 
 	TInventoryOpResult res;
-	CGameItemPtr removedItem = srcInv->removeItem( srcSlot, quantity, &res );
+	CGameItemPtr removedItem = srcInv->removeItem(srcSlot, quantity, &res);
 	if (res != ior_ok)
 		return res;
 
@@ -489,11 +485,11 @@ CInventoryBase::TInventoryOpResult CInventoryBase::moveItem(
 	if (removedItem == NULL)
 		return ior_ok;
 
-	res = dstInv->insertItem( removedItem, dstSlot, true );
+	res = dstInv->insertItem(removedItem, dstSlot, true);
 	if (res != ior_ok)
 	{
 		// In case of failure, put it back (assume the stack was compliant with the boundaries of the inventory (bulk, weight...)
-		srcInv->insertItem( removedItem, srcSlot, true );
+		srcInv->insertItem(removedItem, srcSlot, true);
 		return res;
 	}
 
@@ -538,25 +534,25 @@ CInventoryBase::TInventoryOpResult CInventoryBase::canStackItem(const CGameItemP
 // ****************************************************************************
 /*CInventoryBase::TInventoryOpResult CInventoryBase::canRemoveItem(uint32 slot, uint32 quantity)
 {
-	if (slot >= getSlotCount())
-		return ior_error;
+    if (slot >= getSlotCount())
+        return ior_error;
 
-	CGameItemPtr item = getItem(slot);
+    CGameItemPtr item = getItem(slot);
 
-	if (quantity > item->getStackSize())
-		return ior_stack_undersize;
+    if (quantity > item->getStackSize())
+        return ior_stack_undersize;
 
-	if (item->getNonLockedStackSize() < quantity)
-		return ior_item_locked;
+    if (item->getNonLockedStackSize() < quantity)
+        return ior_item_locked;
 
-	return ior_ok;
+    return ior_ok;
 }*/
 
 // ****************************************************************************
-void CInventoryBase::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) 
+void CInventoryBase::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags)
 {
 	TViewCont::iterator first(_InventoryViews.begin()), last(_InventoryViews.end());
-	for (; first!= last; ++first)
+	for (; first != last; ++first)
 	{
 		CInventoryViewPtr view = *first;
 		view->onItemChanged(slot, changeFlags);
@@ -564,10 +560,10 @@ void CInventoryBase::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags ch
 }
 
 // ****************************************************************************
-void CInventoryBase::onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) 
+void CInventoryBase::onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags)
 {
 	TViewCont::iterator first(_InventoryViews.begin()), last(_InventoryViews.end());
-	for (; first!= last; ++first)
+	for (; first != last; ++first)
 	{
 		CInventoryViewPtr view = *first;
 		view->onInventoryChanged(changeFlags);
@@ -579,7 +575,7 @@ void CInventoryBase::onInventoryChanged(INVENTORIES::TInventoryChangeFlags chang
  *	of the inventory
  */
 // ****************************************************************************
-void	CInventoryBase::onItemStackSizeChanged(uint32 slot, uint32 previousStackSize)
+void CInventoryBase::onItemStackSizeChanged(uint32 slot, uint32 previousStackSize)
 {
 	CGameItemPtr item = getItem(slot);
 	sint32 deltaSize = item->getStackSize() - previousStackSize;
@@ -588,7 +584,7 @@ void	CInventoryBase::onItemStackSizeChanged(uint32 slot, uint32 previousStackSiz
 
 	// callback all the views
 	TViewCont::iterator first(_InventoryViews.begin()), last(_InventoryViews.end());
-	for (; first!= last; ++first)
+	for (; first != last; ++first)
 	{
 		CInventoryViewPtr view = *first;
 
@@ -603,8 +599,8 @@ void CInventoryBase::updateWeightAndBulk(const CGameItemPtr &item, sint32 deltaQ
 
 	if (form != NULL)
 	{
-		_InventoryBulk = uint32(max(sint32(0), sint32(_InventoryBulk + form->Bulk*deltaQt)));
-		_InventoryWeight = uint32(max(sint32(0), sint32(_InventoryWeight + item->weight()*deltaQt)));
+		_InventoryBulk = uint32(max(sint32(0), sint32(_InventoryBulk + form->Bulk * deltaQt)));
+		_InventoryWeight = uint32(max(sint32(0), sint32(_InventoryWeight + item->weight() * deltaQt)));
 
 		if (_InventoryWeight > getMaxWeight())
 		{
@@ -626,7 +622,7 @@ void CInventoryBase::bindView(CInventoryViewPtr inventoryView)
 	_InventoryViews.push_back(inventoryView);
 
 	// 'fill' the new view with actual inventory content
-	for (uint i=0; i<_Items.size(); ++i)
+	for (uint i = 0; i < _Items.size(); ++i)
 	{
 		if (_Items[i] != NULL)
 			inventoryView->onItemChanged(i, INVENTORIES::TItemChangeFlags(INVENTORIES::itc_inserted));
@@ -642,7 +638,7 @@ void CInventoryBase::unbindView(CInventoryViewPtr inventoryView)
 	_InventoryViews.erase(it);
 
 	/// 'empty the view'
-	for (uint i=0; i<_Items.size(); ++i)
+	for (uint i = 0; i < _Items.size(); ++i)
 	{
 		if (_Items[i] != NULL)
 			inventoryView->onItemChanged(i, INVENTORIES::TItemChangeFlags(INVENTORIES::itc_removed));
@@ -662,7 +658,7 @@ CInventoryPtr CInventoryBase::getInventoryCopy() const
 // ****************************************************************************
 void CInventoryBase::copyContentToInventory(CInventoryBase *destInv) const
 {
-	for (uint i=0; i<_Items.size(); ++i)
+	for (uint i = 0; i < _Items.size(); ++i)
 	{
 		if (_Items[i] != NULL)
 		{
@@ -680,11 +676,11 @@ void CInventoryBase::copyContentToInventory(CInventoryBase *destInv) const
 // ****************************************************************************
 void CInventoryBase::clearInventory()
 {
-	for (uint i=0; i<_Items.size(); ++i)
+	for (uint i = 0; i < _Items.size(); ++i)
 	{
 		if (_Items[i] != NULL)
 		{
-			if(_Items[i]->getLockCount() > 0)
+			if (_Items[i]->getLockCount() > 0)
 			{
 				_Items[i]->setLockCount(0);
 			}
@@ -697,7 +693,7 @@ void CInventoryBase::clearInventory()
 void CInventoryBase::forceViewUpdateOfSlot(uint32 slot)
 {
 	TViewCont::iterator first(_InventoryViews.begin()), last(_InventoryViews.end());
-	for ( ; first != last; ++first)
+	for (; first != last; ++first)
 	{
 		CInventoryViewPtr view = *first;
 
@@ -714,7 +710,7 @@ void CInventoryBase::forceViewUpdateOfInventory(bool skipEmptySlots)
 			continue;
 
 		TViewCont::iterator first(_InventoryViews.begin()), last(_InventoryViews.end());
-		for ( ; first != last; ++first)
+		for (; first != last; ++first)
 		{
 			CInventoryViewPtr view = *first;
 
@@ -729,7 +725,7 @@ uint32 CInventoryBase::getFirstFreeSlot() const
 	nlassert(_FreeSlotCount > 0);
 
 	// look for a valid slot
-	for (uint i=0; i<_Items.size(); ++i)
+	for (uint i = 0; i < _Items.size(); ++i)
 	{
 		if (_Items[i] == NULL)
 		{
@@ -742,7 +738,7 @@ uint32 CInventoryBase::getFirstFreeSlot() const
 }
 
 // ****************************************************************************
-void CInventoryBase::dumpInventory(NLMISC::CLog & log, bool dumpItems) const
+void CInventoryBase::dumpInventory(NLMISC::CLog &log, bool dumpItems) const
 {
 	// inventory description
 	log.displayNL("Inventory: %s", INVENTORIES::toString(_InventoryId).c_str());
@@ -761,12 +757,11 @@ void CInventoryBase::dumpInventory(NLMISC::CLog & log, bool dumpItems) const
 				continue;
 
 			// short display of the item description
-			log.displayRawNL( "%u: ", i );
-			item->displayInLog( log );
+			log.displayRawNL("%u: ", i);
+			item->displayInLog(log);
 		}
 	}
 }
-
 
 // ****************************************************************************
 void CInventoryBase::updateAllItemPrerequisit()
@@ -780,16 +775,14 @@ void CInventoryBase::updateAllItemPrerequisit()
 			continue;
 
 		TViewCont::iterator first(_InventoryViews.begin()), last(_InventoryViews.end());
-		for ( ; first != last; ++first)
+		for (; first != last; ++first)
 		{
 			CInventoryViewPtr view = *first;
-			
+
 			view->updateItemPrerequisit(i);
 		}
 	}
 }
-
-
 
 // ****************************************************************************
 // CRefInventory
@@ -832,8 +825,8 @@ CInventoryBase::TInventoryOpResult CRefInventory::doInsertItem(CGameItemPtr &ite
 	/*TViewCont::iterator first(_InventoryViews.begin()), last(_InventoryViews.end());
 	for (; first != last; ++first)
 	{
-		CInventoryViewPtr view = *first;
-		view->onItemChanged(slot, itc_inserted);
+	    CInventoryViewPtr view = *first;
+	    view->onItemChanged(slot, itc_inserted);
 	}*/
 
 	return ior_ok;
@@ -849,7 +842,7 @@ void CRefInventory::deleteItem(uint32 slot)
 }
 
 // ****************************************************************************
-CGameItemPtr CRefInventory::removeItem(uint32 slot, uint32 quantity, TInventoryOpResult * res)
+CGameItemPtr CRefInventory::removeItem(uint32 slot, uint32 quantity, TInventoryOpResult *res)
 {
 	nlassert(slot < _Items.size());
 
@@ -888,7 +881,7 @@ CGameItemPtr CRefInventory::removeItem(uint32 slot, uint32 quantity, TInventoryO
 // ****************************************************************************
 void CRefInventory::clearInventory()
 {
-	for (uint i=0; i<getSlotCount(); ++i)
+	for (uint i = 0; i < getSlotCount(); ++i)
 	{
 		removeItem(i);
 	}
@@ -910,7 +903,7 @@ CInventoryPtr CRefInventory::getInventoryCopy() const
 
 // ****************************************************************************
 IInventoryView::IInventoryView()
-: _BindedInventory(NULL)
+    : _BindedInventory(NULL)
 {
 }
 
@@ -980,11 +973,10 @@ void CCharacterInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags
 {
 	H_AUTO(OnItemChange);
 
-	if (	changeFlags.checkEnumValue(INVENTORIES::itc_inserted)
-		||	changeFlags.checkEnumValue(INVENTORIES::itc_lock_state)
-		|| 	changeFlags.checkEnumValue(INVENTORIES::itc_enchant)
-		||  changeFlags.checkEnumValue(INVENTORIES::itc_worned)
-		)
+	if (changeFlags.checkEnumValue(INVENTORIES::itc_inserted)
+	    || changeFlags.checkEnumValue(INVENTORIES::itc_lock_state)
+	    || changeFlags.checkEnumValue(INVENTORIES::itc_enchant)
+	    || changeFlags.checkEnumValue(INVENTORIES::itc_worned))
 	{
 		const CGameItemPtr item = getInventory()->getItem(slot);
 		nlassert(item != NULL);
@@ -999,22 +991,22 @@ void CCharacterInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags
 	{
 		const CGameItemPtr item = getInventory()->getItem(slot);
 		nlassert(item != NULL);
-		
+
 		// get new worn state
 		ITEM_WORN_STATE::TItemWornState wornState = item->getItemWornState();
 		item->computeItemWornState();
-				
+
 		// if states differs send a message
 		if (wornState != item->getItemWornState())
 		{
 			if (getCharacter() != NULL)
 			{
 				string msgName = ITEM_WORN_STATE::getMessageForState(item->getItemWornState());
-				if ( !msgName.empty())
+				if (!msgName.empty())
 				{
 					SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
 					params[0].SheetId = item->getSheetId();
-					CCharacter::sendDynamicSystemMessage( getCharacter()->getEntityRowId(), msgName, params);
+					CCharacter::sendDynamicSystemMessage(getCharacter()->getEntityRowId(), msgName, params);
 				}
 			}
 		}
@@ -1022,7 +1014,7 @@ void CCharacterInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags
 		// send slot update to the client
 		updateClientSlot(slot, item);
 	}
-	
+
 	if (changeFlags.checkEnumValue(INVENTORIES::itc_info_version))
 	{
 		getCharacter()->_InventoryUpdater.syncInfoVersion(getInventory()->getInventoryId(), slot);
@@ -1050,7 +1042,7 @@ void CCharacterInvView::updateItemPrerequisit(uint32 slot)
 
 	if (item != NULL)
 	{
-		getCharacter()->_InventoryUpdater.setOneItemProp( getInventory()->getInventoryId(), slot, INVENTORIES::PrerequisitValid, getCharacter()->checkPreRequired( item ) );
+		getCharacter()->_InventoryUpdater.setOneItemProp(getInventory()->getInventoryId(), slot, INVENTORIES::PrerequisitValid, getCharacter()->checkPreRequired(item));
 	}
 }
 
@@ -1066,7 +1058,7 @@ void CCharacterInvView::updateClientSlot(uint32 slot, const CGameItemPtr item)
 		uint32 price;
 		RM_FABER_STAT_TYPE::TRMStatType itemBestStat;
 
-		getCharacter()->queryItemPrice( item, price );
+		getCharacter()->queryItemPrice(item, price);
 		itemBestStat = item->getCraftParameters() == 0 ? RM_FABER_STAT_TYPE::Unknown : item->getCraftParameters()->getBestItemStat();
 
 		BOTCHATTYPE::TBotChatResaleFlag resaleFlag = (item->durability() == item->maxDurability() ? BOTCHATTYPE::ResaleOk : BOTCHATTYPE::ResaleKOBroken);
@@ -1085,29 +1077,29 @@ void CCharacterInvView::updateClientSlot(uint32 slot, const CGameItemPtr item)
 
 		const INVENTORIES::TItemId &itemId = item->getItemId();
 
-		INVENTORIES::CItemSlot itemSlot( slot );
-		itemSlot.setItemProp( INVENTORIES::Sheet, item->getSheetId().asInt() );
-		itemSlot.setItemProp( INVENTORIES::Quality, item->quality() );
-		itemSlot.setItemProp( INVENTORIES::Quantity, item->getStackSize() );
-		itemSlot.setItemProp( INVENTORIES::UserColor, item->color() );
-		itemSlot.setItemProp( INVENTORIES::CharacBuffs, item->buffFlags() );
-		itemSlot.setItemProp( INVENTORIES::Locked, item->getLockCount() );
-		itemSlot.setItemProp( INVENTORIES::Access, 0 ); // don't care here
-		itemSlot.setItemProp( INVENTORIES::Weight, item->weight() / 10 );
-		itemSlot.setItemProp( INVENTORIES::NameId, item->sendNameId(getCharacter()) );
-		itemSlot.setItemProp( INVENTORIES::Enchant, item->getClientEnchantValue() );
-		itemSlot.setItemProp( INVENTORIES::Price, price );
-		itemSlot.setItemProp( INVENTORIES::ResaleFlag, resaleFlag );
-		itemSlot.setItemProp( INVENTORIES::ItemClass, item->getItemClass() );
-		itemSlot.setItemProp( INVENTORIES::ItemBestStat, itemBestStat );
-		itemSlot.setItemProp( INVENTORIES::PrerequisitValid, getCharacter()->checkPreRequired( item ) );
-		itemSlot.setItemProp( INVENTORIES::Worned, (item->getItemWornState()==ITEM_WORN_STATE::Worned));
-		getCharacter()->_InventoryUpdater.setItemProps( getInventory()->getInventoryId(), itemSlot );
+		INVENTORIES::CItemSlot itemSlot(slot);
+		itemSlot.setItemProp(INVENTORIES::Sheet, item->getSheetId().asInt());
+		itemSlot.setItemProp(INVENTORIES::Quality, item->quality());
+		itemSlot.setItemProp(INVENTORIES::Quantity, item->getStackSize());
+		itemSlot.setItemProp(INVENTORIES::UserColor, item->color());
+		itemSlot.setItemProp(INVENTORIES::CharacBuffs, item->buffFlags());
+		itemSlot.setItemProp(INVENTORIES::Locked, item->getLockCount());
+		itemSlot.setItemProp(INVENTORIES::Access, 0); // don't care here
+		itemSlot.setItemProp(INVENTORIES::Weight, item->weight() / 10);
+		itemSlot.setItemProp(INVENTORIES::NameId, item->sendNameId(getCharacter()));
+		itemSlot.setItemProp(INVENTORIES::Enchant, item->getClientEnchantValue());
+		itemSlot.setItemProp(INVENTORIES::Price, price);
+		itemSlot.setItemProp(INVENTORIES::ResaleFlag, resaleFlag);
+		itemSlot.setItemProp(INVENTORIES::ItemClass, item->getItemClass());
+		itemSlot.setItemProp(INVENTORIES::ItemBestStat, itemBestStat);
+		itemSlot.setItemProp(INVENTORIES::PrerequisitValid, getCharacter()->checkPreRequired(item));
+		itemSlot.setItemProp(INVENTORIES::Worned, (item->getItemWornState() == ITEM_WORN_STATE::Worned));
+		getCharacter()->_InventoryUpdater.setItemProps(getInventory()->getInventoryId(), itemSlot);
 	}
 	else
 	{
 		// empty slot
-		getCharacter()->_InventoryUpdater.resetItem( getInventory()->getInventoryId(), slot );
+		getCharacter()->_InventoryUpdater.resetItem(getInventory()->getInventoryId(), slot);
 	}
 
 	// send slot update to the client
@@ -1126,7 +1118,7 @@ NLMISC_COMMAND(dumpPlayerInventories, "dump inventories of the player (DEBUG)", 
 
 	CEntityId eid(args[0]);
 
-	CCharacter * c = PlayerManager.getChar(eid);
+	CCharacter *c = PlayerManager.getChar(eid);
 	if (!c)
 		return true;
 
@@ -1159,41 +1151,27 @@ NLMISC_COMMAND(dumpPlayerInventories, "dump inventories of the player (DEBUG)", 
 // ****************************************************************************
 #define PERSISTENT_CLASS CInventoryBase
 
-#define PERSISTENT_APPLY_ARGS CCharacter * owner
+#define PERSISTENT_APPLY_ARGS CCharacter *owner
 
-#define PERSISTENT_DATA\
-	PROP2(_InventoryId, uint32, uint32(_InventoryId), _InventoryId = INVENTORIES::TInventory(_InventoryId))\
-	LSTRUCT_VECT(_Items,\
-	ARRAY_LOGIC(getSlotCount()) if (_Items[i]!=NULL && _Items[i]->getStaticForm() != NULL && _Items[i]->getStaticForm()->Family != ITEMFAMILY::SCROLL_R2),\
-		_Items[i]->store(pdr),\
-		CGameItemPtr item;\
-		item.newItem();\
-		CGameItem::CPersistentApplyArg applyArgs(owner);\
-		item->apply(pdr, applyArgs);\
-		/* ANTIBUG: remove items with unknown sheet*/\
-		if (item->getSheetId() == CSheetId::Unknown)\
-		{\
+#define PERSISTENT_DATA                                                                                                                                                                                                                                                                                                                                                 \
+	PROP2(_InventoryId, uint32, uint32(_InventoryId), _InventoryId = INVENTORIES::TInventory(_InventoryId))                                                                                                                                                                                                                                                             \
+	LSTRUCT_VECT(_Items, ARRAY_LOGIC(getSlotCount()) if (_Items[i] != NULL && _Items[i]->getStaticForm() != NULL && _Items[i]->getStaticForm()->Family != ITEMFAMILY::SCROLL_R2), _Items[i]->store(pdr), CGameItemPtr item; item.newItem(); CGameItem::CPersistentApplyArg applyArgs(owner); item->apply(pdr, applyArgs); /* ANTIBUG: remove items with unknown sheet*/ \
+	             if (item->getSheetId() == CSheetId::Unknown) {\
 			( nlwarning("found unknown item in inventory '%s' at slot %u",\
 				INVENTORIES::toString(getInventoryId()).c_str(),\
 				item->getInventorySlot()\
 				) );\
-			item.deleteItem();\
-		}\
-		else\
-		{\
-			forceLoadItem(item, applyArgs.InventorySlot);\
-		}\
-	)\
+			item.deleteItem(); } else { forceLoadItem(item, applyArgs.InventorySlot); })
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
 // ****************************************************************************
-//void CInventoryBase::legacyLoad(NLMISC::IStream &f, uint16 characterSerialVersion, CCharacter *ownerPtr)
+// void CInventoryBase::legacyLoad(NLMISC::IStream &f, uint16 characterSerialVersion, CCharacter *ownerPtr)
 //{
 //	// this function while load an inventory using the pre-pdr data format.
 //	// this load is mostly a very old recursive item serial loading
-//	// where the file level of item (the inventory) is just read to 
+//	// where the file level of item (the inventory) is just read to
 //	// advance in the stream
 //
 //	uint16			slotImage = 0;
@@ -1231,7 +1209,7 @@ NLMISC_COMMAND(dumpPlayerInventories, "dump inventories of the player (DEBUG)", 
 //			f.serial(coord);
 //			f.serial(coord);
 //		}
-//		
+//
 //		f.serial(timeOnGround);
 //		f.serial(slotCount);
 //		f.serial(carrionSheetId);
@@ -1239,9 +1217,9 @@ NLMISC_COMMAND(dumpPlayerInventories, "dump inventories of the player (DEBUG)", 
 //		f.serial( destroyable );
 //		if ( characterSerialVersion >= 19 )
 //			f.serial(dropable);
-//		
+//
 //		f.serial( creatorID );
-//		
+//
 //		f.serial( hp );
 //		f.serial( recommended );
 //		f.serial( craftParameters );
@@ -1261,7 +1239,7 @@ NLMISC_COMMAND(dumpPlayerInventories, "dump inventories of the player (DEBUG)", 
 //		}
 //
 //		// load children count
-//		uint32 childrenCount = 0; 
+//		uint32 childrenCount = 0;
 //		f.serial( childrenCount );
 //		// load non null children count
 //		uint32 nonNullChildrenCount = 0;
@@ -1333,23 +1311,23 @@ NLMISC_COMMAND(dumpPlayerInventories, "dump inventories of the player (DEBUG)", 
 //
 //		f.serial( dummy_uint16 ); //uint16
 //		f.serial( hp ); //uint32
-//	
+//
 //		if( characterSerialVersion < 7 )
 //			f.serial( dummy_uint16 );
 //		else if( characterSerialVersion == 7 )
 //			f.serial( dummy_f );
-//		
+//
 //		if( characterSerialVersion < 8 )
 //			f.serial( dummy_f );
 //		f.serial( dummy_f );
 //
 //		f.serial( dummy_uint16 );
 //		f.serial( dummy_uint16 );
-//		
+//
 //		if( characterSerialVersion < 8 )
 //			f.serial( dummy_f );
 //		f.serial( dummy_uint16 );
-//		
+//
 //		f.serial( dummy_uint32 );
 //		f.serial( dummy_uint16 );
 //		f.serial( dummy_uint32 );
@@ -1369,7 +1347,7 @@ NLMISC_COMMAND(dumpPlayerInventories, "dump inventories of the player (DEBUG)", 
 //		f.serial( creatorID );
 //
 //		// load children count
-//		uint32 childrenCount = 0; 
+//		uint32 childrenCount = 0;
 //		f.serial( childrenCount );
 //
 //		// load non null children count
@@ -1422,4 +1400,3 @@ NLMISC_COMMAND(dumpPlayerInventories, "dump inventories of the player (DEBUG)", 
 //		}
 //	}
 //}
-

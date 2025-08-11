@@ -14,14 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "proc_item_phrase.h"
 #include "s_phrase_factory.h"
 DEFAULT_SPHRASE_FACTORY(CProcItemPhrase, BRICK_TYPE::PROC_ENCHANTEMENT)
-
-
-
-
-

@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef WORLD_INSTANCES
 #define WORLD_INSTANCES
 
@@ -25,23 +24,22 @@
 class CReportAICollisionAvailableMsgImp : public CReportAICollisionAvailableMsg
 {
 	// overload the callback
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 };
 
 /// Message from AIS to EGS to report static continent instance
 class CReportStaticAIInstanceMsgImp : public CReportStaticAIInstanceMsg
 {
 	// overload the callback
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 };
 
 /// Message from AIS to EGS to report ai instance despawn
 class CReportAIInstanceDespawnMsgImp : public CReportAIInstanceDespawnMsg
 {
 	// overload the callback
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 };
-
 
 /* This class store instance information as well as
  * AIS list with available collision information.
@@ -51,12 +49,11 @@ class CReportAIInstanceDespawnMsgImp : public CReportAIInstanceDespawnMsg
 class CWorldInstances
 {
 public:
-
 	/// Interface for aiInstance ready callback
 	struct IAIInstanceReady
 	{
 		virtual void onAiInstanceReady(const CReportStaticAIInstanceMsg &msg) = 0;
-		virtual void onAiInstanceDown(const CReportStaticAIInstanceMsg &msg) {} // not mandatory
+		virtual void onAiInstanceDown(const CReportStaticAIInstanceMsg &msg) { } // not mandatory
 	};
 
 	/// Singleton access
@@ -71,7 +68,7 @@ public:
 	void msgToAIInstance2(uint32 instanceNumber, NLNET::CMessage &msg);
 
 	/// Return the AIS Id or 0 if no AIS is currently online (no warning if not found)
-	NLNET::TServiceId getAISId(uint32 instanceNumber ) const;
+	NLNET::TServiceId getAISId(uint32 instanceNumber) const;
 
 	/// an ais as just disconnected.
 	void aiDisconnection(NLNET::TServiceId aisId);
@@ -80,51 +77,49 @@ public:
 	bool getAIServiceIdForInstance(uint32 instanceNumber, NLNET::TServiceId &AISId);
 
 	/// Retrieve the instance name for a given AIS service ID
-	bool getAIInstanceNameFromeServiceId(NLNET::TServiceId AISID, std::string & name);
+	bool getAIInstanceNameFromeServiceId(NLNET::TServiceId AISID, std::string &name);
 
 private:
 	// Private constructor, enforce singleton
 	CWorldInstances();
 	// singleton instance pointer
-	static CWorldInstances	*_Instance;
+	static CWorldInstances *_Instance;
 
-	IAIInstanceReady		*_AIReadyCallback;
+	IAIInstanceReady *_AIReadyCallback;
 
 	struct TInstanceInfo
 	{
 		/// Unique instance number.
-		uint32			InstanceNumber;
+		uint32 InstanceNumber;
 		/// Name of the continent for this instance.
-		std::string		ContinentName;
+		std::string ContinentName;
 		/// Service ID of the ais hosting this instance.
-		NLNET::TServiceId	AISId;
+		NLNET::TServiceId AISId;
 	};
 
 	struct TAISInfo
 	{
 		/// AIS service ID
-		NLNET::TServiceId			AISId;
+		NLNET::TServiceId AISId;
 		/// Vector of available continent collision data.
-		std::vector<std::string>	AvailableCollision;
+		std::vector<std::string> AvailableCollision;
 	};
 
-
-	typedef std::map<uint32, TInstanceInfo>	TInstanceInfoCont;
+	typedef std::map<uint32, TInstanceInfo> TInstanceInfoCont;
 	/// Storage for instances info
-	TInstanceInfoCont		_InstanceInfos;
+	TInstanceInfoCont _InstanceInfos;
 
-	typedef std::map<NLNET::TServiceId, TAISInfo>	TAISInfoCont;
+	typedef std::map<NLNET::TServiceId, TAISInfo> TAISInfoCont;
 	/// Storage for ais info
-	TAISInfoCont			_AISInfos;
+	TAISInfoCont _AISInfos;
 
 	friend class CReportAICollisionAvailableMsgImp;
 	friend class CReportStaticAIInstanceMsgImp;
 	friend class CReportAIInstanceDespawnMsgImp;
 
-	void reportAICollisionAvailable (const std::string &name, NLNET::TServiceId id, CReportAICollisionAvailableMsgImp &msg);
-	void reportStaticAIInstance (const std::string &name, NLNET::TServiceId id, CReportStaticAIInstanceMsgImp &msg);
-	void reportAIInstanceDespawn (const std::string &name, NLNET::TServiceId id, CReportAIInstanceDespawnMsgImp &msg);
-
+	void reportAICollisionAvailable(const std::string &name, NLNET::TServiceId id, CReportAICollisionAvailableMsgImp &msg);
+	void reportStaticAIInstance(const std::string &name, NLNET::TServiceId id, CReportStaticAIInstanceMsgImp &msg);
+	void reportAIInstanceDespawn(const std::string &name, NLNET::TServiceId id, CReportAIInstanceDespawnMsgImp &msg);
 };
 
-#endif //WORLD_INSTANCES
+#endif // WORLD_INSTANCES

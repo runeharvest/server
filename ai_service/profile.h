@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/** 
+/**
  * This file defines the classes:
  * - CProfileOwner
  * - IAIProfileFactory
@@ -26,8 +26,7 @@
 #ifndef RYAI_AI_PROFILE_H
 #define RYAI_AI_PROFILE_H
 
-
-//#pragma warning (disable : 4355)	//	warning C4355: 'this' : used in base member initializer list
+// #pragma warning (disable : 4355)	//	warning C4355: 'this' : used in base member initializer list
 
 // This is the base class for defining NPC behaviour profiles
 // The team infrastructure manages the allocation of AI profiles to bots
@@ -42,7 +41,7 @@ class IAIProfile;
 class CProfileOwner
 {
 public:
-	virtual ~CProfileOwner() { }	
+	virtual ~CProfileOwner() { }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -50,12 +49,12 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 class IAIProfileFactory
-: public NLMISC::CDbgRefCount<IAIProfileFactory>
+    : public NLMISC::CDbgRefCount<IAIProfileFactory>
 {
 public:
 	friend class CProfilePtr;
 	virtual ~IAIProfileFactory() { }
-	virtual	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner *owner) = 0;
+	virtual NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner *owner) = 0;
 };
 
 #define RYAI_DECLARE_PROFILE_FACTORY(ProfileClass) RYAI_DECLARE_FACTORY(IAIProfileFactory, ProfileClass, std::string);
@@ -67,10 +66,10 @@ public:
 
 template <class TProfile>
 class CAIGenericProfileFactory
-: public IAIProfileFactory
+    : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner *owner)
 	{
 		return new TProfile(owner);
 	}
@@ -81,11 +80,11 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 class IAIProfile
-: public NLMISC::CRefCount
+    : public NLMISC::CRefCount
 {
 public:
 	virtual ~IAIProfile() { }
-	
+
 	/// @name Virtual interface
 	//@{
 	// routine called when a profOwner starts to use a given profile
@@ -109,11 +108,11 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 class CAIBaseProfile
-: public IAIProfile
+    : public IAIProfile
 {
 public:
 	virtual ~CAIBaseProfile() { }
-	
+
 	/// @name IAIProfile base implementation
 	//@{
 	virtual void stateChangeProfile() { beginProfile(); }
@@ -133,42 +132,42 @@ public:
 		START_BEGIN = 0,
 		START_RESUME
 	};
-	
+
 public:
 	CProfilePtr();
-	
+
 	virtual ~CProfilePtr();
-	
-//	std::string buildProfileDebugString() const;
+
+	//	std::string buildProfileDebugString() const;
 	virtual std::string getOneLineInfoString() const;
-	
-	AITYPES::TProfiles	getAIProfileType() const;
-	
+
+	AITYPES::TProfiles getAIProfileType() const;
+
 	template <class T>
-	void setAIProfile(T* obj, IAIProfileFactory* profile, bool callStateChangedIfSame) const
+	void setAIProfile(T *obj, IAIProfileFactory *profile, bool callStateChangedIfSame) const
 	{
 		if (profile)
 		{
 			setAIProfile(profile->createAIProfile(obj), callStateChangedIfSame);
 		}
 	}
-	
+
 	void setAIProfile(NLMISC::CSmartPtr<IAIProfile> profile, bool callStateChangedIfSame = false, TStartProfileType startType = START_BEGIN) const;
-	
+
 	void updateProfile(uint ticks) const;
-	
+
 	void mayUpdateProfile(uint ticks) const;
-	
-	IAIProfile* getAIProfile() const { return _AiProfile; }
-	NLMISC::CSmartPtr<IAIProfile> const& getAISpawnProfile() const { return _AiProfile; }
-	
+
+	IAIProfile *getAIProfile() const { return _AiProfile; }
+	NLMISC::CSmartPtr<IAIProfile> const &getAISpawnProfile() const { return _AiProfile; }
+
 private:
-	mutable	NLMISC::CSmartPtr<IAIProfile>	_AiProfile;
-	mutable	NLMISC::CSmartPtr<IAIProfile>	_NextAiProfile;
-	mutable bool				_NextAiProfileCallStateChangedIfSame;
-	
-	mutable	TStartProfileType	_NextStartType;
-	mutable	bool				_IsUpdating;
+	mutable NLMISC::CSmartPtr<IAIProfile> _AiProfile;
+	mutable NLMISC::CSmartPtr<IAIProfile> _NextAiProfile;
+	mutable bool _NextAiProfileCallStateChangedIfSame;
+
+	mutable TStartProfileType _NextStartType;
+	mutable bool _IsUpdating;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -176,7 +175,7 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 /// the lookup routine that serves as a kind of repository interface
-IAIProfileFactory* lookupAIGrpProfile(char const* name);
+IAIProfileFactory *lookupAIGrpProfile(char const *name);
 
 /****************************************************************************/
 /* Inlined methods                                                          */
@@ -186,40 +185,35 @@ IAIProfileFactory* lookupAIGrpProfile(char const* name);
 // CProfilePtr                                                              //
 //////////////////////////////////////////////////////////////////////////////
 
-inline
-CProfilePtr::CProfilePtr()
-: _AiProfile(NULL)
-, _NextAiProfile(NULL)
-, _NextStartType(START_BEGIN)
-, _IsUpdating(false)
+inline CProfilePtr::CProfilePtr()
+    : _AiProfile(NULL)
+    , _NextAiProfile(NULL)
+    , _NextStartType(START_BEGIN)
+    , _IsUpdating(false)
 {
 }
 
-inline
-CProfilePtr::~CProfilePtr()
+inline CProfilePtr::~CProfilePtr()
 {
 	_NextAiProfile = NULL;
 	_AiProfile = NULL;
 }
 
-inline
-std::string CProfilePtr::getOneLineInfoString() const
+inline std::string CProfilePtr::getOneLineInfoString() const
 {
 	if (_AiProfile.isNull())
 		return std::string("No Profile");
 	return _AiProfile->getOneLineInfoString();
 }
 
-inline
-AITYPES::TProfiles CProfilePtr::getAIProfileType() const
+inline AITYPES::TProfiles CProfilePtr::getAIProfileType() const
 {
 	if (!_AiProfile.isNull())
 		return _AiProfile->getAIProfileType();
-	return AITYPES::BAD_TYPE;	// unknown
+	return AITYPES::BAD_TYPE; // unknown
 }
 
-inline
-void CProfilePtr::setAIProfile(NLMISC::CSmartPtr<IAIProfile> profile, bool callStateChangedIfSame, TStartProfileType startType) const
+inline void CProfilePtr::setAIProfile(NLMISC::CSmartPtr<IAIProfile> profile, bool callStateChangedIfSame, TStartProfileType startType) const
 {
 	// :NOTE: profile can be NULL
 	if (_IsUpdating)
@@ -229,48 +223,46 @@ void CProfilePtr::setAIProfile(NLMISC::CSmartPtr<IAIProfile> profile, bool callS
 		_NextStartType = startType;
 		return;
 	}
-	
+
 	if (!_AiProfile.isNull())
 	{
 		// we may use the == operator because it doesn't take account of parameters (which is bad) :(
-		if (callStateChangedIfSame==true && _AiProfile->getAIProfileType ()==profile->getAIProfileType ())	// if we already have this profile, then call its stateChangeProfile method
+		if (callStateChangedIfSame == true && _AiProfile->getAIProfileType() == profile->getAIProfileType()) // if we already have this profile, then call its stateChangeProfile method
 		{
 			_AiProfile->stateChangeProfile();
 			return;
 		}
-		
+
 		_AiProfile->endProfile();
 		_AiProfile = NULL;
 	}
-	
+
 	if (!profile.isNull())
 	{
 		_AiProfile = profile;
-		if (startType==START_BEGIN)
+		if (startType == START_BEGIN)
 			_AiProfile->beginProfile();
 		else
 			_AiProfile->resumeProfile();
 	}
 }
 
-inline
-void CProfilePtr::updateProfile(uint ticks) const
+inline void CProfilePtr::updateProfile(uint ticks) const
 {
-	BOMB_IF(_AiProfile.isNull(),"Attempting updateProfile() with _AiProfile.isNull()",return);
+	BOMB_IF(_AiProfile.isNull(), "Attempting updateProfile() with _AiProfile.isNull()", return);
 
 	_IsUpdating = true;
 	_AiProfile->updateProfile(ticks);
 	_IsUpdating = false;
-	
-	if	(!_NextAiProfile.isNull())
+
+	if (!_NextAiProfile.isNull())
 	{
 		setAIProfile(_NextAiProfile, _NextAiProfileCallStateChangedIfSame, _NextStartType);
 		_NextAiProfile = NULL;
 	}
 }
 
-inline
-void CProfilePtr::mayUpdateProfile(uint ticks) const
+inline void CProfilePtr::mayUpdateProfile(uint ticks) const
 {
 	if (_AiProfile)
 		updateProfile(ticks);

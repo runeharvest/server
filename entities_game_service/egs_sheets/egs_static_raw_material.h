@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_EGS_STATIC_RAW_MATERIAL_H
 #define RY_EGS_STATIC_RAW_MATERIAL_H
-
 
 /**
  * class for raw material *for creatures only*
@@ -30,46 +27,48 @@ class CStaticRawMaterial
 {
 public:
 	/// Constructor
-	CStaticRawMaterial() : MinQuality(0), MaxQuality(0)
-	{}
-
-	/// copy Constructor
-	CStaticRawMaterial( const CStaticRawMaterial &m)
+	CStaticRawMaterial()
+	    : MinQuality(0)
+	    , MaxQuality(0)
 	{
-		Name				= m.Name;
-		AssociatedItemName	= m.AssociatedItemName;
-		MinQuality			= m.MinQuality;
-		MaxQuality			= m.MaxQuality;
 	}
 
+	/// copy Constructor
+	CStaticRawMaterial(const CStaticRawMaterial &m)
+	{
+		Name = m.Name;
+		AssociatedItemName = m.AssociatedItemName;
+		MinQuality = m.MinQuality;
+		MaxQuality = m.MaxQuality;
+	}
 
 	/// Destructor
 	~CStaticRawMaterial()
-	{}
+	{
+	}
 
 	/// serial
 	void serial(NLMISC::IStream &f)
 	{
-		f.serial( Name );
-		f.serial( AssociatedItemName );
-		f.serial( MinQuality );
-		f.serial( MaxQuality );
+		f.serial(Name);
+		f.serial(AssociatedItemName);
+		f.serial(MinQuality);
+		f.serial(MaxQuality);
 	}
 
 public:
 	/// name of the mp
-	std::string		Name;
+	std::string Name;
 
 	/// associated item name
-	std::string		AssociatedItemName;
+	std::string AssociatedItemName;
 
 	/// min quality
-	uint8			MinQuality;
+	uint8 MinQuality;
 
 	/// max quality
-	uint8			MaxQuality;
+	uint8 MaxQuality;
 };
-
 
 #endif // BS_MP_H
 

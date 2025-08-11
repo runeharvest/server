@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 
 //
@@ -26,15 +25,15 @@
 
 NL_INSTANCE_COUNTER_IMPL(CCreatureTickUpdateTimerEvent);
 
-CCreatureTickUpdateTimerEvent:: CCreatureTickUpdateTimerEvent(CCreature *parent)
+CCreatureTickUpdateTimerEvent::CCreatureTickUpdateTimerEvent(CCreature *parent)
 {
 	_Parent = parent;
 }
 
-void CCreatureTickUpdateTimerEvent::timerCallback(CTimer* owner)
+void CCreatureTickUpdateTimerEvent::timerCallback(CTimer *owner)
 {
 	H_AUTO(CCreatureTickUpdateTimerEvent);
 
-	uint32 timeToNextTick= _Parent->tickUpdate();
-	owner->setRemaining(timeToNextTick,this,1);
+	uint32 timeToNextTick = _Parent->tickUpdate();
+	owner->setRemaining(timeToNextTick, this, 1);
 }

@@ -14,14 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef EGS_STATIC_WORLD_H
 #define EGS_STATIC_WORLD_H
 
-//Nel georges
+// Nel georges
 #include "nel/georges/u_form.h"
-
 
 /**
  * class used to store the world organisation ( continent ids, ... )
@@ -33,22 +30,22 @@ class CStaticWorld
 {
 public:
 	/// ctor
-	CStaticWorld(){}
+	CStaticWorld() { }
 
 	/// Read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 	/// Return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 1; }
+	inline static uint getVersion() { return 1; }
 	/// Serial
 	void serial(NLMISC::IStream &f)
 	{
-		f.serialCont( Continents );
+		f.serialCont(Continents);
 	}
 	/// Removed
-	void removed() {}
-	
+	void removed() { }
+
 	/// continent in the world (indexed by CONTINENT::TContinent)
-	std::vector< NLMISC::CSheetId > Continents;
+	std::vector<NLMISC::CSheetId> Continents;
 };
 
 /**
@@ -61,26 +58,24 @@ class CStaticContinent
 {
 public:
 	/// ctor
-	CStaticContinent(){}
+	CStaticContinent() { }
 
 	/// Read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 	/// Return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 1; }
+	inline static uint getVersion() { return 1; }
 	/// Serial
 	void serial(NLMISC::IStream &f)
 	{
 		f.serialCont(Outposts);
 	}
 	/// Removed
-	void removed() {}
+	void removed() { }
 
 	/// index of the outposts in this continent
 	std::vector<uint8> Outposts;
 };
 
-
 #endif // EGS_STATIC_WORLD_H
 
 /* End of egs_static_world.h */
-

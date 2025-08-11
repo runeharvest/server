@@ -24,28 +24,26 @@
 #include "nel/misc/file.h"
 #include "nel/misc/config_file.h"
 
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-extern CVariable<std::string>	WebRootDirectory;
+extern CVariable<std::string> WebRootDirectory;
 
-CVariable<bool>			HoFEnableGenerator("hof", "HoFEnableGenerator", "Set if HoF generator is enabled", true, 0, true);
-CVariable<bool>			HoFVerbose("hof", "HoFVerbose", "Set if HoF generator is verbose", false, 0, true);
-CVariable<std::string>	HoFHDTDirectory("hof", "HoFHDTDirectory", "Directory where HDT files are stored", "/local/www/hof", 0, true);
-CVariable<uint32>		HoFGeneratorUpdatePeriod("hof", "HoFGeneratorUpdatePeriod", "HoF generator update period in milliseconds", 1000, 0, true);
-CVariable<uint32>		HoFGeneratorDirUpdatePeriod("hof", "HoFGeneratorDirUpdatePeriod", "HoF generator directory update period in seconds", 60, 0, true);
+CVariable<bool> HoFEnableGenerator("hof", "HoFEnableGenerator", "Set if HoF generator is enabled", true, 0, true);
+CVariable<bool> HoFVerbose("hof", "HoFVerbose", "Set if HoF generator is verbose", false, 0, true);
+CVariable<std::string> HoFHDTDirectory("hof", "HoFHDTDirectory", "Directory where HDT files are stored", "/local/www/hof", 0, true);
+CVariable<uint32> HoFGeneratorUpdatePeriod("hof", "HoFGeneratorUpdatePeriod", "HoF generator update period in milliseconds", 1000, 0, true);
+CVariable<uint32> HoFGeneratorDirUpdatePeriod("hof", "HoFGeneratorDirUpdatePeriod", "HoF generator directory update period in seconds", 60, 0, true);
 
-
-CHoFGenerator * CHoFGenerator::_Instance = NULL;
+CHoFGenerator *CHoFGenerator::_Instance = NULL;
 
 // ****************************************************************************
 // Helpers
 // ****************************************************************************
 
 // ****************************************************************************
-static string createSingleQuotedPHPString(const string & s)
+static string createSingleQuotedPHPString(const string &s)
 {
 	string res;
 	res += "'";
@@ -69,11 +67,11 @@ static string createSingleQuotedPHPString(const string & s)
 // ****************************************************************************
 CHoFGenerator::CHoFGenerator()
 {
-	_LastUpdateTime			= 0;
-	_LastDirUpdateTime		= 0;
-	_CurrentHDTFileIndex	= 0;
-	_CurrentSDBReaderIndex	= 0;
-	_CurrentStepIndex		= 0;
+	_LastUpdateTime = 0;
+	_LastDirUpdateTime = 0;
+	_CurrentHDTFileIndex = 0;
+	_CurrentSDBReaderIndex = 0;
+	_CurrentStepIndex = 0;
 }
 
 // ****************************************************************************
@@ -99,7 +97,7 @@ void CHoFGenerator::serviceUpdate()
 			CPath::getPathContent(dir, true, false, true, files);
 			for (uint i = 0; i < files.size(); i++)
 			{
-				const string & fileName = files[i];
+				const string &fileName = files[i];
 
 				if (toLowerAscii(CFile::getExtension(fileName)) == "hdt")
 				{
@@ -110,9 +108,9 @@ void CHoFGenerator::serviceUpdate()
 
 		if (_CurrentHDTFileIndex >= _HDTFiles.size())
 		{
-			_CurrentHDTFileIndex	= 0;
-			_CurrentSDBReaderIndex	= 0;
-			_CurrentStepIndex		= 0;
+			_CurrentHDTFileIndex = 0;
+			_CurrentSDBReaderIndex = 0;
+			_CurrentStepIndex = 0;
 			_GeneratedScript.clear();
 		}
 	}
@@ -125,21 +123,21 @@ void CHoFGenerator::serviceUpdate()
 }
 
 // ****************************************************************************
-const std::string & CHoFGenerator::getCurrentHDTFile()
+const std::string &CHoFGenerator::getCurrentHDTFile()
 {
 	nlassert(_CurrentHDTFileIndex < _HDTFiles.size());
 	return _HDTFiles[_CurrentHDTFileIndex];
 }
 
 // ****************************************************************************
-const CShardStatDBReader & CHoFGenerator::getCurrentSDBReader()
+const CShardStatDBReader &CHoFGenerator::getCurrentSDBReader()
 {
 	nlassert(_CurrentSDBReaderIndex < _SDBReaders.size());
 	return _SDBReaders[_CurrentSDBReaderIndex];
 }
 
 // ****************************************************************************
-const CHoFGenerator::CParsedData & CHoFGenerator::getCurrentStep()
+const CHoFGenerator::CParsedData &CHoFGenerator::getCurrentStep()
 {
 	nlassert(_CurrentStepIndex < _Steps.size());
 	return _Steps[_CurrentStepIndex];
@@ -202,18 +200,17 @@ void CHoFGenerator::setNextStep()
 		{
 			static const string phpHeader = "<?php\n";
 			static const string phpFooter = "?>\n";
-			
-			ofile.serialBuffer((uint8*)(&phpHeader[0]), (uint)phpHeader.size());
-			ofile.serialBuffer((uint8*)(&_GeneratedScript[0]), (uint)_GeneratedScript.size());
-			ofile.serialBuffer((uint8*)(&phpFooter[0]), (uint)phpFooter.size());
+
+			ofile.serialBuffer((uint8 *)(&phpHeader[0]), (uint)phpHeader.size());
+			ofile.serialBuffer((uint8 *)(&_GeneratedScript[0]), (uint)_GeneratedScript.size());
+			ofile.serialBuffer((uint8 *)(&phpFooter[0]), (uint)phpFooter.size());
 
 			if (HoFVerbose.get())
 			{
 				nlinfo("script file '%s' has been successfully generated from '%s' for shard %u",
-					phpFileName.c_str(),
-					getCurrentHDTFile().c_str(),
-					getCurrentSDBReader().getShardId()
-					);
+				    phpFileName.c_str(),
+				    getCurrentHDTFile().c_str(),
+				    getCurrentSDBReader().getShardId());
 			}
 		}
 		else
@@ -282,7 +279,7 @@ void CHoFGenerator::processGenerationStep()
 }
 
 // ****************************************************************************
-bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & parsedData)
+bool CHoFGenerator::parseHDTFile(const std::string &fileName, CParsedData &parsedData)
 {
 	H_AUTO(CHoFGenerator_parseHDTFile);
 
@@ -294,14 +291,14 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 		H_AUTO(CHoFGenerator_parseHDTFile_1);
 		cfgFile.load(fileName);
 	}
-	catch (const Exception & e)
+	catch (const Exception &e)
 	{
 		nlwarning("cannot load file '%s' : %s", fileName.c_str(), e.what());
 		return false;
 	}
 
-	CConfigFile::CVar *	cfgVar;
-	vector<string>		varNames;
+	CConfigFile::CVar *cfgVar;
+	vector<string> varNames;
 
 	H_BEFORE(CHoFGenerator_parseHDTFile_2);
 
@@ -317,7 +314,7 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 		}
 
 		uint i = 0;
-		while (i+nbParams <= cfgVar->size())
+		while (i + nbParams <= cfgVar->size())
 		{
 			CValueVar valueVar;
 			valueVar.VarName = cfgVar->asString(i);
@@ -327,7 +324,7 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 				return false;
 			}
 
-			valueVar.Path = cfgVar->asString(i+1);
+			valueVar.Path = cfgVar->asString(i + 1);
 
 			parsedData.ValueVars.push_back(valueVar);
 			i += nbParams;
@@ -346,7 +343,7 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 		}
 
 		uint i = 0;
-		while (i+nbParams <= cfgVar->size())
+		while (i + nbParams <= cfgVar->size())
 		{
 			CWildcardValueVar wValueVar;
 			wValueVar.VarName = cfgVar->asString(i);
@@ -356,9 +353,9 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 				return false;
 			}
 
-			wValueVar.PathPattern = cfgVar->asString(i+1);
+			wValueVar.PathPattern = cfgVar->asString(i + 1);
 
-			string sOp = cfgVar->asString(i+2);
+			string sOp = cfgVar->asString(i + 2);
 			wValueVar.Op = toWildcardOp(sOp);
 			if (wValueVar.Op == OpUnknown)
 			{
@@ -383,7 +380,7 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 		}
 
 		uint i = 0;
-		while (i+nbParams <= cfgVar->size())
+		while (i + nbParams <= cfgVar->size())
 		{
 			CTableVar tableVar;
 			tableVar.VarName = cfgVar->asString(i);
@@ -393,9 +390,9 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 				return false;
 			}
 
-			tableVar.Path = cfgVar->asString(i+1);
+			tableVar.Path = cfgVar->asString(i + 1);
 
-			string sField = cfgVar->asString(i+2);
+			string sField = cfgVar->asString(i + 2);
 			tableVar.Field = toTableField(sField);
 
 			if (tableVar.Field == FieldUnknown)
@@ -404,7 +401,7 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 				return false;
 			}
 
-			string sMaxRows = cfgVar->asString(i+3);
+			string sMaxRows = cfgVar->asString(i + 3);
 			if (sMaxRows == "*")
 				tableVar.MaxRows = 0xffffFFFF;
 			else
@@ -427,7 +424,7 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 		}
 
 		uint i = 0;
-		while (i+nbParams <= cfgVar->size())
+		while (i + nbParams <= cfgVar->size())
 		{
 			CWildcardTableVar wTableVar;
 			wTableVar.VarName = cfgVar->asString(i);
@@ -437,9 +434,9 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 				return false;
 			}
 
-			wTableVar.PathPattern = cfgVar->asString(i+1);
+			wTableVar.PathPattern = cfgVar->asString(i + 1);
 
-			string sField = cfgVar->asString(i+2);
+			string sField = cfgVar->asString(i + 2);
 			wTableVar.Field = toTableField(sField);
 
 			if (wTableVar.Field == FieldUnknown)
@@ -448,13 +445,13 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 				return false;
 			}
 
-			string sMaxRows = cfgVar->asString(i+3);
+			string sMaxRows = cfgVar->asString(i + 3);
 			if (sMaxRows == "*")
 				wTableVar.MaxRows = 0xffffFFFF;
 			else
 				NLMISC::fromString(sMaxRows, wTableVar.MaxRows);
 
-			string sOp = cfgVar->asString(i+4);
+			string sOp = cfgVar->asString(i + 4);
 			wTableVar.Op = toWildcardOp(sOp);
 			if (wTableVar.Op == OpUnknown)
 			{
@@ -479,7 +476,7 @@ bool CHoFGenerator::parseHDTFile(const std::string & fileName, CParsedData & par
 }
 
 // ****************************************************************************
-void CHoFGenerator::splitParsedData(const CParsedData & parsedData, std::vector<CParsedData> & parsedDataVec)
+void CHoFGenerator::splitParsedData(const CParsedData &parsedData, std::vector<CParsedData> &parsedDataVec)
 {
 	// clear the vector
 	parsedDataVec.clear();
@@ -502,11 +499,11 @@ void CHoFGenerator::splitParsedData(const CParsedData & parsedData, std::vector<
 
 	// 1 step per table (table vars with the same path)
 	{
-		typedef map<std::string, std::vector<CTableVar> > TTableVarsByPath;
+		typedef map<std::string, std::vector<CTableVar>> TTableVarsByPath;
 		TTableVarsByPath tableVarsByPath;
 		for (uint i = 0; i < parsedData.TableVars.size(); i++)
 		{
-			const CTableVar & tableVar = parsedData.TableVars[i];
+			const CTableVar &tableVar = parsedData.TableVars[i];
 			tableVarsByPath[tableVar.Path].push_back(tableVar);
 		}
 
@@ -520,11 +517,11 @@ void CHoFGenerator::splitParsedData(const CParsedData & parsedData, std::vector<
 
 	// 1 step per wildcard table (wildcard table vars with the same path pattern)
 	{
-		typedef map<std::string, std::vector<CWildcardTableVar> > TWTableVarsByPathPattern;
+		typedef map<std::string, std::vector<CWildcardTableVar>> TWTableVarsByPathPattern;
 		TWTableVarsByPathPattern wTableVarsByPathPattern;
 		for (uint i = 0; i < parsedData.WTableVars.size(); i++)
 		{
-			const CWildcardTableVar & wTableVar = parsedData.WTableVars[i];
+			const CWildcardTableVar &wTableVar = parsedData.WTableVars[i];
 			wTableVarsByPathPattern[wTableVar.PathPattern].push_back(wTableVar);
 		}
 
@@ -538,7 +535,7 @@ void CHoFGenerator::splitParsedData(const CParsedData & parsedData, std::vector<
 }
 
 // ****************************************************************************
-bool CHoFGenerator::generatePHPScript(const CParsedData & parsedData, const CShardStatDBReader & statDBReader, std::string & phpScript)
+bool CHoFGenerator::generatePHPScript(const CParsedData &parsedData, const CShardStatDBReader &statDBReader, std::string &phpScript)
 {
 	H_AUTO(CHoFGenerator_generatePHPScript);
 
@@ -546,21 +543,21 @@ bool CHoFGenerator::generatePHPScript(const CParsedData & parsedData, const CSha
 		return true;
 
 	map<std::string, CTable> sortedTablePerPath;
-	map<std::string, vector<CTable> > sortedWildcardTablesPerPathPattern;
+	map<std::string, vector<CTable>> sortedWildcardTablesPerPathPattern;
 
 	// get sorted tables
 	for (uint i = 0; i < parsedData.TableVars.size(); i++)
 	{
 		H_AUTO(CHoFGenerator_generatePHPScript_1);
 
-		const string & path = parsedData.TableVars[i].Path;
+		const string &path = parsedData.TableVars[i].Path;
 		if (sortedTablePerPath.find(path) != sortedTablePerPath.end())
 			continue;
 
-		CTable & table = sortedTablePerPath[path];
+		CTable &table = sortedTablePerPath[path];
 
-		const TPlayerValues * playerValues;
-		const TGuildValues * guildValues;
+		const TPlayerValues *playerValues;
+		const TGuildValues *guildValues;
 		if (!statDBReader.getTable(path, playerValues, guildValues))
 		{
 			if (HoFVerbose.get())
@@ -576,11 +573,11 @@ bool CHoFGenerator::generatePHPScript(const CParsedData & parsedData, const CSha
 	{
 		H_AUTO(CHoFGenerator_generatePHPScript_2);
 
-		const string & pathPattern = parsedData.WTableVars[i].PathPattern;
+		const string &pathPattern = parsedData.WTableVars[i].PathPattern;
 		if (sortedWildcardTablesPerPathPattern.find(pathPattern) != sortedWildcardTablesPerPathPattern.end())
 			continue;
 
-		vector<CTable> & wildcardTables = sortedWildcardTablesPerPathPattern[pathPattern];
+		vector<CTable> &wildcardTables = sortedWildcardTablesPerPathPattern[pathPattern];
 
 		if (!getSortedWildcardTables(statDBReader, pathPattern, wildcardTables))
 		{
@@ -599,7 +596,7 @@ bool CHoFGenerator::generatePHPScript(const CParsedData & parsedData, const CSha
 	{
 		for (uint i = 0; i < parsedData.ValueVars.size(); i++)
 		{
-			const CValueVar & valueVar = parsedData.ValueVars[i];
+			const CValueVar &valueVar = parsedData.ValueVars[i];
 
 			sint32 val;
 			if (!statDBReader.getValue(valueVar.Path, val))
@@ -617,7 +614,7 @@ bool CHoFGenerator::generatePHPScript(const CParsedData & parsedData, const CSha
 	{
 		for (uint i = 0; i < parsedData.WValueVars.size(); i++)
 		{
-			const CWildcardValueVar & wValueVar = parsedData.WValueVars[i];
+			const CWildcardValueVar &wValueVar = parsedData.WValueVars[i];
 
 			vector<sint32> wildcardValues;
 			if (!statDBReader.getValues(wValueVar.PathPattern, wildcardValues))
@@ -642,10 +639,10 @@ bool CHoFGenerator::generatePHPScript(const CParsedData & parsedData, const CSha
 	{
 		for (uint i = 0; i < parsedData.TableVars.size(); i++)
 		{
-			const CTableVar & tableVar = parsedData.TableVars[i];
+			const CTableVar &tableVar = parsedData.TableVars[i];
 
-			const CTable & table = sortedTablePerPath[tableVar.Path];
-			
+			const CTable &table = sortedTablePerPath[tableVar.Path];
+
 			string phpArray;
 			generatePHPArray(tableVar.VarName, table, tableVar.Field, tableVar.MaxRows, phpArray);
 			phpScript += phpArray + "\n";
@@ -656,10 +653,10 @@ bool CHoFGenerator::generatePHPScript(const CParsedData & parsedData, const CSha
 	{
 		for (uint i = 0; i < parsedData.WTableVars.size(); i++)
 		{
-			const CWildcardTableVar & wTableVar = parsedData.WTableVars[i];
+			const CWildcardTableVar &wTableVar = parsedData.WTableVars[i];
 
 			nlassert(wTableVar.Op >= 0 && wTableVar.Op < NbOps);
-			const CTable & table = sortedWildcardTablesPerPathPattern[wTableVar.PathPattern][wTableVar.Op];
+			const CTable &table = sortedWildcardTablesPerPathPattern[wTableVar.PathPattern][wTableVar.Op];
 
 			string phpArray;
 			generatePHPArray(wTableVar.VarName, table, wTableVar.Field, wTableVar.MaxRows, phpArray);
@@ -673,11 +670,11 @@ bool CHoFGenerator::generatePHPScript(const CParsedData & parsedData, const CSha
 }
 
 // ****************************************************************************
-void CHoFGenerator::generatePHPArray(const std::string & varName, const CTable & table, TTableField tableField, uint32 maxRows, std::string & phpArray)
+void CHoFGenerator::generatePHPArray(const std::string &varName, const CTable &table, TTableField tableField, uint32 maxRows, std::string &phpArray)
 {
 	H_AUTO(CHoFGenerator_generatePHPArray);
 
-	const vector<CTableRow> * tableRows = NULL;
+	const vector<CTableRow> *tableRows = NULL;
 	bool nameField;
 
 	if (tableField == FieldPlayerName)
@@ -724,7 +721,7 @@ void CHoFGenerator::generatePHPArray(const std::string & varName, const CTable &
 			phpArray += toString((*tableRows)[i].Value);
 		}
 
-		if (i < nbRows-1)
+		if (i < nbRows - 1)
 		{
 			phpArray += ",";
 		}
@@ -734,7 +731,7 @@ void CHoFGenerator::generatePHPArray(const std::string & varName, const CTable &
 }
 
 // ****************************************************************************
-bool CHoFGenerator::getSortedWildcardTables(const CShardStatDBReader & statDBReader, const std::string & pathPattern, std::vector<CTable> & wildcardTables) const
+bool CHoFGenerator::getSortedWildcardTables(const CShardStatDBReader &statDBReader, const std::string &pathPattern, std::vector<CTable> &wildcardTables) const
 {
 	H_AUTO(CHoFGenerator_getSortedWildcardTables);
 
@@ -748,7 +745,7 @@ bool CHoFGenerator::getSortedWildcardTables(const CShardStatDBReader & statDBRea
 
 	for (uint i = 0; i < playerValuesVec.size(); i++)
 	{
-		const TPlayerValues * playerValues = playerValuesVec[i];
+		const TPlayerValues *playerValues = playerValuesVec[i];
 		for (TPlayerValues::const_iterator it = playerValues->begin(); it != playerValues->end(); ++it)
 		{
 			for (sint op = 0; op < NbOps; op++)
@@ -768,7 +765,7 @@ bool CHoFGenerator::getSortedWildcardTables(const CShardStatDBReader & statDBRea
 
 	for (uint i = 0; i < guildValuesVec.size(); i++)
 	{
-		const TGuildValues * guildValues = guildValuesVec[i];
+		const TGuildValues *guildValues = guildValuesVec[i];
 		for (TGuildValues::const_iterator it = guildValues->begin(); it != guildValues->end(); ++it)
 		{
 			for (sint op = 0; op < NbOps; op++)
@@ -798,7 +795,7 @@ bool CHoFGenerator::getSortedWildcardTables(const CShardStatDBReader & statDBRea
 }
 
 // ****************************************************************************
-void CHoFGenerator::loadTable(const CShardStatDBReader & statDBReader, const TPlayerValues & playerValues, const TGuildValues & guildValues, CTable & table) const
+void CHoFGenerator::loadTable(const CShardStatDBReader &statDBReader, const TPlayerValues &playerValues, const TGuildValues &guildValues, CTable &table) const
 {
 	H_AUTO(CHoFGenerator_loadTable);
 
@@ -808,7 +805,7 @@ void CHoFGenerator::loadTable(const CShardStatDBReader & statDBReader, const TPl
 	// get player values
 	for (TPlayerValues::const_iterator it = playerValues.begin(); it != playerValues.end(); ++it)
 	{
-		const CEntityId & playerId = (*it).first;
+		const CEntityId &playerId = (*it).first;
 		string playerName;
 		if (!statDBReader.getPlayerName(playerId, playerName))
 		{
@@ -816,8 +813,8 @@ void CHoFGenerator::loadTable(const CShardStatDBReader & statDBReader, const TPl
 		}
 
 		CTableRow tableRow;
-		tableRow.Name	= playerName;
-		tableRow.Value	= (*it).second;
+		tableRow.Name = playerName;
+		tableRow.Value = (*it).second;
 
 		table.PlayerTable.push_back(tableRow);
 	}
@@ -825,7 +822,7 @@ void CHoFGenerator::loadTable(const CShardStatDBReader & statDBReader, const TPl
 	// get guild values
 	for (TGuildValues::const_iterator it = guildValues.begin(); it != guildValues.end(); ++it)
 	{
-		const EGSPD::TGuildId & guildId = (*it).first;
+		const EGSPD::TGuildId &guildId = (*it).first;
 		string guildName;
 		if (!statDBReader.getGuildName(guildId, guildName))
 		{
@@ -833,8 +830,8 @@ void CHoFGenerator::loadTable(const CShardStatDBReader & statDBReader, const TPl
 		}
 
 		CTableRow tableRow;
-		tableRow.Name	= guildName;
-		tableRow.Value	= (*it).second;
+		tableRow.Name = guildName;
+		tableRow.Value = (*it).second;
 
 		table.GuildTable.push_back(tableRow);
 	}
@@ -865,7 +862,7 @@ sint32 CHoFGenerator::applyWildcardOp(TWildcardOp op, sint32 leftVal, sint32 rig
 }
 
 // ****************************************************************************
-CHoFGenerator::TTableField CHoFGenerator::toTableField(const std::string & tableField) const
+CHoFGenerator::TTableField CHoFGenerator::toTableField(const std::string &tableField) const
 {
 	TTableField res;
 
@@ -884,7 +881,7 @@ CHoFGenerator::TTableField CHoFGenerator::toTableField(const std::string & table
 }
 
 // ****************************************************************************
-CHoFGenerator::TWildcardOp CHoFGenerator::toWildcardOp(const std::string & op) const
+CHoFGenerator::TWildcardOp CHoFGenerator::toWildcardOp(const std::string &op) const
 {
 	TWildcardOp res;
 
@@ -899,7 +896,7 @@ CHoFGenerator::TWildcardOp CHoFGenerator::toWildcardOp(const std::string & op) c
 }
 
 // ****************************************************************************
-bool CHoFGenerator::addVarName(std::vector<std::string> & varNames, const std::string & varName) const
+bool CHoFGenerator::addVarName(std::vector<std::string> &varNames, const std::string &varName) const
 {
 	for (uint i = 0; i < varNames.size(); i++)
 	{
@@ -923,4 +920,3 @@ void CHoFGenerator::CTable::sort()
 	std::sort(PlayerTable.begin(), PlayerTable.end());
 	std::sort(GuildTable.begin(), GuildTable.end());
 }
-

@@ -16,7 +16,6 @@
 
 #include "pd_set.h"
 
-namespace RY_PDS
-{
+namespace RY_PDS {
 
 }; // RY_PDS

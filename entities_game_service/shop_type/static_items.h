@@ -21,7 +21,6 @@
 #include "game_share/item_type.h"
 #include "game_share/rm_family.h"
 
-
 /**
  * CStaticItems
  * Mount list of items selling in game
@@ -34,30 +33,29 @@ class CStaticItems
 public:
 	struct CRMForOneItemPart
 	{
-		std::vector< NLMISC::CSheetId >	RawMaterial;
+		std::vector<NLMISC::CSheetId> RawMaterial;
 	};
 
 	// build static item vector
-	static void buildStaticItem();		
+	static void buildStaticItem();
 
 	// CStaticItems::buildOntItem use faber system for make an item
-	static CGameItemPtr buildOnetItem( NLMISC::CSheetId sheet );
+	static CGameItemPtr buildOnetItem(NLMISC::CSheetId sheet);
 
 	// init raw material table used for build static item
 	static void initRmTable();
 
 	// select raw material for build static item
-	static void selectRmForCraft( const NLMISC::CSheetId& craftPlan, std::vector< NLMISC::CSheetId >& Rm, std::vector< NLMISC::CSheetId >& RmFormula );
+	static void selectRmForCraft(const NLMISC::CSheetId &craftPlan, std::vector<NLMISC::CSheetId> &Rm, std::vector<NLMISC::CSheetId> &RmFormula);
 
 	// return StaticItem reference
-	static inline const std::vector< CGameItemPtr > & getStaticItems() {return _StaticItems;}
+	static inline const std::vector<CGameItemPtr> &getStaticItems() { return _StaticItems; }
 
 private:
-	static std::vector< CGameItemPtr >	_StaticItems;
-	static std::vector< CRMForOneItemPart >	_RmForSystemCraft;
+	static std::vector<CGameItemPtr> _StaticItems;
+	static std::vector<CRMForOneItemPart> _RmForSystemCraft;
 };
 
 #endif // RYZOM_STATIC_ITEM_H
 
 /* static_items.h */
-

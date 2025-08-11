@@ -14,11 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_MAGIC_ACTION_AI_MASS_DISPEL_H
 #define RY_MAGIC_ACTION_AI_MASS_DISPEL_H
-
 
 #include "magic_action.h"
 
@@ -33,38 +30,39 @@ public:
 	}
 
 	/// build from an ai action
-	virtual bool initFromAiAction( const CStaticAiAction *aiAction, CMagicPhrase *phrase );
+	virtual bool initFromAiAction(const CStaticAiAction *aiAction, CMagicPhrase *phrase);
 
 protected:
 	struct CTargetInfos
 	{
-		TDataSetRow	RowId;
-		bool		MainTarget;
+		TDataSetRow RowId;
+		bool MainTarget;
 	};
 
 protected:
-	virtual bool addBrick( const CStaticBrick & brick, CMagicPhrase * phrase, bool &effectEnd, CBuildParameters &buildParams )
-	{ return false; }
-	
-	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode) { return true; }
+	virtual bool addBrick(const CStaticBrick &brick, CMagicPhrase *phrase, bool &effectEnd, CBuildParameters &buildParams)
+	{
+		return false;
+	}
 
-	virtual void launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport );
+	virtual bool validate(CMagicPhrase *phrase, std::string &errorCode) { return true; }
 
-	virtual void apply( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-						const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport,
-						sint32 vamp, float vampRatio, bool reportXp );
+	virtual void launch(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+	    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+	    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport);
+
+	virtual void apply(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+	    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+	    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport,
+	    sint32 vamp, float vampRatio, bool reportXp);
 
 protected:
 	/// range in meters
-	float		_Range;
+	float _Range;
 
 	/// targets that need to be treated by apply()
-	std::vector<CTargetInfos>		_ApplyTargets;
+	std::vector<CTargetInfos> _ApplyTargets;
 };
-
 
 #endif // RY_MAGIC_ACTION_AI_MASS_DISPEL_H
 

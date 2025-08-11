@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -30,7 +28,6 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
 //--------------------------------------------------------------
 //		CCharacteristicModifierEffect::isTimeToUpdate()
 //--------------------------------------------------------------
@@ -42,7 +39,7 @@ bool CCharacteristicModifierEffect::isTimeToUpdate()
 //--------------------------------------------------------------
 //		CCharacteristicModifierEffect::update()
 //--------------------------------------------------------------
-bool CCharacteristicModifierEffect::update( uint32 & updateFlag )
+bool CCharacteristicModifierEffect::update(uint32 &updateFlag)
 {
 	if (_AffectedCharac >= CHARACTERISTICS::NUM_CHARACTERISTICS)
 		return true;
@@ -55,7 +52,7 @@ bool CCharacteristicModifierEffect::update( uint32 & updateFlag )
 		return true;
 
 	entity->getCharacteristics()._PhysicalCharacteristics[_AffectedCharac].Modifier = _Modifier + entity->getCharacteristics()._PhysicalCharacteristics[_AffectedCharac].Modifier;
-	if( entity->getCharacteristics()._PhysicalCharacteristics[_AffectedCharac].Modifier >= entity->getCharacteristics()._PhysicalCharacteristics[_AffectedCharac].Base )
+	if (entity->getCharacteristics()._PhysicalCharacteristics[_AffectedCharac].Modifier >= entity->getCharacteristics()._PhysicalCharacteristics[_AffectedCharac].Base)
 	{
 		entity->getCharacteristics()._PhysicalCharacteristics[_AffectedCharac].Modifier = entity->getCharacteristics()._PhysicalCharacteristics[_AffectedCharac].Base - 1;
 	}
@@ -71,4 +68,3 @@ void CCharacteristicModifierEffect::removed()
 	// send messages to clients
 	PHRASE_UTILITIES::sendEffectStandardEndMessages(_CreatorRowId, _TargetRowId, _EffectName);
 } // removed //
-

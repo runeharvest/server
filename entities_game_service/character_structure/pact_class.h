@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_PACT_CLASS_H
 #define RY_PACT_CLASS_H
 
@@ -30,24 +28,31 @@
  */
 struct CPact
 {
-	uint8	PactNature;
-	uint8	PactType;
+	uint8 PactNature;
+	uint8 PactType;
 
 	CPact() { clear(); }
-	CPact( uint8 Nature, uint8 Type ) { PactNature = Nature; PactType = Type; }
-
-	void clear() { PactNature = GSPACT::Kamique; PactType = GSPACT::Type1; }
-
-	bool operator == (const CPact &a) const
+	CPact(uint8 Nature, uint8 Type)
 	{
-		return (PactNature == a.PactNature && PactType == a.PactType );
+		PactNature = Nature;
+		PactType = Type;
 	}
 
-	bool operator != (const CPact &a) const
+	void clear()
 	{
-		return (PactNature != a.PactNature || PactType != a.PactType );
+		PactNature = GSPACT::Kamique;
+		PactType = GSPACT::Type1;
 	}
 
+	bool operator==(const CPact &a) const
+	{
+		return (PactNature == a.PactNature && PactType == a.PactType);
+	}
+
+	bool operator!=(const CPact &a) const
+	{
+		return (PactNature != a.PactNature || PactType != a.PactType);
+	}
 
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
@@ -59,8 +64,8 @@ struct CPact
 
 	void serial(NLMISC::IStream &f)
 	{
-		f.serial( PactNature );
-		f.serial( PactType );
+		f.serial(PactNature);
+		f.serial(PactType);
 	}
 };
 

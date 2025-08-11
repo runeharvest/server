@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 //-------------------------------------------------------------------------
 // Includes & namespaces
 
@@ -26,13 +24,12 @@
 using namespace NLMISC;
 using namespace std;
 
-
 //-------------------------------------------------------------------------
 // The CAISpawnCtrl sub-class
 
-//class CAISSpawnCtrl: public CAISpawnCtrl
+// class CAISSpawnCtrl: public CAISpawnCtrl
 //{
-//protected:
+// protected:
 //	virtual bool _spawn		(int	aiInstance, const std::string &name);
 //	virtual bool _spawnMap	(int	aiInstance, const std::string &name);
 //	virtual bool _spawnMgr	(int	aiInstance, const std::string &name);
@@ -45,26 +42,24 @@ using namespace std;
 //	virtual bool _despawnGrp	(int	aiInstance, const std::string &name);
 //	virtual bool _despawnAll	(int	aiInstance);
 //
-//} AIServiceSpawnCtrl;
-
+// } AIServiceSpawnCtrl;
 
 //-------------------------------------------------------------------------
 // The CAISpawnCtrl singleton data
-//CAISpawnCtrl *CAISpawnCtrl::_instance=&AIServiceSpawnCtrl;
-
+// CAISpawnCtrl *CAISpawnCtrl::_instance=&AIServiceSpawnCtrl;
 
 //-------------------------------------------------------------------------
 // SPAWNING
 
-//bool CAISSpawnCtrl::_spawn(int	aiInstance, const std::string &name)
+// bool CAISSpawnCtrl::_spawn(int	aiInstance, const std::string &name)
 //{
 //	if (_spawnMap(aiInstance, name)) return true;
 //	if (_spawnMgr(aiInstance, name)) return true;
 //	if (_spawnGrp(aiInstance, name)) return true;
 //	return false;
-//}
+// }
 //
-//bool CAISSpawnCtrl::_spawnGrp(int	aiInstance, const std::string &name)
+// bool CAISSpawnCtrl::_spawnGrp(int	aiInstance, const std::string &name)
 //{
 //	bool	returnVal=false;
 //
@@ -81,7 +76,7 @@ using namespace std;
 //			}
 //			++instanceIt;
 //		}
-//		
+//
 //	}
 //	else
 //	{
@@ -93,9 +88,9 @@ using namespace std;
 //				grpPtr->spawn	();	// check error only if not a npc group.
 //				returnVal=true;
 //			}
-//			
+//
 //		}
-//		
+//
 //	}
 //
 //	if (!returnVal)
@@ -103,12 +98,12 @@ using namespace std;
 //		nlinfo("Failed to identify groupe from id: %s",name.c_str());
 //	}
 //	return	returnVal;
-//}
+// }
 //
-//bool CAISSpawnCtrl::_spawnMgr(int	aiInstance, const std::string &name)
+// bool CAISSpawnCtrl::_spawnMgr(int	aiInstance, const std::string &name)
 //{
 //	bool	returnVal=false;
-//	
+//
 //	if	(aiInstance==-1)	// all aiInstance are concerned.
 //	{
 //		CCont<CAIInstance>::iterator	instanceIt=CAIS::instance().AIList().begin(), instanceItEnd=CAIS::instance().AIList().end();
@@ -122,7 +117,7 @@ using namespace std;
 //			}
 //			++instanceIt;
 //		}
-//		
+//
 //	}
 //	else
 //	{
@@ -134,23 +129,23 @@ using namespace std;
 //				mgrPtr->spawn	();	// check error only if not a npc group.
 //				returnVal=true;
 //			}
-//			
+//
 //		}
-//		
+//
 //	}
-//	
+//
 //	if (!returnVal)
 //	{
 //		nlinfo("Failed to identify mgr from id: %s",name.c_str());
 //	}
 //	return	returnVal;
-//}
+// }
 //
-//bool CAISSpawnCtrl::_spawnMap(int	aiInstance, const std::string &name)
+// bool CAISSpawnCtrl::_spawnMap(int	aiInstance, const std::string &name)
 //{
-//#ifdef NL_DEBUG
+// #ifdef NL_DEBUG
 //	nlassert(false);
-//#endif
+// #endif
 ////	// for each manager if map's name found in the command arguments then spawn()
 ////	for (CAIEntityId it=CAIEntityId::firstMgr();!it.isInvalid();it=it.nextMgr())
 ////		if (it.mgrPtr()->getMap()->Name==name)
@@ -158,7 +153,7 @@ using namespace std;
 //	return	true;
 //}
 //
-//bool	CAISSpawnCtrl::_spawnAll	(int	aiInstance)
+// bool	CAISSpawnCtrl::_spawnAll	(int	aiInstance)
 //{
 //	if	(aiInstance==-1)	// all aiInstance are concerned.
 //	{
@@ -168,7 +163,7 @@ using namespace std;
 //			(*instanceIt)->spawnAll();
 //			++instanceIt;
 //		}
-//		
+//
 //	}
 //	else
 //	{
@@ -176,7 +171,7 @@ using namespace std;
 //		{
 //			CAIS::instance().AIList()[aiInstance]->spawnAll();
 //		}
-//		
+//
 //	}
 //	return true;
 //}
@@ -185,7 +180,7 @@ using namespace std;
 ////-------------------------------------------------------------------------
 //// DESPAWNING
 //
-//bool CAISSpawnCtrl::_despawn(int	aiInstance, const std::string &name)
+// bool CAISSpawnCtrl::_despawn(int	aiInstance, const std::string &name)
 //{
 //	if (_despawnMap(aiInstance, name)) return true;
 //	if (_despawnMgr(aiInstance, name)) return true;
@@ -193,11 +188,11 @@ using namespace std;
 //	return false;
 //}
 //
-//bool CAISSpawnCtrl::_despawnGrp(int	aiInstance, const std::string &name)
+// bool CAISSpawnCtrl::_despawnGrp(int	aiInstance, const std::string &name)
 //{
 //
 //	bool	returnVal=false;
-//	
+//
 //	if	(aiInstance==-1)	// all aiInstance are concerned.
 //	{
 //		CCont<CAIInstance>::iterator	instanceIt=CAIS::instance().AIList().begin(), instanceItEnd=CAIS::instance().AIList().end();
@@ -208,10 +203,10 @@ using namespace std;
 //			{
 //				grpPtr->despawnGrp	();	// check error only if not a npc group.
 //				returnVal=true;
-//			}			
+//			}
 //			++instanceIt;
 //		}
-//		
+//
 //	}
 //	else
 //	{
@@ -223,11 +218,11 @@ using namespace std;
 //				grpPtr->despawnGrp	();	// check error only if not a npc group.
 //				returnVal=true;
 //			}
-//			
+//
 //		}
-//		
+//
 //	}
-//	
+//
 //	if (!returnVal)
 //	{
 //		nlinfo("Failed to identify groupe from id: %s",name.c_str());
@@ -235,10 +230,10 @@ using namespace std;
 //	return	returnVal;
 //}
 //
-//bool CAISSpawnCtrl::_despawnMgr(int	aiInstance, const std::string &name)
+// bool CAISSpawnCtrl::_despawnMgr(int	aiInstance, const std::string &name)
 //{
 //	bool	returnVal=false;
-//	
+//
 //	if	(aiInstance==-1)	// all aiInstance are concerned.
 //	{
 //		CCont<CAIInstance>::iterator	instanceIt=CAIS::instance().AIList().begin(), instanceItEnd=CAIS::instance().AIList().end();
@@ -249,10 +244,10 @@ using namespace std;
 //			{
 //				mgrPtr->despawnMgr();	// check error only if not a npc group.
 //				returnVal=true;
-//			}			
+//			}
 //			++instanceIt;
 //		}
-//		
+//
 //	}
 //	else
 //	{
@@ -264,11 +259,11 @@ using namespace std;
 //				mgrPtr->despawnMgr();	// check error only if not a npc group.
 //				returnVal=true;
 //			}
-//			
+//
 //		}
-//		
+//
 //	}
-//	
+//
 //	if (!returnVal)
 //	{
 //		nlinfo("Failed to identify mgr from id: %s",name.c_str());
@@ -276,12 +271,12 @@ using namespace std;
 //	return	returnVal;
 //}
 //
-//bool CAISSpawnCtrl::_despawnMap(int	aiInstance, const std::string &name)
+// bool CAISSpawnCtrl::_despawnMap(int	aiInstance, const std::string &name)
 //{
-//#ifdef	NL_DEBUG
+// #ifdef	NL_DEBUG
 //	nlwarning("Not Implemented");
-//#endif
-//	
+// #endif
+//
 ////	// for each manager if map's name found in the command arguments then spawn()
 ////	for (CAIEntityId it=CAIEntityId::firstMgr();!it.isInvalid();it=it.nextMgr())
 ////		if (it.mgrPtr()->getMap()->Name==name)
@@ -290,7 +285,7 @@ using namespace std;
 //	return true;
 //}
 //
-//bool CAISSpawnCtrl::_despawnAll(int	aiInstance)
+// bool CAISSpawnCtrl::_despawnAll(int	aiInstance)
 //{
 //	if	(aiInstance==-1)	// all aiInstance are concerned.
 //	{
@@ -301,7 +296,7 @@ using namespace std;
 //			(*instanceIt)->despawnAll();
 //			++instanceIt;
 //		}
-//		
+//
 //	}
 //	else
 //	{
@@ -309,7 +304,7 @@ using namespace std;
 //		{
 //			CAIS::instance().AIList()[aiInstance]->despawnAll();
 //		}
-//		
+//
 //	}
 //	return true;
 //}

@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #include "egs_sheets/egs_static_game_item.h"
@@ -43,7 +41,6 @@ using namespace std;
 using namespace NLGEORGES;
 using namespace NLMISC;
 
-
 NL_INSTANCE_COUNTER_IMPL(CGuildOption);
 NL_INSTANCE_COUNTER_IMPL(CCosmetics);
 NL_INSTANCE_COUNTER_IMPL(CConsumable);
@@ -63,42 +60,40 @@ std::vector<RM_GROUP::TRMGroup> CMP::_RMGroupsByFamily;
 std::vector<std::string> CMP::_RMGroupNames;
 CMP::CRmGroupByName CMP::_RMGroupsByName;
 
-map<string,uint16>	CConsumable::FamiliesFromName;
-vector<string>		CConsumable::FamiliesFromIndex;
+map<string, uint16> CConsumable::FamiliesFromName;
+vector<string> CConsumable::FamiliesFromIndex;
 
-
-namespace GUILD_OPTION
-{
-	NL_BEGIN_STRING_CONVERSION_TABLE (TType)
-		NL_STRING_CONVERSION_TABLE_ENTRY(PlayerMainBuilding)
-		NL_STRING_CONVERSION_TABLE_ENTRY(GuildMainBuilding)
+namespace GUILD_OPTION {
+NL_BEGIN_STRING_CONVERSION_TABLE(TType)
+NL_STRING_CONVERSION_TABLE_ENTRY(PlayerMainBuilding)
+NL_STRING_CONVERSION_TABLE_ENTRY(GuildMainBuilding)
 //		NL_STRING_CONVERSION_TABLE_ENTRY(GuildRmFight)
 //		NL_STRING_CONVERSION_TABLE_ENTRY(GuildRmMagic)
 //		NL_STRING_CONVERSION_TABLE_ENTRY(GuildRmHarvest)
 //		NL_STRING_CONVERSION_TABLE_ENTRY(GuildRmCraft)
-		NL_STRING_CONVERSION_TABLE_ENTRY(Unknown)
-	NL_END_STRING_CONVERSION_TABLE(TType, Conversion, Unknown)
-	
-	//--------------------------------------------------------------
-	TType fromString( const std::string & str )
-	{
-		return Conversion.fromString(str);
-	}
-	//--------------------------------------------------------------
-	const std::string & toString( TType type )
-	{
-		return Conversion.toString(type);
-	}
+NL_STRING_CONVERSION_TABLE_ENTRY(Unknown)
+NL_END_STRING_CONVERSION_TABLE(TType, Conversion, Unknown)
+
+//--------------------------------------------------------------
+TType fromString(const std::string &str)
+{
+	return Conversion.fromString(str);
+}
+//--------------------------------------------------------------
+const std::string &toString(TType type)
+{
+	return Conversion.toString(type);
+}
 }
 
 //--------------------------------------------------------------
 void CCosmetics::serial(NLMISC::IStream &f)
 {
-	f.serial( VPValue );
+	f.serial(VPValue);
 }
 
 //--------------------------------------------------------------
-IItemServiceData * IItemServiceData::buildItemServiceData(ITEM_SERVICE_TYPE::TItemServiceType itemServiceType)
+IItemServiceData *IItemServiceData::buildItemServiceData(ITEM_SERVICE_TYPE::TItemServiceType itemServiceType)
 {
 	switch (itemServiceType)
 	{
@@ -118,9 +113,9 @@ void CConsumable::serial(NLMISC::IStream &f)
 	f.serial(ConsumptionTime);
 	f.serial(Data);
 
-	f.serialCont( StringParams );
+	f.serialCont(StringParams);
 
-	if (f.isReading() )
+	if (f.isReading())
 	{
 		// family
 		string familyName;
@@ -128,7 +123,7 @@ void CConsumable::serial(NLMISC::IStream &f)
 		if (FamiliesFromName.find(familyName) == FamiliesFromName.end())
 		{
 			Family = (uint16)FamiliesFromIndex.size();
-			FamiliesFromName.insert( make_pair(familyName, Family) );
+			FamiliesFromName.insert(make_pair(familyName, Family));
 			FamiliesFromIndex.push_back(familyName);
 		}
 		else
@@ -139,7 +134,7 @@ void CConsumable::serial(NLMISC::IStream &f)
 		// Params
 		Params.clear();
 		uint size = (uint)StringParams.size();
-		for (uint i = 0 ; i < size ; ++i)
+		for (uint i = 0; i < size; ++i)
 		{
 			addParam(StringParams[i], Params);
 		}
@@ -156,7 +151,6 @@ void CConsumable::serial(NLMISC::IStream &f)
 	}
 }
 
-
 //--------------------------------------------------------------
 void CXpCatalyser::serial(NLMISC::IStream &f)
 {
@@ -169,16 +163,16 @@ static std::vector<std::string> strsplit(std::string str, std::string sep)
 {
 	std::vector<std::string> strings;
 	size_t index = 0, index2 = 0;
-	while ((index2=str.find(sep, index))!=std::string::npos)
+	while ((index2 = str.find(sep, index)) != std::string::npos)
 	{
-		strings.push_back(str.substr(index, index2-index));
-		index = index2+1;
+		strings.push_back(str.substr(index, index2 - index));
+		index = index2 + 1;
 	}
 	strings.push_back(str.substr(index, std::string::npos));
 	return strings;
 }
 
-bool	SItemSpecialEffect::build(std::string const& str)
+bool SItemSpecialEffect::build(std::string const &str)
 {
 	std::vector<std::string> itemSpecialEffectParams = strsplit(str, ":");
 	EffectType = ITEM_SPECIAL_EFFECT::fromString(itemSpecialEffectParams[0]);
@@ -188,7 +182,7 @@ bool	SItemSpecialEffect::build(std::string const& str)
 	case ITEM_SPECIAL_EFFECT::ISE_FIGHT_VAMPIRISM:
 	case ITEM_SPECIAL_EFFECT::ISE_MAGIC_DIVINE_INTERVENTION:
 	case ITEM_SPECIAL_EFFECT::ISE_FORAGE_NO_RISK:
-		if(itemSpecialEffectParams.size()!=2)
+		if (itemSpecialEffectParams.size() != 2)
 		{
 			nlwarning("<loadItemFX> EffectType needs 1 arg in '%s'", str.c_str());
 			return false;
@@ -200,7 +194,7 @@ bool	SItemSpecialEffect::build(std::string const& str)
 	case ITEM_SPECIAL_EFFECT::ISE_CRAFT_ADD_STAT_BONUS:
 	case ITEM_SPECIAL_EFFECT::ISE_CRAFT_ADD_LIMIT:
 	case ITEM_SPECIAL_EFFECT::ISE_FORAGE_ADD_RM:
-		if(itemSpecialEffectParams.size()!=3)
+		if (itemSpecialEffectParams.size() != 3)
 		{
 			nlwarning("<loadItemFX> EffectType needs 2 args in '%s'", str.c_str());
 			return false;
@@ -218,18 +212,18 @@ bool	SItemSpecialEffect::build(std::string const& str)
 void SItemSpecialEffect::serial(NLMISC::IStream &f)
 {
 	// Don't forget to change the SItem version and the code here if no more 4.
-	nlctassert(MaxEffectPerItem==4);
-		
-	f.serialEnum( EffectType );
-//	f.serial( EffectType );
-	f.serial( EffectArgFloat[0] );
-	f.serial( EffectArgFloat[1] );
-	f.serial( EffectArgFloat[2] );
-	f.serial( EffectArgFloat[3] );
-	f.serial( EffectArgString[0] );
-	f.serial( EffectArgString[1] );
-	f.serial( EffectArgString[2] );
-	f.serial( EffectArgString[3] );
+	nlctassert(MaxEffectPerItem == 4);
+
+	f.serialEnum(EffectType);
+	//	f.serial( EffectType );
+	f.serial(EffectArgFloat[0]);
+	f.serial(EffectArgFloat[1]);
+	f.serial(EffectArgFloat[2]);
+	f.serial(EffectArgFloat[3]);
+	f.serial(EffectArgString[0]);
+	f.serial(EffectArgString[1]);
+	f.serial(EffectArgString[2]);
+	f.serial(EffectArgString[3]);
 }
 
 void SItemSpecialEffects::serial(NLMISC::IStream &f)
@@ -238,48 +232,47 @@ void SItemSpecialEffects::serial(NLMISC::IStream &f)
 }
 
 //--------------------------------------------------------------
-//						init()  
+//						init()
 //--------------------------------------------------------------
 void CStaticItem::init(bool doDelete)
 {
-	Family			= ITEMFAMILY::UNDEFINED;
-	Type			= ITEM_TYPE::UNDEFINED;
-	
+	Family = ITEMFAMILY::UNDEFINED;
+	Type = ITEM_TYPE::UNDEFINED;
+
 	clearPtrs(doDelete);
 
-	Skill			= SKILLS::unknown;
-	MinSkill		= 0;
+	Skill = SKILLS::unknown;
+	MinSkill = 0;
 	CraftingToolType = TOOL_TYPE::Unknown;
 
-	Origin			= ITEM_ORIGIN::UNKNOWN;
+	Origin = ITEM_ORIGIN::UNKNOWN;
 	Sack.clear();
-	Stackable		= 1;
-	Color			= -2;
-	SlotCount		= 0;
-	Bulk			= 0;
-	Weight			= 0;
-	Saleable		= false;
-	NoRent			= false;
+	Stackable = 1;
+	Color = -2;
+	SlotCount = 0;
+	Bulk = 0;
+	Weight = 0;
+	Saleable = false;
+	NoRent = false;
 
 	ItemIdSheetToModelNumber = 0;
 	ItemIdSheetToModelNumberLeftHands = 0;
 
-	RequiredSkill			= SKILLS::unknown;
-	MinRequiredSkillLevel	= 0;
+	RequiredSkill = SKILLS::unknown;
+	MinRequiredSkillLevel = 0;
 	RequiredSkillQualityFactor = 0.0f;
 	RequiredSkillQualityOffset = 0;
-	RequiredSkill2			= SKILLS::unknown;
-	MinRequiredSkillLevel2	= 0;
+	RequiredSkill2 = SKILLS::unknown;
+	MinRequiredSkillLevel2 = 0;
 	RequiredSkillQualityFactor2 = 0.0f;
 	RequiredSkillQualityOffset2 = 0;
-	
-	RequiredCharac			= CHARACTERISTICS::Unknown;
-	MinRequiredCharacLevel	= 0;
+
+	RequiredCharac = CHARACTERISTICS::Unknown;
+	MinRequiredCharacLevel = 0;
 	RequiredCharacQualityFactor = 0.0f;
 	RequiredCharacQualityOffset = 0;
 
 } // init //
-
 
 // ***************************************************************************
 void CStaticItem::clearPtrs(bool doDelete)
@@ -302,111 +295,108 @@ void CStaticItem::clearPtrs(bool doDelete)
 		delete ItemSpecialEffects;
 	}
 
-	Armor			= NULL;
-	MeleeWeapon		= NULL;
-	RangeWeapon		= NULL;
-	Ammo			= NULL;
-	Shield			= NULL;
-	TamingTool		= NULL;
-	Mp				= NULL;
-	GuildOption		= NULL;
-	Cosmetics		= NULL;
-	ItemServiceData	= NULL;
-	ConsumableItem	= NULL;
-	XpCatalyser		= NULL;
-	CommandTicket	= NULL;
+	Armor = NULL;
+	MeleeWeapon = NULL;
+	RangeWeapon = NULL;
+	Ammo = NULL;
+	Shield = NULL;
+	TamingTool = NULL;
+	Mp = NULL;
+	GuildOption = NULL;
+	Cosmetics = NULL;
+	ItemServiceData = NULL;
+	ConsumableItem = NULL;
+	XpCatalyser = NULL;
+	CommandTicket = NULL;
 	ItemSpecialEffects = NULL;
 }
-
 
 //--------------------------------------------------------------
 // copy constructor
 //--------------------------------------------------------------
-CStaticItem::CStaticItem( const CStaticItem& itm )
+CStaticItem::CStaticItem(const CStaticItem &itm)
 {
 	clearPtrs(false);
 
 	*this = itm;
-	if(itm.Armor)
+	if (itm.Armor)
 	{
 		Armor = new SArmor();
 		*Armor = *itm.Armor;
 	}
-	if(itm.MeleeWeapon)
+	if (itm.MeleeWeapon)
 	{
 		MeleeWeapon = new SMeleeWeapon();
 		*MeleeWeapon = *itm.MeleeWeapon;
 	}
-	if(itm.RangeWeapon)
+	if (itm.RangeWeapon)
 	{
 		RangeWeapon = new SRangeWeapon();
 		*RangeWeapon = *itm.RangeWeapon;
 	}
-	if(itm.Ammo)
+	if (itm.Ammo)
 	{
 		Ammo = new SAmmo();
 		*Ammo = *itm.Ammo;
 	}
-	if(itm.Shield)
+	if (itm.Shield)
 	{
 		Shield = new SShield();
 		*Shield = *itm.Shield;
 	}
-	if(itm.TamingTool)
+	if (itm.TamingTool)
 	{
 		TamingTool = new CTamingTool();
 		*TamingTool = *itm.TamingTool;
 	}
-	if(itm.Mp)
+	if (itm.Mp)
 	{
 		Mp = new CMP();
 		*Mp = *itm.Mp;
 	}
-	if(itm.GuildOption)
+	if (itm.GuildOption)
 	{
 		GuildOption = new CGuildOption();
 		*GuildOption = *itm.GuildOption;
 	}
-	if(itm.Cosmetics)
+	if (itm.Cosmetics)
 	{
 		Cosmetics = new CCosmetics();
 		*Cosmetics = *itm.Cosmetics;
 	}
-	if(itm.ConsumableItem)
+	if (itm.ConsumableItem)
 	{
 		ConsumableItem = new CConsumable();
 		*ConsumableItem = *itm.ConsumableItem;
 	}
-	if(itm.XpCatalyser)
+	if (itm.XpCatalyser)
 	{
 		XpCatalyser = new CXpCatalyser();
 		*XpCatalyser = *itm.XpCatalyser;
 	}
-	if(itm.ItemSpecialEffects)
+	if (itm.ItemSpecialEffects)
 	{
 		ItemSpecialEffects = new SItemSpecialEffects();
 		*ItemSpecialEffects = *itm.ItemSpecialEffects;
 	}
-	if(itm.ItemServiceData)
+	if (itm.ItemServiceData)
 	{
 		ItemServiceData = itm.ItemServiceData->clone();
 	}
-	if( itm.CommandTicket)
+	if (itm.CommandTicket)
 	{
 		CommandTicket = new TCommandTicket();
 		*CommandTicket = *itm.CommandTicket;
 	}
 }
 
-
 //--------------------------------------------------------------
-//						~CStaticItem()  
+//						~CStaticItem()
 //--------------------------------------------------------------
 CStaticItem::~CStaticItem()
 {
 	clearPtrs(true);
 } // Destructor //
-
 
 //--------------------------------------------------------------
 //						lookForEffects()
@@ -417,9 +407,9 @@ std::vector<SItemSpecialEffect> CStaticItem::lookForEffects(ITEM_SPECIAL_EFFECT:
 	if (ItemSpecialEffects)
 	{
 		std::vector<SItemSpecialEffect>::const_iterator it, itEnd;
-		for (it=ItemSpecialEffects->Effects.begin(), itEnd=ItemSpecialEffects->Effects.end(); it!=itEnd; ++it)
+		for (it = ItemSpecialEffects->Effects.begin(), itEnd = ItemSpecialEffects->Effects.end(); it != itEnd; ++it)
 		{
-			if (it->EffectType==effectType)
+			if (it->EffectType == effectType)
 				effects.push_back(*it);
 		}
 	}
@@ -427,9 +417,9 @@ std::vector<SItemSpecialEffect> CStaticItem::lookForEffects(ITEM_SPECIAL_EFFECT:
 }
 
 //--------------------------------------------------------------
-//						loadMeleeWeapon()  
+//						loadMeleeWeapon()
 //--------------------------------------------------------------
-void loadMeleeWeapon( UFormElm &root, CStaticItem *item, const CSheetId &sheetId )
+void loadMeleeWeapon(UFormElm &root, CStaticItem *item, const CSheetId &sheetId)
 {
 	if (!item)
 		return;
@@ -438,43 +428,43 @@ void loadMeleeWeapon( UFormElm &root, CStaticItem *item, const CSheetId &sheetId
 		item->MeleeWeapon = new SMeleeWeapon();
 
 	const UFormElm *rangeWeapon = NULL;
-	
-	if ( root.getNodeByName ( &rangeWeapon, "melee weapon") && rangeWeapon )
+
+	if (root.getNodeByName(&rangeWeapon, "melee weapon") && rangeWeapon)
 	{
 		string value;
-			
-		if (root.getValueByName( value, "melee weapon.category" ) )
-			item->MeleeWeapon->WeaponType = WEAPONTYPE::stringToWeaponType( value );
 
-		if ( root.getValueByName(value , "melee weapon.skill" ) )
-			item->Skill = SKILLS::toSkill( value );
+		if (root.getValueByName(value, "melee weapon.category"))
+			item->MeleeWeapon->WeaponType = WEAPONTYPE::stringToWeaponType(value);
 
-		root.getValueByName( item->MinSkill, "melee weapon.minimum score" );
+		if (root.getValueByName(value, "melee weapon.skill"))
+			item->Skill = SKILLS::toSkill(value);
 
-		root.getValueByName( item->MeleeWeapon->RateOfFire, "melee weapon.rate of fire" );
-		root.getValueByName( item->MeleeWeapon->Latency, "melee weapon.latency" );
+		root.getValueByName(item->MinSkill, "melee weapon.minimum score");
 
-		root.getValueByName( item->MeleeWeapon->ReachValue, "melee weapon.melee range" );
+		root.getValueByName(item->MeleeWeapon->RateOfFire, "melee weapon.rate of fire");
+		root.getValueByName(item->MeleeWeapon->Latency, "melee weapon.latency");
 
-		if ( root.getValueByName( value, "melee weapon.damage type" ) )
+		root.getValueByName(item->MeleeWeapon->ReachValue, "melee weapon.melee range");
+
+		if (root.getValueByName(value, "melee weapon.damage type"))
 		{
-			item->MeleeWeapon->DamageType = DMGTYPE::stringToDamageType( value );			
+			item->MeleeWeapon->DamageType = DMGTYPE::stringToDamageType(value);
 		}
 		else
-			nlwarning("<loadMeleeWeapon> DamageType not found for weapon %s", item->Name.c_str() );
+			nlwarning("<loadMeleeWeapon> DamageType not found for weapon %s", item->Name.c_str());
 	}
 	else
 	{
 		// do not show warning for graphicals sheets (starting with fy_, tr_ etc...) or other special sheets with empty name
-		if ( !item->Name.empty() )
-			nlwarning("<loadMeleeWeapon> Can't find the 'melee weapon' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str() );
+		if (!item->Name.empty())
+			nlwarning("<loadMeleeWeapon> Can't find the 'melee weapon' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str());
 	}
 } // loadMeleeWeapon //
 
 //--------------------------------------------------------------
-//						loadRangeWeapon()  
+//						loadRangeWeapon()
 //--------------------------------------------------------------
-void loadRangeWeapon( UFormElm &root, CStaticItem *item, const CSheetId &sheetId )
+void loadRangeWeapon(UFormElm &root, CStaticItem *item, const CSheetId &sheetId)
 {
 	if (!item)
 		return;
@@ -483,425 +473,417 @@ void loadRangeWeapon( UFormElm &root, CStaticItem *item, const CSheetId &sheetId
 		item->RangeWeapon = new SRangeWeapon();
 
 	const UFormElm *rangeWeapon = NULL;
-	
-	if ( root.getNodeByName ( &rangeWeapon, "range weapon") && rangeWeapon )
+
+	if (root.getNodeByName(&rangeWeapon, "range weapon") && rangeWeapon)
 	{
 		string value;
-		
-		if ( root.getValueByName( value, "range weapon.category" ) )
-			item->RangeWeapon->WeaponType = WEAPONTYPE::stringToWeaponType( value );
-		
-		if ( root.getValueByName(value , "range weapon.skill" ) )
-			item->Skill = SKILLS::toSkill( value );
 
-		root.getValueByName( item->MinSkill, "range weapon.minimum score" );
+		if (root.getValueByName(value, "range weapon.category"))
+			item->RangeWeapon->WeaponType = WEAPONTYPE::stringToWeaponType(value);
 
-		root.getValueByName( item->MinSkill, "range weapon.minimum score" );
+		if (root.getValueByName(value, "range weapon.skill"))
+			item->Skill = SKILLS::toSkill(value);
 
-		root.getValueByName(value ,"range weapon.RangeWeaponType" );
+		root.getValueByName(item->MinSkill, "range weapon.minimum score");
+
+		root.getValueByName(item->MinSkill, "range weapon.minimum score");
+
+		root.getValueByName(value, "range weapon.RangeWeaponType");
 		item->RangeWeapon->AreaType = RANGE_WEAPON_TYPE::stringToRangeWeaponType(value);
-		if ( item->RangeWeapon->AreaType == RANGE_WEAPON_TYPE::Unknown )
+		if (item->RangeWeapon->AreaType == RANGE_WEAPON_TYPE::Unknown)
 		{
 			nlwarning("<loadRangeWeapon>unknown area type %s", value.c_str());
 		}
-		else if ( item->RangeWeapon->AreaType == RANGE_WEAPON_TYPE::Missile )
+		else if (item->RangeWeapon->AreaType == RANGE_WEAPON_TYPE::Missile)
 		{
-			root.getValueByName( item->RangeWeapon->Missile.Radius ,"range weapon.MissileRadius" );
-			root.getValueByName( item->RangeWeapon->Missile.MinFactor ,"range weapon.MissileMinFactor" );
+			root.getValueByName(item->RangeWeapon->Missile.Radius, "range weapon.MissileRadius");
+			root.getValueByName(item->RangeWeapon->Missile.MinFactor, "range weapon.MissileMinFactor");
 		}
-		else if ( item->RangeWeapon->AreaType == RANGE_WEAPON_TYPE::Gatlin )
+		else if (item->RangeWeapon->AreaType == RANGE_WEAPON_TYPE::Gatlin)
 		{
-			root.getValueByName( item->RangeWeapon->Gatling.Height ,"range weapon.GatlingHeight" );
-			root.getValueByName( item->RangeWeapon->Gatling.Base ,"range weapon.GatlingBase" );
-			root.getValueByName( item->RangeWeapon->Gatling.Angle ,"range weapon.GatlingAngle" );
+			root.getValueByName(item->RangeWeapon->Gatling.Height, "range weapon.GatlingHeight");
+			root.getValueByName(item->RangeWeapon->Gatling.Base, "range weapon.GatlingBase");
+			root.getValueByName(item->RangeWeapon->Gatling.Angle, "range weapon.GatlingAngle");
 		}
 	}
 	else
 	{
 		// do not show warning for graphicals sheets (starting with fy_, tr_ etc...) or other special sheets with empty name
-		if ( !item->Name.empty() )
-			nlwarning("<loadRangeWeapon> Can't find the 'range weapon' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str() );
+		if (!item->Name.empty())
+			nlwarning("<loadRangeWeapon> Can't find the 'range weapon' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str());
 	}
 } // loadRangeWeapon //
 
 //--------------------------------------------------------------
-//						loadAmmo()  
+//						loadAmmo()
 //--------------------------------------------------------------
-void loadAmmo( UFormElm &root, CStaticItem *item, const CSheetId &sheetId )
+void loadAmmo(UFormElm &root, CStaticItem *item, const CSheetId &sheetId)
 {
-	if ( ! item)
+	if (!item)
 		return;
 
 	if (item->Ammo == NULL)
 		item->Ammo = new SAmmo();
 
 	const UFormElm *ammo = NULL;
-	
-	if ( root.getNodeByName ( &ammo, "ammo") && ammo )
+
+	if (root.getNodeByName(&ammo, "ammo") && ammo)
 	{
 		string value;
-		
-		if (root.getValueByName( value, "ammo.damage type" ))
-			item->Ammo->DamageType = DMGTYPE::stringToDamageType( value );
-		
-		if (root.getValueByName(value , "ammo.weapon type" ) )
-			item->Skill = SKILLS::toSkill( value );
 
-//		root.getValueByName( item->MinSkill, "minimum score" );
+		if (root.getValueByName(value, "ammo.damage type"))
+			item->Ammo->DamageType = DMGTYPE::stringToDamageType(value);
 
-		root.getValueByName( item->Ammo->DamageFactor, "ammo.damage factor" );
-		root.getValueByName( item->Ammo->RateOfFire, "ammo.rate of fire" );
-		root.getValueByName( item->Ammo->Latency, "ammo.latency" );
+		if (root.getValueByName(value, "ammo.weapon type"))
+			item->Skill = SKILLS::toSkill(value);
 
+		//		root.getValueByName( item->MinSkill, "minimum score" );
 
-		root.getValueByName( item->Ammo->ShortRangeLimit, "ammo.short range limit" );
-		root.getValueByName( item->Ammo->MediumRangeLimit, "ammo.medium range limit" );
-		root.getValueByName( item->Ammo->LongRangeLimit, "ammo.long range limit" );
+		root.getValueByName(item->Ammo->DamageFactor, "ammo.damage factor");
+		root.getValueByName(item->Ammo->RateOfFire, "ammo.rate of fire");
+		root.getValueByName(item->Ammo->Latency, "ammo.latency");
 
-		root.getValueByName( item->Ammo->AmmoType, "ammo.type" );
+		root.getValueByName(item->Ammo->ShortRangeLimit, "ammo.short range limit");
+		root.getValueByName(item->Ammo->MediumRangeLimit, "ammo.medium range limit");
+		root.getValueByName(item->Ammo->LongRangeLimit, "ammo.long range limit");
+
+		root.getValueByName(item->Ammo->AmmoType, "ammo.type");
 	}
 	else
 	{
 		// do not show warning for graphicals sheets (starting with fy_, tr_ etc...) or other special sheets with empty name
-		if ( !item->Name.empty() )
-			nlwarning("<loadAmmo> Can't find the 'ammo' structure for item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str() );
+		if (!item->Name.empty())
+			nlwarning("<loadAmmo> Can't find the 'ammo' structure for item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str());
 	}
 } // loadAmmo //
 
-
-
 //--------------------------------------------------------------
-//						loadArmor()  
+//						loadArmor()
 //--------------------------------------------------------------
-void loadArmor( UFormElm &root, CStaticItem *item, const CSheetId &sheetId )
+void loadArmor(UFormElm &root, CStaticItem *item, const CSheetId &sheetId)
 {
-	if ( ! item)
+	if (!item)
 		return;
 
 	if (item->Armor == NULL)
 		item->Armor = new SArmor();
 
 	const UFormElm *armor = NULL;
-	
-	if ( root.getNodeByName ( &armor, "armor") && armor )
+
+	if (root.getNodeByName(&armor, "armor") && armor)
 	{
 		string value;
-		if ( root.getValueByName( value, "armor.Armor category" ) )
-			item->Armor->ArmorType = ARMORTYPE::toArmorType( value );
+		if (root.getValueByName(value, "armor.Armor category"))
+			item->Armor->ArmorType = ARMORTYPE::toArmorType(value);
 
-//		if (root.getValueByName(value , "armor.Skill" ) )
-//			item->Skill = SKILLS::toSkill( value );
+		//		if (root.getValueByName(value , "armor.Skill" ) )
+		//			item->Skill = SKILLS::toSkill( value );
 
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::PIERCING].Max, "armor.Protections.PiercingMax" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::PIERCING].Factor, "armor.Protections.PiercingFactor" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::SLASHING].Max, "armor.Protections.SlashingMax" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::SLASHING].Factor, "armor.Protections.SlashingFactor" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::BLUNT].Max, "armor.Protections.BluntMax" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::BLUNT].Factor, "armor.Protections.BluntFactor" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::ROT].Max, "armor.Protections.RotMax" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::ROT].Factor, "armor.Protections.RotFactor" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::ACID].Max, "armor.Protections.AcidMax" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::ACID].Factor, "armor.Protections.AcidFactor" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::COLD].Max, "armor.Protections.ColdMax" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::COLD].Factor, "armor.Protections.ColdFactor" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::FIRE].Max, "armor.Protections.FireMax" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::FIRE].Factor, "armor.Protections.FireFactor" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::POISON].Max, "armor.Protections.PoisonMax" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::POISON].Factor, "armor.Protections.PoisonFactor" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::ELECTRICITY].Max, "armor.Protections.ElectricityMax" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::ELECTRICITY].Factor, "armor.Protections.ElectricityFactor" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::SHOCK].Max, "armor.Protections.ShockMax" );
-		root.getValueByName( item->Armor->Protections[(uint)DMGTYPE::SHOCK].Factor, "armor.Protections.ShockFactor" );
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::PIERCING].Max, "armor.Protections.PiercingMax");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::PIERCING].Factor, "armor.Protections.PiercingFactor");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::SLASHING].Max, "armor.Protections.SlashingMax");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::SLASHING].Factor, "armor.Protections.SlashingFactor");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::BLUNT].Max, "armor.Protections.BluntMax");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::BLUNT].Factor, "armor.Protections.BluntFactor");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::ROT].Max, "armor.Protections.RotMax");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::ROT].Factor, "armor.Protections.RotFactor");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::ACID].Max, "armor.Protections.AcidMax");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::ACID].Factor, "armor.Protections.AcidFactor");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::COLD].Max, "armor.Protections.ColdMax");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::COLD].Factor, "armor.Protections.ColdFactor");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::FIRE].Max, "armor.Protections.FireMax");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::FIRE].Factor, "armor.Protections.FireFactor");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::POISON].Max, "armor.Protections.PoisonMax");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::POISON].Factor, "armor.Protections.PoisonFactor");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::ELECTRICITY].Max, "armor.Protections.ElectricityMax");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::ELECTRICITY].Factor, "armor.Protections.ElectricityFactor");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::SHOCK].Max, "armor.Protections.ShockMax");
+		root.getValueByName(item->Armor->Protections[(uint)DMGTYPE::SHOCK].Factor, "armor.Protections.ShockFactor");
 	}
 	else
 	{
 		// do not show warning for graphicals sheets (starting with fy_, tr_ etc...) or other special sheets with empty name
-		if ( !item->Name.empty() )
-			nlwarning("<loadArmor> Can't find the 'armor' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str() );
+		if (!item->Name.empty())
+			nlwarning("<loadArmor> Can't find the 'armor' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str());
 	}
 } // loadArmor //
 
-
 //--------------------------------------------------------------
-//						loadShield()  
+//						loadShield()
 //--------------------------------------------------------------
-void loadShield( UFormElm &root, CStaticItem *item, const CSheetId &sheetId )
+void loadShield(UFormElm &root, CStaticItem *item, const CSheetId &sheetId)
 {
-	if ( ! item)
+	if (!item)
 		return;
 
 	if (item->Shield == NULL)
 		item->Shield = new SShield();
 
-	if( sheetId.toString() == "pre_order.sitem" )
+	if (sheetId.toString() == "pre_order.sitem")
 	{
 		item->Shield->Unbreakable = true;
 	}
 
 	const UFormElm *shield = NULL;
-	
-	if ( root.getNodeByName ( &shield, "shield") && shield )
+
+	if (root.getNodeByName(&shield, "shield") && shield)
 	{
 		string value;
-		if ( root.getValueByName( value, "shield.Category" ) )
-			item->Shield->ShieldType = SHIELDTYPE::stringToShieldType( value );
+		if (root.getValueByName(value, "shield.Category"))
+			item->Shield->ShieldType = SHIELDTYPE::stringToShieldType(value);
 
-//		if ( root.getValueByName(value , "shield.Skill" ) )
-//			item->Skill = SKILLS::toSkill( value );
+		//		if ( root.getValueByName(value , "shield.Skill" ) )
+		//			item->Skill = SKILLS::toSkill( value );
 	}
 	else
 	{
 		// do not show warning for graphicals sheets (starting with fy_, tr_ etc...) or other special sheets with empty name
-		if ( !item->Name.empty() )
-			nlwarning("<loadShield> Can't find the 'shield' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str() );
+		if (!item->Name.empty())
+			nlwarning("<loadShield> Can't find the 'shield' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str());
 	}
 } // loadShield //
 
-
 //--------------------------------------------------------------
-//						loadFaberTool()  
+//						loadFaberTool()
 //--------------------------------------------------------------
-void loadFaberTool( UFormElm &root, CStaticItem *item, const CSheetId &sheetId )
+void loadFaberTool(UFormElm &root, CStaticItem *item, const CSheetId &sheetId)
 {
-	if ( ! item)
+	if (!item)
 		return;
 
 	const UFormElm *tool = NULL;
-	
-	if( !root.getValueByName( item->ItemPrice, "basics.Price" ) )
+
+	if (!root.getValueByName(item->ItemPrice, "basics.Price"))
 	{
 		item->ItemPrice = 0;
-		nlwarning("<loadFaberTool> Can't load 'Price' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<loadFaberTool> Can't load 'Price' in sheet %s", sheetId.toString().c_str());
 	}
 
-	if ( root.getNodeByName ( &tool, "crafting tool") && tool )
+	if (root.getNodeByName(&tool, "crafting tool") && tool)
 	{
 		string value;
-		
-		//if ( root.getValueByName(value , "crafting tool.skill" ) )
+
+		// if ( root.getValueByName(value , "crafting tool.skill" ) )
 		//	item->Skill = SKILLS::toSkill( value );
 
-		if ( root.getValueByName(value , "crafting tool.type" ) )
-			item->CraftingToolType = TOOL_TYPE::toToolType( value );
+		if (root.getValueByName(value, "crafting tool.type"))
+			item->CraftingToolType = TOOL_TYPE::toToolType(value);
 	}
 	else
 	{
 		// do not show warning for graphicals sheets (starting with fy_, tr_ etc...) or other special sheets with empty name
-		if ( !item->Name.empty() )
-			nlwarning("<loadFaberTool> Can't find the 'crafting tool'structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str() );
+		if (!item->Name.empty())
+			nlwarning("<loadFaberTool> Can't find the 'crafting tool'structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str());
 	}
 } // loadFaberTool //
 
-
 //--------------------------------------------------------------
-//						loadHarvestTool()  
+//						loadHarvestTool()
 //--------------------------------------------------------------
-void loadHarvestTool( UFormElm &root, CStaticItem *item, const CSheetId &sheetId )
+void loadHarvestTool(UFormElm &root, CStaticItem *item, const CSheetId &sheetId)
 {
-	if ( ! item)
+	if (!item)
 		return;
 
-	if( !root.getValueByName( item->ItemPrice, "basics.Price" ) )
+	if (!root.getValueByName(item->ItemPrice, "basics.Price"))
 	{
 		item->ItemPrice = 0;
-		nlwarning("<loadFaberTool> Can't load 'Price' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<loadFaberTool> Can't load 'Price' in sheet %s", sheetId.toString().c_str());
 	}
 
 	const UFormElm *tool = NULL;
-	
-	if ( root.getNodeByName ( &tool, "harvest tool") && tool )
+
+	if (root.getNodeByName(&tool, "harvest tool") && tool)
 	{
 		string value;
-		
-		if ( root.getValueByName(value , "harvest tool.skill" ) )
-			item->Skill = SKILLS::toSkill( value );
+
+		if (root.getValueByName(value, "harvest tool.skill"))
+			item->Skill = SKILLS::toSkill(value);
 	}
 	else
 	{
-		nlwarning("<loadHarvestTool> Can't find the 'harvest tool' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str() );
+		nlwarning("<loadHarvestTool> Can't find the 'harvest tool' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str());
 	}
 } // loadHarvestTool //
 
-
 //--------------------------------------------------------------
-//						loadTamingTool()  
+//						loadTamingTool()
 //--------------------------------------------------------------
-void loadTamingTool( UFormElm &root, CStaticItem *item, const CSheetId &sheetId )
+void loadTamingTool(UFormElm &root, CStaticItem *item, const CSheetId &sheetId)
 {
-	if ( ! item)
+	if (!item)
 		return;
-	
-	if ( item->TamingTool == NULL)
+
+	if (item->TamingTool == NULL)
 		item->TamingTool = new CTamingTool();
-	
+
 	const UFormElm *tool = NULL;
-	
-	if ( root.getNodeByName ( &tool, "taming tool") && tool )
+
+	if (root.getNodeByName(&tool, "taming tool") && tool)
 	{
 		string value;
-		
-		if ( root.getValueByName(value , "taming tool.skill" ) )
-			item->Skill = SKILLS::toSkill( value );
-		
-		if ( root.getValueByName(value , "taming tool.type" ) )
-			item->TamingTool->Type = TAMING_TOOL_TYPE::toToolType( value );
-		
-		root.getValueByName(item->TamingTool->CommandRange , "taming tool.command range" );
-		root.getValueByName(item->TamingTool->MaxDonkeys , "taming tool.max donkey" );
+
+		if (root.getValueByName(value, "taming tool.skill"))
+			item->Skill = SKILLS::toSkill(value);
+
+		if (root.getValueByName(value, "taming tool.type"))
+			item->TamingTool->Type = TAMING_TOOL_TYPE::toToolType(value);
+
+		root.getValueByName(item->TamingTool->CommandRange, "taming tool.command range");
+		root.getValueByName(item->TamingTool->MaxDonkeys, "taming tool.max donkey");
 	}
 	else
 	{
 		// do not show warning for graphicals sheets (starting with fy_, tr_ etc...) or other special sheets with empty name
-		if ( !item->Name.empty() )
-			nlwarning("<loadTamingTool> Can't find the 'taming tool' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str() );
+		if (!item->Name.empty())
+			nlwarning("<loadTamingTool> Can't find the 'taming tool' structure in item %s (sheet %s)", item->Name.c_str(), sheetId.toString().c_str());
 	}
 } // loadTamingTool //
 
-
 //--------------------------------------------------------------
-//						loadRawMaterial()  
+//						loadRawMaterial()
 //--------------------------------------------------------------
-void loadRawMaterial( UFormElm &root, CStaticItem *item, const CSheetId &sheetId )
+void loadRawMaterial(UFormElm &root, CStaticItem *item, const CSheetId &sheetId)
 {
-	if ( ! item)
+	if (!item)
 		return;
 
-	//nldebug( "MP %s", sheetId.toString().c_str() );
+	// nldebug( "MP %s", sheetId.toString().c_str() );
 
-	if ( item->Mp == NULL)
+	if (item->Mp == NULL)
 		item->Mp = new CMP();
 
 	const UFormElm *mp = NULL;
-	
-	if ( root.getNodeByName ( &mp, "mp") && mp )
+
+	if (root.getNodeByName(&mp, "mp") && mp)
 	{
 		string val;
-	
+
 		uint32 uval;
-		if (mp->getValueByName( uval, "Family") )
+		if (mp->getValueByName(uval, "Family"))
 			item->Mp->Family = (RM_FAMILY::TRMFamily)uval;
 
-		if (mp->getValueByName( uval, "Group" )) // see also CMP::loadGroups()
-			item->Mp->setGroup( (RM_GROUP::TRMGroup)uval );
+		if (mp->getValueByName(uval, "Group")) // see also CMP::loadGroups()
+			item->Mp->setGroup((RM_GROUP::TRMGroup)uval);
 
-		if (mp->getValueByName( val, "Ecosystem"))
-			item->Mp->Ecosystem = ECOSYSTEM::stringToEcosystem( val );
-		
-		if(mp->getValueByName( val, "HarvestSkill"))
-			item->Skill = SKILLS::toSkill( val );
-		
-		if (mp->getValueByName( val, "Category"))
-			item->Mp->Category = MP_CATEGORY::stringToMPCategory( val );
+		if (mp->getValueByName(val, "Ecosystem"))
+			item->Mp->Ecosystem = ECOSYSTEM::stringToEcosystem(val);
 
-		mp->getValueByName( item->Mp->StatEnergy, "StatEnergy" );
+		if (mp->getValueByName(val, "HarvestSkill"))
+			item->Skill = SKILLS::toSkill(val);
 
-		mp->getValueByName( item->Mp->MaxQuality, "MaxQuality" );
+		if (mp->getValueByName(val, "Category"))
+			item->Mp->Category = MP_CATEGORY::stringToMPCategory(val);
 
-		mp->getValueByName( item->Mp->Rarity, "Rarity" );
+		mp->getValueByName(item->Mp->StatEnergy, "StatEnergy");
 
-		mp->getValueByName( item->Mp->MpColor, "MpColor" );
-		
+		mp->getValueByName(item->Mp->MaxQuality, "MaxQuality");
+
+		mp->getValueByName(item->Mp->Rarity, "Rarity");
+
+		mp->getValueByName(item->Mp->MpColor, "MpColor");
+
 		uint size;
 		const UFormElm *mpFaberParam = NULL;
-		root.getNodeByName( &mpFaberParam, "mp.MpParam" );
-		if( mpFaberParam != 0 )
+		root.getNodeByName(&mpFaberParam, "mp.MpParam");
+		if (mpFaberParam != 0)
 		{
-			nlverify( mpFaberParam->getStructSize(size) );
+			nlverify(mpFaberParam->getStructSize(size));
 
-			for( uint i = 0; i < size; ++i )
+			for (uint i = 0; i < size; ++i)
 			{
 				const UFormElm *mpFaberParameter = NULL;
-				mpFaberParam->getStructNode( i, &mpFaberParameter );
-				if( mpFaberParameter )
+				mpFaberParam->getStructNode(i, &mpFaberParameter);
+				if (mpFaberParameter)
 				{
 					CMP::TMpFaberParameters v;
 					uint16 value;
-					if( mpFaberParameter->getValueByName( value, "Durability" ) )
+					if (mpFaberParameter->getValueByName(value, "Durability"))
 					{
-						if( value > 0 )
+						if (value > 0)
 						{
 							v.Durability = value / 100.0f;
-							
-							v.MpFaberType = (RM_FABER_TYPE::TRMFType) i;
 
-							mpFaberParameter->getValueByName( value, "Weight" );
-							v.Weight = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "SapLoad" );
-							v.SapLoad = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							
-							mpFaberParameter->getValueByName( value, "DMG" );
-							v.Dmg = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "Speed" );
-							v.Speed = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "Range" );
-							v.Range = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "DodgeModifier" );
-							v.DodgeModifier = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "ParryModifier" );
-							v.ParryModifier = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "AdversaryDodgeModifier" );
-							v.AdversaryDodgeModifier = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "AdversaryParryModifier" );
-							v.AdversaryParryModifier = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "ProtectionFactor" );
-							v.ProtectionFactor = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "MaxSlashingProtection" );
-							v.MaxSlashingProtection = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "MaxBluntProtection" );
-							v.MaxBluntProtection = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "MaxPiercingProtection" );
-							v.MaxPiercingProtection = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "AcidProtection" );
-							v.AcidProtection = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "ColdProtection" );
-							v.ColdProtection = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "FireProtection" );
-							v.FireProtection = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "RotProtection" );
-							v.RotProtection = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "ShockWaveProtection" );
-							v.ShockWaveProtection = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "PoisonProtection" );
-							v.PoisonProtection = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "ElectricityProtection" );
-							v.ElectricityProtection = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "DesertResistance" );
-							v.DesertResistance = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "ForestResistance" );
-							v.ForestResistance = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "LacustreResistance" );
-							v.LacustreResistance = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "JungleResistance" );
-							v.JungleResistance = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "PrimaryRootResistance" );
-							v.PrimaryRootResistance = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "ElementalCastingTimeFactor" );
-							v.ElementalCastingTimeFactor = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "ElementalPowerFactor" );
-							v.ElementalPowerFactor = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "OffensiveAfflictionCastingTimeFactor" );
-							v.OffensiveAfflictionCastingTimeFactor = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "OffensiveAfflictionPowerFactor" );
-							v.OffensiveAfflictionPowerFactor = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "HealCastingTimeFactor" );
-							v.HealCastingTimeFactor = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "HealPowerFactor" );
-							v.HealPowerFactor = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "DefensiveAfflictionCastingTimeFactor" );
-							v.DefensiveAfflictionCastingTimeFactor = max( 0.0f, min( value / 100.0f, 1.0f ) );
-							mpFaberParameter->getValueByName( value, "DefensiveAfflictionPowerFactor" );
-							v.DefensiveAfflictionPowerFactor = max( 0.0f, min( value / 100.0f, 1.0f ) );
+							v.MpFaberType = (RM_FABER_TYPE::TRMFType)i;
+
+							mpFaberParameter->getValueByName(value, "Weight");
+							v.Weight = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "SapLoad");
+							v.SapLoad = max(0.0f, min(value / 100.0f, 1.0f));
+
+							mpFaberParameter->getValueByName(value, "DMG");
+							v.Dmg = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "Speed");
+							v.Speed = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "Range");
+							v.Range = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "DodgeModifier");
+							v.DodgeModifier = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "ParryModifier");
+							v.ParryModifier = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "AdversaryDodgeModifier");
+							v.AdversaryDodgeModifier = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "AdversaryParryModifier");
+							v.AdversaryParryModifier = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "ProtectionFactor");
+							v.ProtectionFactor = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "MaxSlashingProtection");
+							v.MaxSlashingProtection = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "MaxBluntProtection");
+							v.MaxBluntProtection = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "MaxPiercingProtection");
+							v.MaxPiercingProtection = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "AcidProtection");
+							v.AcidProtection = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "ColdProtection");
+							v.ColdProtection = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "FireProtection");
+							v.FireProtection = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "RotProtection");
+							v.RotProtection = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "ShockWaveProtection");
+							v.ShockWaveProtection = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "PoisonProtection");
+							v.PoisonProtection = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "ElectricityProtection");
+							v.ElectricityProtection = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "DesertResistance");
+							v.DesertResistance = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "ForestResistance");
+							v.ForestResistance = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "LacustreResistance");
+							v.LacustreResistance = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "JungleResistance");
+							v.JungleResistance = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "PrimaryRootResistance");
+							v.PrimaryRootResistance = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "ElementalCastingTimeFactor");
+							v.ElementalCastingTimeFactor = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "ElementalPowerFactor");
+							v.ElementalPowerFactor = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "OffensiveAfflictionCastingTimeFactor");
+							v.OffensiveAfflictionCastingTimeFactor = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "OffensiveAfflictionPowerFactor");
+							v.OffensiveAfflictionPowerFactor = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "HealCastingTimeFactor");
+							v.HealCastingTimeFactor = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "HealPowerFactor");
+							v.HealPowerFactor = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "DefensiveAfflictionCastingTimeFactor");
+							v.DefensiveAfflictionCastingTimeFactor = max(0.0f, min(value / 100.0f, 1.0f));
+							mpFaberParameter->getValueByName(value, "DefensiveAfflictionPowerFactor");
+							v.DefensiveAfflictionPowerFactor = max(0.0f, min(value / 100.0f, 1.0f));
 
 							string civS;
-							mpFaberParameter->getValueByName( civS, "CraftCivSpec" );
-							v.CraftCivSpec = ITEM_ORIGIN::stringToEnum( civS );
+							mpFaberParameter->getValueByName(civS, "CraftCivSpec");
+							v.CraftCivSpec = ITEM_ORIGIN::stringToEnum(civS);
 
-							mpFaberParameter->getValueByName( v.HpBuff, "HpBuff" );
-							mpFaberParameter->getValueByName( v.SapBuff, "SapBuff" );
-							mpFaberParameter->getValueByName( v.StaBuff, "StaBuff" );
-							mpFaberParameter->getValueByName( v.FocusBuff, "FocusBuff" );
-							
-							item->Mp->MpFaberParameters.push_back( v );
+							mpFaberParameter->getValueByName(v.HpBuff, "HpBuff");
+							mpFaberParameter->getValueByName(v.SapBuff, "SapBuff");
+							mpFaberParameter->getValueByName(v.StaBuff, "StaBuff");
+							mpFaberParameter->getValueByName(v.FocusBuff, "FocusBuff");
+
+							item->Mp->MpFaberParameters.push_back(v);
 						}
 					}
 				}
@@ -911,93 +893,90 @@ void loadRawMaterial( UFormElm &root, CStaticItem *item, const CSheetId &sheetId
 	else
 	{
 		// do not show warning for graphicals sheets (starting with fy_, tr_ etc...) or other special sheets with empty name
-		if ( !item->Name.empty() )
-			nlwarning("<loadRawMaterial> Can't find the 'mp' structure in item %s (sheet %s) ?!?", item->Name.c_str(), sheetId.toString().c_str() );
+		if (!item->Name.empty())
+			nlwarning("<loadRawMaterial> Can't find the 'mp' structure in item %s (sheet %s) ?!?", item->Name.c_str(), sheetId.toString().c_str());
 	}
 } // loadRawMaterial //
 
-
 //--------------------------------------------------------------
-//						loadPet()  
+//						loadPet()
 //--------------------------------------------------------------
-void loadPet(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId )
+void loadPet(NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId)
 {
-	if ( ! item )
+	if (!item)
 		return;
-	
+
 	string value;
-	if( root.getValueByName( value, "pet.Pet Sheet" ) )
+	if (root.getValueByName(value, "pet.Pet Sheet"))
 	{
-		item->PetSheet = CSheetId( value );
+		item->PetSheet = CSheetId(value);
 	}
 	else
 	{
-		nlwarning("<loadPet> Can't load 'pet.Pet Sheet' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<loadPet> Can't load 'pet.Pet Sheet' in sheet %s", sheetId.toString().c_str());
 	}
 
-	if( !root.getValueByName( item->ItemPrice, "pet.Pet Price" ) )
+	if (!root.getValueByName(item->ItemPrice, "pet.Pet Price"))
 	{
 		item->ItemPrice = 666;
-		nlwarning("<loadPet> Can't load 'pet.Pet Price' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<loadPet> Can't load 'pet.Pet Price' in sheet %s", sheetId.toString().c_str());
 	}
-	if ( ! root.getValueByName( item->PetHungerCount, "pet.Hunger Count" ) )
+	if (!root.getValueByName(item->PetHungerCount, "pet.Hunger Count"))
 	{
 		item->PetHungerCount = 1000;
-		nlwarning("<loadPet> Can't load 'pet.Hunger Count' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<loadPet> Can't load 'pet.Hunger Count' in sheet %s", sheetId.toString().c_str());
 	}
-} //loadPet
-
+} // loadPet
 
 //--------------------------------------------------------------
-//						loadFood()  
+//						loadFood()
 //--------------------------------------------------------------
-void loadFood( NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId )
+void loadFood(NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId)
 {
-	if ( ! root.getValueByName( item->Calories, "food.Calories" ) )
+	if (!root.getValueByName(item->Calories, "food.Calories"))
 	{
 		item->Calories = 20;
-		nlwarning("<loadPet> Can't load 'food.Calories' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<loadPet> Can't load 'food.Calories' in sheet %s", sheetId.toString().c_str());
 	}
-	if ( item->Calories == 0 )
+	if (item->Calories == 0)
 	{
-		nlwarning( "Invalid 0 Calories in %s", sheetId.toString().c_str() );
+		nlwarning("Invalid 0 Calories in %s", sheetId.toString().c_str());
 		item->Calories = 20;
 	}
 }
 
-
 //--------------------------------------------------------------
-//						loadGuildOption()  
+//						loadGuildOption()
 //--------------------------------------------------------------
-void loadGuildOption(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId )
+void loadGuildOption(NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId)
 {
 	nlassert(item);
 	nlassert(item->GuildOption == NULL);
 	string value;
 	item->GuildOption = new CGuildOption;
-	if( !root.getValueByName( value, "guild option.Type" ) )
+	if (!root.getValueByName(value, "guild option.Type"))
 	{
-		nlwarning("<loadGuildOption> Can't load 'guild option.Type' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<loadGuildOption> Can't load 'guild option.Type' in sheet %s", sheetId.toString().c_str());
 	}
-	item->GuildOption->Type = GUILD_OPTION::fromString( value );
-	if ( item->GuildOption->Type == GUILD_OPTION::Unknown )
+	item->GuildOption->Type = GUILD_OPTION::fromString(value);
+	if (item->GuildOption->Type == GUILD_OPTION::Unknown)
 	{
-		nlwarning("<loadGuildOption> guild option.Type = '%s' ( invalid ) in sheet %s", value.c_str(), sheetId.toString().c_str() );
+		nlwarning("<loadGuildOption> guild option.Type = '%s' ( invalid ) in sheet %s", value.c_str(), sheetId.toString().c_str());
 	}
-//	if( !root.getValueByName( item->GuildOption->XpCost, "guild option.Guild XP Cost" ) )
-//	{
-//		nlwarning("<loadGuildOption> Can't load 'guild option.Guild XP Cost' in sheet %s", sheetId.toString().c_str() );
-//	}
-	if( !root.getValueByName( item->GuildOption->MoneyCost, "guild option.Money Cost" ) )
+	//	if( !root.getValueByName( item->GuildOption->XpCost, "guild option.Guild XP Cost" ) )
+	//	{
+	//		nlwarning("<loadGuildOption> Can't load 'guild option.Guild XP Cost' in sheet %s", sheetId.toString().c_str() );
+	//	}
+	if (!root.getValueByName(item->GuildOption->MoneyCost, "guild option.Money Cost"))
 	{
-		nlwarning("<loadGuildOption> Can't load 'guild option.Money Cost' in sheet %s", sheetId.toString().c_str() );
-	}	
+		nlwarning("<loadGuildOption> Can't load 'guild option.Money Cost' in sheet %s", sheetId.toString().c_str());
+	}
 }
 
 //--------------------------------------------------------------
-//						loadCosmetics()  
+//						loadCosmetics()
 //--------------------------------------------------------------
-void loadCosmetics(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId )
+void loadCosmetics(NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId)
 {
 	nlassert(item);
 	nlassert(item->Cosmetics == NULL);
@@ -1005,39 +984,38 @@ void loadCosmetics(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC:
 
 	std::string name = sheetId.toString();
 
-	string::size_type pos = name.find('.',0);
-	if ( pos == string::npos)
-		nlwarning("<loadCosmetics> Can't load the VPValue from sheet name in sheet %s", sheetId.toString().c_str() );
+	string::size_type pos = name.find('.', 0);
+	if (pos == string::npos)
+		nlwarning("<loadCosmetics> Can't load the VPValue from sheet name in sheet %s", sheetId.toString().c_str());
 	else
 	{
 		sint i = (sint)pos - 1;
-		for(; i >= 0; i-- )
+		for (; i >= 0; i--)
 		{
-			if ( !isdigit( name[i] ) )
+			if (!isdigit(name[i]))
 				break;
 		}
-		if ( i >= -1 )
+		if (i >= -1)
 		{
-			name = name.substr( i+1, pos - i - 1 );
-			NLMISC::fromString( name, item->Cosmetics->VPValue );
+			name = name.substr(i + 1, pos - i - 1);
+			NLMISC::fromString(name, item->Cosmetics->VPValue);
 		}
 	}
 
-	
-	if( !root.getValueByName( item->Cosmetics->VPValue, "Cosmetics.Visual Property Value" ) )
+	if (!root.getValueByName(item->Cosmetics->VPValue, "Cosmetics.Visual Property Value"))
 	{
-		nlwarning("<loadCosmetics> Can't load 'Cosmetics.VPValue' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<loadCosmetics> Can't load 'Cosmetics.VPValue' in sheet %s", sheetId.toString().c_str());
 	}
-	if( !root.getValueByName (item->ItemPrice, "basics.Price") )
+	if (!root.getValueByName(item->ItemPrice, "basics.Price"))
 	{
-		nlwarning("<loadCosmetics> Can't load 'basics.Price' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<loadCosmetics> Can't load 'basics.Price' in sheet %s", sheetId.toString().c_str());
 	}
 }
 
 //--------------------------------------------------------------
 //						loadItemService()
 //--------------------------------------------------------------
-void loadItemService(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId )
+void loadItemService(NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId)
 {
 	string strServiceType;
 	if (root.getValueByName(strServiceType, "service.ServiceType"))
@@ -1055,9 +1033,9 @@ void loadItemService(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMIS
 
 	if (item->ItemServiceType == ITEM_SERVICE_TYPE::SpeedUpDPLoss)
 	{
-		CSpeedUpDPLossData * data = dynamic_cast<CSpeedUpDPLossData *>(item->ItemServiceData);
+		CSpeedUpDPLossData *data = dynamic_cast<CSpeedUpDPLossData *>(item->ItemServiceData);
 		nlassert(data);
-		nlverify( root.getValueByName(data->DurationInDays, "service.DPLossDuration") );
+		nlverify(root.getValueByName(data->DurationInDays, "service.DPLossDuration"));
 	}
 	else
 	{
@@ -1071,11 +1049,10 @@ void loadItemService(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMIS
 	}
 }
 
-
 //--------------------------------------------------------------
 //						loadConsumable()
 //--------------------------------------------------------------
-void loadConsumable(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId )
+void loadConsumable(NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId)
 {
 	nlassert(item);
 	nlassert(item->ConsumableItem == NULL);
@@ -1083,15 +1060,15 @@ void loadConsumable(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC
 
 	//  family
 	string familyName;
-	if ( !root.getValueByName(familyName, "Consumable.Family") )
+	if (!root.getValueByName(familyName, "Consumable.Family"))
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.Family'");
 
 	if (CConsumable::FamiliesFromName.find(familyName) == CConsumable::FamiliesFromName.end())
 	{
 		const uint16 index = (uint16)CConsumable::FamiliesFromIndex.size();
-		CConsumable::FamiliesFromName.insert( make_pair(familyName, index) );
+		CConsumable::FamiliesFromName.insert(make_pair(familyName, index));
 		CConsumable::FamiliesFromIndex.push_back(familyName);
-		item->ConsumableItem->Family= index;
+		item->ConsumableItem->Family = index;
 	}
 	else
 	{
@@ -1100,57 +1077,57 @@ void loadConsumable(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC
 
 	bool flag;
 
-	if( ! root.getValueByName (flag, "Consumable.BreakWhenHit") )
+	if (!root.getValueByName(flag, "Consumable.BreakWhenHit"))
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.BreakWhenHit'");
 	else
-		item->ConsumableItem->Flags.BreakWhenHit = (flag?1:0);
+		item->ConsumableItem->Flags.BreakWhenHit = (flag ? 1 : 0);
 
-	if( ! root.getValueByName (flag, "Consumable.Sit") )
+	if (!root.getValueByName(flag, "Consumable.Sit"))
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.Sit'");
 	else
-		item->ConsumableItem->Flags.Sit = (flag?1:0);
+		item->ConsumableItem->Flags.Sit = (flag ? 1 : 0);
 
-	if( ! root.getValueByName (flag, "Consumable.StandUp") )
+	if (!root.getValueByName(flag, "Consumable.StandUp"))
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.StandUp'");
 	else
-		item->ConsumableItem->Flags.StandUp = (flag?1:0);
+		item->ConsumableItem->Flags.StandUp = (flag ? 1 : 0);
 
-	if( ! root.getValueByName (flag, "Consumable.Swim") )
+	if (!root.getValueByName(flag, "Consumable.Swim"))
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.Swim'");
 	else
-		item->ConsumableItem->Flags.Swim = (flag?1:0);
+		item->ConsumableItem->Flags.Swim = (flag ? 1 : 0);
 
-	if( ! root.getValueByName (flag, "Consumable.Mektoub") )
+	if (!root.getValueByName(flag, "Consumable.Mektoub"))
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.Mektoub'");
 	else
-		item->ConsumableItem->Flags.Mektoub = (flag?1:0);
+		item->ConsumableItem->Flags.Mektoub = (flag ? 1 : 0);
 
-	if ( !root.getValueByName(item->ConsumableItem->LoopTimer, "Consumable.LoopTimer") )
+	if (!root.getValueByName(item->ConsumableItem->LoopTimer, "Consumable.LoopTimer"))
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.LoopTimer'");
 
-	if ( !root.getValueByName(item->ConsumableItem->MaxNbLoops, "Consumable.MaxNbLoops") )
+	if (!root.getValueByName(item->ConsumableItem->MaxNbLoops, "Consumable.MaxNbLoops"))
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.MaxNbLoops'");
 
-	if ( !root.getValueByName(item->ConsumableItem->OverdoseTimer, "Consumable.OverdoseTimer") )
+	if (!root.getValueByName(item->ConsumableItem->OverdoseTimer, "Consumable.OverdoseTimer"))
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.OverdoseTimer'");
 
-	if ( !root.getValueByName(item->ConsumableItem->ConsumptionTime, "Consumable.ConsumptionTime") )
+	if (!root.getValueByName(item->ConsumableItem->ConsumptionTime, "Consumable.ConsumptionTime"))
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.ConsumptionTime'");
 
 	// read the params
-	//Params
+	// Params
 	item->ConsumableItem->StringParams.clear();
-	for (uint i=0;i<4;++i)
+	for (uint i = 0; i < 4; ++i)
 	{
 		string param;
-		std::string s=NLMISC::toString("Consumable.Property %i",i);
-		if ( root.getValueByName (param, s.c_str()) && !param.empty() )
+		std::string s = NLMISC::toString("Consumable.Property %i", i);
+		if (root.getValueByName(param, s.c_str()) && !param.empty())
 			item->ConsumableItem->StringParams.push_back(param);
 	}
 	// Parse Params
 	item->ConsumableItem->Params.clear();
 	const uint size = (uint)item->ConsumableItem->StringParams.size();
-	for (uint i = 0 ; i < size ; ++i)
+	for (uint i = 0; i < size; ++i)
 	{
 		addParam(item->ConsumableItem->StringParams[i], item->ConsumableItem->Params);
 	}
@@ -1159,20 +1136,20 @@ void loadConsumable(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC
 //--------------------------------------------------------------
 //						loadXpCatalyser()
 //--------------------------------------------------------------
-void loadXpCatalyser( NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId )
+void loadXpCatalyser(NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId)
 {
 	nlassert(item);
 	nlassert(item->XpCatalyser == NULL);
 	item->XpCatalyser = new CXpCatalyser();
-	
-	// 
-	if ( !root.getValueByName(item->XpCatalyser->IsRingCatalyser, "Xp Catalyser.IsRing") )
+
+	//
+	if (!root.getValueByName(item->XpCatalyser->IsRingCatalyser, "Xp Catalyser.IsRing"))
 	{
 		nlwarning("<loadXpCatalyser> cannot read the value 'Xp Catalyser.IsRing'");
 	}
 
 	// gain factor
-	if ( !root.getValueByName(item->XpCatalyser->XpBonus, "Xp Catalyser.Xp Bonus") )
+	if (!root.getValueByName(item->XpCatalyser->XpBonus, "Xp Catalyser.Xp Bonus"))
 	{
 		nlwarning("<loadXpCatalyser> cannot read the value 'Xp Catalyser.Xp Bonus'");
 	}
@@ -1181,24 +1158,24 @@ void loadXpCatalyser( NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC
 //--------------------------------------------------------------
 //						loadItemSpecialEffects()
 //--------------------------------------------------------------
-void loadItemSpecialEffects( NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId )
+void loadItemSpecialEffects(NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId)
 {
 	nlassert(item);
 	nlassert(item->XpCatalyser == NULL);
 	item->ItemSpecialEffects = new SItemSpecialEffects();
-	
+
 	// Parse effects
-	for(uint i=0;i<SItemSpecialEffect::MaxEffectPerItem;i++)
+	for (uint i = 0; i < SItemSpecialEffect::MaxEffectPerItem; i++)
 	{
 		std::string str;
-		char	token[256];
-		sprintf(token, "Effects.Effect%d", i+1);
-		if ( root.getValueByName(str, token) )
+		char token[256];
+		sprintf(token, "Effects.Effect%d", i + 1);
+		if (root.getValueByName(str, token))
 		{
 			if (!str.empty())
 			{
-				SItemSpecialEffect	fx;
-				if(fx.build(str))
+				SItemSpecialEffect fx;
+				if (fx.build(str))
 				{
 					item->ItemSpecialEffects->Effects.push_back(fx);
 				}
@@ -1210,9 +1187,9 @@ void loadItemSpecialEffects( NLGEORGES::UFormElm &root, CStaticItem *item, const
 }
 
 //--------------------------------------------------------------
-//						
+//
 //--------------------------------------------------------------
-void loadCommandTicket( NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId )
+void loadCommandTicket(NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC::CSheetId &sheetId)
 {
 	nlassert(item);
 	nlassert(item->CommandTicket == NULL);
@@ -1224,83 +1201,83 @@ void loadCommandTicket( NLGEORGES::UFormElm &root, CStaticItem *item, const NLMI
 }
 
 //--------------------------------------------------------------
-//						serial()  
+//						serial()
 //--------------------------------------------------------------
 void CStaticItem::serial(NLMISC::IStream &f)
 {
-	f.serial( SheetId );
-	f.serialEnum( Origin );
-	f.serialEnum( Family );
-	f.serialEnum( Type );
-	f.serial( Name );
-	f.serial( Sack );
-	f.serial( Stackable );
-	f.serial( Color );
-	f.serial( DropOrSell );
-	f.serial( ShardExchangeable );
-	f.serial( CraftPlan );
-	f.serial( ItemPrice );
-	f.serial( Bulk );
-	f.serial( Weight );
+	f.serial(SheetId);
+	f.serialEnum(Origin);
+	f.serialEnum(Family);
+	f.serialEnum(Type);
+	f.serial(Name);
+	f.serial(Sack);
+	f.serial(Stackable);
+	f.serial(Color);
+	f.serial(DropOrSell);
+	f.serial(ShardExchangeable);
+	f.serial(CraftPlan);
+	f.serial(ItemPrice);
+	f.serial(Bulk);
+	f.serial(Weight);
 	f.serial(TimeToEquip);
-	f.serial( Saleable );
-	f.serial( NoRent );
-	f.serial( Consumable );
-	f.serial( EffectWhenConsumed );
-	f.serial( EmoteWhenConsumed );
+	f.serial(Saleable);
+	f.serial(NoRent);
+	f.serial(Consumable);
+	f.serial(EffectWhenConsumed);
+	f.serial(EmoteWhenConsumed);
 
 	f.serialEnum(CraftingToolType);
-	
+
 	f.serialEnum(Skill);
 	f.serial(MinSkill);
 
-	f.serialCont( Slots );
-	f.serial( WearEquipmentMalus );
+	f.serialCont(Slots);
+	f.serial(WearEquipmentMalus);
 
 	f.serial(PetSheet);
 
 	f.serial(Destination);
-	f.serialEnum( TpType );
-	f.serialEnum( TpEcosystem );
-	
-	f.serial( WeightMax );
-	f.serial( BulkMax );
-	f.serial( SlotCount );
+	f.serialEnum(TpType);
+	f.serialEnum(TpEcosystem);
 
-	f.serial( ItemIdSheetToModelNumber );
-	f.serial( ItemIdSheetToModelNumberLeftHands );
-	
-	f.serialEnum( RequiredSkill );
-	f.serial( MinRequiredSkillLevel );
-	f.serial( RequiredSkillQualityFactor );
-	f.serial( RequiredSkillQualityOffset );
-	f.serialEnum( RequiredSkill2 );
-	f.serial( MinRequiredSkillLevel2 );
-	f.serial( RequiredSkillQualityFactor2 );
-	f.serial( RequiredSkillQualityOffset2 );
-	
-	f.serialEnum( RequiredCharac );
-	f.serial( MinRequiredCharacLevel );
-	f.serial( RequiredCharacQualityFactor );
-	f.serial( RequiredCharacQualityOffset );
-	
-	f.serialCont( TypeSkillMods );
-	
-//	f.serial( AmmoWeaponType );
-//	f.serial( WeaponType );
+	f.serial(WeightMax);
+	f.serial(BulkMax);
+	f.serial(SlotCount);
 
-	if (f.isReading() )
+	f.serial(ItemIdSheetToModelNumber);
+	f.serial(ItemIdSheetToModelNumberLeftHands);
+
+	f.serialEnum(RequiredSkill);
+	f.serial(MinRequiredSkillLevel);
+	f.serial(RequiredSkillQualityFactor);
+	f.serial(RequiredSkillQualityOffset);
+	f.serialEnum(RequiredSkill2);
+	f.serial(MinRequiredSkillLevel2);
+	f.serial(RequiredSkillQualityFactor2);
+	f.serial(RequiredSkillQualityOffset2);
+
+	f.serialEnum(RequiredCharac);
+	f.serial(MinRequiredCharacLevel);
+	f.serial(RequiredCharacQualityFactor);
+	f.serial(RequiredCharacQualityOffset);
+
+	f.serialCont(TypeSkillMods);
+
+	//	f.serial( AmmoWeaponType );
+	//	f.serial( WeaponType );
+
+	if (f.isReading())
 	{
 		ItemSpecialEffects = new SItemSpecialEffects();
 		ItemSpecialEffects->serial(f);
-		
-		switch ( Family )
+
+		switch (Family)
 		{
 		case ITEMFAMILY::MELEE_WEAPON:
 			MeleeWeapon = new SMeleeWeapon();
 			MeleeWeapon->serial(f);
 			break;
-			
+
 		case ITEMFAMILY::RANGE_WEAPON:
 			RangeWeapon = new SRangeWeapon();
 			RangeWeapon->serial(f);
@@ -1322,14 +1299,14 @@ void CStaticItem::serial(NLMISC::IStream &f)
 			break;
 
 		case ITEMFAMILY::JEWELRY:
-		case ITEMFAMILY::HARVEST_TOOL:		
+		case ITEMFAMILY::HARVEST_TOOL:
 			break;
 
 		case ITEMFAMILY::TAMING_TOOL:
 			TamingTool = new CTamingTool();
 			TamingTool->serial(f);
 			break;
-			
+
 		case ITEMFAMILY::CRAFTING_TOOL:
 			break;
 
@@ -1349,11 +1326,11 @@ void CStaticItem::serial(NLMISC::IStream &f)
 			break;
 
 		case ITEMFAMILY::PET_ANIMAL_TICKET:
-			f.serial( PetHungerCount );
+			f.serial(PetHungerCount);
 			break;
 
 		case ITEMFAMILY::FOOD:
-			f.serial( Calories );
+			f.serial(Calories);
 			break;
 
 		case ITEMFAMILY::SERVICE:
@@ -1379,20 +1356,20 @@ void CStaticItem::serial(NLMISC::IStream &f)
 			break;
 
 		default:
-			//nlwarning("<serial> For item %s, family type %d is not managed by this loader", Name.c_str(), Family );
+			// nlwarning("<serial> For item %s, family type %d is not managed by this loader", Name.c_str(), Family );
 			break;
 		};
 	}
 	else
 	{
 		ItemSpecialEffects->serial(f);
-		
-		switch ( Family )
+
+		switch (Family)
 		{
 		case ITEMFAMILY::MELEE_WEAPON:
 			MeleeWeapon->serial(f);
 			break;
-			
+
 		case ITEMFAMILY::RANGE_WEAPON:
 			RangeWeapon->serial(f);
 			break;
@@ -1414,7 +1391,7 @@ void CStaticItem::serial(NLMISC::IStream &f)
 			break;
 
 		case ITEMFAMILY::JEWELRY:
-		case ITEMFAMILY::HARVEST_TOOL:		
+		case ITEMFAMILY::HARVEST_TOOL:
 			break;
 
 		case ITEMFAMILY::CRAFTING_TOOL:
@@ -1431,11 +1408,11 @@ void CStaticItem::serial(NLMISC::IStream &f)
 			break;
 
 		case ITEMFAMILY::PET_ANIMAL_TICKET:
-			f.serial( PetHungerCount );
+			f.serial(PetHungerCount);
 			break;
 
 		case ITEMFAMILY::FOOD:
-			f.serial( Calories );
+			f.serial(Calories);
 			break;
 
 		case ITEMFAMILY::SERVICE:
@@ -1455,19 +1432,18 @@ void CStaticItem::serial(NLMISC::IStream &f)
 		case ITEMFAMILY::COMMAND_TICKET:
 			CommandTicket->serial(f);
 			break;
-			
+
 		default:
-			//nlwarning("<CStaticItem::serial> For item %s, family type %d is not managed by this loader",Name.c_str(), Family );
+			// nlwarning("<CStaticItem::serial> For item %s, family type %d is not managed by this loader",Name.c_str(), Family );
 			break;
 		};
 	}
 }
 
-
 //--------------------------------------------------------------
-//						loadItem()  
+//						loadItem()
 //--------------------------------------------------------------
-void CStaticItem::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const CSheetId &sheetId)
+void CStaticItem::readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const CSheetId &sheetId)
 {
 	if (form == NULL)
 		return;
@@ -1476,7 +1452,7 @@ void CStaticItem::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, 
 	clearPtrs(true);
 
 	// Get the root node, always exist
-    UFormElm &root = form->getRootNode ();
+	UFormElm &root = form->getRootNode();
 
 	string value;
 
@@ -1484,74 +1460,74 @@ void CStaticItem::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, 
 	SheetId = sheetId;
 
 	// default price (is overwritten below by other georges properties for some item families)
-	root.getValueByName( ItemPrice, "basics.Price" );
+	root.getValueByName(ItemPrice, "basics.Price");
 
 	// color
-	if( ! root.getValueByName ( Color, "3d.color") )
+	if (!root.getValueByName(Color, "3d.color"))
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value '3d.color' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get the value '3d.color' in sheet %s", sheetId.toString().c_str());
 	}
 
 	// origin
-	if( root.getValueByName (value, "basics.origin") )
+	if (root.getValueByName(value, "basics.origin"))
 	{
-		Origin = ITEM_ORIGIN::stringToEnum( value );
+		Origin = ITEM_ORIGIN::stringToEnum(value);
 	}
 	else
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.origin' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.origin' in sheet %s", sheetId.toString().c_str());
 	}
 
 	// family
-	if( root.getValueByName (value, "basics.family") )
+	if (root.getValueByName(value, "basics.family"))
 	{
-		Family = ITEMFAMILY::stringToItemFamily( value );
+		Family = ITEMFAMILY::stringToItemFamily(value);
 	}
 	else
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.family' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.family' in sheet %s", sheetId.toString().c_str());
 	}
 
 	// type
-	if( root.getValueByName (value, "basics.ItemType") )
+	if (root.getValueByName(value, "basics.ItemType"))
 	{
-		Type = ITEM_TYPE::stringToItemType( value );
+		Type = ITEM_TYPE::stringToItemType(value);
 	}
 	else
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.ItemType' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.ItemType' in sheet %s", sheetId.toString().c_str());
 	}
 
 	// name
-	if( ! root.getValueByName (Name, "basics.name") )
+	if (!root.getValueByName(Name, "basics.name"))
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.name' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.name' in sheet %s", sheetId.toString().c_str());
 	}
 
 	// Sack type on ground
-	if( ! root.getValueByName (Sack, "basics.sack_type") )
+	if (!root.getValueByName(Sack, "basics.sack_type"))
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.sack_type' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.sack_type' in sheet %s", sheetId.toString().c_str());
 	}
 
 	// Stackable ( 1 = non stackable, > 1 size max of stack )
-	if( ! root.getValueByName (Stackable, "basics.stackable") )
+	if (!root.getValueByName(Stackable, "basics.stackable"))
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.stackable' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.stackable' in sheet %s", sheetId.toString().c_str());
 	}
 
 	// drop sell
-	if( ! root.getValueByName ( DropOrSell, "basics.Drop or Sell") )
+	if (!root.getValueByName(DropOrSell, "basics.Drop or Sell"))
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.Drop or Sell' in sheet %s", sheetId.toString().c_str() );
-		DropOrSell= false;
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.Drop or Sell' in sheet %s", sheetId.toString().c_str());
+		DropOrSell = false;
 	}
 
 	// ShardExchangeable
-	if( ! root.getValueByName ( ShardExchangeable, "basics.ShardExchangeable") )
+	if (!root.getValueByName(ShardExchangeable, "basics.ShardExchangeable"))
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.ShardExchangeable' in sheet %s", sheetId.toString().c_str() );
-		ShardExchangeable= false;
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.ShardExchangeable' in sheet %s", sheetId.toString().c_str());
+		ShardExchangeable = false;
 	}
 
 	// epsilon used when converting floating bulk/weight to avoid round error
@@ -1559,9 +1535,9 @@ void CStaticItem::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, 
 
 	// bulk( in float in sheets, stored in an sint32 to avoid errors while rounding values
 	float bulkFloat;
-	if( ! root.getValueByName ( bulkFloat, "basics.Bulk") )
+	if (!root.getValueByName(bulkFloat, "basics.Bulk"))
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.Bulk' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.Bulk' in sheet %s", sheetId.toString().c_str());
 	}
 	else
 	{
@@ -1570,36 +1546,36 @@ void CStaticItem::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, 
 
 	// weight (in float in sheet, stored in integer as gramme in sheet)
 	float weightFloat;
-	if(!root.getValueByName( weightFloat, "basics.Weight") )
+	if (!root.getValueByName(weightFloat, "basics.Weight"))
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.Weight' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.Weight' in sheet %s", sheetId.toString().c_str());
 	}
 	else
 	{
 		Weight = uint32(weightFloat * 1000.f + epsilon);
 	}
 
-	if( ! root.getValueByName ( TimeToEquip, "basics.Time to Equip In Ticks") )
+	if (!root.getValueByName(TimeToEquip, "basics.Time to Equip In Ticks"))
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.Time to Equip In Ticks' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.Time to Equip In Ticks' in sheet %s", sheetId.toString().c_str());
 	}
 
 	// craft plan
-	if( Family == ITEMFAMILY::AMMO || Family == ITEMFAMILY::ARMOR || Family == ITEMFAMILY::JEWELRY || Family == ITEMFAMILY::MELEE_WEAPON
-	 || Family == ITEMFAMILY::RANGE_WEAPON || Family == ITEMFAMILY::SHIELD )
+	if (Family == ITEMFAMILY::AMMO || Family == ITEMFAMILY::ARMOR || Family == ITEMFAMILY::JEWELRY || Family == ITEMFAMILY::MELEE_WEAPON
+	    || Family == ITEMFAMILY::RANGE_WEAPON || Family == ITEMFAMILY::SHIELD)
 	{
-		if( ! root.getValueByName ( value, "basics.CraftPlan" ))
+		if (!root.getValueByName(value, "basics.CraftPlan"))
 		{
-			nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.CraftPlan' in sheet %s", sheetId.toString().c_str() );
+			nlwarning("<CStaticItem::readGeorges> can get the value 'basics.CraftPlan' in sheet %s", sheetId.toString().c_str());
 		}
 		else
 		{
-			if( !value.empty()) // if no craft plan we consider that this item is non craftable
+			if (!value.empty()) // if no craft plan we consider that this item is non craftable
 			{
-				CraftPlan = CSheetId( value );
-				if( CraftPlan == CSheetId::Unknown )
+				CraftPlan = CSheetId(value);
+				if (CraftPlan == CSheetId::Unknown)
 				{
-					nlwarning("<CStaticItem::readGeorges> Craftable item %s have no valid craft plan", sheetId.toString().c_str() );
+					nlwarning("<CStaticItem::readGeorges> Craftable item %s have no valid craft plan", sheetId.toString().c_str());
 				}
 			}
 		}
@@ -1607,41 +1583,41 @@ void CStaticItem::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, 
 	else CraftPlan = CSheetId::Unknown;
 
 	// Seleable flag
-	if( ! root.getValueByName (Saleable, "basics.Saleable") )
+	if (!root.getValueByName(Saleable, "basics.Saleable"))
 	{
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'basics.Saleable'");
 	}
 
 	// No rent flag
-	if( ! root.getValueByName (NoRent, "basics.No Rent") )
+	if (!root.getValueByName(NoRent, "basics.No Rent"))
 	{
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'basics.No Rent'");
 	}
 
 	// Consumable flag
-	if( ! root.getValueByName (Consumable, "basics.Consumable") )
+	if (!root.getValueByName(Consumable, "basics.Consumable"))
 	{
 		nlwarning("<CStaticItem::readGeorges> cannot read the value 'basics.Consumable'");
 	}
 
 	if (Consumable)
 	{
-		if ( ! root.getValueByName (value, "Consumable.EffectPhrase") )
+		if (!root.getValueByName(value, "Consumable.EffectPhrase"))
 		{
 			nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.EffectPhrase'");
 		}
 		else
 		{
-			if ( !value.empty())
+			if (!value.empty())
 			{
-				EffectWhenConsumed = CSheetId( value );
-				if ( EffectWhenConsumed == CSheetId::Unknown )
+				EffectWhenConsumed = CSheetId(value);
+				if (EffectWhenConsumed == CSheetId::Unknown)
 				{
-					nlwarning("<CStaticItem::readGeorges> Given phrase ID '%s' for consumable effect is unknown", value.c_str() );
+					nlwarning("<CStaticItem::readGeorges> Given phrase ID '%s' for consumable effect is unknown", value.c_str());
 				}
 			}
 		}
-		if( ! root.getValueByName (value, "Consumable.EffectEmote") )
+		if (!root.getValueByName(value, "Consumable.EffectEmote"))
 		{
 			nlwarning("<CStaticItem::readGeorges> cannot read the value 'Consumable.EffectEmote'");
 		}
@@ -1653,19 +1629,19 @@ void CStaticItem::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, 
 	}
 
 	// Teleport destination
-	if( Family == ITEMFAMILY::TELEPORT )
+	if (Family == ITEMFAMILY::TELEPORT)
 	{
-		root.getValueByName (Destination, "teleport.SpawnZone");
-		
-		if ( root.getValueByName (value, "teleport.Type") )
+		root.getValueByName(Destination, "teleport.SpawnZone");
+
+		if (root.getValueByName(value, "teleport.Type"))
 		{
 			TpType = TELEPORT_TYPES::getTpTypeFromString(value);
 		}
-		if( root.getValueByName (value, "teleport.Ecosystem") )
+		if (root.getValueByName(value, "teleport.Ecosystem"))
 		{
-			TpEcosystem = ECOSYSTEM::stringToEcosystem( value );
+			TpEcosystem = ECOSYSTEM::stringToEcosystem(value);
 		}
-		if( !root.getValueByName (ItemPrice, "teleport.Tp Price") )
+		if (!root.getValueByName(ItemPrice, "teleport.Tp Price"))
 		{
 			ItemPrice = 10000;
 		}
@@ -1673,29 +1649,29 @@ void CStaticItem::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, 
 
 	// EquipmentSlots
 	UFormElm *arrayEquipmentSlot = NULL;
-	if( root.getNodeByName( &arrayEquipmentSlot, "basics.EquipmentInfo.EquipmentSlots" ) )
+	if (root.getNodeByName(&arrayEquipmentSlot, "basics.EquipmentInfo.EquipmentSlots"))
 	{
-		if( arrayEquipmentSlot )
+		if (arrayEquipmentSlot)
 		{
 			uint size;
-			nlverify( arrayEquipmentSlot->getArraySize(size) );
-			Slots.resize( size );
-			map< string, uint16 >::iterator it;
+			nlverify(arrayEquipmentSlot->getArraySize(size));
+			Slots.resize(size);
+			map<string, uint16>::iterator it;
 
-			for( uint i = 0; i < size; ++i )
+			for (uint i = 0; i < size; ++i)
 			{
-				arrayEquipmentSlot->getArrayValue( Slots[ i ], i );
-				strupr( Slots[ i ] );
-				
-				if( SLOTTYPE::convertTypeToVisualSlot( SLOTTYPE::stringToSlotType( Slots[ i ] ) ) != SLOTTYPE::HIDDEN_SLOT )
+				arrayEquipmentSlot->getArrayValue(Slots[i], i);
+				strupr(Slots[i]);
+
+				if (SLOTTYPE::convertTypeToVisualSlot(SLOTTYPE::stringToSlotType(Slots[i])) != SLOTTYPE::HIDDEN_SLOT)
 				{
-					if( SLOTTYPE::stringToSlotType( Slots[ i ] ) == SLOTTYPE::LEFT_HAND )
+					if (SLOTTYPE::stringToSlotType(Slots[i]) == SLOTTYPE::LEFT_HAND)
 					{
-						ItemIdSheetToModelNumberLeftHands = (uint16) CVisualSlotManager::getInstance()->sheet2Index( sheetId, SLOTTYPE::convertTypeToVisualSlot( SLOTTYPE::stringToSlotType( Slots[ i ] ) ) );
+						ItemIdSheetToModelNumberLeftHands = (uint16)CVisualSlotManager::getInstance()->sheet2Index(sheetId, SLOTTYPE::convertTypeToVisualSlot(SLOTTYPE::stringToSlotType(Slots[i])));
 					}
 					else
-					{	
-						ItemIdSheetToModelNumber = (uint16) CVisualSlotManager::getInstance()->sheet2Index( sheetId, SLOTTYPE::convertTypeToVisualSlot( SLOTTYPE::stringToSlotType( Slots[ i ] ) ) );
+					{
+						ItemIdSheetToModelNumber = (uint16)CVisualSlotManager::getInstance()->sheet2Index(sheetId, SLOTTYPE::convertTypeToVisualSlot(SLOTTYPE::stringToSlotType(Slots[i])));
 					}
 				}
 			}
@@ -1703,198 +1679,197 @@ void CStaticItem::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, 
 	}
 	else
 	{
-		nlwarning( "<CStaticItem::readGeorges> can get the value 'basics.EquipmentInfo.EquipmentSlots' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get the value 'basics.EquipmentInfo.EquipmentSlots' in sheet %s", sheetId.toString().c_str());
 	}
 
 	// Malus for wearing equipment
-	if( ! root.getValueByName( WearEquipmentMalus, "basics.EquipmentInfo.WearEquipmentMalus" ) )
+	if (!root.getValueByName(WearEquipmentMalus, "basics.EquipmentInfo.WearEquipmentMalus"))
 	{
-		nlwarning("<CStaticItem::readGeorges> can get value 'basics.EquipmentInfo.WearEquipmentMalus' in sheet %s", sheetId.toString().c_str() );
+		nlwarning("<CStaticItem::readGeorges> can get value 'basics.EquipmentInfo.WearEquipmentMalus' in sheet %s", sheetId.toString().c_str());
 	}
 
 	// ********************* Bag *********************
 	// max weight (for animal because player have specific rules)
 	// max bulk
 	float f = 0.0;
-	if( ! root.getValueByName (f, "bag.weight_max") )
+	if (!root.getValueByName(f, "bag.weight_max"))
 	{
 		nlwarning("<CStaticItem::readGeorges> can get the value 'bag.weight_max'");
 	}
 	WeightMax = (uint32)(f * 1000);
-	
-	if( ! root.getValueByName (f, "bag.bulk_max") )
+
+	if (!root.getValueByName(f, "bag.bulk_max"))
 	{
 		nlwarning("<CStaticItem::readGeorges> can get the value 'bag.bulk_max'");
 	}
 	BulkMax = (uint32)(f * 1000);
 
 	// slot count
-	if( ! root.getValueByName (SlotCount, "bag.slot_count") )
+	if (!root.getValueByName(SlotCount, "bag.slot_count"))
 	{
 		nlwarning("<CStaticItem::readGeorges> can get the value 'bag.slot_count'");
 	}
 
 	// ********************* requirements *********************
-	if ( root.getValueByName( value, "basics.RequiredSkill" ) )
+	if (root.getValueByName(value, "basics.RequiredSkill"))
 	{
 		RequiredSkill = SKILLS::toSkill(value);
-		root.getValueByName( MinRequiredSkillLevel, "basics.MinRequiredSkillLevel" );
-		root.getValueByName( RequiredSkillQualityFactor, "basics.RequiredSkillQualityFactor" );
-		root.getValueByName( RequiredSkillQualityOffset, "basics.RequiredSkillQualityOffset" );
+		root.getValueByName(MinRequiredSkillLevel, "basics.MinRequiredSkillLevel");
+		root.getValueByName(RequiredSkillQualityFactor, "basics.RequiredSkillQualityFactor");
+		root.getValueByName(RequiredSkillQualityOffset, "basics.RequiredSkillQualityOffset");
 	}
-	
-	if ( root.getValueByName( value, "basics.RequiredSkill2" ) )
+
+	if (root.getValueByName(value, "basics.RequiredSkill2"))
 	{
 		RequiredSkill2 = SKILLS::toSkill(value);
-		root.getValueByName( MinRequiredSkillLevel2, "basics.MinRequiredSkillLevel2" );
-		root.getValueByName( RequiredSkillQualityFactor2, "basics.RequiredSkillQualityFactor2" );
-		root.getValueByName( RequiredSkillQualityOffset2, "basics.RequiredSkillQualityOffset2" );
+		root.getValueByName(MinRequiredSkillLevel2, "basics.MinRequiredSkillLevel2");
+		root.getValueByName(RequiredSkillQualityFactor2, "basics.RequiredSkillQualityFactor2");
+		root.getValueByName(RequiredSkillQualityOffset2, "basics.RequiredSkillQualityOffset2");
 	}
-	
-	if ( root.getValueByName( value, "basics.RequiredCharac" ) )
+
+	if (root.getValueByName(value, "basics.RequiredCharac"))
 	{
 		RequiredCharac = CHARACTERISTICS::toCharacteristic(value);
-		root.getValueByName( MinRequiredCharacLevel, "basics.MinRequiredCharacLevel" );
-		root.getValueByName( RequiredCharacQualityFactor, "basics.RequiredCharacQualityFactor" );
-		root.getValueByName( RequiredCharacQualityOffset, "basics.RequiredCharacQualityOffset" );
+		root.getValueByName(MinRequiredCharacLevel, "basics.MinRequiredCharacLevel");
+		root.getValueByName(RequiredCharacQualityFactor, "basics.RequiredCharacQualityFactor");
+		root.getValueByName(RequiredCharacQualityOffset, "basics.RequiredCharacQualityOffset");
 	}
 
 	// ********************* specific skill bonus *********************
-	if ( root.getValueByName( value, "basics.Type 1" ) )
+	if (root.getValueByName(value, "basics.Type 1"))
 	{
 		CTypeSkillMod raceMod;
 		raceMod.Type = EGSPD::CClassificationType::fromString(value);
-		if ( raceMod.Type != EGSPD::CClassificationType::Unknown )
+		if (raceMod.Type != EGSPD::CClassificationType::Unknown)
 		{
-			root.getValueByName( raceMod.Modifier, "basics.VS Type skill modifier 1" );
+			root.getValueByName(raceMod.Modifier, "basics.VS Type skill modifier 1");
 			TypeSkillMods.push_back(raceMod);
 		}
 	}
-		
-	loadItemSpecialEffects( root, this, sheetId );
-	
-// load specific elements according to the family type
-	switch ( Family )
+
+	loadItemSpecialEffects(root, this, sheetId);
+
+	// load specific elements according to the family type
+	switch (Family)
 	{
 	case ITEMFAMILY::MELEE_WEAPON:
 		MeleeWeapon = new SMeleeWeapon();
-		loadMeleeWeapon( root, this, sheetId );
+		loadMeleeWeapon(root, this, sheetId);
 		break;
-		
+
 	case ITEMFAMILY::RANGE_WEAPON:
 		RangeWeapon = new SRangeWeapon();
-		loadRangeWeapon( root, this, sheetId );
+		loadRangeWeapon(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::AMMO:
 		Ammo = new SAmmo();
-		loadAmmo( root, this, sheetId );
+		loadAmmo(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::SHIELD:
 		Shield = new SShield();
-		loadShield( root, this, sheetId );
+		loadShield(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::ARMOR:
 		Armor = new SArmor();
-		loadArmor( root, this, sheetId );
+		loadArmor(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::HARVEST_TOOL:
-		loadHarvestTool( root, this, sheetId );
+		loadHarvestTool(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::CRAFTING_TOOL:
-		loadFaberTool( root, this, sheetId );
+		loadFaberTool(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::TAMING_TOOL:
-		loadTamingTool( root, this, sheetId );
+		loadTamingTool(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::JEWELRY:
 		break;
 
 	case ITEMFAMILY::RAW_MATERIAL:
-		loadRawMaterial( root, this, sheetId );
+		loadRawMaterial(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::PET_ANIMAL_TICKET:
-		loadPet( root, this, sheetId );
+		loadPet(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::FOOD:
-		loadFood( root, this, sheetId );
+		loadFood(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::GUILD_OPTION:
-		loadGuildOption(root,this,sheetId);
+		loadGuildOption(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::COSMETIC:
-		loadCosmetics(root,this,sheetId);
+		loadCosmetics(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::SERVICE:
-		loadItemService(root,this,sheetId);
+		loadItemService(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::CONSUMABLE:
-		loadConsumable(root,this,sheetId);
+		loadConsumable(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::XP_CATALYSER:
-		loadXpCatalyser(root,this,sheetId);
+		loadXpCatalyser(root, this, sheetId);
 		break;
 
 	case ITEMFAMILY::COMMAND_TICKET:
-		loadCommandTicket(root,this,sheetId);
+		loadCommandTicket(root, this, sheetId);
 		break;
-		
+
 	default:
-		//nlwarning("<CStaticItem::readGeorges> for item %s, the family type %s is not managed by this loader", Name.c_str(), family.c_str() );
+		// nlwarning("<CStaticItem::readGeorges> for item %s, the family type %s is not managed by this loader", Name.c_str(), family.c_str() );
 		break;
 	};
 } // readGeorges //
 
-
 /*
  * Init the 'group <--> string' mapping (static)
  */
-void CMP::loadGroups( const char *definitionFile )
+void CMP::loadGroups(const char *definitionFile)
 {
 	UFormLoader *formLoader = UFormLoader::createLoader();
 	NLMISC::CSmartPtr<UType> formType;
-	formType = formLoader->loadFormType( definitionFile );
-	if ( ! formType )
-		nlerror( "Can't load %s", definitionFile );
-	
+	formType = formLoader->loadFormType(definitionFile);
+	if (!formType)
+		nlerror("Can't load %s", definitionFile);
+
 	// Browse .typ file. The names are the labels, the unique numbers are the values (not the definition indices)
 	string label, value;
 	uint nb = formType->getNumDefinition();
-	for ( uint i=0; i!=nb; ++i )
+	for (uint i = 0; i != nb; ++i)
 	{
-		formType->getDefinition( i, label, value );
+		formType->getDefinition(i, label, value);
 		uint groupId;
 		NLMISC::fromString(value, groupId);
 
 		// Set group -> name
-		if ( groupId > 100000 )
-			nlerror( "Invalid value %s in %s", value.c_str(), definitionFile );
-		if ( _RMGroupNames.size() <= groupId )
-			_RMGroupNames.resize( groupId + 1 );
-		if ( ! _RMGroupNames[groupId].empty() )
-			nlerror( "Multiple value %s found in %s", value.c_str(), definitionFile );
+		if (groupId > 100000)
+			nlerror("Invalid value %s in %s", value.c_str(), definitionFile);
+		if (_RMGroupNames.size() <= groupId)
+			_RMGroupNames.resize(groupId + 1);
+		if (!_RMGroupNames[groupId].empty())
+			nlerror("Multiple value %s found in %s", value.c_str(), definitionFile);
 		_RMGroupNames[groupId] = label;
 
 		// Set name -> group
-		CRmGroupByName::const_iterator ig = _RMGroupsByName.find( label );
-		if ( ig != _RMGroupsByName.end() )
-			nlerror( "Multiple label %s found in %s", label.c_str(), definitionFile );
-		_RMGroupsByName.insert( make_pair( label, groupId ) );
+		CRmGroupByName::const_iterator ig = _RMGroupsByName.find(label);
+		if (ig != _RMGroupsByName.end())
+			nlerror("Multiple label %s found in %s", label.c_str(), definitionFile);
+		_RMGroupsByName.insert(make_pair(label, groupId));
 	}
-	UFormLoader::releaseLoader( formLoader );
+	UFormLoader::releaseLoader(formLoader);
 }
 
 // ***************************************************************************
@@ -1904,17 +1879,17 @@ void CStaticItem::reloadSheet(const CStaticItem &o)
 	clearPtrs(true);
 
 	// copy everything including pointers
-	*this= o;
+	*this = o;
 
 	// set ptrs to NULL, to avoid destruct in dtor
-	const_cast<CStaticItem&>(o).clearPtrs(false);
+	const_cast<CStaticItem &>(o).clearPtrs(false);
 }
 
 #ifndef NO_EGS_VARS
 // ***************************************************************************
 float CStaticItem::getBaseWeight() const
 {
-	switch( Type )
+	switch (Type)
 	{
 		// melee weapons
 	case ITEM_TYPE::DAGGER:
@@ -1939,7 +1914,7 @@ float CStaticItem::getBaseWeight() const
 		return CWeaponCraftParameters::PikeWeight;
 	case ITEM_TYPE::TWO_HAND_MACE:
 		return CWeaponCraftParameters::TwoHandMaceWeight;
-	
+
 	// range weapon
 	case ITEM_TYPE::AUTOLAUCH:
 		return CWeaponCraftParameters::AutolauchWeight;
@@ -1953,7 +1928,7 @@ float CStaticItem::getBaseWeight() const
 		return CWeaponCraftParameters::BowpistolWeight;
 	case ITEM_TYPE::RIFLE:
 		return CWeaponCraftParameters::RifleWeight;
-	
+
 	// ammo
 	case ITEM_TYPE::AUTOLAUNCH_AMMO:
 		return CWeaponCraftParameters::AutolaunchAmmoWeight;
@@ -1967,7 +1942,7 @@ float CStaticItem::getBaseWeight() const
 		return CWeaponCraftParameters::BowpistolAmmoWeight;
 	case ITEM_TYPE::RIFLE_AMMO:
 		return CWeaponCraftParameters::RifleAmmoWeight;
-	
+
 	// armor and shield
 	case ITEM_TYPE::SHIELD:
 		return CWeaponCraftParameters::ShieldWeight;
@@ -2005,7 +1980,7 @@ float CStaticItem::getBaseWeight() const
 		return CWeaponCraftParameters::HeavyVestWeight;
 	case ITEM_TYPE::HEAVY_HELMET:
 		return CWeaponCraftParameters::HeavyHelmetWeight;
-	
+
 	// jewel
 	case ITEM_TYPE::ANKLET:
 		return CWeaponCraftParameters::AnkletWeight;
@@ -2024,7 +1999,6 @@ float CStaticItem::getBaseWeight() const
 	}
 }
 #endif
-
 
 uint32 CStaticItem::getMaxStackSize() const
 {

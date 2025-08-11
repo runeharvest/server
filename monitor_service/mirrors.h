@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_CMS_MIRRORS_H
 #define RY_CMS_MIRRORS_H
 
@@ -23,21 +21,20 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/entity_id.h"
 #include "nel/misc/sheet_id.h"
-//#include "game_share/property_manager_template.h"
+// #include "game_share/property_manager_template.h"
 #include "game_share/mode_and_behaviour.h"
 #include "game_share/mirror.h"
 #include "game_share/mirror_prop_value.h"
 #include "game_share/ryzom_mirror_properties.h"
 #include "game_share/player_visual_properties.h"
 
-
 class CMirrors
 {
 public:
 	// singleton initialisation and release
-	static void		init( void (*cbUpdate)(), void (*cbSync)() = NULL );
-	static void		release();
-	static void		processMirrorUpdates();
+	static void init(void (*cbUpdate)(), void (*cbSync)() = NULL);
+	static void release();
+	static void processMirrorUpdates();
 	/*static void		initMirror();
 
 	static TDataSetRow			createEntity( const NLMISC::CEntityId& entityId );
@@ -66,7 +63,7 @@ public:
 	static void					setMode( const TDataSetRow& entityIndex, MBEHAV::EMode mode );
 	static void					setBehaviour( const TDataSetRow& entityIndex, MBEHAV::EBehaviour b );
 	static void					setTarget( const TDataSetRow& entityIndex, const TDataSetRow& target);
-	
+
 	static void					setVPA( const TDataSetRow& entityIndex, const SAltLookProp &prop );
 
 	static uint32				currentHitPoints( const TDataSetRow& entityIndex );
@@ -74,20 +71,20 @@ public:
 	static uint32				bestRoleLevel( const TDataSetRow& entityIndex );
 	static uint8				combatState( const TDataSetRow& entityIndex );
 	static uint16				actionFlags( const TDataSetRow& entityIndex );*/
-	
+
 private:
 	// this is a singleton so prohibit instance construction
 	CMirrors();
 
 public:
-	static CMirror			Mirror;
-	static CMirroredDataSet	*DataSet;
+	static CMirror Mirror;
+	static CMirroredDataSet *DataSet;
 };
 
 class CGlobalEntityEntry
 {
 public:
-	CGlobalEntityEntry ()
+	CGlobalEntityEntry()
 	{
 		Flags = 0;
 	}
@@ -99,9 +96,8 @@ public:
 	uint8 Flags;
 };
 
-extern std::vector<CGlobalEntityEntry>	GlobalEntites;
+extern std::vector<CGlobalEntityEntry> GlobalEntites;
 
 #define TheDataset (*CMirrors::DataSet)
-
 
 #endif // RY_CMS_MIRRORS_H

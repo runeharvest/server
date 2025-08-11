@@ -25,7 +25,7 @@
 #include "player_manager/character.h"
 #include "zone_manager.h"
 
-CGmTpPendingCommand * CGmTpPendingCommand::_Instance = 0;
+CGmTpPendingCommand *CGmTpPendingCommand::_Instance = 0;
 
 using namespace std;
 using namespace NLMISC;
@@ -39,9 +39,9 @@ CGmTpPendingCommand::CGmTpPendingCommand()
 	CIFile f;
 	string fileName = Bsi.getLocalPath() + toString("gm_pending_tp.bin");
 	bool open = f.open(fileName);
-	if( open )
+	if (open)
 	{
-		f.serialCont( _CharacterTpPending );
+		f.serialCont(_CharacterTpPending);
 	}
 	f.close();
 }
@@ -53,9 +53,9 @@ CGmTpPendingCommand::~CGmTpPendingCommand()
 }
 
 //-----------------------------------------------------------------------------
-CGmTpPendingCommand * CGmTpPendingCommand::getInstance()
-{ 
-	if( _Instance == 0 )
+CGmTpPendingCommand *CGmTpPendingCommand::getInstance()
+{
+	if (_Instance == 0)
 	{
 		_Instance = new CGmTpPendingCommand();
 	}
@@ -67,33 +67,33 @@ void CGmTpPendingCommand::saveMap()
 {
 	CMemStream stream;
 	string fileName = toString("gm_pending_tp.bin");
-	
-	stream.serialCont( _CharacterTpPending );
 
-	CBackupMsgSaveFile msg( fileName, CBackupMsgSaveFile::SaveFile, Bsi );
-	msg.DataMsg.serialBuffer((uint8*)stream.buffer(), stream.size());
-	Bsi.sendFile( msg );
+	stream.serialCont(_CharacterTpPending);
+
+	CBackupMsgSaveFile msg(fileName, CBackupMsgSaveFile::SaveFile, Bsi);
+	msg.DataMsg.serialBuffer((uint8 *)stream.buffer(), stream.size());
+	Bsi.sendFile(msg);
 }
 
 //-----------------------------------------------------------------------------
-bool CGmTpPendingCommand::getTpPendingforCharacter( const std::string& CharacterName, COfflineEntityState& state, CCharacter& character )
+bool CGmTpPendingCommand::getTpPendingforCharacter(const std::string &CharacterName, COfflineEntityState &state, CCharacter &character)
 {
-	TCharacterTpPending::iterator it = _CharacterTpPending.find( CharacterName );
-	if( it == _CharacterTpPending.end() )
+	TCharacterTpPending::iterator it = _CharacterTpPending.find(CharacterName);
+	if (it == _CharacterTpPending.end())
 	{
 		return false;
 	}
 	else
 	{
 		state = (*it).second;
-		_CharacterTpPending.erase( it );
+		_CharacterTpPending.erase(it);
 		saveMap();
-		if( character.getCurrentContinent() == CONTINENT::NEWBIELAND )
+		if (character.getCurrentContinent() == CONTINENT::NEWBIELAND)
 		{
-			CContinent * cont = CZoneManager::getInstance().getContinent(state.X, state.Y);
-			if(cont == 0)
+			CContinent *cont = CZoneManager::getInstance().getContinent(state.X, state.Y);
+			if (cont == 0)
 				return false;
-			if((CONTINENT::TContinent)cont->getId() != CONTINENT::NEWBIELAND )
+			if ((CONTINENT::TContinent)cont->getId() != CONTINENT::NEWBIELAND)
 				return false;
 		}
 		return true;
@@ -101,12 +101,12 @@ bool CGmTpPendingCommand::getTpPendingforCharacter( const std::string& Character
 }
 
 //-----------------------------------------------------------------------------
-void CGmTpPendingCommand::addTpPendingforCharacter( const std::string& CharacterName, const COfflineEntityState& state )
+void CGmTpPendingCommand::addTpPendingforCharacter(const std::string &CharacterName, const COfflineEntityState &state)
 {
-	TCharacterTpPending::iterator it = _CharacterTpPending.find( CharacterName );
-	if( it == _CharacterTpPending.end() )
+	TCharacterTpPending::iterator it = _CharacterTpPending.find(CharacterName);
+	if (it == _CharacterTpPending.end())
 	{
-		_CharacterTpPending.insert( make_pair( CharacterName, state ) );
+		_CharacterTpPending.insert(make_pair(CharacterName, state));
 	}
 	else
 	{

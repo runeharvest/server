@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 
 #include "variables.h"
@@ -27,11 +26,10 @@
 using namespace std;
 using namespace NLMISC;
 
-uint32			NumEntities			= 0;
-uint32			NumPlayers			= 0;
-bool			Verbose				= false;
-bool			CheckPlayerSpeed	= true;
-
+uint32 NumEntities = 0;
+uint32 NumPlayers = 0;
+bool Verbose = false;
+bool CheckPlayerSpeed = true;
 
 //
 NLMISC_VARIABLE(uint32, NumEntities, "Number of entities currently on service");
@@ -45,11 +43,10 @@ NLMISC_VARIABLE(bool, Verbose, "Allow display of verbose info");
 //
 NLMISC_VARIABLE(bool, CheckPlayerSpeed, "Allow checking player speed -- debug only!");
 
-
 //
 NLMISC_DYNVARIABLE(string, Watch0, "Display of entity 0")
 {
-	static NLMISC::CEntityId	id;
+	static NLMISC::CEntityId id;
 	if (get)
 	{
 		if (id != NLMISC::CEntityId::Unknown)
@@ -64,7 +61,7 @@ NLMISC_DYNVARIABLE(string, Watch0, "Display of entity 0")
 //
 NLMISC_DYNVARIABLE(string, Watch1, "Display of entity 1")
 {
-	static NLMISC::CEntityId	id;
+	static NLMISC::CEntityId id;
 	if (get)
 	{
 		if (id != NLMISC::CEntityId::Unknown)

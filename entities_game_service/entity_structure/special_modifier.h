@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_SPECIAL_MODIFIER_H
 #define RY_SPECIAL_MODIFIER_H
 
@@ -29,7 +27,7 @@ struct CSpecialModifiers
 {
 	enum ESpecialModifiers
 	{
-//		global_skill_modifier = 0,
+		//		global_skill_modifier = 0,
 		speed_variation_modifier,
 		melee_attack_modifier_on_self,
 		melee_attack_modifier_on_enemy,
@@ -60,66 +58,65 @@ struct CSpecialModifiers
 	};
 
 	/// variation of enemy's chance to hit (Melee) (-10 = -10% (ie, base chance = 90%-> final chance =81%) )
-	sint32	MeleeAttackModifierOnEnemy;
+	sint32 MeleeAttackModifierOnEnemy;
 	/// variation of entity chance to hit (Melee)
-	sint32	MeleeAttackModifierOnSelf;
+	sint32 MeleeAttackModifierOnSelf;
 	/// variation of entity casting chance
-	sint32	MagicCastingModifierOnSelf;
+	sint32 MagicCastingModifierOnSelf;
 	/// variation of entity's enemies casting chance
-	sint32	MagicCastingModifierOnEnemy;
+	sint32 MagicCastingModifierOnEnemy;
 	/// variation of enemy's chance to hit (Range) (-10 = -10% (ie, base chance = 90%-> final chance =81%) )
-	sint32	RangeAttackModifierOnEnemy;
+	sint32 RangeAttackModifierOnEnemy;
 	/// variation of entity chance to hit (Range)
-	sint32	RangeAttackModifierOnSelf;
+	sint32 RangeAttackModifierOnSelf;
 	/// variation of entity chance to hit (Range)
-	sint32	AttackModifierOnSelf;
+	sint32 AttackModifierOnSelf;
 
 	/// chance to fail magic/combat/faber sentences because of negative effects
-	sint32	ChanceToFailStrategy;
-	sint32	ChanceToFailSpell;
-	sint32	ChanceToFailFaber;
-	sint32	ChanceToFailHarvest;
-	sint32	ChanceToFailTracking;
-	
+	sint32 ChanceToFailStrategy;
+	sint32 ChanceToFailSpell;
+	sint32 ChanceToFailFaber;
+	sint32 ChanceToFailHarvest;
+	sint32 ChanceToFailTracking;
+
 	/// increase melee attack latency
-	sint32	MeleeAttackSlow;
+	sint32 MeleeAttackSlow;
 
 	/// reduce Slashing damage in melee
-	sint32	MeleeSlashingDamageArmor;
+	sint32 MeleeSlashingDamageArmor;
 	/// reduce Blunt damage in melee
-	sint32	MeleeBluntDamageArmor;
+	sint32 MeleeBluntDamageArmor;
 	/// reduce Piercing damage in melee
-	sint32	MeleePiercingDamageArmor;
+	sint32 MeleePiercingDamageArmor;
 
 	/// Melee Damage modifier factor : all melee damage done by this entity are modified by this factor
-	sint32	MeleeDamageModifierFactor;
+	sint32 MeleeDamageModifierFactor;
 	/// Melee Damage modifier factor : all melee damage done by this entity are modified by this factor
-	sint32	RangeDamageModifierFactor;
+	sint32 RangeDamageModifierFactor;
 
 	//\name modifiers on damage received by this entity
 	//@{
 	/// damage given by creatures in melee combat
-	sint32	CreatureMeleeTakenDamageFactor;	
+	sint32 CreatureMeleeTakenDamageFactor;
 	/// damage given by creatures in range combat
-	sint32	CreatureRangeTakenDamageFactor;	
+	sint32 CreatureRangeTakenDamageFactor;
 	//}@
 	// multiplier on combat brick latency
-	sint32	CombatBrickLatencyMultiplier;
+	sint32 CombatBrickLatencyMultiplier;
 	// multiplier on magic brick latency
-	sint32	MagicBrickLatencyMultiplier;
+	sint32 MagicBrickLatencyMultiplier;
 	// buff on the quality of the armor
-	sint32	ArmorQualityModifier;
+	sint32 ArmorQualityModifier;
 	// buff on the quality of the armor
-	sint32	WeaponQualityModifier;
+	sint32 WeaponQualityModifier;
 	// multiplier on armor absorbtion
-	sint32	ArmorAbsorbtionMultiplier;
+	sint32 ArmorAbsorbtionMultiplier;
 
 	/**
 	 *	Default constructor
 	 */
 	CSpecialModifiers();
 
-	
 	/**
 	 * Serial
 	 */

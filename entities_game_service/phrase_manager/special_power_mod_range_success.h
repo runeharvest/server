@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_SPECIAL_POWER_MOD_RANGE_SUCCESS_H
 #define RYZOM_SPECIAL_POWER_MOD_RANGE_SUCCESS_H
 
 #include "special_power.h"
-
 
 /**
  * Specialized class for power "ModRangeSuccess"
@@ -32,14 +29,16 @@ class CSpecialPowerModRangeSuccess : public CSpecialPower
 {
 public:
 	/// Default Constructor
-	CSpecialPowerModRangeSuccess() : CSpecialPower()
-	{}
+	CSpecialPowerModRangeSuccess()
+	    : CSpecialPower()
+	{
+	}
 
 	/// Constructor
-	CSpecialPowerModRangeSuccess(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds,  
-		POWERS::TPowerType powerType, float modifier1, float modifier2 )
+	CSpecialPowerModRangeSuccess(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds,
+	    POWERS::TPowerType powerType, float modifier1, float modifier2)
 	{
-		if(TheDataset.isAccessible(actorRowId))
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -47,9 +46,9 @@ public:
 		}
 
 		_Phrase = phrase;
-		
+
 		_DisablePowerTime = 0;
-		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());		
+		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());
 
 		_PowerType = powerType;
 		_Modifier1 = modifier1;
@@ -59,14 +58,13 @@ public:
 	/// apply effects
 	virtual void apply();
 
-
 protected:
-	// score modifier 
+	// score modifier
 	float _Modifier1;
 	float _Modifier2;
 
 	/// Duration in ticks
-	NLMISC::TGameCycle	_Duration;
+	NLMISC::TGameCycle _Duration;
 };
 
 #endif // RYZOM_SPECIAL_POWER_MOD_RANGE_SUCCESS_H

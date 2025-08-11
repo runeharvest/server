@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "nel/misc/command.h"
 #include "nel/misc/variable.h"
 #include "nel/misc/common.h"
@@ -34,20 +32,17 @@
 #include <string>
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
 
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
-
-
-CTickService * TS = NULL;
+CTickService *TS = NULL;
 
 NLNET::TServiceId SlowestService(0);
 NLNET::TServiceId SlowestCandidate(0);
@@ -68,43 +63,43 @@ extern CVariable<sint32> TickSpeedLoop;
 
 static NLMISC::TTime BeginOfTickTime = 0;
 
-CVariable<uint> TickSendingMode( "tick", "TickSendingMode", "0=Continuous 1=StepByStep 2=Fastest", 0,
-	0, true );
+CVariable<uint> TickSendingMode("tick", "TickSendingMode", "0=Continuous 1=StepByStep 2=Fastest", 0,
+    0, true);
 
 /*CVariable<float> WaitForBSThreshold( "tick", "WaitForBSThreshold", "Threshold for BSAckDelay beyond which tick starts to slow down to wait for BS (expressed as a factor of _TickTimeStep)", 1.0f,
-	0, true );
+    0, true );
 */
 
 //-----------------------------------------------
 //	cbRegister
 //
 //-----------------------------------------------
-static void cbRegister(CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId)
+static void cbRegister(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
-	if( serviceId.get() > 255 )
+	if (serviceId.get() > 255)
 	{
-		nlwarning("<cbRegister> Service %s id is too higher than 255 : %d, this service will be not registered",serviceName.c_str(),serviceId.get());
+		nlwarning("<cbRegister> Service %s id is too higher than 255 : %d, this service will be not registered", serviceName.c_str(), serviceId.get());
 		return;
 	}
 
 	bool tocking = true;
 	uint16 threshold = 0;
-	msgin.serial( tocking );
-	msgin.serial( threshold );
-	TS->registerClient( serviceId, tocking, threshold );
+	msgin.serial(tocking);
+	msgin.serial(threshold);
+	TS->registerClient(serviceId, tocking, threshold);
 
-	CMessage msgout( "REGISTERED" );
+	CMessage msgout("REGISTERED");
 	TGameTime gameTime = TS->getGameTime();
 	TGameTime gameTimeStep = TS->getGameTimeStep();
 	TGameCycle gameCycle = TS->getGameCycle();
 
-	msgout.serial( gameTime );
-	msgout.serial( gameTimeStep );
-	msgout.serial( gameCycle );
+	msgout.serial(gameTime);
+	msgout.serial(gameTimeStep);
+	msgout.serial(gameCycle);
 
-	CUnifiedNetwork::getInstance()->send(serviceId,msgout);
+	CUnifiedNetwork::getInstance()->send(serviceId, msgout);
 
-	if( TS->getClientCount() == 1 )
+	if (TS->getClientCount() == 1)
 	{
 		TS->FirstTime = true;
 		BeginOfTickTime = CTime::getLocalTime();
@@ -113,43 +108,38 @@ static void cbRegister(CMessage& msgin, const string &serviceName, NLNET::TServi
 
 } // cbRegister //
 
-
-
 //-----------------------------------------------
 //	cbTock
 //
 //-----------------------------------------------
-static void cbTock(CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId)
+static void cbTock(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
 	// Receive measures of client service
-	TS->MainTimeMeasures.CurrentMirrorMeasures.push_back( CMirrorGameCycleTimeMeasureMS() );
-	CMirrorGameCycleTimeMeasureMS& mm = TS->MainTimeMeasures.CurrentMirrorMeasures.back();
-	msgin.serial( mm );
+	TS->MainTimeMeasures.CurrentMirrorMeasures.push_back(CMirrorGameCycleTimeMeasureMS());
+	CMirrorGameCycleTimeMeasureMS &mm = TS->MainTimeMeasures.CurrentMirrorMeasures.back();
+	msgin.serial(mm);
 	mm.MSId = serviceId;
 
 	// Process Tock
-	//nlinfo( "TOCK rcvd at %.6f", CTime::ticksToSecond( CTime::getPerformanceTime() ) );
-	SlowestCandidate=serviceId;
-	TS->addTock( serviceId );
+	// nlinfo( "TOCK rcvd at %.6f", CTime::ticksToSecond( CTime::getPerformanceTime() ) );
+	SlowestCandidate = serviceId;
+	TS->addTock(serviceId);
 
 } // cbTock //
-
-
-
 
 //-----------------------------------------------
 //	cbHaltTick
 //
 //-----------------------------------------------
-static void cbHaltTick(CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId)
+static void cbHaltTick(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
-	std::string	reason = "<UNKNOWN>";
+	std::string reason = "<UNKNOWN>";
 
 	try
 	{
 		msgin.serial(reason);
 	}
-	catch(const Exception&)
+	catch (const Exception &)
 	{
 	}
 
@@ -163,31 +153,28 @@ static void cbHaltTick(CMessage& msgin, const string &serviceName, NLNET::TServi
 //	cbResumeTick
 //
 //-----------------------------------------------
-static void cbResumeTick(CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId)
+static void cbResumeTick(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
 	TS->resumeTick();
 
 } // cbHaltTick //
 
-
 //-----------------------------------------------
 //	callback table for input message
 //
 //-----------------------------------------------
-TUnifiedCallbackItem CbArray[] =
-{
-	{ "REGISTER",		cbRegister },
-	{ "TOCK",			cbTock },
+TUnifiedCallbackItem CbArray[] = {
+	{ "REGISTER", cbRegister },
+	{ "TOCK", cbTock },
 
-	{ "HALT_TICK",		cbHaltTick },
-	{ "RESUME_TICK",	cbResumeTick },
+	{ "HALT_TICK", cbHaltTick },
+	{ "RESUME_TICK", cbResumeTick },
 };
-
 
 /*
  * halt ticking
  */
-void	CTickService::haltTick(const std::string& reason)
+void CTickService::haltTick(const std::string &reason)
 {
 	if (CurrentMode == TickHalted)
 		return;
@@ -208,7 +195,7 @@ void	CTickService::haltTick(const std::string& reason)
 /*
  * resume ticking
  */
-void	CTickService::resumeTick()
+void CTickService::resumeTick()
 {
 	if (CurrentMode == TickRunning)
 		return;
@@ -228,50 +215,47 @@ void	CTickService::resumeTick()
 	IService::clearCurrentStatus("HALTED");
 }
 
-
-
 //-----------------------------------------------
 //	registerClient
 //
 //-----------------------------------------------
-void CTickService::registerClient( NLNET::TServiceId serviceId, bool tocking, uint16 threshold )
+void CTickService::registerClient(NLNET::TServiceId serviceId, bool tocking, uint16 threshold)
 {
-	if( serviceId.get() < _ClientInfos.size() )
+	if (serviceId.get() < _ClientInfos.size())
 	{
-		if( _ClientInfos[serviceId.get()].Registered == true )
+		if (_ClientInfos[serviceId.get()].Registered == true)
 		{
-			nlerror("<CTickService::registerClient> The service %d is alredy registered",serviceId.get());
+			nlerror("<CTickService::registerClient> The service %d is alredy registered", serviceId.get());
 		}
 
 		_ClientInfos[serviceId.get()].Registered = true;
 		_ClientInfos[serviceId.get()].Tocking = tocking;
 		_ClientInfos[serviceId.get()].Threshold = threshold;
-		_QuickLog.displayNL( "%u: +%hu", getGameCycle(), serviceId.get() );
+		_QuickLog.displayNL("%u: +%hu", getGameCycle(), serviceId.get());
 	}
 	else
 	{
-		nlwarning("<CTickService::registerClient> Service id too high : %d (max is %d)",serviceId.get(),_ClientInfos.size()-1);
+		nlwarning("<CTickService::registerClient> Service id too high : %d (max is %d)", serviceId.get(), _ClientInfos.size() - 1);
 	}
 
 } // registerClient //
-
-
 
 //-----------------------------------------------
 //	addTock
 //
 //-----------------------------------------------
-void CTickService::addTock( NLNET::TServiceId serviceId )
+void CTickService::addTock(NLNET::TServiceId serviceId)
 {
-	time_t t; time( &t );
-	_QuickLog.displayNL( "%s: %u: [<-%hu] TOCK-r", IDisplayer::dateToHumanString(t), getGameCycle(), serviceId.get() );
-	if( serviceId.get() < _ClientInfos.size() )
+	time_t t;
+	time(&t);
+	_QuickLog.displayNL("%s: %u: [<-%hu] TOCK-r", IDisplayer::dateToHumanString(t), getGameCycle(), serviceId.get());
+	if (serviceId.get() < _ClientInfos.size())
 	{
-		if( _ClientInfos[serviceId.get()].Registered )
+		if (_ClientInfos[serviceId.get()].Registered)
 		{
-			if( _ClientInfos[serviceId.get()].TockReceived )
+			if (_ClientInfos[serviceId.get()].TockReceived)
 			{
-				if( _ClientInfos[serviceId.get()].Threshold == 0 )
+				if (_ClientInfos[serviceId.get()].Threshold == 0)
 				{
 					nlwarning("<CTickService::addTock> Tock received more than once despite a threshold null");
 				}
@@ -279,10 +263,10 @@ void CTickService::addTock( NLNET::TServiceId serviceId )
 			else
 			{
 				_ClientInfos[serviceId.get()].TockReceived = true;
-				_QuickLog.displayNL( "%u: [<-%hu] TOCK-p", getGameCycle(), serviceId.get() );
+				_QuickLog.displayNL("%u: [<-%hu] TOCK-p", getGameCycle(), serviceId.get());
 			}
 
-			if( _ClientInfos[serviceId.get()].TockMissingCount > 0 )
+			if (_ClientInfos[serviceId.get()].TockMissingCount > 0)
 			{
 				_ClientInfos[serviceId.get()].TockMissingCount--;
 			}
@@ -293,18 +277,16 @@ void CTickService::addTock( NLNET::TServiceId serviceId )
 		}
 		else
 		{
-			nlwarning("(TICKS)<CTickService::addTock> Tock received from service %d which is not registered",serviceId.get());
+			nlwarning("(TICKS)<CTickService::addTock> Tock received from service %d which is not registered", serviceId.get());
 		}
 		checkTockReceived();
 	}
 	else
 	{
-		nlwarning("<CTickService::addTock> Service id too high : %d (max is %d)", serviceId.get(), _ClientInfos.size()-1);
+		nlwarning("<CTickService::addTock> Service id too high : %d (max is %d)", serviceId.get(), _ClientInfos.size() - 1);
 	}
 
 } // addTock //
-
-
 
 //-----------------------------------------------
 //	checkTockReceived
@@ -318,19 +300,19 @@ void CTickService::checkTockReceived()
 
 	// check if all the tocks have been received (or if missing is less than threshold )
 	uint i;
-	for( i=0; i<_ClientInfos.size(); i++ )
+	for (i = 0; i < _ClientInfos.size(); i++)
 	{
 		// if this client is supposed to send a tock
-		if( _ClientInfos[i].Registered )
+		if (_ClientInfos[i].Registered)
 		{
 			// if tock was not received yet
-			if( _ClientInfos[i].TockReceived == false )
+			if (_ClientInfos[i].TockReceived == false)
 			{
 				// if we have to wait for this client
-				if( _ClientInfos[i].Tocking == true )
+				if (_ClientInfos[i].Tocking == true)
 				{
 					// we check threshold
-					if( _ClientInfos[i].TockMissingCount > _ClientInfos[i].Threshold )
+					if (_ClientInfos[i].TockMissingCount > _ClientInfos[i].Threshold)
 					{
 						return;
 					}
@@ -343,13 +325,12 @@ void CTickService::checkTockReceived()
 	// set the TickSpeedLoop var to the same value
 	TickSpeedLoop = TotalSpeedLoop;
 	MainTimeMeasures.CurrentTickServiceMeasure[PrevTotalTickDuration] = (uint16)TotalSpeedLoop.get();
-	//nlinfo( "End of tick at %.6f", CTime::ticksToSecond( CTime::getPerformanceTime() ) );
-
+	// nlinfo( "End of tick at %.6f", CTime::ticksToSecond( CTime::getPerformanceTime() ) );
 
 	// Step by step mode
-	if( TickSendingMode.get() == StepByStep )
+	if (TickSendingMode.get() == StepByStep)
 	{
-		if( _StepCount > 0 )
+		if (_StepCount > 0)
 		{
 			// broadcast the tick
 			broadcastTick();
@@ -359,13 +340,13 @@ void CTickService::checkTockReceived()
 	// Continuous or fastest mode
 	else
 	{
-		TLocalTime currentTime = ((double)CTime::getLocalTime())/1000.0;
+		TLocalTime currentTime = ((double)CTime::getLocalTime()) / 1000.0;
 
-		SlowestService=SlowestCandidate;
+		SlowestService = SlowestCandidate;
 		SlowestTock = currentTime - _TickSendTime;
 
 		// if it's the first time we send a tick, we init the tick send time
-		if( FirstTime )
+		if (FirstTime)
 		{
 			_TickSendTime = currentTime - _TickTimeStep;
 			_LastTickTimeStep = _TickTimeStep;
@@ -373,61 +354,59 @@ void CTickService::checkTockReceived()
 		}
 
 		// setup the default value for the time step to use
-		NLMISC::TLocalTime effectiveTimeStep= _TickTimeStep;
+		NLMISC::TLocalTime effectiveTimeStep = _TickTimeStep;
 
 		// if the backup service is taking longer than _TickTimeStep to respond, then we need to slow down to a little slower than its pace
-/*		NLMISC::TLocalTime lastBSAckDelay= ((NLMISC::TLocalTime)Bsi.getLastAckDelay())/1000.0;
-		if ((WaitForBSThreshold>=1.0f) && (float)lastBSAckDelay>(float)_TickTimeStep*WaitForBSThreshold)
-		{
-			effectiveTimeStep= lastBSAckDelay+ (lastBSAckDelay-_TickTimeStep)/2;
-		}
-*/
+		/*		NLMISC::TLocalTime lastBSAckDelay= ((NLMISC::TLocalTime)Bsi.getLastAckDelay())/1000.0;
+		        if ((WaitForBSThreshold>=1.0f) && (float)lastBSAckDelay>(float)_TickTimeStep*WaitForBSThreshold)
+		        {
+		            effectiveTimeStep= lastBSAckDelay+ (lastBSAckDelay-_TickTimeStep)/2;
+		        }
+		*/
 		// smooth out BS update rate fluctuations with a simple filter and store away the time step value for next time round
-		effectiveTimeStep= (effectiveTimeStep+3*_LastTickTimeStep)/4;
-		_LastTickTimeStep= effectiveTimeStep;
+		effectiveTimeStep = (effectiveTimeStep + 3 * _LastTickTimeStep) / 4;
+		_LastTickTimeStep = effectiveTimeStep;
 
 		// if we have to wait before sending tick
-		while ( ( currentTime < (_TickSendTime + effectiveTimeStep) ) && ( TickSendingMode.get() != Fastest) )
+		while ((currentTime < (_TickSendTime + effectiveTimeStep)) && (TickSendingMode.get() != Fastest))
 		{
-			if ( currentTime < _TickSendTime )
+			if (currentTime < _TickSendTime)
 			{
-				nlinfo( "Backward time sync detected (about %.1f s)", _TickSendTime - currentTime );
+				nlinfo("Backward time sync detected (about %.1f s)", _TickSendTime - currentTime);
 				_TickSendTime = currentTime;
 			}
 			else
 			{
-				nlSleep( (uint32)((_TickSendTime + effectiveTimeStep - currentTime)*1000.0) );
+				nlSleep((uint32)((_TickSendTime + effectiveTimeStep - currentTime) * 1000.0));
 			}
-			currentTime = ((double)CTime::getLocalTime())/1000.0;
+			currentTime = ((double)CTime::getLocalTime()) / 1000.0;
 		}
 
 		// increment the send time
 		TLocalTime oldTime = _TickSendTime;
-		_TickSendTime = ((double)CTime::getLocalTime())/1000.0;
+		_TickSendTime = ((double)CTime::getLocalTime()) / 1000.0;
 		double dt = _TickSendTime - oldTime;
 
 		// round off the send time to iron out high frequency effects
-		if (_TickSendTime<oldTime+effectiveTimeStep)
-			_TickSendTime=oldTime+effectiveTimeStep;
+		if (_TickSendTime < oldTime + effectiveTimeStep)
+			_TickSendTime = oldTime + effectiveTimeStep;
 
-		if (effectiveTimeStep*1000.0>1.0)
+		if (effectiveTimeStep * 1000.0 > 1.0)
 		{
-			dt = double(uint32(dt*1000.0)/ uint32(effectiveTimeStep*1000.0) * uint32(effectiveTimeStep*1000.0))/1000.0;
+			dt = double(uint32(dt * 1000.0) / uint32(effectiveTimeStep * 1000.0) * uint32(effectiveTimeStep * 1000.0)) / 1000.0;
 			_TickSendTime = oldTime + dt;
 		}
 
-		//nlinfo( " %" NL_I64 "u  %" NL_I64 "u", (TTime)((_TickSendTime-oldTime)*1000), (TTime)((d2-oldTime)*1000) );
+		// nlinfo( " %" NL_I64 "u  %" NL_I64 "u", (TTime)((_TickSendTime-oldTime)*1000), (TTime)((d2-oldTime)*1000) );
 
 		// broadcast the tick
 		broadcastTick();
 
 		// update the tick time step
-		//updateTickTimeStep
+		// updateTickTimeStep
 	}
 
 } // checkTockReceived //
-
-
 
 //-----------------------------------------------
 //	broadcastTick
@@ -435,7 +414,7 @@ void CTickService::checkTockReceived()
 //-----------------------------------------------
 void CTickService::broadcastTick()
 {
-	if ( Pause == true ) return;
+	if (Pause == true) return;
 
 	MainTimeMeasures.beginNewCycle();
 	BeginOfTickTime = CTime::getLocalTime();
@@ -443,35 +422,36 @@ void CTickService::broadcastTick()
 	// increment the game time and cycle
 	_GameTime += _GameTimeStep;
 	_GameCycle++;
-	CTickEventHandler::setGameCycle( _GameCycle ); // to display the good value in the variable
+	CTickEventHandler::setGameCycle(_GameCycle); // to display the good value in the variable
 
 	// we send a tick to every registered client
 	uint i;
-	for( i=0; i<_ClientInfos.size(); i++ )
+	for (i = 0; i < _ClientInfos.size(); i++)
 	{
-		if( _ClientInfos[i].Registered )
+		if (_ClientInfos[i].Registered)
 		{
 			CMessage msgout;
-			if( _GameTimeStepHasChanged )
+			if (_GameTimeStepHasChanged)
 			{
-				msgout.setType( "STEP_TICK" );
-				msgout.serial( _GameTimeStep );
-				_QuickLog.displayNL( "%u: [->%u] STEP_TICK", getGameCycle(), i );
+				msgout.setType("STEP_TICK");
+				msgout.serial(_GameTimeStep);
+				_QuickLog.displayNL("%u: [->%u] STEP_TICK", getGameCycle(), i);
 			}
 			else
 			{
-				msgout.setType( "TICK" );
-				time_t t; time( &t );
-				_QuickLog.displayNL( "%s: %u: [->%u] TICK", IDisplayer::dateToHumanString(t), getGameCycle(), i );
+				msgout.setType("TICK");
+				time_t t;
+				time(&t);
+				_QuickLog.displayNL("%s: %u: [->%u] TICK", IDisplayer::dateToHumanString(t), getGameCycle(), i);
 			}
 
-			CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(i),msgout);
+			CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(i), msgout);
 			TSockId host;
 			CCallbackNetBase *cnb;
-			cnb = CUnifiedNetwork::getInstance()->getNetBase(NLNET::TServiceId(i),host);
-			if( cnb )
+			cnb = CUnifiedNetwork::getInstance()->getNetBase(NLNET::TServiceId(i), host);
+			if (cnb)
 			{
-				cnb->flush( host );
+				cnb->flush(host);
 			}
 			// we are now waiting for a tick from this client
 			_ClientInfos[i].TockReceived = false;
@@ -483,51 +463,45 @@ void CTickService::broadcastTick()
 	CSingletonRegistry::getInstance()->tickUpdate();
 } // broadcastTick //
 
-
-
 //-----------------------------------------------
 //	cbClientDisconnection
 //
 //-----------------------------------------------
-void cbClientDisconnection( const std::string &serviceName, NLNET::TServiceId serviceId, void *arg)
+void cbClientDisconnection(const std::string &serviceName, NLNET::TServiceId serviceId, void *arg)
 {
-	TS->unregisterClient( serviceId );
+	TS->unregisterClient(serviceId);
 	TS->checkTockReceived();
 
 } // cbClientDisconnection //
-
-
 
 //-----------------------------------------------
 //	unregisterClient
 //
 //-----------------------------------------------
-void CTickService::unregisterClient( NLNET::TServiceId serviceId )
+void CTickService::unregisterClient(NLNET::TServiceId serviceId)
 {
-	if( serviceId.get() < _ClientInfos.size() )
+	if (serviceId.get() < _ClientInfos.size())
 	{
-		if ( _ClientInfos[serviceId.get()].Registered )
+		if (_ClientInfos[serviceId.get()].Registered)
 		{
 			_ClientInfos[serviceId.get()].Registered = false;
 			_ClientInfos[serviceId.get()].TockReceived = true;
 			_ClientInfos[serviceId.get()].Tocking = true;
 			_ClientInfos[serviceId.get()].Threshold = 0;
 			_ClientInfos[serviceId.get()].TockMissingCount = 0;
-			_QuickLog.displayNL( "%u: -%hu", getGameCycle(), serviceId.get() );
+			_QuickLog.displayNL("%u: -%hu", getGameCycle(), serviceId.get());
 		}
 		else
 		{
-			nlinfo("<CTickService::unregisterClient> Service %d disconnection detected but this service is not registered : nothing to do",serviceId.get());
+			nlinfo("<CTickService::unregisterClient> Service %d disconnection detected but this service is not registered : nothing to do", serviceId.get());
 		}
 	}
 	else
 	{
-		nlwarning("<CTickService::unregisterClient> Service %d  : service id too big ! (max is %d)",serviceId.get(),_ClientInfos.size()-1);
+		nlwarning("<CTickService::unregisterClient> Service %d  : service id too big ! (max is %d)", serviceId.get(), _ClientInfos.size() - 1);
 	}
 
 } // unregisterClient //
-
-
 
 //-----------------------------------------------
 //	getClientCount
@@ -538,9 +512,9 @@ uint16 CTickService::getClientCount()
 	uint16 clientCount = 0;
 
 	uint i;
-	for( i=0; i<_ClientInfos.size(); i++ )
+	for (i = 0; i < _ClientInfos.size(); i++)
 	{
-		if( _ClientInfos[i].Registered )
+		if (_ClientInfos[i].Registered)
 		{
 			clientCount++;
 		}
@@ -550,38 +524,32 @@ uint16 CTickService::getClientCount()
 
 } // getClientCount //
 
-
-
 //-----------------------------------------------
 //	displayGameTime()
 //
 //-----------------------------------------------
 void CTickService::displayGameTime() const
 {
-	CMessage msgout( "DISPLAY_TIME" );
+	CMessage msgout("DISPLAY_TIME");
 	uint i;
-	for( i=0; i<_ClientInfos.size(); i++ )
+	for (i = 0; i < _ClientInfos.size(); i++)
 	{
-		if( _ClientInfos[i].Registered )
+		if (_ClientInfos[i].Registered)
 		{
-			CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(i),msgout);
+			CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(i), msgout);
 		}
 	}
 
-	nlinfo("(TICKS)<CTickService::displayTime> : Game time in the Tick Service : %f sec (local: %f ms)", (double)_GameTime,(double)CTime::getLocalTime());
+	nlinfo("(TICKS)<CTickService::displayTime> : Game time in the Tick Service : %f sec (local: %f ms)", (double)_GameTime, (double)CTime::getLocalTime());
 
 } // displayGameTime //
-
-
-
-
 
 /*
  * Initialise the service
  */
 void CTickService::init()
 {
-	setVersion (RYZOM_PRODUCT_VERSION);
+	setVersion(RYZOM_PRODUCT_VERSION);
 
 	CurrentMode = TickRunning;
 
@@ -595,12 +563,11 @@ void CTickService::init()
 	// maximum 256 clients can be connected
 	_ClientInfos.resize(256);
 
-
 	try
 	{
 		_GameTime = ConfigFile.getVar("GameTime").asFloat();
 	}
-	catch(const Exception &)
+	catch (const Exception &)
 	{
 		// init the game time
 		_GameTime = 0.0f;
@@ -611,18 +578,18 @@ void CTickService::init()
 		_GameCycle = ConfigFile.getVar("GameCycle").asInt();
 		_SavedGameCycle = _GameCycle;
 	}
-	catch(const Exception &)
+	catch (const Exception &)
 	{
 		// init the game cycle from file
 		loadGameCycle();
 	}
-	CTickEventHandler::setGameCycle( _GameCycle ); // to display the good value in the variable
+	CTickEventHandler::setGameCycle(_GameCycle); // to display the good value in the variable
 
 	try
 	{
 		_TickTimeStep = ConfigFile.getVar("TickTimeStep").asFloat();
 	}
-	catch(const Exception &)
+	catch (const Exception &)
 	{
 		// tick service time step between two ticks
 		_TickTimeStep = 0.1f;
@@ -632,7 +599,7 @@ void CTickService::init()
 	{
 		_GameTimeStep = ConfigFile.getVar("GameTimeStep").asFloat();
 	}
-	catch(const Exception &)
+	catch (const Exception &)
 	{
 		// game time between two ticks
 		_GameTimeStep = 0.1f;
@@ -647,13 +614,12 @@ void CTickService::init()
 
 	CUnifiedNetwork::getInstance()->setServiceDownCallback("*", cbClientDisconnection, NULL);
 
-	RecentHistory.setParam( 20 );
-	_QuickLog.addDisplayer( &RecentHistory, false );
+	RecentHistory.setParam(20);
+	_QuickLog.addDisplayer(&RecentHistory, false);
 
 	_RangeMirrorManager.init();
 
 } // init //
-
 
 /*
  * Release
@@ -661,14 +627,13 @@ void CTickService::init()
 void CTickService::release()
 {
 
-	if ( saveGameCycle() )
+	if (saveGameCycle())
 	{
-//		nlinfo( "Game cycle %u saved to %s", _GameCycle, GAME_CYCLE_FILE.c_str() );
+		//		nlinfo( "Game cycle %u saved to %s", _GameCycle, GAME_CYCLE_FILE.c_str() );
 	}
 
 	CSingletonRegistry::getInstance()->release();
 }
-
 
 /*
  * Update
@@ -679,26 +644,26 @@ bool CTickService::update()
 
 	if (CurrentMode == TickHalted)
 	{
-		WaitingForServices = "TICK HALTED: "+HaltedReason;
+		WaitingForServices = "TICK HALTED: " + HaltedReason;
 	}
 	else
 	{
 		WaitingForServices = "";
 		// check if all the tocks have been received (or if missing is less than threshold )
 		uint i;
-		for( i=0; i<_ClientInfos.size(); i++ )
+		for (i = 0; i < _ClientInfos.size(); i++)
 		{
 			// if this client is supposed to send a tock
-			if( _ClientInfos[i].Registered )
+			if (_ClientInfos[i].Registered)
 			{
 				// if tock was not received yet
-				if( _ClientInfos[i].TockReceived == false )
+				if (_ClientInfos[i].TockReceived == false)
 				{
 					// if we have to wait for this client
-					if( _ClientInfos[i].Tocking == true )
+					if (_ClientInfos[i].Tocking == true)
 					{
 						// we check threshold
-						if( _ClientInfos[i].TockMissingCount > _ClientInfos[i].Threshold )
+						if (_ClientInfos[i].TockMissingCount > _ClientInfos[i].Threshold)
 						{
 							WaitingForServices += toString(i) + " ";
 						}
@@ -710,7 +675,7 @@ bool CTickService::update()
 		// don't saveGameCycle if tick halted
 		// because BS probably sent an error report, and it would be hazardous
 		// to send BS new commands!!
-		if ( _GameCycle > _SavedGameCycle + INTERVAL_FOR_SAVING_GAME_CYCLE )
+		if (_GameCycle > _SavedGameCycle + INTERVAL_FOR_SAVING_GAME_CYCLE)
 		{
 			saveGameCycle();
 		}
@@ -718,7 +683,6 @@ bool CTickService::update()
 
 	return true;
 }
-
 
 /*
  * Save to file
@@ -728,28 +692,28 @@ bool CTickService::saveGameCycle()
 	_SavedGameCycle = _GameCycle; // do it anyway
 	try
 	{
-		CBackupMsgSaveFile msg( GAME_CYCLE_FILE, CBackupMsgSaveFile::SaveFile, Bsi );
-		msg.DataMsg.serialVersion( 0 );
-		msg.DataMsg.serial( _GameCycle );
+		CBackupMsgSaveFile msg(GAME_CYCLE_FILE, CBackupMsgSaveFile::SaveFile, Bsi);
+		msg.DataMsg.serialVersion(0);
+		msg.DataMsg.serial(_GameCycle);
 		Bsi.sendFile(msg);
 
-/*
-		COFile file;
-		if ( file.open( SaveShardRoot.get() + IService::getInstance()->SaveFilesDirectory.toString() + GAME_CYCLE_FILE ) )
-		{
-			file.serialVersion( 0 );
-			file.serial( _GameCycle );
-			file.close();
-		}
-		else
-			throw EFileNotOpened( SaveShardRoot.get() + IService::getInstance()->SaveFilesDirectory.toString() + GAME_CYCLE_FILE );
-		return true;
-*/
+		/*
+		        COFile file;
+		        if ( file.open( SaveShardRoot.get() + IService::getInstance()->SaveFilesDirectory.toString() + GAME_CYCLE_FILE ) )
+		        {
+		            file.serialVersion( 0 );
+		            file.serial( _GameCycle );
+		            file.close();
+		        }
+		        else
+		            throw EFileNotOpened( SaveShardRoot.get() + IService::getInstance()->SaveFilesDirectory.toString() + GAME_CYCLE_FILE );
+		        return true;
+		*/
 		return true;
 	}
 	catch (const Exception &e)
 	{
-		nlwarning( "Can't save game cycle: %s", e.what() );
+		nlwarning("Can't save game cycle: %s", e.what());
 		return false;
 	}
 }
@@ -758,23 +722,22 @@ struct TTickFileCallback : public IBackupFileReceiveCallback
 {
 	CTickService *TickService;
 	TTickFileCallback(CTickService *tickService)
-		: TickService(tickService)
+	    : TickService(tickService)
 	{
 	}
 
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream)
 	{
 		TickService->tickFileCallback(fileDescription, dataStream);
 	}
-
 };
 
-void CTickService::tickFileCallback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+void CTickService::tickFileCallback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream)
 {
 	if (!fileDescription.FileName.empty())
 	{
-		dataStream.serialVersion( 0 );
-		dataStream.serial( _GameCycle );
+		dataStream.serialVersion(0);
+		dataStream.serial(_GameCycle);
 		_SavedGameCycle = _GameCycle;
 	}
 	else
@@ -795,65 +758,64 @@ bool CTickService::loadGameCycle()
 
 	return true;
 
-//	try
-//	{
-//		CIFile file;
-//		if ( file.open( Bsi.getLocalPath() + GAME_CYCLE_FILE ) )
-//		{
-//			file.serialVersion( 0 );
-//			file.serial( _GameCycle );
-//			file.close();
-//			_SavedGameCycle = _GameCycle;
-//		}
-//		else
-//			throw EFileNotOpened( Bsi.getLocalPath() + GAME_CYCLE_FILE );
-//		nlinfo( "Loaded game cycle %u from %s, will be saved every %u game cycles", _GameCycle, (CPath::standardizePath(IService::getInstance()->SaveFilesDirectory.toString()) + GAME_CYCLE_FILE).c_str(), INTERVAL_FOR_SAVING_GAME_CYCLE );
-//		return true;
-//	}
-//	catch (const Exception &e)
-//	{
-//		nlwarning( "Can't load game cycle: %s", e.what() );
-//		_GameCycle = 0;
-//		_SavedGameCycle = _GameCycle;
-//		return false;
-//	}
+	//	try
+	//	{
+	//		CIFile file;
+	//		if ( file.open( Bsi.getLocalPath() + GAME_CYCLE_FILE ) )
+	//		{
+	//			file.serialVersion( 0 );
+	//			file.serial( _GameCycle );
+	//			file.close();
+	//			_SavedGameCycle = _GameCycle;
+	//		}
+	//		else
+	//			throw EFileNotOpened( Bsi.getLocalPath() + GAME_CYCLE_FILE );
+	//		nlinfo( "Loaded game cycle %u from %s, will be saved every %u game cycles", _GameCycle, (CPath::standardizePath(IService::getInstance()->SaveFilesDirectory.toString()) + GAME_CYCLE_FILE).c_str(), INTERVAL_FOR_SAVING_GAME_CYCLE );
+	//		return true;
+	//	}
+	//	catch (const Exception &e)
+	//	{
+	//		nlwarning( "Can't load game cycle: %s", e.what() );
+	//		_GameCycle = 0;
+	//		_SavedGameCycle = _GameCycle;
+	//		return false;
+	//	}
 }
-
 
 /*
  *
  */
-CTickServiceGameCycleTimeMeasure::CTickServiceGameCycleTimeMeasure() : HistoryMain( CTickService::getInstance()->getServiceId(), NLNET::TServiceId(std::numeric_limits<uint16>::max()), false ) {}
-
+CTickServiceGameCycleTimeMeasure::CTickServiceGameCycleTimeMeasure()
+    : HistoryMain(CTickService::getInstance()->getServiceId(), NLNET::TServiceId(std::numeric_limits<uint16>::max()), false)
+{
+}
 
 /*
  *
  */
 void CTickServiceGameCycleTimeMeasure::beginNewCycle()
 {
-	if ( ! CurrentMirrorMeasures.empty() )
+	if (!CurrentMirrorMeasures.empty())
 	{
 		// Update stats
-		for ( TMirrorMeasures::const_iterator imm=CurrentMirrorMeasures.begin(); imm!=CurrentMirrorMeasures.end(); ++imm )
+		for (TMirrorMeasures::const_iterator imm = CurrentMirrorMeasures.begin(); imm != CurrentMirrorMeasures.end(); ++imm)
 		{
-			storeMeasureToHistory( HistoryByMirror, imm->MirrorMeasure, imm->MSId, TServiceId(0) );
+			storeMeasureToHistory(HistoryByMirror, imm->MirrorMeasure, imm->MSId, TServiceId(0));
 
-			for ( std::vector<CServiceGameCycleTimeMeasure>::const_iterator ism=(*imm).ServiceMeasures.begin(); ism!=(*imm).ServiceMeasures.end(); ++ism )
+			for (std::vector<CServiceGameCycleTimeMeasure>::const_iterator ism = (*imm).ServiceMeasures.begin(); ism != (*imm).ServiceMeasures.end(); ++ism)
 			{
-				storeMeasureToHistory( HistoryByService, (*ism).ServiceMeasure, (*ism).ClientServiceId, (*imm).MSId );
+				storeMeasureToHistory(HistoryByService, (*ism).ServiceMeasure, (*ism).ClientServiceId, (*imm).MSId);
 			}
 		}
 
-		//nlinfo( "AV: C=%hu H=%hu", CurrentTickServiceMeasure[0], HistoryMain.Stats[MHTMax][0] );
-		HistoryMain.updateStats( CurrentTickServiceMeasure );
-		//nlinfo( "AP: C=%hu H=%hu", CurrentTickServiceMeasure[0], HistoryMain.Stats[MHTMax][0] );
+		// nlinfo( "AV: C=%hu H=%hu", CurrentTickServiceMeasure[0], HistoryMain.Stats[MHTMax][0] );
+		HistoryMain.updateStats(CurrentTickServiceMeasure);
+		// nlinfo( "AP: C=%hu H=%hu", CurrentTickServiceMeasure[0], HistoryMain.Stats[MHTMax][0] );
 
 		// Clear current
 		CurrentMirrorMeasures.clear();
 	}
 }
-
-
 
 /*
  *
@@ -862,87 +824,77 @@ void CTickServiceGameCycleTimeMeasure::resetMeasures()
 {
 	HistoryByMirror.clear();
 	HistoryByService.clear();
-	HistoryMain.reset( false );
+	HistoryMain.reset(false);
 }
-
 
 /*
  *
  */
-void CTickServiceGameCycleTimeMeasure::displayStats( NLMISC::CLog *log )
+void CTickServiceGameCycleTimeMeasure::displayStats(NLMISC::CLog *log)
 {
-	log->displayNL( "Shard timings at GC %u:", CTickEventHandler::getGameCycle() );
-	log->displayRawNL( "___AVG__" );
-	displayStat( log, MHTSum );
-	log->displayRawNL( "___MAX___" );
-	displayStat( log, MHTMax );
-	log->displayRawNL( "___MIN___" );
-	displayStat( log, MHTMin );
+	log->displayNL("Shard timings at GC %u:", CTickEventHandler::getGameCycle());
+	log->displayRawNL("___AVG__");
+	displayStat(log, MHTSum);
+	log->displayRawNL("___MAX___");
+	displayStat(log, MHTMax);
+	log->displayRawNL("___MIN___");
+	displayStat(log, MHTMin);
 }
 
+const char *ServiceTimeMeasureTypeToCString[NbServiceTimeMeasureTypes] = { "TickTockInterval", "TickUpdateDuration", "PrevProcessMirrorUpdateDuration", "PrevReceiveMsgsViaMirrorDuration", "PrevTotalGameCycleDuration" };
 
+const char *MirrorTimeMeasureTypeToCString[NbMirrorTimeMeasureTypes] = { "WaitAllReceivedDeltaDuration", "BuildAndSendDeltaDuration", "PrevApplyReceivedDeltaDuration", "PrevSendUMMDuration" };
 
-
-const char * ServiceTimeMeasureTypeToCString [NbServiceTimeMeasureTypes] =
-{ "TickTockInterval", "TickUpdateDuration", "PrevProcessMirrorUpdateDuration", "PrevReceiveMsgsViaMirrorDuration", "PrevTotalGameCycleDuration" };
-
-const char * MirrorTimeMeasureTypeToCString [NbMirrorTimeMeasureTypes] =
-{ "WaitAllReceivedDeltaDuration", "BuildAndSendDeltaDuration", "PrevApplyReceivedDeltaDuration", "PrevSendUMMDuration" };
-
-const char * TickServiceTimeMeasureTypeToCString [NbTickServiceTimeMeasureTypes] =
-{ "PrevTotalTickDuration" };
-
+const char *TickServiceTimeMeasureTypeToCString[NbTickServiceTimeMeasureTypes] = { "PrevTotalTickDuration" };
 
 /*
  *
  */
-void CTickServiceGameCycleTimeMeasure::displayStat( NLMISC::CLog *log, TTimeMeasureHistoryStat stat )
+void CTickServiceGameCycleTimeMeasure::displayStat(NLMISC::CLog *log, TTimeMeasureHistoryStat stat)
 {
-	log->displayRawNL( "\tTICKS, %u measures:", HistoryMain.NbMeasures );
-	uint divideBy = (HistoryMain.NbMeasures==0) ? 0 : ((stat==MHTSum) ? HistoryMain.NbMeasures : 1);
-	HistoryMain.Stats[stat].displayStat( log, TickServiceTimeMeasureTypeToCString, divideBy );
+	log->displayRawNL("\tTICKS, %u measures:", HistoryMain.NbMeasures);
+	uint divideBy = (HistoryMain.NbMeasures == 0) ? 0 : ((stat == MHTSum) ? HistoryMain.NbMeasures : 1);
+	HistoryMain.Stats[stat].displayStat(log, TickServiceTimeMeasureTypeToCString, divideBy);
 	{
-		CMirrorTimeMeasure gatheredStats [NbTimeMeasureHistoryStats] = { 0, std::numeric_limits<uint16>::max(), 0 };
-		for ( std::vector<CMirrorTimeMeasureHistory>::const_iterator ihm=HistoryByMirror.begin(); ihm!=HistoryByMirror.end(); ++ihm )
+		CMirrorTimeMeasure gatheredStats[NbTimeMeasureHistoryStats] = { 0, std::numeric_limits<uint16>::max(), 0 };
+		for (std::vector<CMirrorTimeMeasureHistory>::const_iterator ihm = HistoryByMirror.begin(); ihm != HistoryByMirror.end(); ++ihm)
 		{
-			log->displayRawNL( "\tMS-%hu, %u measures:", (*ihm).ServiceId.get(), (*ihm).NbMeasures );
-			divideBy = (stat==MHTSum) ? (*ihm).NbMeasures : 1;
-			(*ihm).Stats[stat].displayStat( log, MirrorTimeMeasureTypeToCString, divideBy );
+			log->displayRawNL("\tMS-%hu, %u measures:", (*ihm).ServiceId.get(), (*ihm).NbMeasures);
+			divideBy = (stat == MHTSum) ? (*ihm).NbMeasures : 1;
+			(*ihm).Stats[stat].displayStat(log, MirrorTimeMeasureTypeToCString, divideBy);
 			gatheredStats[MHTSum] += (*ihm).Stats[stat] / (*ihm).NbMeasures;
-			gatheredStats[MHTMin].copyLowerValues( (*ihm).Stats[stat] );
-			gatheredStats[MHTMax].copyHigherValues( (*ihm).Stats[stat] );
+			gatheredStats[MHTMin].copyLowerValues((*ihm).Stats[stat]);
+			gatheredStats[MHTMax].copyHigherValues((*ihm).Stats[stat]);
 		}
-		if ( HistoryByMirror.size() > 1 )
+		if (HistoryByMirror.size() > 1)
 		{
-			log->displayRawNL( "\tAll mirror services:" );
-			gatheredStats[stat].displayStat( log, MirrorTimeMeasureTypeToCString, (stat==MHTSum) ? (uint)HistoryByMirror.size() : 1 ); // not displaying the 3 stats
+			log->displayRawNL("\tAll mirror services:");
+			gatheredStats[stat].displayStat(log, MirrorTimeMeasureTypeToCString, (stat == MHTSum) ? (uint)HistoryByMirror.size() : 1); // not displaying the 3 stats
 		}
 	}
 	{
-		CServiceTimeMeasure gatheredStats [NbTimeMeasureHistoryStats] = { 0, std::numeric_limits<uint16>::max(), 0 };
-		for ( std::vector<CServiceTimeMeasureHistory>::const_iterator ihs=HistoryByService.begin(); ihs!=HistoryByService.end(); ++ihs )
+		CServiceTimeMeasure gatheredStats[NbTimeMeasureHistoryStats] = { 0, std::numeric_limits<uint16>::max(), 0 };
+		for (std::vector<CServiceTimeMeasureHistory>::const_iterator ihs = HistoryByService.begin(); ihs != HistoryByService.end(); ++ihs)
 		{
-			log->displayRawNL( "\t%s (on MS-%hu), %u measures:", CUnifiedNetwork::getInstance()->getServiceUnifiedName( (*ihs).ServiceId ).c_str(), (*ihs).ParentServiceId.get(), (*ihs).NbMeasures );
-			divideBy = (stat==MHTSum) ? (*ihs).NbMeasures : 1;
-			(*ihs).Stats[stat].displayStat( log, ServiceTimeMeasureTypeToCString, divideBy );
+			log->displayRawNL("\t%s (on MS-%hu), %u measures:", CUnifiedNetwork::getInstance()->getServiceUnifiedName((*ihs).ServiceId).c_str(), (*ihs).ParentServiceId.get(), (*ihs).NbMeasures);
+			divideBy = (stat == MHTSum) ? (*ihs).NbMeasures : 1;
+			(*ihs).Stats[stat].displayStat(log, ServiceTimeMeasureTypeToCString, divideBy);
 			gatheredStats[MHTSum] += (*ihs).Stats[stat] / (*ihs).NbMeasures;
-			gatheredStats[MHTMin].copyLowerValues( (*ihs).Stats[stat] );
-			gatheredStats[MHTMax].copyHigherValues( (*ihs).Stats[stat] );
+			gatheredStats[MHTMin].copyLowerValues((*ihs).Stats[stat]);
+			gatheredStats[MHTMax].copyHigherValues((*ihs).Stats[stat]);
 		}
-		if ( HistoryByService.size() > 1 )
+		if (HistoryByService.size() > 1)
 		{
-			log->displayRawNL( "\tAll client services:" );
-			gatheredStats[stat].displayStat( log, ServiceTimeMeasureTypeToCString, (stat==MHTSum) ? (uint)HistoryByService.size() : 1 ); // not displaying the 3 stats
+			log->displayRawNL("\tAll client services:");
+			gatheredStats[stat].displayStat(log, ServiceTimeMeasureTypeToCString, (stat == MHTSum) ? (uint)HistoryByService.size() : 1); // not displaying the 3 stats
 		}
 	}
 }
-
 
 //-----------------------------------------------
 //	NLNET_SERVICE_MAIN
 //-----------------------------------------------
-NLNET_SERVICE_MAIN( CTickService, "TICKS", "tick_service", 0, CbArray, "", "" );
-
+NLNET_SERVICE_MAIN(CTickService, "TICKS", "tick_service", 0, CbArray, "", "");
 
 //
 // Variables
@@ -972,16 +924,15 @@ NLMISC_DYNVARIABLE(string, TickMode, "Current ticking mode")
 		if (TS->CurrentMode == CTickService::TickRunning)
 			*pointer = "Normal";
 		else
-			*pointer = "HALTED: "+TS->HaltedReason;
+			*pointer = "HALTED: " + TS->HaltedReason;
 	}
 }
-
 
 //
 // Commands
 //
 
-NLMISC_COMMAND(haltTick, "Halt tick server", "[reason]" )
+NLMISC_COMMAND(haltTick, "Halt tick server", "[reason]")
 {
 	if (args.size() > 1)
 		return false;
@@ -989,29 +940,28 @@ NLMISC_COMMAND(haltTick, "Halt tick server", "[reason]" )
 	log.displayNL("TICK SERVICE HALTED MANUALLY.");
 	log.displayNL("PLEASE RESTART TICK SERVICE USING resumeTick COMMAND.");
 
-	std::string	reason = "MANUAL HALT";
+	std::string reason = "MANUAL HALT";
 	if (args.size() == 1)
-		reason += ": "+args[0];
+		reason += ": " + args[0];
 
 	TS->haltTick(reason);
 	return true;
 }
 
-NLMISC_COMMAND(resumeTick, "Resume tick server", "" )
+NLMISC_COMMAND(resumeTick, "Resume tick server", "")
 {
 	log.displayNL("TICK SERVICE RESUMED MANUALLY.");
 	TS->resumeTick();
 	return true;
 }
 
-
-NLMISC_COMMAND(displayTimingsOfShard, "Display all timings", "" )
+NLMISC_COMMAND(displayTimingsOfShard, "Display all timings", "")
 {
-	TS->MainTimeMeasures.displayStats( &log );
+	TS->MainTimeMeasures.displayStats(&log);
 	return true;
 }
 
-NLMISC_COMMAND(resetTimingsOfShard, "Reset all timings", "" )
+NLMISC_COMMAND(resetTimingsOfShard, "Reset all timings", "")
 {
 	TS->MainTimeMeasures.resetMeasures();
 	return true;
@@ -1021,63 +971,59 @@ NLMISC_COMMAND(displayGameTime, "The tick service and all connected services dis
 {
 	TS->displayGameTime();
 	return true;
-
 }
 
-NLMISC_COMMAND(send,"enable send (in the step by step mode)"," ")
+NLMISC_COMMAND(send, "enable send (in the step by step mode)", " ")
 {
 	TS->enableSend();
 	return true;
-
 }
 
-NLMISC_COMMAND(clients,"Give the number of clients"," ")
+NLMISC_COMMAND(clients, "Give the number of clients", " ")
 {
 	log.displayNL("Number of connected client : %d", TS->getClientCount());
 	return true;
-
 }
 
 /*
 NLMISC_COMMAND(getServicesState,"Give the current state of all services"," ")
 {
 // todo end the code
-	uint i;
-	for( i=0; i<_ClientInfos.size(); i++ )
-	{
-		// if this client is supposed to send a tock
-		if( _ClientInfos[i].Registered )
-		{
-			// if tock was not received yet
-			if( _ClientInfos[i].TockReceived == false )
-			{
-				// if we have to wait for this client
-				if( _ClientInfos[i].Tocking == true )
-				{
-					// we check threshold
-					if( _ClientInfos[i].TockMissingCount > _ClientInfos[i].Threshold )
-					{
-						return;
-					}
-				}
-			}
-		}
-	}
-	return true;
+    uint i;
+    for( i=0; i<_ClientInfos.size(); i++ )
+    {
+        // if this client is supposed to send a tock
+        if( _ClientInfos[i].Registered )
+        {
+            // if tock was not received yet
+            if( _ClientInfos[i].TockReceived == false )
+            {
+                // if we have to wait for this client
+                if( _ClientInfos[i].Tocking == true )
+                {
+                    // we check threshold
+                    if( _ClientInfos[i].TockMissingCount > _ClientInfos[i].Threshold )
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    return true;
 }
 */
 
-
-NLMISC_COMMAND(displayRecentHistory,"Display the history of tick events","")
+NLMISC_COMMAND(displayRecentHistory, "Display the history of tick events", "")
 {
-	TS->RecentHistory.write( &log );
+	TS->RecentHistory.write(&log);
 	return true;
 }
 
-NLMISC_COMMAND( pause, "Pause the tick service", "" )
+NLMISC_COMMAND(pause, "Pause the tick service", "")
 {
 	Pause = !Pause;
-	if( Pause )
+	if (Pause)
 		nlinfo("Pause On");
 	else
 	{
@@ -1087,9 +1033,6 @@ NLMISC_COMMAND( pause, "Pause the tick service", "" )
 	return true;
 }
 
-
-
-
 /*
  */
 
@@ -1097,95 +1040,95 @@ NLMISC_COMMAND( pause, "Pause the tick service", "" )
 // ADDED by ben: BS test purpose, you can remove this
 NLMISC_COMMAND( sendFileBS, "send file to BS", "<file to send> <file name to be written>")
 {
-	if (args.size() != 2)
-		return false;
+    if (args.size() != 2)
+        return false;
 
-	CIFile	fi;
+    CIFile	fi;
 
-	if (!fi.open(args[0]))
-		return false;
+    if (!fi.open(args[0]))
+        return false;
 
-	std::vector<uint8>		buffer(fi.getFileSize());
-	fi.serialBuffer(&(buffer[0]), buffer.size());
+    std::vector<uint8>		buffer(fi.getFileSize());
+    fi.serialBuffer(&(buffer[0]), buffer.size());
 
-	CBackupMsgSaveFile		msgSave;
-	msgSave.Data.serialBuffer(&(buffer[0]), buffer.size());
-	msgSave.FileName = args[1];
+    CBackupMsgSaveFile		msgSave;
+    msgSave.Data.serialBuffer(&(buffer[0]), buffer.size());
+    msgSave.FileName = args[1];
 
-	Bsi.sendFile(msgSave);
+    Bsi.sendFile(msgSave);
 
-	return true;
+    return true;
 }
 
 NLMISC_COMMAND( sendFileAndCheckBS, "send file to BS", "<file to send> <file name to be written>")
 {
-	if (args.size() != 2)
-		return false;
+    if (args.size() != 2)
+        return false;
 
-	CIFile	fi;
+    CIFile	fi;
 
-	if (!fi.open(args[0]))
-		return false;
+    if (!fi.open(args[0]))
+        return false;
 
-	std::vector<uint8>		buffer(fi.getFileSize());
-	fi.serialBuffer(&(buffer[0]), buffer.size());
+    std::vector<uint8>		buffer(fi.getFileSize());
+    fi.serialBuffer(&(buffer[0]), buffer.size());
 
-	CBackupMsgSaveFile		msgSave;
-	msgSave.Data.serialBuffer(&(buffer[0]), buffer.size());
-	msgSave.FileName = args[1];
+    CBackupMsgSaveFile		msgSave;
+    msgSave.Data.serialBuffer(&(buffer[0]), buffer.size());
+    msgSave.FileName = args[1];
 
-	Bsi.sendFile(msgSave, true);
+    Bsi.sendFile(msgSave, true);
 
-	return true;
+    return true;
 }
 
 NLMISC_COMMAND( appendFileBS, "append file to BS", "<file to send> <file name to be written>")
 {
-	if (args.size() != 2)
-		return false;
+    if (args.size() != 2)
+        return false;
 
-	CIFile	fi;
+    CIFile	fi;
 
-	if (!fi.open(args[0]))
-		return false;
+    if (!fi.open(args[0]))
+        return false;
 
-	std::vector<uint8>		buffer(fi.getFileSize());
-	fi.serialBuffer(&(buffer[0]), buffer.size());
+    std::vector<uint8>		buffer(fi.getFileSize());
+    fi.serialBuffer(&(buffer[0]), buffer.size());
 
-	CBackupMsgSaveFile		msgSave;
-	msgSave.Data.serialBuffer(&(buffer[0]), buffer.size());
-	msgSave.FileName = args[1];
+    CBackupMsgSaveFile		msgSave;
+    msgSave.Data.serialBuffer(&(buffer[0]), buffer.size());
+    msgSave.FileName = args[1];
 
-	Bsi.append(msgSave);
+    Bsi.append(msgSave);
 
-	return true;
+    return true;
 }
 
 NLMISC_COMMAND( appendLineBS, "append line to file via BS", "<line to be sent> <file name to be written>")
 {
-	if (args.size() != 2)
-		return false;
+    if (args.size() != 2)
+        return false;
 
-	Bsi.append(args[0], args[1]);
+    Bsi.append(args[0], args[1]);
 
-	return true;
+    return true;
 }
 
 NLMISC_COMMAND( deleteFileBS, "delete file via BS", "<file name to be deleted> [backup file]")
 {
-	if (args.size() < 1 || args.size() > 2)
-		return false;
+    if (args.size() < 1 || args.size() > 2)
+        return false;
 
-	bool backupFile = false;
+    bool backupFile = false;
 
-	if (args.size() == 2)
-	{
-		NLMISC::fromString(args[1], backupFile);
-	}
+    if (args.size() == 2)
+    {
+        NLMISC::fromString(args[1], backupFile);
+    }
 
-	Bsi.deleteFile(args[0], backupFile);
+    Bsi.deleteFile(args[0], backupFile);
 
-	return true;
+    return true;
 }
 
 
@@ -1193,53 +1136,50 @@ class CFileReceiveCb: public IBackupFileReceiveCallback
 {
 public:
 
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
-	{
-		nlinfo("received file '%s'", fileDescription.FileName.c_str());
-	}
+    virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+    {
+        nlinfo("received file '%s'", fileDescription.FileName.c_str());
+    }
 
 };
 
 NLMISC_COMMAND( loadFileBS, "load a file from BS", "<file to be loaded>")
 {
-	if (args.size() != 1)
-		return false;
+    if (args.size() != 1)
+        return false;
 
-	Bsi.requestFile(args[0], new CFileReceiveCb());
+    Bsi.requestFile(args[0], new CFileReceiveCb());
 
-	return true;
+    return true;
 }
 */
 
-
-class CFileClassReceiveCb: public IBackupFileClassReceiveCallback
+class CFileClassReceiveCb : public IBackupFileClassReceiveCallback
 {
 public:
-
-	virtual void callback(const CFileDescriptionContainer& list)
+	virtual void callback(const CFileDescriptionContainer &list)
 	{
 		nlinfo("received fileclass");
-		uint	i;
-		for (i=0; i<list.size(); ++i)
+		uint i;
+		for (i = 0; i < list.size(); ++i)
 			nlinfo("file: %s", list[i].FileName.c_str());
 		nlinfo("end of class");
 	}
-
 };
 
-NLMISC_COMMAND( loadFileClassBS, "load a fileclass from BS", "<directory> <classes to be loaded>")
+NLMISC_COMMAND(loadFileClassBS, "load a fileclass from BS", "<directory> <classes to be loaded>")
 {
 	if (args.size() <= 1)
 		return false;
 
-	std::string						directory;
-	std::vector<CBackupFileClass>	classes;
-	CBackupFileClass				bclass;
+	std::string directory;
+	std::vector<CBackupFileClass> classes;
+	CBackupFileClass bclass;
 
 	directory = args[0];
 
-	uint	i;
-	for (i=1; i<args.size(); ++i)
+	uint i;
+	for (i = 1; i < args.size(); ++i)
 		bclass.Patterns.push_back(args[i]);
 
 	classes.push_back(bclass);
@@ -1249,7 +1189,7 @@ NLMISC_COMMAND( loadFileClassBS, "load a fileclass from BS", "<directory> <class
 	return true;
 }
 
-//NLMISC_COMMAND( dumpVectorMemory, "Dump memory used in vector", "")
+// NLMISC_COMMAND( dumpVectorMemory, "Dump memory used in vector", "")
 //{
 //	static char buffer[1024*16];
 //	_vector_memory_usage::dump_memory(buffer, 1024*16);
@@ -1257,4 +1197,4 @@ NLMISC_COMMAND( loadFileClassBS, "load a fileclass from BS", "<directory> <class
 //	log.displayNL("Vector memory usage : \n%s", buffer);
 //
 //	return true;
-//}
+// }

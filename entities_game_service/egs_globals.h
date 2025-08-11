@@ -14,18 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_EGS_GLOBALS_H
 #define RY_EGS_GLOBALS_H
 
 #include "nel/misc/random.h"
 
-
 // global declaration of the random generator
 extern NLMISC::CRandom RandomGenerator;
-
-
 
 #endif // RY_EGS_GLOBALS_H
 

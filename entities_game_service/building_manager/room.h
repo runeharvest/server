@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_ROOM_H
 #define RY_ROOM_H
 
@@ -24,68 +22,64 @@
 #include "mission_manager/ai_alias_translator.h"
 #include "guild_manager/guild.h"
 
-
-namespace LIFT_DESTS
+namespace LIFT_DESTS {
+enum TDestType
 {
-	enum TDestType
-	{
-		GuildMain = 0,
-		GuildAnnex,
-		PlayerRoom,
-		CommonRoom,
-		Uninstanciated,
-		Unknown,
-	};
+	GuildMain = 0,
+	GuildAnnex,
+	PlayerRoom,
+	CommonRoom,
+	Uninstanciated,
+	Unknown,
+};
 
-	TDestType toDestType( const std::string & str );
+TDestType toDestType(const std::string &str);
 }
 
-namespace LIFT_RESTRICTION
+namespace LIFT_RESTRICTION {
+// restriction to have a valid destination
+enum TRestriction
 {
-	// restriction to have a valid destination
-	enum TRestriction
-	{
-		Rm_Fight,
-		Rm_Magic,
-		Rm_Harvest,
-		Rm_Craft,
-		Unknown,
-	};
-	
-	TRestriction toRestriction( const std::string & str );
+	Rm_Fight,
+	Rm_Magic,
+	Rm_Harvest,
+	Rm_Craft,
+	Unknown,
+};
+
+TRestriction toRestriction(const std::string &str);
 }
 
 /// a lift destination
 struct CLiftDestination
 {
-	std::string					Name;
+	std::string Name;
 	/// id of the area
-	uint16						Area;
+	uint16 Area;
 	/// type of the destination
-	LIFT_DESTS::TDestType		Type;
+	LIFT_DESTS::TDestType Type;
 	/// name id to display on client
-	std::string					PhraseId;
+	std::string PhraseId;
 	/// icon  to display on client
-	LIFT_ICONS::TLiftIcon		Icon;
+	LIFT_ICONS::TLiftIcon Icon;
 	/// names of the bot
-	std::vector< TAIAlias >		Bots;
+	std::vector<TAIAlias> Bots;
 	/// exit destination
-	CLiftDestination*			Exit;
+	CLiftDestination *Exit;
 	/// true if pets are allowed
-	bool						TeleportPets;
+	bool TeleportPets;
 
 	/// guilds using this destination
-	std::vector< uint32 >					Guilds;
+	std::vector<uint32> Guilds;
 	/// players using this destination
-	std::vector< NLMISC::CEntityId >		Players;
+	std::vector<NLMISC::CEntityId> Players;
 	/// cells of the destination instances. 0 if invalid
-	std::vector< sint32 >					InstanceCells;
+	std::vector<sint32> InstanceCells;
 	/// session of the destination
-	uint16									Session;
+	uint16 Session;
 	/// restriction to go to this destination
 	std::vector<LIFT_RESTRICTION::TRestriction> Restrictions;
 };
-
 
 /**
  * A building room
@@ -97,62 +91,66 @@ class CRoom
 {
 public:
 	CRoom()
-		:_IsValid(false),_RefCount(0),_Destination(NULL),_IndexIndestination(0),_Guild( CGuild::InvalidGuildPtr ){}
-	
+	    : _IsValid(false)
+	    , _RefCount(0)
+	    , _Destination(NULL)
+	    , _IndexIndestination(0)
+	    , _Guild(CGuild::InvalidGuildPtr)
+	{
+	}
+
 	/// return true if the room is valid
-	bool isValid()const{ return _IsValid; }
+	bool isValid() const { return _IsValid; }
 	/// set the next free room id
-	void setNextFreeRoomId( uint id ){ _NextFreeRoomId = id; }
+	void setNextFreeRoomId(uint id) { _NextFreeRoomId = id; }
 	/// get the next free room id
-	uint32 getNextFreeRoomId()const{ return _NextFreeRoomId; }
+	uint32 getNextFreeRoomId() const { return _NextFreeRoomId; }
 	/// add a reference to this room
-	void addRef(){ _RefCount++; }
+	void addRef() { _RefCount++; }
 	/// remove a reference to this room
-	void remRef(){ _RefCount--; }
+	void remRef() { _RefCount--; }
 	/// return the reference count of the room
-	uint getRefCount()const{ return _RefCount; }
+	uint getRefCount() const { return _RefCount; }
 	/// init the room
-	void init( CLiftDestination * destination,uint indexIndestination,CGuild * guild, const NLMISC::CEntityId & player );
+	void init(CLiftDestination *destination, uint indexIndestination, CGuild *guild, const NLMISC::CEntityId &player);
 	/// release the room
 	void release();
 	/// get the parent destination
-	CLiftDestination * getDestination(uint & index)const
+	CLiftDestination *getDestination(uint &index) const
 	{
 		index = _IndexIndestination;
 		return _Destination;
 	}
-	CGuild * getGuild()const
+	CGuild *getGuild() const
 	{
-		if ( _Guild != CGuild::InvalidGuildPtr )
+		if (_Guild != CGuild::InvalidGuildPtr)
 			return _Guild;
 		return NULL;
 	}
-	const NLMISC::CEntityId & getPlayer()const
+	const NLMISC::CEntityId &getPlayer() const
 	{
 		return _Player;
 	}
 
 private:
 	/// true if the room is valid
-	bool							_IsValid;
+	bool _IsValid;
 	/// id of the next free room
-	uint32							_NextFreeRoomId;
+	uint32 _NextFreeRoomId;
 	/// reference count of the room ( number of people in it )
-	uint							_RefCount;
+	uint _RefCount;
 	/// pointer on the parent destination
-	CLiftDestination*				_Destination;
+	CLiftDestination *_Destination;
 	/// index of the room in the parent
-	uint32							_IndexIndestination;
+	uint32 _IndexIndestination;
 	/// referenced guild
-	NLMISC::CSmartPtr<CGuild>		_Guild;
-	///spawned NPCS
-	std::vector<NLMISC::CEntityId>	_NPCs;
+	NLMISC::CSmartPtr<CGuild> _Guild;
+	/// spawned NPCS
+	std::vector<NLMISC::CEntityId> _NPCs;
 	/// owner player
-	NLMISC::CEntityId				_Player;
+	NLMISC::CEntityId _Player;
 };
-
 
 #endif // RY_ROOM_H
 
 /* End of room.h */
-

@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_FE_NET_STAT_H
 #define NL_FE_NET_STAT_H
 
 #include "nel/misc/types_nl.h"
-
 
 /**
  * This class computes mean and variance of different values related to coms between shard and client
@@ -31,16 +28,11 @@
 class CFENetStat
 {
 public:
-
 	/// Constructor
 	CFENetStat();
 
-
 private:
-
-
 };
-
 
 #endif // NL_FE_NET_STAT_H
 

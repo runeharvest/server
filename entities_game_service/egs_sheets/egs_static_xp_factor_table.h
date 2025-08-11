@@ -14,17 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_EGS_STATIC_XPFACTOR_TABLE_H
 #define RY_EGS_STATIC_XPFACTOR_TABLE_H
-
 
 // Nel georges
 #include "nel/georges/u_form.h"
 // game share
 #include "game_share/constants.h"
-
 
 /**
  * class for xp factor table
@@ -34,21 +30,21 @@
  */
 class CStaticXpFactorTable
 {
-public:	
+public:
 	/// Serialisation
 	virtual void serial(NLMISC::IStream &f);
-	
+
 	/// read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
-	
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+
 	// return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 1; } 
-	
+	inline static uint getVersion() { return 1; }
+
 	/// called when the sheet is removed
-	void removed() {}
+	void removed() { }
 
 	/// get factor for a given number of actions (1..255)
-	inline float getXpFactor(uint8 nbActions) const 
+	inline float getXpFactor(uint8 nbActions) const
 	{
 #if !FINAL_VERSION
 		nlassert(_XpFactorTable.size());
@@ -58,35 +54,14 @@ public:
 		if (nbActions < _XpFactorTable.size())
 			return _XpFactorTable[nbActions];
 		else
-			return _XpFactorTable[_XpFactorTable.size()-1];
+			return _XpFactorTable[_XpFactorTable.size() - 1];
 	}
 
 public:
 	/// table lines
-	std::vector< float >	_XpFactorTable;
+	std::vector<float> _XpFactorTable;
 };
 
 #endif // RY_EGS_STATIC_XPFACTOR_TABLE_H
 
 /* End of egs_static_xp_factor_table.h */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

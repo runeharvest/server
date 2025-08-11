@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_VARIABLES_H
 #define NL_VARIABLES_H
 
@@ -26,18 +24,17 @@
 /// \name Various service Info
 //@{
 /// Number of entities referenced on the GPMS
-extern uint32		NumEntities;
+extern uint32 NumEntities;
 /// Number of players referenced on the GPMS
-extern uint32		NumPlayers;
+extern uint32 NumPlayers;
 /// Verbose mode
-extern bool			Verbose;
+extern bool Verbose;
 //@}
-
 
 /// \name Player control
 //@{
 /// Allow check player speed
-extern bool			CheckPlayerSpeed;
+extern bool CheckPlayerSpeed;
 //@}
 
 #endif // NL_VARIABLES_H

@@ -41,36 +41,37 @@ class COutpost;
 class CGuildMemberModule : public IModule
 {
 	NL_INSTANCE_COUNTER_DECL(CGuildMemberModule);
+
 public:
 	/// pseudo factory for guild member module
-	static CGuildMemberModule * createModule( CGuildCharProxy& proxy, CGuildMember* guildMember );
+	static CGuildMemberModule *createModule(CGuildCharProxy &proxy, CGuildMember *guildMember);
 	/// ctor
-	CGuildMemberModule( CGuildCharProxy& proxy, CGuildMember* guildMember );
+	CGuildMemberModule(CGuildCharProxy &proxy, CGuildMember *guildMember);
 	/// Check if the guild is a proxyfied guild
 	bool isGuildProxy();
 	/// set the leader of the guild
-	virtual void setLeader( uint16 index,uint8 session);
+	virtual void setLeader(uint16 index, uint8 session);
 	/// user quit the guild
 	virtual void quitGuild();
 	/// set the grade of a member
-	void setGrade( uint16 index,uint8 session, EGSPD::CGuildGrade::TGuildGrade grade)const;
+	void setGrade(uint16 index, uint8 session, EGSPD::CGuildGrade::TGuildGrade grade) const;
 	/// send a message to all guild members
-	void sendMessageToGuildMembers( const std::string &  msg, const TVectorParamCheck & params )const;
+	void sendMessageToGuildMembers(const std::string &msg, const TVectorParamCheck &params) const;
 	/// invite character in guild
-	void inviteCharacterInGuild(CCharacter * invitedCharacter)const;
+	void inviteCharacterInGuild(CCharacter *invitedCharacter) const;
 	/// invite targeted player character in the guild
-	void inviteTargetInGuild()const;
+	void inviteTargetInGuild() const;
 	/// kicks a member from the guild
-	void kickMember( uint16 index,uint8 session )const;
+	void kickMember(uint16 index, uint8 session) const;
 	/// set message of the day
-	void setMOTD(const std::string& motd);	
-	
+	void setMOTD(const std::string &motd);
+
 	/// return true if the member can take something in the guild inventory
-	virtual bool canTakeGuildItem()const;
+	virtual bool canTakeGuildItem() const;
 	/// return true if the member can invite a player
-	virtual bool canInvite()const;
+	virtual bool canInvite() const;
 	/// buy a guild option for the guild
-	virtual void buyGuildOption( const CStaticItem * form );
+	virtual void buyGuildOption(const CStaticItem *form);
 
 	/// return true if the guild member is an outpost admin (USER:OUTPOST_ADMIN in client database)
 	virtual bool isOutpostAdmin() const;
@@ -91,13 +92,13 @@ public:
 	virtual void outpostSetExpenseLimit(NLMISC::CSheetId outpostSheet, uint32 expenseLimit);
 	/// set the hour of the defense in the defense day
 	virtual void outpostSetDefensePeriod(NLMISC::CSheetId outpostSheet, uint8 hour);
-	
+
 	/// buy a new building
 	virtual bool canBuyOutpostBuilding() const;
 	virtual void buyOutpostBuilding(NLMISC::CSheetId sid);
 
 	/// user wanna pick a mission
-	CMissionGuild * pickMission( TAIAlias alias );
+	CMissionGuild *pickMission(TAIAlias alias);
 
 	// Function to check if the member can pick a mission. By default only Officer and above can pick a guild mission
 	virtual bool canPickMission(TAIAlias alias)
@@ -123,16 +124,16 @@ protected:
 	/// handler called on parent ( player ) destruction
 	void onParentDestructionHandler();
 	/// return true if the member can affect another member of the specified grade
-	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade)const;
-	
+	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade) const;
+
 	/// "core" guild structure
-	NLMISC::CRefPtr<CGuildMember>	_GuildMemberCore;
+	NLMISC::CRefPtr<CGuildMember> _GuildMemberCore;
 
 private:
-	void _inviteCharacterInGuild(CGuildCharProxy& invitor, CGuildCharProxy& target)const;
+	void _inviteCharacterInGuild(CGuildCharProxy &invitor, CGuildCharProxy &target) const;
 
 	/// version of last sent info of items in guild inventory (only for online players who are in a guild)
-	std::vector<uint8>	_LastGuildItemInfoVersionsSent;
+	std::vector<uint8> _LastGuildItemInfoVersionsSent;
 };
 
 #include "egs_utils.h"

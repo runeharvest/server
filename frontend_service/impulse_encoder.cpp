@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #include <nel/misc/hierarchical_timer.h>
@@ -33,127 +31,124 @@
 using namespace CLFECOMMON;
 using namespace NLMISC;
 
-TImpulseReceivedCallback	CImpulseEncoder::_Callbacks[256];
+TImpulseReceivedCallback CImpulseEncoder::_Callbacks[256];
 
-uint MaxImpulseBitSizes [3];
+uint MaxImpulseBitSizes[3];
 
-void cbImpulsionByteSize0Changed( IVariable& var );
-void cbImpulsionByteSize1Changed( IVariable& var );
-void cbImpulsionByteSize2Changed( IVariable& var );
+void cbImpulsionByteSize0Changed(IVariable &var);
+void cbImpulsionByteSize1Changed(IVariable &var);
+void cbImpulsionByteSize2Changed(IVariable &var);
 
-CVariable<uint> ImpulsionByteSize0( "fe", "ImpulsionByteSize0", "Size of impulsion channel 0", 20, 0, true, cbImpulsionByteSize0Changed, true );
-CVariable<uint> ImpulsionByteSize1( "fe", "ImpulsionByteSize1", "Size of impulsion channel 1", 200, 0, true, cbImpulsionByteSize1Changed, true );
-CVariable<uint> ImpulsionByteSize2( "fe", "ImpulsionByteSize2", "Size of impulsion channel 2", 200, 0, true, cbImpulsionByteSize2Changed, true );
+CVariable<uint> ImpulsionByteSize0("fe", "ImpulsionByteSize0", "Size of impulsion channel 0", 20, 0, true, cbImpulsionByteSize0Changed, true);
+CVariable<uint> ImpulsionByteSize1("fe", "ImpulsionByteSize1", "Size of impulsion channel 1", 200, 0, true, cbImpulsionByteSize1Changed, true);
+CVariable<uint> ImpulsionByteSize2("fe", "ImpulsionByteSize2", "Size of impulsion channel 2", 200, 0, true, cbImpulsionByteSize2Changed, true);
 
-void cbImpulsionByteSize0Changed( IVariable& var )
+void cbImpulsionByteSize0Changed(IVariable &var)
 {
 	// -IMPULSE_ACTION_HEADER_BITSIZE not needed, as actions know their own size
 	// and handle it right
-	MaxImpulseBitSizes[0] = (ImpulsionByteSize0.get())*8; // - IMPULSE_ACTION_HEADER_BITSIZE;
+	MaxImpulseBitSizes[0] = (ImpulsionByteSize0.get()) * 8; // - IMPULSE_ACTION_HEADER_BITSIZE;
 }
 
-void cbImpulsionByteSize1Changed( IVariable& var )
+void cbImpulsionByteSize1Changed(IVariable &var)
 {
-	MaxImpulseBitSizes[1] = (ImpulsionByteSize1.get())*8; // - IMPULSE_ACTION_HEADER_BITSIZE;
+	MaxImpulseBitSizes[1] = (ImpulsionByteSize1.get()) * 8; // - IMPULSE_ACTION_HEADER_BITSIZE;
 }
 
-void cbImpulsionByteSize2Changed( IVariable& var )
+void cbImpulsionByteSize2Changed(IVariable &var)
 {
-	MaxImpulseBitSizes[2] = (ImpulsionByteSize2.get())*8; // - IMPULSE_ACTION_HEADER_BITSIZE;
+	MaxImpulseBitSizes[2] = (ImpulsionByteSize2.get()) * 8; // - IMPULSE_ACTION_HEADER_BITSIZE;
 }
-
 
 bool verboseImpulsions = false;
 
 //
-uint32		CImpulseQueue::send( TActionQueue& sourceQueue, uint32 packet, NLMISC::CBitMemStream &outbox, uint32 &sentActions)
+uint32 CImpulseQueue::send(TActionQueue &sourceQueue, uint32 packet, NLMISC::CBitMemStream &outbox, uint32 &sentActions)
 {
-	bool	wasFlushed = false;
+	bool wasFlushed = false;
 	{
 		H_AUTO(ImpulseQueueSend1);
 
 		// If the current sending impulse queue is empty (flushed), fill it with actions from the source queue
-		if ( Queue.empty() )
+		if (Queue.empty())
 		{
 			wasFlushed = true;
 			FirstSent = packet;
 			uint actSize;
-			while ( (!sourceQueue.empty()) && // stop if there are no more actions in the source queue
-					( 
-						// stop if the max size is reached
-						(TotalBitsInImpulseQueue + (actSize=CActionFactory::getInstance()->size(sourceQueue.front())) < MaxBitSize) ||
-						// continue if the action can exceed the total size (only one!)
-						(sourceQueue.front()->AllowExceedingMaxSize && Queue.empty())
-					)
-				  )
+			while ((!sourceQueue.empty()) && // stop if there are no more actions in the source queue
+			    (
+			        // stop if the max size is reached
+			        (TotalBitsInImpulseQueue + (actSize = CActionFactory::getInstance()->size(sourceQueue.front())) < MaxBitSize) ||
+			        // continue if the action can exceed the total size (only one!)
+			        (sourceQueue.front()->AllowExceedingMaxSize && Queue.empty())))
 			{
 				// Move action from the source queue to the current sending impulse queue
-				Queue.push_back( sourceQueue.front() );
-				//nlinfo("add action '%d' size '%d' in queue %d:%d", sourceQueue.front()->Code, actSize, Level, Channel);
+				Queue.push_back(sourceQueue.front());
+				// nlinfo("add action '%d' size '%d' in queue %d:%d", sourceQueue.front()->Code, actSize, Level, Channel);
 				TotalBitsInImpulseQueue += actSize;
 				sourceQueue.pop_front();
 			}
 		}
 	}
 
-	uint	i;
+	uint i;
 
-	bool	impulsionFollowBit = true;
-	uint32	serialised = 0;
+	bool impulsionFollowBit = true;
+	uint32 serialised = 0;
 
 	{
 		H_AUTO(ImpulseQueueSend2);
 		// Send all the current sending impulse queue
-		for ( i=0; i<Queue.size(); ++i )
+		for (i = 0; i < Queue.size(); ++i)
 		{
 			// serial channel swap bit
 			outbox.serialBitAndLog(impulsionFollowBit);
 
 			// serial marked actions
-			CActionFactory::getInstance()->pack( Queue[i], outbox, false );
-	#ifdef NL_DEBUG
-			if ( verboseImpulsions )
-				nldebug( "Sending effectively impulsion %p (len=%u)", Queue[i], CActionFactory::getInstance()->size(Queue[i]) );
-	#endif
-			serialised += (1+CActionFactory::getInstance()->size(Queue[i]));
+			CActionFactory::getInstance()->pack(Queue[i], outbox, false);
+#ifdef NL_DEBUG
+			if (verboseImpulsions)
+				nldebug("Sending effectively impulsion %p (len=%u)", Queue[i], CActionFactory::getInstance()->size(Queue[i]));
+#endif
+			serialised += (1 + CActionFactory::getInstance()->size(Queue[i]));
 			++sentActions;
 		}
 
-		if ( ! Queue.empty() )
-			LOG_IMPULSION_DEBUG("FEIMP: %s %d actions (%u bits) to send on Channel %d at Level %d", (wasFlushed) ? "sent new" : "resent", Queue.size(), serialised+1, Channel, Level);
+		if (!Queue.empty())
+			LOG_IMPULSION_DEBUG("FEIMP: %s %d actions (%u bits) to send on Channel %d at Level %d", (wasFlushed) ? "sent new" : "resent", Queue.size(), serialised + 1, Channel, Level);
 	}
 
 	{
 		H_AUTO(ImpulseQueueSend3);
-		bool	impulsionEndBit = false;
+		bool impulsionEndBit = false;
 		outbox.serialBitAndLog(impulsionEndBit);
 	}
 
-	//nlinfo("serialised %d bits", TotalBitsInImpulseQueue);
+	// nlinfo("serialised %d bits", TotalBitsInImpulseQueue);
 
-	return serialised+1;
+	return serialised + 1;
 }
 
 //
-void	CImpulseQueue::flush(uint packet, CClientHost *client, std::vector<uint8> &impcounts)
+void CImpulseQueue::flush(uint packet, CClientHost *client, std::vector<uint8> &impcounts)
 {
 	if (packet < FirstSent)
 		return;
 
-//	LOG_IMPULSION_DEBUG("FEIMP: flush %d actions from Channel %d at Level %d", QueueMark, Channel, Level);
+	//	LOG_IMPULSION_DEBUG("FEIMP: flush %d actions from Channel %d at Level %d", QueueMark, Channel, Level);
 
 	// Call acknowledge callback for each action in the impulse queue, then clear the queue
-	for ( uint i=0; i<Queue.size(); ++i )
+	for (uint i = 0; i < Queue.size(); ++i)
 	{
-		CAction	*action = Queue[i];
+		CAction *action = Queue[i];
 
 #ifdef TRACE_SHARD_MESSAGES
 		// Measure the latency between adding and acknowledgement
-		LOG_IMPULSION_INFO( "FEIMP: Ack impulsion %p (latency: %u cycles)", Queue[i], CTickEventHandler::getGameCycle()-action->GameCycle );
+		LOG_IMPULSION_INFO("FEIMP: Ack impulsion %p (latency: %u cycles)", Queue[i], CTickEventHandler::getGameCycle() - action->GameCycle);
 #endif
 		// call associated callback
 		if (CImpulseEncoder::_Callbacks[action->Code] != NULL)
-			CImpulseEncoder::_Callbacks[action->Code] (client, action);
+			CImpulseEncoder::_Callbacks[action->Code](client, action);
 		--impcounts[action->Slot];
 		CActionFactory::getInstance()->remove(action);
 	}
@@ -166,49 +161,43 @@ void	CImpulseQueue::flush(uint packet, CClientHost *client, std::vector<uint8> &
 	++FlushTimes;
 }
 
-
 // Get Current Effective Send Rate (based on flush rate) (in bits per second)
-uint	CImpulseQueue::effectiveSendRate()
+uint CImpulseQueue::effectiveSendRate()
 {
 	flushSendRateQueue(CTime::getLocalTime());
 
-	uint	totalBitSent = 0;
-	uint	i;
-	for (i=0; i<SendRateQueue.size(); ++i)
+	uint totalBitSent = 0;
+	uint i;
+	for (i = 0; i < SendRateQueue.size(); ++i)
 		totalBitSent += SendRateQueue[i].Size;
 
 	return totalBitSent / IMPULSE_STAT_MEAN_TIME;
 }
 
 // Get Current Effective Send Rate (based on flush rate) (in bits per second)
-uint64	CImpulseQueue::totalSentData()
+uint64 CImpulseQueue::totalSentData()
 {
 	return SentData;
 }
-
-
-
-
 
 /*
  * Constructor
  */
 CImpulseEncoder::CImpulseEncoder()
 {
-	uint	i;
+	uint i;
 
-	for (i=0; i<1; ++i)		_Level0[i].setup(maxBitSize(0), 0, i);
-	for (i=0; i<2; ++i)		_Level1[i].setup(maxBitSize(1), 1, i);
-	for (i=0; i<4; ++i)		_Level2[i].setup(maxBitSize(2), 2, i);
+	for (i = 0; i < 1; ++i) _Level0[i].setup(maxBitSize(0), 0, i);
+	for (i = 0; i < 2; ++i) _Level1[i].setup(maxBitSize(1), 1, i);
+	for (i = 0; i < 4; ++i) _Level2[i].setup(maxBitSize(2), 2, i);
 
 	_QueuedImpulses.resize(256, 0);
 
 	_TotalPackets = 0;
 }
 
-
 //
-void	CImpulseEncoder::add(CActionImpulsion *action, uint level)
+void CImpulseEncoder::add(CActionImpulsion *action, uint level)
 {
 	nlassert(level < 3);
 
@@ -221,37 +210,37 @@ void	CImpulseEncoder::add(CActionImpulsion *action, uint level)
 
 	countAddedAction(action, level);
 
-/*
-	CImpulseQueue	*table = NULL;
-	switch (level)
-	{
-	case 0:	table = _Level0; break;
-	case 1:	table = _Level1; break;
-	case 2:	table = _Level2; break;
-	}
+	/*
+	    CImpulseQueue	*table = NULL;
+	    switch (level)
+	    {
+	    case 0:	table = _Level0; break;
+	    case 1:	table = _Level1; break;
+	    case 2:	table = _Level2; break;
+	    }
 
-	if (channel == -1)
-	{
-		uint	i, min = -1;
-		channel = 0;
-		uint nbQueues = (uint)(1<<level);
-		for (i=0; i<nbQueues; ++i)
-		{
-			if (table[i].Queue.size() < min)
-			{
-				min = table[i].Queue.size();
-				channel = i;
-			}
-		}
-	}
+	    if (channel == -1)
+	    {
+	        uint	i, min = -1;
+	        channel = 0;
+	        uint nbQueues = (uint)(1<<level);
+	        for (i=0; i<nbQueues; ++i)
+	        {
+	            if (table[i].Queue.size() < min)
+	            {
+	                min = table[i].Queue.size();
+	                channel = i;
+	            }
+	        }
+	    }
 
-	nlassert(channel >= 0);
-	nlassertex(channel < (1<<level), ("channel=%d level=%d", channel, level) );
+	    nlassert(channel >= 0);
+	    nlassertex(channel < (1<<level), ("channel=%d level=%d", channel, level) );
 
-	table[channel].add(action);
-*/
+	    table[channel].add(action);
+	*/
 
-	//nlassert(channel == -1);
+	// nlassert(channel == -1);
 
 	_MainQueues[level].push_back(action);
 
@@ -259,17 +248,17 @@ void	CImpulseEncoder::add(CActionImpulsion *action, uint level)
 }
 
 //
-uint32	CImpulseEncoder::send(uint32 packet, NLMISC::CBitMemStream &outbox, uint32 &sentActions)
+uint32 CImpulseEncoder::send(uint32 packet, NLMISC::CBitMemStream &outbox, uint32 &sentActions)
 {
-	//LOG_IMPULSION_DEBUG("FEIMP: send() packet %d", packet);
+	// LOG_IMPULSION_DEBUG("FEIMP: send() packet %d", packet);
 
-	uint32	serialised = 0;
+	uint32 serialised = 0;
 	sentActions = 0;
 
 	// Send one queue for each level
-	serialised += _Level0[0].send( _MainQueues[0], packet, outbox, sentActions );
-	serialised += _Level1[packet&1].send( _MainQueues[1], packet, outbox, sentActions );
-	serialised += _Level2[packet&3].send( _MainQueues[2], packet, outbox, sentActions );
+	serialised += _Level0[0].send(_MainQueues[0], packet, outbox, sentActions);
+	serialised += _Level1[packet & 1].send(_MainQueues[1], packet, outbox, sentActions);
+	serialised += _Level2[packet & 3].send(_MainQueues[2], packet, outbox, sentActions);
 
 	++_TotalPackets;
 
@@ -277,23 +266,23 @@ uint32	CImpulseEncoder::send(uint32 packet, NLMISC::CBitMemStream &outbox, uint3
 }
 
 //
-void	CImpulseEncoder::ack(uint32 packet)
+void CImpulseEncoder::ack(uint32 packet)
 {
-	//LOG_IMPULSION_DEBUG("FEIMP: ack() packet %d", packet);
+	// LOG_IMPULSION_DEBUG("FEIMP: ack() packet %d", packet);
 
 	_Level0[0].flush(packet, _ClientHost, _QueuedImpulses);
-	_Level1[packet&1].flush(packet, _ClientHost, _QueuedImpulses);
-	_Level2[packet&3].flush(packet, _ClientHost, _QueuedImpulses);
+	_Level1[packet & 1].flush(packet, _ClientHost, _QueuedImpulses);
+	_Level2[packet & 3].flush(packet, _ClientHost, _QueuedImpulses);
 }
 
 //
-uint	CImpulseEncoder::queueSize(uint level) const
+uint CImpulseEncoder::queueSize(uint level) const
 {
 	nlassert(level < 3);
 
-	uint				channel, 
-						maxChannel = (1<<level);
-	const CImpulseQueue	*channels;
+	uint channel,
+	    maxChannel = (1 << level);
+	const CImpulseQueue *channels;
 
 	switch (level)
 	{
@@ -302,70 +291,69 @@ uint	CImpulseEncoder::queueSize(uint level) const
 	case 2: channels = _Level2; break;
 	}
 
-	uint	size = (uint)_MainQueues[level].size();
+	uint size = (uint)_MainQueues[level].size();
 
-	for (channel=0; channel<maxChannel; ++channel)
+	for (channel = 0; channel < maxChannel; ++channel)
 		size += (uint)channels[channel].Queue.size();
 
 	return size;
 }
 
 //
-uint	CImpulseEncoder::queueSize() const
+uint CImpulseEncoder::queueSize() const
 {
-	uint	level, 
-			size = 0;
+	uint level,
+	    size = 0;
 
-	for (level=0; level<3; ++level)
+	for (level = 0; level < 3; ++level)
 		size += queueSize(level);
 
 	return size;
 }
 
 // Get Enqueued actions size in bits for a specified level
-uint	CImpulseEncoder::getEnqueuedSize(uint level) const
+uint CImpulseEncoder::getEnqueuedSize(uint level) const
 {
 	nlassert(level < 3);
-	const TActionQueue&	queue = _MainQueues[level];
+	const TActionQueue &queue = _MainQueues[level];
 
-	uint	bitSize = 0;
-	uint	i;
-	for (i=0; i<queue.size(); ++i)
+	uint bitSize = 0;
+	uint i;
+	for (i = 0; i < queue.size(); ++i)
 		bitSize += CActionFactory::getInstance()->size(queue[i]);
 
 	return bitSize;
 }
 
-
 //
-void	CImpulseEncoder::reset()
+void CImpulseEncoder::reset()
 {
 	_MainQueues[0].clear();
 	_MainQueues[1].clear();
 	_MainQueues[2].clear();
 
-	uint	i;
-	for (i=0; i<1; ++i)		_Level0[i].reset();
-	for (i=0; i<2; ++i)		_Level1[i].reset();
-	for (i=0; i<4; ++i)		_Level2[i].reset();
+	uint i;
+	for (i = 0; i < 1; ++i) _Level0[i].reset();
+	for (i = 0; i < 2; ++i) _Level1[i].reset();
+	for (i = 0; i < 4; ++i) _Level2[i].reset();
 }
 
 //
-void	CImpulseEncoder::unmarkAll()
+void CImpulseEncoder::unmarkAll()
 {
-	uint	i;
-	for (i=0; i<1; ++i)		_Level0[i].reinit();
-	for (i=0; i<2; ++i)		_Level1[i].reinit();
-	for (i=0; i<4; ++i)		_Level2[i].reinit();
+	uint i;
+	for (i = 0; i < 1; ++i) _Level0[i].reinit();
+	for (i = 0; i < 2; ++i) _Level1[i].reinit();
+	for (i = 0; i < 4; ++i) _Level2[i].reinit();
 }
 
 //
-void	CImpulseEncoder::setReceivedCallback(TImpulseReceivedCallback cb, sint actionCode)
+void CImpulseEncoder::setReceivedCallback(TImpulseReceivedCallback cb, sint actionCode)
 {
 	if (actionCode == -1)
 	{
-		uint	i;
-		for (i=0; i<256; ++i)
+		uint i;
+		for (i = 0; i < 256; ++i)
 			_Callbacks[i] = cb;
 	}
 	else
@@ -378,47 +366,46 @@ void	CImpulseEncoder::setReceivedCallback(TImpulseReceivedCallback cb, sint acti
 }
 
 //
-void	CImpulseEncoder::removeEntityReferences(CLFECOMMON::TCLEntityId id)
+void CImpulseEncoder::removeEntityReferences(CLFECOMMON::TCLEntityId id)
 {
 	if (hasEntityReferences(id))
 	{
-		TActionQueue::iterator	it;
-		for (it=_MainQueues[0].begin(); it<_MainQueues[0].end(); )
+		TActionQueue::iterator it;
+		for (it = _MainQueues[0].begin(); it < _MainQueues[0].end();)
 			if ((*it)->Slot == id)
 				CLFECOMMON::CActionFactory::getInstance()->remove(*it), it = _MainQueues[0].erase(it);
 			else
 				++it;
-		for (it=_MainQueues[1].begin(); it<_MainQueues[1].end(); )
+		for (it = _MainQueues[1].begin(); it < _MainQueues[1].end();)
 			if ((*it)->Slot == id)
 				CLFECOMMON::CActionFactory::getInstance()->remove(*it), it = _MainQueues[1].erase(it);
 			else
 				++it;
-		for (it=_MainQueues[2].begin(); it<_MainQueues[2].end(); )
+		for (it = _MainQueues[2].begin(); it < _MainQueues[2].end();)
 			if ((*it)->Slot == id)
 				CLFECOMMON::CActionFactory::getInstance()->remove(*it), it = _MainQueues[2].erase(it);
 			else
 				++it;
 
-		uint	i;
-		for (i=0; i<1; ++i)		_Level0[i].removeReferences(id);
-		for (i=0; i<2; ++i)		_Level1[i].removeReferences(id);
-		for (i=0; i<4; ++i)		_Level2[i].removeReferences(id);
+		uint i;
+		for (i = 0; i < 1; ++i) _Level0[i].removeReferences(id);
+		for (i = 0; i < 2; ++i) _Level1[i].removeReferences(id);
+		for (i = 0; i < 4; ++i) _Level2[i].removeReferences(id);
 		_QueuedImpulses[id] = 0;
 	}
 }
 
-
 // Dump stats to XML stream
-void	CImpulseEncoder::dump(NLMISC::IStream& s)
+void CImpulseEncoder::dump(NLMISC::IStream &s)
 {
 	s.xmlPushBegin("ImpulseStat");
 
 	s.xmlSetAttrib("id");
-	uint32		id = _ClientHost->clientId();
+	uint32 id = _ClientHost->clientId();
 	s.serial(id);
 
 	s.xmlSetAttrib("eid");
-	CEntityId	eid = _ClientHost->eId();
+	CEntityId eid = _ClientHost->eId();
 	s.serial(eid);
 
 	s.xmlSetAttrib("totalPacketSent");
@@ -428,13 +415,13 @@ void	CImpulseEncoder::dump(NLMISC::IStream& s)
 
 	s.xmlPushBegin("Level0");
 	s.xmlSetAttrib("efficiency");
-	float	efficiency = efficiencyRatio(0);
+	float efficiency = efficiencyRatio(0);
 	s.serial(efficiency);
 	s.xmlSetAttrib("stillEnqueued");
-	uint32	enqueuedSize = getEnqueuedSize(0);
+	uint32 enqueuedSize = getEnqueuedSize(0);
 	s.serial(enqueuedSize);
 	s.xmlSetAttrib("addRate");
-	uint32	addRate = effectiveAddRate(0);
+	uint32 addRate = effectiveAddRate(0);
 	s.serial(addRate);
 	s.xmlPushEnd();
 	_Level0[0].dump(s);
@@ -476,39 +463,38 @@ void	CImpulseEncoder::dump(NLMISC::IStream& s)
 }
 
 // Count Added action
-void	CImpulseEncoder::countAddedAction(CLFECOMMON::CActionImpulsion *action, uint level)
+void CImpulseEncoder::countAddedAction(CLFECOMMON::CActionImpulsion *action, uint level)
 {
-	TSendRateQueue&	queue = _AddRateQueues[level];
+	TSendRateQueue &queue = _AddRateQueues[level];
 
-	NLMISC::TTime	ctime = NLMISC::CTime::getLocalTime();
-	while (!queue.empty() && ctime > queue.front().Time+(IMPULSE_STAT_MEAN_TIME*1000))
+	NLMISC::TTime ctime = NLMISC::CTime::getLocalTime();
+	while (!queue.empty() && ctime > queue.front().Time + (IMPULSE_STAT_MEAN_TIME * 1000))
 		queue.pop_front();
 
 	queue.push_back(CTimedSize(ctime, CActionFactory::getInstance()->size(action)));
 }
 
-
 // Effective Add Rate
-uint	CImpulseEncoder::effectiveAddRate(uint level)
+uint CImpulseEncoder::effectiveAddRate(uint level)
 {
-	TSendRateQueue&	queue = _AddRateQueues[level];
+	TSendRateQueue &queue = _AddRateQueues[level];
 
-	NLMISC::TTime	ctime = NLMISC::CTime::getLocalTime();
-	while (!queue.empty() && ctime > queue.front().Time+(IMPULSE_STAT_MEAN_TIME*1000))
+	NLMISC::TTime ctime = NLMISC::CTime::getLocalTime();
+	while (!queue.empty() && ctime > queue.front().Time + (IMPULSE_STAT_MEAN_TIME * 1000))
 		queue.pop_front();
 
-	uint	totalBitAdded = 0;
-	uint	i;
-	for (i=0; i<queue.size(); ++i)
+	uint totalBitAdded = 0;
+	uint i;
+	for (i = 0; i < queue.size(); ++i)
 		totalBitAdded += queue[i].Size;
 
 	return totalBitAdded / IMPULSE_STAT_MEAN_TIME;
 }
 
 // Effective Send Rate (cumulated send of each channel)
-uint	CImpulseEncoder::effectiveSendRate(uint level)
+uint CImpulseEncoder::effectiveSendRate(uint level)
 {
-	CImpulseQueue	*channels;
+	CImpulseQueue *channels;
 
 	switch (level)
 	{
@@ -517,59 +503,56 @@ uint	CImpulseEncoder::effectiveSendRate(uint level)
 	case 2: channels = _Level2; break;
 	}
 
-	uint	rate = 0;
+	uint rate = 0;
 
-	uint	channel, maxChannel = (1<<level);
-	for (channel=0; channel<maxChannel; ++channel)
+	uint channel, maxChannel = (1 << level);
+	for (channel = 0; channel < maxChannel; ++channel)
 		rate += channels[channel].effectiveSendRate();
 
 	return rate;
 }
 
-
 // Efficiency Ratio
-float	CImpulseEncoder::efficiencyRatio(uint level)
+float CImpulseEncoder::efficiencyRatio(uint level)
 {
-	uint	addRate = effectiveAddRate(level);
-	uint	sendRate = effectiveSendRate(level);
+	uint addRate = effectiveAddRate(level);
+	uint sendRate = effectiveSendRate(level);
 
-	return (addRate != 0) ? ((float)sendRate/(float)addRate) : 0.0f;
+	return (addRate != 0) ? ((float)sendRate / (float)addRate) : 0.0f;
 }
 
 // Get least efficiency
-float	CImpulseEncoder::leastEfficiencyRatio()
+float CImpulseEncoder::leastEfficiencyRatio()
 {
-	float	l0 = efficiencyRatio(0);
-	float	l1 = efficiencyRatio(1);
-	float	l2 = efficiencyRatio(2);
-	float	less = 1000.0f;
+	float l0 = efficiencyRatio(0);
+	float l1 = efficiencyRatio(1);
+	float l2 = efficiencyRatio(2);
+	float less = 1000.0f;
 
-	if (l0 > 0 && l0 < less)	less = l0;
-	if (l1 > 0 && l1 < less)	less = l1;
-	if (l2 > 0 && l2 < less)	less = l2;
+	if (l0 > 0 && l0 < less) less = l0;
+	if (l1 > 0 && l1 < less) less = l1;
+	if (l2 > 0 && l2 < less) less = l2;
 
 	return less;
 }
 
 // Get biggest queue size
-uint	CImpulseEncoder::biggestQueueSize()
+uint CImpulseEncoder::biggestQueueSize()
 {
-	uint	l0 = getEnqueuedSize(0);
-	uint	l1 = getEnqueuedSize(1);
-	uint	l2 = getEnqueuedSize(2);
-	uint	more = 0;
+	uint l0 = getEnqueuedSize(0);
+	uint l1 = getEnqueuedSize(1);
+	uint l2 = getEnqueuedSize(2);
+	uint more = 0;
 
-	if (l0 > more)	more = l0;
-	if (l1 > more)	more = l1;
-	if (l2 > more)	more = l2;
+	if (l0 > more) more = l0;
+	if (l1 > more) more = l1;
+	if (l2 > more) more = l2;
 
 	return more;
 }
 
-
-
 //
-void	CImpulseQueue::dump(NLMISC::IStream& s)
+void CImpulseQueue::dump(NLMISC::IStream &s)
 {
 	s.xmlPushBegin("QueueStat");
 
@@ -580,35 +563,33 @@ void	CImpulseQueue::dump(NLMISC::IStream& s)
 	s.serial(MaxBitSize);
 
 	s.xmlSetAttrib("sendRate");
-	uint32	sendRate = effectiveSendRate();
+	uint32 sendRate = effectiveSendRate();
 	s.serial(sendRate);
 
 	s.xmlSetAttrib("sentData");
-	uint64	sentData = totalSentData();
+	uint64 sentData = totalSentData();
 	s.serial(sentData);
 
 	s.xmlSetAttrib("effectiveSend");
-	uint32	effectiveSend = FlushTimes;
+	uint32 effectiveSend = FlushTimes;
 	s.serial(effectiveSend);
 
 	s.xmlPushEnd();
 
 	s.xmlPush("SendQueue");
-	for (uint i=0; i<SendRateQueue.size(); ++i)
+	for (uint i = 0; i < SendRateQueue.size(); ++i)
 		s.serial(SendRateQueue[i]);
 	s.xmlPop();
 
 	s.xmlPop();
 }
 
-
-
-void	CTimedSize::serial(NLMISC::IStream& s)
+void CTimedSize::serial(NLMISC::IStream &s)
 {
 	s.xmlPushBegin("TimedSize");
 
 	s.xmlSetAttrib("time");
-	NLMISC::TTime	dtime = NLMISC::CTime::getLocalTime()-Time;
+	NLMISC::TTime dtime = NLMISC::CTime::getLocalTime() - Time;
 	s.serial(dtime);
 
 	s.xmlSetAttrib("size");
@@ -618,31 +599,29 @@ void	CTimedSize::serial(NLMISC::IStream& s)
 	s.xmlPop();
 }
 
-
 /*
  * Destructor
  */
 CImpulseQueue::~CImpulseQueue()
 {
-	for ( TActionQueue::iterator it=Queue.begin(); it!=Queue.end(); ++it )
+	for (TActionQueue::iterator it = Queue.begin(); it != Queue.end(); ++it)
 	{
-		CLFECOMMON::CActionFactory::getInstance()->remove( *it );
+		CLFECOMMON::CActionFactory::getInstance()->remove(*it);
 	}
 }
-
 
 /*
  * Destructor
  */
 CImpulseEncoder::~CImpulseEncoder()
 {
-	for ( uint i=0; i!=3; ++i )
+	for (uint i = 0; i != 3; ++i)
 	{
-		TActionQueue& queue = _MainQueues[i];
+		TActionQueue &queue = _MainQueues[i];
 
-		for ( TActionQueue::iterator it=queue.begin(); it!=queue.end(); ++it )
+		for (TActionQueue::iterator it = queue.begin(); it != queue.end(); ++it)
 		{
-			CActionFactory::getInstance()->remove( *it );
+			CActionFactory::getInstance()->remove(*it);
 		}
 	}
 }

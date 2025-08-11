@@ -27,11 +27,9 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
+CDirectoryRateStat DirStats;
 
-CDirectoryRateStat	DirStats;
-
-extern CVariable<string>	SaveShardRootGameShare;
-
+extern CVariable<string> SaveShardRootGameShare;
 
 NLMISC_COMMAND(displayFileStats, "display file read/write stats for the last minute", "")
 {
@@ -42,49 +40,48 @@ NLMISC_COMMAND(displayFileStats, "display file read/write stats for the last min
 NLMISC_DYNVARIABLE(string, FileReadStat, "mean file read in bytes per seconds for the last minute")
 {
 	if (get)
-		*pointer = 	bytesToHumanReadable(DirStats.getMeanReadRate());
+		*pointer = bytesToHumanReadable(DirStats.getMeanReadRate());
 	return;
 }
 
 NLMISC_DYNVARIABLE(string, FileWriteStat, "mean file write in bytes per seconds for the last minute")
 {
 	if (get)
-		*pointer = 	bytesToHumanReadable(DirStats.getMeanWriteRate());
+		*pointer = bytesToHumanReadable(DirStats.getMeanWriteRate());
 	return;
 }
 
-
-NLMISC_COMMAND ( resumeBackupService, "reset stall mode for resume backup process", "no params")
+NLMISC_COMMAND(resumeBackupService, "reset stall mode for resume backup process", "no params")
 {
-	CBackupService::getInstance()->setStall( false );
+	CBackupService::getInstance()->setStall(false);
 	CMessage msgOut("RESUME_SHARD");
-	CUnifiedNetwork::getInstance()->send("EGS", msgOut );
+	CUnifiedNetwork::getInstance()->send("EGS", msgOut);
 	return true;
 }
 
-NLMISC_COMMAND ( stallBackupService, "set backup service un stall mode", "no params")
+NLMISC_COMMAND(stallBackupService, "set backup service un stall mode", "no params")
 {
-	CBackupService::getInstance()->stallShard( std::string("Stalled by admin command") );
+	CBackupService::getInstance()->stallShard(std::string("Stalled by admin command"));
 	return true;
 }
 
-NLMISC_COMMAND ( dumpCharacterFile, "dump the content of the save file for a character. Invoke with no param to display a list of available shardId.", "<shardId> <playerID> <slotNum> [<onlyThisTag>|listTokens]")
+NLMISC_COMMAND(dumpCharacterFile, "dump the content of the save file for a character. Invoke with no param to display a list of available shardId.", "<shardId> <playerID> <slotNum> [<onlyThisTag>|listTokens]")
 {
 	if (args.size() == 0)
 	{
 		// just output the list of available shard id
-		vector<string>	shards;
+		vector<string> shards;
 		CPath::getPathContent(SaveShardRootGameShare, false, true, false, shards);
 
 		log.displayNL("Listing %u available shard id in path '%s':", shards.size(), SaveShardRootGameShare.c_str());
-		for (uint i=0; i<shards.size(); ++i)
+		for (uint i = 0; i < shards.size(); ++i)
 		{
 			string id = shards[i];
 			id = CPath::standardizePath(id, false);
-			if (!id.empty() && (id[id.size()-1] == '\\' || id[id.size()-1] == '/'))
-				id.resize(id.size()-1);
+			if (!id.empty() && (id[id.size() - 1] == '\\' || id[id.size() - 1] == '/'))
+				id.resize(id.size() - 1);
 			id = CFile::getFilename(id);
-			
+
 			log.displayNL("  %s", id.c_str());
 		}
 		log.displayNL("End of list.");
@@ -102,18 +99,18 @@ NLMISC_COMMAND ( dumpCharacterFile, "dump the content of the save file for a cha
 
 	if (args.size() == 4)
 	{
-		filterIn = string("<")+args[3];
-		filterOut = string("</")+args[3];
+		filterIn = string("<") + args[3];
+		filterOut = string("</") + args[3];
 		useFilter = true;
 	}
 
-	string fileName = SaveShardRootGameShare.toString()+"/"+args[0]+"/characters/account_"+args[1]+"_"+args[2]+"_pdr.bin";
+	string fileName = SaveShardRootGameShare.toString() + "/" + args[0] + "/characters/account_" + args[1] + "_" + args[2] + "_pdr.bin";
 	if (!CFile::isExists(fileName))
 	{
-		log.displayNL("The file '%s' (located here '%s') cannot be found in '%s' backup directory", 
-			CFile::getFilename(fileName).c_str(), 
-			fileName.c_str(),
-			args[0].c_str());
+		log.displayNL("The file '%s' (located here '%s') cannot be found in '%s' backup directory",
+		    CFile::getFilename(fileName).c_str(),
+		    fileName.c_str(),
+		    args[0].c_str());
 		return true;
 	}
 
@@ -126,7 +123,7 @@ NLMISC_COMMAND ( dumpCharacterFile, "dump the content of the save file for a cha
 		log.displayNL("Error while reading file '%s'", fileName.c_str());
 		return true;
 	}
-	
+
 	string xml;
 	if (!pdr.toString(xml))
 	{
@@ -152,14 +149,14 @@ NLMISC_COMMAND ( dumpCharacterFile, "dump the content of the save file for a cha
 
 			pos = xml.find("<", pos);
 		}
-		
+
 		// output the result
 		log.displayNL("Displaying %u tokens in characters file :", tokens.size());
 		string line;
 		set<string>::iterator first(tokens.begin()), last(tokens.end());
 		for (; first != last; ++first)
 		{
-			line += *first+" ";
+			line += *first + " ";
 
 			if (line.size() > 80)
 			{
@@ -182,7 +179,7 @@ NLMISC_COMMAND ( dumpCharacterFile, "dump the content of the save file for a cha
 
 	bool logOn = !useFilter;
 
-	for (uint i=0; i<lines.size(); ++i)
+	for (uint i = 0; i < lines.size(); ++i)
 	{
 		// check filters
 		if (useFilter)
@@ -195,31 +192,30 @@ NLMISC_COMMAND ( dumpCharacterFile, "dump the content of the save file for a cha
 		// check filter
 		if (useFilter)
 		{
-			if (logOn 
-				&& (lines[i].find(filterOut) != string::npos 
-				|| (lines[i].find(filterIn) != string::npos 
-					&& lines[i].find("/>") != string::npos)
-				))
-					logOn = false;
+			if (logOn
+			    && (lines[i].find(filterOut) != string::npos
+			        || (lines[i].find(filterIn) != string::npos
+			            && lines[i].find("/>") != string::npos)))
+				logOn = false;
 		}
 	}
 
 	return true;
 }
 
-static char		base64Table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-static uint8	base64Revert[256];
-static bool		base64Init = false;
+static char base64Table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static uint8 base64Revert[256];
+static bool base64Init = false;
 
-static void	base64Encode(const std::vector<uint8>& buffer, std::string& encoded)
+static void base64Encode(const std::vector<uint8> &buffer, std::string &encoded)
 {
 	encoded.clear();
-	encoded.reserve(buffer.size()*4/3+3);
+	encoded.reserve(buffer.size() * 4 / 3 + 3);
 
-	uint	i;
-	for (i=0; i<buffer.size(); )
+	uint i;
+	for (i = 0; i < buffer.size();)
 	{
-		uint32	b = 0;
+		uint32 b = 0;
 
 		b |= (buffer[i++] << 16);
 		encoded += base64Table[(b >> 18) & 0x3f];
@@ -247,26 +243,25 @@ static void	base64Encode(const std::vector<uint8>& buffer, std::string& encoded)
 			encoded += '=';
 			encoded += '=';
 		}
-
 	}
 }
 
-static void	base64Decode(std::vector<uint8>& buffer, const std::string& encoded)
+static void base64Decode(std::vector<uint8> &buffer, const std::string &encoded)
 {
-	uint	i;
+	uint i;
 
 	if (!base64Init)
 	{
-		for (i=0; i<256; ++i)
+		for (i = 0; i < 256; ++i)
 			base64Revert[i] = 255;
-		for (i=0; i<sizeof(base64Table); ++i)
+		for (i = 0; i < sizeof(base64Table); ++i)
 			base64Revert[base64Table[i]] = i;
 	}
 
-	uint	sz = (uint)encoded.size();
-	uint	inbits = 0;
-	uint	bitbuffer = 0;
-	for (i=0; i<sz; ++i)
+	uint sz = (uint)encoded.size();
+	uint inbits = 0;
+	uint bitbuffer = 0;
+	for (i = 0; i < sz; ++i)
 	{
 		// padding? -> leave
 		if (encoded[i] == '=')
@@ -281,51 +276,43 @@ static void	base64Decode(std::vector<uint8>& buffer, const std::string& encoded)
 
 		if (inbits >= 8)
 		{
-			buffer.push_back((uint8)(bitbuffer >> (inbits-8)));
+			buffer.push_back((uint8)(bitbuffer >> (inbits - 8)));
 			inbits -= 8;
 		}
 	}
 }
 
-
-
-
-NLMISC_COMMAND ( stallShard, "stall backup service and connected shards (via EGS)", "")
+NLMISC_COMMAND(stallShard, "stall backup service and connected shards (via EGS)", "")
 {
 	CBackupService::getInstance()->FileManager.setMode(CFileAccessManager::Stalled, "MANUAL BS STALL");
 	return true;
 }
 
-NLMISC_COMMAND ( resumeShard, "resume backup service and connected shards (via EGS)", "")
+NLMISC_COMMAND(resumeShard, "resume backup service and connected shards (via EGS)", "")
 {
 	CBackupService::getInstance()->FileManager.setMode(CFileAccessManager::Normal, "MANUAL BS RESUME");
 	return true;
 }
 
-NLMISC_COMMAND ( removeFileAccess, "remove a file access from file access manager (see displayFileAccesses)", "<hexa pointer>")
+NLMISC_COMMAND(removeFileAccess, "remove a file access from file access manager (see displayFileAccesses)", "<hexa pointer>")
 {
 	if (args.size() != 1)
 		return false;
 
-	IFileAccess*	access = NULL;
+	IFileAccess *access = NULL;
 	sscanf(args[0].c_str(), "%p", &access);
 
 	CBackupService::getInstance()->FileManager.removeFileAccess(access);
 	return true;
 }
 
-NLMISC_COMMAND ( displayFileAccesses, "display stacked file accesses", "")
+NLMISC_COMMAND(displayFileAccesses, "display stacked file accesses", "")
 {
 	CBackupService::getInstance()->FileManager.displayFileAccesses(log);
 	return true;
 }
 
-
-
-
-
-
-NLMISC_COMMAND (getFileBase64Content, "dump file content in Base64 encoded form", "<file>")
+NLMISC_COMMAND(getFileBase64Content, "dump file content in Base64 encoded form", "<file>")
 {
 	if (args.size() != 1)
 	{
@@ -333,34 +320,34 @@ NLMISC_COMMAND (getFileBase64Content, "dump file content in Base64 encoded form"
 		return true;
 	}
 
-	CIFile	f;
+	CIFile f;
 	if (!CFile::fileExists(args[0]) || CFile::getFileSize(args[0]) == 0 || !f.open(args[0]))
 	{
 		log.displayRawNL("file %s lines 0 size 0", args[0].c_str());
 		return true;
 	}
 
-	uint	filesize = f.getFileSize();
+	uint filesize = f.getFileSize();
 
-	std::vector<uint8>	buffer;
+	std::vector<uint8> buffer;
 	buffer.resize(filesize);
 	f.serialBuffer(&(buffer[0]), filesize);
 	f.close();
 
-	CHashKeyMD5	key = getMD5(&(buffer[0]), filesize);
+	CHashKeyMD5 key = getMD5(&(buffer[0]), filesize);
 
-	std::string			encoded;
+	std::string encoded;
 	base64Encode(buffer, encoded);
 
-	uint	numcharperline = 224;
-	uint	numlines = ((uint)encoded.size()+numcharperline-1)/numcharperline;
+	uint numcharperline = 224;
+	uint numlines = ((uint)encoded.size() + numcharperline - 1) / numcharperline;
 
 	log.displayRawNL("file %s lines %d size %d haskey %s", args[0].c_str(), numlines, filesize, key.toString().c_str());
 
-	uint	cpos = 0;
+	uint cpos = 0;
 	while (cpos < encoded.size())
 	{
-		std::string	line = encoded.substr(cpos, numcharperline);
+		std::string line = encoded.substr(cpos, numcharperline);
 		log.displayRawNL("%s", line.c_str());
 		cpos += numcharperline;
 	}
@@ -368,21 +355,21 @@ NLMISC_COMMAND (getFileBase64Content, "dump file content in Base64 encoded form"
 	return true;
 }
 
-NLMISC_COMMAND (putFileBase64Content, "fill file with content in Base64 encoded form", "<file> <base64content>")
+NLMISC_COMMAND(putFileBase64Content, "fill file with content in Base64 encoded form", "<file> <base64content>")
 {
 	if (args.size() < 2)
 		return false;
 
-	COFile	f;
+	COFile f;
 	if (!f.open(args[0]))
 		return false;
 
-	std::string	encoded;
-	uint	i;
-	for (i=1; i<args.size(); ++i)
+	std::string encoded;
+	uint i;
+	for (i = 1; i < args.size(); ++i)
 		encoded += args[i];
 
-	std::vector<uint8>	buffer;
+	std::vector<uint8> buffer;
 	base64Decode(buffer, encoded);
 
 	f.serialBuffer(&(buffer[0]), (uint)buffer.size());

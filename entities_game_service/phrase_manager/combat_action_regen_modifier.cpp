@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -32,7 +29,7 @@ using namespace NLMISC;
 using namespace NLNET;
 
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CCombatActionRegenModifier::apply(CCombatPhrase *phrase)
 {
@@ -46,15 +43,15 @@ void CCombatActionRegenModifier::apply(CCombatPhrase *phrase)
 	if (_ApplyOnTargets)
 	{
 		const std::vector<CCombatPhrase::TTargetInfos> &targets = phrase->getTargets();
-		for (uint i = 0; i < targets.size() ; ++i)
+		for (uint i = 0; i < targets.size(); ++i)
 		{
-//			if ( !phrase->hasTargetDodged(i) )
-			if ( phrase->getTargetDodgeFactor(i) == 0.0f )
+			//			if ( !phrase->hasTargetDodged(i) )
+			if (phrase->getTargetDodgeFactor(i) == 0.0f)
 			{
 				if (targets[i].Target != NULL)
 				{
-					//applyOnEntity(targets[i].Target->getEntity(), phrase->getPhraseSuccessDamageFactor());
-					applyOnEntity(targets[i].Target->getEntity(), 1.0f-phrase->getTargetDodgeFactor(i));
+					// applyOnEntity(targets[i].Target->getEntity(), phrase->getPhraseSuccessDamageFactor());
+					applyOnEntity(targets[i].Target->getEntity(), 1.0f - phrase->getTargetDodgeFactor(i));
 				}
 			}
 		}
@@ -67,23 +64,23 @@ void CCombatActionRegenModifier::apply(CCombatPhrase *phrase)
 			nlwarning("COMBAT : <CCombatActionRegenModifier::apply> Cannot find the target entity, cancel");
 			return;
 		}
-//		applyOnEntity(entity, phrase->getPhraseSuccessDamageFactor());
+		//		applyOnEntity(entity, phrase->getPhraseSuccessDamageFactor());
 		applyOnEntity(entity, 1.0f);
 	}
 } // apply //
 
 //--------------------------------------------------------------
-//					applyOnEntity()  
+//					applyOnEntity()
 //--------------------------------------------------------------
-void CCombatActionRegenModifier::applyOnEntity( CEntityBase *entity, float successFactor )
+void CCombatActionRegenModifier::applyOnEntity(CEntityBase *entity, float successFactor)
 {
 	if (!entity || !_CombatPhrase) return;
 
 	// if entity is already dead, return
 	if (entity->isDead())
 		return;
-	
-	TGameCycle	endDate = TGameCycle(_Duration*successFactor) + CTickEventHandler::getGameCycle();
+
+	TGameCycle endDate = TGameCycle(_Duration * successFactor) + CTickEventHandler::getGameCycle();
 
 	float factor = getApplyValue(_CombatPhrase->weaponSabrinaValue());
 
@@ -101,7 +98,7 @@ void CCombatActionRegenModifier::applyOnEntity( CEntityBase *entity, float succe
 	// check an effect name has been set
 	if (_EffectName.empty())
 	{
-		nlwarning("COMBAT : Effect name not set for effect family %s", EFFECT_FAMILIES::toString(_Family).c_str() );
+		nlwarning("COMBAT : Effect name not set for effect family %s", EFFECT_FAMILIES::toString(_Family).c_str());
 		return;
 	}
 

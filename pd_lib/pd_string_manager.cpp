@@ -16,25 +16,25 @@
 
 #error "deprecated"
 
-//#include "pd_string_manager.h"
-//#include "pd_lib.h"
+// #include "pd_string_manager.h"
+// #include "pd_lib.h"
 //
-//#include <string.h>
+// #include <string.h>
 //
-//#include <nel/misc/file.h>
-//#include <nel/misc/command.h>
-//#include <nel/net/unified_network.h>
-//#include <nel/net/service.h>
+// #include <nel/misc/file.h>
+// #include <nel/misc/command.h>
+// #include <nel/net/unified_network.h>
+// #include <nel/net/service.h>
 //
-//#include "pd_lib.h"
-//#include "timestamp.h"
+// #include "pd_lib.h"
+// #include "timestamp.h"
 //
-//using namespace std;
-//using namespace NLMISC;
-//using namespace NLNET;
+// using namespace std;
+// using namespace NLMISC;
+// using namespace NLNET;
 //
 //
-//namespace RY_PDS 
+// namespace RY_PDS
 //{
 //
 ////
@@ -73,19 +73,19 @@
 //
 //
 //// Is net callback ready?
-//bool				CPDStringManager::_InitCb = false;
+// bool				CPDStringManager::_InitCb = false;
 //
 ///// Null String
-//ucstring			CPDStringManager::_NullStr;
+// ucstring			CPDStringManager::_NullStr;
 //
 ///// Number of store string requests that have not been processed by IOS yet
-//uint				CPDStringManager::_NbProcessingStoreStringRequests = 0;
+// uint				CPDStringManager::_NbProcessingStoreStringRequests = 0;
 //
 //
 ///*
 // * Constructor
 // */
-//CPDStringManager::CPDStringManager()
+// CPDStringManager::CPDStringManager()
 //{
 //	_PDSLib = NULL;
 //	_Callback = NULL;
@@ -95,7 +95,7 @@
 ///*
 // * Destructor
 // */
-//CPDStringManager::~CPDStringManager()
+// CPDStringManager::~CPDStringManager()
 //{
 //}
 //
@@ -103,7 +103,7 @@
 ///*
 // * Init
 // */
-//void	CPDStringManager::init(CPDSLib* lib)
+// void	CPDStringManager::init(CPDSLib* lib)
 //{
 //	//
 //	if (!_InitCb)
@@ -120,7 +120,7 @@
 ///*
 // * Get string entry (allocate a new entry if not yet in container)
 // */
-//CPDStringManager::TEntryId	CPDStringManager::getEntryIdNonConst(const ucstring& str)
+// CPDStringManager::TEntryId	CPDStringManager::getEntryIdNonConst(const ucstring& str)
 //{
 //	THash		hash = getHash(str);
 //	TEntryId	entryId = InvalidEntryId;
@@ -173,7 +173,7 @@
 ///*
 // * Compares 2 ucchar strings
 // */
-//bool	CPDStringManager::compare(const ucchar* a, const ucchar* b)
+// bool	CPDStringManager::compare(const ucchar* a, const ucchar* b)
 //{
 //	while (*a == *b && *a != 0)
 //	{
@@ -192,7 +192,7 @@
 // * \param string is the string to add
 // * \return the persistant string id
 // */
-//void	CPDStringManager::addString(NLMISC::CEntityId eid, const ucstring& str, bool addToLog)
+// void	CPDStringManager::addString(NLMISC::CEntityId eid, const ucstring& str, bool addToLog)
 //{
 //	TEntryId		entry = getEntryIdNonConst(str);
 //
@@ -217,7 +217,7 @@
 ///*
 // * Unmap EntityId
 // */
-//void	CPDStringManager::unmap(NLMISC::CEntityId eid, bool addToLog)
+// void	CPDStringManager::unmap(NLMISC::CEntityId eid, bool addToLog)
 //{
 //	TEIdMap::iterator	it = _EIdMap.find(eid);
 //	if (it == _EIdMap.end())
@@ -258,7 +258,7 @@
 // * This callback is called when the string id is received from the IOS.
 // * That is when string id is ready to be used
 // */
-//void	CPDStringManager::setCallback(TStringCallback callback)
+// void	CPDStringManager::setCallback(TStringCallback callback)
 //{
 //	_Callback = callback;
 //}
@@ -269,7 +269,7 @@
 ///*
 // * Display Manager content
 // */
-//void	CPDStringManager::display(NLMISC::CLog* log) const
+// void	CPDStringManager::display(NLMISC::CLog* log) const
 //{
 //}
 //
@@ -278,7 +278,7 @@
 ///*
 // * Serial String Manager
 // */
-//void	CPDStringManager::serial(NLMISC::IStream& f)
+// void	CPDStringManager::serial(NLMISC::IStream& f)
 //{
 //	H_AUTO( PDSSM_SERIAL );
 //	f.serialCheck((uint32)'PDSM');
@@ -305,7 +305,7 @@
 // * Set String (PDS side)
 // */
 ///*
-//bool	CPDStringManager::setString(const NLMISC::CEntityId& eid, TEntryId id, const ucstring& str)
+// bool	CPDStringManager::setString(const NLMISC::CEntityId& eid, TEntryId id, const ucstring& str)
 //{
 //	bool	success = true;
 //
@@ -336,7 +336,7 @@
 //	_EIdMap[eid] = id;
 //
 //	return success;
-//}
+// }
 //*/
 //
 //
@@ -344,7 +344,7 @@
 ///*
 // * Set string Id
 // */
-//void	CPDStringManager::setStringId(const ucstring& str, TStringId id)
+// void	CPDStringManager::setStringId(const ucstring& str, TStringId id)
 //{
 //	THash		hash = getHash(str);
 //	TEntryId	entryId = InvalidEntryId;
@@ -377,7 +377,7 @@
 ///*
 // * Build All String Associations
 // */
-//void	CPDStringManager::buildStringAssociation()
+// void	CPDStringManager::buildStringAssociation()
 //{
 //	uint	i;
 //	for (i=0; i<CPDSLib::_Libs.size(); ++i)
@@ -392,7 +392,7 @@
 ///*
 // * Ask Associations
 // */
-//void	CPDStringManager::askAssociations()
+// void	CPDStringManager::askAssociations()
 //{
 //	uint	i;
 //	for (i=0; i<_StringEntries.size(); ++i)
@@ -407,7 +407,7 @@
 ///*
 // * Rebuild volatile data
 // */
-//void	CPDStringManager::buildVolatileData()
+// void	CPDStringManager::buildVolatileData()
 //{
 //	static bool alreadyBuilt = false;
 //
@@ -451,7 +451,7 @@
 ///*
 // * Load String manager default file (to be used by client when PDS is not connected)
 // */
-//bool	CPDStringManager::load()
+// bool	CPDStringManager::load()
 //{
 //	if (_PDSLib == NULL)
 //		return false;
@@ -477,7 +477,7 @@
 ///*
 // * Save String manager default file (to be used by client when PDS is not connected)
 // */
-//bool	CPDStringManager::save()
+// bool	CPDStringManager::save()
 //{
 //	if (_PDSLib == NULL)
 //		return false;
@@ -503,7 +503,7 @@
 ///*
 // * Load String manager file
 // */
-//bool	CPDStringManager::load(const std::string& path)
+// bool	CPDStringManager::load(const std::string& path)
 //{
 //	std::string	filename = getFile(path);
 //
@@ -536,7 +536,7 @@
 ///*
 // * Save String manager file
 // */
-//bool	CPDStringManager::save(const std::string& path)
+// bool	CPDStringManager::save(const std::string& path)
 //{
 //	std::string	filename = getFile(path);
 //
@@ -563,7 +563,7 @@
 ///*
 // * Get String manager filename
 // */
-//std::string	CPDStringManager::getFile(const std::string& path)
+// std::string	CPDStringManager::getFile(const std::string& path)
 //{
 //	return CPath::standardizePath(path) + "string_manager.bin";
 //}
@@ -572,7 +572,7 @@
 ///*
 // * Apply log
 // */
-//bool	CPDStringManager::applyLog(NLMISC::IStream& s)
+// bool	CPDStringManager::applyLog(NLMISC::IStream& s)
 //{
 //	try
 //	{
@@ -607,7 +607,7 @@
 ///*
 // * Store log
 // */
-//bool	CPDStringManager::storeLog(NLMISC::IStream& s)
+// bool	CPDStringManager::storeLog(NLMISC::IStream& s)
 //{
 //	try
 //	{
@@ -627,7 +627,7 @@
 ///*
 // * Is log file
 // */
-//bool	CPDStringManager::isLogFileName(const std::string& filename, CTimestamp& timestamp)
+// bool	CPDStringManager::isLogFileName(const std::string& filename, CTimestamp& timestamp)
 //{
 //	char	buffer[32];
 //	if (NLMISC::CFile::getExtension(filename) != "xml" ||
@@ -640,7 +640,7 @@
 ///*
 // * Store string in IOS
 // */
-//void	CPDStringManager::storeStringInIOS(const ucstring& str)
+// void	CPDStringManager::storeStringInIOS(const ucstring& str)
 //{
 //	CMessage msgios("STORE_STRING");
 //	msgios.serial( const_cast<ucstring&>(str) );
@@ -652,7 +652,7 @@
 ///*
 // * Returns true if IOS has not processed all store string requests
 // */
-//bool	CPDStringManager::isWaitingIOSStoreStringResult()
+// bool	CPDStringManager::isWaitingIOSStoreStringResult()
 //{
 //	return (_NbProcessingStoreStringRequests != 0);
 //}

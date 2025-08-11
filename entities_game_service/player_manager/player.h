@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef PLAYER_H
 #define PLAYER_H
 
@@ -47,26 +45,29 @@ class CPlayer;
 class CAsyncPlayerLoad : public NLMISC::CRefCount
 {
 	NL_INSTANCE_COUNTER_DECL(CAsyncPlayerLoad);
-public:
 
+public:
 	CAsyncPlayerLoad();
 
-	CPlayer*				Player;
-	uint32					UserId;
-	std::string				LanguageId;
-	bool					AllAuthorized;
-	NLNET::CLoginCookie		LoginCookie;
+	CPlayer *Player;
+	uint32 UserId;
+	std::string LanguageId;
+	bool AllAuthorized;
+	NLNET::CLoginCookie LoginCookie;
 
 	struct CLoadChar
 	{
-		CLoadChar() : Ready(false)	{ }
-		bool						Ready;
-		std::vector<std::string>	Files;
+		CLoadChar()
+		    : Ready(false)
+		{
+		}
+		bool Ready;
+		std::vector<std::string> Files;
 	};
 
-	std::vector<CLoadChar>	Chars;
+	std::vector<CLoadChar> Chars;
 
-	void			clear()
+	void clear()
 	{
 		Player = NULL;
 		UserId = 0;
@@ -76,24 +77,22 @@ public:
 	}
 
 	/// Clear up struct for chars to be received
-	void			initChars();
+	void initChars();
 
 	/// Ask BS to transfer character data
-	void			startLoading();
-
+	void startLoading();
 
 	/// Received characters file list
-	void			receivedCharacterFileList(const CFileDescriptionContainer& fileList, uint charId);
+	void receivedCharacterFileList(const CFileDescriptionContainer &fileList, uint charId);
 
 	/// Received character file
-	void			receivedCharacterFile(const CFileDescription& fileDescription, NLMISC::IStream& dataStream, uint charId);
-
+	void receivedCharacterFile(const CFileDescription &fileDescription, NLMISC::IStream &dataStream, uint charId);
 
 	/// Start Char loading
-	void			startCharLoading(uint charId);
+	void startCharLoading(uint charId);
 
 	/// Set Char ready
-	bool			setCharReady(uint charId)
+	bool setCharReady(uint charId)
 	{
 		if (Chars.size() > charId)
 			Chars[charId].Ready = true;
@@ -101,17 +100,20 @@ public:
 	}
 
 	/// Check All characters ready
-	bool			allCharsReady();
-	
-private:
+	bool allCharsReady();
 
+private:
 	class CFileClassCallback : public IBackupFileClassReceiveCallback
 	{
 	public:
-		CFileClassCallback(CAsyncPlayerLoad* load, uint charId) : Load(load), CharId(charId)	{}
-		uint								CharId;
-		NLMISC::CSmartPtr<CAsyncPlayerLoad>	Load;
-		void				callback(const CFileDescriptionContainer& fileList)
+		CFileClassCallback(CAsyncPlayerLoad *load, uint charId)
+		    : Load(load)
+		    , CharId(charId)
+		{
+		}
+		uint CharId;
+		NLMISC::CSmartPtr<CAsyncPlayerLoad> Load;
+		void callback(const CFileDescriptionContainer &fileList)
 		{
 			if (Load)
 			{
@@ -120,29 +122,33 @@ private:
 			}
 		}
 	};
-/*
-	class CFileListCallback : public IBackupFileListReceiveCallback
-	{
-	public:
-		CFileListCallback(CAsyncPlayerLoad* load) : Load(load)	{}
-		NLMISC::CSmartPtr<CAsyncPlayerLoad>	Load;
-		void				callback(const CFileDescriptionContainer& fileList)
-		{
-			if (Load)
-			{
-				Load->receivedCharactersFileList(fileList);
-				Load = NULL;
-			}
-		}
-	};
-*/
+	/*
+	    class CFileListCallback : public IBackupFileListReceiveCallback
+	    {
+	    public:
+	        CFileListCallback(CAsyncPlayerLoad* load) : Load(load)	{}
+	        NLMISC::CSmartPtr<CAsyncPlayerLoad>	Load;
+	        void				callback(const CFileDescriptionContainer& fileList)
+	        {
+	            if (Load)
+	            {
+	                Load->receivedCharactersFileList(fileList);
+	                Load = NULL;
+	            }
+	        }
+	    };
+	*/
 	class CFileCallback : public IBackupFileReceiveCallback
 	{
 	public:
-		CFileCallback(CAsyncPlayerLoad* load, uint charId) : Load(load), CharId(charId)	{}
-		uint								CharId;
-		NLMISC::CSmartPtr<CAsyncPlayerLoad>	Load;
-		void				callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+		CFileCallback(CAsyncPlayerLoad *load, uint charId)
+		    : Load(load)
+		    , CharId(charId)
+		{
+		}
+		uint CharId;
+		NLMISC::CSmartPtr<CAsyncPlayerLoad> Load;
+		void callback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream)
 		{
 			if (Load)
 			{
@@ -151,9 +157,7 @@ private:
 			}
 		}
 	};
-
 };
-
 
 /**
  * Player class
@@ -164,6 +168,7 @@ private:
 class CPlayer
 {
 	NL_INSTANCE_COUNTER_DECL(CPlayer);
+
 public:
 	/**
 	 * Default constructor
@@ -175,45 +180,45 @@ public:
 	 * WARNING : the version number should be incremented when the serial method is modified
 	 */
 	/// version 2 : for game master titles
-	static inline uint16 getCurrentVersion(){ return 3; }
-	
+	static inline uint16 getCurrentVersion() { return 3; }
+
 	/**
 	 * Get the user unique id
 	 */
 	uint32 getUserId() const { return _UserId; }
-	
+
 	// CPlayer : createCharacter
-	NLMISC::CEntityId createCharacter( const std::string& characterName, EGSPD::CPeople::TPeople people, GSGENDER::EGender gender );
+	NLMISC::CEntityId createCharacter(const std::string &characterName, EGSPD::CPeople::TPeople people, GSGENDER::EGender gender);
 
 	// get first free character slot index
 	sint32 getFirstFreeCharacterIndex();
 
 	/// \return character index corresponding to character number
-	sint32 getCharacterIndex( uint32 number );
+	sint32 getCharacterIndex(uint32 number);
 
 	/**
 	 * provides access to a character
 	 * \return pointer on character
 	 */
 	// By index
-	CCharacter * getCharacter( uint32 c );
+	CCharacter *getCharacter(uint32 c);
 
 	// By CEntityId
-	CCharacter * getCharacter( const NLMISC::CEntityId& id );
+	CCharacter *getCharacter(const NLMISC::CEntityId &id);
 
 	/**
 	 * provides acces to the active character
 	 *
-	 * \return reference on the active character 
+	 * \return reference on the active character
 	 */
-	CCharacter * getActiveCharacter()
+	CCharacter *getActiveCharacter()
 	{
-		if( _ActiveCharIndex >= (sint32)_Characters.size() )
+		if (_ActiveCharIndex >= (sint32)_Characters.size())
 		{
-			nlwarning("<BUG: CCharacter::getActiveCharacter> %d, %d", _ActiveCharIndex, _Characters.size() );
+			nlwarning("<BUG: CCharacter::getActiveCharacter> %d, %d", _ActiveCharIndex, _Characters.size());
 			return 0;
 		}
-		if( _ActiveCharIndex >= 0 )
+		if (_ActiveCharIndex >= 0)
 		{
 			return _Characters[_ActiveCharIndex];
 		}
@@ -224,7 +229,7 @@ public:
 	}
 
 	// Return reference on character vector
-	const std::vector<CCharacter *>& getCharacterReference() { return _Characters; }
+	const std::vector<CCharacter *> &getCharacterReference() { return _Characters; }
 
 	/**
 	 * get the character count
@@ -238,12 +243,12 @@ public:
 	 *
 	 * \param ch is the new character
 	 */
-	void addCharacter( CCharacter * ch, uint32 index )
+	void addCharacter(CCharacter *ch, uint32 index)
 	{
-		nlassert( ch );
-		nlassert( index < _Characters.size() );
-		nlassert( _Characters[ index ] == 0 );
-		_Characters[ index ] = ch;
+		nlassert(ch);
+		nlassert(index < _Characters.size());
+		nlassert(_Characters[index] == 0);
+		_Characters[index] = ch;
 	}
 
 	/**
@@ -251,16 +256,15 @@ public:
 	 *
 	 * \Index is index of character
 	 */
-	void deleteCharacter( uint32 index );
+	void deleteCharacter(uint32 index);
 
 	/**
 	 * Get the characters infos used at char selection menu
 	 *
 	 * \return reference on Id
 	 */
-	void getCharactersSummary( std::vector<CCharacterSummary>& chars );
+	void getCharactersSummary(std::vector<CCharacterSummary> &chars);
 
-	
 	/**
 	 * provides acces user Id
 	 *
@@ -276,16 +280,16 @@ public:
 	 *
 	 * \param id the player's unique id
 	 */
-	void setId( uint32 id )
+	void setId(uint32 id)
 	{
 		_UserId = id;
 	}
-	
+
 	/**
 	 *	set player connection status
 	 * \param status is true if player connected, false if disconnected
 	 */
-	inline void setPlayerConnection( bool status ) { _ConnexionStatus = status; }
+	inline void setPlayerConnection(bool status) { _ConnexionStatus = status; }
 
 	/**
 	 *	Get the player connection status
@@ -298,14 +302,14 @@ public:
 	 * \param charIndex is the index of the player char
 	 * \return state of this char
 	 */
-	const CEntityState& getState( sint32 charIndex = -1 );
+	const CEntityState &getState(sint32 charIndex = -1);
 
 	/**
 	 *	Return the type of the character
 	 * \param charIndex is the index of the player char
 	 * \return type of this char (sheetId)
 	 */
-	NLMISC::CSheetId getType( sint32 charIndex = -1 );
+	NLMISC::CSheetId getType(sint32 charIndex = -1);
 
 	/**
 	 * load all characters of the player
@@ -330,12 +334,12 @@ public:
 	/**
 	 * Write crash marker file so if EGS crash on a saved char, it can wipe it next time
 	 */
-	static void	writeCrashMarker( uint32 userId, uint32 charId);
+	static void writeCrashMarker(uint32 userId, uint32 charId);
 
 	/**
 	 * Check EGS didn't crashed on last load (and wipe buggy file if so)
 	 */
-	static void	checkCrashMarker();
+	static void checkCrashMarker();
 
 	/**
 	 * get the active character index
@@ -348,29 +352,29 @@ public:
 	 * \param uint32 index the active character index
 	 * \return bool true if the index was valid, false otherwise
 	 */
-	bool setActiveCharIndex( uint32 index, NLMISC::CEntityId charId );
+	bool setActiveCharIndex(uint32 index, NLMISC::CEntityId charId);
 
 	/**
 	 *	Set the value of a var
 	 * \param var is the name of the variable
 	 * \param value is the new value for the variable
 	 */
-	void setValue( std::string var, std::string value );
-	
+	void setValue(std::string var, std::string value);
+
 	/**
 	 *	Return the value of the variable
 	 * \param var is the name of the variable
 	 * \param value is the current value of the variable
 	 */
-	void getValue( std::string var, std::string& value );
+	void getValue(std::string var, std::string &value);
 
 	/**
-     * Set disconnection time
-     */
+	 * Set disconnection time
+	 */
 	void setDisconnectionTime() { _DisconnectionTime = CTickEventHandler::getGameCycle(); }
 
 	/**
-     * Get disconnection time
+	 * Get disconnection time
 	 */
 	NLMISC::TGameCycle getDisconnectionTime() { return _DisconnectionTime; }
 
@@ -379,26 +383,26 @@ public:
 	 */
 	void removeAllCharacters();
 
-	void setUserName( const std::string& name ) { _UserName = name; }
-	const std::string& getUserName() { return _UserName; }
+	void setUserName(const std::string &name) { _UserName = name; }
+	const std::string &getUserName() { return _UserName; }
 
-	void setUserPriv( const std::string& priv ) { _UserPriv = priv; }
-	const std::string& getUserPriv() const { return _UserPriv; }
+	void setUserPriv(const std::string &priv) { _UserPriv = priv; }
+	const std::string &getUserPriv() const { return _UserPriv; }
 
 	// return true if the user have the privilege
-	bool havePriv( const std::string &priv ) const;
+	bool havePriv(const std::string &priv) const;
 
 	// return true is the user have any privilege
 	bool haveAnyPriv() const { return !_UserPriv.empty(); }
 
 	/// Get login cookie of the player
-	const NLNET::CLoginCookie	&getLoginCookie() const
+	const NLNET::CLoginCookie &getLoginCookie() const
 	{
 		return _LoginCookie;
 	}
 
 	/// Set login cookie
-	void	setLoginCookie(const NLNET::CLoginCookie &cookie)
+	void setLoginCookie(const NLNET::CLoginCookie &cookie)
 	{
 		_LoginCookie = cookie;
 	}
@@ -415,10 +419,10 @@ public:
 	 * Set Verbose mode for player
 	 * \param verbose is true for verbose, false for quiet
 	 */
-	inline void setVerboseMode( bool verbose ) { _Verbose = verbose; }
+	inline void setVerboseMode(bool verbose) { _Verbose = verbose; }
 
 	void setUserLanguage(const std::string &langId) { _LanguageId = langId; }
-	const std::string &getUserLanguage()	{ return _LanguageId; }
+	const std::string &getUserLanguage() { return _LanguageId; }
 
 	void isBetaTester(bool betaTester);
 	inline bool isBetaTester() const { return _BetaTester; }
@@ -435,57 +439,56 @@ public:
 protected:
 	friend class CAsyncPlayerLoad;
 	friend class CPlayerManager;
-	inline void clearActivePlayerPointer() 
-	{ 
-		if (_ActiveCharIndex >= 0 && (uint32)_ActiveCharIndex < _Characters.size() )
+	inline void clearActivePlayerPointer()
+	{
+		if (_ActiveCharIndex >= 0 && (uint32)_ActiveCharIndex < _Characters.size())
 		{
 			_Characters[_ActiveCharIndex] = 0;
 		}
 	}
 
 private:
-
 	/// load the player ( old player format ( version < 3 : all characters in the same player )
 	void loadOldFormat(class NLMISC::IStream &f);
 
 	// user id & name
-	uint32						_UserId;	// Id of the acount
-	std::string					_UserName;	// Name of the account (not the name of the player)
-	std::string					_UserPriv;	// Privilege of the account
-	std::string					_LanguageId;	// Language used by the player (default to 'en').
+	uint32 _UserId; // Id of the acount
+	std::string _UserName; // Name of the account (not the name of the player)
+	std::string _UserPriv; // Privilege of the account
+	std::string _LanguageId; // Language used by the player (default to 'en').
 
 	/// beta tester?
-	bool						_BetaTester;
+	bool _BetaTester;
 
 	/// pre order?
-	bool						_PreOrder;
+	bool _PreOrder;
 
 	// old windermeer community player ?
-	bool						_WindermeerCommunity;
+	bool _WindermeerCommunity;
 
 	// Trial player ?
-	bool						_TrialPlayer;
+	bool _TrialPlayer;
 
 	// id that will be used for the next created player
-	static uint32				_PlayerIdCount;
+	static uint32 _PlayerIdCount;
 
 	/// the active character index (curently used by this player, -1 = none)
-	sint32						_ActiveCharIndex;
+	sint32 _ActiveCharIndex;
 
 	/// characters of the player
-	std::vector<CCharacter *>	_Characters;
+	std::vector<CCharacter *> _Characters;
 
 	/// Verbose commuted if true, for debug
-	bool						_Verbose;
+	bool _Verbose;
 
 	/// connexion status
-	bool						_ConnexionStatus;
+	bool _ConnexionStatus;
 
 	/// login cookie copy
-	NLNET::CLoginCookie			_LoginCookie;
+	NLNET::CLoginCookie _LoginCookie;
 
 	/// disconnection time
-	NLMISC::TGameCycle			_DisconnectionTime;
+	NLMISC::TGameCycle _DisconnectionTime;
 };
 
 #endif // PLAYER_H

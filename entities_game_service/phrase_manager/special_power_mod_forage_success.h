@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_SPECIAL_POWER_MOD_FORAGE_SUCCESS_H
 #define RYZOM_SPECIAL_POWER_MOD_FORAGE_SUCCESS_H
 
 #include "special_power.h"
-
 
 /**
  * Specialized class for power "ModForageSuccess"
@@ -32,27 +29,28 @@ class CSpecialPowerModForageSuccess : public CSpecialPower
 {
 public:
 	/// Default Constructor
-	CSpecialPowerModForageSuccess() : CSpecialPower()
-	{}
+	CSpecialPowerModForageSuccess()
+	    : CSpecialPower()
+	{
+	}
 
 	/// Constructor
-	CSpecialPowerModForageSuccess(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds,  
-		const std::string& ecosystem, float modifier1, float modifier2 );
+	CSpecialPowerModForageSuccess(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds,
+	    const std::string &ecosystem, float modifier1, float modifier2);
 
 	/// apply effects
 	virtual void apply();
 
-
 protected:
 	/// ecosystem
-	std::string	_Ecosystem;
+	std::string _Ecosystem;
 
-	// score modifier 
+	// score modifier
 	float _Modifier1;
 	float _Modifier2;
 
 	/// Duration in ticks
-	NLMISC::TGameCycle	_Duration;
+	NLMISC::TGameCycle _Duration;
 };
 
 #endif // RYZOM_SPECIAL_POWER_MOD_FORAGE_SUCCESS_H

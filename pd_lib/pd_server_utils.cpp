@@ -33,14 +33,13 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
-
 /*
  * Load a Reference index file
  */
-bool	CRefIndex::load(const string& filename)
+bool CRefIndex::load(const string &filename)
 {
-	CIFile		reffile;
-	CIXml		ixml;
+	CIFile reffile;
+	CIXml ixml;
 
 	if (!reffile.open(filename) || !ixml.init(reffile))
 		return false;
@@ -49,7 +48,7 @@ bool	CRefIndex::load(const string& filename)
 	{
 		serial(ixml);
 	}
-	catch (const Exception&)
+	catch (const Exception &)
 	{
 		return false;
 	}
@@ -60,22 +59,22 @@ bool	CRefIndex::load(const string& filename)
 /*
  * Load a Reference index file
  */
-bool	CRefIndex::load()
+bool CRefIndex::load()
 {
-	string	rootpath = getRootPath();
+	string rootpath = getRootPath();
 	if (rootpath.empty())
 		return false;
 
-	return load(rootpath+"ref");
+	return load(rootpath + "ref");
 }
 
 /*
  * Save a Reference index file
  */
-bool	CRefIndex::save(const string& filename)
+bool CRefIndex::save(const string &filename)
 {
-	COFile		reffile;
-	COXml		oxml;
+	COFile reffile;
+	COXml oxml;
 
 	if (!reffile.open(filename) || !oxml.init(&reffile))
 		return false;
@@ -84,7 +83,7 @@ bool	CRefIndex::save(const string& filename)
 	{
 		serial(oxml);
 	}
-	catch (const Exception&)
+	catch (const Exception &)
 	{
 		return false;
 	}
@@ -95,32 +94,31 @@ bool	CRefIndex::save(const string& filename)
 /*
  * Save a Reference index file
  */
-bool	CRefIndex::save()
+bool CRefIndex::save()
 {
-	string	path = getPath();
+	string path = getPath();
 	if (path.empty())
 		return false;
 
-	return checkDirectory(path) && save(path+"ref");
+	return checkDirectory(path) && save(path + "ref");
 }
 
 /*
  * Set As Valid Reference
  */
-bool	CRefIndex::setAsValidRef()
+bool CRefIndex::setAsValidRef()
 {
-	string	rootpath = getRootPath();
+	string rootpath = getRootPath();
 	if (rootpath.empty())
 		return false;
 
-	return save(rootpath+"ref");
+	return save(rootpath + "ref");
 }
-
 
 /*
  * Build next Reference index file
  */
-bool	CRefIndex::buildNext()
+bool CRefIndex::buildNext()
 {
 	if (!load())
 		Index = 0;
@@ -141,21 +139,19 @@ bool	CRefIndex::buildNext()
 /*
  * Get next Reference index file
  */
-void	CRefIndex::getNext()
+void CRefIndex::getNext()
 {
 	++Index;
 
 	setup();
 }
 
-
-
 /*
  * Get (and setup if needed) database root path
  */
-std::string	CRefIndex::getRootPath()
+std::string CRefIndex::getRootPath()
 {
-	string	path = getNominalRootPath();
+	string path = getNominalRootPath();
 
 	if (!CFile::isExists(path) || !CFile::isDirectory(path))
 	{
@@ -175,37 +171,32 @@ std::string	CRefIndex::getRootPath()
 	return path;
 }
 
-
 /*
  * Get Nominal Root Path
  */
-std::string	CRefIndex::getNominalRootPath()
+std::string CRefIndex::getNominalRootPath()
 {
 	return RY_PDS::CPDSLib::getRootDirectory(DatabaseId);
 }
 
-
 /*
  * Get reference path
  */
-std::string	CRefIndex::getPath()
+std::string CRefIndex::getPath()
 {
 	return NLMISC::CPath::standardizePath(getRootPath() + Path);
 }
 
-
-
-
 /*
  * Setup reference directory
  */
-bool	CRefIndex::setupDirectory()
+bool CRefIndex::setupDirectory()
 {
-	string	rootpath = getRootPath();
+	string rootpath = getRootPath();
 	if (rootpath.empty())
 		return false;
 
-	string	path = NLMISC::CPath::standardizePath(rootpath + Path);
+	string path = NLMISC::CPath::standardizePath(rootpath + Path);
 
 	if (!checkDirectory(path))
 	{
@@ -243,7 +234,7 @@ bool	CRefIndex::setupDirectory()
 /*
  * Check directory
  */
-bool	CRefIndex::checkDirectory(const std::string& path)
+bool CRefIndex::checkDirectory(const std::string &path)
 {
 	if (!CFile::isExists(path))
 	{
@@ -268,21 +259,18 @@ bool	CRefIndex::checkDirectory(const std::string& path)
 	return true;
 }
 
-
 /*
  * Set Time stamp
  */
-void	CRefIndex::setTimestamp()
+void CRefIndex::setTimestamp()
 {
 	Timestamp.setToCurrent();
 }
 
-
-
 /*
  * Get Seconds update path
  */
-std::string	CRefIndex::getSecondsUpdatePath()
+std::string CRefIndex::getSecondsUpdatePath()
 {
 	return getRootPath() + "seconds/";
 }
@@ -290,7 +278,7 @@ std::string	CRefIndex::getSecondsUpdatePath()
 /*
  * Get Minutes update path
  */
-std::string	CRefIndex::getMinutesUpdatePath()
+std::string CRefIndex::getMinutesUpdatePath()
 {
 	return getRootPath() + "minutes/";
 }
@@ -298,7 +286,7 @@ std::string	CRefIndex::getMinutesUpdatePath()
 /*
  * Get Hours update path
  */
-std::string	CRefIndex::getHoursUpdatePath()
+std::string CRefIndex::getHoursUpdatePath()
 {
 	return getRootPath() + "hours/";
 }
@@ -306,13 +294,10 @@ std::string	CRefIndex::getHoursUpdatePath()
 /*
  * Get Log path
  */
-std::string	CRefIndex::getLogPath()
+std::string CRefIndex::getLogPath()
 {
 	return getRootPath() + "logs/";
 }
-
-
-
 
 /*
  * Constructor
@@ -320,19 +305,19 @@ std::string	CRefIndex::getLogPath()
 CDatabaseState::CDatabaseState()
 {
 	Id = 0xffffffff;
-	LastUpdateId = (0-1);
+	LastUpdateId = (0 - 1);
 	CurrentIndex = 0;
 }
 
 /*
  * Serial method
  */
-void	CDatabaseState::serial(NLMISC::IStream& s)
+void CDatabaseState::serial(NLMISC::IStream &s)
 {
 	s.xmlPush("database_state");
 
 	s.serialCheck(NELID("DBST"));
-	uint	version = s.serialVersion(0);
+	uint version = s.serialVersion(0);
 
 	s.xmlPush("name");
 	s.serial(Name);
@@ -353,13 +338,13 @@ void	CDatabaseState::serial(NLMISC::IStream& s)
 	s.xmlPush("endtimestamp");
 	if (s.isReading())
 	{
-		std::string	ts;
+		std::string ts;
 		s.serial(ts);
 		EndTimestamp.fromString(ts.c_str());
 	}
 	else
 	{
-		std::string	ts = EndTimestamp.toString();
+		std::string ts = EndTimestamp.toString();
 		s.serial(ts);
 	}
 	s.xmlPop();
@@ -370,12 +355,12 @@ void	CDatabaseState::serial(NLMISC::IStream& s)
 /*
  * Save State
  */
-bool	CDatabaseState::save(CRefIndex& ref)
+bool CDatabaseState::save(CRefIndex &ref)
 {
-	COFile		f;
-	COXml		oxml;
+	COFile f;
+	COXml oxml;
 
-	string		filename = fileName(ref);
+	string filename = fileName(ref);
 
 	if (!f.open(filename) || !oxml.init(&f))
 		return false;
@@ -384,7 +369,7 @@ bool	CDatabaseState::save(CRefIndex& ref)
 	{
 		serial(oxml);
 	}
-	catch (const Exception&)
+	catch (const Exception &)
 	{
 		return false;
 	}
@@ -395,21 +380,20 @@ bool	CDatabaseState::save(CRefIndex& ref)
 /*
  * Load State
  */
-bool	CDatabaseState::load(CRefIndex& ref, bool usePrevious)
+bool CDatabaseState::load(CRefIndex &ref, bool usePrevious)
 {
 	return load(ref.getRootPath(), usePrevious);
 }
 
-
 /*
  * Load State
  */
-bool	CDatabaseState::load(const std::string& rootpath, bool usePrevious)
+bool CDatabaseState::load(const std::string &rootpath, bool usePrevious)
 {
-	CIFile		f;
-	CIXml		ixml;
+	CIFile f;
+	CIXml ixml;
 
-	string		filename = CPath::standardizePath(rootpath);
+	string filename = CPath::standardizePath(rootpath);
 	if (usePrevious)
 		filename += "previous_state";
 	else
@@ -422,7 +406,7 @@ bool	CDatabaseState::load(const std::string& rootpath, bool usePrevious)
 	{
 		serial(ixml);
 	}
-	catch (const Exception&)
+	catch (const Exception &)
 	{
 		return false;
 	}
@@ -433,12 +417,11 @@ bool	CDatabaseState::load(const std::string& rootpath, bool usePrevious)
 /*
  * State exists in path
  */
-bool	CDatabaseState::exists(const std::string& rootpath)
+bool CDatabaseState::exists(const std::string &rootpath)
 {
-	string		filename = CPath::standardizePath(rootpath) + "state";
+	string filename = CPath::standardizePath(rootpath) + "state";
 	return CFile::fileExists(filename);
 }
 
-
-uint64	CMixedStreamFile::_ReadBytes = 0;
-uint64	CMixedStreamFile::_WrittenBytes = 0;
+uint64 CMixedStreamFile::_ReadBytes = 0;
+uint64 CMixedStreamFile::_WrittenBytes = 0;

@@ -22,24 +22,23 @@
 
 struct CUserModels
 {
-	NLNET::TServiceId					ServiceId;
-	NLMISC::CSmartPtr<CStaticCreatures>	CustomSheet;
+	NLNET::TServiceId ServiceId;
+	NLMISC::CSmartPtr<CStaticCreatures> CustomSheet;
 };
 
 struct CCustomLootTables
 {
-	NLNET::TServiceId	ServiceId;
-	CStaticLootTable	Table;
+	NLNET::TServiceId ServiceId;
+	CStaticLootTable Table;
 };
 
-
 /** callback called when receiving USR_MDL msg sent by AIS */
-void cbGetUserModels( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+void cbGetUserModels(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
 /** callback called when receiving CUSTOMLT msg sent by AIS */
-void cbGetCustomLootTables(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+void cbGetCustomLootTables(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
-void cbDeleteCustomDataByPrimAlias(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+void cbDeleteCustomDataByPrimAlias(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
 class CDynamicSheetManager
 {
@@ -56,38 +55,38 @@ public:
 	bool isAlreadyStored(CCustomElementId id);
 
 	/** Add user models into manager's structures upon reception of the AIS msg
-	* @param msgin the AIS CMessage containing custom loot table info
-	* @param serviceId id of the AIS that sent the msg
-	*/
+	 * @param msgin the AIS CMessage containing custom loot table info
+	 * @param serviceId id of the AIS that sent the msg
+	 */
 	void getUserModelsFromMsg(NLNET::CMessage &f, NLNET::TServiceId serviceId);
 
 	/** Add custom loot tables into manager's structures upon reception of the AIS msg
-	* @param msgin the AIS CMessage containing custom loot table info
-	* @param serviceId id of the AIS that sent the msg
-	*/
+	 * @param msgin the AIS CMessage containing custom loot table info
+	 * @param serviceId id of the AIS that sent the msg
+	 */
 	void getCustomLootTablesFromMsg(NLNET::CMessage &msgin, NLNET::TServiceId serviceId);
 
 	/** Gets a copy of the base sheet, applies script-defined modifications and stores the modified sheet
-	* @param modelId id of the user model
-	* @param scriptData all script lines
-	* @param serviceId id of the AIS that sent the datas
-	*/
+	 * @param modelId id of the user model
+	 * @param scriptData all script lines
+	 * @param serviceId id of the AIS that sent the datas
+	 */
 	void instanciateDynamicSheet(CCustomElementId modelId, std::vector<std::string> scriptData, NLNET::TServiceId serviceId);
 
 	/** Returns the modified CStaticCreature associated to a UserModel
-	* @param userModelId the id of the user model
-	*/
+	 * @param userModelId the id of the user model
+	 */
 	CStaticCreatures *getDynamicSheet(uint32 primAlias, const std::string &userModelId);
 
 	/** Indicates whether there have been parse errors while building a UserModel or not.
-	* @param userModelId id of the user model
-	* @return true if there are some errors in the user model
-	*/
+	 * @param userModelId id of the user model
+	 * @return true if there are some errors in the user model
+	 */
 	bool scriptErrors(uint32 primAlias, const std::string &userModelId);
 
 	/** deletes all data that were sent by a given AIS. Called when a AIS is down.
-	* @param serviceId the AIS id
-	*/
+	 * @param serviceId the AIS id
+	 */
 	void releaseCustomDataByServiceId(NLNET::TServiceId serviceId);
 
 	void deleteCustomDataByPrimAlias(uint32 primAlias);
@@ -101,22 +100,21 @@ public:
 	typedef std::map<CCustomElementId, CCustomLootTables> TCustomTables;
 
 private:
-
-	static CDynamicSheetManager		*_Instance;
+	static CDynamicSheetManager *_Instance;
 
 	/** contains complete custom loot tables. Key: CustomLootTableId, value: CStaticLootTable
-	* @see CStaticLootTable
-	*/
-	TCustomTables					_CustomLootTables;
+	 * @see CStaticLootTable
+	 */
+	TCustomTables _CustomLootTables;
 
 	/** contains all user models. key: user model id, value: struct containing the AIservice id that sent the model,
-	* and a smart pointer towards the modified CStaticCreature
-	* @see CUserModels
-	*/
-	TModifiedCreaturesMap			_CreaturesMap;
+	 * and a smart pointer towards the modified CStaticCreature
+	 * @see CUserModels
+	 */
+	TModifiedCreaturesMap _CreaturesMap;
 
 	/** just a map for script error identification key: user model id, value: if there were any errors or not */
-	TScriptErrors					_UserModelLoadingErrors;
+	TScriptErrors _UserModelLoadingErrors;
 };
 
 #endif

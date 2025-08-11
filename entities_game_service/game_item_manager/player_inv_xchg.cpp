@@ -24,10 +24,8 @@
 #include "game_share/slot_equipment.h"
 #include "player_manager/character.h"
 
-
 using namespace NLMISC;
 using namespace std;
-
 
 /////////////////////////////////////////////////////////////
 // CExchangeView
@@ -59,7 +57,7 @@ void CExchangeView::clearExchangeView()
 }
 
 // ****************************************************************************
-void CExchangeView::setInterlocutorView(CExchangeView * interlocutorView)
+void CExchangeView::setInterlocutorView(CExchangeView *interlocutorView)
 {
 	_InterlocutorView = interlocutorView;
 }
@@ -78,7 +76,7 @@ bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint3
 	if (quantity == 0)
 		return false;
 
-	const CStaticItem * form = item->getStaticForm();
+	const CStaticItem *form = item->getStaticForm();
 	if (form == NULL)
 		return false;
 
@@ -94,11 +92,11 @@ bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint3
 	// You cannot exchange genesis named items
 	if (item->getPhraseId().find("genesis_") == 0)
 	{
-		nlwarning("Character %s tries to sell '%s'", getCharacter()->getId().toString().c_str(), item->getPhraseId().c_str() );
+		nlwarning("Character %s tries to sell '%s'", getCharacter()->getId().toString().c_str(), item->getPhraseId().c_str());
 		return false;
 	}
 
-	if( getCharacter()->isAnActiveXpCatalyser(item) )
+	if (getCharacter()->isAnActiveXpCatalyser(item))
 		return false;
 
 	if (getExchangeItem(exchangeSlot) != NULL)
@@ -188,7 +186,7 @@ bool CExchangeView::putItemInFirstEmptyExchangeSlot(uint32 bagSlot, uint32 quant
 	item->setLockCount(item->getLockCount() + quantity);
 
 	updateExchangeSlot(exchangeSlot);
-//	getCharacter()->_PropertyDatabase.setProp("EXCHANGE:ACCEPTED", 1);
+	//	getCharacter()->_PropertyDatabase.setProp("EXCHANGE:ACCEPTED", 1);
 	CBankAccessor_PLR::getEXCHANGE().setACCEPTED(getCharacter()->_PropertyDatabase, true);
 	return true;
 }
@@ -213,7 +211,7 @@ bool CExchangeView::removeItemFromExchange(uint32 exchangeSlot, uint32 quantity)
 	// quantity can be set to CInventoryBase::REMOVE_MAX_STACK_QUANTITY
 	quantity = std::min(quantity, _ExchangeSlots[exchangeSlot].Quantity);
 
-	const CStaticItem * form = item->getStaticForm();
+	const CStaticItem *form = item->getStaticForm();
 	if (form == NULL)
 		return false;
 
@@ -240,7 +238,7 @@ bool CExchangeView::removeItemFromExchange(uint32 exchangeSlot, uint32 quantity)
 }
 
 // ****************************************************************************
-void CExchangeView::validateExchange(std::vector<CGameItemPtr> * givenItems)
+void CExchangeView::validateExchange(std::vector<CGameItemPtr> *givenItems)
 {
 	for (uint i = 0; i < _ExchangeSlots.size(); i++)
 	{
@@ -256,7 +254,7 @@ void CExchangeView::validateExchange(std::vector<CGameItemPtr> * givenItems)
 
 		// remove the exchange quantity of item from the bag
 		CGameItemPtr item = getInventory()->removeItem(bagSlot, exchangeQuantity);
-		BOMB_IF( item == NULL, "<CExchangeView::validateExchange> Can't remove "<<exchangeQuantity<<" item(s) from slot "<<bagSlot<<" of the bag", continue );
+		BOMB_IF(item == NULL, "<CExchangeView::validateExchange> Can't remove " << exchangeQuantity << " item(s) from slot " << bagSlot << " of the bag", continue);
 
 		// put the removed item in the given items
 		if (givenItems != NULL)
@@ -265,7 +263,7 @@ void CExchangeView::validateExchange(std::vector<CGameItemPtr> * givenItems)
 }
 
 // ****************************************************************************
-CGameItemPtr CExchangeView::getExchangeItem(uint32 exchangeSlot, uint32 * exchangeQuantity) const
+CGameItemPtr CExchangeView::getExchangeItem(uint32 exchangeSlot, uint32 *exchangeQuantity) const
 {
 	nlassert(exchangeSlot < NbExchangeSlots);
 
@@ -308,7 +306,7 @@ void CExchangeView::onInterlocutorSlotChanged(uint32 interlocutorGiveSlot)
 	nlassert(interlocutorGiveSlot < NbExchangeSlots);
 	nlassert(_InterlocutorView != NULL);
 
-//	string sDBPath = NLMISC::toString("EXCHANGE:RECEIVE:%u", interlocutorGiveSlot);
+	//	string sDBPath = NLMISC::toString("EXCHANGE:RECEIVE:%u", interlocutorGiveSlot);
 	CBankAccessor_PLR::TEXCHANGE::TRECEIVE::TArray &recvItem = CBankAccessor_PLR::getEXCHANGE().getRECEIVE().getArray(interlocutorGiveSlot);
 
 	uint32 exchangeQuantity;
@@ -317,71 +315,71 @@ void CExchangeView::onInterlocutorSlotChanged(uint32 interlocutorGiveSlot)
 	if (item != NULL)
 	{
 		RM_FABER_STAT_TYPE::TRMStatType itemBestStat = RM_FABER_STAT_TYPE::Unknown;
-		
+
 		if (item->getCraftParameters() != NULL)
 			itemBestStat = item->getCraftParameters()->getBestItemStat();
 
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":SHEET",				item->getSheetId().asInt());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":SHEET",				item->getSheetId().asInt());
 		recvItem.setSHEET(getCharacter()->_PropertyDatabase, item->getSheetId());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUALITY",			item->quality());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUALITY",			item->quality());
 		recvItem.setQUALITY(getCharacter()->_PropertyDatabase, item->quality());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			exchangeQuantity);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			exchangeQuantity);
 		recvItem.setQUANTITY(getCharacter()->_PropertyDatabase, uint16(exchangeQuantity));
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		item->color());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		item->color());
 		recvItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, item->color());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		item->buffFlags());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		item->buffFlags());
 		recvItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, item->buffFlags());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			item->weight() / 10);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			item->weight() / 10);
 		recvItem.setWEIGHT(getCharacter()->_PropertyDatabase, uint16(item->weight() / 10));
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			item->sendNameId(getCharacter()));
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			item->sendNameId(getCharacter()));
 		recvItem.setNAMEID(getCharacter()->_PropertyDatabase, item->sendNameId(getCharacter()));
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":ENCHANT",			item->getClientEnchantValue());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":ENCHANT",			item->getClientEnchantValue());
 		recvItem.setENCHANT(getCharacter()->_PropertyDatabase, item->getClientEnchantValue());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_CLASS_TYPE",		item->getItemClass());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_CLASS_TYPE",		item->getItemClass());
 		recvItem.setRM_CLASS_TYPE(getCharacter()->_PropertyDatabase, item->getItemClass());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_FABER_STAT_TYPE",itemBestStat);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_FABER_STAT_TYPE",itemBestStat);
 		recvItem.setRM_FABER_STAT_TYPE(getCharacter()->_PropertyDatabase, itemBestStat);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":PREREQUISIT_VALID", getCharacter()->checkPreRequired( item ) );
-		recvItem.setPREREQUISIT_VALID(getCharacter()->_PropertyDatabase, getCharacter()->checkPreRequired( item ));
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":PREREQUISIT_VALID", getCharacter()->checkPreRequired( item ) );
+		recvItem.setPREREQUISIT_VALID(getCharacter()->_PropertyDatabase, getCharacter()->checkPreRequired(item));
 	}
 	else
 	{
 		// empty slot
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":SHEET",				0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":SHEET",				0);
 		recvItem.setSHEET(getCharacter()->_PropertyDatabase, CSheetId::Unknown);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUALITY",			0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUALITY",			0);
 		recvItem.setQUALITY(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			0);
 		recvItem.setQUANTITY(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		0);
 		recvItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 1);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		0);
 		recvItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			0);
 		recvItem.setWEIGHT(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			0);
 		recvItem.setNAMEID(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":ENCHANT",			0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":ENCHANT",			0);
 		recvItem.setENCHANT(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_CLASS_TYPE",		0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_CLASS_TYPE",		0);
 		recvItem.setRM_CLASS_TYPE(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_FABER_STAT_TYPE",0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_FABER_STAT_TYPE",0);
 		recvItem.setRM_FABER_STAT_TYPE(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":PREREQUISIT_VALID", 0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":PREREQUISIT_VALID", 0);
 		recvItem.setPREREQUISIT_VALID(getCharacter()->_PropertyDatabase, false);
 	}
-	
+
 	// increment the info version
-//	sint64 nPropValue = getCharacter()->_PropertyDatabase.getProp(sDBPath+":INFO_VERSION");
+	//	sint64 nPropValue = getCharacter()->_PropertyDatabase.getProp(sDBPath+":INFO_VERSION");
 	uint8 nPropValue = recvItem.getINFO_VERSION(getCharacter()->_PropertyDatabase);
-//	getCharacter()->_PropertyDatabase.setProp(sDBPath+":INFO_VERSION", nPropValue+1);
-	recvItem.setINFO_VERSION(getCharacter()->_PropertyDatabase, nPropValue+1);
+	//	getCharacter()->_PropertyDatabase.setProp(sDBPath+":INFO_VERSION", nPropValue+1);
+	recvItem.setINFO_VERSION(getCharacter()->_PropertyDatabase, nPropValue + 1);
 }
 
 // ****************************************************************************
 void CExchangeView::updateExchangeSlot(uint32 exchangeSlot)
 {
-//	string sDBPath = NLMISC::toString("EXCHANGE:GIVE:%u", exchangeSlot);
+	//	string sDBPath = NLMISC::toString("EXCHANGE:GIVE:%u", exchangeSlot);
 	CBankAccessor_PLR::TEXCHANGE::TGIVE::TArray &giveItem = CBankAccessor_PLR::getEXCHANGE().getGIVE().getArray(exchangeSlot);
 
 	// get the item on the bag
@@ -391,65 +389,65 @@ void CExchangeView::updateExchangeSlot(uint32 exchangeSlot)
 	if (item != NULL)
 	{
 		RM_FABER_STAT_TYPE::TRMStatType itemBestStat = RM_FABER_STAT_TYPE::Unknown;
-		
+
 		if (item->getCraftParameters() != NULL)
 			itemBestStat = item->getCraftParameters()->getBestItemStat();
 
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":SHEET",				item->getSheetId().asInt());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":SHEET",				item->getSheetId().asInt());
 		giveItem.setSHEET(getCharacter()->_PropertyDatabase, item->getSheetId());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUALITY",			item->quality());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUALITY",			item->quality());
 		giveItem.setQUALITY(getCharacter()->_PropertyDatabase, item->quality());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			exchangeQuantity);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			exchangeQuantity);
 		giveItem.setQUANTITY(getCharacter()->_PropertyDatabase, uint16(exchangeQuantity));
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		item->color());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		item->color());
 		giveItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, item->color());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		item->buffFlags());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		item->buffFlags());
 		giveItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, item->buffFlags());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			item->weight() / 10);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			item->weight() / 10);
 		giveItem.setWEIGHT(getCharacter()->_PropertyDatabase, uint16(item->weight() / 10));
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			item->sendNameId(getCharacter()));
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			item->sendNameId(getCharacter()));
 		giveItem.setNAMEID(getCharacter()->_PropertyDatabase, item->sendNameId(getCharacter()));
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":ENCHANT",			item->getClientEnchantValue());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":ENCHANT",			item->getClientEnchantValue());
 		giveItem.setENCHANT(getCharacter()->_PropertyDatabase, item->getClientEnchantValue());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_CLASS_TYPE",		item->getItemClass());
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_CLASS_TYPE",		item->getItemClass());
 		giveItem.setRM_CLASS_TYPE(getCharacter()->_PropertyDatabase, item->getItemClass());
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_FABER_STAT_TYPE",itemBestStat);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_FABER_STAT_TYPE",itemBestStat);
 		giveItem.setRM_FABER_STAT_TYPE(getCharacter()->_PropertyDatabase, itemBestStat);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":PREREQUISIT_VALID", getCharacter()->checkPreRequired( item ) );
-		giveItem.setPREREQUISIT_VALID(getCharacter()->_PropertyDatabase, getCharacter()->checkPreRequired( item ));
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":PREREQUISIT_VALID", getCharacter()->checkPreRequired( item ) );
+		giveItem.setPREREQUISIT_VALID(getCharacter()->_PropertyDatabase, getCharacter()->checkPreRequired(item));
 	}
 	else
 	{
 		// empty slot
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":SHEET",				0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":SHEET",				0);
 		giveItem.setSHEET(getCharacter()->_PropertyDatabase, CSheetId::Unknown);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUALITY",			0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUALITY",			0);
 		giveItem.setQUALITY(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":QUANTITY",			0);
 		giveItem.setQUANTITY(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":USER_COLOR",		0);
 		giveItem.setUSER_COLOR(getCharacter()->_PropertyDatabase, 1);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":CHARAC_BUFFS",		0);
 		giveItem.setCHARAC_BUFFS(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":WEIGHT",			0);
 		giveItem.setWEIGHT(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":NAMEID",			0);
 		giveItem.setNAMEID(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":ENCHANT",			0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":ENCHANT",			0);
 		giveItem.setENCHANT(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_CLASS_TYPE",		0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_CLASS_TYPE",		0);
 		giveItem.setRM_CLASS_TYPE(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_FABER_STAT_TYPE",0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":RM_FABER_STAT_TYPE",0);
 		giveItem.setRM_FABER_STAT_TYPE(getCharacter()->_PropertyDatabase, 0);
-//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":PREREQUISIT_VALID", 0);
+		//		getCharacter()->_PropertyDatabase.setProp(sDBPath+":PREREQUISIT_VALID", 0);
 		giveItem.setPREREQUISIT_VALID(getCharacter()->_PropertyDatabase, false);
 	}
-	
+
 	// increment the info version
-//	sint64 nPropValue = getCharacter()->_PropertyDatabase.getProp(sDBPath+":INFO_VERSION");
+	//	sint64 nPropValue = getCharacter()->_PropertyDatabase.getProp(sDBPath+":INFO_VERSION");
 	uint8 nPropValue = giveItem.getINFO_VERSION(getCharacter()->_PropertyDatabase);
-//	getCharacter()->_PropertyDatabase.setProp(sDBPath+":INFO_VERSION", nPropValue+1);
-	giveItem.setINFO_VERSION(getCharacter()->_PropertyDatabase, nPropValue+1);
+	//	getCharacter()->_PropertyDatabase.setProp(sDBPath+":INFO_VERSION", nPropValue+1);
+	giveItem.setINFO_VERSION(getCharacter()->_PropertyDatabase, nPropValue + 1);
 
 	// update interlocutor client
 	if (_InterlocutorView != NULL)
@@ -468,7 +466,7 @@ bool CExchangeView::isPetTicket(ITEM_TYPE::TItemType itemType) const
 }
 
 // ****************************************************************************
-uint32 * CExchangeView::getPetTicketCount(ITEM_TYPE::TItemType itemType)
+uint32 *CExchangeView::getPetTicketCount(ITEM_TYPE::TItemType itemType)
 {
 	if (itemType == ITEM_TYPE::MEKTOUB_PACKER_TICKET)
 		return &_PackerTicketCount;

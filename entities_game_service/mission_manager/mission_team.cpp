@@ -33,82 +33,82 @@ NL_INSTANCE_COUNTER_IMPL(CMissionTeam);
 //----------------------------------------------------------------------------
 void CMissionTeam::updateUsersJournalEntry()
 {
-	CTeam * team = TeamManager.getRealTeam( _TeamId );
+	CTeam *team = TeamManager.getRealTeam(_TeamId);
 	nlassert(team);
 
-	for ( list<CEntityId>::const_iterator it = team->getTeamMembers().begin(); it != team->getTeamMembers().end();++it )
+	for (list<CEntityId>::const_iterator it = team->getTeamMembers().begin(); it != team->getTeamMembers().end(); ++it)
 	{
-		CCharacter * user = PlayerManager.getChar( *it );
-		if ( !user )
+		CCharacter *user = PlayerManager.getChar(*it);
+		if (!user)
 		{
-			nlwarning( "<MISSIONS>cant find user %s", (*it).toString().c_str() );
+			nlwarning("<MISSIONS>cant find user %s", (*it).toString().c_str());
 			continue;
 		}
-		updateUserJournalEntry(*user,"GROUP:");
+		updateUserJournalEntry(*user, "GROUP:");
 	}
 }
 
 //----------------------------------------------------------------------------
 void CMissionTeam::clearUsersJournalEntry()
 {
-	CTeam * team = TeamManager.getRealTeam( _TeamId );
-	if ( !team )
+	CTeam *team = TeamManager.getRealTeam(_TeamId);
+	if (!team)
 	{
-		nlwarning( "<MISSIONS>cant find team ID : %d", _TeamId );
+		nlwarning("<MISSIONS>cant find team ID : %d", _TeamId);
 		return;
 	}
-	
-	for ( list<CEntityId>::const_iterator it = team->getTeamMembers().begin(); it != team->getTeamMembers().end();++it )
+
+	for (list<CEntityId>::const_iterator it = team->getTeamMembers().begin(); it != team->getTeamMembers().end(); ++it)
 	{
-		CCharacter * user = PlayerManager.getChar( *it );
-		if ( !user )
+		CCharacter *user = PlayerManager.getChar(*it);
+		if (!user)
 		{
-			nlwarning( "<MISSIONS>cant find user %s", (*it).toString().c_str() );
+			nlwarning("<MISSIONS>cant find user %s", (*it).toString().c_str());
 			continue;
 		}
 
 		CBankAccessor_PLR::TGROUP::TMISSIONS::TArray &missionItem = CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(_ClientIndex);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TYPE",_ClientIndex), 0);
+		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TYPE",_ClientIndex), 0);
 		missionItem.setTYPE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:ICON",_ClientIndex), 0);
+		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:ICON",_ClientIndex), 0);
 		missionItem.setICON(user->_PropertyDatabase, CSheetId::Unknown);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TITLE",_ClientIndex), 0);
+		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TITLE",_ClientIndex), 0);
 		missionItem.setTITLE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:DETAIL_TEXT",_ClientIndex), 0);
+		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:DETAIL_TEXT",_ClientIndex), 0);
 		missionItem.setDETAIL_TEXT(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:END_DATE",_ClientIndex), 0 );
+		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:END_DATE",_ClientIndex), 0 );
 		missionItem.setEND_DATE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:BEGIN_DATE",_ClientIndex), 0 );
+		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:BEGIN_DATE",_ClientIndex), 0 );
 		missionItem.setBEGIN_DATE(user->_PropertyDatabase, 0);
 		for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
 		{
 			CBankAccessor_PLR::TGROUP::TMISSIONS::TArray::TTARGET &targetItem = missionItem.getTARGET(i);
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:TITLE",_ClientIndex,i), 0);
+			//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:TITLE",_ClientIndex,i), 0);
 			targetItem.setTITLE(user->_PropertyDatabase, 0);
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:X",_ClientIndex,i), 0);
+			//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:X",_ClientIndex,i), 0);
 			targetItem.setX(user->_PropertyDatabase, 0);
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:Y",_ClientIndex,i), 0);
+			//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:Y",_ClientIndex,i), 0);
 			targetItem.setY(user->_PropertyDatabase, 0);
 		}
 		for (uint i = 0; i < NB_STEP_PER_MISSION; i++)
 		{
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:GOALS:%u:TEXT",_ClientIndex,i), 0);
+			//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:GOALS:%u:TEXT",_ClientIndex,i), 0);
 			missionItem.getGOALS().getArray(i).setTEXT(user->_PropertyDatabase, 0);
-		}	
+		}
 	}
 }
 
 //----------------------------------------------------------------------------
-void CMissionTeam::setupEscort(const std::vector<TAIAlias> & aliases)
+void CMissionTeam::setupEscort(const std::vector<TAIAlias> &aliases)
 {
-	TDataSetRow row = TheDataset.getDataSetRow( CAIAliasTranslator::getInstance()->getEntityId( _Giver ) );
-	if ( !TheDataset.isAccessible( row ) )
+	TDataSetRow row = TheDataset.getDataSetRow(CAIAliasTranslator::getInstance()->getEntityId(_Giver));
+	if (!TheDataset.isAccessible(row))
 	{
-		nlwarning("<MISSIONS> Cant setup escort : giver is invalid %s", CPrimitivesParser::aliasToString(_Giver).c_str() );
+		nlwarning("<MISSIONS> Cant setup escort : giver is invalid %s", CPrimitivesParser::aliasToString(_Giver).c_str());
 		return;
 	}
 	CSetEscortTeamId msg;
-	CMirrorPropValueRO<uint32>	in(TheDataset, row, DSPropertyAI_INSTANCE);
+	CMirrorPropValueRO<uint32> in(TheDataset, row, DSPropertyAI_INSTANCE);
 	msg.InstanceNumber = in;
 	msg.Groups = aliases;
 	msg.TeamId = _TeamId;
@@ -116,14 +116,14 @@ void CMissionTeam::setupEscort(const std::vector<TAIAlias> & aliases)
 }
 
 //----------------------------------------------------------------------------
-void CMissionTeam::getEntities(std::vector<TDataSetRow>& entities)
+void CMissionTeam::getEntities(std::vector<TDataSetRow> &entities)
 {
-	CTeam * team = TeamManager.getRealTeam( _TeamId );
-	if ( team )
+	CTeam *team = TeamManager.getRealTeam(_TeamId);
+	if (team)
 	{
 		std::list<CEntityId>::const_iterator it = team->getTeamMembers().begin();
-		for (;it != team->getTeamMembers().end(); ++it )
-			entities.push_back( TheDataset.getDataSetRow(*it) );
+		for (; it != team->getTeamMembers().end(); ++it)
+			entities.push_back(TheDataset.getDataSetRow(*it));
 	}
 	else
 		nlwarning("<MISSIONS> Invalid team %u", _TeamId);
@@ -132,53 +132,53 @@ void CMissionTeam::getEntities(std::vector<TDataSetRow>& entities)
 //----------------------------------------------------------------------------
 void CMissionTeam::stopChildren()
 {
-	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
+	CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(_Mission->getTemplateId());
 	nlassert(templ);
-	for ( uint i = 0; i < templ->ChildrenMissions.size(); i++ )
+	for (uint i = 0; i < templ->ChildrenMissions.size(); i++)
 	{
-		const CMissionTemplate * child = CMissionManager::getInstance()->getTemplate( templ->ChildrenMissions[i] );
-		if ( child )
+		const CMissionTemplate *child = CMissionManager::getInstance()->getTemplate(templ->ChildrenMissions[i]);
+		if (child)
 		{
-			for ( uint j = 0; j < child->Instances.size(); j++ )
+			for (uint j = 0; j < child->Instances.size(); j++)
 			{
-				CMissionTeam * mission = dynamic_cast<CMissionTeam*>( child->Instances[j] );
-				if ( mission && mission->_TeamId == _TeamId )
-					mission->onFailure( true,false );
+				CMissionTeam *mission = dynamic_cast<CMissionTeam *>(child->Instances[j]);
+				if (mission && mission->_TeamId == _TeamId)
+					mission->onFailure(true, false);
 			}
 		}
 		else
-			nlwarning("<MISSIONS> : invalid child template %u",templ->ChildrenMissions[i] );
+			nlwarning("<MISSIONS> : invalid child template %u", templ->ChildrenMissions[i]);
 	}
 }
 
 //----------------------------------------------------------------------------
 void CMissionTeam::onFailure(bool ignoreJumps, bool sendMessage)
 {
-	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
+	CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(_Mission->getTemplateId());
 	nlassert(templ);
 	CMission::onFailure(ignoreJumps);
-	sendMessage = ( sendMessage && !templ->Tags.NoList );
-	if ( getProcessingState() == CMissionBaseBehaviour::Normal  )
+	sendMessage = (sendMessage && !templ->Tags.NoList);
+	if (getProcessingState() == CMissionBaseBehaviour::Normal)
 	{
-		CTeam * team = TeamManager.getRealTeam( _TeamId );
-		if ( team )
+		CTeam *team = TeamManager.getRealTeam(_TeamId);
+		if (team)
 		{
 			if (sendMessage && !templ->Tags.NoList && !templ->Tags.AutoRemove)
-				team->sendDynamicMessageToMembers("MISSION_FAILED",TVectorParamCheck());
+				team->sendDynamicMessageToMembers("MISSION_FAILED", TVectorParamCheck());
 
-			if ( templ->Tags.NoList || isChained() || templ->Tags.AutoRemove )
+			if (templ->Tags.NoList || isChained() || templ->Tags.AutoRemove)
 				team->removeMission(this, mr_fail);
 			else
 				setFailureFlag();
 		}
 		return;
 	}
-	if ( _ProcessingState == CMissionBaseBehaviour::InJump )
+	if (_ProcessingState == CMissionBaseBehaviour::InJump)
 	{
 		_ProcessingState = Normal;
 		return;
 	}
-	else if ( _ProcessingState == CMissionBaseBehaviour::Complete )
+	else if (_ProcessingState == CMissionBaseBehaviour::Complete)
 	{
 		forceSuccess();
 		return;
@@ -188,34 +188,33 @@ void CMissionTeam::onFailure(bool ignoreJumps, bool sendMessage)
 //----------------------------------------------------------------------------
 void CMissionTeam::forceSuccess()
 {
-	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
+	CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(_Mission->getTemplateId());
 	nlassert(templ);
-	CTeam * team = TeamManager.getRealTeam( _TeamId );
-	if ( team )
+	CTeam *team = TeamManager.getRealTeam(_TeamId);
+	if (team)
 	{
 		_ProcessingState = Normal;
-		CMissionEventMissionDone  event(templ->Alias);
-		std::list< CMissionEvent * > eventList;
-		eventList.push_back( &event );
+		CMissionEventMissionDone event(templ->Alias);
+		std::list<CMissionEvent *> eventList;
+		eventList.push_back(&event);
 
-
-		const list<CEntityId> & members = team->getTeamMembers();
-		for (list<CEntityId>::const_iterator it = members.begin() ; it != members.end() ; ++it)
+		const list<CEntityId> &members = team->getTeamMembers();
+		for (list<CEntityId>::const_iterator it = members.begin(); it != members.end(); ++it)
 		{
-			CCharacter * c = PlayerManager.getChar( (*it) );
-			if (c )
+			CCharacter *c = PlayerManager.getChar((*it));
+			if (c)
 			{
-				c->addSuccessfulMissions( *templ );
-				if ( !templ->Tags.NoList && !templ->Tags.AutoRemove )
-					CCharacter::sendDynamicSystemMessage( c->getId(), isChained()?"EGS_MISSION_STEP_SUCCESS":"EGS_MISSION_SUCCESS");
+				c->addSuccessfulMissions(*templ);
+				if (!templ->Tags.NoList && !templ->Tags.AutoRemove)
+					CCharacter::sendDynamicSystemMessage(c->getId(), isChained() ? "EGS_MISSION_STEP_SUCCESS" : "EGS_MISSION_SUCCESS");
 			}
-		}	
+		}
 		CMissionManager::getInstance()->missionDoneOnce(templ);
 		stopChildren();
-		team->processTeamMissionEvent( eventList, CAIAliasTranslator::Invalid  );
-		
+		team->processTeamMissionEvent(eventList, CAIAliasTranslator::Invalid);
+
 		// only remove no list missions, other must be manually removed by user
-		if ( templ->Tags.NoList || isChained() || templ->Tags.AutoRemove )
+		if (templ->Tags.NoList || isChained() || templ->Tags.AutoRemove)
 		{
 			updateEncyclopedia();
 			team->removeMission(this, mr_success);
@@ -230,11 +229,11 @@ void CMissionTeam::forceSuccess()
 }
 
 //----------------------------------------------------------------------------
-CCharacter* CMissionTeam::getMainEntity()
+CCharacter *CMissionTeam::getMainEntity()
 {
-	CTeam * team = TeamManager.getRealTeam(_TeamId);
-	if ( team )
-		return PlayerManager.getChar( team->getLeader() );
-	nlwarning( "<MISSIONS> invalid team id '%u' ",_TeamId );
+	CTeam *team = TeamManager.getRealTeam(_TeamId);
+	if (team)
+		return PlayerManager.getChar(team->getLeader());
+	nlwarning("<MISSIONS> invalid team id '%u' ", _TeamId);
 	return NULL;
 }

@@ -14,18 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_MISSION_TYPES_H
 #define RY_MISSION_TYPES_H
 
 #include "egs_pd.h"
 typedef EGSPD::CMissionPD CMission;
 
-
 #endif // RY_MISSION_TYPES_H
 
 /* End of mission_types.h */
-
-
-

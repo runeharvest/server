@@ -43,7 +43,8 @@ NL_INSTANCE_COUNTER_IMPL(CCharacterEncyclopedia);
 // methods CCharacterEncyclopedia
 //-----------------------------------------------------------------------------
 
-CCharacterEncyclopedia::CCharacterEncyclopedia(CCharacter &c) : _Char(c)
+CCharacterEncyclopedia::CCharacterEncyclopedia(CCharacter &c)
+    : _Char(c)
 {
 	init();
 }
@@ -53,9 +54,9 @@ CCharacterEncyclopedia::CCharacterEncyclopedia(CCharacter &c) : _Char(c)
 void CCharacterEncyclopedia::init()
 {
 	const CStaticEncyclo &rSE = CSheets::getEncyclopedia();
-	_EncyCharAlbums.resize( rSE.getNbAlbum() );
+	_EncyCharAlbums.resize(rSE.getNbAlbum());
 	for (uint32 i = 0; i < rSE.getNbAlbum(); ++i)
-		_EncyCharAlbums[i].Themas.resize( rSE.getNbThema(i) );
+		_EncyCharAlbums[i].Themas.resize(rSE.getNbThema(i));
 }
 
 //-----------------------------------------------------------------------------
@@ -78,17 +79,17 @@ void CCharacterEncyclopedia::updateTask(uint32 nAlbum, uint32 nThema, uint32 nTa
 	// If album or thema already completed there is some kind of problem mission should not be accessible anymore
 	if (_EncyCharAlbums[nAlbum].AlbumState == 2)
 	{
-		nlwarning("album already completed album:%d thema:%d task:%d", nAlbum, nThema+1, nTask);
+		nlwarning("album already completed album:%d thema:%d task:%d", nAlbum, nThema + 1, nTask);
 		return;
 	}
 	else if (_EncyCharAlbums[nAlbum].Themas[nThema].ThemaState == 2)
 	{
-		nlwarning("thema already completed album:%d thema:%d task:%d", nAlbum, nThema+1, nTask);
+		nlwarning("thema already completed album:%d thema:%d task:%d", nAlbum, nThema + 1, nTask);
 		return;
 	}
 	else if (_EncyCharAlbums[nAlbum].Themas[nThema].getTaskState((uint8)nTask) == nNewState)
 	{
-		nlwarning("task already completed album:%d thema:%d task:%d", nAlbum, nThema+1, nTask);
+		nlwarning("task already completed album:%d thema:%d task:%d", nAlbum, nThema + 1, nTask);
 		return;
 	}
 	_EncyCharAlbums[nAlbum].Themas[nThema].setTaskState((uint8)nTask, nNewState);
@@ -125,21 +126,21 @@ void CCharacterEncyclopedia::unlockThema(uint32 nAlbum, uint32 nThema, bool bSen
 	nlassert(nThema < _EncyCharAlbums[nAlbum].Themas.size());
 
 	const CStaticEncyclo &rSE = CSheets::getEncyclopedia();
-	const CStaticEncycloThema *pSThm = rSE.getThema(nAlbum, nThema+1);
+	const CStaticEncycloThema *pSThm = rSE.getThema(nAlbum, nThema + 1);
 
 	if (pSThm == NULL)
 	{
-		nlwarning("thema unknown album:%d thema:%d",nAlbum, nThema+1);
+		nlwarning("thema unknown album:%d thema:%d", nAlbum, nThema + 1);
 		return;
 	}
 
 	if (_EncyCharAlbums[nAlbum].AlbumState == 0)
 		_EncyCharAlbums[nAlbum].AlbumState = 1;
-	
+
 	if (_EncyCharAlbums[nAlbum].Themas[nThema].ThemaState == 0)
 		_EncyCharAlbums[nAlbum].Themas[nThema].ThemaState = 1;
-	
-	uint8 nNbTask = (uint8)pSThm->Tasks.size()+1;
+
+	uint8 nNbTask = (uint8)pSThm->Tasks.size() + 1;
 	for (uint8 i = 0; i < nNbTask; ++i)
 	{
 		if (_EncyCharAlbums[nAlbum].Themas[nThema].getTaskState(i) == 0)
@@ -150,7 +151,7 @@ void CCharacterEncyclopedia::unlockThema(uint32 nAlbum, uint32 nThema, bool bSen
 	{
 		// Create update album message
 		sendAlbumMessage(nAlbum, nThema);
-		
+
 		// and send a message to the client
 		CCharacter::sendDynamicSystemMessage(_Char.getEntityRowId(), "EGS_UNLOCK_ENCYCLO");
 	}
@@ -166,15 +167,15 @@ bool CCharacterEncyclopedia::isAllTaskDone(uint32 nAlbum, uint32 nThema)
 	nlassert(nThema < _EncyCharAlbums[nAlbum].Themas.size());
 
 	const CStaticEncyclo &rSE = CSheets::getEncyclopedia();
-	const CStaticEncycloThema *pSThm = rSE.getThema(nAlbum, nThema+1);
-	
+	const CStaticEncycloThema *pSThm = rSE.getThema(nAlbum, nThema + 1);
+
 	if (pSThm == NULL)
 	{
-		nlwarning("thema unknown album:%d thema:%d",nAlbum, nThema+1);
+		nlwarning("thema unknown album:%d thema:%d", nAlbum, nThema + 1);
 		return false;
 	}
-	
-	uint8 nNbTask = (uint8)pSThm->Tasks.size()+1;
+
+	uint8 nNbTask = (uint8)pSThm->Tasks.size() + 1;
 	for (uint8 i = 1; i < nNbTask; ++i)
 	{
 		if (_EncyCharAlbums[nAlbum].Themas[nThema].getTaskState(i) != 2)
@@ -191,17 +192,17 @@ bool CCharacterEncyclopedia::isAtLeastOneTaskNotDone(uint32 nAlbum, uint32 nThem
 	nlassert(nThema > 0); // Thema must start at 1
 	nThema = nThema - 1;
 	nlassert(nThema < _EncyCharAlbums[nAlbum].Themas.size());
-	
+
 	const CStaticEncyclo &rSE = CSheets::getEncyclopedia();
-	const CStaticEncycloThema *pSThm = rSE.getThema(nAlbum, nThema+1);
-	
+	const CStaticEncycloThema *pSThm = rSE.getThema(nAlbum, nThema + 1);
+
 	if (pSThm == NULL)
 	{
-		nlwarning("thema unknown album:%d thema:%d",nAlbum, nThema+1);
+		nlwarning("thema unknown album:%d thema:%d", nAlbum, nThema + 1);
 		return false;
 	}
-	
-	uint8 nNbTask = (uint8)pSThm->Tasks.size()+1;
+
+	uint8 nNbTask = (uint8)pSThm->Tasks.size() + 1;
 	for (uint8 i = 1; i < nNbTask; ++i)
 	{
 		if (_EncyCharAlbums[nAlbum].Themas[nThema].getTaskState(i) != 2)
@@ -217,7 +218,7 @@ void CCharacterEncyclopedia::sendEncycloToClient()
 	CEncyclopediaUpdateMsg msgToClient;
 	const CStaticEncyclo &rSE = CSheets::getEncyclopedia();
 	msgToClient.Type = CEncyclopediaUpdateMsg::UpdateInit;
-	
+
 	for (uint32 nAlbum = 0; nAlbum < rSE.getNbAlbum(); ++nAlbum)
 	{
 		CEncyMsgAlbum albumOut;
@@ -229,8 +230,8 @@ void CCharacterEncyclopedia::sendEncycloToClient()
 		TVectorParamCheck vParams;
 
 		if (rECAlb.AlbumNameCache == 0)
-			rECAlb.AlbumNameCache = STRING_MANAGER::sendStringToClient(	_Char.getEntityRowId(), 
-																		pSAlb->Title, vParams	);
+			rECAlb.AlbumNameCache = STRING_MANAGER::sendStringToClient(_Char.getEntityRowId(),
+			    pSAlb->Title, vParams);
 		albumOut.Name = rECAlb.AlbumNameCache;
 		albumOut.State = rECAlb.AlbumState;
 		// If the album is finished display the associated brick
@@ -260,7 +261,7 @@ bool CCharacterEncyclopedia::checkIfThemaCompleted(uint32 nAlbum, uint32 nThemaI
 	nlassert(nThemaInt < _EncyCharAlbums[nAlbum].Themas.size());
 	// Get the number of tasks of this thema
 	const CStaticEncyclo &rSE = CSheets::getEncyclopedia();
-	const CStaticEncycloThema *pThm = rSE.getThema(nAlbum, nThemaInt+1);
+	const CStaticEncycloThema *pThm = rSE.getThema(nAlbum, nThemaInt + 1);
 	if (pThm == NULL) return false;
 	uint32 nNbTask = (uint32)pThm->Tasks.size();
 
@@ -268,7 +269,7 @@ bool CCharacterEncyclopedia::checkIfThemaCompleted(uint32 nAlbum, uint32 nThemaI
 	bool bTasksFinished[7];
 	for (uint8 nTask = 1; nTask < 8; ++nTask)
 	{
-		bTasksFinished[nTask-1] = (_EncyCharAlbums[nAlbum].Themas[nThemaInt].getTaskState(nTask) == 2);
+		bTasksFinished[nTask - 1] = (_EncyCharAlbums[nAlbum].Themas[nThemaInt].getTaskState(nTask) == 2);
 	}
 
 	bool bThemaFinished = bRiteFinished;
@@ -319,7 +320,7 @@ void CCharacterEncyclopedia::sendAlbumMessage(uint32 nAlbum, uint32 nThema)
 	msgToClient.Type = CEncyclopediaUpdateMsg::UpdateAlbum;
 
 	const CStaticEncycloAlbum *pSAlb = rSE.getAlbum(nAlbum);
-	const CStaticEncycloThema *pSThm = rSE.getThema(nAlbum, nThema+1);
+	const CStaticEncycloThema *pSThm = rSE.getThema(nAlbum, nThema + 1);
 	if ((pSAlb == NULL) || (pSThm == NULL)) return;
 	TVectorParamCheck vParams;
 	if (_EncyCharAlbums[nAlbum].AlbumNameCache == 0)
@@ -344,47 +345,47 @@ void CCharacterEncyclopedia::makeThemaMessage(CEncyMsgThema &t, uint32 nAlbum, u
 {
 	const CStaticEncyclo &rSE = CSheets::getEncyclopedia();
 	// nThema is from 0 because this method is internally used
-	const CStaticEncycloThema *pSThm = rSE.getThema(nAlbum, nThema+1);
+	const CStaticEncycloThema *pSThm = rSE.getThema(nAlbum, nThema + 1);
 	if (pSThm == NULL) return;
-	
+
 	CEncyCharThema &rECThm = _EncyCharAlbums[nAlbum].Themas[nThema];
 	if (rECThm.ThemaState == 0) return;
-	
+
 	TVectorParamCheck vParams;
 
 	if (rECThm.ThemaNameCache == 0)
-		rECThm.ThemaNameCache = STRING_MANAGER::sendStringToClient(	_Char.getEntityRowId(), 
-																	pSThm->Title, vParams);
+		rECThm.ThemaNameCache = STRING_MANAGER::sendStringToClient(_Char.getEntityRowId(),
+		    pSThm->Title, vParams);
 	t.Name = rECThm.ThemaNameCache;
 	t.State = rECThm.ThemaState;
 	// If the thema is finished display associated stuff
 	if (t.State == 2)
 	{
 		if (rECThm.RewardTextCache == 0)
-			rECThm.RewardTextCache = STRING_MANAGER::sendStringToClient( _Char.getEntityRowId(), 
-																		pSThm->RewardText, vParams);
+			rECThm.RewardTextCache = STRING_MANAGER::sendStringToClient(_Char.getEntityRowId(),
+			    pSThm->RewardText, vParams);
 		t.RewardText = rECThm.RewardTextCache;
 		t.RewardSheet = pSThm->RewardSheet.asInt();
 	}
-	t.NbTask = pSThm->Tasks.size()+1;
+	t.NbTask = pSThm->Tasks.size() + 1;
 	t.RiteTaskStatePacked = rECThm.RiteTaskStatePacked;
-	
+
 	CAIAliasTranslator *pAIAT = CAIAliasTranslator::getInstance();
 	CMissionManager *pMM = CMissionManager::getInstance();
-	// For the moment update all tasks and rite	
+	// For the moment update all tasks and rite
 	for (uint32 i = 0; i < t.NbTask; ++i)
 	{
 		if (rECThm.getTaskState((uint8)i) != 0)
 		{
 			CMissionTemplate *pMT = NULL;
 			if (i == 0)
-				pMT = pMM->getTemplate( pAIAT->getMissionUniqueIdFromName(pSThm->Rite) );
+				pMT = pMM->getTemplate(pAIAT->getMissionUniqueIdFromName(pSThm->Rite));
 			else
-				pMT = pMM->getTemplate( pAIAT->getMissionUniqueIdFromName(pSThm->Tasks[i-1]) );
-			
+				pMT = pMM->getTemplate(pAIAT->getMissionUniqueIdFromName(pSThm->Tasks[i - 1]));
+
 			if (pMT == NULL) continue;
 			TDataSetRow rGiver = TheDataset.getDataSetRow(pAIAT->getEntityId(pMT->EncycloNPC));
-			
+
 			if (rGiver.isNull())
 			{
 				nlwarning("Missing NPC alias : %d", pMT->EncycloNPC);
@@ -393,13 +394,13 @@ void CCharacterEncyclopedia::makeThemaMessage(CEncyMsgThema &t, uint32 nAlbum, u
 			{
 				if (rECThm.RiteTaskNameCache[i] == 0)
 					rECThm.RiteTaskNameCache[i] = pMT->sendTitleText(_Char.getEntityRowId(), rGiver);
-				
+
 				t.TaskName[i] = rECThm.RiteTaskNameCache[i];
-				
-				CMirrorPropValue<TYPE_NAME_STRING_ID> nameId( TheDataset, rGiver, DSPropertyNAME_STRING_ID );
+
+				CMirrorPropValue<TYPE_NAME_STRING_ID> nameId(TheDataset, rGiver, DSPropertyNAME_STRING_ID);
 				uint32 nNPCname = nameId;
 				t.TaskNPCName[i] = nNPCname;
 			}
 		}
-	}	
+	}
 }

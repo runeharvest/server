@@ -28,16 +28,16 @@
 
 using namespace std;
 using namespace NLMISC;
-using namespace	PHRASE_UTILITIES;
+using namespace PHRASE_UTILITIES;
 
-CVariable<bool> ResPawnPVPInSameRegionForbiden("egs","ResPawnPVPInSameRegionForbiden", "When character dead in PvP Faction, it can't respawn in same same region of it's death", true, 0, true );
+CVariable<bool> ResPawnPVPInSameRegionForbiden("egs", "ResPawnPVPInSameRegionForbiden", "When character dead in PvP Faction, it can't respawn in same same region of it's death", true, 0, true);
 
 //----------------------------------------------------------------------------
-PVP_RELATION::TPVPRelation CPVPFaction::getPVPRelation( CCharacter * actor, CEntityBase * target, bool curative ) const
+PVP_RELATION::TPVPRelation CPVPFaction::getPVPRelation(CCharacter *actor, CEntityBase *target, bool curative) const
 {
 	// Init relation reminders
-	CPVPManager2::getInstance()->setPVPFactionAllyReminder( false );
-	CPVPManager2::getInstance()->setPVPFactionEnemyReminder( false );
+	CPVPManager2::getInstance()->setPVPFactionAllyReminder(false);
+	CPVPManager2::getInstance()->setPVPFactionEnemyReminder(false);
 
 	bool isAlly = false;
 
@@ -53,7 +53,7 @@ PVP_RELATION::TPVPRelation CPVPFaction::getPVPRelation( CCharacter * actor, CEnt
 		return PVP_RELATION::Unknown;
 	}
 
-	CCharacter * pTarget = dynamic_cast<CCharacter*>(target);
+	CCharacter *pTarget = dynamic_cast<CCharacter *>(target);
 	if (pTarget == 0)
 		return PVP_RELATION::Unknown;
 
@@ -64,13 +64,13 @@ PVP_RELATION::TPVPRelation CPVPFaction::getPVPRelation( CCharacter * actor, CEnt
 			targetSafe = true;
 	}
 
-	if( CPVPManager2::getInstance()->inSafeZone(actor->getPosition()))
+	if (CPVPManager2::getInstance()->inSafeZone(actor->getPosition()))
 	{
 		actorInSafeZone = true;
-		if( actor->getSafeInPvPSafeZone())
+		if (actor->getSafeInPvPSafeZone())
 			actorSafe = true;
 	}
-	
+
 	// Target is not tagged => Neutral
 	if (!pTarget->getPVPFlag() && !pTarget->getPvPRecentActionFlag())
 		return PVP_RELATION::Neutral;
@@ -84,7 +84,6 @@ PVP_RELATION::TPVPRelation CPVPFaction::getPVPRelation( CCharacter * actor, CEnt
 		else
 			return PVP_RELATION::Neutral;
 	}
-
 
 	// In same Team => Ally
 	if ((pTarget->getTeamId() != CTEAM::InvalidTeamId) && (actor->getTeamId() != CTEAM::InvalidTeamId) && (actor->getTeamId() == pTarget->getTeamId()))
@@ -111,7 +110,7 @@ PVP_RELATION::TPVPRelation CPVPFaction::getPVPRelation( CCharacter * actor, CEnt
 		{
 			return PVP_RELATION::NeutralPVP;
 		}
-		
+
 		// One is safe but not other => NeutralPVP
 		if (targetSafe != actorSafe)
 		{
@@ -121,14 +120,14 @@ PVP_RELATION::TPVPRelation CPVPFaction::getPVPRelation( CCharacter * actor, CEnt
 		CPVPManager2::getInstance()->setPVPFactionAllyReminder(true);
 		return PVP_RELATION::Ally;
 	}
-	
+
 	// If one is safe => NeutralPVP
 	if (targetSafe || actorSafe)
 	{
 		return PVP_RELATION::NeutralPVP;
 	}
-	
-	// 
+
+	//
 	if ((targetInSafeZone && !pTarget->getPvPRecentActionFlag()) || (actorInSafeZone && !actor->getPvPRecentActionFlag()))
 	{
 		return PVP_RELATION::NeutralPVP;
@@ -138,31 +137,30 @@ PVP_RELATION::TPVPRelation CPVPFaction::getPVPRelation( CCharacter * actor, CEnt
 	return PVP_RELATION::Ennemy;
 }
 
-
 //----------------------------------------------------------------------------
-bool CPVPFaction::isTPValid( CCharacter* actor, CGameItemPtr TeleportTicket ) const
+bool CPVPFaction::isTPValid(CCharacter *actor, CGameItemPtr TeleportTicket) const
 {
-	bool result = ! actor->getPvPRecentActionFlag();
-	if( TeleportTicket != 0 && TeleportTicket->getStaticForm() != 0 && result )
+	bool result = !actor->getPvPRecentActionFlag();
+	if (TeleportTicket != 0 && TeleportTicket->getStaticForm() != 0 && result)
 	{
 		// if character have is not PvP faction flagged (Tag PvP off), only recent PvP action can forbid TP usage
-		if( actor->getPVPFlag() == false )
+		if (actor->getPVPFlag() == false)
 			return true;
 
-		// check if war occurs between player character allegiances and region destination clan owner  
-		uint16 idx = CZoneManager::getInstance().getTpSpawnZoneIdByName( TeleportTicket->getStaticForm()->Destination );
-		const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone( idx );
-		if( zone != 0 )
+		// check if war occurs between player character allegiances and region destination clan owner
+		uint16 idx = CZoneManager::getInstance().getTpSpawnZoneIdByName(TeleportTicket->getStaticForm()->Destination);
+		const CTpSpawnZone *zone = CZoneManager::getInstance().getTpSpawnZone(idx);
+		if (zone != 0)
 		{
-			PVP_CLAN::TPVPClan regionFactionOwner = CPVPFactionRewardManager::getInstance().getRegionOwner( zone->getRegion() );
+			PVP_CLAN::TPVPClan regionFactionOwner = CPVPFactionRewardManager::getInstance().getRegionOwner(zone->getRegion());
 			pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> actorAllegiance = actor->getAllegiance();
 
-			if( regionFactionOwner == PVP_CLAN::Neutral )
+			if (regionFactionOwner == PVP_CLAN::Neutral)
 				return true;
 			else
 			{
-				if( CPVPManager2::getInstance()->factionWarOccurs(actorAllegiance.first, regionFactionOwner) == false 
-				&& CPVPManager2::getInstance()->factionWarOccurs(actorAllegiance.second, regionFactionOwner) == false )
+				if (CPVPManager2::getInstance()->factionWarOccurs(actorAllegiance.first, regionFactionOwner) == false
+				    && CPVPManager2::getInstance()->factionWarOccurs(actorAllegiance.second, regionFactionOwner) == false)
 					return true;
 			}
 		}
@@ -171,62 +169,60 @@ bool CPVPFaction::isTPValid( CCharacter* actor, CGameItemPtr TeleportTicket ) co
 }
 
 //----------------------------------------------------------------------------
-bool CPVPFaction::isRespawnValid( CCharacter* actor, CCharacterRespawnPoints::TRespawnPoint respawnPoint ) const
+bool CPVPFaction::isRespawnValid(CCharacter *actor, CCharacterRespawnPoints::TRespawnPoint respawnPoint) const
 {
-	if( actor->getPVPFlag() == false )
+	if (actor->getPVPFlag() == false)
 		return true;
 
-	const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
+	const CTpSpawnZone *zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
 	if (zone == NULL)
 		return false;
 
 	// validate default respawn point
-	if( zone->getPlaceType() == PLACE_TYPE::Capital || zone->getName() == "place_aegus" || zone->getName() == "place_stalli" || zone->getName() == "place_qai_lo" || zone->getName() == "place_aubermouth" )
+	if (zone->getPlaceType() == PLACE_TYPE::Capital || zone->getName() == "place_aegus" || zone->getName() == "place_stalli" || zone->getName() == "place_qai_lo" || zone->getName() == "place_aubermouth")
 		return true;
 
 	// check if the respawn point is in the region where player character is killed in PvP
-	if( ResPawnPVPInSameRegionForbiden )
-		if ( (zone->getRegion() == actor->getKilledPvPRegion() ) && actor->getPvPRecentActionFlag() )
+	if (ResPawnPVPInSameRegionForbiden)
+		if ((zone->getRegion() == actor->getKilledPvPRegion()) && actor->getPvPRecentActionFlag())
 			return false;
 
 	// check if respawn point is in enemy region
 	PVP_CLAN::TPVPClan regionClan = CPVPFactionRewardManager::getInstance().getRegionOwner(zone->getRegion());
-	pair< PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan > allegiance = actor->getAllegiance();
+	pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance = actor->getAllegiance();
 
-	if( regionClan != PVP_CLAN::Neutral )
+	if (regionClan != PVP_CLAN::Neutral)
 	{
-		if( CPVPManager2::getInstance()->factionWarOccurs( regionClan, allegiance.first ) || 
-			CPVPManager2::getInstance()->factionWarOccurs( regionClan, allegiance.second ) )
+		if (CPVPManager2::getInstance()->factionWarOccurs(regionClan, allegiance.first) || CPVPManager2::getInstance()->factionWarOccurs(regionClan, allegiance.second))
 			return false;
 	}
 	return true;
 }
 
 //----------------------------------------------------------------------------
-void CPVPFaction::finalBlowerKillerInPvPFaction( CCharacter * killer, PVP_CLAN::TPVPClan finalBlowerFaction, CCharacter * victimChar ) const
+void CPVPFaction::finalBlowerKillerInPvPFaction(CCharacter *killer, PVP_CLAN::TPVPClan finalBlowerFaction, CCharacter *victimChar) const
 {
-	CPVPFactionHOF::getInstance()->writeStatInHOFDatabase( killer, finalBlowerFaction, CPVPFactionHOF::final_blow, 1 );
+	CPVPFactionHOF::getInstance()->writeStatInHOFDatabase(killer, finalBlowerFaction, CPVPFactionHOF::final_blow, 1);
 
-	BOMB_IF(victimChar == 0, "<CPVPFaction::finalBlowerKillerInPvPFaction> victimChar pointer is null !", return );
+	BOMB_IF(victimChar == 0, "<CPVPFaction::finalBlowerKillerInPvPFaction> victimChar pointer is null !", return);
 
 	SM_STATIC_PARAMS_1(fbMsgParam, STRING_MANAGER::player);
-	fbMsgParam[0].setEId( victimChar->getId() );
-	CCharacter::sendDynamicSystemMessage( killer->getId(), "CHARACTER_MADE_THE_FINAL_BLOW", fbMsgParam );
+	fbMsgParam[0].setEId(victimChar->getId());
+	CCharacter::sendDynamicSystemMessage(killer->getId(), "CHARACTER_MADE_THE_FINAL_BLOW", fbMsgParam);
 }
 
 //----------------------------------------------------------------------------
-void CPVPFaction::characterKillerInPvPFaction( CCharacter * character, PVP_CLAN::TPVPClan winnerFaction, sint32 factionPoint ) const
+void CPVPFaction::characterKillerInPvPFaction(CCharacter *character, PVP_CLAN::TPVPClan winnerFaction, sint32 factionPoint) const
 {
-	CPVPFactionHOF::getInstance()->writeStatInHOFDatabase( character, winnerFaction, CPVPFactionHOF::faction_point, factionPoint );
-	CPVPFactionHOF::getInstance()->writeStatInHOFDatabase( character, winnerFaction, CPVPFactionHOF::kill, 1 );
+	CPVPFactionHOF::getInstance()->writeStatInHOFDatabase(character, winnerFaction, CPVPFactionHOF::faction_point, factionPoint);
+	CPVPFactionHOF::getInstance()->writeStatInHOFDatabase(character, winnerFaction, CPVPFactionHOF::kill, 1);
 }
 
 //----------------------------------------------------------------------------
-void CPVPFaction::characterKilledInPvPFaction( CCharacter * character, PVP_CLAN::TPVPClan looserFaction, sint32 factionPoint ) const
+void CPVPFaction::characterKilledInPvPFaction(CCharacter *character, PVP_CLAN::TPVPClan looserFaction, sint32 factionPoint) const
 {
-	CPVPFactionHOF::getInstance()->writeStatInHOFDatabase( character, looserFaction, CPVPFactionHOF::faction_point, factionPoint );
-	CPVPFactionHOF::getInstance()->writeStatInHOFDatabase( character, looserFaction, CPVPFactionHOF::lost, 1 );
+	CPVPFactionHOF::getInstance()->writeStatInHOFDatabase(character, looserFaction, CPVPFactionHOF::faction_point, factionPoint);
+	CPVPFactionHOF::getInstance()->writeStatInHOFDatabase(character, looserFaction, CPVPFactionHOF::lost, 1);
 
 	character->killedInPVP();
 }
-

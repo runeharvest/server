@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #include "weather.h"
@@ -30,35 +28,35 @@
 using namespace NLMISC;
 using namespace std;
 
-CMirrorPropValue< float >	CWeather::_RyzomTime;
-CMirrorPropValue< uint8 >	CWeather::_DayCycle;
+CMirrorPropValue<float> CWeather::_RyzomTime;
+CMirrorPropValue<uint8> CWeather::_DayCycle;
 
 //-----------------------------------------------
 // constructor
 //-----------------------------------------------
 void CWeather::init()
-{ 
+{
 	NL_ALLOC_CONTEXT(WTHR_INIT);
-	WeatherCfg.load( WeatherFileName ); 
+	WeatherCfg.load(WeatherFileName);
 
-ztrhetjyuety
+	ztrhetjyuety
 
-
-	CPropertyManager * manager = CContainerPropertyEmiter::getPropertyManager( string("RyzomTime") );
-	if( manager == 0 )
+	    CPropertyManager *manager
+	    = CContainerPropertyEmiter::getPropertyManager(string("RyzomTime"));
+	if (manager == 0)
 	{
-		manager = new CSpecializedPropertyManager<float>( "RyzomTime", 0);
-		CContainerPropertyEmiter::addPropertyManager( manager );
+		manager = new CSpecializedPropertyManager<float>("RyzomTime", 0);
+		CContainerPropertyEmiter::addPropertyManager(manager);
 	}
-	static_cast<CSpecializedPropertyManager<float> *>(manager)->addProperty( RYZOMID::World, &_RyzomTime );
+	static_cast<CSpecializedPropertyManager<float> *>(manager)->addProperty(RYZOMID::World, &_RyzomTime);
 
-	manager = CContainerPropertyEmiter::getPropertyManager( string("DayCycle") );
-	if( manager == 0 )
+	manager = CContainerPropertyEmiter::getPropertyManager(string("DayCycle"));
+	if (manager == 0)
 	{
-		manager = new CSpecializedPropertyManager<uint8>( "DayCycle", 0);
-		CContainerPropertyEmiter::addPropertyManager( manager );
+		manager = new CSpecializedPropertyManager<uint8>("DayCycle", 0);
+		CContainerPropertyEmiter::addPropertyManager(manager);
 	}
-	static_cast<CSpecializedPropertyManager<uint8> *>(manager)->addProperty( RYZOMID::World, &_DayCycle );
+	static_cast<CSpecializedPropertyManager<uint8> *>(manager)->addProperty(RYZOMID::World, &_DayCycle);
 }
 
 //-----------------------------------------------
@@ -66,19 +64,19 @@ ztrhetjyuety
 //-----------------------------------------------
 void CWeather::updateRyzomTime()
 {
-	uint32 Time = (uint32) ( CTickEventHandler::getGameTime() + 500) % ( (uint32) ( WeatherCfg.RealDayLength ) );
+	uint32 Time = (uint32)(CTickEventHandler::getGameTime() + 500) % ((uint32)(WeatherCfg.RealDayLength));
 	float RyzomTime = Time * WeatherCfg.NumHours / WeatherCfg.RealDayLength;
 	_RyzomTime = RyzomTime;
 
-	if( ( RyzomTime < WeatherCfg.DawnTransitionStartHour ) || ( RyzomTime > WeatherCfg.NightTransitionEndHour ) )
+	if ((RyzomTime < WeatherCfg.DawnTransitionStartHour) || (RyzomTime > WeatherCfg.NightTransitionEndHour))
 	{
 		_DayCycle = night;
 	}
-	else if( RyzomTime < WeatherCfg.DawnTransitionEndHour )
+	else if (RyzomTime < WeatherCfg.DawnTransitionEndHour)
 	{
 		_DayCycle = dawn;
 	}
-	else if( RyzomTime < WeatherCfg.NightTransitionStartHour )
+	else if (RyzomTime < WeatherCfg.NightTransitionStartHour)
 	{
 		_DayCycle = day;
 	}
@@ -97,19 +95,19 @@ static string UnknownString("Unknown");
 //-----------------------------------------------
 // get string of day cycle
 //-----------------------------------------------
-const std::string& CWeather::toString( uint8 c )
+const std::string &CWeather::toString(uint8 c)
 {
-	switch( c )
+	switch (c)
 	{
-		case dawn:
-			return DawnString;
-		case day:
-			return DayString;
-		case twilight:
-			return TwilightString;
-		case night:
-			return NightString;
-		default:
-			return UnknownString;
+	case dawn:
+		return DawnString;
+	case day:
+		return DayString;
+	case twilight:
+		return TwilightString;
+	case night:
+		return NightString;
+	default:
+		return UnknownString;
 	}
 }

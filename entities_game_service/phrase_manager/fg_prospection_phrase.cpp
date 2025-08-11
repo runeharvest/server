@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "fg_prospection_phrase.h"
 #include "nel/misc/common.h"
@@ -40,29 +38,25 @@
 #include "server_share/used_continent.h"
 #include "game_share/time_weather_season/time_date_season_manager.h"
 #include "server_share/stl_allocator_checker.h"
-//#include "dss_session_manager.h"
+// #include "dss_session_manager.h"
 
-DEFAULT_SPHRASE_FACTORY( CFgProspectionPhrase, BRICK_TYPE::FORAGE_PROSPECTION );
-//DEFAULT_SPHRASE_FACTORY( CFgSpyingPhrase, BRICK_TYPE::FORAGE_SPYING );
-//DEFAULT_SPHRASE_FACTORY( CFgGardeningPhrase, BRICK_TYPE::FORAGE_GARDENING );
+DEFAULT_SPHRASE_FACTORY(CFgProspectionPhrase, BRICK_TYPE::FORAGE_PROSPECTION);
+// DEFAULT_SPHRASE_FACTORY( CFgSpyingPhrase, BRICK_TYPE::FORAGE_SPYING );
+// DEFAULT_SPHRASE_FACTORY( CFgGardeningPhrase, BRICK_TYPE::FORAGE_GARDENING );
 
 using namespace NLMISC;
 using namespace std;
 
-
-
 extern CVariable<uint32> ForageLocateDepositUpdateFrequency;
 extern CHarvestSource AutoSpawnSourceIniProperties;
 
-CVariable<sint32> ForageForcedSeason( "egs", "ForageForcedSeason", "-1=Use real season, 0=Spring, ..., 3=Winter", -1, 0, true );
-CVariable<sint32> ForageForcedDaycycle( "egs", "ForageForcedDaycycle", "-1=Use real day cycle, 0=Day/Dawn, 1=Day/Day, 2=Day/Evening, 3=Night/Nightfall, 4=Night/Night", -1, 0, true );
-CVariable<sint32> ForageForcedWeather( "egs", "ForageForcedWeather", "-1=Use real weather, 0=Best, ..., 3=Worst", -1, 0, true );
+CVariable<sint32> ForageForcedSeason("egs", "ForageForcedSeason", "-1=Use real season, 0=Spring, ..., 3=Winter", -1, 0, true);
+CVariable<sint32> ForageForcedDaycycle("egs", "ForageForcedDaycycle", "-1=Use real day cycle, 0=Day/Dawn, 1=Day/Day, 2=Day/Evening, 3=Night/Nightfall, 4=Night/Night", -1, 0, true);
+CVariable<sint32> ForageForcedWeather("egs", "ForageForcedWeather", "-1=Use real weather, 0=Best, ..., 3=Worst", -1, 0, true);
 
 bool WarnIfOutsideOfRegion = true;
 
-
-const char * NothingFoundReasonStrs[NFNbReasons] =
-{
+const char *NothingFoundReasonStrs[NFNbReasons] = {
 	NULL, // unknown => no string
 	"FORAGE_NO_DEPOSIT_HERE",
 	"FORAGE_NO_DEPOSIT_IN_SEASON",
@@ -80,10 +74,8 @@ const char * NothingFoundReasonStrs[NFNbReasons] =
 	"FORAGE_CANT_ADD_SOURCE"
 };
 
-
 const float MaxForageRange = 100.0f; // 0 is forbidden
-const float MaxForageAngle = (float)(2.0*Pi); // 0 is forbidden
-
+const float MaxForageAngle = (float)(2.0 * Pi); // 0 is forbidden
 
 /**
  * Helper for sending position validation requests to AIS
@@ -91,59 +83,55 @@ const float MaxForageAngle = (float)(2.0*Pi); // 0 is forbidden
 class CSourceSpawnPosValidator
 {
 public:
-
 	/// Constructor. Simple version, only one source per message, and no path checking.
-	CSourceSpawnPosValidator( uint32 aiInstanceNumber );
-	
+	CSourceSpawnPosValidator(uint32 aiInstanceNumber);
+
 	/// Constructor, multiple & path checking version
-	CSourceSpawnPosValidator( uint32 aiInstanceNumber, const NLMISC::CVector& prospectingPos );
+	CSourceSpawnPosValidator(uint32 aiInstanceNumber, const NLMISC::CVector &prospectingPos);
 
 	/// Push pos and source datasetrow. Precondition: isValidationPossible().
-	void		pushPosAndRow( const NLMISC::CVector2f& pos, const TDataSetRow& row );
+	void pushPosAndRow(const NLMISC::CVector2f &pos, const TDataSetRow &row);
 
 	/// Send validation request. Precondition: isValidationPossible().
-	void		sendRequest();
-	
+	void sendRequest();
+
 	/// Return true if the source(s) should not be spawned without validation (i.e. an AIS has been found for the specified instance)
-	bool		isValidationPossible() const { return ForageValidateSourcesSpawnPos.get() && (_AisId.get() != 0); }
+	bool isValidationPossible() const { return ForageValidateSourcesSpawnPos.get() && (_AisId.get() != 0); }
 
 private:
-	
-	NLNET::TServiceId	_AisId;
+	NLNET::TServiceId _AisId;
 
-	uint16				_SizePos;
+	uint16 _SizePos;
 
-	NLNET::CMessage		_MsgOut;
+	NLNET::CMessage _MsgOut;
 
-	uint32				_NbItems; // if ~0, only one call to pushPosAndRow() is possible
+	uint32 _NbItems; // if ~0, only one call to pushPosAndRow() is possible
 };
-
 
 /*
  * Constructor
  */
-CSourceSpawnPosValidator::CSourceSpawnPosValidator( uint32 aiInstanceNumber )
+CSourceSpawnPosValidator::CSourceSpawnPosValidator(uint32 aiInstanceNumber)
 {
-	_AisId = CWorldInstances::instance().getAISId( aiInstanceNumber );
-	if ( _AisId.get() != 0 )
+	_AisId = CWorldInstances::instance().getAISId(aiInstanceNumber);
+	if (_AisId.get() != 0)
 	{
-		_MsgOut.setType( "S_SRC_SPWN_VLD" );
+		_MsgOut.setType("S_SRC_SPWN_VLD");
 		_NbItems = ~0;
 	}
 }
 
-
 /*
  * Constructor, multiple & path checking version
  */
-CSourceSpawnPosValidator::CSourceSpawnPosValidator( uint32 aiInstanceNumber, const NLMISC::CVector& prospectingPos )
+CSourceSpawnPosValidator::CSourceSpawnPosValidator(uint32 aiInstanceNumber, const NLMISC::CVector &prospectingPos)
 {
-	_AisId = CWorldInstances::instance().getAISId( aiInstanceNumber );
-	if ( _AisId.get() != 0 )
+	_AisId = CWorldInstances::instance().getAISId(aiInstanceNumber);
+	if (_AisId.get() != 0)
 	{
-		_MsgOut.setType( "SRC_SPWN_VLD" );
+		_MsgOut.setType("SRC_SPWN_VLD");
 		//_MsgOut.serial( const_cast<CVector&>(prospectingPos) );
-		_SizePos = (uint16)_MsgOut.reserve( sizeof(_NbItems) );
+		_SizePos = (uint16)_MsgOut.reserve(sizeof(_NbItems));
 		_NbItems = 0;
 	}
 }
@@ -151,33 +139,31 @@ CSourceSpawnPosValidator::CSourceSpawnPosValidator( uint32 aiInstanceNumber, con
 /*
  * Push pos and source datasetrow. Precondition: isValidationPossible().
  */
-void		CSourceSpawnPosValidator::pushPosAndRow( const NLMISC::CVector2f& pos, const TDataSetRow& row )
+void CSourceSpawnPosValidator::pushPosAndRow(const NLMISC::CVector2f &pos, const TDataSetRow &row)
 {
-	//nlassert( isValidationPossible() );
-	_MsgOut.serial( const_cast<CVector2f&>(pos) );
-	_MsgOut.serial( const_cast<TDataSetRow&>(row) );
-	if ( _NbItems != ~0 )
+	// nlassert( isValidationPossible() );
+	_MsgOut.serial(const_cast<CVector2f &>(pos));
+	_MsgOut.serial(const_cast<TDataSetRow &>(row));
+	if (_NbItems != ~0)
 		++_NbItems;
 }
-
 
 /*
  * Send validation request. Precondition: isValidationPossible().
  */
-void		CSourceSpawnPosValidator::sendRequest()
+void CSourceSpawnPosValidator::sendRequest()
 {
-	//nlassert( isValidationPossible() );
-	if ( _NbItems != ~0 )
-		_MsgOut.poke( _NbItems, (sint32)_SizePos );
-	NLNET::CUnifiedNetwork::getInstance()->send( _AisId, _MsgOut ); // not via mirror because mirror not accessed by receiver
+	// nlassert( isValidationPossible() );
+	if (_NbItems != ~0)
+		_MsgOut.poke(_NbItems, (sint32)_SizePos);
+	NLNET::CUnifiedNetwork::getInstance()->send(_AisId, _MsgOut); // not via mirror because mirror not accessed by receiver
 }
-
-
 
 /*
  * CFgProspectionPhrase constructor
  */
-CFgSearchPhrase::CFgSearchPhrase() : CForagePhrase()
+CFgSearchPhrase::CFgSearchPhrase()
+    : CForagePhrase()
 {
 	// Set default values
 	_ForageTime = 150; // 15 s
@@ -193,88 +179,87 @@ CFgSearchPhrase::CFgSearchPhrase() : CForagePhrase()
 	_MaterialFamilyFilter = RM_FAMILY::Unknown;
 	_CraftableItemPartFilter = ~0;
 	_IsLocateDepositProspection = false;
-	_PhraseType	= BRICK_TYPE::FORAGE_PROSPECTION;
+	_PhraseType = BRICK_TYPE::FORAGE_PROSPECTION;
 	_IsStatic = true;
 	_UsedSkillValue = 0;
 }
 
-
 /*
  *
  */
-bool CFgSearchPhrase::build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute )
+bool CFgSearchPhrase::build(const TDataSetRow &actorRowId, const std::vector<const CStaticBrick *> &bricks, bool buildToExecute)
 {
 	H_AUTO(CFgSearchPhrase_build);
-	
+
 	_ActorRowId = actorRowId;
 
 	// Check grammar
-	if ( ! validateSabrinaGrammar( bricks, _ActorRowId ) )
+	if (!validateSabrinaGrammar(bricks, _ActorRowId))
 		return false;
 
 	// Iterate on the bricks
 	sint32 sabrinaCredit = 0, sabrinaCost = 0;
 	float sabrinaRelativeCredit = 1.0f, sabrinaRelativeCost = 1.0f;
-	for (std::vector<const CStaticBrick*>::const_iterator ib=bricks.begin(); ib!=bricks.end(); ++ib )
+	for (std::vector<const CStaticBrick *>::const_iterator ib = bricks.begin(); ib != bricks.end(); ++ib)
 	{
-		const CStaticBrick& brick = *(*ib);
-		
+		const CStaticBrick &brick = *(*ib);
+
 		// Compute Sabrina balance (and Sabrina cost)
-		if ( brick.SabrinaValue > 0 )
+		if (brick.SabrinaValue > 0)
 			sabrinaCost += brick.SabrinaValue;
 		else
 			sabrinaCredit -= brick.SabrinaValue;
 
-		if( brick.SabrinaRelativeValue > 0.0f )
+		if (brick.SabrinaRelativeValue > 0.0f)
 			sabrinaRelativeCost += brick.SabrinaRelativeValue;
 		else
 			sabrinaRelativeCredit -= brick.SabrinaRelativeValue;
-		
+
 		// Decode property
-		for ( std::vector<TBrickParam::IIdPtr>::const_iterator ip=brick.Params.begin(); ip!=brick.Params.end(); ++ip )
+		for (std::vector<TBrickParam::IIdPtr>::const_iterator ip = brick.Params.begin(); ip != brick.Params.end(); ++ip)
 		{
-			TBrickParam::IId* param = (*ip);
-			switch ( param->id() )
+			TBrickParam::IId *param = (*ip);
+			switch (param->id())
 			{
 			case TBrickParam::FOCUS:
-				INFOLOG("FOCUS: %i",((CSBrickParamFocus *)param)->Focus);
+				INFOLOG("FOCUS: %i", ((CSBrickParamFocus *)param)->Focus);
 				_FocusCost += ((CSBrickParamFocus *)param)->Focus;
 				break;
 			case TBrickParam::FG_RANGE:
-				INFOLOG("RANGE: %g",((CSBrickParamForageRange *)param)->Range);
+				INFOLOG("RANGE: %g", ((CSBrickParamForageRange *)param)->Range);
 				_ForageRange = ((CSBrickParamForageRange *)param)->Range;
 				break;
 			case TBrickParam::FG_LD_RANGE:
-				INFOLOG("FG_LD_RANGE: %f",((CSBrickParamForageLocateDepositRange *)param)->Range);
+				INFOLOG("FG_LD_RANGE: %f", ((CSBrickParamForageLocateDepositRange *)param)->Range);
 				_ForageRange = ((CSBrickParamForageLocateDepositRange *)param)->Range;
 				break;
 			case TBrickParam::FG_ANGLE:
-				INFOLOG("ANGLE: %u",((CSBrickParamForageAngle *)param)->Angle);
-				_ForageAngle = ((float)(((CSBrickParamForageAngle *)param)->Angle)) * (float)Pi / 180.0f ;
+				INFOLOG("ANGLE: %u", ((CSBrickParamForageAngle *)param)->Angle);
+				_ForageAngle = ((float)(((CSBrickParamForageAngle *)param)->Angle)) * (float)Pi / 180.0f;
 				break;
 			case TBrickParam::FG_MULTI:
-				INFOLOG("MULTI: %u",((CSBrickParamForageMulti *)param)->Limit);
+				INFOLOG("MULTI: %u", ((CSBrickParamForageMulti *)param)->Limit);
 				_MultiSpotLimit = (uint16)((CSBrickParamForageMulti *)param)->Limit;
 				break;
 			case TBrickParam::FG_KNOW:
-				INFOLOG("FG_KNOW: %i",((CSBrickParamForageKnowledge *)param)->Know);
-				_KnowledgePrecision = ((CSBrickParamForageKnowledge *)param)->Know ;
+				INFOLOG("FG_KNOW: %i", ((CSBrickParamForageKnowledge *)param)->Know);
+				_KnowledgePrecision = ((CSBrickParamForageKnowledge *)param)->Know;
 				break;
 			case TBrickParam::FG_TIME:
-				INFOLOG("TIME: %u",((CSBrickParamForageTime *)param)->Time);
+				INFOLOG("TIME: %u", ((CSBrickParamForageTime *)param)->Time);
 				_ForageTime = (TGameCycle)(((CSBrickParamForageTime *)param)->Time * 10.0f);
 				break;
 			case TBrickParam::FG_SRC_TIME:
-				INFOLOG("FG_SRC_TIME: %f",((CSBrickParamForageSourceTime *)param)->Time);
-				_SourceIniProperties.setProspectionExtraExtractionTime( (TGameCycle)(((CSBrickParamForageSourceTime *)param)->Time * 10.0f) ); // initial extraction time
+				INFOLOG("FG_SRC_TIME: %f", ((CSBrickParamForageSourceTime *)param)->Time);
+				_SourceIniProperties.setProspectionExtraExtractionTime((TGameCycle)(((CSBrickParamForageSourceTime *)param)->Time * 10.0f)); // initial extraction time
 				break;
 			case TBrickParam::FG_STAT_ENERGY:
-				INFOLOG("FG_STAT_ENERGY: %f",((CSBrickParamForageStatEnergy *)param)->StatEnergy);
+				INFOLOG("FG_STAT_ENERGY: %f", ((CSBrickParamForageStatEnergy *)param)->StatEnergy);
 				_MaterialEnergy = (uint8)(((CSBrickParamForageStatEnergy *)param)->StatEnergy);
 				_FindExactMaterialEnergy = false;
 				break;
 			case TBrickParam::FG_STAT_ENERGY_ONLY:
-				INFOLOG("FG_STAT_ENERGY_ONLY: %i",((CSBrickParamStatEnergyOnly *)param)->StatEnergyExact);
+				INFOLOG("FG_STAT_ENERGY_ONLY: %i", ((CSBrickParamStatEnergyOnly *)param)->StatEnergyExact);
 				_MaterialEnergy = (uint8)((CSBrickParamStatEnergyOnly *)param)->StatEnergyExact;
 				_FindExactMaterialEnergy = true;
 				break;
@@ -287,64 +272,63 @@ bool CFgSearchPhrase::build( const TDataSetRow & actorRowId, const std::vector< 
 				_SourceIniProperties.setStealthVis( VISIBILITY_RIGHTS::fromInt( ((CSBrickParamForageVisStealth *)param)->Mode ) );
 				break;*/
 			case TBrickParam::FG_ECT_SPC:
-				INFOLOG("FG_ECT_SPC: %s",((CSBrickParamForageEcotypeSpec *)param)->Ecotype.c_str());
-				_EcotypeSpec = ECOSYSTEM::stringToEcosystem( ((CSBrickParamForageEcotypeSpec *)param)->Ecotype );
+				INFOLOG("FG_ECT_SPC: %s", ((CSBrickParamForageEcotypeSpec *)param)->Ecotype.c_str());
+				_EcotypeSpec = ECOSYSTEM::stringToEcosystem(((CSBrickParamForageEcotypeSpec *)param)->Ecotype);
 				break;
 			case TBrickParam::FG_RMGRP_FILT:
-				INFOLOG("FG_RMGRP_FILT: %i",((CSBrickParamForageRMGroupFilter *)param)->Value);
+				INFOLOG("FG_RMGRP_FILT: %i", ((CSBrickParamForageRMGroupFilter *)param)->Value);
 				_MaterialGroupFilter = ((CSBrickParamForageRMGroupFilter *)param)->Value;
 				break;
 			case TBrickParam::FG_ATTEMPTS:
-				INFOLOG("FG_ATTEMPTS: %i",((CSBrickParamForageAttempts *)param)->Nb);
+				INFOLOG("FG_ATTEMPTS: %i", ((CSBrickParamForageAttempts *)param)->Nb);
 				_NbAttempts = ((CSBrickParamForageAttempts *)param)->Nb;
 				break;
 			case TBrickParam::FG_RMFAM_FILT:
-				INFOLOG("FG_RMFAM_FILT: %i",((CSBrickParamForageRMFamilyFilter *)param)->Value);
+				INFOLOG("FG_RMFAM_FILT: %i", ((CSBrickParamForageRMFamilyFilter *)param)->Value);
 				_MaterialFamilyFilter = ((CSBrickParamForageRMFamilyFilter *)param)->Value;
 				break;
 			case TBrickParam::FG_ITEMPART_FILT:
-				INFOLOG("FG_ITEMPART_FILT: %i",((CSBrickParamForageItemPartFilter *)param)->ItemPartIndex);
+				INFOLOG("FG_ITEMPART_FILT: %i", ((CSBrickParamForageItemPartFilter *)param)->ItemPartIndex);
 				_CraftableItemPartFilter = ((CSBrickParamForageItemPartFilter *)param)->ItemPartIndex;
 				break;
 			case TBrickParam::FG_SRC_LOCATOR:
-				INFOLOG("FG_SRC_LOCATOR: %i",((CSBrickParamForageSourceLocator *)param)->Flag);
+				INFOLOG("FG_SRC_LOCATOR: %i", ((CSBrickParamForageSourceLocator *)param)->Flag);
 				_IsLocateDepositProspection = (((CSBrickParamForageSourceLocator *)param)->Flag == 1);
 				break;
 			default:;
 			}
 		}
-		//nlerror( "TODO: Families" );
-		//if ( brick.Family >= BRICK_FAMILIES::BeginForage
-		
-		//insertProgressingSkill( brick.Skill, brick.SheetId );
+		// nlerror( "TODO: Families" );
+		// if ( brick.Family >= BRICK_FAMILIES::BeginForage
+
+		// insertProgressingSkill( brick.Skill, brick.SheetId );
 	}
 
 	// Calculate actual focus cost
-	CCharacter *player = (CCharacter*)CEntityBaseManager::getEntityBasePtr( _ActorRowId );
-	if ( ! player )
+	CCharacter *player = (CCharacter *)CEntityBaseManager::getEntityBasePtr(_ActorRowId);
+	if (!player)
 	{
 		return false;
 	}
 	_FocusCost = (sint32)(((float)_FocusCost) * (1.0f + player->wearMalus()));
 
-	//egs_feinfo( "Forage phrase built" );
-	if ( ForageDebug.get() == 10 )
+	// egs_feinfo( "Forage phrase built" );
+	if (ForageDebug.get() == 10)
 	{
 		_ForageTime = 10; // 1 s
 		_ForageRange = 20; // 20 m
 		_ForageAngle = (float)Pi;
 		_MultiSpotLimit = 10; // up to 10 sources
-		_SourceIniProperties.setLifetime( 1200 ); // 2 min (max)
-		_SourceIniProperties.setProspectionExtraExtractionTime( 1200 ); // 2 min (max)
-		testSabrinaBalance( (sint32)(sabrinaCredit * sabrinaRelativeCredit), (sint32)(sabrinaCost * sabrinaRelativeCost) );
+		_SourceIniProperties.setLifetime(1200); // 2 min (max)
+		_SourceIniProperties.setProspectionExtraExtractionTime(1200); // 2 min (max)
+		testSabrinaBalance((sint32)(sabrinaCredit * sabrinaRelativeCredit), (sint32)(sabrinaCost * sabrinaRelativeCost));
 		return true;
 	}
 	else
 	{
-		return testSabrinaBalance( (sint32)(sabrinaCredit * sabrinaRelativeCredit), (sint32)(sabrinaCost * sabrinaRelativeCost) );
+		return testSabrinaBalance((sint32)(sabrinaCredit * sabrinaRelativeCredit), (sint32)(sabrinaCost * sabrinaRelativeCost));
 	}
 }
-
 
 /*
  * evaluate phrase
@@ -356,18 +340,17 @@ bool CFgSearchPhrase::evaluate()
 	return true;
 }
 
-
 /*
  *
  */
 bool CFgSearchPhrase::validate()
 {
 	H_AUTO(CFgSearchPhrase_validate);
-	
-	if ( !HarvestSystemEnabled )
-		return false;	
+
+	if (!HarvestSystemEnabled)
+		return false;
 	// Get entity
-	CCharacter *player = (CCharacter*)CEntityBaseManager::getEntityBasePtr( _ActorRowId );
+	CCharacter *player = (CCharacter *)CEntityBaseManager::getEntityBasePtr(_ActorRowId);
 	if (!player)
 	{
 		nlwarning("FG: Player character not found but his action still running!");
@@ -379,9 +362,9 @@ bool CFgSearchPhrase::validate()
 	{
 		return false;
 	}
-	
+
 	// Entities cant forage if in combat
-	TDataSetRow entityRowId = CPhraseManager::getInstance().getEntityEngagedMeleeBy( _ActorRowId );
+	TDataSetRow entityRowId = CPhraseManager::getInstance().getEntityEngagedMeleeBy(_ActorRowId);
 	if (TheDataset.isAccessible(entityRowId))
 	{
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "CANT_FORAGE_ENGAGED_IN_MELEE");
@@ -390,34 +373,34 @@ bool CFgSearchPhrase::validate()
 
 	// Test if the correct tool is in use (in the right hand!)
 	bool correctToolFound = false;
-	CGameItemPtr item = player->getItem( INVENTORIES::handling, INVENTORIES::right );
-	if ( ! (item == 0) )
+	CGameItemPtr item = player->getItem(INVENTORIES::handling, INVENTORIES::right);
+	if (!(item == 0))
 	{
-		const CStaticItem *staticItem = CSheets::getForm( item->getSheetId() );
-		if ( (staticItem) && (staticItem->Family == ITEMFAMILY::HARVEST_TOOL) )
+		const CStaticItem *staticItem = CSheets::getForm(item->getSheetId());
+		if ((staticItem) && (staticItem->Family == ITEMFAMILY::HARVEST_TOOL))
 			correctToolFound = true;
 	}
-	if ( ! correctToolFound )
+	if (!correctToolFound)
 	{
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "INVALID_FORAGE_TOOL");
 		return false;
 	}
 
 	// test if tool is not worned
-	if( item->getItemWornState() == ITEM_WORN_STATE::Worned )
+	if (item->getItemWornState() == ITEM_WORN_STATE::Worned)
 	{
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "INVALID_FORAGE_TOOL");
 		return false;
 	}
 
 	// Check focus
-	if ( ! (_IsLocateDepositProspection && player->getProspectionLocateDepositEffect()) ) // a deposit tracking cancellation does not take focus
+	if (!(_IsLocateDepositProspection && player->getProspectionLocateDepositEffect())) // a deposit tracking cancellation does not take focus
 	{
-		const sint32 focus = player->getScores()._PhysicalScores[ SCORES::focus ].Current;
-		if ( focus < _FocusCost)
+		const sint32 focus = player->getScores()._PhysicalScores[SCORES::focus].Current;
+		if (focus < _FocusCost)
 		{
 			PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "PHRASE_NOT_ENOUGH_FOCUS");
-			if ( ForageDebug.get() == 0 )
+			if (ForageDebug.get() == 0)
 				return false;
 		}
 	}
@@ -429,12 +412,11 @@ bool CFgSearchPhrase::validate()
 	}
 
 	// TODO: Check if on mount
-	
+
 	// OK
-	//egs_feinfo( "Forage phrase validated" );
+	// egs_feinfo( "Forage phrase validated" );
 	return true;
 }
-
 
 /*
  *
@@ -444,57 +426,56 @@ bool CFgSearchPhrase::update()
 	return true;
 }
 
-
 /*
  *
  */
 void CFgSearchPhrase::execute()
 {
 	H_AUTO(CFgSearchPhrase_execute);
-	
+
 	// Init phrase execution
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
 	_ExecutionEndDate = time + _ForageTime;
 
 	// Get character
-	CCharacter* player = PlayerManager.getChar( _ActorRowId );
+	CCharacter *player = PlayerManager.getChar(_ActorRowId);
 	if (!player)
 		return;
 
 	// Stopping a deposit location is immediate: no execution delay
-	if ( _IsLocateDepositProspection && player->getProspectionLocateDepositEffect() )
+	if (_IsLocateDepositProspection && player->getProspectionLocateDepositEffect())
 		_ExecutionEndDate = time + 1;
 
 	// Begin action
-	player->setCurrentAction( CLIENT_ACTION_TYPE::Forage, _ExecutionEndDate );
-	player->staticActionInProgress( true, STATIC_ACT_TYPES::Forage );
+	player->setCurrentAction(CLIENT_ACTION_TYPE::Forage, _ExecutionEndDate);
+	player->staticActionInProgress(true, STATIC_ACT_TYPES::Forage);
 
 	// Get deposits and skill depending on current ecotype
-	CVector playerPos( float(player->getState().X)/1000.0f, float(player->getState().Y)/1000.0f, 0.0f );
-	CDeposit* aDepositAtPlayerPos = CZoneManager::getInstance().getFirstFoundDepositUnderPos( playerPos );
-	if ( aDepositAtPlayerPos )
+	CVector playerPos(float(player->getState().X) / 1000.0f, float(player->getState().Y) / 1000.0f, 0.0f);
+	CDeposit *aDepositAtPlayerPos = CZoneManager::getInstance().getFirstFoundDepositUnderPos(playerPos);
+	if (aDepositAtPlayerPos)
 	{
-		if ( aDepositAtPlayerPos->ecotype() != ECOSYSTEM::common_ecosystem )
+		if (aDepositAtPlayerPos->ecotype() != ECOSYSTEM::common_ecosystem)
 		{
-			SKILLS::ESkills usedSkill = getForageSkillByEcotype( aDepositAtPlayerPos->ecotype() );
-			_UsedSkillValue = player->getSkillValue( usedSkill );
+			SKILLS::ESkills usedSkill = getForageSkillByEcotype(aDepositAtPlayerPos->ecotype());
+			_UsedSkillValue = player->getSkillValue(usedSkill);
 
 			// add modifier from consumable
 			_UsedSkillValue += player->forageSuccessModifier(aDepositAtPlayerPos->ecotype()) + player->forageSuccessModifier(ECOSYSTEM::common_ecosystem);
-			_UsedSkillValue = std::max(_UsedSkillValue,(sint32)0);
+			_UsedSkillValue = std::max(_UsedSkillValue, (sint32)0);
 		}
 		else
 		{
-			nlwarning( "FG: Deposit %s has no ecotype", aDepositAtPlayerPos->name().c_str() );
+			nlwarning("FG: Deposit %s has no ecotype", aDepositAtPlayerPos->name().c_str());
 			return;
 		}
 	}
 	// If player is not on a deposit but sources are on a deposit, _UsedSkillValue will remain 0 (=> low FX, short lifetime sources)
 
-	// Set behaviour (warning: max prospection level = 250) 
-	MBEHAV::CBehaviour behav( MBEHAV::PROSPECTING );
+	// Set behaviour (warning: max prospection level = 250)
+	MBEHAV::CBehaviour behav(MBEHAV::PROSPECTING);
 #ifdef NL_OS_WINDOWS
-	if ( ForageDebug == 7 )
+	if (ForageDebug == 7)
 	{
 		behav.ForageProspection.Range = ForageRange.get();
 		behav.ForageProspection.Angle = ForageAngle.get();
@@ -507,10 +488,9 @@ void CFgSearchPhrase::execute()
 		behav.ForageProspection.Angle = (min((uint)((_ForageAngle / MaxForageAngle) * 4.0f), (uint)3)); // 0..3
 		behav.ForageProspection.Level = (min((_UsedSkillValue * 5 / 250), 4)); // 0..4
 	}
-	PHRASE_UTILITIES::sendUpdateBehaviour( _ActorRowId, behav );
-	//egs_feinfo( "Forage phrase execution begins (time: %u s)", _ForageTime/10 );
+	PHRASE_UTILITIES::sendUpdateBehaviour(_ActorRowId, behav);
+	// egs_feinfo( "Forage phrase execution begins (time: %u s)", _ForageTime/10 );
 }
-
 
 /*
  * called at the end of the latency time
@@ -518,43 +498,43 @@ void CFgSearchPhrase::execute()
 void CFgProspectionPhrase::end()
 {
 	H_AUTO(CFgProspectionPhrase_end);
-	
-	CCharacter* player = PlayerManager.getChar(_ActorRowId); // checks isAccessible()
+
+	CCharacter *player = PlayerManager.getChar(_ActorRowId); // checks isAccessible()
 	if (!player)
 		return;
 
 	// Test forced failure
-	if ( ! PHRASE_UTILITIES::forceActionFailure(player) )
+	if (!PHRASE_UTILITIES::forceActionFailure(player))
 	{
 		// Always succeed, do not calculate successFactor
 		// successFactor = (ForageDebug.get()<5) ? rollSuccessFactor( deltaLvl ) : 1.0f;
 
 		// Don't send report for success
-		//PHRASE_UTILITIES::sendDynamicSystemMessage( _ActorRowId, "FORAGE_SUCCESS"); // string localization not done
-		//PHRASE_UTILITIES::sendDynamicSystemMessage( _ActorRowId, "FORAGE_MISS");
+		// PHRASE_UTILITIES::sendDynamicSystemMessage( _ActorRowId, "FORAGE_SUCCESS"); // string localization not done
+		// PHRASE_UTILITIES::sendDynamicSystemMessage( _ActorRowId, "FORAGE_MISS");
 
 		// Distance detection mode
 		// As stopping the effect uses the same brick as starting it, it's cheaper to make a special action with it (and no other options) for the stop action!
-		if ( _IsLocateDepositProspection )
+		if (_IsLocateDepositProspection)
 		{
-			if ( player->getProspectionLocateDepositEffect() )
-				stopLocateDeposit( player );
+			if (player->getProspectionLocateDepositEffect())
+				stopLocateDeposit(player);
 			else
-				startLocateDeposit( player );
+				startLocateDeposit(player);
 		}
 		else
 		{
 			// Set source life time, depending on _MultiSpotLimit ("MULTI") (previously: depending on player's prospection skill)
 			// Skill	0	50	100		250
 			// Time		10	35	1'		2'15
-			//uint timeInSec = (_UsedSkillValue / 2) + 10;
+			// uint timeInSec = (_UsedSkillValue / 2) + 10;
 			// Multi	1	2	5		10
 			// Time		20	40	1'40	3'20  (see relation to extraction time)
 			uint timeInSec = ((uint)_MultiSpotLimit) * 20;
-			_SourceIniProperties.setLifetime( ((TGameCycle)(timeInSec)) * 10 );
+			_SourceIniProperties.setLifetime(((TGameCycle)(timeInSec)) * 10);
 
 			// Generate source(s)
-			generateSources( player );
+			generateSources(player);
 		}
 
 		// Previously here: display stat about progression
@@ -563,9 +543,8 @@ void CFgProspectionPhrase::end()
 	player->clearCurrentAction();
 	player->staticActionInProgress(false);
 
-	//egs_feinfo( "Forage phrase end" );
+	// egs_feinfo( "Forage phrase end" );
 }
-
 
 /*
  * called when the action is interupted
@@ -573,8 +552,8 @@ void CFgProspectionPhrase::end()
 void CFgSearchPhrase::stop()
 {
 	H_AUTO(CFgSearchPhrase_stop);
-	
-	CCharacter* player = PlayerManager.getChar(_ActorRowId);
+
+	CCharacter *player = PlayerManager.getChar(_ActorRowId);
 	if (!player)
 		return;
 
@@ -582,14 +561,13 @@ void CFgSearchPhrase::stop()
 	player->staticActionInProgress(false);
 
 	// Set behaviour (with all arguments to 0), only if execute() was called (no animation if stop() called after the first validate())
-	if ( _ExecutionEndDate != 0 )
-		PHRASE_UTILITIES::sendUpdateBehaviour( _ActorRowId, MBEHAV::PROSPECTING_END );
+	if (_ExecutionEndDate != 0)
+		PHRASE_UTILITIES::sendUpdateBehaviour(_ActorRowId, MBEHAV::PROSPECTING_END);
 
 	// Don't send message
-	//PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "FORAGE_CANCEL"); // string localization not done
-	//egs_feinfo( "Forage phrase cancelled" ); // TEMP
+	// PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "FORAGE_CANCEL"); // string localization not done
+	// egs_feinfo( "Forage phrase cancelled" ); // TEMP
 }
-
 
 /*
  *
@@ -597,12 +575,12 @@ void CFgSearchPhrase::stop()
 class CSEffectLocateDeposit : public CSEffect
 {
 public:
-	inline CSEffectLocateDeposit( const TDataSetRow & creatorRowId,
-		sint32 focusCost, // transmitted into effectValue
-		uint8 power,
-		const NLMISC::CVector2f& locatedPoint )
-		: CSEffect ( creatorRowId, creatorRowId, EFFECT_FAMILIES::ForageLocateDeposit, false, focusCost, power ),
-		_LocatedPoint(locatedPoint)
+	inline CSEffectLocateDeposit(const TDataSetRow &creatorRowId,
+	    sint32 focusCost, // transmitted into effectValue
+	    uint8 power,
+	    const NLMISC::CVector2f &locatedPoint)
+	    : CSEffect(creatorRowId, creatorRowId, EFFECT_FAMILIES::ForageLocateDeposit, false, focusCost, power)
+	    , _LocatedPoint(locatedPoint)
 	{
 		//_MagicFxType = MAGICFX::healtoMagicFx( _HealHp,_HealSap,_HealSta,true); /*TODO*/
 	}
@@ -611,46 +589,43 @@ public:
 	 * apply the effects of the... effect
 	 * \return true if the effect must be removed
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent *event, bool applyEffect);
 
 	///
-	void endProspection( bool found=false )
+	void endProspection(bool found = false)
 	{
-		PHRASE_UTILITIES::sendDynamicSystemMessage( _CreatorRowId, found ? "FORAGE_DEPOSIT_LOCATED" : "FORAGE_DEP_TRACKG_STOPPED" );
+		PHRASE_UTILITIES::sendDynamicSystemMessage(_CreatorRowId, found ? "FORAGE_DEPOSIT_LOCATED" : "FORAGE_DEP_TRACKG_STOPPED");
 	}
 
 private:
-
-	NLMISC::CVector2f	_LocatedPoint;
-
+	NLMISC::CVector2f _LocatedPoint;
 };
-
 
 /*
  *
  */
-bool CSEffectLocateDeposit::update(CTimerEvent * event, bool )
+bool CSEffectLocateDeposit::update(CTimerEvent *event, bool)
 {
 	H_AUTO(CSEffectLocateDeposit_update);
 
-	CCharacter *player = dynamic_cast<CCharacter*>(CEntityBaseManager::getEntityBasePtr( _CreatorRowId ));
-	if ( ! player )
+	CCharacter *player = dynamic_cast<CCharacter *>(CEntityBaseManager::getEntityBasePtr(_CreatorRowId));
+	if (!player)
 	{
-		nlwarning("Invalid caster %u", _CreatorRowId.getIndex() );
+		nlwarning("Invalid caster %u", _CreatorRowId.getIndex());
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
 	}
 
-	if ( ForageDebug.get() == 0 )
+	if (ForageDebug.get() == 0)
 	{
 		// Spend energies, or stop effect if not enough focus
 		SCharacteristicsAndScores &focus = player->getScores()._PhysicalScores[SCORES::focus];
-		if ( focus.Current() >= _Value)
+		if (focus.Current() >= _Value)
 			focus.Current = focus.Current - _Value;
 		else
 		{
 			endProspection();
-			player->setProspectionLocateDepositEffect( NULL );
+			player->setProspectionLocateDepositEffect(NULL);
 			_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 			return true;
 		}
@@ -658,26 +633,25 @@ bool CSEffectLocateDeposit::update(CTimerEvent * event, bool )
 
 	// Calculate the new distance to the located point
 	CVector2f playerPos;
-	player->getState().getVector2f( playerPos );
+	player->getState().getVector2f(playerPos);
 	float dist = (_LocatedPoint - playerPos).norm();
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
 	params[0].Int = (sint32)dist; // The 0 case is handled in the translation file
-	PHRASE_UTILITIES::sendDynamicSystemMessage( _CreatorRowId, "FORAGE_DEPOSIT_DISTANCE", params );
+	PHRASE_UTILITIES::sendDynamicSystemMessage(_CreatorRowId, "FORAGE_DEPOSIT_DISTANCE", params);
 
 	// Stop effect if we got nearer than 3 m of destination
-	if ( dist < 3.0f )
+	if (dist < 3.0f)
 	{
-		endProspection( true );
-		player->setProspectionLocateDepositEffect( NULL );
+		endProspection(true);
+		player->setProspectionLocateDepositEffect(NULL);
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
 	}
 
-	_UpdateTimer.setRemaining( ForageLocateDepositUpdateFrequency, event );
+	_UpdateTimer.setRemaining(ForageLocateDepositUpdateFrequency, event);
 
 	return false;
 }
-
 
 /*
  *
@@ -689,23 +663,22 @@ bool CFgProspectionPhrase::launch()
 	return true;
 }
 
-
 /*
  *
  */
 void CFgProspectionPhrase::apply()
 {
 	H_AUTO(CFgProspectionPhrase_apply);
-	
-	CCharacter* player = PlayerManager.getChar( _ActorRowId );
+
+	CCharacter *player = PlayerManager.getChar(_ActorRowId);
 	if (!player)
 		return;
 
 	// Spend energies
-	if ( ! (_IsLocateDepositProspection && player->getProspectionLocateDepositEffect()) ) // a deposit tracking cancellation does not spend focus
+	if (!(_IsLocateDepositProspection && player->getProspectionLocateDepositEffect())) // a deposit tracking cancellation does not spend focus
 	{
 		SCharacteristicsAndScores &focus = player->getScores()._PhysicalScores[SCORES::focus];
-		if ( focus.Current != 0)
+		if (focus.Current != 0)
 		{
 			focus.Current = focus.Current - _FocusCost;
 			if (focus.Current < 0)
@@ -713,137 +686,135 @@ void CFgProspectionPhrase::apply()
 		}
 	}
 
-	//egs_feinfo( "Forage phrase applied" );
+	// egs_feinfo( "Forage phrase applied" );
 
 	// Set behaviour for animation 'state end'
 	MBEHAV::CBehaviour behav = player->getBehaviour(); // keep arguments
 	behav.Behaviour = MBEHAV::PROSPECTING_END;
-	PHRASE_UTILITIES::sendUpdateBehaviour( _ActorRowId, behav );
+	PHRASE_UTILITIES::sendUpdateBehaviour(_ActorRowId, behav);
 	_LatencyEndDate = (double)ForageSourceSpawnDelay.get(); // wait a short time before spawning the source(s) (to let animation/fx time)
 }
 
-
-#define MSG_REASON( r ) \
-		if ( reasons.find( r ) != reasons.end() ) \
-			reasonStr = NothingFoundReasonStrs[r];
-
+#define MSG_REASON(r)                     \
+	if (reasons.find(r) != reasons.end()) \
+		reasonStr = NothingFoundReasonStrs[r];
 
 /*
  * Generate one or more sources when applying the action. Return the number of sources spawned.
  */
-uint CFgProspectionPhrase::generateSources( CCharacter *player )
+uint CFgProspectionPhrase::generateSources(CCharacter *player)
 {
 	H_AUTO(CFgProspectionPhrase_generateSources);
-	
-	CVector playerPos( float(player->getState().X)/1000.0f, float(player->getState().Y)/1000.0f, float(player->getState().Z)/1000.0f ), pos;
+
+	CVector playerPos(float(player->getState().X) / 1000.0f, float(player->getState().Y) / 1000.0f, float(player->getState().Z) / 1000.0f), pos;
 	pos.z = 0; // to keep consistency with deposit maps
 	bool fromNeighbourhood;
 	fromNeighbourhood = (_ForageRange < 3.0f);
-	if ( (_ForageRange < 3.0f) && (_ForageAngle < 0.35) ) // <21 degrees
+	if ((_ForageRange < 3.0f) && (_ForageAngle < 0.35)) // <21 degrees
 		_NbAttempts = 1;
 
 	// Get weather
-	CRyzomTime::EWeather weather = WeatherEverywhere.getWeather( playerPos, CTimeDateSeasonManager::getRyzomTimeReference() );
+	CRyzomTime::EWeather weather = WeatherEverywhere.getWeather(playerPos, CTimeDateSeasonManager::getRyzomTimeReference());
 
 	// Get AI instance for validation request to the AIS in charge of the continent
-	CSourceSpawnPosValidator sourcePosValidator( player->getInstanceNumber(), playerPos );
-		
+	CSourceSpawnPosValidator sourcePosValidator(player->getInstanceNumber(), playerPos);
+
 	// Try to spawn several sources
-	uint nbOfSources = _MultiSpotLimit; //RandomGenerator.rand( _MultiSpotLimit-1 ) + 1; // at least 1
+	uint nbOfSources = _MultiSpotLimit; // RandomGenerator.rand( _MultiSpotLimit-1 ) + 1; // at least 1
 #ifdef NL_DEBUG
-	nldebug( "FG: Trying to generate %u sources...", nbOfSources );
+	nldebug("FG: Trying to generate %u sources...", nbOfSources);
 #endif
 	set<TNothingFoundReason> reasons;
 	uint nbFound = 0;
 	OptFastFloorBegin(); // for CNoiseValue called in selectRMAtPos()
-	for ( uint iSource=0; iSource!=nbOfSources; ++iSource )
+	for (uint iSource = 0; iSource != nbOfSources; ++iSource)
 	{
 		TNothingFoundReason reason;
 		const CStaticDepositRawMaterial *rawMaterial = NULL;
 		CDeposit *deposit = NULL, *depositForK;
 
 		// Make several attempts to find a pos that matches the filters
-		for ( uint iAttempt=0; iAttempt!=(uint)_NbAttempts; ++iAttempt )
+		for (uint iAttempt = 0; iAttempt != (uint)_NbAttempts; ++iAttempt)
 		{
 			// Randomize a position in the prospection cone
-			float angle = RandomGenerator.frandPlusMinus( _ForageAngle/2.0f ); // relative to the player's heading
-			float radius = max( 2.0f, RandomGenerator.frand( _ForageRange ) ); // at least 2 m
+			float angle = RandomGenerator.frandPlusMinus(_ForageAngle / 2.0f); // relative to the player's heading
+			float radius = max(2.0f, RandomGenerator.frand(_ForageRange)); // at least 2 m
 
 			// Calculate source position (TODO: Z)
 			angle += player->getState().Heading();
-			pos.x = playerPos.x + radius * (float)cos( angle );
-			pos.y = playerPos.y + radius * (float)sin( angle );
+			pos.x = playerPos.x + radius * (float)cos(angle);
+			pos.y = playerPos.y + radius * (float)sin(angle);
 #ifdef NL_DEBUG
-			nldebug( "FG: Source pos: %s", pos.asString().c_str() );
+			nldebug("FG: Source pos: %s", pos.asString().c_str());
 #endif
 			// Select a raw material
 			rawMaterial = selectRMAtPos(
-				pos, weather, _EcotypeSpec,
-				_MaterialGroupFilter, _MaterialFamilyFilter, _CraftableItemPartFilter,
-				_MaterialEnergy, _FindExactMaterialEnergy, fromNeighbourhood, true, &deposit, &depositForK, reason );
-			if ( rawMaterial || (!deposit) )
+			    pos, weather, _EcotypeSpec,
+			    _MaterialGroupFilter, _MaterialFamilyFilter, _CraftableItemPartFilter,
+			    _MaterialEnergy, _FindExactMaterialEnergy, fromNeighbourhood, true, &deposit, &depositForK, reason);
+			if (rawMaterial || (!deposit))
 				break; // stop attempts if RM found (rawMaterial) or impossible to find one (!deposit)
 		}
 
-		if ( rawMaterial && deposit )
+		if (rawMaterial && deposit)
 		{
 			// Find or open a forage site //nlassert( deposit && depositForK && forageSite );
-			CRecentForageSite *forageSite = deposit->findOrCreateForageSite( pos );
-			if ( forageSite->addActiveSource() )
+			CRecentForageSite *forageSite = deposit->findOrCreateForageSite(pos);
+			if (forageSite->addActiveSource())
 			{
 				// Quantity ratio: 10%-30% of MaxStackable (now ecotype spec does not impact on it but on extracted qtty)
-				float quantityRatio = 0.10f + RandomGenerator.frand( 0.20f );
+				float quantityRatio = 0.10f + RandomGenerator.frand(0.20f);
 
 				// Make and spawn the source
 				CHarvestSource *hsource = new CHarvestSource();
-				//nldebug( "+++ %p from %p", hsource, forageSite );
+				// nldebug( "+++ %p from %p", hsource, forageSite );
 				CVector2f pos2f = pos;
-				if ( hsource->init( _SourceIniProperties, pos2f, forageSite, depositForK, rawMaterial, quantityRatio ) )
+				if (hsource->init(_SourceIniProperties, pos2f, forageSite, depositForK, rawMaterial, quantityRatio))
 				{
-					if ( _EcotypeSpec != ECOSYSTEM::common_ecosystem )
-						hsource->setBonusForA( 20 );
-					
-					if ( hsource->spawnBegin( _KnowledgePrecision, player->getEntityRowId(), false ) )
+					if (_EcotypeSpec != ECOSYSTEM::common_ecosystem)
+						hsource->setBonusForA(20);
+
+					if (hsource->spawnBegin(_KnowledgePrecision, player->getEntityRowId(), false))
 					{
-	#ifdef NL_DEBUG
-						nldebug( "FG: Source spawned with RM %s, quantity %g (validation pending)", hsource->materialSheet().toString().c_str(), hsource->quantity() );
-	#endif
+#ifdef NL_DEBUG
+						nldebug("FG: Source spawned with RM %s, quantity %g (validation pending)", hsource->materialSheet().toString().c_str(), hsource->quantity());
+#endif
 						++nbFound;
-						
+
 						// add item special effect
-						if ( player )
+						if (player)
 						{
 							std::vector<SItemSpecialEffect> effects = player->lookForSpecialItemEffects(ITEM_SPECIAL_EFFECT::ISE_FORAGE_NO_RISK);
 							std::vector<SItemSpecialEffect>::const_iterator it, itEnd;
 							double addedQty = 0.;
-							for (it=effects.begin(), itEnd=effects.end(); it!=itEnd; ++it)
+							for (it = effects.begin(), itEnd = effects.end(); it != itEnd; ++it)
 							{
 								float rnd = RandomGenerator.frand();
-								if (rnd<it->EffectArgFloat[0])
+								if (rnd < it->EffectArgFloat[0])
 								{
 									hsource->setSafeSource(true);
 									PHRASE_UTILITIES::sendItemSpecialEffectProcMessage(ITEM_SPECIAL_EFFECT::ISE_FORAGE_NO_RISK, player);
 								}
 							}
 						}
-						
- 						if ( sourcePosValidator.isValidationPossible() )
+
+						if (sourcePosValidator.isValidationPossible())
 						{
 							// Store pos for validation
-							sourcePosValidator.pushPosAndRow( pos2f, hsource->rowId() );
+							sourcePosValidator.pushPosAndRow(pos2f, hsource->rowId());
 						}
 						else
 						{
 							// If no corresponding AIS is online, the position is assumed good and spawning is completed
-							hsource->spawnEnd( true );
+							hsource->spawnEnd(true);
 						}
 					}
 					else
 					{
-						nlwarning( "FG: Unable to spawn forage source (mirror range full?)" );
+						nlwarning("FG: Unable to spawn forage source (mirror range full?)");
 						forageSite->removeActiveSource();
 						delete hsource;
-						reasons.insert( NFCantSpawnSource );
+						reasons.insert(NFCantSpawnSource);
 					}
 				}
 				else
@@ -851,26 +822,26 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 					// The available quantity has fallen to 0
 					forageSite->removeActiveSource();
 					delete hsource;
-					reasons.insert( NFDepositDepleted );
+					reasons.insert(NFDepositDepleted);
 				}
 			}
 			else
 			{
 				// Would mean a lot of sources in the same place!
-				nlwarning( "FG: Can't add more sources to forage site in %s", pos.asString().c_str() );
-				reasons.insert( NFCantSpawnSource );
+				nlwarning("FG: Can't add more sources to forage site in %s", pos.asString().c_str());
+				reasons.insert(NFCantSpawnSource);
 			}
 		}
 		else
 		{
-			reasons.insert( reason );
+			reasons.insert(reason);
 		}
 	}
 	OptFastFloorEnd();
 
-	if ( nbFound != 0 )
+	if (nbFound != 0)
 	{
-		if ( sourcePosValidator.isValidationPossible() )
+		if (sourcePosValidator.isValidationPossible())
 		{
 			// Send a request to the AIS in charge of the continent (if online), to check the positions.
 			sourcePosValidator.sendRequest();
@@ -880,7 +851,7 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 			// If no corresponding AIS is online, report result to the player (should not occur in normal conditions)
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
 			params[0].Int = (sint32)nbFound;
-			PHRASE_UTILITIES::sendDynamicSystemMessage( player->getEntityRowId(), "FORAGE_FOUND_SOURCES", params );
+			PHRASE_UTILITIES::sendDynamicSystemMessage(player->getEntityRowId(), "FORAGE_FOUND_SOURCES", params);
 		}
 	}
 	else
@@ -890,118 +861,119 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 
 		// RMs could be found but the site is depleted
 		// => "Some raw materials used to be present here, but the place seems exhausted."
-		MSG_REASON( NFSiteDepleted )
+		MSG_REASON(NFSiteDepleted)
 
 		// A matching deposit has been found but stat does not match exactly at the random points
 		// => the player has to retry of move a little to find
 		// => "Some raw materials were detected here, but they have a different class than the materials searched by your current prospecting action. Some matching materials were detected near by, though."
-		else MSG_REASON( NFStatEnergyDifferentLocal )
+		else MSG_REASON(NFStatEnergyDifferentLocal)
 
-		// A matching deposit has been found but stat is too high at the random points
-		// => the player has to retry of move a little to find
-		// => "Some raw materials were detected here, but they have a higher class than your current prospecting action allows to find. Some lower class materials were detected near by, though."
-		else MSG_REASON( NFStatEnergyTooHighLocal )
+		    // A matching deposit has been found but stat is too high at the random points
+		    // => the player has to retry of move a little to find
+		    // => "Some raw materials were detected here, but they have a higher class than your current prospecting action allows to find. Some lower class materials were detected near by, though."
+		    else MSG_REASON(NFStatEnergyTooHighLocal)
 
-		// A deposit with matching group/family filter has been found but the RMs at the random points didn't match
-		// => the player has to retry of move a little to find
-		// => "Some specified raw materials were detected near by, though."
-		else MSG_REASON( NFNoLocalMaterialForFilter )
+		    // A deposit with matching group/family filter has been found but the RMs at the random points didn't match
+		    // => the player has to retry of move a little to find
+		    // => "Some specified raw materials were detected near by, though."
+		    else MSG_REASON(NFNoLocalMaterialForFilter)
 
-		// No deposit found with matching group/family filter at the random points
-		// => "No specified raw materials are present in the area."
-		else MSG_REASON( NFNoDepositForFilter )
+		    // No deposit found with matching group/family filter at the random points
+		    // => "No specified raw materials are present in the area."
+		    else MSG_REASON(NFNoDepositForFilter)
 
-		// No deposit found with exactly matching stat at the random points
-		// => "You could detect the presence of raw materials, but they have a different class than the materials searched by your current prospecting action."
-		else MSG_REASON( NFStatEnergyDifferent )
-		
-		// No deposit found with matching stat at the random points
-		// => "You could detect the presence of raw materials, but they have a higher class than your current prospecting action allows to find."
-		else MSG_REASON( NFStatEnergyTooHigh )
+		    // No deposit found with exactly matching stat at the random points
+		    // => "You could detect the presence of raw materials, but they have a different class than the materials searched by your current prospecting action."
+		    else MSG_REASON(NFStatEnergyDifferent)
 
-		// Ecotype spec not matching any deposit at the random points
-		// => "The terrain specialization cannot be used here."
-		else MSG_REASON( NFInvalidEcotype )
+		    // No deposit found with matching stat at the random points
+		    // => "You could detect the presence of raw materials, but they have a higher class than your current prospecting action allows to find."
+		    else MSG_REASON(NFStatEnergyTooHigh)
 
-		// Deposits with time/weather not matching at the random points
-		// => "No specified raw materials are present in the area in this season/at the moment/in these weather conditions."
-		else MSG_REASON( NFInvalidCurrentSeason )
-		else MSG_REASON( NFInvalidCurrentTimeOfDay )
-		else MSG_REASON( NFInvalidCurrentWeather )
+		    // Ecotype spec not matching any deposit at the random points
+		    // => "The terrain specialization cannot be used here."
+		    else MSG_REASON(NFInvalidEcotype)
 
-		// No deposit found at the random points
-		// "No raw materials were detected in this area."
-		else MSG_REASON( NFNoDepositHere )
+		    // Deposits with time/weather not matching at the random points
+		    // => "No specified raw materials are present in the area in this season/at the moment/in these weather conditions."
+		    else MSG_REASON(NFInvalidCurrentSeason) else MSG_REASON(NFInvalidCurrentTimeOfDay) else MSG_REASON(NFInvalidCurrentWeather)
 
-		// The quantity in the deposit is 0
-		// "Some raw materials used to be present here, but all have been pulled out and the deposit is now empty for a while."
-		else MSG_REASON( NFDepositDepleted )
+		    // No deposit found at the random points
+		    // "No raw materials were detected in this area."
+		    else MSG_REASON(NFNoDepositHere)
 
-		// No more sources can be spawned!
-		// "No more forage sources can be seen at the moment."
-		else MSG_REASON( NFCantSpawnSource )
+		    // The quantity in the deposit is 0
+		    // "Some raw materials used to be present here, but all have been pulled out and the deposit is now empty for a while."
+		    else MSG_REASON(NFDepositDepleted)
 
-		if ( reasonStr )
-			PHRASE_UTILITIES::sendDynamicSystemMessage( _ActorRowId, reasonStr );
+		    // No more sources can be spawned!
+		    // "No more forage sources can be seen at the moment."
+		    else MSG_REASON(NFCantSpawnSource)
+
+		        if (reasonStr)
+		            PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, reasonStr);
 	}
 
 	return nbFound;
 }
-
 
 /*
  *
  */
 struct TDepositLoc
 {
-	TDepositLoc( float d=0, const NLMISC::CVector& np=NLMISC::CVector(), bool i=false ) : Distance(d), NearestPos(np), Inside(i) {}
+	TDepositLoc(float d = 0, const NLMISC::CVector &np = NLMISC::CVector(), bool i = false)
+	    : Distance(d)
+	    , NearestPos(np)
+	    , Inside(i)
+	{
+	}
 
-	float	Distance;
-	CVector	NearestPos;
-	bool	Inside;
+	float Distance;
+	CVector NearestPos;
+	bool Inside;
 };
-
 
 /*
  * Precondition: player->getProspectionLocateDepositEffect() is null
  */
-void CFgProspectionPhrase::startLocateDeposit( CCharacter *player )
+void CFgProspectionPhrase::startLocateDeposit(CCharacter *player)
 {
 	H_AUTO(CFgProspectionPhrase_startLocateDeposit);
-	
+
 	// Get deposits in region
-	CVector playerPos( float(player->getState().X)/1000.0f, float(player->getState().Y)/1000.0f, 0.0f ), pos;
-	CRegion *currentRegion = CZoneManager::getInstance().getRegion( playerPos );
-	if ( ! currentRegion )
+	CVector playerPos(float(player->getState().X) / 1000.0f, float(player->getState().Y) / 1000.0f, 0.0f), pos;
+	CRegion *currentRegion = CZoneManager::getInstance().getRegion(playerPos);
+	if (!currentRegion)
 		return; // warning in getRegion()
 
 	// Eliminate deposits not within range
-	map< CDeposit*, TDepositLoc > depositLocRepository;
-	vector<CDeposit*> matchingDeposits;
-	for ( vector<CDeposit*>::iterator itd=currentRegion->getDeposits().begin(); itd!=currentRegion->getDeposits().end(); ++itd )
+	map<CDeposit *, TDepositLoc> depositLocRepository;
+	vector<CDeposit *> matchingDeposits;
+	for (vector<CDeposit *>::iterator itd = currentRegion->getDeposits().begin(); itd != currentRegion->getDeposits().end(); ++itd)
 	{
 		CDeposit *deposit = (*itd);
 		NLMISC::CVector locatedPos;
 		float dist;
-		bool inside = deposit->contains( playerPos, dist, locatedPos, false );
-		if ( inside || (dist < _ForageRange) )
+		bool inside = deposit->contains(playerPos, dist, locatedPos, false);
+		if (inside || (dist < _ForageRange))
 		{
-			matchingDeposits.push_back( deposit );
-			depositLocRepository.insert( make_pair( deposit, TDepositLoc( dist, locatedPos, inside ) ) );
+			matchingDeposits.push_back(deposit);
+			depositLocRepository.insert(make_pair(deposit, TDepositLoc(dist, locatedPos, inside)));
 		}
 	}
 
 	// Filter the deposits using current context and action's constraints
-	CRyzomTime::EWeather weather = WeatherEverywhere.getWeather( playerPos, CTimeDateSeasonManager::getRyzomTimeReference() );
-	vector<CDeposit*>::iterator matchingEnd;
+	CRyzomTime::EWeather weather = WeatherEverywhere.getWeather(playerPos, CTimeDateSeasonManager::getRyzomTimeReference());
+	vector<CDeposit *>::iterator matchingEnd;
 	TNothingFoundReason reason = NFUnknown;
-	filterDeposits( matchingDeposits, weather, _EcotypeSpec,
-		_MaterialGroupFilter, _MaterialFamilyFilter, _CraftableItemPartFilter,
-		_MaterialEnergy, _FindExactMaterialEnergy, matchingEnd, reason );
-	if ( reason != NFUnknown )
+	filterDeposits(matchingDeposits, weather, _EcotypeSpec,
+	    _MaterialGroupFilter, _MaterialFamilyFilter, _CraftableItemPartFilter,
+	    _MaterialEnergy, _FindExactMaterialEnergy, matchingEnd, reason);
+	if (reason != NFUnknown)
 	{
-		PHRASE_UTILITIES::sendDynamicSystemMessage( _ActorRowId, NothingFoundReasonStrs[reason] );
-		nldebug( "There is no deposit in range" );
+		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, NothingFoundReasonStrs[reason]);
+		nldebug("There is no deposit in range");
 	}
 	else
 	{
@@ -1009,18 +981,18 @@ void CFgProspectionPhrase::startLocateDeposit( CCharacter *player )
 		nlassert(matchingDeposits.size());
 		TDepositLoc *retainedLoc = NULL;
 		float minDist = _ForageRange;
-		for ( vector<CDeposit*>::iterator itd=matchingDeposits.begin(); itd!=matchingEnd; ++itd )
+		for (vector<CDeposit *>::iterator itd = matchingDeposits.begin(); itd != matchingEnd; ++itd)
 		{
 			CDeposit *deposit = (*itd);
-			TDepositLoc& depositLoc = depositLocRepository[deposit];
-			if ( depositLoc.Inside )
+			TDepositLoc &depositLoc = depositLocRepository[deposit];
+			if (depositLoc.Inside)
 			{
 				depositLoc.Distance = 0;
-				depositLoc.NearestPos = CVector2f( playerPos );
+				depositLoc.NearestPos = CVector2f(playerPos);
 				retainedLoc = &depositLoc;
 				break;
 			}
-			else if ( depositLoc.Distance < minDist )
+			else if (depositLoc.Distance < minDist)
 			{
 				minDist = depositLoc.Distance;
 				retainedLoc = &depositLoc;
@@ -1029,72 +1001,75 @@ void CFgProspectionPhrase::startLocateDeposit( CCharacter *player )
 
 		// Start the effect
 		nlassert(retainedLoc);
-		CVector2f locatedPoint( retainedLoc->NearestPos );
+		CVector2f locatedPoint(retainedLoc->NearestPos);
 		TReportAction report;
 		sint32 effectFocusCostByUpdate = _FocusCost / ForageFocusRatioOfLocateDeposit.get();
-		if ( _EcotypeSpec != ECOSYSTEM::common_ecosystem )
+		if (_EcotypeSpec != ECOSYSTEM::common_ecosystem)
 			effectFocusCostByUpdate /= 2; // lower focus consumption with terrain specialization
 		CSEffectLocateDeposit *effect = new CSEffectLocateDeposit(
-			player->getEntityRowId(),
-			effectFocusCostByUpdate, 1 /*not used: power*/, locatedPoint );
-		player->addSabrinaEffect( effect ); // the linked entity
-		player->setProspectionLocateDepositEffect( effect );
+		    player->getEntityRowId(),
+		    effectFocusCostByUpdate, 1 /*not used: power*/, locatedPoint);
+		player->addSabrinaEffect(effect); // the linked entity
+		player->setProspectionLocateDepositEffect(effect);
 	}
 }
-
 
 /*
  * Precondition: player->getProspectionLocateDepositEffect() not null
  */
-void CFgProspectionPhrase::stopLocateDeposit( CCharacter *player )
+void CFgProspectionPhrase::stopLocateDeposit(CCharacter *player)
 {
 	H_AUTO(CFgProspectionPhrase_stopLocateDeposit);
-	
-	CSEffectLocateDeposit *effect = (CSEffectLocateDeposit*)(CSEffect*)(player->getProspectionLocateDepositEffect());
+
+	CSEffectLocateDeposit *effect = (CSEffectLocateDeposit *)(CSEffect *)(player->getProspectionLocateDepositEffect());
 	effect->endProspection();
 	effect->stopEffect();
-	player->setProspectionLocateDepositEffect( NULL );
+	player->setProspectionLocateDepositEffect(NULL);
 }
-
 
 /**
  *
  */
-struct COpenForProspectionPred 
+struct COpenForProspectionPred
 #ifndef NL_CPP17
-	: public std::unary_function< CDeposit*, bool >
+    : public std::unary_function<CDeposit *, bool>
 #endif
 {
 	/// Predicate
-	bool operator() ( CDeposit* deposit ) const
+	bool operator()(CDeposit *deposit) const
 	{
 		return (deposit->enabled() && deposit->canProspect());
 	}
 };
 
-
 /**
  *
  */
-struct CContextMatchPred 
+struct CContextMatchPred
 #ifndef NL_CPP17
-	: public std::unary_function< CDeposit*, bool >
+    : public std::unary_function<CDeposit *, bool>
 #endif
 {
-	enum TContextStatus { CSMatching=0, CSSeason=1, CSTimeOfDay=2, CSWeather=4 };
+	enum TContextStatus
+	{
+		CSMatching = 0,
+		CSSeason = 1,
+		CSTimeOfDay = 2,
+		CSWeather = 4
+	};
 
 	/// Constructor
-	CContextMatchPred( const CRyzomTime::EWeather& weather, uint *pStatusBitfield )
+	CContextMatchPred(const CRyzomTime::EWeather &weather, uint *pStatusBitfield)
 	{
-		if ( ForageForcedSeason.get() != -1 )
+		if (ForageForcedSeason.get() != -1)
 			Season = (CRyzomTime::ESeason)(uint)(ForageForcedSeason.get());
 		else
 			Season = CTimeDateSeasonManager::getRyzomTimeReference().getRyzomSeason();
-		if ( ForageForcedDaycycle.get() != -1 )
+		if (ForageForcedDaycycle.get() != -1)
 			TimeOfDay = (CRyzomTime::ETimeOfDay)(uint)ForageForcedDaycycle.get();
 		else
 			TimeOfDay = CTimeDateSeasonManager::getDayCycle();
-		if ( ForageForcedWeather.get() != -1 )
+		if (ForageForcedWeather.get() != -1)
 			Weather = (CRyzomTime::EWeather)(uint)ForageForcedWeather.get();
 		else
 			Weather = weather;
@@ -1103,19 +1078,19 @@ struct CContextMatchPred
 	}
 
 	/// Predicate
-	bool operator() ( CDeposit* deposit )
+	bool operator()(CDeposit *deposit)
 	{
-		if ( ! deposit->matchSeason( Season ) )
+		if (!deposit->matchSeason(Season))
 		{
 			*StatusBitfield |= CSSeason;
 			return false;
 		}
-		else if ( ! deposit->matchTimeOfDay( TimeOfDay ) )
+		else if (!deposit->matchTimeOfDay(TimeOfDay))
 		{
 			*StatusBitfield |= CSTimeOfDay;
 			return false;
 		}
-		else if ( ! deposit->matchWeather( Weather ) )
+		else if (!deposit->matchWeather(Weather))
 		{
 			*StatusBitfield |= CSWeather;
 			return false;
@@ -1123,89 +1098,88 @@ struct CContextMatchPred
 		return true;
 	}
 
-	CRyzomTime::ESeason		Season;
-	CRyzomTime::ETimeOfDay	TimeOfDay;
-	CRyzomTime::EWeather	Weather;
+	CRyzomTime::ESeason Season;
+	CRyzomTime::ETimeOfDay TimeOfDay;
+	CRyzomTime::EWeather Weather;
 
-	uint					*StatusBitfield;
+	uint *StatusBitfield;
 };
-
 
 /*
  * Spawn a source automatically from the deposit, if it matches the current context
  */
-bool CFgProspectionPhrase::autoSpawnSource( const NLMISC::CVector& pos, CDeposit *deposit )
+bool CFgProspectionPhrase::autoSpawnSource(const NLMISC::CVector &pos, CDeposit *deposit)
 {
 	H_AUTO(CFgProspectionPhrase_autoSpawnSource);
-	
+
 	// Get weather
-	CRyzomTime::EWeather weather = WeatherEverywhere.getWeather( pos, CTimeDateSeasonManager::getRyzomTimeReference() );
+	CRyzomTime::EWeather weather = WeatherEverywhere.getWeather(pos, CTimeDateSeasonManager::getRyzomTimeReference());
 
 	// Check weather, season, time of day...
 	uint status;
-	CContextMatchPred contextCheck( weather, &status );
-	if ( ! contextCheck( deposit ) )
+	CContextMatchPred contextCheck(weather, &status);
+	if (!contextCheck(deposit))
 		return false;
 
 	// Get AI instance for validation request to the AIS in charge of the continent (position -> continent by name -> instance number (may be slow))
-	CContinent *continent = CZoneManager::getInstance().getContinent( pos );
-	uint32 aiInstance = CUsedContinent::instance().getInstanceForContinent( (CONTINENT::TContinent)continent->getId() );
-	CSourceSpawnPosValidator sourcePosValidator( aiInstance );
+	CContinent *continent = CZoneManager::getInstance().getContinent(pos);
+	uint32 aiInstance = CUsedContinent::instance().getInstanceForContinent((CONTINENT::TContinent)continent->getId());
+	CSourceSpawnPosValidator sourcePosValidator(aiInstance);
 
 	// Get a random raw material among the ones availables in this deposit
 	bool isDepleted = false;
-	const CStaticDepositRawMaterial *rawMaterial = deposit->getRMAtPos( pos, true, isDepleted );
-	if ( rawMaterial )
+	const CStaticDepositRawMaterial *rawMaterial = deposit->getRMAtPos(pos, true, isDepleted);
+	if (rawMaterial)
 	{
 		// Find or open a forage site //nlassert( deposit );
-		CRecentForageSite *forageSite = deposit->findOrCreateForageSite( pos );
-		if ( forageSite->addActiveSource() )
+		CRecentForageSite *forageSite = deposit->findOrCreateForageSite(pos);
+		if (forageSite->addActiveSource())
 		{
 			// Make and spawn the source
 			CHarvestSource *hsource = new CHarvestSource();
-			//nldebug( "+++ %p from %p", hsource, forageSite );
-			float quantityRatio = 0.10f + RandomGenerator.frand( 0.10f ); // 10%-20% of MaxStackable
+			// nldebug( "+++ %p from %p", hsource, forageSite );
+			float quantityRatio = 0.10f + RandomGenerator.frand(0.10f); // 10%-20% of MaxStackable
 			const CAutoSpawnProperties *props = deposit->getAutoSpawnProperties();
-			if ( props )
+			if (props)
 			{
 				/* Add a random of 30 sec in lifetime (300 ticks).
-					This is to smooth the respawn across time for deposits that have a 
-					big number of "minimal auto spawned source".
-					By doing this, the sources will smoothly unspawn in 30 seconds, and then respawn 
-					one by one each tick.
+				    This is to smooth the respawn across time for deposits that have a
+				    big number of "minimal auto spawned source".
+				    By doing this, the sources will smoothly unspawn in 30 seconds, and then respawn
+				    one by one each tick.
 				*/
-				TGameCycle	lifeTime= (TGameCycle)props->LifeTimeGc;
-				lifeTime+= (TGameCycle)RandomGenerator.rand(300);
-				AutoSpawnSourceIniProperties.setLifetime( lifeTime );
-				AutoSpawnSourceIniProperties.setProspectionExtraExtractionTime( 0 /*(TGameCycle)props->ExtractionTimeGc*/ );
+				TGameCycle lifeTime = (TGameCycle)props->LifeTimeGc;
+				lifeTime += (TGameCycle)RandomGenerator.rand(300);
+				AutoSpawnSourceIniProperties.setLifetime(lifeTime);
+				AutoSpawnSourceIniProperties.setProspectionExtraExtractionTime(0 /*(TGameCycle)props->ExtractionTimeGc*/);
 			}
 			else
-				nlwarning( "FG: Auto-spawn for deposit with auto-spawn off" );
+				nlwarning("FG: Auto-spawn for deposit with auto-spawn off");
 
 			// NOTE: Unlike with prospection, the depositForK is not the one for which K is the lowest
 			// at the position, but it's the deposit for auto-spawn
 			CVector2f pos2f = pos;
-			hsource->init( AutoSpawnSourceIniProperties, pos2f, forageSite, deposit, rawMaterial, quantityRatio );
-			
+			hsource->init(AutoSpawnSourceIniProperties, pos2f, forageSite, deposit, rawMaterial, quantityRatio);
+
 			// Bkup deposit for auto spawn
 			hsource->setDepositAutoSpawn(deposit);
 
 			TDataSetRow dsr;
-			if ( hsource->spawnBegin( 0, dsr, true ) ) // minimal knowledge
+			if (hsource->spawnBegin(0, dsr, true)) // minimal knowledge
 			{
 #ifdef NL_DEBUG
-				nldebug( "FG: Source auto-spawned in %s at %s with RM %s, quantity %g (validation pending)", deposit->name().c_str(), pos.toString().c_str(), hsource->materialSheet().toString().c_str(), hsource->quantity() );
+				nldebug("FG: Source auto-spawned in %s at %s with RM %s, quantity %g (validation pending)", deposit->name().c_str(), pos.toString().c_str(), hsource->materialSheet().toString().c_str(), hsource->quantity());
 #endif
- 				if ( sourcePosValidator.isValidationPossible() )
+				if (sourcePosValidator.isValidationPossible())
 				{
 					// Store pos for validation & send request
-					sourcePosValidator.pushPosAndRow( pos2f, hsource->rowId() );
+					sourcePosValidator.pushPosAndRow(pos2f, hsource->rowId());
 					sourcePosValidator.sendRequest();
 				}
 				else
 				{
 					// If no corresponding AIS is online, the position is assumed good and spawning is completed
-					hsource->spawnEnd( true );
+					hsource->spawnEnd(true);
 				}
 				return true;
 			}
@@ -1219,44 +1193,43 @@ bool CFgProspectionPhrase::autoSpawnSource( const NLMISC::CVector& pos, CDeposit
 	return false;
 }
 
-
 /*
  * Reorder matchingDeposits so that [begin(), matchingEnd] is the range matching the filters.
  * If no deposit matches the filter, return a reason different from NFUnknown.
  */
 void CFgProspectionPhrase::filterDeposits(
-	std::vector<CDeposit*>& matchingDeposits,
-	const CRyzomTime::EWeather& weather,
-	const TEcotype& ecotypeSpec,
-	const RM_GROUP::TRMGroup& groupFilter,
-	const RM_FAMILY::TRMFamily& familyFilter,
-	uint craftableItemPartFilter,
-	uint8 statEnergy,
-	bool findExactStatEnergy,
-	std::vector<CDeposit*>::iterator& matchingEnd,
-	TNothingFoundReason& reason )
+    std::vector<CDeposit *> &matchingDeposits,
+    const CRyzomTime::EWeather &weather,
+    const TEcotype &ecotypeSpec,
+    const RM_GROUP::TRMGroup &groupFilter,
+    const RM_FAMILY::TRMFamily &familyFilter,
+    uint craftableItemPartFilter,
+    uint8 statEnergy,
+    bool findExactStatEnergy,
+    std::vector<CDeposit *>::iterator &matchingEnd,
+    TNothingFoundReason &reason)
 {
 	H_AUTO(CFgProspectionPhrase_filterDeposits);
-	
+
 	// Filter the deposits with 'enabled' and 'can prospect' status
-	matchingEnd = partition( matchingDeposits.begin(), matchingDeposits.end(), COpenForProspectionPred() );
-	if ( matchingEnd == matchingDeposits.begin() )
+	matchingEnd = partition(matchingDeposits.begin(), matchingDeposits.end(), COpenForProspectionPred());
+	if (matchingEnd == matchingDeposits.begin())
 	{
 		reason = NFNoDepositHere;
 		return;
 	}
 
 	// Filter the remaining deposits with ecotype specialization (if any)
-	if ( ecotypeSpec != ECOSYSTEM::common_ecosystem )
+	if (ecotypeSpec != ECOSYSTEM::common_ecosystem)
 	{
-		matchingEnd = partition( matchingDeposits.begin(), matchingEnd,
+		matchingEnd = partition(matchingDeposits.begin(), matchingEnd,
 #ifndef NL_CPP17
-			bind2nd( mem_fun(&CDeposit::matchEcotype), ecotypeSpec ) 
+		    bind2nd(mem_fun(&CDeposit::matchEcotype), ecotypeSpec)
 #else
-			std::bind(&CDeposit::matchEcotype, std::placeholders::_1, ecotypeSpec)
+		    std::bind(&CDeposit::matchEcotype, std::placeholders::_1, ecotypeSpec)
 #endif
 		);
-		if ( matchingEnd == matchingDeposits.begin() )
+		if (matchingEnd == matchingDeposits.begin())
 		{
 			reason = NFInvalidEcotype;
 			return;
@@ -1264,21 +1237,21 @@ void CFgProspectionPhrase::filterDeposits(
 	}
 
 	// Filter the remaining deposits with group and family filters, and item part filter
-	if ( craftableItemPartFilter != ~0 )
+	if (craftableItemPartFilter != ~0)
 	{
-		matchingEnd = partition( matchingDeposits.begin(), matchingEnd, 
+		matchingEnd = partition(matchingDeposits.begin(), matchingEnd,
 #ifndef NL_CPP17
-			bind2nd( mem_fun(&CDeposit::hasRMForItemPart), craftableItemPartFilter ) 
+		    bind2nd(mem_fun(&CDeposit::hasRMForItemPart), craftableItemPartFilter)
 #else
 		    std::bind(&CDeposit::hasRMForItemPart, std::placeholders::_1, craftableItemPartFilter)
-#endif		
+#endif
 		);
 	}
-	if ( familyFilter != RM_FAMILY::Unknown )
+	if (familyFilter != RM_FAMILY::Unknown)
 	{
-		matchingEnd = partition( matchingDeposits.begin(), matchingEnd, 
+		matchingEnd = partition(matchingDeposits.begin(), matchingEnd,
 #ifndef NL_CPP17
-			bind2nd( mem_fun(&CDeposit::hasFamily), familyFilter ) 
+		    bind2nd(mem_fun(&CDeposit::hasFamily), familyFilter)
 #else
 		    std::bind(&CDeposit::hasFamily, std::placeholders::_1, familyFilter)
 #endif
@@ -1286,18 +1259,18 @@ void CFgProspectionPhrase::filterDeposits(
 	}
 	else
 	{
-		if ( groupFilter != RM_GROUP::Unknown )
+		if (groupFilter != RM_GROUP::Unknown)
 		{
-			matchingEnd = partition( matchingDeposits.begin(), matchingEnd, 
+			matchingEnd = partition(matchingDeposits.begin(), matchingEnd,
 #ifndef NL_CPP17
-				bind2nd( mem_fun(&CDeposit::hasGroup), groupFilter ) 
+			    bind2nd(mem_fun(&CDeposit::hasGroup), groupFilter)
 #else
 			    std::bind(&CDeposit::hasGroup, std::placeholders::_1, groupFilter)
 #endif
 			);
 		}
 	}
-	if ( matchingEnd == matchingDeposits.begin() )
+	if (matchingEnd == matchingDeposits.begin())
 	{
 		reason = NFNoDepositForFilter;
 		return;
@@ -1306,21 +1279,21 @@ void CFgProspectionPhrase::filterDeposits(
 	/*nldebug( "5 first matching deposits before stat energy filter:" );
 	for ( uint i=0; i!=min((uint)(matchingEnd-matchingDeposits.begin()), (uint)5); ++i )
 	{
-		matchingDeposits[i]->displayContent( NLMISC::DebugLog );
+	    matchingDeposits[i]->displayContent( NLMISC::DebugLog );
 	}*/
 
 	// Filter the remaining deposits with max stat energy
 
-	matchingEnd = partition( matchingDeposits.begin(), matchingEnd,
+	matchingEnd = partition(matchingDeposits.begin(), matchingEnd,
 #ifndef NL_CPP17
-		bind2nd( mem_fun( findExactStatEnergy ? &CDeposit::hasExactStatEnergy : &CDeposit::hasLowerStatEnergy ), statEnergy )
+	    bind2nd(mem_fun(findExactStatEnergy ? &CDeposit::hasExactStatEnergy : &CDeposit::hasLowerStatEnergy), statEnergy)
 #else
 	    std::bind(findExactStatEnergy ? &CDeposit::hasExactStatEnergy : &CDeposit::hasLowerStatEnergy, std::placeholders::_1, statEnergy)
 #endif
 	);
-	if ( matchingEnd == matchingDeposits.begin() )
+	if (matchingEnd == matchingDeposits.begin())
 	{
-		if ( findExactStatEnergy )
+		if (findExactStatEnergy)
 			reason = NFStatEnergyDifferent;
 		else
 			reason = NFStatEnergyTooHigh; // can get here also if the deposit have no RM in their vector!
@@ -1329,23 +1302,22 @@ void CFgProspectionPhrase::filterDeposits(
 
 	// Filter the deposits with current context (match season & weather & time of day)
 	uint statusBitfield;
-	CContextMatchPred contextMatchPred( weather, &statusBitfield );
-	matchingEnd = partition( matchingDeposits.begin(), matchingEnd, contextMatchPred ); // warning: contextMatchPred is passed by value!!!
+	CContextMatchPred contextMatchPred(weather, &statusBitfield);
+	matchingEnd = partition(matchingDeposits.begin(), matchingEnd, contextMatchPred); // warning: contextMatchPred is passed by value!!!
 #ifdef NL_DEBUG
-	nldebug( "FG: Matching deposits: ALL %u, CONTEXT %u...", matchingDeposits.size(), matchingEnd - matchingDeposits.begin() );
+	nldebug("FG: Matching deposits: ALL %u, CONTEXT %u...", matchingDeposits.size(), matchingEnd - matchingDeposits.begin());
 #endif
-	if ( matchingEnd == matchingDeposits.begin() )
+	if (matchingEnd == matchingDeposits.begin())
 	{
-		if ( (statusBitfield & CContextMatchPred::CSWeather) != 0 ) // if there's a deposit with matching season and time, report invalid weather
+		if ((statusBitfield & CContextMatchPred::CSWeather) != 0) // if there's a deposit with matching season and time, report invalid weather
 			reason = NFInvalidCurrentWeather;
-		else if ( (statusBitfield & CContextMatchPred::CSTimeOfDay) != 0 ) // if there's a deposit with matching season, report time
+		else if ((statusBitfield & CContextMatchPred::CSTimeOfDay) != 0) // if there's a deposit with matching season, report time
 			reason = NFInvalidCurrentTimeOfDay;
 		else // if ( (statusBitfield & CContextMatchPred::CSSeason) != 0 ) // if there's no deposit with matching season, report season
 			reason = NFInvalidCurrentSeason;
 		return;
 	}
 }
-
 
 /*
  * Select a raw material that can be found at the specified position. (static)
@@ -1358,7 +1330,7 @@ void CFgProspectionPhrase::filterDeposits(
  * \param groupFilter If not Unknown, searches only a RM from the group (ignored if familyFilter is not Unknown)
  * \param familyFilter If not Unknown, searches only a RM from the family
  * \param craftableItemPartFilter If not ~0, searches only a RM useful to craft the specified item part
- * \param maxStatEnergy Discards RM that have a higher energy than specified 
+ * \param maxStatEnergy Discards RM that have a higher energy than specified
  * \param fromNeighboorhood If true, selects randomly a RM from a small area, otherwise returns only a RM at the exact pos
  * \param testIfSiteDepleted Set it to false for map generation.
  *
@@ -1371,30 +1343,30 @@ void CFgProspectionPhrase::filterDeposits(
  * \return If a RM is found, returns it, otherwise NULL.
  */
 const CStaticDepositRawMaterial *CFgProspectionPhrase::selectRMAtPos(
-	const NLMISC::CVector& sourcePos,
-	const CRyzomTime::EWeather& weather,
-	const TEcotype& ecotypeSpec,
-	const RM_GROUP::TRMGroup& groupFilter,
-	const RM_FAMILY::TRMFamily& familyFilter,
-	uint craftableItemPartFilter,
-	uint8 statEnergy,
-	bool findExactStatEnergy,
-	bool fromNeighbourHood,
-	bool testIfSiteDepleted,
-	CDeposit **deposit,
-	CDeposit **depositForK,
-	TNothingFoundReason& reason,
-	bool ignoreContextMatch )
+    const NLMISC::CVector &sourcePos,
+    const CRyzomTime::EWeather &weather,
+    const TEcotype &ecotypeSpec,
+    const RM_GROUP::TRMGroup &groupFilter,
+    const RM_FAMILY::TRMFamily &familyFilter,
+    uint craftableItemPartFilter,
+    uint8 statEnergy,
+    bool findExactStatEnergy,
+    bool fromNeighbourHood,
+    bool testIfSiteDepleted,
+    CDeposit **deposit,
+    CDeposit **depositForK,
+    TNothingFoundReason &reason,
+    bool ignoreContextMatch)
 {
 	H_AUTO(CFgProspectionPhrase_selectRMAtPos);
-	
+
 	*deposit = NULL;
 	reason = NFUnknown;
 
 	// Find all the deposits at this position
-	vector<CDeposit*> matchingDeposits;
-	CZoneManager::getInstance().getDepositsUnderPos( sourcePos, matchingDeposits, WarnIfOutsideOfRegion );
-	if ( matchingDeposits.empty() )
+	vector<CDeposit *> matchingDeposits;
+	CZoneManager::getInstance().getDepositsUnderPos(sourcePos, matchingDeposits, WarnIfOutsideOfRegion);
+	if (matchingDeposits.empty())
 	{
 		reason = NFNoDepositHere;
 		return NULL;
@@ -1402,16 +1374,16 @@ const CStaticDepositRawMaterial *CFgProspectionPhrase::selectRMAtPos(
 
 	// Filter the deposits using availability ('enabled', 'can prospect', current context) and action
 	// criteria (ecotype specialization, group/family filters, item part filter, stat energy)
-	vector<CDeposit*>::iterator matchingEnd;
-	if ( ignoreContextMatch )
+	vector<CDeposit *>::iterator matchingEnd;
+	if (ignoreContextMatch)
 	{
 		matchingEnd = matchingDeposits.end();
 	}
 	else
 	{
-		filterDeposits( matchingDeposits, weather, ecotypeSpec, groupFilter, familyFilter,
-			craftableItemPartFilter, statEnergy, findExactStatEnergy, matchingEnd, reason );
-		if ( reason != NFUnknown )
+		filterDeposits(matchingDeposits, weather, ecotypeSpec, groupFilter, familyFilter,
+		    craftableItemPartFilter, statEnergy, findExactStatEnergy, matchingEnd, reason);
+		if (reason != NFUnknown)
 		{
 			return NULL;
 		}
@@ -1420,56 +1392,56 @@ const CStaticDepositRawMaterial *CFgProspectionPhrase::selectRMAtPos(
 	// Now we are sure the deposit(s) before matchingEnd contain(s) raw materials compliant with the filters (not exclusively).
 	// Select a random deposit among them. If not found, another attempt will be necessary.
 	uint nbMatching = (uint)(matchingEnd - matchingDeposits.begin());
-	*deposit = matchingDeposits[RandomGenerator.rand((uint16)(nbMatching-1))];
+	*deposit = matchingDeposits[RandomGenerator.rand((uint16)(nbMatching - 1))];
 
 	// Find the deposit, among the matching ones, for which the kami anger level is the lowest (nlassert(matchingEnd!=matchingDeposits.begin())
-	*depositForK = *min_element( matchingDeposits.begin(), matchingEnd, CHasLowerKamiAngerPred() );
+	*depositForK = *min_element(matchingDeposits.begin(), matchingEnd, CHasLowerKamiAngerPred());
 
 	// Get a random raw material among the ones available at this position
 	bool isDepleted = false;
 	const CStaticDepositRawMaterial *rawMaterial = /*fromNeighbourHood ? (*deposit)->getRandomRMAtPos( sourcePos, testIfSiteDepleted, isDepleted ) :*/
-		(*deposit)->getRMAtPos( sourcePos, testIfSiteDepleted, isDepleted ); // now, always use getRMAtPos()
-	if ( rawMaterial )
+	    (*deposit)->getRMAtPos(sourcePos, testIfSiteDepleted, isDepleted); // now, always use getRMAtPos()
+	if (rawMaterial)
 	{
 		// Check if the RM found at the position matches the filters (except context, already excluded)
-		const CAllStaticItems& allItems = CSheets::getItemMapForm();
-		CAllStaticItems::const_iterator it = allItems.find( rawMaterial->MaterialSheet );
-		if ( (it != allItems.end()) && (*it).second.Mp )
+		const CAllStaticItems &allItems = CSheets::getItemMapForm();
+		CAllStaticItems::const_iterator it = allItems.find(rawMaterial->MaterialSheet);
+		if ((it != allItems.end()) && (*it).second.Mp)
 		{
-			const CStaticItem& staticItem = (*it).second;
+			const CStaticItem &staticItem = (*it).second;
 
 			// Check family
-			if ( familyFilter != RM_FAMILY::Unknown )
+			if (familyFilter != RM_FAMILY::Unknown)
 			{
-				if ( staticItem.Mp->Family != familyFilter )
+				if (staticItem.Mp->Family != familyFilter)
 				{
 					reason = NFNoLocalMaterialForFilter;
 					return NULL;
 				}
 			}
 			// Check group
-			else if ( groupFilter != RM_GROUP::Unknown )
+			else if (groupFilter != RM_GROUP::Unknown)
 			{
-				if ( staticItem.Mp->getGroup() != groupFilter )
+				if (staticItem.Mp->getGroup() != groupFilter)
 				{
 					reason = NFNoLocalMaterialForFilter;
 					return NULL;
 				}
 			}
 			// Check craftable item part
-			if ( craftableItemPartFilter != ~0 )
+			if (craftableItemPartFilter != ~0)
 			{
-				const CMP::TMpFaberParameters *mpFaberParam = staticItem.Mp->getMpFaberParameters( craftableItemPartFilter );
-				if ( ! (mpFaberParam && (mpFaberParam->Durability != 0)) )
+				const CMP::TMpFaberParameters *mpFaberParam = staticItem.Mp->getMpFaberParameters(craftableItemPartFilter);
+				if (!(mpFaberParam && (mpFaberParam->Durability != 0)))
 				{
 					reason = NFNoLocalMaterialForFilter;
 					return NULL;
 				}
 			}
 			// Check stat energy
-			if ( findExactStatEnergy )
+			if (findExactStatEnergy)
 			{
-				if ( staticItem.Mp->StatEnergy != statEnergy )
+				if (staticItem.Mp->StatEnergy != statEnergy)
 				{
 					reason = NFStatEnergyDifferentLocal;
 					return NULL;
@@ -1477,7 +1449,7 @@ const CStaticDepositRawMaterial *CFgProspectionPhrase::selectRMAtPos(
 			}
 			else
 			{
-				if ( staticItem.Mp->StatEnergy > statEnergy )
+				if (staticItem.Mp->StatEnergy > statEnergy)
 				{
 					reason = NFStatEnergyTooHighLocal;
 					return NULL;
@@ -1487,72 +1459,68 @@ const CStaticDepositRawMaterial *CFgProspectionPhrase::selectRMAtPos(
 		else
 		{
 #ifdef NL_DEBUG
-			nlwarning( "FG: Raw material %s not found in item map", rawMaterial->MaterialSheet.toString().c_str() );
+			nlwarning("FG: Raw material %s not found in item map", rawMaterial->MaterialSheet.toString().c_str());
 #endif
 			return NULL; // should not occur
 		}
 	}
-	if ( isDepleted )
+	if (isDepleted)
 		reason = NFSiteDepleted;
 	return rawMaterial;
 }
 
-
 /*
  * static
  */
-void CFgProspectionPhrase::displayRMNearBy( CCharacter *player, bool onlyAtExactPos, bool extendedInfo, NLMISC::CLog *log )
+void CFgProspectionPhrase::displayRMNearBy(CCharacter *player, bool onlyAtExactPos, bool extendedInfo, NLMISC::CLog *log)
 {
 	H_AUTO(CFgProspectionPhrase_displayRMNearBy);
-	
-	CVector pos( float(player->getState().X)/1000.0f, float(player->getState().Y)/1000.0f, 0.0f );
+
+	CVector pos(float(player->getState().X) / 1000.0f, float(player->getState().Y) / 1000.0f, 0.0f);
 
 	// Find all the deposits at this position
-	if ( onlyAtExactPos )
-		log->displayNL( "All possible RMs at exact pos (see 'nearby version' for context info):" );
-	vector<CDeposit*> matchingDeposits;
-	CZoneManager::getInstance().getDepositsUnderPos( pos, matchingDeposits );
+	if (onlyAtExactPos)
+		log->displayNL("All possible RMs at exact pos (see 'nearby version' for context info):");
+	vector<CDeposit *> matchingDeposits;
+	CZoneManager::getInstance().getDepositsUnderPos(pos, matchingDeposits);
 	OptFastFloorBegin();
 	uint nbDeposits = 0;
-	for( vector<CDeposit*>::const_iterator it=matchingDeposits.begin(); it!=matchingDeposits.end(); ++it )
+	for (vector<CDeposit *>::const_iterator it = matchingDeposits.begin(); it != matchingDeposits.end(); ++it)
 	{
-		if ( onlyAtExactPos )
+		if (onlyAtExactPos)
 		{
 			bool isDepleted = false;
-			const CStaticDepositRawMaterial *rawMaterial = (*it)->getRMAtPos( pos, false, isDepleted );
-			if ( rawMaterial )
+			const CStaticDepositRawMaterial *rawMaterial = (*it)->getRMAtPos(pos, false, isDepleted);
+			if (rawMaterial)
 			{
-				log->displayRawNL( "%s", rawMaterial->MaterialSheet.toString().c_str() );
+				log->displayRawNL("%s", rawMaterial->MaterialSheet.toString().c_str());
 				++nbDeposits;
 			}
 		}
 		else
 		{
-			(*it)->displayContent( log, extendedInfo );
+			(*it)->displayContent(log, extendedInfo);
 		}
 	}
-	log->displayRawNL( "(within %u deposits at this position)", nbDeposits );
+	log->displayRawNL("(within %u deposits at this position)", nbDeposits);
 	OptFastFloorEnd();
 }
 
-
-
-NLMISC_DYNVARIABLE( uint32, RyzomSeason, "Get season number (0=Spring)" )
+NLMISC_DYNVARIABLE(uint32, RyzomSeason, "Get season number (0=Spring)")
 {
-	if ( get )
+	if (get)
 		*pointer = CTimeDateSeasonManager::getRyzomTimeReference().getRyzomSeason();
 }
 
-
 /*--------------------------------------------------------------------------------------------------------*/
-#define DEPOSIT_MAP_GENERATION 
+#define DEPOSIT_MAP_GENERATION
 
 #ifdef DEPOSIT_MAP_GENERATION
 
 #include "game_share/bmp4image.h"
 #include <nel/misc/words_dictionary.h>
 
-typedef std::map< std::string, pair< pair< float, float >, uint > > CSUMap;
+typedef std::map<std::string, pair<pair<float, float>, uint>> CSUMap;
 
 CWordsDictionary *WordDic = NULL;
 
@@ -1562,84 +1530,84 @@ CWordsDictionary *WordDic = NULL;
 class CRMColorMapping
 {
 public:
-
 	///
-	CRMColorMapping() : _ColorIndex(0) {}
-
-	///
-	uint16	getColorMapping( const NLMISC::CSheetId rmId )
+	CRMColorMapping()
+	    : _ColorIndex(0)
 	{
-		if ( rmId == CSheetId::Unknown )
+	}
+
+	///
+	uint16 getColorMapping(const NLMISC::CSheetId rmId)
+	{
+		if (rmId == CSheetId::Unknown)
 		{
 			return 0;
 		}
 		else
 		{
 			string sheetCode = rmId.toString();
-			string sheetCodeLeft = sheetCode.substr( 0, 5 ); // only family
+			string sheetCodeLeft = sheetCode.substr(0, 5); // only family
 			float qualityLightFactor = 0.25f + (((float)(uint)(sheetCode[9] - 'b' + 1)) / 5.0f / 2.0f); // from 0.25 to 0.75
-			if ( qualityLightFactor > 1.0f )
+			if (qualityLightFactor > 1.0f)
 			{
-				nlwarning( "Invalid quality for %s", sheetCode.c_str() );
+				nlwarning("Invalid quality for %s", sheetCode.c_str());
 				return 0;
 			}
-			CSUMap::iterator it = _Mapping.find( sheetCodeLeft );
-			if ( it != _Mapping.end() )
+			CSUMap::iterator it = _Mapping.find(sheetCodeLeft);
+			if (it != _Mapping.end())
 			{
 				// Return existing color for rmId (with shade expressing quality)
 				++((*it).second.second);
-				pair<float,float> colorInfo = (*it).second.first;
+				pair<float, float> colorInfo = (*it).second.first;
 				CRGBA color;
-				color.buildFromHLS( colorInfo.first, qualityLightFactor, colorInfo.second );
-				return CTGAImage::getColor16( color.R, color.G, color.B );
+				color.buildFromHLS(colorInfo.first, qualityLightFactor, colorInfo.second);
+				return CTGAImage::getColor16(color.R, color.G, color.B);
 			}
 			else
 			{
 				// Map a new color for new rmId
-				static const float HuePalette [7] = { 0.0f, 30.0f, 60.0f, 125.0f, 184.0f, 245.0f, 294.0f };
+				static const float HuePalette[7] = { 0.0f, 30.0f, 60.0f, 125.0f, 184.0f, 245.0f, 294.0f };
 				float colorIndex = (float)(_ColorIndex++);
 				float h = HuePalette[_ColorIndex % 7];
-				if ( _ColorIndex > 6 )
+				if (_ColorIndex > 6)
 					h += ((float)(_ColorIndex / 7)) * 13.0f;
-				float s = 0.5f + RandomGenerator.frand( 0.5f );
-				_Mapping.insert( make_pair( sheetCodeLeft, make_pair( make_pair( h, s ), 1 ) ) );
+				float s = 0.5f + RandomGenerator.frand(0.5f);
+				_Mapping.insert(make_pair(sheetCodeLeft, make_pair(make_pair(h, s), 1)));
 				CRGBA color;
-				color.buildFromHLS( h, qualityLightFactor, s );
-				return CTGAImage::getColor16( color.R, color.G, color.B );
+				color.buildFromHLS(h, qualityLightFactor, s);
+				return CTGAImage::getColor16(color.R, color.G, color.B);
 			}
 		}
 	}
 
 	///
-	void	displayFrequencies( NLMISC::CLog& log )
+	void displayFrequencies(NLMISC::CLog &log)
 	{
 		uint total = 0;
-		for ( CSUMap::const_iterator it=_Mapping.begin(); it!=_Mapping.end(); ++it )
+		for (CSUMap::const_iterator it = _Mapping.begin(); it != _Mapping.end(); ++it)
 			total += (*it).second.second;
-		log.displayNL( "Frequencies of the %u RM families (%u total pts):", _Mapping.size(), total );
-		for ( CSUMap::const_iterator it=_Mapping.begin(); it!=_Mapping.end(); ++it )
+		log.displayNL("Frequencies of the %u RM families (%u total pts):", _Mapping.size(), total);
+		for (CSUMap::const_iterator it = _Mapping.begin(); it != _Mapping.end(); ++it)
 		{
-			log.displayRawNL( "%s (hue %u) -> %u pts (%.1f%%)", (*it).first.c_str(), (uint)((*it).second.first.first), (*it).second.second, (float)(*it).second.second * 100.0f / (float)total );
+			log.displayRawNL("%s (hue %u) -> %u pts (%.1f%%)", (*it).first.c_str(), (uint)((*it).second.first.first), (*it).second.second, (float)(*it).second.second * 100.0f / (float)total);
 		}
 	}
 
 private:
+	///
+	CSUMap _Mapping;
 
 	///
-	CSUMap		_Mapping;
-
-	///
-	uint		_ColorIndex;
+	uint _ColorIndex;
 };
-
 
 /*
  * makeDepositMap command
  */
-NLMISC_COMMAND( makeDepositMap, "Write a map of the raw materials at a position", "<_playerRowId | posX,posY | depositName> <outputFilename.tga> [<resolution=0.5> [<width=200> [<neighboorhoodMode=0> [<displayColorFrequencies=0> [<onlySpecifiedDeposit>]]]]" )
+NLMISC_COMMAND(makeDepositMap, "Write a map of the raw materials at a position", "<_playerRowId | posX,posY | depositName> <outputFilename.tga> [<resolution=0.5> [<width=200> [<neighboorhoodMode=0> [<displayColorFrequencies=0> [<onlySpecifiedDeposit>]]]]")
 {
 	H_AUTO(makeDepositMap);
-	
+
 	// Default arguments
 	float resolution = 0.50f; // 0.5 m
 	float zoneWidth = 200.0f; // 200 m
@@ -1648,22 +1616,22 @@ NLMISC_COMMAND( makeDepositMap, "Write a map of the raw materials at a position"
 	bool onlySpecifiedDeposit = false;
 
 	// Read arguments
-	if ( args.size() < 2 )
+	if (args.size() < 2)
 		return false;
 	string outputFilename = args[1].c_str();
-	if ( args.size() > 2 )
+	if (args.size() > 2)
 	{
-		resolution = (float)atof( args[2].c_str() );
-		if ( args.size() > 3 )
+		resolution = (float)atof(args[2].c_str());
+		if (args.size() > 3)
 		{
-			zoneWidth = (float)atof( args[3].c_str() );
-			if ( args.size() > 4 )
+			zoneWidth = (float)atof(args[3].c_str());
+			if (args.size() > 4)
 			{
 				neighbourhood = (args[4] == "1");
-				if ( args.size() > 5 )
+				if (args.size() > 5)
 				{
 					displayColorFrequencies = (args[5] == "1");
-					if ( args.size() > 6 )
+					if (args.size() > 6)
 						onlySpecifiedDeposit = (args[6] == "1");
 				}
 			}
@@ -1671,17 +1639,17 @@ NLMISC_COMMAND( makeDepositMap, "Write a map of the raw materials at a position"
 	}
 	uint16 dim = (uint16)(uint)(zoneWidth / resolution);
 	const CDeposit *depositToScan = NULL;
-	
+
 	// Compute bounds
 	TDataSetRow playerRowId;
 	CVector leftCornerPos, rightCornerPos;
 	string::size_type p;
-	if ( (p = args[0].find( ',' )) != string::npos )
+	if ((p = args[0].find(',')) != string::npos)
 	{
 		// Get specified position
 		CVector centerPos;
-		centerPos.x = (float)atof( args[0].substr( 0, p ).c_str() );
-		centerPos.y = (float)atof( args[0].substr( p+1 ).c_str() );
+		centerPos.x = (float)atof(args[0].substr(0, p).c_str());
+		centerPos.y = (float)atof(args[0].substr(p + 1).c_str());
 		leftCornerPos.x = centerPos.x - dim;
 		leftCornerPos.y = centerPos.y - dim;
 		leftCornerPos.z = 0;
@@ -1689,23 +1657,23 @@ NLMISC_COMMAND( makeDepositMap, "Write a map of the raw materials at a position"
 		rightCornerPos.y = centerPos.y + dim;
 		rightCornerPos.z = 0;
 	}
-	else if ( (p = args[0].find( '_' )) == 0 )
+	else if ((p = args[0].find('_')) == 0)
 	{
 		// Get player position (if rowId given)
 		TDataSetIndex entityIndex;
-		NLMISC::fromString(args[0].substr( 1 ), entityIndex);
+		NLMISC::fromString(args[0].substr(1), entityIndex);
 		playerRowId = TDataSetRow::createFromRawIndex(entityIndex);
-		if ( TheDataset.isAccessible(playerRowId) )
+		if (TheDataset.isAccessible(playerRowId))
 		{
 			CVector centerPos;
-			CCharacter* player = PlayerManager.getChar( playerRowId );
-			if ( ! player )
+			CCharacter *player = PlayerManager.getChar(playerRowId);
+			if (!player)
 			{
-				log.displayNL( "%u is not a player", playerRowId.getIndex() );
+				log.displayNL("%u is not a player", playerRowId.getIndex());
 				return true;
 			}
-			centerPos.x = float(player->getState().X)/1000.0f;
-			centerPos.y = float(player->getState().Y)/1000.0f;
+			centerPos.x = float(player->getState().X) / 1000.0f;
+			centerPos.y = float(player->getState().Y) / 1000.0f;
 			leftCornerPos.x = centerPos.x - dim;
 			leftCornerPos.y = centerPos.y - dim;
 			leftCornerPos.z = 0;
@@ -1715,7 +1683,7 @@ NLMISC_COMMAND( makeDepositMap, "Write a map of the raw materials at a position"
 		}
 		else
 		{
-			log.displayNL( "Player not found" );
+			log.displayNL("Player not found");
 			return true;
 		}
 	}
@@ -1723,13 +1691,13 @@ NLMISC_COMMAND( makeDepositMap, "Write a map of the raw materials at a position"
 	{
 		// Get deposit coordinates (if name given)
 		string depositName = args[0];
-		const std::vector<CDeposit*>& depositList = CZoneManager::getInstance().getDeposits();
-		for ( std::vector<CDeposit*>::const_iterator idl=depositList.begin(); idl!=depositList.end(); ++idl )
+		const std::vector<CDeposit *> &depositList = CZoneManager::getInstance().getDeposits();
+		for (std::vector<CDeposit *>::const_iterator idl = depositList.begin(); idl != depositList.end(); ++idl)
 		{
 			const CDeposit *deposit = (*idl);
-			if ( deposit && (deposit->name() == depositName) )
+			if (deposit && (deposit->name() == depositName))
 			{
-				deposit->getAABox( leftCornerPos, rightCornerPos );
+				deposit->getAABox(leftCornerPos, rightCornerPos);
 				depositToScan = deposit;
 				break;
 			}
@@ -1737,46 +1705,45 @@ NLMISC_COMMAND( makeDepositMap, "Write a map of the raw materials at a position"
 	}
 
 	// Init dictionary if not already done
-	if ( ! WordDic )
+	if (!WordDic)
 	{
 		WordDic = new CWordsDictionary(); // never deleted (for test only)
-		WordDic->init( "egs_deposit_map_dictionary.cfg" );
+		WordDic->init("egs_deposit_map_dictionary.cfg");
 	}
 
 	// Setup output image
 	CRMColorMapping colorMapping;
 	CTGAImage image;
-	image.setup( (uint16)((rightCornerPos.x - leftCornerPos.x) / resolution) + 1,
-		(uint16)((rightCornerPos.y - leftCornerPos.y) / resolution) + 1, outputFilename, 0, 0 );
+	image.setup((uint16)((rightCornerPos.x - leftCornerPos.x) / resolution) + 1,
+	    (uint16)((rightCornerPos.y - leftCornerPos.y) / resolution) + 1, outputFilename, 0, 0);
 	image.setupForCol();
-	set<CDeposit*> deposits;
+	set<CDeposit *> deposits;
 
 	// Scan area and write image
 	WarnIfOutsideOfRegion = false;
-	map<const CStaticDepositRawMaterial*, uint> foundMaterials;
+	map<const CStaticDepositRawMaterial *, uint> foundMaterials;
 	CVector pos;
 	pos.z = 0;
 	uint c;
 	OptFastFloorBegin(); // for CNoiseValue called in selectRMAtPos()
-	for ( pos.y=leftCornerPos.y; pos.y<=rightCornerPos.y; pos.y+=resolution )
+	for (pos.y = leftCornerPos.y; pos.y <= rightCornerPos.y; pos.y += resolution)
 	{
-		for ( c=0, pos.x=leftCornerPos.x; pos.x<=rightCornerPos.x; pos.x+=resolution, ++c )
+		for (c = 0, pos.x = leftCornerPos.x; pos.x <= rightCornerPos.x; pos.x += resolution, ++c)
 		{
 			TNothingFoundReason reason;
 			CDeposit *deposit, *depositForK;
-			const CStaticDepositRawMaterial *rawMaterial =
-				CFgProspectionPhrase::selectRMAtPos( pos, CRyzomTime::unknownWeather, ECOSYSTEM::common_ecosystem, RM_GROUP::Unknown, RM_FAMILY::Unknown, ~0, 255, false, neighbourhood, false, &deposit, &depositForK, reason, true );
-			if ( (!depositToScan) || (depositToScan == deposit) )
+			const CStaticDepositRawMaterial *rawMaterial = CFgProspectionPhrase::selectRMAtPos(pos, CRyzomTime::unknownWeather, ECOSYSTEM::common_ecosystem, RM_GROUP::Unknown, RM_FAMILY::Unknown, ~0, 255, false, neighbourhood, false, &deposit, &depositForK, reason, true);
+			if ((!depositToScan) || (depositToScan == deposit))
 			{
-				if ( deposit )
-					deposits.insert( deposit );
-				image.set16( c, colorMapping.getColorMapping( rawMaterial ? rawMaterial->MaterialSheet : CSheetId::Unknown ) );
-				if ( rawMaterial )
-					++foundMaterials[ rawMaterial ];
+				if (deposit)
+					deposits.insert(deposit);
+				image.set16(c, colorMapping.getColorMapping(rawMaterial ? rawMaterial->MaterialSheet : CSheetId::Unknown));
+				if (rawMaterial)
+					++foundMaterials[rawMaterial];
 			}
 			else
 			{
-				image.set16( c, colorMapping.getColorMapping( CSheetId::Unknown ) );
+				image.set16(c, colorMapping.getColorMapping(CSheetId::Unknown));
 			}
 		}
 		image.writeLine();
@@ -1784,36 +1751,35 @@ NLMISC_COMMAND( makeDepositMap, "Write a map of the raw materials at a position"
 	OptFastFloorEnd();
 	WarnIfOutsideOfRegion = true;
 
-	log.displayNL( "Written %s. Found %u matching deposits", outputFilename.c_str(), deposits.size() );
+	log.displayNL("Written %s. Found %u matching deposits", outputFilename.c_str(), deposits.size());
 
 	// Display color frequencies (raw materials merged by families)
-	if ( displayColorFrequencies )
-		colorMapping.displayFrequencies( log );
+	if (displayColorFrequencies)
+		colorMapping.displayFrequencies(log);
 
 	// Display raw material frequencies
 	uint totalOccurrences = 0;
-	for ( map<const CStaticDepositRawMaterial*, uint>::const_iterator ifm=foundMaterials.begin(); ifm!=foundMaterials.end(); ++ifm )
+	for (map<const CStaticDepositRawMaterial *, uint>::const_iterator ifm = foundMaterials.begin(); ifm != foundMaterials.end(); ++ifm)
 	{
 		const uint &nbOccurrences = (*ifm).second;
 		totalOccurrences += nbOccurrences;
 	}
-	log.displayNL( "Summary for this deposit (%u total pts):", totalOccurrences );
-	for ( map<const CStaticDepositRawMaterial*, uint>::const_iterator ifm=foundMaterials.begin(); ifm!=foundMaterials.end(); ++ifm )
+	log.displayNL("Summary for this deposit (%u total pts):", totalOccurrences);
+	for (map<const CStaticDepositRawMaterial *, uint>::const_iterator ifm = foundMaterials.begin(); ifm != foundMaterials.end(); ++ifm)
 	{
 		const uint &nbOccurrences = (*ifm).second;
-		log.displayRawNL( "%s -> %u pts (%.1f%%)", (*ifm).first->MaterialSheet.toString().c_str(),
-			nbOccurrences, ((float)nbOccurrences) * 100.0f / (float)totalOccurrences );
+		log.displayRawNL("%s -> %u pts (%.1f%%)", (*ifm).first->MaterialSheet.toString().c_str(),
+		    nbOccurrences, ((float)nbOccurrences) * 100.0f / (float)totalOccurrences);
 	}
 
 	// Display deposit specifications
-	log.displayNL( "Deposits:" );
-	for ( set<CDeposit*>::const_iterator idp=deposits.begin(); idp!=deposits.end(); ++idp )
+	log.displayNL("Deposits:");
+	for (set<CDeposit *>::const_iterator idp = deposits.begin(); idp != deposits.end(); ++idp)
 	{
-		(*idp)->displayContent( &log, false, WordDic );
+		(*idp)->displayContent(&log, false, WordDic);
 	}
 	return true;
 }
-
 
 /**
  * CBackgroundTask
@@ -1822,14 +1788,18 @@ class CBackgroundTask : public NLMISC::IRunnable
 {
 public:
 	/// Constructor
-	CBackgroundTask() : _Stopping(false), _Complete(false) {}
+	CBackgroundTask()
+	    : _Stopping(false)
+	    , _Complete(false)
+	{
+	}
 
 	/// Destructor
 	virtual ~CBackgroundTask()
 	{
-		if ( _Thread )
+		if (_Thread)
 		{
-			if ( ! _Complete )
+			if (!_Complete)
 			{
 				pleaseStop();
 				_Thread->wait();
@@ -1840,18 +1810,18 @@ public:
 	}
 
 	/// Start (called in main thread)
-	void	start()
+	void start()
 	{
-		if ( _Thread && (!_Complete) )
+		if (_Thread && (!_Complete))
 			return;
 		_Stopping = false;
 		_Complete = false;
-		_Thread = NLMISC::IThread::create( this );
+		_Thread = NLMISC::IThread::create(this);
 		_Thread->start();
 	}
 
 	/// Ask for stop and wait until terminated (called in main thread)
-	void	terminateTask()
+	void terminateTask()
 	{
 		pleaseStop();
 		_Thread->wait();
@@ -1860,31 +1830,28 @@ public:
 	}
 
 	///
-	bool	isRunning() const { return (_Thread != NULL) && (!_Complete); }
+	bool isRunning() const { return (_Thread != NULL) && (!_Complete); }
 
 	///
-	bool	isStopping() const { return _Stopping; }
+	bool isStopping() const { return _Stopping; }
 
 	///
-	bool	isComplete() const { return _Complete; }
+	bool isComplete() const { return _Complete; }
 
 	///
 	virtual void run() = 0;
 
 protected:
-
-	void	setComplete() { _Complete = true; }
+	void setComplete() { _Complete = true; }
 
 private:
-
-	void	pleaseStop() { _Stopping = true; }
+	void pleaseStop() { _Stopping = true; }
 
 	NLMISC::CAtomicBool _Stopping;
 	NLMISC::CAtomicBool _Complete;
 
-	NLMISC::IThread	*_Thread;
+	NLMISC::IThread *_Thread;
 };
-
 
 /**
  * CDepositMapsBatchTask
@@ -1892,25 +1859,26 @@ private:
 class CDepositMapsBatchTask : public CBackgroundTask
 {
 public:
-
 	/// Constructor
-	CDepositMapsBatchTask() : CBackgroundTask(), _CurrentMap(0) {}
+	CDepositMapsBatchTask()
+	    : CBackgroundTask()
+	    , _CurrentMap(0)
+	{
+	}
 
 	///
-	void	setInputFilename( const std::string& ifn ) { _InputFilename = ifn; }
+	void setInputFilename(const std::string &ifn) { _InputFilename = ifn; }
 
 	///
-	uint	currentMap() const { return _CurrentMap; }
+	uint currentMap() const { return _CurrentMap; }
 
 	///
 	virtual void run();
 
 private:
-
-	std::string		_InputFilename;
-	uint			_CurrentMap;
+	std::string _InputFilename;
+	uint _CurrentMap;
 };
-
 
 /*
  *
@@ -1918,76 +1886,80 @@ private:
 void CDepositMapsBatchTask::run()
 {
 	H_AUTO(CDepositMapsBatchTask_run);
-	
+
 	// Open files
 	CSString pathName = "deposit_maps";
-	if ( ! CFile::isExists( pathName ) )
-		CFile::createDirectory( pathName );
+	if (!CFile::isExists(pathName))
+		CFile::createDirectory(pathName);
 	pathName += "/";
 	FILE *outputF = nlfopen(pathName + "deposit_maps.html", "w");
-	if ( ! outputF )
+	if (!outputF)
 	{
-		nlwarning( "Can't create file %sdeposit_maps.html", pathName.c_str() );
+		nlwarning("Can't create file %sdeposit_maps.html", pathName.c_str());
 		return;
 	}
 	FILE *inputF = nlfopen(_InputFilename, "r");
-	if ( ! inputF )
+	if (!inputF)
 	{
-		fprintf( outputF, "File %s not found", _InputFilename.c_str() );
-		fclose( outputF );
+		fprintf(outputF, "File %s not found", _InputFilename.c_str());
+		fclose(outputF);
 		return;
 	}
-	
+
 	// Process
 	_CurrentMap = 1;
 	CLightMemDisplayer disp;
-	disp.setParam( ~0 ); // no limit
+	disp.setParam(~0); // no limit
 	CLog log;
-	log.addDisplayer( &disp );
-	char inputLine [1024];
+	log.addDisplayer(&disp);
+	char inputLine[1024];
 	CSString line;
 	CVectorSString fields;
-	while ( ! feof( inputF ) )
+	while (!feof(inputF))
 	{
-		if ( isStopping() || (! fgets( inputLine, 1024, inputF )) )
+		if (isStopping() || (!fgets(inputLine, 1024, inputF)))
 			break;
 
-		line = CSString( inputLine );
-		if ( (! line.empty()) && (line[line.size()-1]=='\n') )
-			line.resize( line.size()-1 );
+		line = CSString(inputLine);
+		if ((!line.empty()) && (line[line.size() - 1] == '\n'))
+			line.resize(line.size() - 1);
 		fields.clear();
-		line.splitBySeparator( '\t', fields );
-		enum TField { FRegion, FPlace, FPos };
-		if ( fields.size() >= 3 )
+		line.splitBySeparator('\t', fields);
+		enum TField
 		{
-			fields[FPos] = fields[FPos].replace( " ", "" );
+			FRegion,
+			FPlace,
+			FPos
+		};
+		if (fields.size() >= 3)
+		{
+			fields[FPos] = fields[FPos].replace(" ", "");
 			CSString imageFilename = fields[FRegion] + "-" + fields[FPlace] + ".tga";
-			imageFilename = imageFilename.replace( " ", "" );
+			imageFilename = imageFilename.replace(" ", "");
 			CSString cmdLine = "makeDepositMap " + fields[FPos] + " " + pathName + imageFilename + " 1 600";
-			egs_feinfo( cmdLine.c_str() );
-			log.displayNL( ("\n\n<B><A HREF=\"" + imageFilename + "\">" + imageFilename + "</A></B>\n").c_str() );
-			ICommand::execute( cmdLine, log );
+			egs_feinfo(cmdLine.c_str());
+			log.displayNL(("\n\n<B><A HREF=\"" + imageFilename + "\">" + imageFilename + "</A></B>\n").c_str());
+			ICommand::execute(cmdLine, log);
 			++_CurrentMap;
 		}
 	}
 
 	// Convert log to html & write it
-	egs_feinfo( "Writing deposit_maps.html..." );
+	egs_feinfo("Writing deposit_maps.html...");
 	CSString res;
-	disp.write( res );
-	res = res.replace( "\n", "<BR>\n" );
-	fprintf( outputF, "%s", res.c_str() );
+	disp.write(res);
+	res = res.replace("\n", "<BR>\n");
+	fprintf(outputF, "%s", res.c_str());
 
 	// Close files
-	fclose( inputF );
-	fclose( outputF );
+	fclose(inputF);
+	fclose(outputF);
 	delete WordDic;
 	WordDic = NULL;
-	egs_feinfo( "End of makeDepositMapsBatch." );
-	
+	egs_feinfo("End of makeDepositMapsBatch.");
+
 	setComplete();
 }
-
 
 /**
  * CCheckDepositContentTask
@@ -1995,19 +1967,20 @@ void CDepositMapsBatchTask::run()
 class CCheckDepositContentTask : public CBackgroundTask
 {
 public:
-
-	CCheckDepositContentTask() : _MustCreateMapOnProblem(false), _ResolutionForErroneousSmallDeposits(0.5f) {}
+	CCheckDepositContentTask()
+	    : _MustCreateMapOnProblem(false)
+	    , _ResolutionForErroneousSmallDeposits(0.5f)
+	{
+	}
 
 	///
 	virtual void run();
 
-	float	_ResolutionForErroneousSmallDeposits;
-	bool	_MustCreateMapOnProblem;
+	float _ResolutionForErroneousSmallDeposits;
+	bool _MustCreateMapOnProblem;
 };
 
-
-CVariable<float> ForageMinimumRatioRmAreaInDeposit( "egs", "ForageMinimumRatioRmAreaInDeposit", "", 0.33f, 0, true );
-
+CVariable<float> ForageMinimumRatioRmAreaInDeposit("egs", "ForageMinimumRatioRmAreaInDeposit", "", 0.33f, 0, true);
 
 /*
  *
@@ -2015,23 +1988,23 @@ CVariable<float> ForageMinimumRatioRmAreaInDeposit( "egs", "ForageMinimumRatioRm
 void CCheckDepositContentTask::run()
 {
 	H_AUTO(CCheckDepositContentTask_run);
-	
+
 	CVector pos;
 	pos.z = 0;
-	const std::vector<CDeposit*>& depositList = CZoneManager::getInstance().getDeposits();
-	for ( std::vector<CDeposit*>::const_iterator idl=depositList.begin(); idl!=depositList.end(); ++idl )
+	const std::vector<CDeposit *> &depositList = CZoneManager::getInstance().getDeposits();
+	for (std::vector<CDeposit *>::const_iterator idl = depositList.begin(); idl != depositList.end(); ++idl)
 	{
-		if ( isStopping() )
+		if (isStopping())
 			break;
 
 		const CDeposit *scannedDeposit = (*idl);
 
 		// Get AABox
 		CVector cornerMin, cornerMax;
-		scannedDeposit->getAABox( cornerMin, cornerMax );
-		bool isSmallDeposit = (scannedDeposit->getAreaOfAABox() < 64.0f*64.0f);
+		scannedDeposit->getAABox(cornerMin, cornerMax);
+		bool isSmallDeposit = (scannedDeposit->getAreaOfAABox() < 64.0f * 64.0f);
 
-		map<const CStaticDepositRawMaterial*, uint> foundMaterials;
+		map<const CStaticDepositRawMaterial *, uint> foundMaterials;
 
 		float resolution = 1.0f;
 		do
@@ -2039,19 +2012,18 @@ void CCheckDepositContentTask::run()
 			// Scan deposit zone
 			WarnIfOutsideOfRegion = false;
 			OptFastFloorBegin(); // for CNoiseValue called in selectRMAtPos()
-			for ( float y=cornerMin.y; y<=cornerMax.y; y+=resolution )
+			for (float y = cornerMin.y; y <= cornerMax.y; y += resolution)
 			{
 				pos.y = y;
-				for ( float x=cornerMin.x; x<=cornerMax.x; x+=resolution )
+				for (float x = cornerMin.x; x <= cornerMax.x; x += resolution)
 				{
 					pos.x = x;
 					TNothingFoundReason reason;
 					CDeposit *deposit, *depositForK;
-					const CStaticDepositRawMaterial *rawMaterial =
-						CFgProspectionPhrase::selectRMAtPos( pos, CRyzomTime::unknownWeather, ECOSYSTEM::common_ecosystem, RM_GROUP::Unknown, RM_FAMILY::Unknown, ~0, 255, false, false, false, &deposit, &depositForK, reason, true );
-					if ( rawMaterial && (deposit == scannedDeposit) )
+					const CStaticDepositRawMaterial *rawMaterial = CFgProspectionPhrase::selectRMAtPos(pos, CRyzomTime::unknownWeather, ECOSYSTEM::common_ecosystem, RM_GROUP::Unknown, RM_FAMILY::Unknown, ~0, 255, false, false, false, &deposit, &depositForK, reason, true);
+					if (rawMaterial && (deposit == scannedDeposit))
 					{
-						++foundMaterials[ rawMaterial ];
+						++foundMaterials[rawMaterial];
 					}
 				}
 			}
@@ -2060,145 +2032,139 @@ void CCheckDepositContentTask::run()
 
 			// Check results
 			float totalArea = 0;
-			if ( foundMaterials.size() != scannedDeposit->getContentSize() )
+			if (foundMaterials.size() != scannedDeposit->getContentSize())
 			{
-				if ( isSmallDeposit && (resolution > _ResolutionForErroneousSmallDeposits) )
+				if (isSmallDeposit && (resolution > _ResolutionForErroneousSmallDeposits))
 				{
 					resolution = _ResolutionForErroneousSmallDeposits; // retry with thinner resolution
 					continue;
 				}
-				if ( _MustCreateMapOnProblem )
-					InfoLog->displayRawNL( "=================================================" );
-				egs_feinfo( "Error in %s: %u RMs found instead of %u [ptWidth=%gm]", scannedDeposit->name().c_str(), foundMaterials.size(), scannedDeposit->getContentSize(), resolution );
-				if ( _MustCreateMapOnProblem )
-					ICommand::execute( string("makeDepositMap ") + scannedDeposit->name() + string(" ") + scannedDeposit->name() + string(".tga 1 0 0 1 1"), *InfoLog );
+				if (_MustCreateMapOnProblem)
+					InfoLog->displayRawNL("=================================================");
+				egs_feinfo("Error in %s: %u RMs found instead of %u [ptWidth=%gm]", scannedDeposit->name().c_str(), foundMaterials.size(), scannedDeposit->getContentSize(), resolution);
+				if (_MustCreateMapOnProblem)
+					ICommand::execute(string("makeDepositMap ") + scannedDeposit->name() + string(" ") + scannedDeposit->name() + string(".tga 1 0 0 1 1"), *InfoLog);
 			}
 			else
 			{
 				bool mustRetry = false;
-				for ( map<const CStaticDepositRawMaterial*, uint>::const_iterator ifm=foundMaterials.begin(); ifm!=foundMaterials.end(); ++ifm )
+				for (map<const CStaticDepositRawMaterial *, uint>::const_iterator ifm = foundMaterials.begin(); ifm != foundMaterials.end(); ++ifm)
 				{
 					const uint &nbOccurrences = (*ifm).second;
 					totalArea += (float)nbOccurrences;
 				}
 				float rmAverageArea = totalArea / (float)scannedDeposit->getContentSize();
-				for ( map<const CStaticDepositRawMaterial*, uint>::const_iterator ifm=foundMaterials.begin(); ifm!=foundMaterials.end(); ++ifm )
+				for (map<const CStaticDepositRawMaterial *, uint>::const_iterator ifm = foundMaterials.begin(); ifm != foundMaterials.end(); ++ifm)
 				{
 					const uint &nbOccurrences = (*ifm).second;
-					if ( (float)nbOccurrences < rmAverageArea * ForageMinimumRatioRmAreaInDeposit.get() )
+					if ((float)nbOccurrences < rmAverageArea * ForageMinimumRatioRmAreaInDeposit.get())
 					{
-						if ( isSmallDeposit && (resolution > _ResolutionForErroneousSmallDeposits) )
+						if (isSmallDeposit && (resolution > _ResolutionForErroneousSmallDeposits))
 						{
 							resolution = _ResolutionForErroneousSmallDeposits; // retry with thinner resolution
 							mustRetry = true;
 							break;
 						}
-						if ( _MustCreateMapOnProblem )
-							InfoLog->displayRawNL( "=================================================" );
-						egs_feinfo( "Warning in %s: %s is spread on only %.1f%% of the deposit (%u of %u pts [ptWidth=%gm]), should be about %.1f%%",
-							scannedDeposit->name().c_str(), (*ifm).first->MaterialSheet.toString().c_str(),
-							(float)nbOccurrences * 100.0f / totalArea, nbOccurrences, (uint)totalArea, resolution,
-							rmAverageArea * 100.0f / totalArea);
-						if ( _MustCreateMapOnProblem )
-							ICommand::execute( string("makeDepositMap ") + scannedDeposit->name() + string(" ") + scannedDeposit->name() + NLMISC::toString("[%g].tga 1 0 0 1 1", resolution), *InfoLog );
+						if (_MustCreateMapOnProblem)
+							InfoLog->displayRawNL("=================================================");
+						egs_feinfo("Warning in %s: %s is spread on only %.1f%% of the deposit (%u of %u pts [ptWidth=%gm]), should be about %.1f%%",
+						    scannedDeposit->name().c_str(), (*ifm).first->MaterialSheet.toString().c_str(),
+						    (float)nbOccurrences * 100.0f / totalArea, nbOccurrences, (uint)totalArea, resolution,
+						    rmAverageArea * 100.0f / totalArea);
+						if (_MustCreateMapOnProblem)
+							ICommand::execute(string("makeDepositMap ") + scannedDeposit->name() + string(" ") + scannedDeposit->name() + NLMISC::toString("[%g].tga 1 0 0 1 1", resolution), *InfoLog);
 					}
 				}
-				if ( mustRetry )
+				if (mustRetry)
 					continue;
 			}
 			break;
-		}
-		while ( true );
+		} while (true);
 	}
-	egs_feinfo( "End. %u deposits processed", depositList.size() );
-	
+	egs_feinfo("End. %u deposits processed", depositList.size());
+
 	setComplete();
 }
-
 
 CDepositMapsBatchTask DepositMapsBatchTask;
 CCheckDepositContentTask CheckDepositsTask;
 
-
 /*
  *
  */
-NLMISC_COMMAND( makeDepositMapsBatch, "", "[stop | <inputFilename>]" )
+NLMISC_COMMAND(makeDepositMapsBatch, "", "[stop | <inputFilename>]")
 {
 	// Read arguments
 	string inputFilename;
-	if ( ! args.empty() )
+	if (!args.empty())
 		inputFilename = args[0];
 
 	// Manage task status
-	if ( inputFilename == "stop" )
+	if (inputFilename == "stop")
 	{
-		if ( DepositMapsBatchTask.isRunning() )
+		if (DepositMapsBatchTask.isRunning())
 		{
 			DepositMapsBatchTask.terminateTask();
-			log.displayNL( "Task stopped" );
+			log.displayNL("Task stopped");
 		}
 		else
-			log.displayNL( "Task is not running" );
+			log.displayNL("Task is not running");
 	}
-	else if ( DepositMapsBatchTask.isRunning() )
+	else if (DepositMapsBatchTask.isRunning())
 	{
-		log.displayNL( "Task is running, current processed map %u", DepositMapsBatchTask.currentMap() );
+		log.displayNL("Task is running, current processed map %u", DepositMapsBatchTask.currentMap());
 	}
-	else if ( ! inputFilename.empty() )
+	else if (!inputFilename.empty())
 	{
-		DepositMapsBatchTask.setInputFilename( inputFilename );
+		DepositMapsBatchTask.setInputFilename(inputFilename);
 		DepositMapsBatchTask.start();
-		log.displayNL( "Task started" );
+		log.displayNL("Task started");
 	}
 	else
-		log.displayNL( "Task is not running" );
+		log.displayNL("Task is not running");
 	return true;
 }
-
 
 /*
  *
  */
-NLMISC_COMMAND( forageCheckDepositContent, "Check that all RMs set in deposits are available in sufficient places", "<createMapOnProblem=1>|stop resolutionForErroneousSmallDeposits=0.25" )
+NLMISC_COMMAND(forageCheckDepositContent, "Check that all RMs set in deposits are available in sufficient places", "<createMapOnProblem=1>|stop resolutionForErroneousSmallDeposits=0.25")
 {
 	bool mustCreateMapOnProblem = true;
 	float resolutionForErroneousSmallDeposits = 0.25f;
-	if ( ! args.empty() )
+	if (!args.empty())
 	{
-		if ( args.size() > 1 )
-			resolutionForErroneousSmallDeposits = (float)atof( args[0].c_str() );
-		if ( args[0] == "stop" )
+		if (args.size() > 1)
+			resolutionForErroneousSmallDeposits = (float)atof(args[0].c_str());
+		if (args[0] == "stop")
 		{
-			if ( CheckDepositsTask.isRunning() )
+			if (CheckDepositsTask.isRunning())
 			{
 				CheckDepositsTask.terminateTask();
-				log.displayNL( "Task stopped" );
+				log.displayNL("Task stopped");
 			}
 			else
-				log.displayNL( "Task is not running" );
+				log.displayNL("Task is not running");
 			return true;
 		}
-		else if ( args[0] == "1" )
+		else if (args[0] == "1")
 		{
 			mustCreateMapOnProblem = true;
 		}
 	}
 
-	if ( CheckDepositsTask.isRunning() )
+	if (CheckDepositsTask.isRunning())
 	{
-		log.displayNL( "Task is already running" );
+		log.displayNL("Task is already running");
 	}
 	else
 	{
 		CheckDepositsTask._MustCreateMapOnProblem = mustCreateMapOnProblem;
 		CheckDepositsTask._ResolutionForErroneousSmallDeposits = resolutionForErroneousSmallDeposits;
 		CheckDepositsTask.start();
-		log.displayNL( "Task started" );
+		log.displayNL("Task started");
 	}
 	return true;
 }
 
-
 #endif
-

@@ -17,7 +17,6 @@
 #ifndef INTER_SHARD_EXCHANGE_VALIDATOR_H
 #define INTER_SHARD_EXCHANGE_VALIDATOR_H
 
-
 //-------------------------------------------------------------------------------------------------
 // includes
 //-------------------------------------------------------------------------------------------------
@@ -25,13 +24,11 @@
 // NeL MISC
 #include "nel/misc/singleton.h"
 
-
 //-------------------------------------------------------------------------------------------------
 // forward declarations
 //-------------------------------------------------------------------------------------------------
 
 class CGameItemPtr;
-
 
 //-------------------------------------------------------------------------------------------------
 // singleton class IInterShardExchangeValidator
@@ -45,14 +42,13 @@ public:
 	typedef uint32 TLevelCap;
 
 	/// validate an item for exchange
-	virtual bool isExchangeAllowed(const CGameItemPtr& theItem, TShardId shardId0, TShardId shardId1) const =0;
+	virtual bool isExchangeAllowed(const CGameItemPtr &theItem, TShardId shardId0, TShardId shardId1) const = 0;
 
 	/// validate money for exchange
-	virtual bool isMoneyExchangeAllowed(TShardId shardId0, TShardId shardId1) const =0;
+	virtual bool isMoneyExchangeAllowed(TShardId shardId0, TShardId shardId1) const = 0;
 
 	/// Singleton accessor
-	static IInterShardExchangeValidator* getInstance();
+	static IInterShardExchangeValidator *getInstance();
 };
-
 
 #endif // INTER_SHARD_EXCHANGE_VALIDATOR_H

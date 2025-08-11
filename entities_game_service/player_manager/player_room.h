@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef RY_PLAYER_ROOM_H
 #define RY_PLAYER_ROOM_H
 
 #include "game_item_manager/game_item_manager.h"
-
 
 class CBuildingPhysicalPlayer;
 /**
@@ -31,8 +29,8 @@ class CBuildingPhysicalPlayer;
 class CPlayerRoomInterface
 {
 	NL_INSTANCE_COUNTER_DECL(CPlayerRoomInterface);
-public:
 
+public:
 	/// ctor
 	CPlayerRoomInterface();
 
@@ -40,14 +38,14 @@ public:
 	~CPlayerRoomInterface();
 
 	/// persistence methods
-	void store(CPersistentDataRecord & pdr) const;
-	void apply(CPersistentDataRecord & pdr, CCharacter * owner);
+	void store(CPersistentDataRecord &pdr) const;
+	void apply(CPersistentDataRecord &pdr, CCharacter *owner);
 
 	/// clear player room
 	void clear();
 
 	/// return the destination where the room physically is
-	const CBuildingPhysicalPlayer * getBuilding()
+	const CBuildingPhysicalPlayer *getBuilding()
 	{
 		if (_Data == NULL)
 			return NULL;
@@ -55,22 +53,22 @@ public:
 	}
 
 	/// set the destination where the room physically is
-	void setBuilding(CBuildingPhysicalPlayer  * building)
+	void setBuilding(CBuildingPhysicalPlayer *building)
 	{
 		_Data->Building = building;
 	}
 
 	/// init the room. Should be called when a user buys it
-	void init(CCharacter * owner, CBuildingPhysicalPlayer * building);
+	void init(CCharacter *owner, CBuildingPhysicalPlayer *building);
 
 	/// serial of the interface
-//	void serial(NLMISC::IStream & f, CCharacter * owner, uint16 playerVersion);
+	//	void serial(NLMISC::IStream & f, CCharacter * owner, uint16 playerVersion);
 
 	/// return true if char is allowed in the building
-	bool isAllowedInBuilding(const CCharacter * owner, const CCharacter * user);
+	bool isAllowedInBuilding(const CCharacter *owner, const CCharacter *user);
 
 	/// return true if user can use inventory
-	bool canUseInventory(const CCharacter * owner, const CCharacter * user) const;
+	bool canUseInventory(const CCharacter *owner, const CCharacter *user) const;
 
 	/// return the building inventory
 	CInventoryPtr getInventory() const
@@ -83,7 +81,6 @@ public:
 	/// return true if the player has a room
 	bool isValid() const { return _Data != NULL; }
 
-
 private:
 	/// internal data accessed through the interface
 	class CPlayerRoomData
@@ -92,29 +89,27 @@ private:
 		DECLARE_PERSISTENCE_METHODS
 
 		/// ctor
-		CPlayerRoomData(CCharacter * owner, CBuildingPhysicalPlayer * building);
+		CPlayerRoomData(CCharacter *owner, CBuildingPhysicalPlayer *building);
 
 		/// initialize the inventory
-		void initInventory(CCharacter * owner);
+		void initInventory(CCharacter *owner);
 
 		/// clear
 		void clear();
 
 		/// serial
-//		void serial(NLMISC::IStream & f, CCharacter * owner, uint16 playerVersion);
+		//		void serial(NLMISC::IStream & f, CCharacter * owner, uint16 playerVersion);
 
 	public:
 		/// the room inventory
 		CInventoryPtr Inventory;
 
 		/// the building where the room is
-		CBuildingPhysicalPlayer * Building;
+		CBuildingPhysicalPlayer *Building;
 	};
 
-	CPlayerRoomData * _Data;
+	CPlayerRoomData *_Data;
 };
-
-
 
 #endif // RY_PLAYER_ROOM_H
 

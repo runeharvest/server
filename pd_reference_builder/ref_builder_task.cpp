@@ -18,14 +18,12 @@
 #include "pd_lib/reference_builder.h"
 #include "pd_lib/delta_builder.h"
 
-
 /*
  * Constructor
  */
 CRefBuilderTask::CRefBuilderTask()
 {
 }
-
 
 /*
  * Destructor
@@ -34,21 +32,19 @@ CRefBuilderTask::~CRefBuilderTask()
 {
 }
 
-
-
 /*
  * Setup Task
  */
-void	CRefBuilderTask::setup(	const std::string& rootRefPath,
-								const std::string& previousReferencePath,
-								const std::string& nextReferencePath,
-								const std::string& hoursUpdatePath,
-								const std::string& minutesUpdatePath,
-								const std::string& secondsUpdatePath,
-								const std::string& logUpdatePath,
-								const std::string& mintimestamp,
-								const std::string& maxtimestamp,
-								const std::string& keeptimestamp)
+void CRefBuilderTask::setup(const std::string &rootRefPath,
+    const std::string &previousReferencePath,
+    const std::string &nextReferencePath,
+    const std::string &hoursUpdatePath,
+    const std::string &minutesUpdatePath,
+    const std::string &secondsUpdatePath,
+    const std::string &logUpdatePath,
+    const std::string &mintimestamp,
+    const std::string &maxtimestamp,
+    const std::string &keeptimestamp)
 {
 	_RootRefPath = rootRefPath;
 	_PreviousReferencePath = previousReferencePath;
@@ -62,23 +58,22 @@ void	CRefBuilderTask::setup(	const std::string& rootRefPath,
 	_KeepTimestamp = keeptimestamp;
 }
 
-
 /*
  * Run task
  */
-bool	CRefBuilderTask::execute()
+bool CRefBuilderTask::execute()
 {
 	// generate new reference
-	if (!CReferenceBuilder::build(	_RootRefPath,
-									_PreviousReferencePath,
-									_NextReferencePath,
-									_HoursUpdatePath,
-									_MinutesUpdatePath,
-									_SecondsUpdatePath,
-									_LogUpdatePath,
-									_Mintimestamp,
-									_Maxtimestamp,
-									&AskedToStop ))
+	if (!CReferenceBuilder::build(_RootRefPath,
+	        _PreviousReferencePath,
+	        _NextReferencePath,
+	        _HoursUpdatePath,
+	        _MinutesUpdatePath,
+	        _SecondsUpdatePath,
+	        _LogUpdatePath,
+	        _Mintimestamp,
+	        _Maxtimestamp,
+	        &AskedToStop))
 	{
 		nlwarning("CRefBuilderTask: failed to build new reference, from '%s' to '%s'", _PreviousReferencePath.c_str(), _NextReferencePath.c_str());
 		return false;
@@ -99,9 +94,9 @@ bool	CRefBuilderTask::execute()
 /*
  * Compute next timestamp
  */
-std::string	CRefBuilderTask::getNextTimestamp(const std::string& timestamp)
+std::string CRefBuilderTask::getNextTimestamp(const std::string &timestamp)
 {
-	uint	year, month, day, hour, minute, second;
+	uint year, month, day, hour, minute, second;
 
 	if (sscanf(timestamp.c_str(), "%d.%d.%d.%d.%d.%d", &year, &month, &day, &hour, &minute, &second) != 6)
 	{
@@ -116,13 +111,13 @@ std::string	CRefBuilderTask::getNextTimestamp(const std::string& timestamp)
 
 	++day;
 
-	bool		bissextile = ((year%4) == 0) && (((year%100) != 0) || ((year%400) == 0));
+	bool bissextile = ((year % 4) == 0) && (((year % 100) != 0) || ((year % 400) == 0));
 
-	static uint	maxdays[12][2] = {	{ 31, 31 }, { 28, 29 }, { 31, 31 }, { 30, 30 },
-									{ 31, 31 }, { 30, 30 }, { 31, 31 }, { 31, 31 },
-									{ 30, 30 }, { 31, 31 }, { 30, 30 }, { 31, 31 } };
+	static uint maxdays[12][2] = { { 31, 31 }, { 28, 29 }, { 31, 31 }, { 30, 30 },
+		{ 31, 31 }, { 30, 30 }, { 31, 31 }, { 31, 31 },
+		{ 30, 30 }, { 31, 31 }, { 30, 30 }, { 31, 31 } };
 
-	if ( (day > maxdays[month-1][bissextile ? 1 : 0]) )
+	if ((day > maxdays[month - 1][bissextile ? 1 : 0]))
 	{
 		day = 1;
 		++month;

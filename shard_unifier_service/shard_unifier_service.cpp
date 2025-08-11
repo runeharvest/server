@@ -24,13 +24,13 @@
 
 #include "game_share/singleton_registry.h"
 #include <time.h>
-//#include <sys/utime.h>
+// #include <sys/utime.h>
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
 
 using namespace std;
@@ -51,17 +51,12 @@ extern void forceEntityLocatorLink();
 extern void forceMailForumFwdLink();
 extern void forceChatUnifierLink();
 
-
-
-NLNET::TUnifiedCallbackItem cbArraySU[] =
-{
-	{"", NULL}
+NLNET::TUnifiedCallbackItem cbArraySU[] = {
+	{ "", NULL }
 };
 
 // declare the serive
 NLNET_SERVICE_MAIN(CShardUnifier, "SU", "shard_unifier_service", 43505, cbArraySU, "", "");
-
-
 
 void CShardUnifier::init()
 {
@@ -80,7 +75,6 @@ void CShardUnifier::release()
 	CSingletonRegistry::getInstance()->release();
 }
 
-
 // force modules linking
 void forceModuleLink()
 {
@@ -89,4 +83,3 @@ void forceModuleLink()
 	forceMailForumFwdLink();
 	forceChatUnifierLink();
 }
-

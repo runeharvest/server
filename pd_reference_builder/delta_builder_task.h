@@ -22,7 +22,6 @@
 
 #include "pd_lib/delta_builder.h"
 
-
 /**
  * This task builds a delta from other delta updates
  * \author Benjamin Legros
@@ -32,7 +31,6 @@
 class CDeltaBuilderTask : public IRefTask
 {
 public:
-
 	/// Constructor
 	CDeltaBuilderTask();
 
@@ -40,33 +38,28 @@ public:
 	~CDeltaBuilderTask();
 
 	/// Setup Task
-	void		setup(const std::string& outputPath,
-					  const std::string& hoursUpdatePath,
-					  const std::string& minutesUpdatePath,
-					  const std::string& secondsUpdatePath,
-					  const std::string& mintimestamp,
-					  const std::string& maxtimestamp,
-					  CDeltaBuilder::TDelta type,
-					  const std::string& keeptimestamp);
-
-
+	void setup(const std::string &outputPath,
+	    const std::string &hoursUpdatePath,
+	    const std::string &minutesUpdatePath,
+	    const std::string &secondsUpdatePath,
+	    const std::string &mintimestamp,
+	    const std::string &maxtimestamp,
+	    CDeltaBuilder::TDelta type,
+	    const std::string &keeptimestamp);
 
 	/// Run task
-	virtual bool	execute();
-
+	virtual bool execute();
 
 private:
-
-	std::string		_OutputPath;
-	std::string		_HoursUpdatePath;
-	std::string		_MinutesUpdatePath;
-	std::string		_SecondsUpdatePath;
-	std::string		_Mintimestamp;
-	std::string		_Maxtimestamp;
-	CDeltaBuilder::TDelta	_Type;
-	std::string		_KeepTimestamp;
+	std::string _OutputPath;
+	std::string _HoursUpdatePath;
+	std::string _MinutesUpdatePath;
+	std::string _SecondsUpdatePath;
+	std::string _Mintimestamp;
+	std::string _Maxtimestamp;
+	CDeltaBuilder::TDelta _Type;
+	std::string _KeepTimestamp;
 };
-
 
 #endif // NL_DELTA_BUILDER_TASK_H
 

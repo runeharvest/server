@@ -16,7 +16,7 @@
 
 #include "reference_builder.h"
 #include "pds_table_buffer.h"
-//#include "pd_string_manager.h"
+// #include "pd_string_manager.h"
 
 #include <nel/misc/path.h>
 #include <nel/misc/file.h>
@@ -25,7 +25,6 @@
 using namespace std;
 using namespace NLMISC;
 
-
 /*
  * Constructor
  */
@@ -33,58 +32,56 @@ CReferenceBuilder::CReferenceBuilder()
 {
 }
 
-
-
 /*
  * Build a new reference from a older reference
  * Apply delta changes so new reference is clean
  */
-bool	CReferenceBuilder::build(CRefIndex& previous, CRefIndex& next)
+bool CReferenceBuilder::build(CRefIndex &previous, CRefIndex &next)
 {
 	return build(previous.getRootPath(),
-				 previous.getPath(),
-				 next.getPath(),
-				 previous.getRootPath()+"hours",
-				 previous.getRootPath()+"minutes",
-				 previous.getRootPath()+"seconds",
-				 previous.getRootPath()+"logs",
-				 previous.Timestamp.toString(), 
-				 next.Timestamp.toString());
+	    previous.getPath(),
+	    next.getPath(),
+	    previous.getRootPath() + "hours",
+	    previous.getRootPath() + "minutes",
+	    previous.getRootPath() + "seconds",
+	    previous.getRootPath() + "logs",
+	    previous.Timestamp.toString(),
+	    next.Timestamp.toString());
 }
 
 /*
  * Build a new reference from a older reference
  * Apply delta changes so new reference is clean
  */
-bool	CReferenceBuilder::build(	const std::string& rootRefPath,
-									const std::string& previousReferencePath,
-									const std::string& nextReferencePath,
-									const std::string& hoursUpdatePath,
-									const std::string& minutesUpdatePath,
-									const std::string& secondsUpdatePath,
-									const std::string& logPath,
-									const std::string& mintimestamp,
-									const std::string& maxtimestamp,
-									NLMISC::CAtomicBool* stopAsked)
+bool CReferenceBuilder::build(const std::string &rootRefPath,
+    const std::string &previousReferencePath,
+    const std::string &nextReferencePath,
+    const std::string &hoursUpdatePath,
+    const std::string &minutesUpdatePath,
+    const std::string &secondsUpdatePath,
+    const std::string &logPath,
+    const std::string &mintimestamp,
+    const std::string &maxtimestamp,
+    NLMISC::CAtomicBool *stopAsked)
 {
-	if (!internalBuild(	rootRefPath,
-						previousReferencePath,
-						nextReferencePath,
-						hoursUpdatePath,
-						minutesUpdatePath,
-						secondsUpdatePath,
-						logPath,
-						mintimestamp,
-						maxtimestamp,
-						stopAsked))
+	if (!internalBuild(rootRefPath,
+	        previousReferencePath,
+	        nextReferencePath,
+	        hoursUpdatePath,
+	        minutesUpdatePath,
+	        secondsUpdatePath,
+	        logPath,
+	        mintimestamp,
+	        maxtimestamp,
+	        stopAsked))
 	{
 		// clean up if failed...
 		// delete all files generated in the next reference path
-		vector<string>	files;
+		vector<string> files;
 		NLMISC::CPath::getPathContent(nextReferencePath, false, false, true, files);
 
-		uint	i;
-		for (i=0; i<files.size(); ++i)
+		uint i;
+		for (i = 0; i < files.size(); ++i)
 			if (!CFile::deleteFile(files[i]))
 				nlwarning("CReferenceBuilder::build(): after failure, failed to delete generated file '%s'", files[i].c_str());
 
@@ -98,43 +95,44 @@ bool	CReferenceBuilder::build(	const std::string& rootRefPath,
  * Build a new reference from a older reference
  * Apply delta changes so new reference is clean
  */
-bool	CReferenceBuilder::internalBuild(const std::string& rootRefPath,
-										 const std::string& previousReferencePath,
-										 const std::string& nextReferencePath,
-										 const std::string& hoursUpdatePath,
-										 const std::string& minutesUpdatePath,
-										 const std::string& secondsUpdatePath,
-										 const std::string& logPath,
-										 const std::string& mintimestamp,
-										 const std::string& maxtimestamp,
-										 NLMISC::CAtomicBool* stopAsked)
+bool CReferenceBuilder::internalBuild(const std::string &rootRefPath,
+    const std::string &previousReferencePath,
+    const std::string &nextReferencePath,
+    const std::string &hoursUpdatePath,
+    const std::string &minutesUpdatePath,
+    const std::string &secondsUpdatePath,
+    const std::string &logPath,
+    const std::string &mintimestamp,
+    const std::string &maxtimestamp,
+    NLMISC::CAtomicBool *stopAsked)
 {
-	PDS_LOG_DEBUG(1)("CReferenceBuilder::build()");
+	PDS_LOG_DEBUG(1)
+	("CReferenceBuilder::build()");
 
-	string	root = NLMISC::CPath::standardizePath(rootRefPath);
-	string	previous = NLMISC::CPath::standardizePath(previousReferencePath);
-	string	next = NLMISC::CPath::standardizePath(nextReferencePath);
-	string	hourspath = NLMISC::CPath::standardizePath(hoursUpdatePath);
-	string	minutespath = NLMISC::CPath::standardizePath(minutesUpdatePath);
-	string	secondspath = NLMISC::CPath::standardizePath(secondsUpdatePath);
+	string root = NLMISC::CPath::standardizePath(rootRefPath);
+	string previous = NLMISC::CPath::standardizePath(previousReferencePath);
+	string next = NLMISC::CPath::standardizePath(nextReferencePath);
+	string hourspath = NLMISC::CPath::standardizePath(hoursUpdatePath);
+	string minutespath = NLMISC::CPath::standardizePath(minutesUpdatePath);
+	string secondspath = NLMISC::CPath::standardizePath(secondsUpdatePath);
 
-	CTimestamp	minstamp(mintimestamp);
-	CTimestamp	maxstamp(maxtimestamp);
+	CTimestamp minstamp(mintimestamp);
+	CTimestamp maxstamp(maxtimestamp);
 
 	// copy xml description from previous directory to new
-	if (!CFile::copyFile(next+"description.xml", previous+"description.xml", true))
+	if (!CFile::copyFile(next + "description.xml", previous + "description.xml", true))
 	{
 		nlwarning("CReferenceBuilder::build(): failed to copy 'description.xml' from '%s' to '%s'", previous.c_str(), next.c_str());
 		return false;
 	}
 
-	uint	i;
+	uint i;
 
 	// copy previous reference
-	vector<string>	files;
+	vector<string> files;
 	NLMISC::CPath::getPathContent(previous, false, false, true, files);
 
-	for (i=0; i<files.size(); ++i)
+	for (i = 0; i < files.size(); ++i)
 	{
 		if (stopAsked != NULL && *stopAsked)
 		{
@@ -142,27 +140,25 @@ bool	CReferenceBuilder::internalBuild(const std::string& rootRefPath,
 			return false;
 		}
 
-		string	ext = CFile::getExtension(files[i]);
+		string ext = CFile::getExtension(files[i]);
 
 		// is ref file?
 		if (ext != CDBReferenceFile::getRefFileExt())
 			continue;
 
-		string	file = CFile::getFilename(files[i]);
+		string file = CFile::getFilename(files[i]);
 
 		// copy from old to new directory
-		if (!CFile::copyFile(next+file, previous+file, true))
+		if (!CFile::copyFile(next + file, previous + file, true))
 		{
 			nlwarning("CReferenceBuilder::build(): failed to copy '%s' from '%s' to '%s'", file.c_str(), previous.c_str(), next.c_str());
 			return false;
 		}
 	}
 
-	vector<TUpdateList>	updateList;
+	vector<TUpdateList> updateList;
 
-	if (!buildUpdateList(updateList, hourspath) ||
-		!buildUpdateList(updateList, minutespath) ||
-		!buildUpdateList(updateList, secondspath))
+	if (!buildUpdateList(updateList, hourspath) || !buildUpdateList(updateList, minutespath) || !buildUpdateList(updateList, secondspath))
 	{
 		nlwarning("CReferenceBuilder::build(): failed to build update list for new reference '%s'", next.c_str());
 		return false;
@@ -175,37 +171,35 @@ bool	CReferenceBuilder::internalBuild(const std::string& rootRefPath,
 		return false;
 	}
 
-//	buildStringManagerRef(previousReferencePath, nextReferencePath, 
-//						  logPath,
-//						  minstamp, maxstamp);
+	//	buildStringManagerRef(previousReferencePath, nextReferencePath,
+	//						  logPath,
+	//						  minstamp, maxstamp);
 
 	return true;
 }
 
-
-
 /*
  * Apply delta
  */
-bool	CReferenceBuilder::updateReference(std::vector<TUpdateList>& updateList,
-										   const CTimestamp& baseTimestamp,
-										   const CTimestamp& endTimestamp,
-										   const string& refRootPath,
-										   const string& refPath,
-										   NLMISC::CAtomicBool* stopAsked)
+bool CReferenceBuilder::updateReference(std::vector<TUpdateList> &updateList,
+    const CTimestamp &baseTimestamp,
+    const CTimestamp &endTimestamp,
+    const string &refRootPath,
+    const string &refPath,
+    NLMISC::CAtomicBool *stopAsked)
 {
 	if (updateList.empty())
 		return true;
-	
-	uint	i, j;
-	for (i=0; i<updateList.size(); ++i)
+
+	uint i, j;
+	for (i = 0; i < updateList.size(); ++i)
 	{
-		const TUpdateList&	tableList = updateList[i];
+		const TUpdateList &tableList = updateList[i];
 
 		if (tableList.empty())
 			continue;
 
-		CTableBuffer	tableBuffer;
+		CTableBuffer tableBuffer;
 		tableBuffer.init(i, refRootPath, refPath);
 
 		if (!tableBuffer.openAllRefFilesWrite())
@@ -214,9 +208,9 @@ bool	CReferenceBuilder::updateReference(std::vector<TUpdateList>& updateList,
 			return false;
 		}
 
-		for (j=0; j<tableList.size(); ++j)
+		for (j = 0; j < tableList.size(); ++j)
 		{
-			const CUpdateFile&	update = tableList[j];
+			const CUpdateFile &update = tableList[j];
 
 			if (update.EndTime < baseTimestamp || update.StartTime >= endTimestamp)
 				continue;
@@ -227,7 +221,8 @@ bool	CReferenceBuilder::updateReference(std::vector<TUpdateList>& updateList,
 				return false;
 			}
 
-			PDS_LOG_DEBUG(1)("CReferenceBuilder::updateReference(): updated reference with file '%s'", update.Filename.c_str());
+			PDS_LOG_DEBUG(1)
+			("CReferenceBuilder::updateReference(): updated reference with file '%s'", update.Filename.c_str());
 		}
 	}
 
@@ -237,9 +232,9 @@ bool	CReferenceBuilder::updateReference(std::vector<TUpdateList>& updateList,
 /*
  * Build update list
  */
-bool	CReferenceBuilder::buildUpdateList(std::vector<TUpdateList>& updateList, const std::string& filePath)
+bool CReferenceBuilder::buildUpdateList(std::vector<TUpdateList> &updateList, const std::string &filePath)
 {
-	vector<string>	fileList;
+	vector<string> fileList;
 	NLMISC::CPath::getPathContent(filePath, false, false, true, fileList);
 
 	if (fileList.empty())
@@ -248,16 +243,16 @@ bool	CReferenceBuilder::buildUpdateList(std::vector<TUpdateList>& updateList, co
 	// sort table by id first then date
 	sort(fileList.begin(), fileList.end());
 
-	uint	i;
-	for (i=0; i<fileList.size(); ++i)
+	uint i;
+	for (i = 0; i < fileList.size(); ++i)
 	{
-		uint32		tableId;
-		CTimestamp	timestamp;
+		uint32 tableId;
+		CTimestamp timestamp;
 
 		if (!CDBDeltaFile::isDeltaFileName(fileList[i], tableId, timestamp))
 			continue;
 
-		CDBDeltaFile	delta;
+		CDBDeltaFile delta;
 		delta.setup(fileList[i], 0, CTimestamp(), CTimestamp());
 
 		if (!delta.preload())
@@ -266,30 +261,29 @@ bool	CReferenceBuilder::buildUpdateList(std::vector<TUpdateList>& updateList, co
 			continue;
 		}
 
-		CTimestamp	starttime, endtime;
+		CTimestamp starttime, endtime;
 
 		starttime.fromTime(delta.getStartTimestamp());
 		endtime.fromTime(delta.getEndTimestamp());
 
 		if (updateList.size() <= tableId)
-			updateList.resize(tableId+1);
+			updateList.resize(tableId + 1);
 
-		TUpdateList&			list = updateList[tableId];
-		TUpdateList::iterator	it;
+		TUpdateList &list = updateList[tableId];
+		TUpdateList::iterator it;
 
-		bool					insert = true;
+		bool insert = true;
 
-		for (it=list.begin(); it!=list.end(); ++it)
+		for (it = list.begin(); it != list.end(); ++it)
 		{
-			CUpdateFile&	update = *it;
+			CUpdateFile &update = *it;
 
 			// ok, insert here
 			if (endtime < update.StartTime)
 				break;
 
 			// discard any overlap
-			if ((starttime >= update.StartTime && starttime < update.EndTime) ||
-				(endtime > update.StartTime && endtime <= update.EndTime))
+			if ((starttime >= update.StartTime && starttime < update.EndTime) || (endtime > update.StartTime && endtime <= update.EndTime))
 			{
 				insert = false;
 				break;
@@ -299,7 +293,7 @@ bool	CReferenceBuilder::buildUpdateList(std::vector<TUpdateList>& updateList, co
 		if (!insert)
 			continue;
 
-		CUpdateFile	update;
+		CUpdateFile update;
 
 		update.StartTime = starttime;
 		update.EndTime = endtime;
@@ -311,11 +305,10 @@ bool	CReferenceBuilder::buildUpdateList(std::vector<TUpdateList>& updateList, co
 	return true;
 }
 
-
 /* Build string manager reference
  *
  */
-//bool	CReferenceBuilder::buildStringManagerRef(const std::string& previousReferencePath,
+// bool	CReferenceBuilder::buildStringManagerRef(const std::string& previousReferencePath,
 //												 const std::string& nextReferencePath,
 //												 const std::string& logPath,
 //												 const CTimestamp& baseTimestamp,
@@ -371,4 +364,4 @@ bool	CReferenceBuilder::buildUpdateList(std::vector<TUpdateList>& updateList, co
 //	}
 //
 //	return true;
-//}
+// }

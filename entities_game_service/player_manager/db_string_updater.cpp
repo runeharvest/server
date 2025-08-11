@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "nel/net/unified_network.h"
 #include "db_string_updater.h"
@@ -23,14 +22,12 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-TUnifiedCallbackItem	StringUpdateCbArray[] =
-{
-	{"STORE_STRING_RESULT", &CDBStringUpdater::cbStoreStringResult },
+TUnifiedCallbackItem StringUpdateCbArray[] = {
+	{ "STORE_STRING_RESULT", &CDBStringUpdater::cbStoreStringResult },
 };
 
-
 CDBStringUpdater::CDBStringUpdater()
-	: _IOSIsUp(false)
+    : _IOSIsUp(false)
 {
 	// register the callback from IOS
 	NLNET::CUnifiedNetwork::getInstance()->addCallbackArray(StringUpdateCbArray, sizeofarray(StringUpdateCbArray));
@@ -62,7 +59,6 @@ void CDBStringUpdater::onIOSUp()
 
 		storeAStringInIOS(str);
 	}
-
 }
 
 void CDBStringUpdater::onIOSDown()
@@ -73,7 +69,7 @@ void CDBStringUpdater::onIOSDown()
 
 void CDBStringUpdater::onClientDatabaseDeleted(CCDBSynchronised *clientDB)
 {
-	static vector<TBDStringLeaf>	entryToRemove;
+	static vector<TBDStringLeaf> entryToRemove;
 
 	entryToRemove.clear();
 
@@ -142,11 +138,11 @@ ucstring CDBStringUpdater::getUcstringLeaf(CCDBSynchronised *clientDB, ICDBStruc
 	TStringLeafs::const_iterator it(_StringLeafs.find(ident));
 	if (it == _StringLeafs.end())
 		return emptyStr;
-	
+
 	return ucstring::makeFromUtf8(CStringMapper::unmap(it->second.LocalStringId));
 }
 
-const std::string & CDBStringUpdater::getStringLeaf(CCDBSynchronised *clientDB, ICDBStructNode *node) const
+const std::string &CDBStringUpdater::getStringLeaf(CCDBSynchronised *clientDB, ICDBStructNode *node) const
 {
 	static const std::string emptyStr;
 	TBDStringLeaf ident(clientDB, node);
@@ -155,10 +151,9 @@ const std::string & CDBStringUpdater::getStringLeaf(CCDBSynchronised *clientDB, 
 	TStringLeafs::const_iterator it(_StringLeafs.find(ident));
 	if (it == _StringLeafs.end())
 		return emptyStr;
-	
+
 	return CStringMapper::unmap(it->second.LocalStringId);
 }
-
 
 void CDBStringUpdater::storeAStringInIOS(const ucstring &str)
 {
@@ -170,16 +165,15 @@ void CDBStringUpdater::storeAStringInIOS(const ucstring &str)
 	}
 }
 
-
-void	CDBStringUpdater::cbStoreStringResult(CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId)
+void CDBStringUpdater::cbStoreStringResult(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
 	CDBStringUpdater::getInstance().storeStringResult(msgin, serviceName, serviceId);
 }
 
-void	CDBStringUpdater::storeStringResult(CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId)
+void CDBStringUpdater::storeStringResult(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
 {
-	ucstring			str;
-	TIOSStringId		iosStringId;
+	ucstring str;
+	TIOSStringId iosStringId;
 
 	msgin.serial(str);
 	msgin.serial(iosStringId);
@@ -206,6 +200,3 @@ void	CDBStringUpdater::storeStringResult(CMessage& msgin, const string &serviceN
 		}
 	}
 }
-
-
-

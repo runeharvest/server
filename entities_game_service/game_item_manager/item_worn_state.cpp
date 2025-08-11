@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 
 #include "nel/misc/debug.h"
@@ -25,49 +24,44 @@
 using namespace std;
 using namespace NLMISC;
 
-namespace ITEM_WORN_STATE
+namespace ITEM_WORN_STATE {
+NL_BEGIN_STRING_CONVERSION_TABLE(TItemWornState)
+NL_STRING_CONVERSION_TABLE_ENTRY(Unspoiled)
+NL_STRING_CONVERSION_TABLE_ENTRY(WornState1)
+NL_STRING_CONVERSION_TABLE_ENTRY(WornState2)
+NL_STRING_CONVERSION_TABLE_ENTRY(WornState3)
+NL_STRING_CONVERSION_TABLE_ENTRY(WornState4)
+NL_STRING_CONVERSION_TABLE_ENTRY(Worned)
+NL_END_STRING_CONVERSION_TABLE(TItemWornState, Conversion, Unspoiled)
+
+//-----------------------------------------------
+// fromString:
+//-----------------------------------------------
+TItemWornState fromString(const std::string &str)
 {
-	NL_BEGIN_STRING_CONVERSION_TABLE (TItemWornState)
-		NL_STRING_CONVERSION_TABLE_ENTRY(Unspoiled)
-		NL_STRING_CONVERSION_TABLE_ENTRY(WornState1)
-		NL_STRING_CONVERSION_TABLE_ENTRY(WornState2)
-		NL_STRING_CONVERSION_TABLE_ENTRY(WornState3)
-		NL_STRING_CONVERSION_TABLE_ENTRY(WornState4)
-		NL_STRING_CONVERSION_TABLE_ENTRY(Worned)
-	NL_END_STRING_CONVERSION_TABLE(TItemWornState, Conversion, Unspoiled)
-		
-	
-	//-----------------------------------------------
-	// fromString:
-	//-----------------------------------------------
-	TItemWornState fromString(const std::string &str)
-	{
-		return Conversion.fromString(str);
-	}
+	return Conversion.fromString(str);
+}
 
+//-----------------------------------------------
+// toString :
+//-----------------------------------------------
+const std::string &toString(TItemWornState state)
+{
+	return Conversion.toString(state);
+}
 
-	//-----------------------------------------------
-	// toString :
-	//-----------------------------------------------
-	const std::string& toString(TItemWornState state)
-	{
-		return Conversion.toString(state);
-	}
+string stateMsgs[] = {
+	"ITEM_UNSPOILED",
+	"ITEM_WORN_STATE_1",
+	"ITEM_WORN_STATE_2",
+	"ITEM_WORN_STATE_3",
+	"ITEM_WORN_STATE_4",
+	"ITEM_WORNED"
+};
 
-
-	string stateMsgs[] =
-	{
-		"ITEM_UNSPOILED",
-		"ITEM_WORN_STATE_1",
-		"ITEM_WORN_STATE_2",
-		"ITEM_WORN_STATE_3",
-		"ITEM_WORN_STATE_4",
-		"ITEM_WORNED"	
-	};
-
-	const std::string& getMessageForState(TItemWornState state)
-	{
-		return stateMsgs[state];
-	}
+const std::string &getMessageForState(TItemWornState state)
+{
+	return stateMsgs[state];
+}
 
 }; // ITEM_WORN_STATE

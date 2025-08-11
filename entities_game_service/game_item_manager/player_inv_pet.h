@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef PLAYER_INV_PET_H
 #define PLAYER_INV_PET_H
 
@@ -25,7 +24,6 @@
 class CPetInventory : public CInventoryBase
 {
 public:
-
 	CPetInventory();
 
 	void initPetInventory(uint32 petIndex, uint32 petMaxWeight, uint32 petMaxBulk);
@@ -36,17 +34,17 @@ public:
 	uint32 getMaxWeight() const;
 	uint32 getMaxBulk() const;
 	uint32 getMaxSlot() const;
-	
+
 	/// Update database of item representation
-//	virtual void onItemChanged(uint32 slot);
+	//	virtual void onItemChanged(uint32 slot);
 	/// Update database of inventory representation
-//	virtual void onInventoryChanged();
+	//	virtual void onInventoryChanged();
 	//@}
 
 private:
-	uint32	_PetIndex;
-	uint32	_PetMaxWeight;
-	uint32	_PetMaxBulk;
+	uint32 _PetIndex;
+	uint32 _PetMaxWeight;
+	uint32 _PetMaxBulk;
 };
 
 /** View for the mektoub inventory */

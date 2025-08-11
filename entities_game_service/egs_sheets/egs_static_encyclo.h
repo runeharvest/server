@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef EGS_STATIC_ENCYCLO_H
 #define EGS_STATIC_ENCYCLO_H
 
-//Nel georges
+// Nel georges
 #include "nel/georges/u_form.h"
 
 /*
@@ -27,9 +25,8 @@
  *  At the packing time we convert the string inside georges sheet into SheetId.
  */
 
-
 /**
- * 
+ *
  * \author Matthieu 'Trap' Besson
  * \author Nevrax France
  * \date November 2004
@@ -37,41 +34,41 @@
 class CStaticEncycloAlbum
 {
 	friend class CStaticEncyclo;
+
 public:
 	/// ctor
-	CStaticEncycloAlbum(){}
+	CStaticEncycloAlbum() { }
 
 	/// Read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 	/// Return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 1; }
+	inline static uint getVersion() { return 1; }
 	/// Serial
 	void serial(NLMISC::IStream &f)
 	{
-		f.serial( AlbumNumber );
-		f.serial( Title );
-		f.serial( RewardBrick );
-		f.serialCont( Themas );
+		f.serial(AlbumNumber);
+		f.serial(Title);
+		f.serial(RewardBrick);
+		f.serialCont(Themas);
 	}
 	/// Removed
-	void removed() {}
+	void removed() { }
 
 	/// same as the one used in title (used to classify album read in random order)
-	uint32							AlbumNumber;
+	uint32 AlbumNumber;
 	/// title something like ENCY_ALB_00 (in phrases\encyclopedia\phrase_ency_alb_00_en.txt for instance)
-	std::string						Title;
+	std::string Title;
 	/// a brick that can unlock a honorific title for the player
-	NLMISC::CSheetId				RewardBrick;
+	NLMISC::CSheetId RewardBrick;
 
 	// Never use the themas list directly (this is not ordered)
 private:
-
 	/// a list of themas that composed the album (themas can then be accessed through a common CSheetId ctor)
-	std::vector< NLMISC::CSheetId > Themas;
+	std::vector<NLMISC::CSheetId> Themas;
 };
 
 /**
- * 
+ *
  * \author Matthieu 'Trap' Besson
  * \author Nevrax France
  * \date November 2004
@@ -80,38 +77,37 @@ class CStaticEncycloThema
 {
 public:
 	/// ctor
-	CStaticEncycloThema(){}
+	CStaticEncycloThema() { }
 
 	/// Read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 	/// Return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 1; }
+	inline static uint getVersion() { return 1; }
 	/// Serial
 	void serial(NLMISC::IStream &f)
 	{
-		f.serial( ThemaNumber );
-		f.serial( Title );
-		f.serial( RewardText );
-		f.serial( RewardSheet );
-		f.serialCont( Tasks );
-		f.serial( Rite );
+		f.serial(ThemaNumber);
+		f.serial(Title);
+		f.serial(RewardText);
+		f.serial(RewardSheet);
+		f.serialCont(Tasks);
+		f.serial(Rite);
 	}
 	/// Removed
-	void removed() {}
+	void removed() { }
 
 	/// number of the thema in the album (needed for ordering) (begins at 1 not 0)
-	uint32							ThemaNumber;
+	uint32 ThemaNumber;
 	/// title something like ENCY_THM_00_01 (in phrases\encyclopedia\phrase_ency_alb_00_en.txt for instance)
-	std::string						Title;
+	std::string Title;
 	/// something like ENCY_THM_TXT_00_01, text explaining game background
-	std::string						RewardText;
+	std::string RewardText;
 	/// a brick, phrase or item that can be a special aura or increase the number of landmarks etc...
-	NLMISC::CSheetId				RewardSheet;
+	NLMISC::CSheetId RewardSheet;
 	/// all the missions that unlock the rite mission (the name is the 'symbolic name' task, aka id for leveldesign team)
-	std::vector<std::string>		Tasks;
+	std::vector<std::string> Tasks;
 	/// this name is also a 'symbolic name'
-	std::string						Rite;
-
+	std::string Rite;
 };
 
 /**
@@ -123,49 +119,48 @@ public:
 class CStaticEncyclo
 {
 	NL_INSTANCE_COUNTER_DECL(CStaticEncyclo);
-public:
 
+public:
 	// Init is called after the 2 maps are loaded and is used to create accelerators and thema by numbers
 	void init();
 
 	// Get album/thema from the sheet id
-	const CStaticEncycloAlbum * getAlbumForm( const NLMISC::CSheetId& sheetId ) const;
-	const CStaticEncycloThema * getThemaForm( const NLMISC::CSheetId& sheetId ) const;
+	const CStaticEncycloAlbum *getAlbumForm(const NLMISC::CSheetId &sheetId) const;
+	const CStaticEncycloThema *getThemaForm(const NLMISC::CSheetId &sheetId) const;
 
 	// Get album/thema from index in the structure (given by the AlbumNumber and ThemaNumber in the georges sheets)
-	uint32						getNbAlbum () const;
-	const CStaticEncycloAlbum * getAlbum ( uint32 nAlbumNb ) const;
-	uint32						getNbThema ( uint32 nAlbumNb ) const;
-	const CStaticEncycloThema * getThema ( uint32 nAlbumNb, uint32 nThema ) const;
+	uint32 getNbAlbum() const;
+	const CStaticEncycloAlbum *getAlbum(uint32 nAlbumNb) const;
+	uint32 getNbThema(uint32 nAlbumNb) const;
+	const CStaticEncycloThema *getThema(uint32 nAlbumNb, uint32 nThema) const;
 
 	// Return the position in the static structure of a mission (given its symbolic name)
 	// for the nOutTask 0 is the rite 1->7 are tasks prerequesite
 	bool isMissionPresent(const std::string &sMissionSymbolicName, sint32 &nOutAlb, sint32 &nOutThm, sint32 &nOutTask) const;
 
 	// get album and thema number, and task count, from rite name
-	void getRiteInfos( std::string& rite, uint32& nAlbum, uint32& nThema, uint32& taskCount ) const;
+	void getRiteInfos(std::string &rite, uint32 &nAlbum, uint32 &nThema, uint32 &taskCount) const;
 
 private:
 	// These 2 maps are initialized at CSheets::init time
-	std::map<NLMISC::CSheetId, CStaticEncycloAlbum>	_AlbumsFromSheet;
-	std::map<NLMISC::CSheetId, CStaticEncycloThema>	_ThemasFromSheet;
+	std::map<NLMISC::CSheetId, CStaticEncycloAlbum> _AlbumsFromSheet;
+	std::map<NLMISC::CSheetId, CStaticEncycloThema> _ThemasFromSheet;
 	friend class CSheets;
 
 	// Accelerator Table
 	struct CAlbum
 	{
-		CStaticEncycloAlbum					*AlbumSheet;
-		std::vector<CStaticEncycloThema*>	ThemaSheets;
+		CStaticEncycloAlbum *AlbumSheet;
+		std::vector<CStaticEncycloThema *> ThemaSheets;
 		// ---------------------------------------------
-		CAlbum() 
+		CAlbum()
 		{
 			AlbumSheet = NULL;
 		}
 	};
-	std::vector<CAlbum>	_OrderedAlbums;
+	std::vector<CAlbum> _OrderedAlbums;
 };
 
 #endif // EGS_STATIC_WORLD_H
 
 /* End of egs_static_world.h */
-

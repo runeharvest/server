@@ -14,11 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "combat_move.h"
 
-//void	CCMSAddEntityMSG::callback (const std::string &name, uint8 id)
+// void	CCMSAddEntityMSG::callback (const std::string &name, uint8 id)
 //{
 //	CAIEntityPhysical*	entity=CAIS::getEntityPhysical(Entity);
 //	CAIEntityPhysical*	target=CAIS::getEntityPhysical(Target);
@@ -28,15 +27,15 @@
 //	}
 //	else
 //	{
-//#ifdef NL_DEBUG
+// #ifdef NL_DEBUG
 //		nlwarning("wrong engage params..");
-//#endif
+// #endif
 //	}
-//	
+//
 //}
 
-//void	CCMSRemoveEntityMSG::callback (const std::string &name, uint8 id)
+// void	CCMSRemoveEntityMSG::callback (const std::string &name, uint8 id)
 //{
-//	CAIEntityPhysical*	entity=CAIS::getEntityPhysical(Entity);	
+//	CAIEntityPhysical*	entity=CAIS::getEntityPhysical(Entity);
 ////	entity->desengage();
 //}

@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_PROC_ITEM_PHRASE_H
 #define RY_PROC_ITEM_PHRASE_H
 
 #include "phrase_manager/s_phrase.h"
-
 
 /**
  * class implemented proc item sabtrina phrases
@@ -31,13 +28,12 @@
 class CProcItemPhrase : public CSPhrase
 {
 public:
-	
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool execution = true )
+	virtual bool build(const TDataSetRow &actorRowId, const std::vector<const CStaticBrick *> &bricks, bool execution = true)
 	{
 		// nothing to do there
 		return true;
 	}
-	virtual void setPrimaryTarget( const TDataSetRow &entityRowId )
+	virtual void setPrimaryTarget(const TDataSetRow &entityRowId)
 	{
 		nlerror("Invalid overload");
 		return;
@@ -76,7 +72,6 @@ public:
 		return;
 	}
 };
-
 
 #endif // RY_PROC_ITEM_PHRASE_H
 

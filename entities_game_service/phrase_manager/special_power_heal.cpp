@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -39,8 +36,8 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-extern CPlayerManager	PlayerManager;
-extern CTeamManager		TeamManager;
+extern CPlayerManager PlayerManager;
+extern CTeamManager TeamManager;
 
 //--------------------------------------------------------------
 //	CSpecialPower::validate()
@@ -53,16 +50,15 @@ bool CSpecialPowerHeal::validate(std::string &errorCode)
 	// check affected score is valid
 	if (_AffectedScore < 0 || _AffectedScore >= SCORES::NUM_SCORES)
 	{
-		nlwarning("Invalid score %d", (sint)_AffectedScore );
+		nlwarning("Invalid score %d", (sint)_AffectedScore);
 		return false;
 	}
 
 	return true;
 }
-	
 
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CSpecialPowerHeal::apply()
 {
@@ -70,7 +66,7 @@ void CSpecialPowerHeal::apply()
 		return;
 
 #if !FINAL_VERSION
-	nlassert(_AffectedScore==SCORES::hit_points || _AffectedScore==SCORES::sap || _AffectedScore==SCORES::stamina || _AffectedScore==SCORES::focus);
+	nlassert(_AffectedScore == SCORES::hit_points || _AffectedScore == SCORES::sap || _AffectedScore == SCORES::stamina || _AffectedScore == SCORES::focus);
 #endif
 
 	CCharacter *actor = PlayerManager.getChar(_ActorRowId);
@@ -83,22 +79,22 @@ void CSpecialPowerHeal::apply()
 	// disable power
 	actor->forbidPower(_PowerType, _Phrase->getConsumableFamilyId(), CTickEventHandler::getGameCycle() + _DisablePowerTime + _Phrase->getAdditionalRecastTime());
 
-	sint32 healValue = sint32( _HealValue + actor->getMaxScore(_AffectedScore) * _HealFactorValue );
+	sint32 healValue = sint32(_HealValue + actor->getMaxScore(_AffectedScore) * _HealFactorValue);
 
-	CCharacter* player = PlayerManager.getChar( _ActorRowId );
-	if ( player )
+	CCharacter *player = PlayerManager.getChar(_ActorRowId);
+	if (player)
 	{
-		const CSEffect* pEffect = player->lookForActiveEffect( EFFECT_FAMILIES::TotemCombatMagDef );
-		if ( pEffect != NULL )
+		const CSEffect *pEffect = player->lookForActiveEffect(EFFECT_FAMILIES::TotemCombatMagDef);
+		if (pEffect != NULL)
 		{
-			healValue += ( healValue * pEffect->getParamValue() / 100 );
+			healValue += (healValue * pEffect->getParamValue() / 100);
 		}
 	}
 
 	// heal actor
-	actor->changeScore(_AffectedScore, healValue );
+	actor->changeScore(_AffectedScore, healValue);
 
 	// send messages
-	PHRASE_UTILITIES::sendScoreModifierSpellMessage( actor->getId(), actor->getId(), healValue, healValue, _AffectedScore , ACTNATURE::CURATIVE_MAGIC);
+	PHRASE_UTILITIES::sendScoreModifierSpellMessage(actor->getId(), actor->getId(), healValue, healValue, _AffectedScore, ACTNATURE::CURATIVE_MAGIC);
 
 } // apply //

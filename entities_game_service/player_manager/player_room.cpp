@@ -32,7 +32,7 @@ NL_INSTANCE_COUNTER_IMPL(CPlayerRoomInterface);
 
 //----------------------------------------------------------------------------
 CPlayerRoomInterface::CPlayerRoomInterface()
-: _Data(NULL)
+    : _Data(NULL)
 {
 }
 
@@ -47,7 +47,7 @@ CPlayerRoomInterface::~CPlayerRoomInterface()
 }
 
 //----------------------------------------------------------------------------
-void CPlayerRoomInterface::store(CPersistentDataRecord & pdr) const
+void CPlayerRoomInterface::store(CPersistentDataRecord &pdr) const
 {
 	if (_Data == NULL)
 		return;
@@ -55,7 +55,7 @@ void CPlayerRoomInterface::store(CPersistentDataRecord & pdr) const
 }
 
 //----------------------------------------------------------------------------
-void CPlayerRoomInterface::apply(CPersistentDataRecord & pdr, CCharacter * owner)
+void CPlayerRoomInterface::apply(CPersistentDataRecord &pdr, CCharacter *owner)
 {
 	if (_Data == NULL)
 	{
@@ -79,7 +79,7 @@ void CPlayerRoomInterface::clear()
 }
 
 //----------------------------------------------------------------------------
-void CPlayerRoomInterface::init(CCharacter * owner, CBuildingPhysicalPlayer * building)
+void CPlayerRoomInterface::init(CCharacter *owner, CBuildingPhysicalPlayer *building)
 {
 	nlassert(owner != NULL);
 
@@ -97,7 +97,7 @@ void CPlayerRoomInterface::init(CCharacter * owner, CBuildingPhysicalPlayer * bu
 }
 
 //----------------------------------------------------------------------------
-//void CPlayerRoomInterface::serial(NLMISC::IStream & f, CCharacter * owner, uint16 playerVersion)
+// void CPlayerRoomInterface::serial(NLMISC::IStream & f, CCharacter * owner, uint16 playerVersion)
 //{
 //	f.xmlPush("room");
 //	if ( f.isReading() )
@@ -124,27 +124,27 @@ void CPlayerRoomInterface::init(CCharacter * owner, CBuildingPhysicalPlayer * bu
 //			f.serial(hasRoom);
 //		}
 //	}
-//	
+//
 //	f.xmlPop();
 //}
 
 //----------------------------------------------------------------------------
-bool CPlayerRoomInterface::isAllowedInBuilding(const CCharacter * owner, const CCharacter * user)
+bool CPlayerRoomInterface::isAllowedInBuilding(const CCharacter *owner, const CCharacter *user)
 {
 	// for the moment only owner is allowed in the room
 	return (owner == user);
 }
 
 //----------------------------------------------------------------------------
-CPlayerRoomInterface::CPlayerRoomData::CPlayerRoomData(CCharacter * owner, CBuildingPhysicalPlayer * building)
-: Building(building)
+CPlayerRoomInterface::CPlayerRoomData::CPlayerRoomData(CCharacter *owner, CBuildingPhysicalPlayer *building)
+    : Building(building)
 {
 	nlassert(owner != NULL);
 	initInventory(owner);
 }
 
 //----------------------------------------------------------------------------
-void CPlayerRoomInterface::CPlayerRoomData::initInventory(CCharacter * owner)
+void CPlayerRoomInterface::CPlayerRoomData::initInventory(CCharacter *owner)
 {
 	nlassert(owner != NULL);
 	nlassert(Inventory == NULL);
@@ -155,7 +155,7 @@ void CPlayerRoomInterface::CPlayerRoomData::initInventory(CCharacter * owner)
 	Inventory->setSlotCount(Inventory->getMaxSlot());
 
 	// create the inventory view
-	CPlayerRoomInvView * view = new CPlayerRoomInvView;
+	CPlayerRoomInvView *view = new CPlayerRoomInvView;
 	view->setCharacter(owner);
 	view->bindToInventory(Inventory);
 }
@@ -168,7 +168,7 @@ void CPlayerRoomInterface::CPlayerRoomData::clear()
 }
 
 //----------------------------------------------------------------------------
-//void CPlayerRoomInterface::CPlayerRoomData::serial(NLMISC::IStream & f, CCharacter * owner, uint16 playerVersion)
+// void CPlayerRoomInterface::CPlayerRoomData::serial(NLMISC::IStream & f, CCharacter * owner, uint16 playerVersion)
 //{
 //	// We do not support saving this way
 //	nlassert(f.isReading());
@@ -184,7 +184,7 @@ void CPlayerRoomInterface::CPlayerRoomData::clear()
 //			Building = dynamic_cast<CBuildingPhysicalPlayer*> ( CBuildingManager::getInstance()->getBuildingPhysicalsByName( name ) );
 //		}
 //		else
-//		{	
+//		{
 //			TAIAlias alias;
 //			f.serial(alias);
 //			if ( alias != CAIAliasTranslator::Invalid )
@@ -204,7 +204,7 @@ void CPlayerRoomInterface::CPlayerRoomData::clear()
 //		f.serial( alias );
 ////		Inventory->save(f);
 //	}
-//	
+//
 //	//f.serial(Bulk);
 //	//f.serial(MaxBulk);
 //	sint32 dummy;
@@ -215,26 +215,26 @@ void CPlayerRoomInterface::CPlayerRoomData::clear()
 //}
 
 //----------------------------------------------------------------------------
-bool CPlayerRoomInterface::canUseInventory(const CCharacter * owner, const CCharacter * user) const
+bool CPlayerRoomInterface::canUseInventory(const CCharacter *owner, const CCharacter *user) const
 {
 	/// only the owner can use its room, and only if he is inside
 	if (owner != user)
 		return false;
 
-	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( user->getId() ));
+	CPlayer *p = PlayerManager.getPlayer(PlayerManager.getPlayerId(user->getId()));
 	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return true);
-	if ( p->isTrialPlayer() )
+	if (p->isTrialPlayer())
 	{
-		user->sendDynamicSystemMessage( user->getId(), "EGS_CANT_USE_ROOM_INV_IS_TRIAL_PLAYER" );
+		user->sendDynamicSystemMessage(user->getId(), "EGS_CANT_USE_ROOM_INV_IS_TRIAL_PLAYER");
 		return false;
 	}
 
-	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, user->getEntityRowId(), DSPropertyCELL );
+	CMirrorPropValueRO<TYPE_CELL> mirrorCell(TheDataset, user->getEntityRowId(), DSPropertyCELL);
 	const sint32 cell = mirrorCell;
-	if ( !CBuildingManager::getInstance()->isRoomCell(cell) )
+	if (!CBuildingManager::getInstance()->isRoomCell(cell))
 		return false;
 
-	const CRoomInstancePlayer * room = dynamic_cast<CRoomInstancePlayer*>( CBuildingManager::getInstance()->getRoomInstanceFromCell( cell ) );
+	const CRoomInstancePlayer *room = dynamic_cast<CRoomInstancePlayer *>(CBuildingManager::getInstance()->getRoomInstanceFromCell(cell));
 	if (room == NULL)
 		return false;
 

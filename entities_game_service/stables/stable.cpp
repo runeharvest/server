@@ -14,13 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "stable.h"
 
 // static members of CStable
-CStable * CStable::_Instance = NULL;
+CStable *CStable::_Instance = NULL;
 
 using namespace std;
 using namespace NLMISC;
@@ -35,7 +33,6 @@ CStable::CStable()
 {
 }
 
-
 //----------------------------------------------------------------------------
 // dtor
 //----------------------------------------------------------------------------
@@ -49,39 +46,37 @@ CStable::~CStable()
 //----------------------------------------------------------------------------
 // add a stable
 //----------------------------------------------------------------------------
-void CStable::addStable( const std::string& stableName, uint16 placeId, const std::string& continent, float x, float y, float z, float theta )
+void CStable::addStable(const std::string &stableName, uint16 placeId, const std::string &continent, float x, float y, float z, float theta)
 {
 	TStableData sd;
 
 	sd.StableName = stableName;
-	sd.Continent = CONTINENT::toContinent( continent );
+	sd.Continent = CONTINENT::toContinent(continent);
 	sd.StableExitX = sint32(x * 1000);
 	sd.StableExitY = sint32(y * 1000);
 	sd.StableExitZ = sint32(z * 1000);
 	sd.Theta = theta;
 
-	if( ! isStable( placeId ) )
+	if (!isStable(placeId))
 	{
-		_Stables.insert( make_pair(placeId, sd) );
+		_Stables.insert(make_pair(placeId, sd));
 	}
 	else
 	{
-		nlwarning("<CStable::addStable> Stable name %s (PlaceId %u) already exist !!!", stableName.c_str(), placeId );
+		nlwarning("<CStable::addStable> Stable name %s (PlaceId %u) already exist !!!", stableName.c_str(), placeId);
 	}
 }
 
 //----------------------------------------------------------------------------
 // return stable entry point coordinate
 //----------------------------------------------------------------------------
-bool CStable::getStableData( uint16 placeId, TStableData& stableData ) const
+bool CStable::getStableData(uint16 placeId, TStableData &stableData) const
 {
-	TStableContainer::const_iterator it = _Stables.find( placeId );
-	if( it != _Stables.end() )
+	TStableContainer::const_iterator it = _Stables.find(placeId);
+	if (it != _Stables.end())
 	{
 		stableData = (*it).second;
 		return true;
 	}
 	return false;
 }
-
-

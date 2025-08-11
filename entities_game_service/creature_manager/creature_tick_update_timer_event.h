@@ -25,13 +25,14 @@
 
 class CCreature;
 
-class CCreatureTickUpdateTimerEvent:public CTimerEvent
+class CCreatureTickUpdateTimerEvent : public CTimerEvent
 {
 	NL_INSTANCE_COUNTER_DECL(CCreatureTickUpdateTimerEvent);
-public:
 
+public:
 	CCreatureTickUpdateTimerEvent(CCreature *parent);
 	void timerCallback(CTimer *owner);
+
 private:
 	CCreature *_Parent;
 };

@@ -36,24 +36,24 @@
 class CDynamicItems
 {
 	NL_INSTANCE_COUNTER_DECL(CDynamicItems);
-public:
 
+public:
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
 	// At time of writing it evaluated to:
 	//	void store(CPersistentDataRecord &pdr) const;
 	//	void apply(CPersistentDataRecord &pdr);
-	
+
 	DECLARE_PERSISTENCE_METHODS_WITH_ARG(uint index)
 
 	// return an instance on singleton
-	static CDynamicItems * getInstance();
+	static CDynamicItems *getInstance();
 
 	// add dynamic item for sell
-	bool addDynamicItemForSell( TItemTradePtr& item );
+	bool addDynamicItemForSell(TItemTradePtr &item);
 
 	// remove dynamic item for sell
-	void removeDynamicItemForSell( TItemTradePtr& item );
+	void removeDynamicItemForSell(TItemTradePtr &item);
 
 	// init CDynamicItems, load save file
 	void init();
@@ -63,22 +63,21 @@ public:
 
 	// tickupdate
 	void tickUpdate();
-	
+
 	// return item in _DynamicItems for character
-	void getItemsOfCharacter( const NLMISC::CEntityId& charId, std::vector< TItemTradePtr >& itemsForSaleOfCharacter );
+	void getItemsOfCharacter(const NLMISC::CEntityId &charId, std::vector<TItemTradePtr> &itemsForSaleOfCharacter);
 
 	// return true if dynamic items store initialized (= loaded)
 	inline bool isInit() { return _InitOk; }
 
 	// backup service callback
-	void fileAvailable(const CFileDescription& fileDescription, NLMISC::IStream& dataStream);
+	void fileAvailable(const CFileDescription &fileDescription, NLMISC::IStream &dataStream);
 
 private:
-
 	CDynamicItems();
 
 	// typedef for base sub vectors
-	typedef std::vector<TItemTradePtr>		TItemTradeVector;
+	typedef std::vector<TItemTradePtr> TItemTradeVector;
 
 	// get the save directory path (does not include SaveFilesDirectory, only relative path)
 	void getSavePath(std::string &path);
@@ -87,43 +86,40 @@ private:
 	void makeFileName(uint subIndex, std::string &fileName);
 
 	// return the sub index according to owner
-	uint32 getSubVectorIndex(const NLMISC::CEntityId& characterId);
+	uint32 getSubVectorIndex(const NLMISC::CEntityId &characterId);
 
 	// return the sub index according to item owner
-	uint32 getSubVectorIndex(const TItemTradePtr& item);
+	uint32 getSubVectorIndex(const TItemTradePtr &item);
 
-	TItemTradeVector &getSubVector(const TItemTradePtr& item);
+	TItemTradeVector &getSubVector(const TItemTradePtr &item);
 
 	// save dynamic items content sub vector
-	void save(uint subIndex );
-
-
+	void save(uint subIndex);
 
 	enum // for speudo contantes
-	{	
+	{
 		SALE_STORE_VERSION = 1,
-		// 1024 vectors 
-		NUM_SUB_VECTORS = 1<<10,
+		// 1024 vectors
+		NUM_SUB_VECTORS = 1 << 10,
 		// mask for sub vector index
-		SUB_VECTOR_MASK = NUM_SUB_VECTORS-1,
+		SUB_VECTOR_MASK = NUM_SUB_VECTORS - 1,
 	};
 
-	static CDynamicItems *	_Instance;
+	static CDynamicItems *_Instance;
 
-	TItemTradeVector		_DynamicItems[NUM_SUB_VECTORS];
-//	std::vector< TItemTradePtr >	_DynamicItems;
-	NLMISC::TGameCycle		_LastSaveTick;
-	uint32					_NextVectorToSave;
-	uint32					_NextVectorToCheck;
-	uint32					_NextItemToCheck;
-	uint32					_TotalNbItemsForSale;
+	TItemTradeVector _DynamicItems[NUM_SUB_VECTORS];
+	//	std::vector< TItemTradePtr >	_DynamicItems;
+	NLMISC::TGameCycle _LastSaveTick;
+	uint32 _NextVectorToSave;
+	uint32 _NextVectorToCheck;
+	uint32 _NextItemToCheck;
+	uint32 _TotalNbItemsForSale;
 
-	bool					_InitOk;
+	bool _InitOk;
 
-	uint32					_CurrentLoadIndex;
+	uint32 _CurrentLoadIndex;
 };
 
 #endif // RYZOM_STATIC_ITEM_H
 
 /* dynamic_items.h */
-

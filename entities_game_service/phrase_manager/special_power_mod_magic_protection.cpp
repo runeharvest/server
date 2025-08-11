@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -33,16 +30,14 @@
 #include "player_manager/player.h"
 #include "mod_magic_protection_effet.h"
 
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CSpecialPowerModMagicProtection::apply()
 {
@@ -60,21 +55,21 @@ void CSpecialPowerModMagicProtection::apply()
 	actor->forbidPower(_PowerType, _Phrase->getConsumableFamilyId(), CTickEventHandler::getGameCycle() + _DisablePowerTime + _Duration);
 
 	const TGameCycle endDate = _Duration + CTickEventHandler::getGameCycle();
-	
+
 	PROTECTION_TYPE::TProtectionType _AffectedProtectionType = PROTECTION_TYPE::fromString(_AffectedProtection);
-	if(_AffectedProtectionType == PROTECTION_TYPE::None)
+	if (_AffectedProtectionType == PROTECTION_TYPE::None)
 	{
 		nlwarning("<CSpecialPowerModMagicProtection::apply> Cannot convert protection: <%s> to a knowned <PROTECTION_TYPE::TProtectionType>", _AffectedProtection.c_str());
 		return;
 	}
 
 	// create effect and apply it on target
-	CModMagicProtectionEffect *effect = new CModMagicProtectionEffect(_ActorRowId, 
-													endDate, 
-													EFFECT_FAMILIES::PowerModMagicProtection,
-													_AffectedProtectionType,
-													_Modifier1,
-													_Modifier2);
+	CModMagicProtectionEffect *effect = new CModMagicProtectionEffect(_ActorRowId,
+	    endDate,
+	    EFFECT_FAMILIES::PowerModMagicProtection,
+	    _AffectedProtectionType,
+	    _Modifier1,
+	    _Modifier2);
 	if (!effect)
 	{
 		nlwarning("<CSpecialPowerModMagicProtection::apply> Failed to allocate new CModMagicProtectionEffect");

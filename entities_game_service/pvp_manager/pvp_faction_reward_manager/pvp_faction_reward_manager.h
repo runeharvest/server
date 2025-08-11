@@ -32,11 +32,11 @@ struct TFactionPossessions
 	DECLARE_PERSISTENCE_METHODS
 
 	/// Number of totems owned by the faction
-	uint32	NbTotems;
+	uint32 NbTotems;
 	/// Level of the totems
-	uint8	Level;
+	uint8 Level;
 	/// Number of faction points owned by all the faction members
-	sint32	FactionPointsPool;
+	sint32 FactionPointsPool;
 };
 
 /**
@@ -48,75 +48,75 @@ struct TFactionPossessions
 class CPVPFactionRewardManager
 {
 	DECLARE_PERSISTENCE_METHODS
-public :
+public:
 	typedef std::vector<int> TPossessionsPerEffect;
-	
+
 	/// Totems levels with the number of totems needed to reach them
 	enum TotemLevel
 	{
-		LEVEL_0 =  1,
-		LEVEL_1 =  5,
+		LEVEL_0 = 1,
+		LEVEL_1 = 5,
 		LEVEL_2 = 15,
 		LEVEL_3 = 25,
 		LEVEL_4 = 35,
 	};
 
 	/// Values of each effects
-	static sint32 EffectValues[ EFFECT_FAMILIES::EndTotemEffects+1 ];
+	static sint32 EffectValues[EFFECT_FAMILIES::EndTotemEffects + 1];
 
 	/// Returns the totem base for a given region using its ID
-	const CTotemBase* getTotemBaseFromId( uint16 regionId ) { return _GetTotemBaseFromId( regionId ); }
+	const CTotemBase *getTotemBaseFromId(uint16 regionId) { return _GetTotemBaseFromId(regionId); }
 
 	/// Singleton declaration
 	NLMISC_SAFE_SINGLETON_DECL(CPVPFactionRewardManager);
 
-private :
+private:
 	///\ctor
 	CPVPFactionRewardManager();
 
 	/// Returns the totem base for a given region using its alias
-	CTotemBase*	_GetTotemBase( TAIAlias regionAlias );
+	CTotemBase *_GetTotemBase(TAIAlias regionAlias);
 
 	/// Returns the totem base for a given region using its ID
-	CTotemBase* _GetTotemBaseFromId( uint16 regionId );
+	CTotemBase *_GetTotemBaseFromId(uint16 regionId);
 
 	/// Update totems level for a given faction
-	void	_UpdateLevel( PVP_CLAN::TPVPClan faction );
-	
+	void _UpdateLevel(PVP_CLAN::TPVPClan faction);
+
 	/// Get effect bonus for each totem level
-	sint32	_GetLevelBonus( EFFECT_FAMILIES::TEffectFamily, uint8 level );
+	sint32 _GetLevelBonus(EFFECT_FAMILIES::TEffectFamily, uint8 level);
 
 	/// Get the effects a character would get on a totem
-	void	_GetTotemsEffectsRec( CCharacter* user, CTotemBase* pTotem, 
-		                          std::vector<CSEffect*>& outEffects, std::vector<CTotemBase*>& processed );
+	void _GetTotemsEffectsRec(CCharacter *user, CTotemBase *pTotem,
+	    std::vector<CSEffect *> &outEffects, std::vector<CTotemBase *> &processed);
 	/// Remove all totem effects from a given player
-	void	_removeTotemsEffects( CCharacter* user );
+	void _removeTotemsEffects(CCharacter *user);
 
 	/// Totem bases sorted by region
-	std::map<TAIAlias, CTotemBase*>	_TotemBasesPerRegion;
+	std::map<TAIAlias, CTotemBase *> _TotemBasesPerRegion;
 
 	/// Number of totems
-	uint32						_NbTotems;
+	uint32 _NbTotems;
 
 	/// Possessions for each faction
-	TFactionPossessions			_FactionsPossessions[PVP_CLAN::NbClans];
+	TFactionPossessions _FactionsPossessions[PVP_CLAN::NbClans];
 
 	/// Build the totem bases using the a LIGO primitive
-	void	_BuildTotemBasesRec( const NLLIGO::IPrimitive* prim,
-		                         std::map<CTotemBase*, std::set<std::string> >& neighboursNames,
-							     std::map<std::string, CTotemBase*>& totemBasesPerName );
+	void _BuildTotemBasesRec(const NLLIGO::IPrimitive *prim,
+	    std::map<CTotemBase *, std::set<std::string>> &neighboursNames,
+	    std::map<std::string, CTotemBase *> &totemBasesPerName);
 
 	/// Have the totem bases been setup ?
-	bool				_InitDone;
+	bool _InitDone;
 
 	/// Has data been load from database ?
-	bool				_DBLoaded;
+	bool _DBLoaded;
 
 	/// Is there some updates we could save ?
-	bool				_DataUpdated;
+	bool _DataUpdated;
 
 	/// Date of last save
-	NLMISC::TGameCycle	_LastSave;
+	NLMISC::TGameCycle _LastSave;
 
 	/**
 	 * Load from database factions and totems data
@@ -124,65 +124,65 @@ private :
 	 */
 	bool _LoadFromPDR();
 	// callback from BS
-	void _totemFileCallback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream);
+	void _totemFileCallback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream);
 
 	friend struct TTotemFileCallback;
 
-public :
+public:
 	/// Initialize totem bases and effect values (called only once)
 	void init();
 
 	/**
 	 * Start building a totem in a given region. This totem will be owned
-	 * by the builder's faction. 
+	 * by the builder's faction.
 	 * Return true if the building has started, false elsewhere.
 	 */
-	bool startTotemBuilding( uint16 regionIndex, CCharacter* builder );
+	bool startTotemBuilding(uint16 regionIndex, CCharacter *builder);
 
-	/// Destroy the totem in a given region 
-	bool destroyTotem( uint16 regionIndex, TDataSetRow killerRowId );
+	/// Destroy the totem in a given region
+	bool destroyTotem(uint16 regionIndex, TDataSetRow killerRowId);
 
 	/// Get the list of reward effects for a character depending on its coordinates
-	std::vector<CSEffect*> getTotemsEffects( CCharacter* user, std::vector<CTotemBase*>& processed );
+	std::vector<CSEffect *> getTotemsEffects(CCharacter *user, std::vector<CTotemBase *> &processed);
 
 	/// Give totem rewards to a player
-	void giveTotemsEffects( CCharacter* user );
+	void giveTotemsEffects(CCharacter *user);
 
 	/// Remove all totem effects from a given player and update player database
-	void removeTotemsEffects( CCharacter* user );
+	void removeTotemsEffects(CCharacter *user);
 
 	/// Update totems building
 	void tickUpdate();
 
 	/// Update the faction points pool of a faction
-	void updateFactionPointPool( PVP_CLAN::TPVPClan faction, sint32 fpDelta );
+	void updateFactionPointPool(PVP_CLAN::TPVPClan faction, sint32 fpDelta);
 
 	/// get faction points in pool of a faction
-	sint32 getFactionPointPool( PVP_CLAN::TPVPClan faction );
+	sint32 getFactionPointPool(PVP_CLAN::TPVPClan faction);
 
 	/// Returns true if this botObject is linked to a CTotemBase
-	bool isATotem( CCreature* botObject );
+	bool isATotem(CCreature *botObject);
 
 	/// Returns true if the targeted botObject can be attacked by the actor
-	bool isAttackable( CCharacter* actor, CEntityBase* target );
+	bool isAttackable(CCharacter *actor, CEntityBase *target);
 
 	/// Returns true if the actor can build a totem in this region
-	bool canBuildTotem( CCharacter* actor );
+	bool canBuildTotem(CCharacter *actor);
 
 	/// Returns the faction which currently owns a region
-	PVP_CLAN::TPVPClan getRegionOwner( uint16 regionId );
+	PVP_CLAN::TPVPClan getRegionOwner(uint16 regionId);
 
 	/// send event message to ai
-	void sendEventToAI( const CTotemBase * totem, const std::string& event );
+	void sendEventToAI(const CTotemBase *totem, const std::string &event);
 
 	/// send message when spire is attacked
-	void spireAttacked( CCharacter * actor, CCreature * spire );
+	void spireAttacked(CCharacter *actor, CCreature *spire);
 
 	/**
 	 * Add a new totem bot object. This bot object will be linked
 	 * to the corresponding CTotemBase depending on its coordinates
 	 */
-	void addBotObject( CCreature* botObject );
+	void addBotObject(CCreature *botObject);
 
 	inline bool isInit() { return _InitDone; }
 };

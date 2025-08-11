@@ -97,5 +97,4 @@
 #include "server_share/logger_service_client.h"
 #include "server_share/r2_variables.h"
 
-#endif //INPUT_OUTPUT_SERVICE_STDPCH_H
-
+#endif // INPUT_OUTPUT_SERVICE_STDPCH_H

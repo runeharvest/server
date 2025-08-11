@@ -29,55 +29,55 @@
 // CAIEvent
 //---------------------------------------------------------------------------------
 
-class	CAIEvent : public NLMISC::CDbgRefCount<CAIEvent>
+class CAIEvent : public NLMISC::CDbgRefCount<CAIEvent>
 {
 public:
-	CAIEvent	() : _Name()
-	{}
+	CAIEvent()
+	    : _Name()
+	{
+	}
 
-	virtual ~CAIEvent() {}
-
+	virtual ~CAIEvent() { }
 
 	// called when an event reaction is added during parse of a .primitive file
 	// called by the event reaction object
-	inline void addReaction( CAIEventReaction *reaction);
+	inline void addReaction(CAIEventReaction *reaction);
 
 	// called when an event reaction is deleted due to a modification in a .primitive file
-	inline	void removeReaction(CAIEventReaction *reaction);
+	inline void removeReaction(CAIEventReaction *reaction);
 
-	inline	void removeAllReaction	()
+	inline void removeAllReaction()
 	{
-		_Reactions.clear	();
-	}
-	
-	void	setName(const std::string &name)
-	{
-		_Name=name;
+		_Reactions.clear();
 	}
 
-	const	std::string	&getName()	const
+	void setName(const std::string &name)
 	{
-		return	_Name;
+		_Name = name;
 	}
 
-	typedef		std::vector<NLMISC::CDbgPtr<CAIEventReaction> >	TReactionList;
-
-	const	TReactionList	&reactionList()	const
+	const std::string &getName() const
 	{
-		return	_Reactions;
+		return _Name;
 	}
-	
+
+	typedef std::vector<NLMISC::CDbgPtr<CAIEventReaction>> TReactionList;
+
+	const TReactionList &reactionList() const
+	{
+		return _Reactions;
+	}
+
 private:
-	std::string		_Name;
-	TReactionList	_Reactions;
+	std::string _Name;
+	TReactionList _Reactions;
 };
-
 
 //---------------------------------------------------------------------------------
 // CAIEvent
 //---------------------------------------------------------------------------------
 
-inline void CAIEvent::addReaction	(CAIEventReaction	*reaction)
+inline void CAIEvent::addReaction(CAIEventReaction *reaction)
 {
 
 	if (std::find_if(_Reactions.begin(), _Reactions.end(),
@@ -93,12 +93,11 @@ inline void CAIEvent::addReaction	(CAIEventReaction	*reaction)
 	}
 	else
 	{
-		nlwarning("BUG: Attempt to add the same reaction '%s' to event manager more than once",	reaction->getAliasNode()->fullName().c_str());
+		nlwarning("BUG: Attempt to add the same reaction '%s' to event manager more than once", reaction->getAliasNode()->fullName().c_str());
 	}
-
 }
 
-inline	void CAIEvent::removeReaction(CAIEventReaction *reaction)
+inline void CAIEvent::removeReaction(CAIEventReaction *reaction)
 {
 
 	TReactionList::iterator it = std::find_if(_Reactions.begin(), _Reactions.end(),
@@ -108,29 +107,27 @@ inline	void CAIEvent::removeReaction(CAIEventReaction *reaction)
 	    std::bind(std::equal_to<CAIEventReaction *>(), std::placeholders::_1, reaction)
 #endif
 	);
-	if	(it==_Reactions.end())
+	if (it == _Reactions.end())
 	{
 		nlwarning("BUG: Failed to remove event reaction from manager as object not found!!!");
 	}
 	else
 	{
-		*it=_Reactions.back();
+		*it = _Reactions.back();
 		_Reactions.pop_back();
 	}
 
-	
-//	for (uint i=0;i<_Reactions.size();++i)
-//	{
-//		if	(_Reactions[i].ptr()!=reaction)
-//			continue;
-//
-//		_Reactions[i]=_Reactions[_Reactions.size()-1];
-//		_Reactions.pop_back();
-//		return;
-//	}	
-//	nlwarning("BUG: Failed to remove event reaction from manager as object not found!!!");
+	//	for (uint i=0;i<_Reactions.size();++i)
+	//	{
+	//		if	(_Reactions[i].ptr()!=reaction)
+	//			continue;
+	//
+	//		_Reactions[i]=_Reactions[_Reactions.size()-1];
+	//		_Reactions.pop_back();
+	//		return;
+	//	}
+	//	nlwarning("BUG: Failed to remove event reaction from manager as object not found!!!");
 }
-
 
 //---------------------------------------------------------------------------------
 #endif

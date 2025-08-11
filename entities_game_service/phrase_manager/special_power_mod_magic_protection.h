@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_SPECIAL_POWER_MOD_MAGIC_PROTECTION_H
 #define RYZOM_SPECIAL_POWER_MOD_MAGIC_PROTECTION_H
 
 #include "special_power.h"
-
 
 /**
  * Specialized class for power "ModMagicProtection"
@@ -32,14 +29,16 @@ class CSpecialPowerModMagicProtection : public CSpecialPower
 {
 public:
 	/// Default Constructor
-	CSpecialPowerModMagicProtection() : CSpecialPower()
-	{}
+	CSpecialPowerModMagicProtection()
+	    : CSpecialPower()
+	{
+	}
 
 	/// Constructor
-	CSpecialPowerModMagicProtection(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds,  
-		POWERS::TPowerType powerType, const std::string& protection, float modifier1, float modifier2 )
+	CSpecialPowerModMagicProtection(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds,
+	    POWERS::TPowerType powerType, const std::string &protection, float modifier1, float modifier2)
 	{
-		if(TheDataset.isAccessible(actorRowId))
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -47,8 +46,8 @@ public:
 		}
 
 		_Phrase = phrase;
-		
-		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());		
+
+		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());
 		_DisablePowerTime = _Duration;
 
 		_PowerType = powerType;
@@ -60,17 +59,16 @@ public:
 	/// apply effects
 	virtual void apply();
 
-
 protected:
 	/// affected protection
-	std::string	_AffectedProtection;
+	std::string _AffectedProtection;
 
-	// score modifier 
+	// score modifier
 	float _Modifier1;
 	float _Modifier2;
 
 	/// Duration in ticks
-	NLMISC::TGameCycle	_Duration;
+	NLMISC::TGameCycle _Duration;
 };
 
 #endif // RYZOM_SPECIAL_POWER_MOD_MAGIC_PROTECTION_H

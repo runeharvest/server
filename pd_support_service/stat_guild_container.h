@@ -25,12 +25,11 @@
 #include "nel/misc/sstring.h"
 #include "game_share/persistent_data_tree.h"
 
-
 //-------------------------------------------------------------------------------------------------
 // class CStatGuildContainer
 //-------------------------------------------------------------------------------------------------
 
-class CStatGuildContainer: public NLMISC::CRefCount
+class CStatGuildContainer : public NLMISC::CRefCount
 {
 public:
 	CStatGuildContainer();
@@ -39,20 +38,20 @@ public:
 public:
 	// interface for the guild scan job to use
 	void startScan();
-	void addGuildFile(const NLMISC::CSString& fileName, CPersistentDataRecord& fileContent);
+	void addGuildFile(const NLMISC::CSString &fileName, CPersistentDataRecord &fileContent);
 	void endScan();
 
 	// handy introspection routines
-	void display(NLMISC::CLog* log=NLMISC::InfoLog);
+	void display(NLMISC::CLog *log = NLMISC::InfoLog);
 
-	// write a table (line per guild member), columns: file name, guild name, guild id, rank, entry date, account, slot 
-	void writeMemberListFile(const NLMISC::CSString& path);
+	// write a table (line per guild member), columns: file name, guild name, guild id, rank, entry date, account, slot
+	void writeMemberListFile(const NLMISC::CSString &path);
 
 	// write a table (line per item in guild inventory), columns: file name, guild name, guild id, slot, <item stats>
-	void writeInventoryFile(const NLMISC::CSString& path);
+	void writeInventoryFile(const NLMISC::CSString &path);
 
 	// write a table (line per guild), columns for all basic properties of the guild
-	void writeMiscDataFile(const NLMISC::CSString& path);
+	void writeMiscDataFile(const NLMISC::CSString &path);
 
 private:
 	// the data representation for a guild file
@@ -67,7 +66,6 @@ private:
 
 	bool _InProgress;
 };
-
 
 //-------------------------------------------------------------------------------------------------
 #endif

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_EFFECT_FACTORY_H
 #define RY_EFFECT_FACTORY_H
 
@@ -32,8 +30,8 @@
 class IEffectFactory
 {
 	NL_INSTANCE_COUNTER_DECL(IEffectFactory);
-public:
 
+public:
 	/// clear the class factory
 	static void clear();
 
@@ -42,36 +40,37 @@ public:
 	 * \param prim : the primitive node used to build the step
 	 * \return a pointer on the built step (NULL if failure)
 	 */
-	inline static CSTimedEffect * buildEffect(EFFECT_FAMILIES::TEffectFamily effectFamily)
+	inline static CSTimedEffect *buildEffect(EFFECT_FAMILIES::TEffectFamily effectFamily)
 	{
-		//get appropriate factory
-		for ( uint i = 0; i < Factories->size(); i++ )
+		// get appropriate factory
+		for (uint i = 0; i < Factories->size(); i++)
 		{
-			if ( (*Factories)[i].first == effectFamily )
+			if ((*Factories)[i].first == effectFamily)
 			{
-				INFOLOG(" effect family %s is managed by the system. Building effect...",EFFECT_FAMILIES::toString(effectFamily).c_str());
+				INFOLOG(" effect family %s is managed by the system. Building effect...", EFFECT_FAMILIES::toString(effectFamily).c_str());
 				return (*Factories)[i].second->buildEffect();
 			}
 		}
-		nlwarning( "<IEffectFactory buildEffect> the effect %s has no corresponding effect class", EFFECT_FAMILIES::toString(effectFamily).c_str() );
+		nlwarning("<IEffectFactory buildEffect> the effect %s has no corresponding effect class", EFFECT_FAMILIES::toString(effectFamily).c_str());
 		return NULL;
 	}
+
 protected:
 	///\init the factories
 	inline static void init()
-	{	
-		if( !Factories )
-			Factories = new std::vector< std::pair< EFFECT_FAMILIES::TEffectFamily , IEffectFactory* > >;
+	{
+		if (!Factories)
+			Factories = new std::vector<std::pair<EFFECT_FAMILIES::TEffectFamily, IEffectFactory *>>;
 	}
 	/**
 	 * Create a step from parameters
 	 * \param params : a vector of vector of strings describing the step params
 	 * \return a pointer on the built step (NULL if failure)
 	 */
-	virtual CSTimedEffect * buildEffect() = 0;
-	
-	///the phrase factories. We use a pointer here because we cant control the order inwhich ctor of static members are called
-	static std::vector< std::pair< EFFECT_FAMILIES::TEffectFamily , IEffectFactory* > >* Factories;
+	virtual CSTimedEffect *buildEffect() = 0;
+
+	/// the phrase factories. We use a pointer here because we cant control the order inwhich ctor of static members are called
+	static std::vector<std::pair<EFFECT_FAMILIES::TEffectFamily, IEffectFactory *>> *Factories;
 };
 
 /**
@@ -80,29 +79,30 @@ protected:
  * \author Nevrax France
  * \date 2003
  */
-template <class T> class CEffectTFactory : public IEffectFactory
+template <class T>
+class CEffectTFactory : public IEffectFactory
 {
 public:
 	explicit CEffectTFactory(EFFECT_FAMILIES::TEffectFamily family)
 	{
 		IEffectFactory::init();
-		
+
 #ifdef NL_DEBUG
 		// check this type isn't used yet
-		for (uint i = 0; i < Factories->size(); i++ )
+		for (uint i = 0; i < Factories->size(); i++)
 		{
-			if ( (*Factories)[i].first == family )
+			if ((*Factories)[i].first == family)
 			{
 				nlstop;
 			}
 		}
 #endif
 		// add factory
-		Factories->push_back(std::make_pair( family ,this));
+		Factories->push_back(std::make_pair(family, this));
 	};
 
 	/// buildEffect method
-	CSTimedEffect * buildEffect()
+	CSTimedEffect *buildEffect()
 	{
 		T *instance = new T;
 		if (!instance)
@@ -114,25 +114,6 @@ public:
 	}
 };
 
-
 #endif // RY_EFFECT_FACTORY_H
 
 /* End of effect_factory.h */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

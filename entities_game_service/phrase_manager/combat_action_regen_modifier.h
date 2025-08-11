@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_COMBAT_ACTION_REGEN_MODIFIER_H
 #define RY_COMBAT_ACTION_REGEN_MODIFIER_H
 
 #include "combat_action.h"
-
 
 /**
  * Class managing the creation of regen modifiers effects
@@ -32,21 +29,24 @@ class CCombatActionRegenModifier : public CCombatDynamicAction
 {
 public:
 	/// Constructor
-	CCombatActionRegenModifier(): _Duration(0)
+	CCombatActionRegenModifier()
+	    : _Duration(0)
 	{
 	}
 
 	/// Constructor
-	CCombatActionRegenModifier(	const TDataSetRow & actorRowId, 
-								CCombatPhrase *phrase,
-								NLMISC::TGameCycle duration,
-								SCORES::TScores score,
-								EFFECT_FAMILIES::TEffectFamily family)
-	: _Duration(duration), _AffectedScore(score), _Family(family)
+	CCombatActionRegenModifier(const TDataSetRow &actorRowId,
+	    CCombatPhrase *phrase,
+	    NLMISC::TGameCycle duration,
+	    SCORES::TScores score,
+	    EFFECT_FAMILIES::TEffectFamily family)
+	    : _Duration(duration)
+	    , _AffectedScore(score)
+	    , _Family(family)
 	{
 		_CombatPhrase = phrase;
-		
-		if(TheDataset.isAccessible(actorRowId))
+
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -66,23 +66,21 @@ public:
 	inline const std::string &effectName() { return _EffectName; }
 
 	/// apply on entity
-	virtual void applyOnEntity( CEntityBase *entity, float successFactor );
+	virtual void applyOnEntity(CEntityBase *entity, float successFactor);
 
 private:
 	/// duration (in ticks)
-	NLMISC::TGameCycle				_Duration;
+	NLMISC::TGameCycle _Duration;
 
 	/// affected score
-	SCORES::TScores					_AffectedScore;
+	SCORES::TScores _AffectedScore;
 
 	/// effect family
-	EFFECT_FAMILIES::TEffectFamily	_Family;
+	EFFECT_FAMILIES::TEffectFamily _Family;
 
 	/// effect code name used to send system messages to clients
-	std::string						_EffectName;
-	
+	std::string _EffectName;
 };
-
 
 #endif // RY_COMBAT_ACTION_REGEN_MODIFIER_H
 

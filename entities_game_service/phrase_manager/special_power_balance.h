@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef RYZOM_SPECIAL_POWER_BALANCE_H
 #define RYZOM_SPECIAL_POWER_BALANCE_H
 
 #include "special_power.h"
-
 
 /**
  * Specialized class for balance powers
@@ -32,7 +30,7 @@ class CSpecialPowerBalance : public CSpecialPower
 public:
 	/// Constructor
 	CSpecialPowerBalance(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float disableTimeInSeconds, float lossFactor, float range, POWERS::TPowerType powerType)
-	:CSpecialPower()
+	    : CSpecialPower()
 	{
 		_AffectedScore = SCORES::hit_points;
 		_Phrase = phrase;
@@ -41,8 +39,8 @@ public:
 		_DisablePowerTime = NLMISC::TGameCycle(disableTimeInSeconds / CTickEventHandler::getGameTimeStep());
 
 		_PowerType = powerType;
-		
-		if(TheDataset.isAccessible(actorRowId))
+
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -52,23 +50,22 @@ public:
 
 	/// validate the power utilisation
 	virtual bool validate(std::string &errorCode);
-	
+
 	/// set affected score
-	inline void setAffectedScore( SCORES::TScores score ) { _AffectedScore = score; }
+	inline void setAffectedScore(SCORES::TScores score) { _AffectedScore = score; }
 
 	/// apply effects
 	virtual void apply();
 
 protected:
 	/// loss factor on total value (1 = 100%, 0.5 = 50%, 0.3 = 30%)
-	float			_LossFactor;
+	float _LossFactor;
 	/// max Range in meters
-	float			_Range;
+	float _Range;
 	/// affected score (Hp, sap, sta)
-	SCORES::TScores	_AffectedScore;
+	SCORES::TScores _AffectedScore;
 };
 
 #endif // RYZOM_SPECIAL_POWER_BALANCE_H
 
 /* End of special_power_balance.h */
-

@@ -20,7 +20,6 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/entity_id.h>
 
-
 /**
  * Possible datatypes
  */
@@ -80,41 +79,39 @@ enum TMetaType
 /**
  * Id of type/class
  */
-typedef uint32		TTypeId;
-const TTypeId		INVALID_TYPE_ID = 0xffffffff;
+typedef uint32 TTypeId;
+const TTypeId INVALID_TYPE_ID = 0xffffffff;
 
 /**
  * Type for builtin indexes
  */
-typedef uint32		TIndexValue;	// only for handling, storage assumes its own type (see dimension)
-const TIndexValue	INVALID_INDEX_VALUE = 0xffffffff;
+typedef uint32 TIndexValue; // only for handling, storage assumes its own type (see dimension)
+const TIndexValue INVALID_INDEX_VALUE = 0xffffffff;
 
 /**
  * Type for builtin enums
  */
-typedef TIndexValue	TEnumValue;
-const TEnumValue	INVALID_ENUM_VALUE = INVALID_INDEX_VALUE;
-const uint32		ENUM_BYTE_SIZE = 4;
+typedef TIndexValue TEnumValue;
+const TEnumValue INVALID_ENUM_VALUE = INVALID_INDEX_VALUE;
+const uint32 ENUM_BYTE_SIZE = 4;
 #define INVALID_ENUM_NAME "InvalidEnumName"
-
-
 
 /**
  * Display function for all datatypes
  */
-template<typename T>
-std::string	dataTypeAsString(const T& a)							{ return "'"+NLMISC::toString(a)+"'"; }
-inline std::string	dataTypeAsString(const bool &a)					{ return "'"+NLMISC::toString((uint)a)+"' "+std::string(a ? "true" : "false"); }
-inline std::string	dataTypeAsString(const char &a)					{ return std::string("'")+a+std::string("' '")+NLMISC::toString((uint8)a)+"'"; }
-inline std::string	dataTypeAsString(const NLMISC::CEntityId &a)	{ return a.toString(); }
-
+template <typename T>
+std::string dataTypeAsString(const T &a) { return "'" + NLMISC::toString(a) + "'"; }
+inline std::string dataTypeAsString(const bool &a) { return "'" + NLMISC::toString((uint)a) + "' " + std::string(a ? "true" : "false"); }
+inline std::string dataTypeAsString(const char &a) { return std::string("'") + a + std::string("' '") + NLMISC::toString((uint8)a) + "'"; }
+inline std::string dataTypeAsString(const NLMISC::CEntityId &a) { return a.toString(); }
 
 /**
  * Get the TDataType from a name
  */
-inline TDataType	getDataTypeFromName(const std::string &name)
+inline TDataType getDataTypeFromName(const std::string &name)
 {
-#define CHECK_DATATYPE(type)	if (name == #type) return PDS_##type;
+#define CHECK_DATATYPE(type) \
+	if (name == #type) return PDS_##type;
 
 	CHECK_DATATYPE(bool)
 	CHECK_DATATYPE(char)
@@ -142,9 +139,10 @@ inline TDataType	getDataTypeFromName(const std::string &name)
 /**
  * Get the name of a TDataType
  */
-inline std::string	getNameFromDataType(TDataType type)
+inline std::string getNameFromDataType(TDataType type)
 {
-#define CHECK_DATATYPE_NAME(type)	case PDS_##type: return #type; break;
+#define CHECK_DATATYPE_NAME(type) \
+	case PDS_##type: return #type; break;
 
 	switch (type)
 	{
@@ -175,13 +173,13 @@ inline std::string	getNameFromDataType(TDataType type)
 	return "UnknownDataType";
 }
 
-
 /**
  * Get the TMetaType from a name
  */
-inline TMetaType	getMetaTypeFromName(const std::string &name)
+inline TMetaType getMetaTypeFromName(const std::string &name)
 {
-#define CHECK_METATYPE(typestr, type)	if (name == #typestr) return PDS_##type;
+#define CHECK_METATYPE(typestr, type) \
+	if (name == #typestr) return PDS_##type;
 
 	CHECK_METATYPE(type, Type)
 	CHECK_METATYPE(class, Class)
@@ -198,9 +196,10 @@ inline TMetaType	getMetaTypeFromName(const std::string &name)
 /**
  * Get the name of a TMetaType
  */
-inline std::string	getNameFromMetaType(TMetaType type)
+inline std::string getNameFromMetaType(TMetaType type)
 {
-#define CHECK_METATYPE_NAME(typestr, type)	case PDS_##type: return #typestr; break;
+#define CHECK_METATYPE_NAME(typestr, type) \
+	case PDS_##type: return #typestr; break;
 
 	switch (type)
 	{
@@ -220,13 +219,13 @@ inline std::string	getNameFromMetaType(TMetaType type)
 	return "UnknownDataType";
 }
 
-
 /**
  * Get standard byte size
  */
-inline uint32		getStandardByteSize(TDataType dataType)
+inline uint32 getStandardByteSize(TDataType dataType)
 {
-#define CHECK_DATATYPE_SIZE(type, size)		case PDS_##type: return size; break;
+#define CHECK_DATATYPE_SIZE(type, size) \
+	case PDS_##type: return size; break;
 
 	switch (dataType)
 	{
@@ -265,7 +264,7 @@ inline uint32		getStandardByteSize(TDataType dataType)
  * Get strict standard byte size
  * Will fail for PDS_List and PDS_Index datatypes
  */
-inline uint32		getStrictStandardByteSize(TDataType dataType)
+inline uint32 getStrictStandardByteSize(TDataType dataType)
 {
 	switch (dataType)
 	{
@@ -301,7 +300,7 @@ inline uint32		getStrictStandardByteSize(TDataType dataType)
 /**
  * Check TDataType
  */
-inline bool			checkDataType(TDataType dataType)
+inline bool checkDataType(TDataType dataType)
 {
 	return dataType >= PDS_FirstDataType && dataType < PDS_OverLastDataType;
 }
@@ -309,18 +308,16 @@ inline bool			checkDataType(TDataType dataType)
 /**
  * Check TMetaType
  */
-inline bool			checkMetaType(TMetaType metaType)
+inline bool checkMetaType(TMetaType metaType)
 {
 	return metaType >= PDS_FirstMetaType && metaType < PDS_OverLastMetaType;
 }
 
-
-
-
 //
-inline bool	isIntegerType(TDataType type)
+inline bool isIntegerType(TDataType type)
 {
-#define CHECK_IS_INTEGER_TYPE(type)		case PDS_##type: return true; break;
+#define CHECK_IS_INTEGER_TYPE(type) \
+	case PDS_##type: return true; break;
 
 	switch (type)
 	{
@@ -333,25 +330,26 @@ inline bool	isIntegerType(TDataType type)
 		CHECK_IS_INTEGER_TYPE(uint64)
 		CHECK_IS_INTEGER_TYPE(sint64)
 		CHECK_IS_INTEGER_TYPE(dimension)
-		default:
-			return false;
-			break;
+	default:
+		return false;
+		break;
 	}
 
 	return false;
 }
 
-inline bool	isFloatType(TDataType type)
+inline bool isFloatType(TDataType type)
 {
-#define CHECK_IS_FLOAT_TYPE(type)		case PDS_##type: return true; break;
+#define CHECK_IS_FLOAT_TYPE(type) \
+	case PDS_##type: return true; break;
 
 	switch (type)
 	{
 		CHECK_IS_FLOAT_TYPE(float)
 		CHECK_IS_FLOAT_TYPE(double)
-		default:
-			return false;
-			break;
+	default:
+		return false;
+		break;
 	}
 
 	return false;
@@ -360,16 +358,15 @@ inline bool	isFloatType(TDataType type)
 /**
  * Check Strict Datatype
  */
-inline bool			checkStrictDataType(TDataType dataType)
+inline bool checkStrictDataType(TDataType dataType)
 {
 	return dataType >= PDS_FirstDataType && dataType <= PDS_StrictDataType;
 }
 
-
 /**
  * Check Datatype compatibility
  */
-inline bool			checkDataTypeCompatible(TDataType from, TDataType into)
+inline bool checkDataTypeCompatible(TDataType from, TDataType into)
 {
 	// check from and into are known datatypes
 	if (!checkDataType(from) || !checkDataType(into))
@@ -447,8 +444,4 @@ inline bool			checkDataTypeCompatible(TDataType from, TDataType into)
 	return false;
 }
 
-
-#endif //RY_PDS_TYPES_H
-
-
-
+#endif // RY_PDS_TYPES_H

@@ -14,15 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "egs_static_rolemaster_phrase.h"
 #include "egs_static_brick.h"
 #include "egs_sheets.h"
 #include "game_share/fame.h"
 
-//Nel georges
+// Nel georges
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/load_form.h"
 
@@ -30,24 +28,23 @@ using namespace NLMISC;
 using namespace NLGEORGES;
 using namespace std;
 
-
 // ***************************************************************************
-void CStaticRolemasterPhrase::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
+void CStaticRolemasterPhrase::readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
 {
-	form->getRootNode().getValueByName( IsRolemasterPhrase, "usable_by_player" );
-	form->getRootNode().getValueByName( IsValidPhrase, "castable" );
+	form->getRootNode().getValueByName(IsRolemasterPhrase, "usable_by_player");
+	form->getRootNode().getValueByName(IsValidPhrase, "castable");
 
 	string sbrickSheetName;
 	uint i = 0;
-	while ( i < 100 )
+	while (i < 100)
 	{
-		bool res = form->getRootNode().getValueByName( sbrickSheetName, toString( "brick %u", i ) );
-		if ( (! res) || sbrickSheetName.empty() )
+		bool res = form->getRootNode().getValueByName(sbrickSheetName, toString("brick %u", i));
+		if ((!res) || sbrickSheetName.empty())
 		{
 			++i;
 			continue;
 		}
-		Bricks.push_back( CSheetId( sbrickSheetName ) );
+		Bricks.push_back(CSheetId(sbrickSheetName));
 		++i;
 	}
 
@@ -58,10 +55,10 @@ void CStaticRolemasterPhrase::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UF
 void CStaticRolemasterPhrase::computeMinFameValue()
 {
 	MinFameValue = (sint32)0x80000000;
-	for ( uint i = 0; i  < Bricks.size(); i++ )
+	for (uint i = 0; i < Bricks.size(); i++)
 	{
-		const CStaticBrick * brick = CSheets::getSBrickForm( Bricks[i] );
-		if( brick && brick->MinFameValue > MinFameValue )
+		const CStaticBrick *brick = CSheets::getSBrickForm(Bricks[i]);
+		if (brick && brick->MinFameValue > MinFameValue)
 			MinFameValue = brick->MinFameValue;
 	}
 }
@@ -70,6 +67,5 @@ void CStaticRolemasterPhrase::computeMinFameValue()
 void CStaticRolemasterPhrase::reloadSheet(const CStaticRolemasterPhrase &o)
 {
 	// nothing special
-	*this= o;
+	*this = o;
 }
-

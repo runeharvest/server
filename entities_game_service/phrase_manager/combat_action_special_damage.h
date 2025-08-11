@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_COMBAT_ACTION_SPECIAL_DAMAGE_H
 #define RY_COMBAT_ACTION_SPECIAL_DAMAGE_H
 
@@ -32,16 +30,18 @@ class CCombatActionSpecialDamage : public CCombatDynamicAction
 {
 public:
 	/// Constructor
-	CCombatActionSpecialDamage(): CCombatDynamicAction()
+	CCombatActionSpecialDamage()
+	    : CCombatDynamicAction()
 	{
 	}
 
 	/// Constructor
-	CCombatActionSpecialDamage(const TDataSetRow & actorRowId, CCombatPhrase *phrase, DMGTYPE::EDamageType dmgType) : _DamageType(dmgType)
+	CCombatActionSpecialDamage(const TDataSetRow &actorRowId, CCombatPhrase *phrase, DMGTYPE::EDamageType dmgType)
+	    : _DamageType(dmgType)
 	{
 		_CombatPhrase = phrase;
-		
-		if(TheDataset.isAccessible(actorRowId))
+
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -57,12 +57,11 @@ public:
 
 private:
 	/// apply combat action effects on target
-	void applyOnTarget( uint8 targetIndex, CCombatPhrase *phrase);
+	void applyOnTarget(uint8 targetIndex, CCombatPhrase *phrase);
 
 	// type of damage
-	DMGTYPE::EDamageType	_DamageType;
+	DMGTYPE::EDamageType _DamageType;
 };
-
 
 #endif // RY_COMBAT_ACTION_SPECIAL_DAMAGE_H
 

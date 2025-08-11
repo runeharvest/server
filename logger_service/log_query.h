@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef LOG_QUERY_H
 #define LOG_QUERY_H
 
@@ -34,39 +33,37 @@
 
 struct EIncompatibleType : public NLMISC::Exception
 {
-	LGS::TSupportedParamType	ValueType;
-	LGS::TSupportedParamType	RequiredType;
+	LGS::TSupportedParamType ValueType;
+	LGS::TSupportedParamType RequiredType;
 
 	EIncompatibleType(LGS::TSupportedParamType valueType, LGS::TSupportedParamType requiredType)
-		:	ValueType(valueType),
-			RequiredType(requiredType)
+	    : ValueType(valueType)
+	    , RequiredType(requiredType)
 	{
 	}
 
-	virtual const char	*what() const throw()
+	virtual const char *what() const throw()
 	{
 		return "Incompatible types";
 	}
-
 };
 
 /// A set of log entry index, used as 'result set' for a predicate node
-typedef std::set<uint32>	TLogEntries;
+typedef std::set<uint32> TLogEntries;
 
 /// Define a time slice for opening log file
 struct TTimeSlice
 {
 	/// the inclusive start date
-	uint32		StartDate;
+	uint32 StartDate;
 	/// The excluded end date
-	uint32		EndDate;	
+	uint32 EndDate;
 };
 
-const TTimeSlice FullTimeSlice = {0, std::numeric_limits<uint32>::max()};
+const TTimeSlice FullTimeSlice = { 0, std::numeric_limits<uint32>::max() };
 
 /// Defile the complete selected time line
-typedef std::vector<TTimeSlice>	TTimeLine;
-
+typedef std::vector<TTimeSlice> TTimeLine;
 
 /// The token returned by the lexer function (or manually set by parser)
 enum TTokenType
@@ -113,20 +110,19 @@ enum TTokenType
 	tt_EOF
 };
 
-
-
 /// Base class for the parsed request tree
 struct TQueryNode
 {
-	TQueryNode	*LeftNode;
-	TQueryNode	*RightNode;
-//	TQueryNode	*ParentNode;
+	TQueryNode *LeftNode;
+	TQueryNode *RightNode;
+	//	TQueryNode	*ParentNode;
 
 	TQueryNode()
-		:	LeftNode(NULL),
-			RightNode(NULL)
-//			ParentNode(NULL)
-	{}
+	    : LeftNode(NULL)
+	    , RightNode(NULL)
+	//			ParentNode(NULL)
+	{
+	}
 
 	virtual ~TQueryNode()
 	{
@@ -137,14 +133,13 @@ struct TQueryNode
 	}
 
 	// init the node
-	virtual bool init() =0;
-
+	virtual bool init() = 0;
 
 	/// Evaluate the node result
-	virtual TLogEntries evalNode(const CLogStorage &logs) =0;
+	virtual TLogEntries evalNode(const CLogStorage &logs) = 0;
 
 	/// Evaluate a date against the predicate (only test the date predicate)
-	virtual TTimeLine evalDate() =0;
+	virtual TTimeLine evalDate() = 0;
 
 	/// dump the node
 	void dump(NLMISC::CLog &log, const std::string &tab) const
@@ -154,34 +149,32 @@ struct TQueryNode
 		if (LeftNode)
 		{
 			log.displayNL("%s + => ", tab.c_str());
-			LeftNode->dump(log, tab+"\t");
+			LeftNode->dump(log, tab + "\t");
 		}
 		if (RightNode)
 		{
 			log.displayNL("%s + => ", tab.c_str());
-			RightNode->dump(log, tab+"\t");
+			RightNode->dump(log, tab + "\t");
 		}
 	}
 
 	/// Display node content
-	virtual void dumpNode(NLMISC::CLog &log, const std::string &tab) const =0;
-
+	virtual void dumpNode(NLMISC::CLog &log, const std::string &tab) const = 0;
 };
 
-//extern LGS::TSupportedParamType ConversionTable[LGS::TSupportedParamType::nb_enum_items][LGS::TSupportedParamType::nb_enum_items];
+// extern LGS::TSupportedParamType ConversionTable[LGS::TSupportedParamType::nb_enum_items][LGS::TSupportedParamType::nb_enum_items];
 extern bool ConversionTable[LGS::TSupportedParamType::nb_enum_items][LGS::TSupportedParamType::nb_enum_items];
-
 
 /// A type to store the list of selected parameter and log types
 struct TSelectedParam
 {
-	uint32	LogDefIndex;
-	bool	ListParam;
-	uint32	ParamIndex;
+	uint32 LogDefIndex;
+	bool ListParam;
+	uint32 ParamIndex;
 };
 
 /// For each param id, associate a vector of log def index
-typedef std::map<CLogStorage::TLogParamId, std::vector<TSelectedParam> > TSelectedParams;
+typedef std::map<CLogStorage::TLogParamId, std::vector<TSelectedParam>> TSelectedParams;
 
 /// A big function to do all allowed type conversion
 inline LGS::TParamValue convertParam(const LGS::TParamValue &value, LGS::TSupportedParamType type)
@@ -202,11 +195,11 @@ inline LGS::TParamValue convertParam(const LGS::TParamValue &value, LGS::TSuppor
 		case LGS::TSupportedParamType::spt_string:
 			return LGS::TParamValue(NLMISC::toString(value.get_uint32()));
 		case LGS::TSupportedParamType::spt_entityId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_sheetId:
 			return LGS::TParamValue(NLMISC::CSheetId(value.get_uint32()));
 		case LGS::TSupportedParamType::spt_itemId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		}
 		break;
 	case LGS::TSupportedParamType::spt_uint64:
@@ -225,7 +218,7 @@ inline LGS::TParamValue convertParam(const LGS::TParamValue &value, LGS::TSuppor
 		case LGS::TSupportedParamType::spt_entityId:
 			return LGS::TParamValue(NLMISC::CEntityId(value.get_uint64()));
 		case LGS::TSupportedParamType::spt_sheetId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_itemId:
 			return LGS::TParamValue(INVENTORIES::TItemId(value.get_uint64()));
 		}
@@ -244,11 +237,11 @@ inline LGS::TParamValue convertParam(const LGS::TParamValue &value, LGS::TSuppor
 		case LGS::TSupportedParamType::spt_string:
 			return LGS::TParamValue(NLMISC::toString(value.get_sint32()));
 		case LGS::TSupportedParamType::spt_entityId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_sheetId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_itemId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		}
 		break;
 	case LGS::TSupportedParamType::spt_float:
@@ -265,26 +258,24 @@ inline LGS::TParamValue convertParam(const LGS::TParamValue &value, LGS::TSuppor
 		case LGS::TSupportedParamType::spt_string:
 			return LGS::TParamValue(NLMISC::toString(value.get_float()));
 		case LGS::TSupportedParamType::spt_entityId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_sheetId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_itemId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		}
 		break;
 	case LGS::TSupportedParamType::spt_string:
 		switch (type.getValue())
 		{
-		case LGS::TSupportedParamType::spt_uint32:
-		{
+		case LGS::TSupportedParamType::spt_uint32: {
 			uint32 tmp;
 			NLMISC::fromString(value.get_string(), tmp);
 			return LGS::TParamValue(tmp);
 		}
 		case LGS::TSupportedParamType::spt_uint64:
 			return LGS::TParamValue((uint64)atol(value.get_string().c_str()));
-		case LGS::TSupportedParamType::spt_sint32:
-		{
+		case LGS::TSupportedParamType::spt_sint32: {
 			sint32 tmp;
 			NLMISC::fromString(value.get_string(), tmp);
 			return LGS::TParamValue(tmp);
@@ -305,61 +296,61 @@ inline LGS::TParamValue convertParam(const LGS::TParamValue &value, LGS::TSuppor
 		switch (type.getValue())
 		{
 		case LGS::TSupportedParamType::spt_uint32:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_uint64:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_sint32:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_float:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_string:
 			return value.get_entityId().toString();
 		case LGS::TSupportedParamType::spt_entityId:
 			return value;
 		case LGS::TSupportedParamType::spt_sheetId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_itemId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		}
 		break;
 	case LGS::TSupportedParamType::spt_sheetId:
 		switch (type.getValue())
 		{
 		case LGS::TSupportedParamType::spt_uint32:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_uint64:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_sint32:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_float:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_string:
 			return value.get_sheetId().toString(true);
 		case LGS::TSupportedParamType::spt_entityId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_sheetId:
 			return value;
 		case LGS::TSupportedParamType::spt_itemId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		}
 		break;
 	case LGS::TSupportedParamType::spt_itemId:
 		switch (type.getValue())
 		{
 		case LGS::TSupportedParamType::spt_uint32:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_uint64:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_sint32:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_float:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_string:
 			return value.get_itemId().toString();
 		case LGS::TSupportedParamType::spt_entityId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_sheetId:
-				throw EIncompatibleType(value.getType().getValue(), type.getValue());
+			throw EIncompatibleType(value.getType().getValue(), type.getValue());
 		case LGS::TSupportedParamType::spt_itemId:
 			return value;
 		}
@@ -408,50 +399,47 @@ struct TCombineNode : public TQueryNode
 		return comb(left, right);
 	}
 
-
 	virtual void dumpNode(NLMISC::CLog &log, const std::string &tab) const
 	{
 		log.displayNL("%s%s", tab.c_str(), typeid(this).name());
 	}
-
 };
-
 
 /// Given the parameter index selected, build the list of logs that use the selected param
 inline void buildSelectedLogList(const std::vector<uint32> &selectedIndex, const CLogStorage &logs, const std::vector<TSelectedParam> &selectedParams, TLogEntries &result)
 {
 	// for each log type to test
-	for (uint j=0; j<selectedParams.size(); ++j)
+	for (uint j = 0; j < selectedParams.size(); ++j)
 	{
 		uint entryIndex = 0;
 		// for each selected parameter index
-		for (uint k=0; k<selectedIndex.size(); ++k)
+		for (uint k = 0; k < selectedIndex.size(); ++k)
 		{
 			uint32 currentParamIndex = selectedIndex[k];
-			
+
 			while (entryIndex < logs._DiskLogEntries.size())
 			{
 				const CLogStorage::TDiskLogEntry &dle = logs._DiskLogEntries[entryIndex];
-				
+
 				if (dle.LogType == selectedParams[j].LogDefIndex)
 				{
 					if (selectedParams[j].ListParam)
 					{
 						// read the variable parameter
 						const CLogStorage::TParamIndex &indexes = dle.ListParamIndex[selectedParams[j].ParamIndex];
-						if (indexes.empty() 
-							|| indexes.back() < currentParamIndex)
+						if (indexes.empty()
+						    || indexes.back() < currentParamIndex)
 						{
 							// this log is empty or too old, advance to next one
 							++entryIndex;
 							continue;
 						}
-						else if (indexes.front() <=  currentParamIndex)
+						else if (indexes.front() <= currentParamIndex)
 						{
 							// we found the list that contains the selected index
 							result.insert(entryIndex);
 							++entryIndex;
-							
+
 							// advance to next parameter
 							break;
 						}
@@ -475,7 +463,7 @@ inline void buildSelectedLogList(const std::vector<uint32> &selectedIndex, const
 							// this is the log we are looking for
 							result.insert(entryIndex);
 							++entryIndex;
-							
+
 							// advance to next parameter
 							break;
 						}
@@ -493,40 +481,37 @@ inline void buildSelectedLogList(const std::vector<uint32> &selectedIndex, const
 	}
 }
 
-
 /// The predicate node. This node apply the operator with the reference value and the matching log paramters type
 template <class Operator>
 struct TTypePredicateNode : public TQueryNode
 {
 	/// The reference value used to compute the predicate
-	LGS::TParamValue			_RefValue;
+	LGS::TParamValue _RefValue;
 	/// The type of parameter that we check
-	LGS::TSupportedParamType	_ParamType;
-	
-	/// The log info vector
-	const TLogDefinitions		&_LogDefs;
+	LGS::TSupportedParamType _ParamType;
 
+	/// The log info vector
+	const TLogDefinitions &_LogDefs;
 
 	/// The list of parameter that match the name/type
-	TSelectedParams				_SelectedParams;
+	TSelectedParams _SelectedParams;
 
-
-	TTypePredicateNode(const LGS::TParamValue &refValue, const LGS::TSupportedParamType &paramType, const TLogDefinitions &logDefs )
-		:	_RefValue(refValue),
-			_ParamType(paramType),
-			_LogDefs(logDefs)
+	TTypePredicateNode(const LGS::TParamValue &refValue, const LGS::TSupportedParamType &paramType, const TLogDefinitions &logDefs)
+	    : _RefValue(refValue)
+	    , _ParamType(paramType)
+	    , _LogDefs(logDefs)
 	{
 	}
 
 	bool init()
 	{
 		// Build a list of compatible parameters
-		for (uint i=0; i<_LogDefs.size(); ++i)
+		for (uint i = 0; i < _LogDefs.size(); ++i)
 		{
 			const LGS::TLogDefinition &logDef = _LogDefs[i];
 
 			// read each param
-			for (uint j=0; j<logDef.getParams().size(); ++j)
+			for (uint j = 0; j < logDef.getParams().size(); ++j)
 			{
 				const LGS::TParamDesc &paramDesc = logDef.getParams()[j];
 
@@ -536,17 +521,17 @@ struct TTypePredicateNode : public TQueryNode
 					CLogStorage::TLogParamId lpi;
 					lpi.ParamName = paramDesc.getName();
 					lpi.ParamType = paramDesc.getType();
-					TSelectedParam	sp;
+					TSelectedParam sp;
 					sp.LogDefIndex = i;
 					sp.ListParam = false;
 					sp.ParamIndex = j;
 					// select this one
-//					_SelectedParams.insert(std::make_pair(logDef.getLogName(), j));
+					//					_SelectedParams.insert(std::make_pair(logDef.getLogName(), j));
 					_SelectedParams[lpi].push_back(sp);
 				}
 			}
 			// read each list param
-			for (uint j=0; j<logDef.getListParams().size(); ++j)
+			for (uint j = 0; j < logDef.getListParams().size(); ++j)
 			{
 				const LGS::TParamDesc &paramDesc = logDef.getListParams()[j];
 
@@ -556,12 +541,12 @@ struct TTypePredicateNode : public TQueryNode
 					CLogStorage::TLogParamId lpi;
 					lpi.ParamName = paramDesc.getName();
 					lpi.ParamType = paramDesc.getType();
-					TSelectedParam	sp;
+					TSelectedParam sp;
 					sp.LogDefIndex = i;
 					sp.ListParam = true;
 					sp.ParamIndex = j;
 					// select this one
-//					_SelectedParams.insert(std::make_pair(logDef.getLogName(), j));
+					//					_SelectedParams.insert(std::make_pair(logDef.getLogName(), j));
 					_SelectedParams[lpi].push_back(sp);
 				}
 			}
@@ -576,9 +561,9 @@ struct TTypePredicateNode : public TQueryNode
 
 		// parse each param table, then look back in the logs for the selected entry
 		TSelectedParams::iterator first(_SelectedParams.begin()), last(_SelectedParams.end());
-		for (;first != last; ++first)
+		for (; first != last; ++first)
 		{
-			std::vector<uint32>	selectedIndex;
+			std::vector<uint32> selectedIndex;
 
 			const CLogStorage::TLogParamId &lpi = first->first;
 			const std::vector<TSelectedParam> &sps = first->second;
@@ -588,12 +573,12 @@ struct TTypePredicateNode : public TQueryNode
 			if (it != logs._ParamTables.end())
 			{
 				const CLogStorage::TParamsTable &pt = it->second;
-				
+
 				// parse each entry of the param table
-				for (uint j=0; j<pt.size(); ++j)
+				for (uint j = 0; j < pt.size(); ++j)
 				{
 					// apply the operator
-					
+
 					if (op(pt[j], _RefValue))
 					{
 						// the operator returned true, add this log to the set of
@@ -601,7 +586,7 @@ struct TTypePredicateNode : public TQueryNode
 						selectedIndex.push_back(j);
 					}
 				}
-				
+
 				// now, look back for the logs that use the selected parameter
 				buildSelectedLogList(selectedIndex, logs, sps, ret);
 			}
@@ -619,7 +604,6 @@ struct TTypePredicateNode : public TQueryNode
 		return tl;
 	}
 
-
 	virtual void dumpNode(NLMISC::CLog &log, const std::string &tab) const
 	{
 		log.displayNL("%s%s", tab.c_str(), typeid(this).name());
@@ -628,12 +612,11 @@ struct TTypePredicateNode : public TQueryNode
 		TSelectedParams::const_iterator first(_SelectedParams.begin()), last(_SelectedParams.end());
 		for (; first != last; ++first)
 		{
-			for (uint i=0; i<first->second.size(); ++i)
+			for (uint i = 0; i < first->second.size(); ++i)
 			{
 				const LGS::TLogDefinition &logDef = _LogDefs[first->second[i].LogDefIndex];
 				log.displayNL("%s  Matching in log '%s', parameter %u", tab.c_str(), logDef.getLogName().c_str(), first->second[i].ParamIndex);
 			}
-
 		}
 	}
 };
@@ -643,22 +626,20 @@ template <class Operator>
 struct TPredicateNode : public TQueryNode
 {
 	/// The reference value used to compute the predicate
-	LGS::TParamValue	_RefValue;
+	LGS::TParamValue _RefValue;
 	/// Name of the	parameter
-	std::string			_ParameterName;
-	
+	std::string _ParameterName;
+
 	/// The log info vector
 	const TLogDefinitions &_LogDefs;
 
-
 	/// The list of parameter that match the name/type
-	TSelectedParams		_SelectedParams;
+	TSelectedParams _SelectedParams;
 
-
-	TPredicateNode(const LGS::TParamValue &refValue, const std::string &paramName, const TLogDefinitions &logDefs )
-		:	_RefValue(refValue),
-			_ParameterName(paramName),
-			_LogDefs(logDefs)
+	TPredicateNode(const LGS::TParamValue &refValue, const std::string &paramName, const TLogDefinitions &logDefs)
+	    : _RefValue(refValue)
+	    , _ParameterName(paramName)
+	    , _LogDefs(logDefs)
 	{
 	}
 
@@ -672,7 +653,7 @@ struct TPredicateNode : public TQueryNode
 			CLogStorage::TLogParamId lpi;
 			lpi.ParamName = "LogDate";
 			lpi.ParamType = LGS::TSupportedParamType::invalid_val;
-//				_SelectedParams.insert(std::make_pair(logDef.getLogName(), logDef.getParams().size()));
+			//				_SelectedParams.insert(std::make_pair(logDef.getLogName(), logDef.getParams().size()));
 			// Create a fake entry in the selected param container
 			_SelectedParams[lpi];
 		}
@@ -690,7 +671,7 @@ struct TPredicateNode : public TQueryNode
 		else if (_ParameterName == "ShardId")
 		{
 			if (!ConversionTable[_RefValue.getType().getValue()][LGS::TSupportedParamType::spt_uint32]
-				&&!ConversionTable[_RefValue.getType().getValue()][LGS::TSupportedParamType::spt_string])
+			    && !ConversionTable[_RefValue.getType().getValue()][LGS::TSupportedParamType::spt_string])
 				throw EIncompatibleType(_RefValue.getType().getValue(), LGS::TSupportedParamType::spt_uint32);
 			// any log is applicable
 			CLogStorage::TLogParamId lpi;
@@ -702,16 +683,16 @@ struct TPredicateNode : public TQueryNode
 		else
 		{
 			// Build a list of compatible parameters
-			for (uint i=0; i<_LogDefs.size(); ++i)
+			for (uint i = 0; i < _LogDefs.size(); ++i)
 			{
 				const LGS::TLogDefinition &logDef = _LogDefs[i];
-				
+
 				{
 					// read each param
-					for (uint j=0; j<logDef.getParams().size(); ++j)
+					for (uint j = 0; j < logDef.getParams().size(); ++j)
 					{
 						const LGS::TParamDesc &paramDesc = logDef.getParams()[j];
-						
+
 						// check the parameter type and conversion validity
 						if (paramDesc.getName() == _ParameterName && ConversionTable[_RefValue.getType().asIndex()][paramDesc.getType().asIndex()])
 						{
@@ -722,13 +703,13 @@ struct TPredicateNode : public TQueryNode
 							sp.LogDefIndex = i;
 							sp.ListParam = false;
 							sp.ParamIndex = j;
-							
+
 							// select this one
 							_SelectedParams[lpi].push_back(sp);
 						}
 					}
 					// read each list param
-					for (uint j=0; j<logDef.getListParams().size(); ++j)
+					for (uint j = 0; j < logDef.getListParams().size(); ++j)
 					{
 						const LGS::TParamDesc &paramDesc = logDef.getListParams()[j];
 
@@ -738,7 +719,7 @@ struct TPredicateNode : public TQueryNode
 							CLogStorage::TLogParamId lpi;
 							lpi.ParamName = paramDesc.getName();
 							lpi.ParamType = paramDesc.getType();
-							TSelectedParam	sp;
+							TSelectedParam sp;
 							sp.LogDefIndex = i;
 							sp.ListParam = true;
 							sp.ParamIndex = j;
@@ -758,7 +739,7 @@ struct TPredicateNode : public TQueryNode
 	{
 		if (_SelectedParams.size() == 1 && _SelectedParams.begin()->first.ParamType == LGS::TSupportedParamType::invalid_val)
 		{
-			if(_ParameterName == "LogDate")
+			if (_ParameterName == "LogDate")
 			{
 				TTimeSlice ts;
 				TTimeLine tl;
@@ -771,11 +752,11 @@ struct TPredicateNode : public TQueryNode
 					break;
 				case tt_LESS_EQUAL:
 					ts.StartDate = 0;
-					ts.EndDate = _RefValue.get_uint32()+1;
+					ts.EndDate = _RefValue.get_uint32() + 1;
 					tl.push_back(ts);
 					break;
 				case tt_GREATER:
-					ts.StartDate = _RefValue.get_uint32()+1;
+					ts.StartDate = _RefValue.get_uint32() + 1;
 					ts.EndDate = ~0;
 					tl.push_back(ts);
 					break;
@@ -786,7 +767,7 @@ struct TPredicateNode : public TQueryNode
 					break;
 				case tt_EQUAL:
 					ts.StartDate = _RefValue.get_uint32();
-					ts.EndDate = _RefValue.get_uint32()+1;
+					ts.EndDate = _RefValue.get_uint32() + 1;
 					tl.push_back(ts);
 					break;
 				case tt_NOT_EQUAL:
@@ -794,7 +775,7 @@ struct TPredicateNode : public TQueryNode
 					ts.StartDate = 0;
 					ts.EndDate = _RefValue.get_uint32();
 					tl.push_back(ts);
-					ts.StartDate = _RefValue.get_uint32()+1;
+					ts.StartDate = _RefValue.get_uint32() + 1;
 					ts.EndDate = ~0;
 					tl.push_back(ts);
 					break;
@@ -805,11 +786,10 @@ struct TPredicateNode : public TQueryNode
 				return tl;
 			}
 		}
-		
+
 		// otherwise, return full time range
 		return TTimeLine(1, FullTimeSlice);
 	}
-
 
 	TLogEntries evalNode(const CLogStorage &logs)
 	{
@@ -820,12 +800,12 @@ struct TPredicateNode : public TQueryNode
 
 		if (_SelectedParams.size() == 1 && _SelectedParams.begin()->first.ParamType == LGS::TSupportedParamType::invalid_val)
 		{
-			if(_ParameterName == "LogDate")
+			if (_ParameterName == "LogDate")
 			{
 				LGS::TParamValue ref = convertParam(_RefValue, LGS::TSupportedParamType::spt_uint32);
 
 				// this is a date comparison
-				for (uint i=0; i<logs._DiskLogEntries.size(); ++i)
+				for (uint i = 0; i < logs._DiskLogEntries.size(); ++i)
 				{
 					const CLogStorage::TDiskLogEntry &dle = logs._DiskLogEntries[i];
 					if (op(dle.LogDate, _RefValue.get_uint32()))
@@ -834,20 +814,20 @@ struct TPredicateNode : public TQueryNode
 			}
 			else if (_ParameterName == "LogName")
 			{
-				std::vector<uint32>	matchingLogs;
+				std::vector<uint32> matchingLogs;
 				LGS::TParamValue ref = convertParam(_RefValue, LGS::TSupportedParamType::spt_string);
 				// select only log of a given log name (aka type)
-				
-				for (uint32 defIndex=0; defIndex<_LogDefs.size(); ++defIndex)
+
+				for (uint32 defIndex = 0; defIndex < _LogDefs.size(); ++defIndex)
 				{
 					if (op(LGS::TParamValue(_LogDefs[defIndex].getLogName()), ref))
 						matchingLogs.push_back(defIndex);
 				}
 
-				for (uint32 j=0; j<matchingLogs.size(); ++j)
+				for (uint32 j = 0; j < matchingLogs.size(); ++j)
 				{
 					uint32 logType = matchingLogs[j];
-					for (uint i=0; i<logs._DiskLogEntries.size(); ++i)
+					for (uint i = 0; i < logs._DiskLogEntries.size(); ++i)
 					{
 						if (logs._DiskLogEntries[i].LogType == logType)
 							ret.insert(i);
@@ -856,7 +836,7 @@ struct TPredicateNode : public TQueryNode
 			}
 			else if (_ParameterName == "ShardId")
 			{
-				std::vector<uint32>	matchingLogs;
+				std::vector<uint32> matchingLogs;
 				LGS::TParamValue ref;
 
 				// if we have a string, we interpret it as a shard name
@@ -866,7 +846,7 @@ struct TPredicateNode : public TQueryNode
 					ref = convertParam(_RefValue, LGS::TSupportedParamType::spt_uint32);
 
 				// select only log of the correct shard id
-				for (uint i=0; i<logs._DiskLogEntries.size(); ++i)
+				for (uint i = 0; i < logs._DiskLogEntries.size(); ++i)
 				{
 					if (op(logs._DiskLogEntries[i].ShardId, ref.get_uint32()))
 						ret.insert(i);
@@ -879,19 +859,19 @@ struct TPredicateNode : public TQueryNode
 		{
 			// parse each param table, then look back in the logs for the selected entry
 			TSelectedParams::iterator first(_SelectedParams.begin()), last(_SelectedParams.end());
-			for (;first != last; ++first)
+			for (; first != last; ++first)
 			{
-				std::vector<uint32>	selectedIndex;
-				
+				std::vector<uint32> selectedIndex;
+
 				const CLogStorage::TLogParamId &lpi = first->first;
 				const std::vector<TSelectedParam> &sps = first->second;
-				
+
 				// retrieve the table for this param
 				CLogStorage::TParamsTables::const_iterator it(logs._ParamTables.find(lpi));
 				if (it != logs._ParamTables.end())
 				{
 					const CLogStorage::TParamsTable &pt = it->second;
-					
+
 					LGS::TParamValue ref;
 					if (Operator::getOperatorType() == tt_like)
 					{
@@ -902,9 +882,9 @@ struct TPredicateNode : public TQueryNode
 					{
 						ref = convertParam(_RefValue, lpi.ParamType);
 					}
-					
+
 					// parse each entry of the param table
-					for (uint j=0; j<pt.size(); ++j)
+					for (uint j = 0; j < pt.size(); ++j)
 					{
 						// apply the operator
 						if (op(pt[j], ref))
@@ -914,7 +894,7 @@ struct TPredicateNode : public TQueryNode
 							selectedIndex.push_back(j);
 						}
 					}
-					
+
 					// now, look back for the logs that use the selected parameter
 					buildSelectedLogList(selectedIndex, logs, sps, ret);
 				}
@@ -931,7 +911,7 @@ struct TPredicateNode : public TQueryNode
 		TSelectedParams::const_iterator first(_SelectedParams.begin()), last(_SelectedParams.end());
 		for (; first != last; ++first)
 		{
-			for (uint i=0; i<first->second.size(); ++i)
+			for (uint i = 0; i < first->second.size(); ++i)
 			{
 				const LGS::TLogDefinition &logDef = _LogDefs[first->second[i].LogDefIndex];
 				log.displayNL("%s  Matching in log '%s', parameter %u", tab.c_str(), logDef.getLogName().c_str(), first->second[i].ParamIndex);
@@ -945,119 +925,118 @@ struct TPredicateNode : public TQueryNode
 struct TEqualOp
 {
 	template <class T>
-	bool operator () (const T &value, const T &ref) const
+	bool operator()(const T &value, const T &ref) const
 	{
 		return value == ref;
 	}
 
-	static TTokenType getOperatorType()	{ return tt_EQUAL;};
+	static TTokenType getOperatorType() { return tt_EQUAL; };
 };
 
 struct TLessOp
 {
 	template <class T>
-	bool operator () (const T &value, const T &ref) const
+	bool operator()(const T &value, const T &ref) const
 	{
 		return value < ref;
 	}
-	static TTokenType getOperatorType()	{ return tt_LESS;};
+	static TTokenType getOperatorType() { return tt_LESS; };
 };
 
 struct TLessEqualOp
 {
 	template <class T>
-	bool operator () (const T &value, const T &ref) const
+	bool operator()(const T &value, const T &ref) const
 	{
 		return value == ref || value < ref;
 	}
-	static TTokenType getOperatorType()	{ return tt_LESS_EQUAL;};
+	static TTokenType getOperatorType() { return tt_LESS_EQUAL; };
 };
 
 struct TGreaterOp
 {
 	template <class T>
-	bool operator () (const T &value, const T &ref) const
+	bool operator()(const T &value, const T &ref) const
 	{
 		return !(value < ref || value == ref);
 	}
-	static TTokenType getOperatorType()	{ return tt_GREATER;};
+	static TTokenType getOperatorType() { return tt_GREATER; };
 };
 
 struct TGreaterEqualOp
 {
 	template <class T>
-	bool operator () (const T &value, const T &ref) const
+	bool operator()(const T &value, const T &ref) const
 	{
-		return !(value < ref) ;
+		return !(value < ref);
 	}
-	static TTokenType getOperatorType()	{ return tt_GREATER_EQUAL;};
+	static TTokenType getOperatorType() { return tt_GREATER_EQUAL; };
 };
 
 struct TNotEqualOp
 {
 	template <class T>
-	bool operator () (const T &value, const T &ref) const
+	bool operator()(const T &value, const T &ref) const
 	{
 		return !(value == ref);
 	}
-	static TTokenType getOperatorType()	{ return tt_NOT_EQUAL;};
+	static TTokenType getOperatorType() { return tt_NOT_EQUAL; };
 };
 
 struct TLikeOp
 {
 	template <class T>
-	bool operator () (const T &value, const T &ref) const
+	bool operator()(const T &value, const T &ref) const
 	{
 		std::string refStr = NLMISC::toString(ref);
 		std::string valueStr = NLMISC::toString(value);
 
 		return valueStr.find(refStr) != std::string::npos;
 	}
-	static TTokenType getOperatorType()	{ return tt_like;};
+	static TTokenType getOperatorType() { return tt_like; };
 };
 
 struct TOrCombiner
 {
-	TLogEntries operator () (const TLogEntries &leftEntry, const TLogEntries &rightEntry) const
+	TLogEntries operator()(const TLogEntries &leftEntry, const TLogEntries &rightEntry) const
 	{
 		TLogEntries ret;
-		std::set_union(leftEntry.begin(), leftEntry.end(), 
-			rightEntry.begin(), rightEntry.end(), 
-			std::inserter(ret, ret.begin()));
+		std::set_union(leftEntry.begin(), leftEntry.end(),
+		    rightEntry.begin(), rightEntry.end(),
+		    std::inserter(ret, ret.begin()));
 
 		return ret;
 	}
 
-	TTimeLine operator ()(const TTimeLine &left, const TTimeLine &right) const
+	TTimeLine operator()(const TTimeLine &left, const TTimeLine &right) const
 	{
 		TTimeLine ret;
 
 		std::map<uint32, sint32> timeTags;
 
 		// first loop to init all entry needed to zero
-		for (uint i=0; i<left.size(); ++i)
+		for (uint i = 0; i < left.size(); ++i)
 		{
-			timeTags[left[i].StartDate] =0;
-			timeTags[left[i].EndDate] =0;
+			timeTags[left[i].StartDate] = 0;
+			timeTags[left[i].EndDate] = 0;
 		}
-		for (uint i=0; i<right.size(); ++i)
+		for (uint i = 0; i < right.size(); ++i)
 		{
-			timeTags[right[i].StartDate] =0;
-			timeTags[right[i].EndDate] =0;
+			timeTags[right[i].StartDate] = 0;
+			timeTags[right[i].EndDate] = 0;
 		}
 
 		// second loop to inc/dec the start and end date
-		for (uint i=0; i<left.size(); ++i)
+		for (uint i = 0; i < left.size(); ++i)
 		{
-			timeTags[left[i].StartDate] +=1;
-			timeTags[left[i].EndDate] -=1;
+			timeTags[left[i].StartDate] += 1;
+			timeTags[left[i].EndDate] -= 1;
 		}
-		for (uint i=0; i<right.size(); ++i)
+		for (uint i = 0; i < right.size(); ++i)
 		{
-			timeTags[right[i].StartDate] +=1;
-			timeTags[right[i].EndDate] -=1;
+			timeTags[right[i].StartDate] += 1;
+			timeTags[right[i].EndDate] -= 1;
 		}
-
 
 		sint32 count = 0;
 		TTimeSlice ts;
@@ -1066,7 +1045,7 @@ struct TOrCombiner
 		{
 			if (count == 0 && first->second > 0)
 				ts.StartDate = first->first;
-			else if (count > 0 && count+first->second == 0)
+			else if (count > 0 && count + first->second == 0)
 			{
 				ts.EndDate = first->first;
 				ret.push_back(ts);
@@ -1080,43 +1059,43 @@ struct TOrCombiner
 
 struct TAndCombiner
 {
-	TLogEntries operator () (const TLogEntries &leftEntry, const TLogEntries &rightEntry) const
+	TLogEntries operator()(const TLogEntries &leftEntry, const TLogEntries &rightEntry) const
 	{
 		TLogEntries ret;
-		std::set_intersection(leftEntry.begin(), leftEntry.end(), 
-			rightEntry.begin(), rightEntry.end(), 
-			std::inserter(ret, ret.begin()));
+		std::set_intersection(leftEntry.begin(), leftEntry.end(),
+		    rightEntry.begin(), rightEntry.end(),
+		    std::inserter(ret, ret.begin()));
 		return ret;
 	}
 
-	TTimeLine operator ()(const TTimeLine &left, const TTimeLine &right) const
+	TTimeLine operator()(const TTimeLine &left, const TTimeLine &right) const
 	{
 		TTimeLine ret;
 
 		std::map<uint32, sint32> timeTags;
 
 		// first loop to init all entry needed to zero
-		for (uint i=0; i<left.size(); ++i)
+		for (uint i = 0; i < left.size(); ++i)
 		{
-			timeTags[left[i].StartDate] =0;
-			timeTags[left[i].EndDate] =0;
+			timeTags[left[i].StartDate] = 0;
+			timeTags[left[i].EndDate] = 0;
 		}
-		for (uint i=0; i<right.size(); ++i)
+		for (uint i = 0; i < right.size(); ++i)
 		{
-			timeTags[right[i].StartDate] =0;
-			timeTags[right[i].EndDate] =0;
+			timeTags[right[i].StartDate] = 0;
+			timeTags[right[i].EndDate] = 0;
 		}
 
 		// second loop to inc/dec the start and end date
-		for (uint i=0; i<left.size(); ++i)
+		for (uint i = 0; i < left.size(); ++i)
 		{
-			timeTags[left[i].StartDate] +=1;
-			timeTags[left[i].EndDate] -=1;
+			timeTags[left[i].StartDate] += 1;
+			timeTags[left[i].EndDate] -= 1;
 		}
-		for (uint i=0; i<right.size(); ++i)
+		for (uint i = 0; i < right.size(); ++i)
 		{
-			timeTags[right[i].StartDate] +=1;
-			timeTags[right[i].EndDate] -=1;
+			timeTags[right[i].StartDate] += 1;
+			timeTags[right[i].EndDate] -= 1;
 		}
 
 		sint32 count = 0;
@@ -1124,7 +1103,7 @@ struct TAndCombiner
 		std::map<uint32, sint32>::iterator first(timeTags.begin()), last(timeTags.end());
 		for (; first != last; ++first)
 		{
-			if (count < 2 && count+first->second == 2)
+			if (count < 2 && count + first->second == 2)
 				ts.StartDate = first->first;
 			else if (count == 2 && first->second < 0)
 			{
@@ -1151,18 +1130,18 @@ class CQueryParser
 	struct TToken
 	{
 		/// The position that generated this token
-		iterator	It;
+		iterator It;
 		/// The token type
-		TTokenType	TokenType;
+		TTokenType TokenType;
 		/// The text value of the token
 		std::string Text;
 	};
 
-	typedef	std::map<std::string, TTokenType> TKeywords;
-	/// A set a predefined keyword. If a token found by the parser is equal to one 
+	typedef std::map<std::string, TTokenType> TKeywords;
+	/// A set a predefined keyword. If a token found by the parser is equal to one
 	/// of the keyword, then the lexer substitute the token type with the
 	/// one associated with the keyword
-	TKeywords	_Keywords;
+	TKeywords _Keywords;
 
 	/// The log definition used to build the query tree (needed to build the list
 	/// of matching log types in the predicate nodes)
@@ -1170,57 +1149,56 @@ class CQueryParser
 
 public:
 	/// Exception class thrown by the lexer/parser in case or error
-	struct EInvalidQuery : public NLMISC::Exception 
+	struct EInvalidQuery : public NLMISC::Exception
 	{
 		/// The iterator in the string where the error is detected
-		iterator	It;
+		iterator It;
 		/// The error string
-		const char		*ErrorStr;
+		const char *ErrorStr;
 		EInvalidQuery(iterator it, const char *erroStr)
-			:	It(it),
-				ErrorStr(erroStr)
-		{}
+		    : It(it)
+		    , ErrorStr(erroStr)
+		{
+		}
 
-		virtual const char* what() const throw ()
+		virtual const char *what() const throw()
 		{
 			return ErrorStr;
 		}
-
 	};
 
 	struct TParserResult
 	{
 		/// The query tree
-		//mutable std::shared_ptr<TQueryNode> QueryTree;
+		// mutable std::shared_ptr<TQueryNode> QueryTree;
 		mutable CUniquePtr<TQueryNode> QueryTree;
 
 		/// Option to extract full context with selected logs
-		bool		FullContext;
+		bool FullContext;
 
 		/// Option to add a prefix to the output file
-		std::string	OutputPrefix;
+		std::string OutputPrefix;
 
 		TParserResult()
-			:	FullContext(false)
+		    : FullContext(false)
 		{
 		}
 
 		TParserResult(const TParserResult &other)
-			:	QueryTree(CUniquePtrMove(other.QueryTree)),
-				FullContext(other.FullContext),
-				OutputPrefix(other.OutputPrefix)
+		    : QueryTree(CUniquePtrMove(other.QueryTree))
+		    , FullContext(other.FullContext)
+		    , OutputPrefix(other.OutputPrefix)
 
 		{
 		}
 	};
 
-
 	/// Constructor
 	CQueryParser(const TLogDefinitions &logDefs);
-	
+
 	/// Parse the queryStr and return the root of the query tree
 	TParserResult parseQuery(const std::string &queryStr, bool parseOnlyOption);
-	
+
 private:
 	/// Convert a string into a supported param type (if possible)
 	LGS::TSupportedParamType parseParamType(const std::string &typeName);
@@ -1229,7 +1207,6 @@ private:
 	void parseOptions(CQueryParser::TParserResult &parserResult, CQueryParser::iterator &it, CQueryParser::iterator end);
 	/// Parse one option
 	bool parseOption(CQueryParser::TParserResult &parserResult, CQueryParser::iterator &it, CQueryParser::iterator end);
-
 
 	/// Build a predicate node according to the specified operator, reference value and left value type.
 	TQueryNode *buildPredicate(const LGS::TParamValue &refVal, const TToken &operatorType, const TToken &leftValue, iterator &it, iterator end);
@@ -1265,13 +1242,11 @@ private:
 	bool parseINT(iterator &it, iterator end);
 	/// The lexer
 	TToken getNextToken(iterator &it, iterator end);
-	/// Skip the WhiteSpace 
+	/// Skip the WhiteSpace
 	iterator skipWS(iterator it, iterator end);
 
 	/// Check is a string contains a naked hexadecimal value
 	bool isNakedHexa(const std::string &text);
-
 };
 
-
-#endif //LOG_QUERY_H
+#endif // LOG_QUERY_H

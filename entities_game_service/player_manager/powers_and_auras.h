@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_POWERS_AND_AURAS_H
 #define RY_POWERS_AND_AURAS_H
 
@@ -32,16 +30,26 @@ struct CPowerActivationDate
 
 	DECLARE_PERSISTENCE_METHODS
 
-	POWERS::TPowerType	PowerType;
-	uint16				ConsumableFamilyId; // ~0 mean is not a consumable who create this power
-	NLMISC::TGameCycle	DeactivationDate;
-	NLMISC::TGameCycle	ActivationDate;
+	POWERS::TPowerType PowerType;
+	uint16 ConsumableFamilyId; // ~0 mean is not a consumable who create this power
+	NLMISC::TGameCycle DeactivationDate;
+	NLMISC::TGameCycle ActivationDate;
 
-	CPowerActivationDate() : PowerType(POWERS::UnknownType), ConsumableFamilyId(std::numeric_limits<uint16>::max()), DeactivationDate(0), ActivationDate(0)
-	{}
+	CPowerActivationDate()
+	    : PowerType(POWERS::UnknownType)
+	    , ConsumableFamilyId(std::numeric_limits<uint16>::max())
+	    , DeactivationDate(0)
+	    , ActivationDate(0)
+	{
+	}
 
-	CPowerActivationDate(POWERS::TPowerType type, uint16 consumableFamilyId, NLMISC::TGameCycle dateOff, NLMISC::TGameCycle dateOn) : PowerType(type), ConsumableFamilyId(consumableFamilyId), DeactivationDate(dateOff), ActivationDate(dateOn)
-	{}
+	CPowerActivationDate(POWERS::TPowerType type, uint16 consumableFamilyId, NLMISC::TGameCycle dateOff, NLMISC::TGameCycle dateOn)
+	    : PowerType(type)
+	    , ConsumableFamilyId(consumableFamilyId)
+	    , DeactivationDate(dateOff)
+	    , ActivationDate(dateOn)
+	{
+	}
 
 	void serial(NLMISC::IStream &f);
 };
@@ -60,7 +68,7 @@ struct CPowerActivationDateVector
 
 	DECLARE_PERSISTENCE_METHODS
 
-	std::vector <CPowerActivationDate>	PowerActivationDates;
+	std::vector<CPowerActivationDate> PowerActivationDates;
 	bool doNotClear;
 
 	CPowerActivationDateVector() { doNotClear = true; }
@@ -78,7 +86,7 @@ struct CPowerActivationDateVector
 	/// is power allowed ? also clean the vector
 	bool isPowerAllowed(POWERS::TPowerType type, uint16 consumableFamilyId, NLMISC::TGameCycle &endDate);
 
-	void writeUsablePowerFlags( uint32 &usablePowerFlags);
+	void writeUsablePowerFlags(uint32 &usablePowerFlags);
 
 	void activate();
 };
@@ -93,11 +101,10 @@ struct CPowerActivationDateVector
 struct CAuraActivationDateVector
 {
 private:
-	std::vector <CPowerActivationDate>	_AuraActivationDates;
-	std::vector <NLMISC::CEntityId>		_AuraUsers;
+	std::vector<CPowerActivationDate> _AuraActivationDates;
+	std::vector<NLMISC::CEntityId> _AuraUsers;
 
 public:
-
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
 	// At time of writing it evaluated to:
@@ -137,14 +144,20 @@ struct CConsumableOverdoseTimer
 
 	DECLARE_PERSISTENCE_METHODS
 
-	uint16	Family;
-	NLMISC::TGameCycle	ActivationDate;
+	uint16 Family;
+	NLMISC::TGameCycle ActivationDate;
 
-	CConsumableOverdoseTimer() : Family(0), ActivationDate(0)
-	{}
+	CConsumableOverdoseTimer()
+	    : Family(0)
+	    , ActivationDate(0)
+	{
+	}
 
-	CConsumableOverdoseTimer(uint16 type, NLMISC::TGameCycle date) : Family(type), ActivationDate(date)
-	{}
+	CConsumableOverdoseTimer(uint16 type, NLMISC::TGameCycle date)
+	    : Family(type)
+	    , ActivationDate(date)
+	{
+	}
 };
 
 /**
@@ -161,7 +174,7 @@ struct CConsumableOverdoseTimerVector
 
 	DECLARE_PERSISTENCE_METHODS
 
-	std::vector <CConsumableOverdoseTimer>	Dates;
+	std::vector<CConsumableOverdoseTimer> Dates;
 
 	inline void clear() { Dates.clear(); }
 
@@ -174,9 +187,6 @@ struct CConsumableOverdoseTimerVector
 	void activate();
 };
 
-
-
-#endif //RY_POWERS_AND_AURAS_H
-
+#endif // RY_POWERS_AND_AURAS_H
 
 /* End of powers_and_auras.h */

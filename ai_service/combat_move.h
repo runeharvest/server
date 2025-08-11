@@ -14,12 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#ifndef	_COMBAT_MOVE_
-#define	_COMBAT_MOVE_
+#ifndef _COMBAT_MOVE_
+#define _COMBAT_MOVE_
 
 ##include "game_share/msg_combat_move_service.h"
 
 #endif
-

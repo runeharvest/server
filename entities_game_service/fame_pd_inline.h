@@ -17,13 +17,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace EGSPD
-{
-	
+namespace EGSPD {
+
 /* -----------------------------------------
-* Inline implementation of CFameTrend
-* ----------------------------------------- */
-inline const std::string&		CFameTrend::toString(TFameTrend v)
+ * Inline implementation of CFameTrend
+ * ----------------------------------------- */
+inline const std::string &CFameTrend::toString(TFameTrend v)
 {
 	if (v < 0 || v >= ___TFameTrend_useSize)
 	{
@@ -36,17 +35,17 @@ inline const std::string&		CFameTrend::toString(TFameTrend v)
 	}
 	return _StrTable[v];
 }
-inline CFameTrend::TFameTrend	CFameTrend::fromString(const std::string& v)
+inline CFameTrend::TFameTrend CFameTrend::fromString(const std::string &v)
 {
 	if (!_Initialised)
 	{
 		init();
 	}
-	if(v==_UnknownString)
+	if (v == _UnknownString)
 	{
 		return Unknown;
 	}
-	const std::map<std::string, TFameTrend>::const_iterator	it = _ValueMap.find(NLMISC::toLowerAscii(v));
+	const std::map<std::string, TFameTrend>::const_iterator it = _ValueMap.find(NLMISC::toLowerAscii(v));
 	if (it == _ValueMap.end())
 	{
 		nlwarning("TFameTrend::toString(): string '%s' is not matched, 'Unknown' enum value returned", v.c_str());
@@ -57,8 +56,8 @@ inline CFameTrend::TFameTrend	CFameTrend::fromString(const std::string& v)
 // End of inline implementation of CFameTrend
 
 /* -----------------------------------------
-* Inline implementation of CFameContainerEntryPD
-* ----------------------------------------- */
+ * Inline implementation of CFameContainerEntryPD
+ * ----------------------------------------- */
 inline CFameContainerEntryPD::CFameContainerEntryPD()
 {
 	__BaseTable = 0;
@@ -69,8 +68,8 @@ inline CFameContainerEntryPD::~CFameContainerEntryPD()
 // End of inline implementation of CFameContainerEntryPD
 
 /* -----------------------------------------
-* Inline implementation of CFameContainerPD
-* ----------------------------------------- */
+ * Inline implementation of CFameContainerPD
+ * ----------------------------------------- */
 inline CFameContainerPD::CFameContainerPD()
 {
 	__BaseTable = 1;
@@ -81,8 +80,8 @@ inline CFameContainerPD::~CFameContainerPD()
 // End of inline implementation of CFameContainerPD
 
 /* -----------------------------------------
-* Inline implementation of CGuildFameContainerPD
-* ----------------------------------------- */
+ * Inline implementation of CGuildFameContainerPD
+ * ----------------------------------------- */
 inline CGuildFameContainerPD::CGuildFameContainerPD()
 {
 	__BaseTable = 2;
@@ -92,5 +91,4 @@ inline CGuildFameContainerPD::~CGuildFameContainerPD()
 }
 // End of inline implementation of CGuildFameContainerPD
 
-	
 } // End of EGSPD

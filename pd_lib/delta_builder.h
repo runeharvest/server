@@ -23,7 +23,6 @@
 
 #include <vector>
 
-
 /**
  * <Class description>
  * \author Benjamin Legros
@@ -33,7 +32,6 @@
 class CDeltaBuilder
 {
 public:
-
 	/**
 	 * Type of Delta to build
 	 */
@@ -48,53 +46,49 @@ public:
 	 * Build delta
 	 * Builds delta files from an stamp interval
 	 */
-	static bool		build(const std::string& outputPath,
-						  const std::string& hoursUpdatePath,
-						  const std::string& minutesUpdatePath,
-						  const std::string& secondsUpdatePath,
-						  const std::string& mintimestamp,
-						  const std::string& maxtimestamp,
-						  TDelta deltaType);
+	static bool build(const std::string &outputPath,
+	    const std::string &hoursUpdatePath,
+	    const std::string &minutesUpdatePath,
+	    const std::string &secondsUpdatePath,
+	    const std::string &mintimestamp,
+	    const std::string &maxtimestamp,
+	    TDelta deltaType);
 
 	/*
 	 * Remove older files in update path
 	 */
-	static bool		removeOlderDeltaInPath(const std::string& keeptimestamp,
-										   const std::string& path);
+	static bool removeOlderDeltaInPath(const std::string &keeptimestamp,
+	    const std::string &path);
 
 private:
-
 	/// Constructor
 	CDeltaBuilder();
-
 
 	/**
 	 * Build delta
 	 * Builds delta files from an stamp interval
 	 */
-	static bool		internalBuild(	const std::string& outputPath,
-									const std::string& hoursUpdatePath,
-									const std::string& minutesUpdatePath,
-									const std::string& secondsUpdatePath,
-									const std::string& mintimestamp,
-									const std::string& maxtimestamp,
-									TDelta deltaType,
-									std::vector<std::string>& generatedFiles);
+	static bool internalBuild(const std::string &outputPath,
+	    const std::string &hoursUpdatePath,
+	    const std::string &minutesUpdatePath,
+	    const std::string &secondsUpdatePath,
+	    const std::string &mintimestamp,
+	    const std::string &maxtimestamp,
+	    TDelta deltaType,
+	    std::vector<std::string> &generatedFiles);
 
 	/// Generate Delta update file
-	static bool		generateDeltaFile(const std::string& outputPath,
-									  const std::vector<std::string>& updateFiles,
-									  const CTimestamp& starttime,
-									  const CTimestamp& endtime);
+	static bool generateDeltaFile(const std::string &outputPath,
+	    const std::vector<std::string> &updateFiles,
+	    const CTimestamp &starttime,
+	    const CTimestamp &endtime);
 
 	/// Build update files list
-	static bool		updateFilesList(std::vector<std::vector<std::string> >& fileLists,
-									std::vector<std::string>& updateFiles,
-									const CTimestamp& minstamp,
-									const CTimestamp& maxstamp);
-
+	static bool updateFilesList(std::vector<std::vector<std::string>> &fileLists,
+	    std::vector<std::string> &updateFiles,
+	    const CTimestamp &minstamp,
+	    const CTimestamp &maxstamp);
 };
-
 
 #endif // NL_DELTA_BUILDER_H
 

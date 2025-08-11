@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_EVS_H
 #define RY_EVS_H
 
@@ -52,51 +50,61 @@
 
 class CEntity;
 
-typedef CMoveGrid<CEntity*, 256, 32.0f>						TEntityGrid;
-typedef CMoveGrid<NLPACS::COrderedChain3f*, 256, 32.0f>		TChainGrid;
+typedef CMoveGrid<CEntity *, 256, 32.0f> TEntityGrid;
+typedef CMoveGrid<NLPACS::COrderedChain3f *, 256, 32.0f> TChainGrid;
 
 class CEntity
 {
 public:
 	//
-	CEntity() : Position(0.0, 0.0, 0.0), Orientation(0.0f), Check(false), Target(NLMISC::CEntityId::Unknown), SheetId(0), Radius(0.5f), Height(2.0f), EntityIndex() {}
+	CEntity()
+	    : Position(0.0, 0.0, 0.0)
+	    , Orientation(0.0f)
+	    , Check(false)
+	    , Target(NLMISC::CEntityId::Unknown)
+	    , SheetId(0)
+	    , Radius(0.5f)
+	    , Height(2.0f)
+	    , EntityIndex()
+	{
+	}
 
 	//
-	NLMISC::CEntityId							Id;
-	TDataSetRow									EntityIndex;
-	NLMISC::CVectorD							Position;
-	NLMISC::CVectorD							NonMirroredPos;
-	float										Orientation;
-	bool										Check;
-	TEntityGrid::CIterator						Iterator;
+	NLMISC::CEntityId Id;
+	TDataSetRow EntityIndex;
+	NLMISC::CVectorD Position;
+	NLMISC::CVectorD NonMirroredPos;
+	float Orientation;
+	bool Check;
+	TEntityGrid::CIterator Iterator;
 
 	//
-	NLMISC::CEntityId							Target;
+	NLMISC::CEntityId Target;
 
 	//
-	NLMISC::CSheetId							SheetId;
-	std::string									SheetName;
-	float										Radius;
-	float										Height;
+	NLMISC::CSheetId SheetId;
+	std::string SheetName;
+	float Radius;
+	float Height;
 
 	//
-	CMirrorPropValueAlice1DS<TYPE_COMBAT_STATE>	CombatState;
+	CMirrorPropValueAlice1DS<TYPE_COMBAT_STATE> CombatState;
 
 	//
-	CMirrorPropValueAlice1DS<TYPE_POSX>			X;
-	CMirrorPropValueAlice1DS<TYPE_POSY>			Y;
-	CMirrorPropValueAlice1DS<TYPE_POSZ>			Z;
-	CMirrorPropValueAlice1DS<TYPE_ORIENTATION>	Theta;
-	CMirrorPropValueAlice1DS<TYPE_SHEET>		Sheet;
+	CMirrorPropValueAlice1DS<TYPE_POSX> X;
+	CMirrorPropValueAlice1DS<TYPE_POSY> Y;
+	CMirrorPropValueAlice1DS<TYPE_POSZ> Z;
+	CMirrorPropValueAlice1DS<TYPE_ORIENTATION> Theta;
+	CMirrorPropValueAlice1DS<TYPE_SHEET> Sheet;
 
 	//
-	std::deque<NLMISC::CVectorD>				Path;
+	std::deque<NLMISC::CVectorD> Path;
 
 	//
-	void	setup(const TDataSetRow& entityIndex);
+	void setup(const TDataSetRow &entityIndex);
 
 	//
-	void	setSheet(const NLMISC::CSheetId &sheetId);
+	void setSheet(const NLMISC::CSheetId &sheetId);
 };
 
 /**
@@ -109,11 +117,10 @@ public:
 class CEntityViewService : public NLNET::IService
 {
 private:
-	typedef std::map<NLMISC::CEntityId, CEntity>	TEntityMap;
+	typedef std::map<NLMISC::CEntityId, CEntity> TEntityMap;
 
 public:
-
-	/** 
+	/**
 	 * init the service
 	 */
 	void init(void);
@@ -130,11 +137,11 @@ public:
 
 	void displayEntities()
 	{
-		TEntityMap::iterator	ite;
-		uint					n = 0;
-		for (ite=_Entities.begin(); ite!=_Entities.end(); ++ite)
+		TEntityMap::iterator ite;
+		uint n = 0;
+		for (ite = _Entities.begin(); ite != _Entities.end(); ++ite)
 		{
-			CEntity	&entity=(*ite).second;
+			CEntity &entity = (*ite).second;
 			nlinfo("  %s: (%.3f,%.3f,%.3f)", entity.Id.toString().c_str(), entity.Position.x, entity.Position.y, entity.Position.z);
 			++n;
 		}
@@ -142,9 +149,9 @@ public:
 	}
 
 	/// Set target
-	void	setTarget(const NLMISC::CEntityId &entity, const NLMISC::CEntityId &target)
+	void setTarget(const NLMISC::CEntityId &entity, const NLMISC::CEntityId &target)
 	{
-		TEntityMap::iterator	ite, itt;
+		TEntityMap::iterator ite, itt;
 
 		if ((ite = _Entities.find(entity)) == _Entities.end())
 			return;
@@ -153,34 +160,31 @@ public:
 	}
 
 	/// Set target
-	void	setPos(const NLMISC::CEntityId &entity, sint x, sint y, sint z)
+	void setPos(const NLMISC::CEntityId &entity, sint x, sint y, sint z)
 	{
-		TEntityMap::iterator	ite, itt;
+		TEntityMap::iterator ite, itt;
 
 		if ((ite = _Entities.find(entity)) == _Entities.end())
 			return;
 
-		(*ite).second.NonMirroredPos = NLMISC::CVectorD(x*0.001, y*0.001, z*0.001);
+		(*ite).second.NonMirroredPos = NLMISC::CVectorD(x * 0.001, y * 0.001, z * 0.001);
 	}
 
-	void	initMirror();
+	void initMirror();
 
-	CMirror				Mirror;
-	CMirroredDataSet	*DataSet;
-
-
-
+	CMirror Mirror;
+	CMirroredDataSet *DataSet;
 
 	//
-	void	updateEntities();
+	void updateEntities();
 
 	//
-	TEntityMap::iterator	createEntity(const NLMISC::CEntityId &id)
+	TEntityMap::iterator createEntity(const NLMISC::CEntityId &id)
 	{
 		nlinfo("Create entity %s", id.toString().c_str());
 
-		std::pair<TEntityMap::iterator,bool>	res = _Entities.insert(std::make_pair<NLMISC::CEntityId,CEntity>(id, CEntity()));
-		TEntityMap::iterator	ite = res.first;
+		std::pair<TEntityMap::iterator, bool> res = _Entities.insert(std::make_pair<NLMISC::CEntityId, CEntity>(id, CEntity()));
+		TEntityMap::iterator ite = res.first;
 		nlassert(ite != _Entities.end() && res.second);
 
 		(*ite).second.Iterator = _EntityGrid.insert(&((*ite).second), (*ite).second.Position);
@@ -190,11 +194,11 @@ public:
 	}
 
 	//
-	void					removeEntity(const NLMISC::CEntityId &id)
+	void removeEntity(const NLMISC::CEntityId &id)
 	{
 		nlinfo("Remove entity %s", id.toString().c_str());
 
-		TEntityMap::iterator	ite = _Entities.find(id);
+		TEntityMap::iterator ite = _Entities.find(id);
 		if (ite == _Entities.end())
 			return;
 
@@ -205,9 +209,9 @@ public:
 	}
 
 	//
-	CEntity					*getEntity(const NLMISC::CEntityId &id)
+	CEntity *getEntity(const NLMISC::CEntityId &id)
 	{
-		TEntityMap::iterator	it = _Entities.find(id);
+		TEntityMap::iterator it = _Entities.find(id);
 
 		if (it == _Entities.end())
 			return NULL;
@@ -215,34 +219,29 @@ public:
 		return &((*it).second);
 	}
 
-
 private:
 	//
-	TEntityMap										_Entities;
+	TEntityMap _Entities;
 
 	//
-	std::vector<NL3D::UInstance*>					_OBoxes;
-	std::vector<NL3D::UInstance*>					_TBoxes;
-	std::vector<NL3D::UInstance*>					_OCylinders;
-	std::vector<NL3D::UInstance*>					_TCylinders;
+	std::vector<NL3D::UInstance *> _OBoxes;
+	std::vector<NL3D::UInstance *> _TBoxes;
+	std::vector<NL3D::UInstance *> _OCylinders;
+	std::vector<NL3D::UInstance *> _TCylinders;
 
-	std::vector<NLMISC::CLine>						_Directions;
-	std::vector<NLMISC::CLineColor>					_Targets;
+	std::vector<NLMISC::CLine> _Directions;
+	std::vector<NLMISC::CLineColor> _Targets;
 
 	//
-	TEntityGrid										_EntityGrid;
-	TChainGrid										_ChainGrid;
+	TEntityGrid _EntityGrid;
+	TChainGrid _ChainGrid;
 
-	std::vector<NLPACS::COrderedChain3f>			_Chains;
+	std::vector<NLPACS::COrderedChain3f> _Chains;
 };
 
-extern CEntityViewService		*pEVS;
+extern CEntityViewService *pEVS;
 
 #define TheMirror (pEVS->Mirror)
 #define TheDataset (*(pEVS->DataSet))
 
-
-#endif //RY_GPMS_H
-
-
-
+#endif // RY_GPMS_H

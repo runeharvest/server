@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_POSITION_FLAG_MANAGER_H
 #define RY_POSITION_FLAG_MANAGER_H
 
@@ -25,8 +23,13 @@
 class CFlagPosition
 {
 public:
-	CFlagPosition() {}
-	CFlagPosition(sint32 x, sint32 y, sint32 z) : X(x), Y(y), Z(z) {}
+	CFlagPosition() { }
+	CFlagPosition(sint32 x, sint32 y, sint32 z)
+	    : X(x)
+	    , Y(y)
+	    , Z(z)
+	{
+	}
 
 public:
 	/// in meters
@@ -39,42 +42,40 @@ class CPositionFlagManager : public NLMISC::CSingleton<CPositionFlagManager>
 {
 public:
 	/// set a flag with the given position
-	void setFlag(const std::string & flagName, const CFlagPosition & flagPos);
+	void setFlag(const std::string &flagName, const CFlagPosition &flagPos);
 
 	/// remove a flag
-	void removeFlag(const std::string & flagName);
+	void removeFlag(const std::string &flagName);
 
 	/// get a flag position, return NULL if the flag does not exist
-	const CFlagPosition * getFlagPosition(const std::string & flagName) const;
+	const CFlagPosition *getFlagPosition(const std::string &flagName) const;
 
 	/// return true if the flag exists
-	bool flagExists(const std::string & flagName) const;
+	bool flagExists(const std::string &flagName) const;
 
 	/// serial flags and their positions
-	void serial(NLMISC::IStream & f);
+	void serial(NLMISC::IStream &f);
 
 	/// save flags to the given file
-	void saveToFile(const std::string & fileName);
+	void saveToFile(const std::string &fileName);
 
 	/// load flags from the given file
-	void loadFromFile(const std::string & fileName);
+	void loadFromFile(const std::string &fileName);
 
 	/** send the list of flags in a given radius to a character
 	 *  \param eid id of the character
 	 *  \param shortFormat true if you only want to list flag names
 	 *  \param radius in meters, zero means no distance limit
 	 */
-	void sendFlagsList(const NLMISC::CEntityId & eid, bool shortFormat = false, uint32 radius = 0) const;
+	void sendFlagsList(const NLMISC::CEntityId &eid, bool shortFormat = false, uint32 radius = 0) const;
 
 private:
 	typedef std::map<std::string, CFlagPosition> TFlagPositionMap;
 
 private:
-
 	/// flag positions
 	TFlagPositionMap _FlagPositions;
 };
-
 
 #endif // RY_POSITION_FLAG_MANAGER_H
 

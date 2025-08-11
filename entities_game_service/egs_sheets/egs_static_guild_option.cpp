@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "egs_static_guild_option.h"
 
@@ -26,52 +25,51 @@ using namespace NLMISC;
 using namespace NLGEORGES;
 using namespace std;
 
-namespace GUILD_OPTIONS
-{
-	NL_BEGIN_STRING_CONVERSION_TABLE (TType)
-	NL_STRING_CONVERSION_TABLE_ENTRY(MainBuilding)
-	NL_STRING_CONVERSION_TABLE_ENTRY(RmFight)
-	NL_STRING_CONVERSION_TABLE_ENTRY(RmMagic)
-	NL_STRING_CONVERSION_TABLE_ENTRY(RmHarvest)
-	NL_STRING_CONVERSION_TABLE_ENTRY(RmCraft)
-	NL_END_STRING_CONVERSION_TABLE(TType, Conversion, Unknown )
+namespace GUILD_OPTIONS {
+NL_BEGIN_STRING_CONVERSION_TABLE(TType)
+NL_STRING_CONVERSION_TABLE_ENTRY(MainBuilding)
+NL_STRING_CONVERSION_TABLE_ENTRY(RmFight)
+NL_STRING_CONVERSION_TABLE_ENTRY(RmMagic)
+NL_STRING_CONVERSION_TABLE_ENTRY(RmHarvest)
+NL_STRING_CONVERSION_TABLE_ENTRY(RmCraft)
+NL_END_STRING_CONVERSION_TABLE(TType, Conversion, Unknown)
 }
 
-void CStaticGuildOption::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
+void CStaticGuildOption::readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
 {
-	UFormElm &root = form->getRootNode ();
-	if ( !root.getValueByName( Price, "price" ) )
+	UFormElm &root = form->getRootNode();
+	if (!root.getValueByName(Price, "price"))
 	{
-		nlwarning("Can get value price in form '%s'",sheetId.toString().c_str());
+		nlwarning("Can get value price in form '%s'", sheetId.toString().c_str());
 	}
 	string str;
-	if ( !root.getValueByName( str, "type" ) )
+	if (!root.getValueByName(str, "type"))
 	{
-		nlwarning("Can get value price in form '%s'",sheetId.toString().c_str());
+		nlwarning("Can get value price in form '%s'", sheetId.toString().c_str());
 	}
-	Type = GUILD_OPTIONS::Conversion.fromString( str );
-	if( Type == GUILD_OPTIONS::Unknown )
+	Type = GUILD_OPTIONS::Conversion.fromString(str);
+	if (Type == GUILD_OPTIONS::Unknown)
 	{
-		nlwarning("sheet %s guild option : invalid type %s",sheetId.toString().c_str(),str.c_str());
+		nlwarning("sheet %s guild option : invalid type %s", sheetId.toString().c_str(), str.c_str());
 	}
 }
 
 void CStaticGuildOption::serial(NLMISC::IStream &f)
 {
 	f.serial(Price);
-	if ( f.isReading() )
+	if (f.isReading())
 	{
 		string str;
 		f.serial(str);
-		Type = GUILD_OPTIONS::Conversion.fromString( str );
-		if( Type == GUILD_OPTIONS::Unknown )
+		Type = GUILD_OPTIONS::Conversion.fromString(str);
+		if (Type == GUILD_OPTIONS::Unknown)
 		{
-			nlwarning("guild option : invalid type %s",str.c_str());
+			nlwarning("guild option : invalid type %s", str.c_str());
 		}
 	}
 	else
 	{
-		string str = GUILD_OPTIONS::Conversion.toString( Type );
+		string str = GUILD_OPTIONS::Conversion.toString(Type);
 		f.serial(str);
 	}
 }

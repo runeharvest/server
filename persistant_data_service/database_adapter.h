@@ -30,107 +30,102 @@
 class CDatabaseAdapter
 {
 public:
-
 	/// Constructor
 	CDatabaseAdapter();
-
-
 
 	/**
 	 * Build the adapter using 2 database description
 	 * \param from is the old database to adapt from
 	 * \param into is the new database to adapt into
 	 */
-	bool			build(CDatabase* from, CDatabase* into);
-
+	bool build(CDatabase *from, CDatabase *into);
 
 	/**
 	 * Build new database content
 	 */
-	bool			buildContent();
-
+	bool buildContent();
 
 private:
-
-	const CDatabase*	From;
-	CDatabase*			Into;
+	const CDatabase *From;
+	CDatabase *Into;
 
 	class CColumnAdapter
 	{
 	public:
+		CColumnAdapter()
+		    : From(NULL)
+		    , Into(NULL)
+		{
+		}
 
-		CColumnAdapter() : From(NULL), Into(NULL)	{ }
-
-		const CColumn*	From;
-		const CColumn*	Into;
+		const CColumn *From;
+		const CColumn *Into;
 	};
 
 	class CTableAdapter
 	{
 	public:
+		CTableAdapter()
+		    : From(NULL)
+		    , Into(NULL)
+		{
+		}
 
-		CTableAdapter() : From(NULL), Into(NULL)	{ }
+		const CTable *From;
+		CTable *Into;
 
-		const CTable*	From;
-		CTable*			Into;
-
-		std::vector<CColumnAdapter>	Columns;
+		std::vector<CColumnAdapter> Columns;
 	};
 
-	std::vector<CTableAdapter>	Tables;
-
+	std::vector<CTableAdapter> Tables;
 
 	/// Fast remapping for tables, from old to new indices
-	std::vector<TTypeId>		TableRemap;
+	std::vector<TTypeId> TableRemap;
 
 	/// Fast remapping for enums, from old enum value to new enum value
-	typedef std::vector<TEnumValue>	TEnumRemap;
-	std::vector<TEnumRemap>		EnumRemap;
-
+	typedef std::vector<TEnumValue> TEnumRemap;
+	std::vector<TEnumRemap> EnumRemap;
 
 	/**
 	 * Build adapter for 2 tables
 	 */
-	bool			buildTableAdapter(const CTable* from, const CTable* into, CTableAdapter& adapter);
+	bool buildTableAdapter(const CTable *from, const CTable *into, CTableAdapter &adapter);
 
 	/**
 	 * Build column content
 	 */
-	bool			buildColumnContent(const CColumnAdapter& adapter, const uint8* from, uint8* into);
+	bool buildColumnContent(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
 
 	/**
 	 * Build Enum Remapping
 	 */
-	bool			buildEnumRemapping(const CType* fromType, const CType* intoType);
-
+	bool buildEnumRemapping(const CType *fromType, const CType *intoType);
 
 	/// \name Type Adapt Methods
 	// @{
 
-	bool			adaptBool(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptChar(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptUcchar(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptUint8(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptUint16(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptUint32(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptUint64(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptSint8(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptSint16(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptSint32(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptSint64(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptFloat(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptDouble(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptCSheetId(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptCEntityId(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptEnum(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptDimension(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptIndex(const CColumnAdapter& adapter, const uint8* from, uint8* into);
-	bool			adaptList(const CColumnAdapter& adapter, const uint8* from, uint8* into);
+	bool adaptBool(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptChar(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptUcchar(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptUint8(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptUint16(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptUint32(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptUint64(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptSint8(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptSint16(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptSint32(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptSint64(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptFloat(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptDouble(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptCSheetId(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptCEntityId(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptEnum(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptDimension(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptIndex(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
+	bool adaptList(const CColumnAdapter &adapter, const uint8 *from, uint8 *into);
 
 	// @}
-
 };
-
 
 #endif // NL_DATABASE_ADAPTER_H
 

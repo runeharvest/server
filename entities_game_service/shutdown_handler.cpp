@@ -31,52 +31,49 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
 // Shutdown State
-CShutdownHandler::TState	CShutdownHandler::_State = CShutdownHandler::Running;
+CShutdownHandler::TState CShutdownHandler::_State = CShutdownHandler::Running;
 
 // Shutdown Timeout
-NLMISC::TTime				CShutdownHandler::_ShutdownTimeout = 0;
+NLMISC::TTime CShutdownHandler::_ShutdownTimeout = 0;
 
 // Shutdown Timeout
-NLMISC::TTime				CShutdownHandler::_NextBroadcastMessage;
+NLMISC::TTime CShutdownHandler::_NextBroadcastMessage;
 
 // ShardOpen has been closed
-bool						CShutdownHandler::_ShardClosed = false;
+bool CShutdownHandler::_ShardClosed = false;
 
 // Broadcast Message Rate
-uint						CShutdownHandler::_BroadcastMessageRate = 0;
+uint CShutdownHandler::_BroadcastMessageRate = 0;
 
 // Game cycle of last config file check
-NLMISC::TGameCycle			CAutomaticShutdownHandler::_LastGCChecked = 0;
+NLMISC::TGameCycle CAutomaticShutdownHandler::_LastGCChecked = 0;
 
-static const TSecTime MaxTime = ~0; //std::numeric_limits<TSecTime>::max()
+static const TSecTime MaxTime = ~0; // std::numeric_limits<TSecTime>::max()
 
 // Time of next planned shutdown sequence start
-TSecTime					CAutomaticShutdownHandler::_NextPlannedShutdownStartTime = MaxTime;
+TSecTime CAutomaticShutdownHandler::_NextPlannedShutdownStartTime = MaxTime;
 
 // Time of next planned shutdown sequence end
-TSecTime					CAutomaticShutdownHandler::_NextPlannedShutdownEndTime = MaxTime;
-
+TSecTime CAutomaticShutdownHandler::_NextPlannedShutdownEndTime = MaxTime;
 
 /**
  * Shutdown Counter, in minutes
  */
-CVariable<uint>		ShutdownCounter("egs", "ShutdownCounter", "Time to shutdown in minutes", 5, 0, true);
+CVariable<uint> ShutdownCounter("egs", "ShutdownCounter", "Time to shutdown in minutes", 5, 0, true);
 
 /**
  * Broadcast shutdown message rate in seconds
  */
-CVariable<uint>		BroadcastShutdownMessageRate("egs", "BroadcastShutdownMessageRate", "Number of seconds between 2 shutdown message in seconds", 30, 0, true);
+CVariable<uint> BroadcastShutdownMessageRate("egs", "BroadcastShutdownMessageRate", "Number of seconds between 2 shutdown message in seconds", 30, 0, true);
 
 /**
  * Close shard Access at
  */
-CVariable<uint>		CloseShardAccessAt("egs", "CloseShardAccessAt", "Time to shutdown to close shard access, in seconds", 60, 0, true);
-
+CVariable<uint> CloseShardAccessAt("egs", "CloseShardAccessAt", "Time to shutdown to close shard access, in seconds", 60, 0, true);
 
 // Callback for DailyShutdownSequenceTime
-void cbChangeDailyShutdownSequenceTime( IVariable& var )
+void cbChangeDailyShutdownSequenceTime(IVariable &var)
 {
 	CAutomaticShutdownHandler::computePlannedShutdownTimes();
 }
@@ -84,28 +81,27 @@ void cbChangeDailyShutdownSequenceTime( IVariable& var )
 /**
  * DailyShutdownSequenceTime
  */
-CVariable<string>	DailyShutdownSequenceTime("egs","DailyShutdownSequenceTime", "Time of day when the service will start a shutdown sequence (ex: \"20:55\"). Set \"\" or -1 to disable)", string(), 0, true, cbChangeDailyShutdownSequenceTime, true );
+CVariable<string> DailyShutdownSequenceTime("egs", "DailyShutdownSequenceTime", "Time of day when the service will start a shutdown sequence (ex: \"20:55\"). Set \"\" or -1 to disable)", string(), 0, true, cbChangeDailyShutdownSequenceTime, true);
 
 /**
  * Daily Shutdown Counter, in minutes
  */
-CVariable<uint>		DailyShutdownCounterMinutes("egs", "DailyShutdownCounterMinutes", "Time to shutdown in minutes", 1, 0, true);
+CVariable<uint> DailyShutdownCounterMinutes("egs", "DailyShutdownCounterMinutes", "Time to shutdown in minutes", 1, 0, true);
 
 /**
  * DailyShutdownBroadcastMessage
  */
-CVariable<string>	DailyShutdownBroadcastMessage("egs","DailyShutdownBroadcastMessage", "Message to broadcast before daily shutdown", string("The shard will be shut down in 1 minute"), 0, true );
+CVariable<string> DailyShutdownBroadcastMessage("egs", "DailyShutdownBroadcastMessage", "Message to broadcast before daily shutdown", string("The shard will be shut down in 1 minute"), 0, true);
 
 /**
  * CheckShutdownPeriodGC
  */
-CVariable<uint>		CheckShutdownPeriodGC("egs","CheckShutdownPeriodGC", "Automatic shutdown sequence is tested every CheckShutdownPeriodGC game cycles", 50, 0, true );
-
+CVariable<uint> CheckShutdownPeriodGC("egs", "CheckShutdownPeriodGC", "Automatic shutdown sequence is tested every CheckShutdownPeriodGC game cycles", 50, 0, true);
 
 /*
  * Inits Handler
  */
-void	CShutdownHandler::init()
+void CShutdownHandler::init()
 {
 	_State = Running;
 	_ShutdownTimeout = NLMISC::CTime::getLocalTime();
@@ -116,11 +112,11 @@ void	CShutdownHandler::init()
 /*
  * Update Handler
  */
-void	CShutdownHandler::update()
+void CShutdownHandler::update()
 {
 	if (_State == ShuttingDown)
 	{
-		NLMISC::TTime	now = NLMISC::CTime::getLocalTime();
+		NLMISC::TTime now = NLMISC::CTime::getLocalTime();
 
 		// time to shutdown?
 		if (_ShutdownTimeout <= now)
@@ -134,13 +130,13 @@ void	CShutdownHandler::update()
 		}
 
 		// time to close shard access?
-		if (_ShutdownTimeout-(CloseShardAccessAt*60*1000) <= now && !_ShardClosed)
+		if (_ShutdownTimeout - (CloseShardAccessAt * 60 * 1000) <= now && !_ShardClosed)
 		{
 			nlinfo("CShutdownHandler::update(): close access to shard, SET_SHARD_OPEN sent to WS");
 
 			// send WS setShardOpen message
-			CMessage	msgShardOpen("SET_SHARD_OPEN");
-			uint8		close = 0;
+			CMessage msgShardOpen("SET_SHARD_OPEN");
+			uint8 close = 0;
 			msgShardOpen.serial(close);
 			CUnifiedNetwork::getInstance()->send("WS", msgShardOpen);
 
@@ -158,18 +154,14 @@ void	CShutdownHandler::update()
 /*
  * Release Handler
  */
-void	CShutdownHandler::release()
+void CShutdownHandler::release()
 {
 }
-
-
-
-
 
 /*
  * Start Shutdown Counter
  */
-void	CShutdownHandler::startShutdown(sint shutdownCounter, sint broadcastMessageRate)
+void CShutdownHandler::startShutdown(sint shutdownCounter, sint broadcastMessageRate)
 {
 	nlinfo("CShutdownHandler::startShutdown(): starting count down to shutdown");
 
@@ -179,13 +171,13 @@ void	CShutdownHandler::startShutdown(sint shutdownCounter, sint broadcastMessage
 		return;
 	}
 
-	NLMISC::TTime	now = NLMISC::CTime::getLocalTime();
+	NLMISC::TTime now = NLMISC::CTime::getLocalTime();
 
 	nlinfo("CShutdownHandler::startShutdown(): counter set to %u seconds", ShutdownCounter.get());
 
 	// time in ms
 	_State = ShuttingDown;
-	_ShutdownTimeout = now + (shutdownCounter > 0 ? shutdownCounter : ShutdownCounter)*60*1000;
+	_ShutdownTimeout = now + (shutdownCounter > 0 ? shutdownCounter : ShutdownCounter) * 60 * 1000;
 	_BroadcastMessageRate = (broadcastMessageRate > 0 ? broadcastMessageRate : BroadcastShutdownMessageRate);
 	_NextBroadcastMessage = now;
 	_ShardClosed = false;
@@ -194,7 +186,7 @@ void	CShutdownHandler::startShutdown(sint shutdownCounter, sint broadcastMessage
 /*
  * Cancel Shutdown
  */
-void	CShutdownHandler::cancelShutdown()
+void CShutdownHandler::cancelShutdown()
 {
 	nlinfo("CShutdownHandler::cancelShutdown(): cancelling shard shutdown");
 
@@ -211,7 +203,7 @@ void	CShutdownHandler::cancelShutdown()
 	if (_ShardClosed)
 	{
 		nlinfo("CShutdownHandler::cancelShutdown(): WS ShardOpen state modified, sending restore request");
-		CMessage	msgShardOpen("RESTORE_SHARD_OPEN");
+		CMessage msgShardOpen("RESTORE_SHARD_OPEN");
 		CUnifiedNetwork::getInstance()->send("WS", msgShardOpen);
 	}
 }
@@ -220,7 +212,7 @@ void	CShutdownHandler::cancelShutdown()
  * Restart shard
  * Actually reset WS ShardOpen variable to OpenForAll
  */
-void	CShutdownHandler::restartShard()
+void CShutdownHandler::restartShard()
 {
 	nlinfo("CShutdownHandler::restartShard(): restarting shard after shutdown");
 
@@ -236,18 +228,14 @@ void	CShutdownHandler::restartShard()
 
 	// send SET_SHARD_OPEN to WS
 	nlinfo("CShutdownHandler::restartShard(): WS ShardOpen state modified, sending restore request");
-	CMessage	msgShardOpen("RESTORE_SHARD_OPEN");
+	CMessage msgShardOpen("RESTORE_SHARD_OPEN");
 	CUnifiedNetwork::getInstance()->send("WS", msgShardOpen);
 }
-
-
-
-
 
 /*
  * Get current shard state
  */
-std::string	CShutdownHandler::getState()
+std::string CShutdownHandler::getState()
 {
 	if (_State == Running)
 	{
@@ -255,7 +243,7 @@ std::string	CShutdownHandler::getState()
 	}
 	else if (_State == ShuttingDown)
 	{
-		sint	shutdown = (sint)((_ShutdownTimeout-NLMISC::CTime::getLocalTime()) / 1000);
+		sint shutdown = (sint)((_ShutdownTimeout - NLMISC::CTime::getLocalTime()) / 1000);
 
 		if (_ShardClosed)
 		{
@@ -272,13 +260,12 @@ std::string	CShutdownHandler::getState()
 	}
 }
 
-
 /*
  * Broadcast message
  */
-void	CShutdownHandler::broadcastMessage(const ucstring& message)
+void CShutdownHandler::broadcastMessage(const ucstring &message)
 {
-	_NextBroadcastMessage = NLMISC::CTime::getLocalTime() + _BroadcastMessageRate*1000;
+	_NextBroadcastMessage = NLMISC::CTime::getLocalTime() + _BroadcastMessageRate * 1000;
 
 	/// \todo handle ucstring somewhere here...
 	PlayerManager.broadcastMessage(1, 0, 0, message.toString());
@@ -287,22 +274,22 @@ void	CShutdownHandler::broadcastMessage(const ucstring& message)
 /*
  * Broadcast Shutdown message
  */
-void	CShutdownHandler::broadcastShutdownMessage()
+void CShutdownHandler::broadcastShutdownMessage()
 {
 	nlinfo("CShutdownHandler::broadcastShutdownMessage(): broadcasting shutdown message");
 
-	std::string		shutdownMessage;
-	const sint		timeAccuracy = 10;
+	std::string shutdownMessage;
+	const sint timeAccuracy = 10;
 
-	sint	shutdown = (sint)((_ShutdownTimeout-NLMISC::CTime::getLocalTime()) / 1000);
+	sint shutdown = (sint)((_ShutdownTimeout - NLMISC::CTime::getLocalTime()) / 1000);
 
-	shutdown += (timeAccuracy/2);
+	shutdown += (timeAccuracy / 2);
 
 	// clamp to 0
 	if (shutdown < 0)
 		shutdown = 0;
 
-	shutdown = shutdown - (shutdown%timeAccuracy);
+	shutdown = shutdown - (shutdown % timeAccuracy);
 
 	if (shutdown < timeAccuracy)
 	{
@@ -316,44 +303,42 @@ void	CShutdownHandler::broadcastShutdownMessage()
 		}
 		else
 		{
-			uint	min = shutdown/60;
-			uint	sec = shutdown%60;
+			uint min = shutdown / 60;
+			uint sec = shutdown % 60;
 			broadcastMessage(NLMISC::toString("Shard shuts down in %dmn %ds", min, sec));
 		}
 	}
 }
 
-
 /*
  * Disconnect all players
  */
-void	CShutdownHandler::disconnectPlayers()
+void CShutdownHandler::disconnectPlayers()
 {
 	nlinfo("CShutdownHandler::disconnectPlayers(): disconnecting all players");
 
-	CMessage	msgout("DISCONNECT_ALL_CLIENTS");
+	CMessage msgout("DISCONNECT_ALL_CLIENTS");
 	CUnifiedNetwork::getInstance()->send("FS", msgout);
 
-/*
-	const CPlayerManager::TMapPlayers&	playerMap = PlayerManager.getPlayers();
+	/*
+	    const CPlayerManager::TMapPlayers&	playerMap = PlayerManager.getPlayers();
 
-	// browse through all players to disconnect them
-	CPlayerManager::TMapPlayers::const_iterator	it;
-	for (it = playerMap.begin(); it != playerMap.end(); )
-	{
-		const CPlayerManager::SCPlayer&	player = (*it).second;
-		++it;
+	    // browse through all players to disconnect them
+	    CPlayerManager::TMapPlayers::const_iterator	it;
+	    for (it = playerMap.begin(); it != playerMap.end(); )
+	    {
+	        const CPlayerManager::SCPlayer&	player = (*it).second;
+	        ++it;
 
-		if (player.Player != NULL)
-		{
-			uint32	userId = player.Player->getUserId();
-			PlayerManager.savePlayer(userId);
-			PlayerManager.disconnectPlayer(userId);
-		}
-	}
-*/
+	        if (player.Player != NULL)
+	        {
+	            uint32	userId = player.Player->getUserId();
+	            PlayerManager.savePlayer(userId);
+	            PlayerManager.disconnectPlayer(userId);
+	        }
+	    }
+	*/
 }
-
 
 /*
  * Update.
@@ -361,22 +346,22 @@ void	CShutdownHandler::disconnectPlayers()
  */
 void CAutomaticShutdownHandler::update()
 {
-	if ( CTickEventHandler::getGameCycle() - _LastGCChecked >= CheckShutdownPeriodGC )
+	if (CTickEventHandler::getGameCycle() - _LastGCChecked >= CheckShutdownPeriodGC)
 	{
 		_LastGCChecked = CTickEventHandler::getGameCycle();
 		TSecTime nowSec = NLMISC::CTime::getSecondsSince1970();
-		
+
 		// Time to start an automatic shutdown sequence?
-		if ( nowSec >= _NextPlannedShutdownStartTime )
+		if (nowSec >= _NextPlannedShutdownStartTime)
 		{
 			string msg = DailyShutdownBroadcastMessage.get();
-			PlayerManager.broadcastMessage( 1, 0, 0, msg );
-			nlinfo( msg.c_str() );
-			_NextPlannedShutdownEndTime = _NextPlannedShutdownStartTime + (DailyShutdownCounterMinutes.get()*60);
+			PlayerManager.broadcastMessage(1, 0, 0, msg);
+			nlinfo(msg.c_str());
+			_NextPlannedShutdownEndTime = _NextPlannedShutdownStartTime + (DailyShutdownCounterMinutes.get() * 60);
 			_NextPlannedShutdownStartTime = MaxTime;
 		}
 		// Time to shutdown?
-		else if ( nowSec >= _NextPlannedShutdownEndTime )
+		else if (nowSec >= _NextPlannedShutdownEndTime)
 		{
 			_NextPlannedShutdownEndTime = MaxTime;
 			IService::getInstance()->exit();
@@ -384,37 +369,36 @@ void CAutomaticShutdownHandler::update()
 	}
 }
 
-
 /*
  * Use daily shutdown sequence time to compute next time
  */
-void	CAutomaticShutdownHandler::computePlannedShutdownTimes( NLMISC::CLog *log )
+void CAutomaticShutdownHandler::computePlannedShutdownTimes(NLMISC::CLog *log)
 {
 	string dailyTimeStr = DailyShutdownSequenceTime.get();
-	if ( dailyTimeStr.empty() || (dailyTimeStr == "-1") )
+	if (dailyTimeStr.empty() || (dailyTimeStr == "-1"))
 	{
 		// No automatic shutdown sequence
 		_NextPlannedShutdownStartTime = MaxTime;
 		_NextPlannedShutdownEndTime = MaxTime;
-		if ( log )
-			log->displayNL( "Automatic shutdown sequence disabled" );
+		if (log)
+			log->displayNL("Automatic shutdown sequence disabled");
 	}
 	else
 	{
 		// Setup next automatic shutdown sequence
-		time_t currentTime = time( NULL );
-		struct tm *localTime = localtime( &currentTime );
+		time_t currentTime = time(NULL);
+		struct tm *localTime = localtime(&currentTime);
 		struct tm shutdownTime = *localTime;
-		string::size_type cp = dailyTimeStr.find( ':' );
-		shutdownTime.tm_hour = atoi( dailyTimeStr.substr( 0, cp ).c_str() );
+		string::size_type cp = dailyTimeStr.find(':');
+		shutdownTime.tm_hour = atoi(dailyTimeStr.substr(0, cp).c_str());
 		shutdownTime.tm_min = 0;
-		if ( cp != string::npos )
-			shutdownTime.tm_min = atoi( dailyTimeStr.substr( cp+1 ).c_str() );
+		if (cp != string::npos)
+			shutdownTime.tm_min = atoi(dailyTimeStr.substr(cp + 1).c_str());
 		shutdownTime.tm_sec = 0;
 		shutdownTime.tm_isdst = -1;
-		_NextPlannedShutdownStartTime = nl_mktime( &shutdownTime );
+		_NextPlannedShutdownStartTime = nl_mktime(&shutdownTime);
 		char *dayWhenStr;
-		if ( _NextPlannedShutdownStartTime > (TSecTime)currentTime )
+		if (_NextPlannedShutdownStartTime > (TSecTime)currentTime)
 		{
 			dayWhenStr = "today";
 		}
@@ -422,14 +406,13 @@ void	CAutomaticShutdownHandler::computePlannedShutdownTimes( NLMISC::CLog *log )
 		{
 			dayWhenStr = "tomorrow";
 			++shutdownTime.tm_mday;
-			_NextPlannedShutdownStartTime = nl_mktime( &shutdownTime );
+			_NextPlannedShutdownStartTime = nl_mktime(&shutdownTime);
 		}
-		_NextPlannedShutdownEndTime = _NextPlannedShutdownStartTime + (DailyShutdownCounterMinutes.get()*60);
-		if ( log )
-			log->displayNL( "Next automatic shutdown sequence will begin %s at %02u:%02u with %u-minute delay", dayWhenStr, shutdownTime.tm_hour, shutdownTime.tm_min, DailyShutdownCounterMinutes.get() );
+		_NextPlannedShutdownEndTime = _NextPlannedShutdownStartTime + (DailyShutdownCounterMinutes.get() * 60);
+		if (log)
+			log->displayNL("Next automatic shutdown sequence will begin %s at %02u:%02u with %u-minute delay", dayWhenStr, shutdownTime.tm_hour, shutdownTime.tm_min, DailyShutdownCounterMinutes.get());
 	}
 }
-
 
 NLMISC_DYNVARIABLE(std::string, ShutdownState, "Current shutdown state of the shard, as a string (Read only)")
 {
@@ -438,7 +421,6 @@ NLMISC_DYNVARIABLE(std::string, ShutdownState, "Current shutdown state of the sh
 		*pointer = CShutdownHandler::getState();
 }
 
-
 // Commands
 
 NLMISC_COMMAND(startShutdown, "Ask the EGS to shutdown the whole shard", "[time to shutdown, minutes] [time between 2 messages, seconds]")
@@ -446,8 +428,8 @@ NLMISC_COMMAND(startShutdown, "Ask the EGS to shutdown the whole shard", "[time 
 	if (args.size() > 2)
 		return false;
 
-	sint	counter = -1;
-	sint	msgRate = -1;
+	sint counter = -1;
+	sint msgRate = -1;
 
 	if (args.size() >= 1)
 		counter = atoi(args[0].c_str());
@@ -470,4 +452,3 @@ NLMISC_COMMAND(restartShard, "Restart the shard after a shutdown", "")
 	CShutdownHandler::restartShard();
 	return true;
 }
-

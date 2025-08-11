@@ -21,10 +21,8 @@
 #include "nel/misc/entity_id.h"
 #include "server_share/mysql_wrapper.h"
 
-namespace RSMGR
-{
-	const char *const RingSessionManagerClassName = "RingSessionManager";
+namespace RSMGR {
+const char *const RingSessionManagerClassName = "RingSessionManager";
 }
-
 
 #endif

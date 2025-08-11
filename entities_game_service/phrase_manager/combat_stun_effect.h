@@ -14,14 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_COMBAT_STUN_EFFECT_H
 #define RY_COMBAT_STUN_EFFECT_H
 
 #include "phrase_manager/s_effect.h"
 #include "entity_manager/entity_base.h"
-
 
 /**
  * <Class description>
@@ -33,8 +30,9 @@ class CCombatStunEffect : public CSEffect
 {
 public:
 	///\ctor
-	CCombatStunEffect( const TDataSetRow & creatorRowId, const TDataSetRow & targetRowId, EFFECT_FAMILIES::TEffectFamily family, sint32 effectValue, uint32 endDate)
-		:CSEffect(creatorRowId, targetRowId, family, effectValue,0), _StunEndDate(endDate)
+	CCombatStunEffect(const TDataSetRow &creatorRowId, const TDataSetRow &targetRowId, EFFECT_FAMILIES::TEffectFamily family, sint32 effectValue, uint32 endDate)
+	    : CSEffect(creatorRowId, targetRowId, family, effectValue, 0)
+	    , _StunEndDate(endDate)
 	{
 	}
 
@@ -48,7 +46,7 @@ public:
 	 * \param updateFlag is a flag telling which effect type has been already processed for an entity. An effect shoud set to 1 the bit corresponding to its effect family
 	 * \return true if the effect ends and must be removed
 	 */
-	virtual bool update( uint32 & updateFlag );
+	virtual bool update(uint32 &updateFlag);
 
 	/// callback called when the effect is actually removed
 	virtual void removed();
@@ -61,12 +59,11 @@ public:
 
 private:
 	/// effect end date in ticks
-	NLMISC::TGameCycle		_StunEndDate;
+	NLMISC::TGameCycle _StunEndDate;
 
 	/// affected entity
-	CEntityBase				*_StunnedEntity;
+	CEntityBase *_StunnedEntity;
 };
-
 
 #endif // RY_COMBAT_STUN_EFFECT_H
 

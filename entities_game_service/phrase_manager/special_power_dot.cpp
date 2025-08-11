@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -41,9 +38,8 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CSpecialPowerDoT::apply()
 {
@@ -62,7 +58,7 @@ void CSpecialPowerDoT::apply()
 
 	// create effect and apply it on actor
 	const TGameCycle endDate = _Duration + CTickEventHandler::getGameCycle();
-	
+
 	CNoLinkDOTEffect *effect = new CNoLinkDOTEffect(_ActorRowId, _ActorRowId, _EffectFamily, _ParamValue, endDate, _UpdateFrequency, SCORES::hit_points, _DamagePerUpdate, DMGTYPE::UNDEFINED);
 	if (effect)
 	{
@@ -73,7 +69,7 @@ void CSpecialPowerDoT::apply()
 	else
 		return;
 	// send messages
-//	TVectorParamCheck params;
+	//	TVectorParamCheck params;
 	// for actor
 	if (actor->getId().getType() == RYZOMID::player)
 	{
@@ -83,15 +79,15 @@ void CSpecialPowerDoT::apply()
 	}
 
 	// for spectators
-//	{
-//		vector<CEntityId> excluded;
-//		excluded.push_back(actor->getId());
-//
-//		params.resize(2);
-//		params[0].Type = STRING_MANAGER::entity;
-//		params[0].EId = actor->getId();
-//		params[1].Type = STRING_MANAGER::power_type;
-//		params[1].Enum = _PowerType;
-//		PHRASE_UTILITIES::sendDynamicGroupSystemMessage(_ActorRowId, excluded, "POWER_USE_SPECTATORS", params);
-//	}
+	//	{
+	//		vector<CEntityId> excluded;
+	//		excluded.push_back(actor->getId());
+	//
+	//		params.resize(2);
+	//		params[0].Type = STRING_MANAGER::entity;
+	//		params[0].EId = actor->getId();
+	//		params[1].Type = STRING_MANAGER::power_type;
+	//		params[1].Enum = _PowerType;
+	//		PHRASE_UTILITIES::sendDynamicGroupSystemMessage(_ActorRowId, excluded, "POWER_USE_SPECTATORS", params);
+	//	}
 } // apply //

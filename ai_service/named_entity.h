@@ -25,24 +25,25 @@ class CGroupNpc;
 class CNamedEntity
 {
 public:
-	CNamedEntity(std::string const& name);
-	std::string const& name() const;
-	NLMISC::CEntityId const& id() const;
-	std::string const& getState();
-	std::string const& getParam1();
-	std::string const& getParam2();
-	std::string get(std::string const& prop);
-	void set(std::string const& prop, std::string const& value, bool reportChange=false);
-	void addListenerGroup(std::string const& prop, CGroupNpc* persGrp);
-	void delListenerGroup(std::string const& prop, CGroupNpc* persGrp);
+	CNamedEntity(std::string const &name);
+	std::string const &name() const;
+	NLMISC::CEntityId const &id() const;
+	std::string const &getState();
+	std::string const &getParam1();
+	std::string const &getParam2();
+	std::string get(std::string const &prop);
+	void set(std::string const &prop, std::string const &value, bool reportChange = false);
+	void addListenerGroup(std::string const &prop, CGroupNpc *persGrp);
+	void delListenerGroup(std::string const &prop, CGroupNpc *persGrp);
+
 private:
-	void namedEntityCb(std::string const& prop);
+	void namedEntityCb(std::string const &prop);
 	std::string _name;
 	NLMISC::CEntityId _id;
 	std::string _state;
 	std::string _param1;
 	std::string _param2;
-	typedef std::multimap<std::string, CGroupNpc*> TListenerGroupList;
+	typedef std::multimap<std::string, CGroupNpc *> TListenerGroupList;
 	TListenerGroupList _listenerGroups;
 };
 

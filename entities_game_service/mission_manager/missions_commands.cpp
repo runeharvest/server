@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "mission_manager/ai_alias_translator.h"
 #include "nel/net/service.h"
@@ -50,13 +49,13 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
-NLMISC_COMMAND( forceMissionProgress,"debug command used to trigger debug commands","<user>" )
+NLMISC_COMMAND(forceMissionProgress, "debug command used to trigger debug commands", "<user>")
 {
 	if (args.size() != 1)
 		return false;
 	CEntityId id;
-	id.fromString( args[0].c_str() );
-	CCharacter * c = PlayerManager.getChar( id );
+	id.fromString(args[0].c_str());
+	CCharacter *c = PlayerManager.getChar(id);
 	if (!c)
 		return true;
 	CMissionEventDebug event;
@@ -67,42 +66,42 @@ NLMISC_COMMAND( forceMissionProgress,"debug command used to trigger debug comman
 //-----------------------------------------------
 // forceJournalUpdate
 //-----------------------------------------------
-NLMISC_COMMAND(forceJournalUpdate,"force mission journal update","<player id(id:type:crea:dyn)>")
+NLMISC_COMMAND(forceJournalUpdate, "force mission journal update", "<player id(id:type:crea:dyn)>")
 {
-	if ( args.size() != 1 )
+	if (args.size() != 1)
 		return false;
 	CEntityId id;
 	id.fromString(args[0].c_str());
-	CCharacter * user = PlayerManager.getChar( id );
-	if( !user )
+	CCharacter *user = PlayerManager.getChar(id);
+	if (!user)
 	{
 		log.displayNL("invalid char");
 		return true;
 	}
-	for ( map<TAIAlias,CMission*>::iterator it = user->getMissionsBegin(); it != user->getMissionsEnd(); ++it )
+	for (map<TAIAlias, CMission *>::iterator it = user->getMissionsBegin(); it != user->getMissionsEnd(); ++it)
 	{
 		(*it).second->updateUsersJournalEntry();
 	}
 
-	CTeam * team = TeamManager.getTeam( user->getTeamId() );
-	if ( team )
+	CTeam *team = TeamManager.getTeam(user->getTeamId());
+	if (team)
 	{
-		for ( uint i  = 0; i < team->getMissions().size(); i++ )
+		for (uint i = 0; i < team->getMissions().size(); i++)
 		{
 			team->getMissions()[i]->updateUsersJournalEntry();
 		}
 	}
-	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
+	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
 	if (guild)
 	{
-		for ( uint i  = 0; i < guild->getMissions().size(); i++ )
+		for (uint i = 0; i < guild->getMissions().size(); i++)
 		{
 			guild->getMissions()[i]->updateUsersJournalEntry();
 		}
 	}
 	/*for (uint i = 0; i < MaxGuildMissionCount; i++)
 	{
-		/// todo guild mission
+	    /// todo guild mission
 	}*/
 	return true;
 } // missionProgress //
@@ -110,11 +109,11 @@ NLMISC_COMMAND(forceJournalUpdate,"force mission journal update","<player id(id:
 //-----------------------------------------------
 // simMissionEvent
 //-----------------------------------------------
-NLMISC_COMMAND(simMissionEvent,"simulate a mission event","<player> <event type> *[<event param>]")
+NLMISC_COMMAND(simMissionEvent, "simulate a mission event", "<player> <event type> *[<event param>]")
 {
-	if ( args.empty() )
+	if (args.empty())
 		return false;
-	if ( !CMissionEvent::simMissionEvent( args,log ) )
+	if (!CMissionEvent::simMissionEvent(args, log))
 		log.displayNL("simMissionEvent failed");
 	return true;
 } // simMissionEvent //
@@ -122,29 +121,29 @@ NLMISC_COMMAND(simMissionEvent,"simulate a mission event","<player> <event type>
 //-----------------------------------------------
 // reload missions
 //-----------------------------------------------
-NLMISC_COMMAND(reloadMissions,"reload the mission primitives. Picked missions are erased","[bool telling if we have tio reset aliases (default : false)]")
+NLMISC_COMMAND(reloadMissions, "reload the mission primitives. Picked missions are erased", "[bool telling if we have tio reset aliases (default : false)]")
 {
-	if ( args.size() > 1 )
+	if (args.size() > 1)
 		return true;
 	CPlayerManager::TMapPlayers::const_iterator itPlayer = PlayerManager.getPlayers().begin();
 
-	for (; itPlayer != PlayerManager.getPlayers().end(); ++itPlayer )
+	for (; itPlayer != PlayerManager.getPlayers().end(); ++itPlayer)
 	{
-		if ( (*itPlayer).second.Player )
+		if ((*itPlayer).second.Player)
 		{
-			CCharacter * user = (*itPlayer).second.Player->getActiveCharacter();
-			if ( user )
+			CCharacter *user = (*itPlayer).second.Player->getActiveCharacter();
+			if (user)
 			{
-				while ( user->getMissionsBegin() != user->getMissionsEnd()  )
+				while (user->getMissionsBegin() != user->getMissionsEnd())
 				{
-					user->removeMission( ( *user->getMissionsBegin() ).first, mr_forced);
+					user->removeMission((*user->getMissionsBegin()).first, mr_forced);
 				}
-				CTeam * team = TeamManager.getRealTeam( user->getTeamId() );
-				if ( team )
+				CTeam *team = TeamManager.getRealTeam(user->getTeamId());
+				if (team)
 				{
-					for ( uint i = 0; i < team->getMissions().size(); i++ )
+					for (uint i = 0; i < team->getMissions().size(); i++)
 					{
-						team->removeMission( i, mr_forced);
+						team->removeMission(i, mr_forced);
 					}
 				}
 				/// todo guild mission
@@ -153,36 +152,34 @@ NLMISC_COMMAND(reloadMissions,"reload the mission primitives. Picked missions ar
 	}
 
 	bool reloadAliases = false;
-	if ( args.size() == 1 && ( args[0] == "true" || args[0] == "1" ) )
+	if (args.size() == 1 && (args[0] == "true" || args[0] == "1"))
 		reloadAliases = true;
 	CMissionManager::release();
-	if ( reloadAliases )
+	if (reloadAliases)
 	{
-		log.displayNL( "please restart AI service" );
+		log.displayNL("please restart AI service");
 		CAIAliasTranslator::release();
 	}
-	if ( reloadAliases )
+	if (reloadAliases)
 		CAIAliasTranslator::init();
 	CMissionManager::init();
-	log.displayNL( "missions reloaded" );
+	log.displayNL("missions reloaded");
 	return true;
 } // reloadMissions
 
-
-
-NLMISC_COMMAND(addSuccessfulMission,"add a successful mission to the player","<player > <mission alias>")
+NLMISC_COMMAND(addSuccessfulMission, "add a successful mission to the player", "<player > <mission alias>")
 {
-	if ( args.size() != 2 )
+	if (args.size() != 2)
 		return false;
-	
+
 	CEntityId id;
 	id.fromString(args[0].c_str());
-	CCharacter * user = PlayerManager.getChar( id );
+	CCharacter *user = PlayerManager.getChar(id);
 	if (user)
 	{
 		TAIAlias alias;
 		NLMISC::fromString(args[1], alias);
-		const CHashMap< uint,CMissionTemplate* > &mts = CMissionManager::getInstance()->getMissionTemplates();
+		const CHashMap<uint, CMissionTemplate *> &mts = CMissionManager::getInstance()->getMissionTemplates();
 		if (mts.find(alias) == mts.end())
 		{
 			log.displayNL("Invalid mission");
@@ -190,7 +187,7 @@ NLMISC_COMMAND(addSuccessfulMission,"add a successful mission to the player","<p
 		}
 		CMissionTemplate *mt = mts.find(alias)->second;
 		if (mt)
-			user->addSuccessfulMissions( *mt );
+			user->addSuccessfulMissions(*mt);
 	}
 	else
 		log.displayNL("Invalid user");
@@ -198,54 +195,52 @@ NLMISC_COMMAND(addSuccessfulMission,"add a successful mission to the player","<p
 	return true;
 } // addSuccesfulMission
 
-
-
-NLMISC_COMMAND(createMissionItem,"","")
+NLMISC_COMMAND(createMissionItem, "", "")
 {
-	if ( args.size() != 3 )
+	if (args.size() != 3)
 		return false;
 	string varName;
 
 	CEntityId id;
 	id.fromString(args[0].c_str());
-	CCharacter * user = PlayerManager.getChar(id);
+	CCharacter *user = PlayerManager.getChar(id);
 
-	if ( !user )
+	if (!user)
 	{
-		log.displayNL( "invalid char" );
+		log.displayNL("invalid char");
 		return true;
 	}
 
 	uint16 quantity;
 	NLMISC::fromString(args[1], quantity);
 
-	std::vector< std::string > script;
-	vector< pair<string, STRING_MANAGER::TParamType > > chatParams;
-	NLMISC::splitString( args[2],":",script );
+	std::vector<std::string> script;
+	vector<pair<string, STRING_MANAGER::TParamType>> chatParams;
+	NLMISC::splitString(args[2], ":", script);
 
 	CMissionItem item;
-	item.buildFromScript( script,chatParams, varName );
+	item.buildFromScript(script, chatParams, varName);
 
-	item.createItemInTempInv( user,quantity );
-		
+	item.createItemInTempInv(user, quantity);
+
 	return true;
 } // createMissionItem
 
-NLMISC_COMMAND(clearMissionDone,"Clear the list of already done missions.","<character id(id:type:crea:dyn)>")
+NLMISC_COMMAND(clearMissionDone, "Clear the list of already done missions.", "<character id(id:type:crea:dyn)>")
 {
 	if (args.size() != 1)
 		return false;
-	
+
 	CEntityId id;
-	id.fromString( args[0].c_str() );
-	
+	id.fromString(args[0].c_str());
+
 	CCharacter *c = PlayerManager.getChar(id);
-	if( c == 0 )
+	if (c == 0)
 	{
-		log.displayNL("<clearMissionDone> unknown character '%s'", id.toString().c_str() );
+		log.displayNL("<clearMissionDone> unknown character '%s'", id.toString().c_str());
 		return false;
 	}
-	
+
 	c->clearSuccessfullMission();
 	return true;
 }
@@ -254,8 +249,8 @@ NLMISC_COMMAND(clearMissionGlobalReplayTimer, "Clear the global replay timer of 
 {
 	CMissionManager *mm = CMissionManager::getInstance();
 
-	const CHashMap< uint,CMissionTemplate* >&mts = mm->getMissionTemplates();
-	CHashMap< uint,CMissionTemplate* >::const_iterator first(mts.begin()), last(mts.end());
+	const CHashMap<uint, CMissionTemplate *> &mts = mm->getMissionTemplates();
+	CHashMap<uint, CMissionTemplate *>::const_iterator first(mts.begin()), last(mts.end());
 	for (; first != last; ++first)
 	{
 		const CMissionTemplate *mt = first->second;
@@ -284,7 +279,7 @@ NLMISC_COMMAND(displayMissionsPlayerStats, "display the missions statistic data 
 		return false;
 	}
 
-//	CCharacterManager *cm = CCharacterManager::getInstance();
+	//	CCharacterManager *cm = CCharacterManager::getInstance();
 	CCharacter *c = PlayerManager.getChar(eid);
 	if (c == NULL)
 	{
@@ -292,18 +287,17 @@ NLMISC_COMMAND(displayMissionsPlayerStats, "display the missions statistic data 
 		return false;
 	}
 
-//	const std::vector< CMissionInstanceSolo* > & missions = c->getMissions();
+	//	const std::vector< CMissionInstanceSolo* > & missions = c->getMissions();
 
-
-	const std::map< TAIAlias, TMissionHistory > &mhs = c->getMissionHistories();
+	const std::map<TAIAlias, TMissionHistory> &mhs = c->getMissionHistories();
 	log.displayNL("Listing %u missions history for player '%s'", mhs.size(), args[0].c_str());
-	std::map< TAIAlias, TMissionHistory >::const_iterator firsth(mhs.begin()), lasth(mhs.end());
+	std::map<TAIAlias, TMissionHistory>::const_iterator firsth(mhs.begin()), lasth(mhs.end());
 	for (; firsth != lasth; ++firsth)
 	{
 		const TMissionHistory &mh = firsth->second;
-		bool	running = false;
+		bool running = false;
 
-		map<TAIAlias, CMission*>::iterator first(c->getMissionsBegin()), last(c->getMissionsEnd());
+		map<TAIAlias, CMission *>::iterator first(c->getMissionsBegin()), last(c->getMissionsEnd());
 		for (; first != last; ++first)
 		{
 			CMission *mission = first->second;
@@ -315,102 +309,100 @@ NLMISC_COMMAND(displayMissionsPlayerStats, "display the missions statistic data 
 		}
 
 		log.displayNL("Mission '%s' \t(alias %10u) : Success:%s, Status:%s, last success : %s",
-			CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(firsth->first).c_str(),
-			firsth->first,
-			mh.Successfull ? "YES":"NO",
-			running ? "RUNNING":"NOT RUNNING",
-			mh.LastSuccessDate != 0 ? toString("%10u ticks ago", CTickEventHandler::getGameCycle() - mh.LastSuccessDate).c_str() : "never");
+		    CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(firsth->first).c_str(),
+		    firsth->first,
+		    mh.Successfull ? "YES" : "NO",
+		    running ? "RUNNING" : "NOT RUNNING",
+		    mh.LastSuccessDate != 0 ? toString("%10u ticks ago", CTickEventHandler::getGameCycle() - mh.LastSuccessDate).c_str() : "never");
 	}
 
 	return true;
 }
 
-
-
 NLMISC_COMMAND(simAISMAction, "simulate an AI action.", "<action name> *[params]")
 {
-	if ( args.size() == 2 )
+	if (args.size() == 2)
 	{
-		TAIAlias alias = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName( args[1] );
-		if ( alias != CAIAliasTranslator::Invalid )
+		TAIAlias alias = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName(args[1]);
+		if (alias != CAIAliasTranslator::Invalid)
 		{
-			const CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate(alias);
-			if ( templ != NULL )
+			const CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(alias);
+			if (templ != NULL)
 			{
-				if ( args[0] == "end_escort" )
+				if (args[0] == "end_escort")
 				{
-					for ( uint i = 0; i < templ->Instances.size() ; i++)
+					for (uint i = 0; i < templ->Instances.size(); i++)
 					{
-						if ( templ->Instances[i] )
+						if (templ->Instances[i])
 						{
 							vector<TDataSetRow> entities;
-							templ->Instances[i]->getEntities( entities );
-							for ( uint j = 0; j < entities.size() ; j++ )
+							templ->Instances[i]->getEntities(entities);
+							for (uint j = 0; j < entities.size(); j++)
 							{
-								CCharacter * user = PlayerManager.getChar( entities[j] );
-								if( user)
+								CCharacter *user = PlayerManager.getChar(entities[j]);
+								if (user)
 								{
-									CMissionEventEscort event( alias );
-									user->processMissionEvent( event, alias );
+									CMissionEventEscort event(alias);
+									user->processMissionEvent(event, alias);
 								}
 								else
-									nlwarning( "<CCAisActionMsgImp callback> invalid user %u",entities[j].getIndex() );
+									nlwarning("<CCAisActionMsgImp callback> invalid user %u", entities[j].getIndex());
 							}
 						}
 						else
-							nlwarning( "<CCAisActionMsgImp callback> %s mission %s  has a NULL instance ",args[0].c_str(),args[1].c_str() );
+							nlwarning("<CCAisActionMsgImp callback> %s mission %s  has a NULL instance ", args[0].c_str(), args[1].c_str());
 					}
 				}
-				else if ( args[0] == "fail" )
+				else if (args[0] == "fail")
 				{
 					bool exit = false;
-					
+
 					// get instance currently in escort step
-					for ( uint i = 0; (i < templ->Instances.size()) && !exit ; ++i)
+					for (uint i = 0; (i < templ->Instances.size()) && !exit; ++i)
 					{
-						if ( templ->Instances[i] != NULL )
+						if (templ->Instances[i] != NULL)
 						{
 							// check step
-							for ( map<uint32, EGSPD::CActiveStepPD>::const_iterator itStep = templ->Instances[i]->getStepsBegin(); itStep != templ->Instances[i]->getStepsEnd(); ++itStep )
+							for (map<uint32, EGSPD::CActiveStepPD>::const_iterator itStep = templ->Instances[i]->getStepsBegin(); itStep != templ->Instances[i]->getStepsEnd(); ++itStep)
 							{
-								nlassert( uint( (*itStep).second.getIndexInTemplate() - 1 ) < templ->Steps.size() );
-								
-								CMissionStepEscort *escortStep = dynamic_cast<CMissionStepEscort*> (templ->Steps[ (*itStep).second.getIndexInTemplate() - 1 ]);
-								if ( escortStep != NULL )
+								nlassert(uint((*itStep).second.getIndexInTemplate() - 1) < templ->Steps.size());
+
+								CMissionStepEscort *escortStep = dynamic_cast<CMissionStepEscort *>(templ->Steps[(*itStep).second.getIndexInTemplate() - 1]);
+								if (escortStep != NULL)
 								{
 									templ->Instances[i]->onFailure(false);
-									
+
 									exit = true;
 									break;
 								}
-							}							
+							}
 						}
 						else
-							nlwarning( "<CCAisActionMsgImp callback> *fail* mission %s  has a NULL instance ",args[1].c_str() );
+							nlwarning("<CCAisActionMsgImp callback> *fail* mission %s  has a NULL instance ", args[1].c_str());
 					}
 				}
 				else
 				{
-					for ( uint i = 0; i < templ->Instances.size() ; ++i)
+					for (uint i = 0; i < templ->Instances.size(); ++i)
 					{
-						if ( templ->Instances[i] )
+						if (templ->Instances[i])
 						{
 							vector<TDataSetRow> entities;
-							templ->Instances[i]->getEntities( entities );
-							for ( uint j = 0 ; j < entities.size() ; ++j )
+							templ->Instances[i]->getEntities(entities);
+							for (uint j = 0; j < entities.size(); ++j)
 							{
-								CCharacter * user = PlayerManager.getChar( entities[j] );
-								if( user)
+								CCharacter *user = PlayerManager.getChar(entities[j]);
+								if (user)
 								{
 									CMissionEventAIMsg event(args[0]);
-									user->processMissionEvent( event, alias );
+									user->processMissionEvent(event, alias);
 								}
 								else
-									nlwarning( "<CCAisActionMsgImp callback> invalid user %u",entities[j].getIndex() );
+									nlwarning("<CCAisActionMsgImp callback> invalid user %u", entities[j].getIndex());
 							}
 						}
 						else
-							nlwarning( "<CCAisActionMsgImp callback> %s mission %s  has a NULL instance ",args[0].c_str(),args[1].c_str() );
+							nlwarning("<CCAisActionMsgImp callback> %s mission %s  has a NULL instance ", args[0].c_str(), args[1].c_str());
 					}
 				}
 			}
@@ -420,15 +412,14 @@ NLMISC_COMMAND(simAISMAction, "simulate an AI action.", "<action name> *[params]
 	return false;
 }
 
-
 //-----------------------------------------------
 // failMissionCategory
 //-----------------------------------------------
-NLMISC_COMMAND(failMissionCategory,"fail all missions of a specified category for all players","<mission_category>")
+NLMISC_COMMAND(failMissionCategory, "fail all missions of a specified category for all players", "<mission_category>")
 {
 	if (args.size() != 1)
 		return false;
-	
+
 	string sMissCat = strlwr(args[0]);
 
 	CMissionManager *pMM = CMissionManager::getInstance();
@@ -445,15 +436,15 @@ NLMISC_COMMAND(failMissionCategory,"fail all missions of a specified category fo
 			if (pChar != NULL)
 			{
 				// Parse all missions to see if there is a mission that belongs to the mission_category
-				std::map<TAIAlias, CMission*>::iterator itMiss = pChar->getMissionsBegin();
+				std::map<TAIAlias, CMission *>::iterator itMiss = pChar->getMissionsBegin();
 				while (itMiss != pChar->getMissionsEnd())
 				{
-					map<TAIAlias, CMission*>::iterator itNext = itMiss;
+					map<TAIAlias, CMission *>::iterator itNext = itMiss;
 					++itNext;
 
 					CMission *pMiss = itMiss->second;
 					if (pMiss != NULL)
-					{						
+					{
 						CMissionTemplate *pMissTemplate;
 						bool bFailed = false;
 						// Check the mission template category
@@ -466,7 +457,7 @@ NLMISC_COMMAND(failMissionCategory,"fail all missions of a specified category fo
 							}
 
 						// and the main mission template category
-						if (!bFailed) // do not fail a mission twice 
+						if (!bFailed) // do not fail a mission twice
 						{
 							pMissTemplate = pMM->getTemplate(pMiss->getMainMissionTemplateId());
 							if (pMissTemplate != NULL)
@@ -489,7 +480,7 @@ NLMISC_COMMAND(failMissionCategory,"fail all missions of a specified category fo
 //-----------------------------------------------
 // characterMissionDump
 //-----------------------------------------------
-NLMISC_COMMAND(characterMissionDump,"dump character missions","<character_id>")
+NLMISC_COMMAND(characterMissionDump, "dump character missions", "<character_id>")
 {
 	if (args.size() != 1)
 		return false;
@@ -498,12 +489,12 @@ NLMISC_COMMAND(characterMissionDump,"dump character missions","<character_id>")
 
 	std::string text;
 	uint i = 0;
-	for ( map<TAIAlias, CMission*>::iterator it = c->getMissionsBegin(); it != c->getMissionsEnd(); ++it )
+	for (map<TAIAlias, CMission *>::iterator it = c->getMissionsBegin(); it != c->getMissionsEnd(); ++it)
 	{
 		log.displayNL("- %2d: Mission '%s' (alias %10u) Bot Giver Alias: %10u", i++,
-			CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId((*it).first).c_str(),
-			(*it).first,
-			(*it).second->getGiver());
+		    CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId((*it).first).c_str(),
+		    (*it).first,
+		    (*it).second->getGiver());
 	}
 
 	return true;
@@ -512,7 +503,7 @@ NLMISC_COMMAND(characterMissionDump,"dump character missions","<character_id>")
 //-----------------------------------------------
 // removeMission
 //-----------------------------------------------
-NLMISC_COMMAND(removeMission,"Remove mission of character","<character_id> <mission alias>")
+NLMISC_COMMAND(removeMission, "Remove mission of character", "<character_id> <mission alias>")
 {
 	if (args.size() != 2)
 		return false;
@@ -525,9 +516,9 @@ NLMISC_COMMAND(removeMission,"Remove mission of character","<character_id> <miss
 	c->removeMissionFromHistories(missionAlias);
 
 	log.displayNL("Mission '%s' \t(alias %10u)  removed from character %s",
-	CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(missionAlias).c_str(),
-	missionAlias, 
-	args[0].c_str());
+	    CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(missionAlias).c_str(),
+	    missionAlias,
+	    args[0].c_str());
 
 	return true;
 }
@@ -535,30 +526,30 @@ NLMISC_COMMAND(removeMission,"Remove mission of character","<character_id> <miss
 //-----------------------------------------------
 // addMission
 //-----------------------------------------------
-NLMISC_COMMAND(addMission,"Add mission to character","<character_id> <Mission giver Alias> <mission alias>")
+NLMISC_COMMAND(addMission, "Add mission to character", "<character_id> <Mission giver Alias> <mission alias>")
 {
 	if (args.size() != 3)
 		return false;
 
 	GET_CHARACTER
-	
+
 	TAIAlias giverAlias;
-	NLMISC::fromString(args[1], giverAlias);	
+	NLMISC::fromString(args[1], giverAlias);
 
 	TAIAlias missionAlias;
-	NLMISC::fromString(args[2], missionAlias);	
+	NLMISC::fromString(args[2], missionAlias);
 
 	c->endBotChat();
 	c->setAfkState(false);
-	
-	std::list< CMissionEvent* > eventList;
-	CMissionManager::getInstance()->instanciateMission(c, missionAlias,	giverAlias, eventList);
-	c->processMissionEventList( eventList,true, CAIAliasTranslator::Invalid );
+
+	std::list<CMissionEvent *> eventList;
+	CMissionManager::getInstance()->instanciateMission(c, missionAlias, giverAlias, eventList);
+	c->processMissionEventList(eventList, true, CAIAliasTranslator::Invalid);
 
 	log.displayNL("Mission '%s' \t(alias %10u)  added to character %s",
-		CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(missionAlias).c_str(),
-		missionAlias, 
-		args[0].c_str());
+	    CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(missionAlias).c_str(),
+	    missionAlias,
+	    args[0].c_str());
 
 	return true;
 }
@@ -571,21 +562,21 @@ CInventoryPtr getInventory(CCharacter *c, const string &inv)
 		INVENTORIES::TInventory selectedInv = INVENTORIES::toInventory(inv);
 		switch (selectedInv)
 		{
-			case INVENTORIES::temporary:
-			case INVENTORIES::bag:
-			case INVENTORIES::equipment:
-			case INVENTORIES::pet_animal1:
-			case INVENTORIES::pet_animal2:
-			case INVENTORIES::pet_animal3:
-			case INVENTORIES::pet_animal4:
-			case INVENTORIES::guild:
-			case INVENTORIES::player_room:
-				inventoryPtr = c->getInventory(selectedInv);
-				break;
+		case INVENTORIES::temporary:
+		case INVENTORIES::bag:
+		case INVENTORIES::equipment:
+		case INVENTORIES::pet_animal1:
+		case INVENTORIES::pet_animal2:
+		case INVENTORIES::pet_animal3:
+		case INVENTORIES::pet_animal4:
+		case INVENTORIES::guild:
+		case INVENTORIES::player_room:
+			inventoryPtr = c->getInventory(selectedInv);
+			break;
 
-			default:
-				// No-op
-				break;
+		default:
+			// No-op
+			break;
 		}
 	}
 	return inventoryPtr;
@@ -646,13 +637,15 @@ NLMISC_COMMAND(getItemList, "get list of named items of character by filter", "<
 	{
 		std::vector<string> invs;
 		NLMISC::splitString(selected_inv, ",", invs);
-		for (uint32 i=0; i<invs.size(); i++)
+		for (uint32 i = 0; i < invs.size(); i++)
 		{
 			INVENTORIES::TInventory selectedInv = INVENTORIES::toInventory(invs[i]);
 			if (selectedInv != INVENTORIES::UNDEFINED)
 				inventories.push_back(selectedInv);
 		}
-	} else {
+	}
+	else
+	{
 		inventories.push_back(INVENTORIES::equipment);
 		inventories.push_back(INVENTORIES::bag);
 		inventories.push_back(INVENTORIES::pet_animal1);
@@ -663,12 +656,13 @@ NLMISC_COMMAND(getItemList, "get list of named items of character by filter", "<
 		inventories.push_back(INVENTORIES::player_room);
 	}
 
-	if (inventories.empty()) {
+	if (inventories.empty())
+	{
 		log.displayNL("ERR: invalid inventories");
 		return false;
 	}
 
-	for (uint32 i=0; i<inventories.size(); i++)
+	for (uint32 i = 0; i < inventories.size(); i++)
 	{
 		CInventoryPtr childSrc = c->getInventory(inventories[i]);
 		if (childSrc != NULL)
@@ -676,7 +670,7 @@ NLMISC_COMMAND(getItemList, "get list of named items of character by filter", "<
 			uint32 k = 0;
 			log.displayNL("#%s", INVENTORIES::toString(inventories[i]).c_str());
 
-			for ( uint j = 0; j < childSrc->getSlotCount(); j++ )
+			for (uint j = 0; j < childSrc->getSlotCount(); j++)
 			{
 				CGameItemPtr itemPtr = childSrc->getItem(j);
 				if (itemPtr != NULL)
@@ -687,7 +681,7 @@ NLMISC_COMMAND(getItemList, "get list of named items of character by filter", "<
 						uint32 item_stack = itemPtr->getStackSize();
 						uint32 item_quality = itemPtr->quality();
 						if (item_stack >= quantity_min && item_stack <= quantity_max
-							&& item_quality >= quality_min && item_quality <= quality_max)
+						    && item_quality >= quality_min && item_quality <= quality_max)
 						{
 							string item_stats = toString("%3d|%s|", j, sheet.c_str());
 							if (!extra.empty())
@@ -747,13 +741,15 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 	{
 		std::vector<string> invs;
 		NLMISC::splitString(selected_inv, ",", invs);
-		for (uint32 i=0; i<invs.size(); i++)
+		for (uint32 i = 0; i < invs.size(); i++)
 		{
 			INVENTORIES::TInventory selectedInv = INVENTORIES::toInventory(invs[i]);
 			if (selectedInv != INVENTORIES::UNDEFINED)
 				inventories.push_back(selectedInv);
 		}
-	} else {
+	}
+	else
+	{
 		inventories.push_back(INVENTORIES::equipment);
 		inventories.push_back(INVENTORIES::bag);
 		inventories.push_back(INVENTORIES::pet_animal1);
@@ -764,7 +760,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 		inventories.push_back(INVENTORIES::player_room);
 	}
 
-	for (uint32 i=0; i<inventories.size(); i++)
+	for (uint32 i = 0; i < inventories.size(); i++)
 	{
 		CInventoryPtr childSrc = c->getInventory(inventories[i]);
 		if (childSrc != NULL)
@@ -772,7 +768,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 			uint32 k = 0;
 			log.displayNL("#%s", INVENTORIES::toString(inventories[i]).c_str());
 
-			for ( uint j = 0; j < childSrc->getSlotCount(); j++ )
+			for (uint j = 0; j < childSrc->getSlotCount(); j++)
 			{
 				CGameItemPtr itemPtr = childSrc->getItem(j);
 				if (itemPtr != NULL)
@@ -783,7 +779,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 						uint32 item_stack = itemPtr->getStackSize();
 						uint32 item_quality = itemPtr->quality();
 						if (item_stack >= quantity_min && item_stack <= quantity_max
-							&& item_quality >= quality_min && item_quality <= quality_max)
+						    && item_quality >= quality_min && item_quality <= quality_max)
 						{
 							string item_stats = toString("%3d|%s|", j, phraseId.c_str());
 							if (!extra.empty())
@@ -802,7 +798,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(deleteInventoryItems, "Delete items from a characters inventory", "<uid> <sheetnames> <quality> <quantity>")
 {
-	if (args.size () < 5)
+	if (args.size() < 5)
 	{
 		log.displayNL("ERR: Invalid number of parameters. Parameters: <inventory> <sheetnames> <quality> <quantity>");
 		return false;
@@ -819,11 +815,11 @@ NLMISC_COMMAND(deleteInventoryItems, "Delete items from a characters inventory",
 	std::vector<string> quantities;
 	NLMISC::splitString(args[3], ",", quantities);
 
-	for (uint32 i=0; i < std::min(quantities.size(), std::min(qualities.size(), sheet_names.size())); i++)
+	for (uint32 i = 0; i < std::min(quantities.size(), std::min(qualities.size(), sheet_names.size())); i++)
 	{
 		uint32 quantity = 0;
 		fromString(quantities[i], quantity);
-		need_items.insert(make_pair(sheet_names[i]+":"+qualities[i], quantity));
+		need_items.insert(make_pair(sheet_names[i] + ":" + qualities[i], quantity));
 	}
 
 	std::map<uint32, uint32> slots;
@@ -833,14 +829,14 @@ NLMISC_COMMAND(deleteInventoryItems, "Delete items from a characters inventory",
 	CInventoryPtr inventory = c->getInventory(INVENTORIES::bag);
 	if (inventory != NULL)
 	{
-		for ( uint32 j = 0; j < inventory->getSlotCount(); j++ )
+		for (uint32 j = 0; j < inventory->getSlotCount(); j++)
 		{
 			CGameItemPtr itemPtr = inventory->getItem(j);
 			if (itemPtr != NULL)
 			{
 				string sheet = itemPtr->getSheetId().toString();
 				uint32 item_quality = itemPtr->quality();
-				itNeedItems = need_items.find(sheet+":"+NLMISC::toString("%d", item_quality));
+				itNeedItems = need_items.find(sheet + ":" + NLMISC::toString("%d", item_quality));
 				if (itNeedItems != need_items.end() && (*itNeedItems).second > 0)
 				{
 					nlinfo("Found : %s %d", sheet.c_str(), item_quality);
@@ -852,17 +848,18 @@ NLMISC_COMMAND(deleteInventoryItems, "Delete items from a characters inventory",
 		}
 
 		// Check if all items has been found
-		for ( itNeedItems = need_items.begin(); itNeedItems != need_items.end(); ++itNeedItems )
+		for (itNeedItems = need_items.begin(); itNeedItems != need_items.end(); ++itNeedItems)
 		{
-			if ((*itNeedItems).second != 0) {
+			if ((*itNeedItems).second != 0)
+			{
 				nlinfo("Missing : %s", (*itNeedItems).first.c_str());
 				log.displayNL("ERR: Not enough items.");
 				return false;
 			}
 		}
 
-		//Delete them
-		for ( std::map<uint32, uint32>::iterator it = slots.begin(); it != slots.end(); ++it )
+		// Delete them
+		for (std::map<uint32, uint32>::iterator it = slots.begin(); it != slots.end(); ++it)
 		{
 			nlinfo("Deleting... %d, %d", (*it).first, (*it).second);
 			inventory->deleteStackItem((*it).first, (*it).second);
@@ -871,8 +868,6 @@ NLMISC_COMMAND(deleteInventoryItems, "Delete items from a characters inventory",
 
 	return true;
 }
-
-
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(getPosition, "get position of entity", "<uid>")
@@ -889,7 +884,7 @@ NLMISC_COMMAND(getPosition, "get position of entity", "<uid>")
 	h = c->getState().Heading;
 
 	TDataSetRow dsr = c->getEntityRowId();
-	CMirrorPropValueRO<TYPE_CELL> srcCell( TheDataset, dsr, DSPropertyCELL );
+	CMirrorPropValueRO<TYPE_CELL> srcCell(TheDataset, dsr, DSPropertyCELL);
 	cell = srcCell;
 
 	log.displayNL("%.2f|%.2f|%.2f|%.4f|%d", x, y, z, h, cell);
@@ -901,21 +896,21 @@ NLMISC_COMMAND(getPosition, "get position of entity", "<uid>")
 NLMISC_COMMAND(getFame, "get fame of player", "<uid> faction")
 {
 
-	if (args.size () < 2)
+	if (args.size() < 2)
 	{
 		log.displayNL("ERR: invalid arg count");
 		return false;
 	}
-	
+
 	GET_ACTIVE_CHARACTER
 
-	uint32 factionIndex	= CStaticFames::getInstance().getFactionIndex(args[1]);
+	uint32 factionIndex = CStaticFames::getInstance().getFactionIndex(args[1]);
 	if (factionIndex == CStaticFames::INVALID_FACTION_INDEX)
 	{
 		log.displayNL("ERR: invalid fame");
 		return false;
 	}
-	
+
 	sint32 fame = CFameInterface::getInstance().getFameIndexed(c->getId(), factionIndex);
 	log.displayNL("%d", fame);
 
@@ -926,12 +921,12 @@ NLMISC_COMMAND(getFame, "get fame of player", "<uid> faction")
 NLMISC_COMMAND(getFames, "get fames of player", "<uid> faction1,faction2,faction3,...")
 {
 
-	if (args.size () < 2)
+	if (args.size() < 2)
 	{
 		log.displayNL("ERR: invalid arg count");
 		return false;
 	}
-	
+
 	GET_ACTIVE_CHARACTER
 
 	string sfames;
@@ -945,10 +940,10 @@ NLMISC_COMMAND(getFames, "get fames of player", "<uid> faction1,faction2,faction
 
 	std::vector<string> fames;
 	NLMISC::splitString(args[1], ",", fames);
-	for (uint32 i=0; i<fames.size(); i++)
+	for (uint32 i = 0; i < fames.size(); i++)
 	{
-			
-		uint32 factionIndex	= CStaticFames::getInstance().getFactionIndex(fames[i]);
+
+		uint32 factionIndex = CStaticFames::getInstance().getFactionIndex(fames[i]);
 		if (factionIndex == CStaticFames::INVALID_FACTION_INDEX)
 			log.displayNL("ERR: invalid fame");
 		else
@@ -958,7 +953,6 @@ NLMISC_COMMAND(getFames, "get fames of player", "<uid> faction1,faction2,faction
 	return true;
 }
 
-
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(getTarget, "get target of player", "<uid>")
 {
@@ -966,7 +960,7 @@ NLMISC_COMMAND(getTarget, "get target of player", "<uid>")
 	GET_ACTIVE_CHARACTER
 
 	const CEntityId &target = c->getTarget();
-	string msg = target.toString()+"|";
+	string msg = target.toString() + "|";
 
 	if (target == CEntityId::Unknown)
 	{
@@ -985,9 +979,10 @@ NLMISC_COMMAND(getTarget, "get target of player", "<uid>")
 
 	if (target.getType() == RYZOMID::player)
 	{
-		CCharacter * cTarget = dynamic_cast<CCharacter*>(CEntityBaseManager::getEntityBasePtr(target));
-		if (cTarget) {
-			msg += cTarget->getName().toString()+"|";
+		CCharacter *cTarget = dynamic_cast<CCharacter *>(CEntityBaseManager::getEntityBasePtr(target));
+		if (cTarget)
+		{
+			msg += cTarget->getName().toString() + "|";
 
 			if (c->getGuildId() != 0 && c->getGuildId() == cTarget->getGuildId())
 				msg += "g|";
@@ -1000,9 +995,9 @@ NLMISC_COMMAND(getTarget, "get target of player", "<uid>")
 				msg += "0";
 		}
 	}
-	
+
 	log.displayNL(msg.c_str());
-	
+
 	return true;
 }
 
@@ -1040,7 +1035,6 @@ NLMISC_COMMAND(getCivCultOrg, "get civ cult and organization of player", "<uid>"
 
 	std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance = c->getAllegiance();
 
-
 	log.displayNL("%s|%s|%u", PVP_CLAN::toString(allegiance.first).c_str(), PVP_CLAN::toString(allegiance.second).c_str(), c->getOrganization());
 
 	return true;
@@ -1053,37 +1047,40 @@ NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> player_name number"
 {
 	GET_ACTIVE_CHARACTER
 
-	IBuildingPhysical * building;	
-	if (args.size () >= 3)
-		building = CBuildingManager::getInstance()->getBuildingPhysicalsByName("building_instance_ZO_player_11"+args[2]);
+	IBuildingPhysical *building;
+	if (args.size() >= 3)
+		building = CBuildingManager::getInstance()->getBuildingPhysicalsByName("building_instance_ZO_player_11" + args[2]);
 	else
 		building = CBuildingManager::getInstance()->getBuildingPhysicalsByName("building_instance_ZO_player_111");
 
-
-	if ( building )
+	if (building)
 	{
 
 		if (building->getTemplate()->Type == BUILDING_TYPES::Player)
 		{
 
-			CBuildingPhysicalPlayer * buildingPlayer = dynamic_cast<CBuildingPhysicalPlayer *>( building );
+			CBuildingPhysicalPlayer *buildingPlayer = dynamic_cast<CBuildingPhysicalPlayer *>(building);
 
 			CEntityBase *entityBase = PlayerManager.getCharacterByName(CShardNames::getInstance().makeFullNameFromRelative(c->getHomeMainlandSessionId(), args[2]));
 			if (buildingPlayer && entityBase)
 			{
-				CBuildingManager::getInstance()->removePlayerFromRoom( c );
-				uint16 ownerId = buildingPlayer->getOwnerIdx( entityBase->getId() );
+				CBuildingManager::getInstance()->removePlayerFromRoom(c);
+				uint16 ownerId = buildingPlayer->getOwnerIdx(entityBase->getId());
 				sint32 cell;
 				buildingPlayer->addUser(c, 0, ownerId, cell);
-//				c->setPowoCell(cell);
-//				CBuildingManager::getInstance()->setRoomLifeTime(cell, TGameCycle(NLMISC::TGameTime(4*60*60) / CTickEventHandler::getGameTimeStep()));
+				//				c->setPowoCell(cell);
+				//				CBuildingManager::getInstance()->setRoomLifeTime(cell, TGameCycle(NLMISC::TGameTime(4*60*60) / CTickEventHandler::getGameTimeStep()));
 				log.displayNL("%d", cell);
 			}
-		} else {
+		}
+		else
+		{
 			log.displayNL("ERR: invalid number");
 			return false;
 		}
-	} else {
+	}
+	else
+	{
 		log.displayNL("ERR: invalid number");
 		return false;
 	}
@@ -1094,16 +1091,16 @@ NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> player_name number"
 NLMISC_COMMAND(slide, "slide to the powo", "<uid> x y cell [z] [h]")
 {
 
-	if (args.size () < 4)
+	if (args.size() < 4)
 	{
 		log.displayNL("ERR: invalid arg count");
 		return false;
 	}
 
 	GET_ACTIVE_CHARACTER
-	
+
 	string value = args[1];
-	
+
 	sint32 x;
 	sint32 y;
 	sint32 cell = 0; // c->getPowoCell();
@@ -1126,7 +1123,7 @@ NLMISC_COMMAND(slide, "slide to the powo", "<uid> x y cell [z] [h]")
 	if (args.size() >= 6)
 		fromString(args[5], h);
 
-	c->teleportCharacter(x,y,z,false,true,h,0xFF,cell);
+	c->teleportCharacter(x, y, z, false, true, h, 0xFF, cell);
 
 	return true;
 }
@@ -1136,14 +1133,13 @@ NLMISC_COMMAND(slide, "slide to the powo", "<uid> x y cell [z] [h]")
 NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion orientation groupname x y look cell")
 {
 
-	if (args.size () < 10)
+	if (args.size() < 10)
 	{
 		log.displayNL("ERR: invalid arg count");
 		return false;
 	}
 
 	GET_ACTIVE_CHARACTER
-
 
 	uint32 instanceNumber = 0;
 	sint32 x = 0;
@@ -1154,7 +1150,7 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion orientati
 
 	uint32 nbBots;
 	fromString(args[1], nbBots);
-	if (nbBots<=0)
+	if (nbBots <= 0)
 	{
 		log.displayNL("ERR: invalid bot count");
 		return false;
@@ -1167,10 +1163,11 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion orientati
 		return true;
 
 	double dispersionRadius = 10.;
-	if (args.size()>3)
+	if (args.size() > 3)
 	{
 		fromString(args[3], dispersionRadius);
-		if (dispersionRadius < 0.) {
+		if (dispersionRadius < 0.)
+		{
 			log.displayNL("ERR: invalid dispersion");
 			return false;
 		}
@@ -1178,7 +1175,7 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion orientati
 
 	bool spawnBots = true;
 
-	if (args.size()>4)
+	if (args.size() > 4)
 	{
 		if (args[4] == "self")
 		{
@@ -1192,7 +1189,7 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion orientati
 	}
 
 	string botsName = args[5];
-		
+
 	float userX;
 	NLMISC::fromString(args[6], userX);
 	x = (sint32)(userX * 1000.0);

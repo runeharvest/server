@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_KNOWN_MEMORIZED_PHRASES_H
 #define RY_KNOWN_MEMORIZED_PHRASES_H
 
@@ -24,7 +22,7 @@
 #include "game_share/memorization_set_types.h"
 
 // the max number of sentence that can be memorized in one set (must match client interface)
-const uint8 MaxNbSentencesPerSet			= 20;
+const uint8 MaxNbSentencesPerSet = 20;
 
 class CCharacter;
 
@@ -41,14 +39,13 @@ struct CKnownPhrase
 
 	DECLARE_PERSISTENCE_METHODS
 
-	CSPhraseCom			PhraseDesc;
-	NLMISC::CSheetId	PhraseSheetId;
+	CSPhraseCom PhraseDesc;
+	NLMISC::CSheetId PhraseSheetId;
 
 	bool empty() const;
 	void clear();
 	void serial(NLMISC::IStream &f);
 };
-
 
 /**
  * struct for a memorized phrase
@@ -56,8 +53,8 @@ struct CKnownPhrase
 struct CMemorizedPhrase
 {
 	NL_INSTANCE_COUNTER_DECL(CMemorizedPhrase);
-public:
 
+public:
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
 	// At time of writing it evaluated to:
@@ -72,8 +69,8 @@ public:
 	void clear();
 	void serial(NLMISC::IStream &f);
 
-	std::vector<NLMISC::CSheetId>	Bricks;
-	uint16							PhraseId;
+	std::vector<NLMISC::CSheetId> Bricks;
+	uint16 PhraseId;
 };
 
 /**
@@ -82,8 +79,8 @@ public:
 struct CMemorizationSet
 {
 	NL_INSTANCE_COUNTER_DECL(CMemorizationSet);
-public:
 
+public:
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
 	// At time of writing it evaluated to:
@@ -106,7 +103,7 @@ public:
 
 	/// memorize in first found empty slot, returns true if successful, make no check
 	bool memorizeInFirstEmptySlot(const std::vector<NLMISC::CSheetId> &bricks, uint16 id);
-	
+
 	void executePhrase(uint8 i, CCharacter *actor, const TDataSetRow &target, bool cyclic, bool enchant);
 
 	void forget(uint8 i);
@@ -116,21 +113,20 @@ public:
 
 	/// Re-memorise phrases to reconstruct them in case bricks inside had changed.
 	void fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const TDataSetRow &rowId);
-	
-	const std::vector<CMemorizedPhrase*>	&getMemorizedPhrases() const { return Phrases; }
+
+	const std::vector<CMemorizedPhrase *> &getMemorizedPhrases() const { return Phrases; }
 
 	void serial(NLMISC::IStream &f);
 
 private:
-	std::vector<CMemorizedPhrase*>	Phrases;
+	std::vector<CMemorizedPhrase *> Phrases;
 
 private:
 	// prevent copy constructor
-	CMemorizationSet(const CMemorizationSet &other) {}
+	CMemorizationSet(const CMemorizationSet &other) { }
 	// prevent copy operator
-	CMemorizationSet &operator =(const CMemorizationSet&other) { return *this;}
+	CMemorizationSet &operator=(const CMemorizationSet &other) { return *this; }
 };
-
 
 /**
  * struct for all memorized phrase for a player
@@ -155,13 +151,13 @@ struct CPlayerPhraseMemory
 
 	/// memorize starter phrases in easy order for newcomers
 	bool memorizeStarterPhrase(const std::vector<NLMISC::CSheetId> &bricks, uint16 id);
-	
+
 	/// memorize in first found empty slot, returns true if successful, make no check on phrase validity
 	bool memorizeInFirstEmptySlot(const std::vector<NLMISC::CSheetId> &bricks, uint16 id);
 
 	// memorize in given set without any check on phrase validity
-	void memorizeWithoutCheck(uint8 memorizationSet, uint8 i, const std::vector<NLMISC::CSheetId> &bricks, uint16 id );
-		
+	void memorizeWithoutCheck(uint8 memorizationSet, uint8 i, const std::vector<NLMISC::CSheetId> &bricks, uint16 id);
+
 	void executePhrase(uint8 memorizationSet, uint8 i, CCharacter *actor, const TDataSetRow &target, bool cyclic, bool enchant);
 
 	void forget(uint8 memorizationSet, uint8 i);
@@ -172,26 +168,21 @@ struct CPlayerPhraseMemory
 	/// Re-memorise phrases to reconstruct them in case bricks inside had changed.
 	void fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const TDataSetRow &rowId);
 
-	const std::vector<CMemorizationSet*>	&getMemorizationSets() const { return _MemSets; }
+	const std::vector<CMemorizationSet *> &getMemorizationSets() const { return _MemSets; }
 
 	void serial(NLMISC::IStream &f);
 
 private:
-	CMemorizationSet* getMemSet(uint32 idx);
-	std::vector<CMemorizationSet*>	_MemSets;
-
+	CMemorizationSet *getMemSet(uint32 idx);
+	std::vector<CMemorizationSet *> _MemSets;
 
 private:
 	// prevent copy constructor
-	CPlayerPhraseMemory(const CMemorizationSet &other) {}
+	CPlayerPhraseMemory(const CMemorizationSet &other) { }
 	// prevent copy operator
-	CPlayerPhraseMemory &operator =(const CMemorizationSet&other) { return *this;}
+	CPlayerPhraseMemory &operator=(const CMemorizationSet &other) { return *this; }
 };
 
-
-
-
-#endif //RY_KNOWN_MEMORIZED_PHRASES_H
-
+#endif // RY_KNOWN_MEMORIZED_PHRASES_H
 
 /* End of known_and_memorized_phrases.h */

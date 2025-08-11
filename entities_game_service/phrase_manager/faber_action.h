@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RYZOM_FABER_ACTION_H
 #define RYZOM_FABER_ACTION_H
 
@@ -27,42 +25,49 @@
 
 class CFaberPhrase;
 
-/// Macro used to declare a Sabrina Faber action ( i.e. : Sword Faber ) 
-#define FABER_ACTION_FACTORY(_class_,_type_) \
-class _class_##Factory : public IFaberActionFactory \
-{\
-public:\
-	_class_##Factory()\
-	{\
-		for (uint i = 0; i < Factories.size(); i++ ){ \
-		if ( Factories[i].first == _type_){nlerror("<IFaberActionFactory buildPhrase> item type %s is affected to more than one class",ITEM_TYPE::toString(_type_).c_str() );}} \
-		Factories.push_back(std::make_pair(_type_,this));\
-	};\
-protected:\
-	IFaberAction * build( const TDataSetRow & actorRowId, CFaberPhrase * phrase )\
-	{\
-		_class_ *inst = new _class_;\
-		if ( !inst->build( actorRowId, phrase  ) ){delete inst;return NULL;} \
-		return inst;\
-	}\
-};\
-_class_##Factory* _class_##FactoryInstance = new _class_##Factory;
+/// Macro used to declare a Sabrina Faber action ( i.e. : Sword Faber )
+#define FABER_ACTION_FACTORY(_class_, _type_)                                                                                                                                            \
+	class _class_##Factory : public IFaberActionFactory                                                                                                                                  \
+	{                                                                                                                                                                                    \
+	public:                                                                                                                                                                              \
+		_class_##Factory()                                                                                                                                                               \
+		{                                                                                                                                                                                \
+			for (uint i = 0; i < Factories.size(); i++)                                                                                                                                  \
+			{                                                                                                                                                                            \
+				if (Factories[i].first == _type_) { nlerror("<IFaberActionFactory buildPhrase> item type %s is affected to more than one class", ITEM_TYPE::toString(_type_).c_str()); } \
+			}                                                                                                                                                                            \
+			Factories.push_back(std::make_pair(_type_, this));                                                                                                                           \
+		};                                                                                                                                                                               \
+                                                                                                                                                                                         \
+	protected:                                                                                                                                                                           \
+		IFaberAction *build(const TDataSetRow &actorRowId, CFaberPhrase *phrase)                                                                                                         \
+		{                                                                                                                                                                                \
+			_class_ *inst = new _class_;                                                                                                                                                 \
+			if (!inst->build(actorRowId, phrase))                                                                                                                                        \
+			{                                                                                                                                                                            \
+				delete inst;                                                                                                                                                             \
+				return NULL;                                                                                                                                                             \
+			}                                                                                                                                                                            \
+			return inst;                                                                                                                                                                 \
+		}                                                                                                                                                                                \
+	};                                                                                                                                                                                   \
+	_class_##Factory *_class_##FactoryInstance = new _class_##Factory;
 
 // CFaber action, interface and common members
 class IFaberAction
 {
 public:
-	bool build( const TDataSetRow & actorRowId, CFaberPhrase* phrase )
+	bool build(const TDataSetRow &actorRowId, CFaberPhrase *phrase)
 	{
-		if ( !checkSentenceValidity( phrase ) ) return false;
+		if (!checkSentenceValidity(phrase)) return false;
 		return true;
 	}
-	virtual void apply(CFaberPhrase * phrase) = 0;
-	virtual void systemApply(CFaberPhrase * phrase) = 0;
-	
+	virtual void apply(CFaberPhrase *phrase) = 0;
+	virtual void systemApply(CFaberPhrase *phrase) = 0;
+
 protected:
-	//check sentence validity
-	virtual bool checkSentenceValidity( CFaberPhrase * phrase ) = 0;
+	// check sentence validity
+	virtual bool checkSentenceValidity(CFaberPhrase *phrase) = 0;
 };
 
 /**
@@ -82,16 +87,16 @@ public:
 	 * \param prim : the primitive node used to build the step
 	 * \return a pointer on the built step (NULL if failure)
 	 */
-	inline static IFaberAction * buildAction( const TDataSetRow & actorRowId, CFaberPhrase * phrase, ITEM_TYPE::TItemType type )
+	inline static IFaberAction *buildAction(const TDataSetRow &actorRowId, CFaberPhrase *phrase, ITEM_TYPE::TItemType type)
 	{
-		for ( uint i = 0; i < Factories.size(); i++ )
+		for (uint i = 0; i < Factories.size(); i++)
 		{
-			if ( Factories[i].first == type )
+			if (Factories[i].first == type)
 			{
-				return Factories[i].second->build( actorRowId, phrase );
+				return Factories[i].second->build(actorRowId, phrase);
 			}
 		}
-		nlwarning( "<IFaberActionFactory buildAction> the item type %s has no corresponding faber action class", ITEM_TYPE::toString( type ).c_str() );
+		nlwarning("<IFaberActionFactory buildAction> the item type %s has no corresponding faber action class", ITEM_TYPE::toString(type).c_str());
 		return NULL;
 	}
 
@@ -101,9 +106,9 @@ protected:
 	 * \param params : a vector of vector of strings describing the step params
 	 * \return a pointer on the built step (NULL if failure)
 	 */
-	virtual IFaberAction * build( const TDataSetRow & actorRowId, CFaberPhrase * phrase ) = 0;
+	virtual IFaberAction *build(const TDataSetRow &actorRowId, CFaberPhrase *phrase) = 0;
 
-	static std::vector< std::pair< ITEM_TYPE::TItemType , IFaberActionFactory* > > Factories;
+	static std::vector<std::pair<ITEM_TYPE::TItemType, IFaberActionFactory *>> Factories;
 };
 
 #endif // RYZOM_FABER_ACTION_H

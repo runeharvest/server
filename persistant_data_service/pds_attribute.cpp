@@ -27,18 +27,16 @@
 using namespace std;
 using namespace NLMISC;
 
-
 /// Destructor
 CAttribute::~CAttribute()
 {
-	//PDS_DEBUG("delete()");
+	// PDS_DEBUG("delete()");
 }
-
 
 /*
  * Initialize attribute using a full xml node
  */
-bool	CAttribute::init(CDatabase *root, CTable* parent, const CAttributeNode& attribute)
+bool CAttribute::init(CDatabase *root, CTable *parent, const CAttributeNode &attribute)
 {
 	// set parent logger
 	setParentLogger(parent);
@@ -54,18 +52,17 @@ bool	CAttribute::init(CDatabase *root, CTable* parent, const CAttributeNode& att
 
 	switch (_MetaType)
 	{
-	case PDS_Type:
+	case PDS_Type: {
+		const CType *type = _Root->getType(_TypeId);
+		if (type == NULL)
 		{
-			const CType*	type = _Root->getType(_TypeId);
-			if (type == NULL)
-			{
-				PDS_WARNING("init(): unknown type '%d'", _TypeId);
-				return false;
-			}
-
-			_DataType = type->getDataType();
+			PDS_WARNING("init(): unknown type '%d'", _TypeId);
+			return false;
 		}
-		break;
+
+		_DataType = type->getDataType();
+	}
+	break;
 
 	case PDS_Class:
 		_DataType = PDS_UnknownDataType;
@@ -81,57 +78,54 @@ bool	CAttribute::init(CDatabase *root, CTable* parent, const CAttributeNode& att
 		_ReferencedAttribute = attribute.Reference;
 		break;
 
-	case PDS_ArrayType:
+	case PDS_ArrayType: {
+		const CType *index = _Root->getType(attribute.Index);
+		if (index == NULL || !index->isIndex())
 		{
-			const CType*	index = _Root->getType(attribute.Index);
-			if (index == NULL || !index->isIndex())
-			{
-				PDS_WARNING("init(): type '%d' unknown or not an index", attribute.Index);
-				return false;
-			}
-
-			_IndexId = attribute.Index;
-
-			const CType*	type = _Root->getType(_TypeId);
-			if (type == NULL)
-			{
-				PDS_WARNING("init(): unknown type '%d'", _TypeId);
-				return false;
-			}
-
-			_DataType = type->getDataType();
+			PDS_WARNING("init(): type '%d' unknown or not an index", attribute.Index);
+			return false;
 		}
-		break;
 
-	case PDS_ArrayClass:
+		_IndexId = attribute.Index;
+
+		const CType *type = _Root->getType(_TypeId);
+		if (type == NULL)
 		{
-			const CType*	type = _Root->getType(attribute.Index);
-			if (type == NULL || !type->isIndex())
-			{
-				PDS_WARNING("init(): type '%d' unknown or not an index", attribute.Index);
-				return false;
-			}
-
-			_IndexId = attribute.Index;
-			_DataType = PDS_UnknownDataType;
+			PDS_WARNING("init(): unknown type '%d'", _TypeId);
+			return false;
 		}
-		break;
 
-	case PDS_ArrayRef:
+		_DataType = type->getDataType();
+	}
+	break;
+
+	case PDS_ArrayClass: {
+		const CType *type = _Root->getType(attribute.Index);
+		if (type == NULL || !type->isIndex())
 		{
-			const CType*	type = _Root->getType(attribute.Index);
-			if (type == NULL || !type->isIndex())
-			{
-				PDS_WARNING("init(): type '%d' unknown or not an index", attribute.Index);
-				return false;
-			}
-
-			_IndexId = attribute.Index;
-			_DataType = PDS_Index;
-			_ReferencedAttribute = attribute.Reference;
-			_AllowNull = attribute.AllowNull;
+			PDS_WARNING("init(): type '%d' unknown or not an index", attribute.Index);
+			return false;
 		}
-		break;
+
+		_IndexId = attribute.Index;
+		_DataType = PDS_UnknownDataType;
+	}
+	break;
+
+	case PDS_ArrayRef: {
+		const CType *type = _Root->getType(attribute.Index);
+		if (type == NULL || !type->isIndex())
+		{
+			PDS_WARNING("init(): type '%d' unknown or not an index", attribute.Index);
+			return false;
+		}
+
+		_IndexId = attribute.Index;
+		_DataType = PDS_Index;
+		_ReferencedAttribute = attribute.Reference;
+		_AllowNull = attribute.AllowNull;
+	}
+	break;
 
 	case PDS_Set:
 		_DataType = PDS_List;
@@ -147,172 +141,167 @@ bool	CAttribute::init(CDatabase *root, CTable* parent, const CAttributeNode& att
 /*
  * Build columns for this attribute
  */
-bool	CAttribute::buildColumns()
+bool CAttribute::buildColumns()
 {
-	vector<CColumn>&	columns = _Parent->_Columns;
+	vector<CColumn> &columns = _Parent->_Columns;
 
 	_Offset = (uint32)columns.size();
 
 	switch (_MetaType)
 	{
-	case PDS_Type:
+	case PDS_Type: {
+		CColumn column;
+		column._Parent = this;
+		column._Root = _Root;
+		column._Id = (uint32)columns.size();
+		column._Name = _Name;
+		column._MetaType = PDS_Type;
+		column._DataType = _DataType;
+		column._TypeId = _TypeId;
+		const CType *type = _Root->getType(_TypeId);
+		if (type == NULL)
 		{
-			CColumn	column;
+			PDS_WARNING("init(): unknown type '%d'", _TypeId);
+			return false;
+		}
+		column._ByteSize = type->getByteSize();
+		column._Init = true;
+		columns.push_back(column);
+	}
+	break;
+
+	case PDS_Class: {
+		CTable *sub = const_cast<CTable *>(_Root->getTable(_TypeId));
+
+		if (sub == NULL || !sub->buildColumns())
+			return false;
+
+		uint i;
+		for (i = 0; i < sub->_Columns.size(); ++i)
+		{
+			CColumn column = sub->_Columns[i];
 			column._Parent = this;
 			column._Root = _Root;
 			column._Id = (uint32)columns.size();
-			column._Name = _Name;
+			column._Name = _Name + "." + column._Name;
+			column._Init = true;
+			columns.push_back(column);
+		}
+	}
+	break;
+
+	case PDS_BackRef:
+	case PDS_ForwardRef:
+	case PDS_Set: {
+		CColumn column;
+		column._Parent = this;
+		column._Root = _Root;
+		column._Id = (uint32)columns.size();
+		column._Name = _Name;
+		column._MetaType = _MetaType;
+		column._DataType = _DataType;
+		column._TypeId = _TypeId;
+		column._ByteSize = getStandardByteSize(column._DataType);
+		column._Init = true;
+		columns.push_back(column);
+	}
+	break;
+
+	case PDS_ArrayType: {
+		const CType *type = _Root->getType(_TypeId);
+		const CType *index = _Root->getType(_IndexId);
+
+		if (type == NULL)
+		{
+			PDS_WARNING("init(): unknown type '%d'", _TypeId);
+			return false;
+		}
+
+		if (index == NULL || !index->isIndex())
+		{
+			PDS_WARNING("buildColumns(): type '%d' unknown or not an index", _IndexId);
+			return false;
+		}
+
+		uint i;
+		for (i = 0; i < index->getIndexSize(); ++i)
+		{
+			CColumn column;
+			column._Parent = this;
+			column._Root = _Root;
+			column._Id = (uint32)columns.size();
+			column._Name = _Name + "[" + index->getIndexName(i) + "]";
 			column._MetaType = PDS_Type;
 			column._DataType = _DataType;
 			column._TypeId = _TypeId;
-			const CType*	type = _Root->getType(_TypeId);
-			if (type == NULL)
-			{
-				PDS_WARNING("init(): unknown type '%d'", _TypeId);
-				return false;
-			}
 			column._ByteSize = type->getByteSize();
 			column._Init = true;
 			columns.push_back(column);
 		}
-		break;
+	}
+	break;
 
-	case PDS_Class:
+	case PDS_ArrayClass: {
+		CTable *sub = const_cast<CTable *>(_Root->getTable(_TypeId));
+		const CType *index = _Root->getType(_IndexId);
+
+		if (sub == NULL || sub == NULL || !sub->buildColumns())
 		{
-			CTable*	sub = const_cast<CTable*>(_Root->getTable(_TypeId));
+			PDS_WARNING("buildColumns(): unknown table '%d' or failed to build its columns", _TypeId);
+			return false;
+		}
 
-			if (sub == NULL || !sub->buildColumns())
-				return false;
+		if (index == NULL || index == NULL || !index->isIndex())
+		{
+			PDS_WARNING("buildColumns(): type '%d' unknown or not an index", _IndexId);
+			return false;
+		}
 
-			uint	i;
-			for (i=0; i<sub->_Columns.size(); ++i)
+		uint i;
+		for (i = 0; i < index->getIndexSize(); ++i)
+		{
+			uint j;
+			for (j = 0; j < sub->_Columns.size(); ++j)
 			{
-				CColumn	column = sub->_Columns[i];
+				CColumn column = sub->_Columns[j];
 				column._Parent = this;
 				column._Root = _Root;
 				column._Id = (uint32)columns.size();
-				column._Name = _Name+"."+column._Name;
+				column._Name = _Name + "[" + index->getIndexName(i) + "]" + "." + column._Name;
 				column._Init = true;
 				columns.push_back(column);
 			}
 		}
-		break;
+	}
+	break;
 
-	case PDS_BackRef:
-	case PDS_ForwardRef:
-	case PDS_Set:
+	case PDS_ArrayRef: {
+		const CType *index = _Root->getType(_IndexId);
+
+		if (index == NULL || !index->isIndex())
 		{
-			CColumn	column;
+			PDS_WARNING("buildColumns(): type '%d' unknown or not an index", _IndexId);
+			return false;
+		}
+
+		uint i;
+		for (i = 0; i < index->getIndexSize(); ++i)
+		{
+			CColumn column;
 			column._Parent = this;
 			column._Root = _Root;
 			column._Id = (uint32)columns.size();
-			column._Name = _Name;
-			column._MetaType = _MetaType;
+			column._Name = _Name + "[" + index->getIndexName(i) + "]";
+			;
+			column._MetaType = PDS_ForwardRef;
 			column._DataType = _DataType;
 			column._TypeId = _TypeId;
 			column._ByteSize = getStandardByteSize(column._DataType);
 			column._Init = true;
 			columns.push_back(column);
 		}
-		break;
-
-	case PDS_ArrayType:
-		{
-			const CType*	type = _Root->getType(_TypeId);
-			const CType*	index = _Root->getType(_IndexId);
-
-			if (type == NULL)
-			{
-				PDS_WARNING("init(): unknown type '%d'", _TypeId);
-				return false;
-			}
-
-			if (index == NULL || !index->isIndex())
-			{
-				PDS_WARNING("buildColumns(): type '%d' unknown or not an index", _IndexId);
-				return false;
-			}
-
-			uint	i;
-			for (i=0; i<index->getIndexSize(); ++i)
-			{
-				CColumn	column;
-				column._Parent = this;
-				column._Root = _Root;
-				column._Id = (uint32)columns.size();
-				column._Name = _Name+"["+index->getIndexName(i)+"]";
-				column._MetaType = PDS_Type;
-				column._DataType = _DataType;
-				column._TypeId = _TypeId;
-				column._ByteSize = type->getByteSize();
-				column._Init = true;
-				columns.push_back(column);
-			}
-		}
-		break;
-
-	case PDS_ArrayClass:
-		{
-			CTable*			sub = const_cast<CTable*>(_Root->getTable(_TypeId));
-			const CType*	index = _Root->getType(_IndexId);
-
-			if (sub == NULL || sub == NULL || !sub->buildColumns())
-			{
-				PDS_WARNING("buildColumns(): unknown table '%d' or failed to build its columns", _TypeId);
-				return false;
-			}
-
-			if (index == NULL || index == NULL || !index->isIndex())
-			{
-				PDS_WARNING("buildColumns(): type '%d' unknown or not an index", _IndexId);
-				return false;
-			}
-
-			uint	i;
-			for (i=0; i<index->getIndexSize(); ++i)
-			{
-				uint	j;
-				for (j=0; j<sub->_Columns.size(); ++j)
-				{
-					CColumn	column = sub->_Columns[j];
-					column._Parent = this;
-					column._Root = _Root;
-					column._Id = (uint32)columns.size();
-					column._Name = _Name+"["+index->getIndexName(i)+"]"+"."+column._Name;
-					column._Init = true;
-					columns.push_back(column);
-				}
-			}
-		}
-		break;
-
-	case PDS_ArrayRef:
-		{
-			const CType*	index = _Root->getType(_IndexId);
-
-			if (index == NULL || !index->isIndex())
-			{
-				PDS_WARNING("buildColumns(): type '%d' unknown or not an index", _IndexId);
-				return false;
-			}
-
-			uint	i;
-			for (i=0; i<index->getIndexSize(); ++i)
-			{
-				CColumn	column;
-				column._Parent = this;
-				column._Root = _Root;
-				column._Id = (uint32)columns.size();
-				column._Name = _Name+"["+index->getIndexName(i)+"]";;
-				column._MetaType = PDS_ForwardRef;
-				column._DataType = _DataType;
-				column._TypeId = _TypeId;
-				column._ByteSize = getStandardByteSize(column._DataType);
-				column._Init = true;
-				columns.push_back(column);
-			}
-		}
-		break;
+	}
+	break;
 
 	default:
 		PDS_WARNING("buildColumns(): attribute '%s' metatype is unknown", _Name.c_str());
@@ -325,27 +314,26 @@ bool	CAttribute::buildColumns()
 	return true;
 }
 
-
 /*
  * Compute back reference key
  */
-bool	CAttribute::computeBackRefKey()
+bool CAttribute::computeBackRefKey()
 {
 	if (_MetaType == PDS_BackRef)
 	{
-		const CTable*		parentTable = _Root->getTable(_TypeId);
-		const CAttribute*	parentAttribute = parentTable->getAttribute(_ReferencedAttribute);
+		const CTable *parentTable = _Root->getTable(_TypeId);
+		const CAttribute *parentAttribute = parentTable->getAttribute(_ReferencedAttribute);
 
 		// should check parentAttribute is a forward reference of any kind
 
-		const CTable*		childTable = _Root->getTable(parentAttribute->getTypeId());
+		const CTable *childTable = _Root->getTable(parentAttribute->getTypeId());
 
 		_Key = childTable->getKey();
 	}
 	else if (_MetaType == PDS_ArrayRef || _MetaType == PDS_Set)
 	{
-		const CTable*		childTable = _Root->getTable(_TypeId);
-		const CAttribute*	childAttribute = childTable->getAttribute(_ReferencedAttribute);
+		const CTable *childTable = _Root->getTable(_TypeId);
+		const CAttribute *childAttribute = childTable->getAttribute(_ReferencedAttribute);
 
 		if (childAttribute == NULL)
 		{
@@ -366,7 +354,7 @@ bool	CAttribute::computeBackRefKey()
 			return false;
 		}
 
-		const CAttribute*	keyAttribute = childTable->getAttribute(_Key);
+		const CAttribute *keyAttribute = childTable->getAttribute(_Key);
 
 		if (keyAttribute == NULL)
 		{
@@ -383,5 +371,3 @@ bool	CAttribute::computeBackRefKey()
 
 	return true;
 }
-
-

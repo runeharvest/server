@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef ENTITY_MANAGER_H
 #define ENTITY_MANAGER_H
 
-//game share
+// game share
 #include "game_share/ryzom_entity_id.h"
 #include "game_share/sentence_appraisal.h"
 #include "server_share/msg_ai_service.h"
@@ -28,14 +26,13 @@
 
 class CEntityBase;
 
-
 /**
  * Implementation of the entity info transport class
  */
 class CAIInfosOnEntityMsgImp : public CAIInfosOnEntityMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 };
 
 /**
@@ -43,7 +40,7 @@ public:
  */
 class CQueryEgsImp : public CQueryEgs
 {
-	void callback (const std::string &name, NLNET::TServiceId id);
+	void callback(const std::string &name, NLNET::TServiceId id);
 };
 
 /**
@@ -59,30 +56,34 @@ public:
 	/// exception thrown when entity is unknown
 	struct EEntity : public NLMISC::Exception
 	{
-		EEntity( const NLMISC::CEntityId& id ) : Exception ("The entity "+id.toString()+" doesn't exist") {}
+		EEntity(const NLMISC::CEntityId &id)
+		    : Exception("The entity " + id.toString() + " doesn't exist")
+		{
+		}
 	};
 
-/*	// Success table for calculation of success probability and associate xp-gains
-	struct SSuccessXpLine
-	{
-		sint16	RelativeLevel;
-		uint16	SuccessProbability;
-		float	XpGain;
-		SENTENCE_APPRAISAL::ESentenceAppraisal DifficultyAppreciation;
-	};
+	/*	// Success table for calculation of success probability and associate xp-gains
+	    struct SSuccessXpLine
+	    {
+	        sint16	RelativeLevel;
+	        uint16	SuccessProbability;
+	        float	XpGain;
+	        SENTENCE_APPRAISAL::ESentenceAppraisal DifficultyAppreciation;
+	    };
 
-	struct TSuccessTable
-	{
-		float	MaxSuccess;
-		float	FadeSuccess;
-		uint8	FadeRoll;
+	    struct TSuccessTable
+	    {
+	        float	MaxSuccess;
+	        float	FadeSuccess;
+	        uint8	FadeRoll;
 
-		uint8	CraftFullSuccessRole;
-		float	CraftMinSuccess;
-		uint8	CraftMinSuccessRole;
-	};
+	        uint8	CraftFullSuccessRole;
+	        float	CraftMinSuccess;
+	        uint8	CraftMinSuccessRole;
+	    };
 
-*/	/**
+	*/
+	/**
 	 * Constructor
 	 */
 	CEntityBaseManager();
@@ -93,20 +94,20 @@ public:
 	void addEntityCallback();
 
 	// getEntityPtr : return CEntityBase * ptr on Id corresponding entity
-	/*A*/static CEntityBase			*getEntityBasePtr	( const NLMISC::CEntityId& id );
-	/*A*/static CEntityBase			*getEntityBasePtr	( const	TDataSetRow	&entityRowId )
+	/*A*/ static CEntityBase *getEntityBasePtr(const NLMISC::CEntityId &id);
+	/*A*/ static CEntityBase *getEntityBasePtr(const TDataSetRow &entityRowId)
 	{
-		if ( TheDataset.isAccessible( entityRowId ) )
+		if (TheDataset.isAccessible(entityRowId))
 		{
-			return getEntityBasePtr( TheDataset.getEntityId( entityRowId ) );
+			return getEntityBasePtr(TheDataset.getEntityId(entityRowId));
 		}
 		return 0;
 	}
 
-	/*A*/static NLMISC::CEntityId	getEntityId			( const	TDataSetRow	&entityRowId )
+	/*A*/ static NLMISC::CEntityId getEntityId(const TDataSetRow &entityRowId)
 	{
-		if ( TheDataset.isAccessible( entityRowId ) ) //( entityRowId.isValid() && TheDataset.isDataSetRowStillValid(entityRowId) )
-			return TheDataset.getEntityId( entityRowId );
+		if (TheDataset.isAccessible(entityRowId)) //( entityRowId.isValid() && TheDataset.isDataSetRowStillValid(entityRowId) )
+			return TheDataset.getEntityId(entityRowId);
 		else
 			return NLMISC::CEntityId::Unknown;
 	}
@@ -120,11 +121,10 @@ public:
 	 * load table of success probability and xp gains
 	 * \param tableName is name of table contained success change and xp gain
 	 */
-//	void loadSuccessXpTable( const std::string& tableName );
+	//	void loadSuccessXpTable( const std::string& tableName );
 
-//	static std::vector< SSuccessXpLine >	_SuccessXpTable;
-//	static TSuccessTable					_SuccessTable;
+	//	static std::vector< SSuccessXpLine >	_SuccessXpTable;
+	//	static TSuccessTable					_SuccessTable;
 };
 
-
-#endif //CREATURE_MANAGER
+#endif // CREATURE_MANAGER

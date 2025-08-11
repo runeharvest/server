@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_SIMPLE_EFFECT_H
 #define RY_SIMPLE_EFFECT_H
 
 #include "phrase_manager/s_effect.h"
-
 
 /**
  * Effect class for simple effects
@@ -33,35 +30,35 @@ class CSimpleEffect : public CSTimedEffect
 public:
 	NLMISC_DECLARE_CLASS(CSimpleEffect)
 
-	CSimpleEffect() : CSTimedEffect()
+	CSimpleEffect()
+	    : CSTimedEffect()
 	{
 #ifdef NL_DEBUG
-		_Applied =false;
+		_Applied = false;
 #endif
 	}
-	
-	CSimpleEffect( const TDataSetRow & creatorRowId, const TDataSetRow & targetRowId, EFFECT_FAMILIES::TEffectFamily family, sint32 effectValue, uint32 endDate, uint8 power )
-		:CSTimedEffect(creatorRowId, targetRowId, family, false, effectValue, power, endDate)
+
+	CSimpleEffect(const TDataSetRow &creatorRowId, const TDataSetRow &targetRowId, EFFECT_FAMILIES::TEffectFamily family, sint32 effectValue, uint32 endDate, uint8 power)
+	    : CSTimedEffect(creatorRowId, targetRowId, family, false, effectValue, power, endDate)
 	{
 #ifdef NL_DEBUG
-		_Applied =false;
+		_Applied = false;
 #endif
 	}
 
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent *event, bool applyEffect);
 
 	/// callback called when the effect is actually removed
 	virtual void removed();
 
 #ifdef NL_DEBUG
 private:
-	bool			_Applied;
+	bool _Applied;
 #endif
 };
-
 
 #endif // RY_SIMPLE_EFFECT_H
 

@@ -34,7 +34,7 @@ public:
 	/// get singleton instance
 	static CNamedItems &getInstance()
 	{
-		if(!_Instance)
+		if (!_Instance)
 		{
 			_Instance = new CNamedItems;
 			nlassert(_Instance);
@@ -43,10 +43,10 @@ public:
 	}
 
 	/// load named items from file
-	void loadNamedItemsFromFile(const std::string & fileName);
+	void loadNamedItemsFromFile(const std::string &fileName);
 
 	/// create a named item
-	CGameItemPtr createNamedItem(const std::string & name, uint32 quantity);
+	CGameItemPtr createNamedItem(const std::string &name, uint32 quantity);
 
 	/// get a reference on a specific named item (to get all its properties)
 	CGameItemPtr getNamedItemRef(const std::string &name);
@@ -56,18 +56,17 @@ private:
 	CNamedItems();
 
 	/// load an named items inventory from a persistent data record
-	CInventoryPtr loadFromPdr(CPersistentDataRecord & pdr);
+	CInventoryPtr loadFromPdr(CPersistentDataRecord &pdr);
 	/// save an inventory item into a persistent data record
-	void saveIntoPdr(CPersistentDataRecord & pdr, CInventoryPtr namedItemsInv);
+	void saveIntoPdr(CPersistentDataRecord &pdr, CInventoryPtr namedItemsInv);
 
 private:
 	/// singleton instance
-	static CNamedItems * _Instance;
+	static CNamedItems *_Instance;
 
 	/// named items, sorted by names
 	CHashMap<std::string, CGameItemPtr> _NamedItems;
 };
-
 
 #endif // RY_NAMED_ITEMS_H
 

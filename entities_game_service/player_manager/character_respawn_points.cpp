@@ -23,16 +23,13 @@
 #include "game_share/fame.h"
 #include "game_share/continent.h"
 
-//#include "backward_compatibility/spawn_zones_back_compat.h"
+// #include "backward_compatibility/spawn_zones_back_compat.h"
 #include "player_manager/character_respawn_points.h"
 #include "player_manager/character.h"
 #include "pvp_manager/pvp_manager_2.h"
 #include "modules/shard_unifier_client.h"
 
 #include "zone_manager.h"
-
-
-
 
 //-----------------------------------------------------------------------------
 // namespaces
@@ -44,22 +41,22 @@ using namespace NLNET;
 
 NL_INSTANCE_COUNTER_IMPL(CCharacterRespawnPoints);
 
-extern CGenericXmlMsgHeaderManager	GenericMsgManager;
-
+extern CGenericXmlMsgHeaderManager GenericMsgManager;
 
 //-----------------------------------------------------------------------------
 // methods CCharacterRespawnPoints
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-CCharacterRespawnPoints::CCharacterRespawnPoints(CCharacter &c) : _Char(c)
+CCharacterRespawnPoints::CCharacterRespawnPoints(CCharacter &c)
+    : _Char(c)
 {
 }
 
 //-----------------------------------------------------------------------------
 void CCharacterRespawnPoints::addRespawnPoint(TRespawnPoint respawnPoint)
 {
-	const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
+	const CTpSpawnZone *zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
 	if (zone == NULL)
 	{
 		DEBUG_STOP;
@@ -76,7 +73,7 @@ void CCharacterRespawnPoints::addRespawnPoint(TRespawnPoint respawnPoint)
 	_RegularRespawnPoints.push_back(respawnPoint);
 
 	// add the point to client database only if needed
-	const CMissionRespawnPoints * missionRespawnPoints = getMissionRespawnPoints( zone->getContinent() );
+	const CMissionRespawnPoints *missionRespawnPoints = getMissionRespawnPoints(zone->getContinent());
 	if (missionRespawnPoints == NULL || !missionRespawnPoints->getHideOthers())
 	{
 		if (isUsableRegularRespawnPoint(_Char.getCurrentContinent(), respawnPoint))
@@ -157,42 +154,40 @@ void CCharacterRespawnPoints::addDefaultRespawnPoint(CONTINENT::TContinent conti
 		defaultPlaceName = "newbie_start_point";
 	}
 
-	CPlace * defaultPlace = CZoneManager::getInstance().getPlaceFromName(defaultPlaceName);
+	CPlace *defaultPlace = CZoneManager::getInstance().getPlaceFromName(defaultPlaceName);
 	if (defaultPlace == NULL)
 	{
 		nlwarning("<RESPAWN_POINT> %s : no default respawn point because '%s' in continent '%s' is unknown",
-			_Char.getId().toString().c_str(),
-			defaultPlaceName.c_str(),
-			CONTINENT::toString(continent).c_str()
-			);
+		    _Char.getId().toString().c_str(),
+		    defaultPlaceName.c_str(),
+		    CONTINENT::toString(continent).c_str());
 		return;
 	}
 
 	if (defaultPlace->getRespawnPoints().empty())
 	{
 		nlwarning("<RESPAWN_POINT> %s : no default respawn point because '%s' in continent '%s' has no spawn zone",
-			_Char.getId().toString().c_str(),
-			defaultPlaceName.c_str(),
-			CONTINENT::toString(continent).c_str()
-			);
+		    _Char.getId().toString().c_str(),
+		    defaultPlaceName.c_str(),
+		    CONTINENT::toString(continent).c_str());
 		return;
 	}
 
 	// add the default respawn point
 	uint i;
-	for( i=0; i<defaultPlace->getRespawnPoints().size(); ++i )
+	for (i = 0; i < defaultPlace->getRespawnPoints().size(); ++i)
 	{
 		addRespawnPoint(defaultPlace->getRespawnPoints()[i]);
 	}
 }
 
 //-----------------------------------------------------------------------------
-void CCharacterRespawnPoints::setMissionRespawnPoints(CONTINENT::TContinent continent, const std::vector<TRespawnPoint> & respawnPoints, bool hideOthers)
+void CCharacterRespawnPoints::setMissionRespawnPoints(CONTINENT::TContinent continent, const std::vector<TRespawnPoint> &respawnPoints, bool hideOthers)
 {
 	if (respawnPoints.empty())
 		return;
 
-	CMissionRespawnPoints & missionRespawnPoints = _MissionRespawnPointsByContinent[continent];
+	CMissionRespawnPoints &missionRespawnPoints = _MissionRespawnPointsByContinent[continent];
 	static_cast<std::vector<TRespawnPoint> &>(missionRespawnPoints) = respawnPoints;
 	missionRespawnPoints.setHideOthers(hideOthers);
 
@@ -201,7 +196,7 @@ void CCharacterRespawnPoints::setMissionRespawnPoints(CONTINENT::TContinent cont
 }
 
 //-----------------------------------------------------------------------------
-const CCharacterRespawnPoints::CMissionRespawnPoints * CCharacterRespawnPoints::getMissionRespawnPoints(CONTINENT::TContinent continent) const
+const CCharacterRespawnPoints::CMissionRespawnPoints *CCharacterRespawnPoints::getMissionRespawnPoints(CONTINENT::TContinent continent) const
 {
 	map<sint32, CMissionRespawnPoints>::const_iterator it = _MissionRespawnPointsByContinent.find(continent);
 	if (it != _MissionRespawnPointsByContinent.end())
@@ -214,7 +209,7 @@ const CCharacterRespawnPoints::CMissionRespawnPoints * CCharacterRespawnPoints::
 //-----------------------------------------------------------------------------
 bool CCharacterRespawnPoints::setRingAdventureRespawnpoint(const CFarPosition &farPos)
 {
-	if( farPos == _RingRespawnPoint )
+	if (farPos == _RingRespawnPoint)
 		return false;
 
 	_RingRespawnPoint = farPos;
@@ -230,9 +225,9 @@ void CCharacterRespawnPoints::clearRingRespawnpoint()
 }
 
 //-----------------------------------------------------------------------------
-bool CCharacterRespawnPoints::getRingAdventuresRespawnPoint( sint32 &x, sint32 &y ) const
+bool CCharacterRespawnPoints::getRingAdventuresRespawnPoint(sint32 &x, sint32 &y) const
 {
-	if( _RingRespawnPoint.SessionId.asInt() != 0 )
+	if (_RingRespawnPoint.SessionId.asInt() != 0)
 	{
 		x = _RingRespawnPoint.PosState.X;
 		y = _RingRespawnPoint.PosState.Y;
@@ -242,19 +237,19 @@ bool CCharacterRespawnPoints::getRingAdventuresRespawnPoint( sint32 &x, sint32 &
 }
 
 //-----------------------------------------------------------------------------
-void CCharacterRespawnPoints::getUsableRespawnPoints(CONTINENT::TContinent continent, std::vector<TRespawnPoint> & respawnPoints) const
+void CCharacterRespawnPoints::getUsableRespawnPoints(CONTINENT::TContinent continent, std::vector<TRespawnPoint> &respawnPoints) const
 {
 	respawnPoints.clear();
 
 	// ring re-spawn point override mission and regular re-spawn point
-	if( _RingRespawnPoint.SessionId.asInt() != 0 )
+	if (_RingRespawnPoint.SessionId.asInt() != 0)
 	{
-		respawnPoints.push_back(0); //only one ring re-spawn point
+		respawnPoints.push_back(0); // only one ring re-spawn point
 		return;
 	}
 
 	// mission respawn points
-	const CMissionRespawnPoints * missionRespawnPoints = getMissionRespawnPoints(continent);
+	const CMissionRespawnPoints *missionRespawnPoints = getMissionRespawnPoints(continent);
 	if (missionRespawnPoints != NULL)
 	{
 		nlassert(!missionRespawnPoints->empty());
@@ -274,8 +269,8 @@ void CCharacterRespawnPoints::getUsableRespawnPoints(CONTINENT::TContinent conti
 		if (isUsableRegularRespawnPoint(continent, respawnPoint))
 		{
 			// if the respawn point already was added from mission respawn points, skip it
-			if (	missionRespawnPoints != NULL
-				&&	std::find(missionRespawnPoints->begin(), missionRespawnPoints->end(), respawnPoint) != missionRespawnPoints->end())
+			if (missionRespawnPoints != NULL
+			    && std::find(missionRespawnPoints->begin(), missionRespawnPoints->end(), respawnPoint) != missionRespawnPoints->end())
 			{
 				continue;
 			}
@@ -292,16 +287,16 @@ CONTINENT::TRespawnPointCounters CCharacterRespawnPoints::buildRingPoints() cons
 
 	CONTINENT::TRespawnPointCounters capital;
 
-	for (uint i=0; i<_RegularRespawnPoints.size(); ++i)
+	for (uint i = 0; i < _RegularRespawnPoints.size(); ++i)
 	{
 		const TRespawnPoint &rp = _RegularRespawnPoints[i];
 
 		const CTpSpawnZone *tsz = CZoneManager::getInstance().getTpSpawnZone(rp);
-		if (tsz != NULL 
-			/*&& (tsz->getType() == RESPAWN_POINT::KAMI || tsz->getType() == RESPAWN_POINT::KARAVAN)*/)
+		if (tsz != NULL
+		    /*&& (tsz->getType() == RESPAWN_POINT::KAMI || tsz->getType() == RESPAWN_POINT::KARAVAN)*/)
 		{
 			ret[tsz->getContinent()]++;
-			if(tsz->getPlaceType() == PLACE_TYPE::Capital)
+			if (tsz->getPlaceType() == PLACE_TYPE::Capital)
 			{
 				capital[tsz->getContinent()]++;
 			}
@@ -309,14 +304,13 @@ CONTINENT::TRespawnPointCounters CCharacterRespawnPoints::buildRingPoints() cons
 	}
 
 	// we must only add one point per re spawn points linked in capital
-	for( CONTINENT::TRespawnPointCounters::iterator it = capital.begin(); it != capital.end(); ++it )
+	for (CONTINENT::TRespawnPointCounters::iterator it = capital.begin(); it != capital.end(); ++it)
 	{
 		ret[(*it).first] -= (*it).second - 1;
 	}
 
 	return ret;
 }
-
 
 //-----------------------------------------------------------------------------
 void CCharacterRespawnPoints::clearRespawnPoints()
@@ -354,7 +348,7 @@ bool CCharacterRespawnPoints::isUsableRegularRespawnPoint(CONTINENT::TContinent 
 	if (continent == CONTINENT::UNKNOWN)
 		return false;
 
-	const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
+	const CTpSpawnZone *zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
 	if (zone == NULL)
 		return false;
 
@@ -362,39 +356,39 @@ bool CCharacterRespawnPoints::isUsableRegularRespawnPoint(CONTINENT::TContinent 
 	if (zone->getContinent() != continent)
 		return false;
 
-	// check if the player is kami or karavan 	 
-	static const uint32 kamiFaction = CStaticFames::getInstance().getFactionIndex("kami"); 	 
-	static const uint32 karavanFaction = CStaticFames::getInstance().getFactionIndex("karavan"); 	 
-	sint32 kamiFame = CFameInterface::getInstance().getFameIndexed(_Char.getId(), kamiFaction); 	 
-	sint32 karavanFame = CFameInterface::getInstance().getFameIndexed(_Char.getId(), karavanFaction); 	 
-	bool isKami = (kamiFame >= karavanFame); 	 
-  	 
-	if (zone->getType() == RESPAWN_POINT::KAMI && !isKami) 	 
+	// check if the player is kami or karavan
+	static const uint32 kamiFaction = CStaticFames::getInstance().getFactionIndex("kami");
+	static const uint32 karavanFaction = CStaticFames::getInstance().getFactionIndex("karavan");
+	sint32 kamiFame = CFameInterface::getInstance().getFameIndexed(_Char.getId(), kamiFaction);
+	sint32 karavanFame = CFameInterface::getInstance().getFameIndexed(_Char.getId(), karavanFaction);
+	bool isKami = (kamiFame >= karavanFame);
+
+	if (zone->getType() == RESPAWN_POINT::KAMI && !isKami)
 	{
-		return false; 	 
+		return false;
 	}
-	else if (zone->getType() == RESPAWN_POINT::KARAVAN && isKami) 	 
+	else if (zone->getType() == RESPAWN_POINT::KARAVAN && isKami)
 	{
-		return false; 	 
-    }
-	return CPVPManager2::getInstance()->isRespawnValid( &_Char, respawnPoint );
+		return false;
+	}
+	return CPVPManager2::getInstance()->isRespawnValid(&_Char, respawnPoint);
 }
 
 //-----------------------------------------------------------------------------
 void CCharacterRespawnPoints::resetUserDb() const
 {
-	if ( !_Char.getEnterFlag() )
+	if (!_Char.getEnterFlag())
 		return;
 
 	NLMISC::CEntityId id = _Char.getId();
 	CMessage msgout("IMPULSION_ID");
-	msgout.serial( id );
+	msgout.serial(id);
 	CBitMemStream bms;
-	nlverify( GenericMsgManager.pushNameToStream("DEATH:RESPAWN_POINT", bms) );
+	nlverify(GenericMsgManager.pushNameToStream("DEATH:RESPAWN_POINT", bms));
 
 	CRespawnPointsMsg respawnPointMsg;
 
-	if( _RingRespawnPoint.SessionId.asInt() != 0 )
+	if (_RingRespawnPoint.SessionId.asInt() != 0)
 	{
 		CRespawnPointsMsg::SRespawnPoint rs;
 		rs.x = _RingRespawnPoint.PosState.X;
@@ -408,7 +402,7 @@ void CCharacterRespawnPoints::resetUserDb() const
 
 		for (uint i = 0; i < respawnPoints.size(); i++)
 		{
-			const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoints[i]);
+			const CTpSpawnZone *zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoints[i]);
 			if (zone == NULL)
 			{
 				nlwarning("<RESPAWN_POINT> %s : invalid zone id %u", id.toString().c_str(), respawnPoints[i]);
@@ -421,8 +415,8 @@ void CCharacterRespawnPoints::resetUserDb() const
 		}
 	}
 	respawnPointMsg.NeedToReset = true;
-	bms.serial( respawnPointMsg );
-	msgout.serialMemStream( bms );
+	bms.serial(respawnPointMsg);
+	msgout.serialMemStream(bms);
 	CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(id.getDynamicId()), msgout);
 }
 
@@ -431,12 +425,12 @@ void CCharacterRespawnPoints::addRespawnPointToUserDb(TRespawnPoint respawnPoint
 {
 	NLMISC::CEntityId id = _Char.getId();
 	CMessage msgout("IMPULSION_ID");
-	msgout.serial( id );
+	msgout.serial(id);
 	CBitMemStream bms;
-	nlverify( GenericMsgManager.pushNameToStream("DEATH:RESPAWN_POINT", bms) );
+	nlverify(GenericMsgManager.pushNameToStream("DEATH:RESPAWN_POINT", bms));
 
 	CRespawnPointsMsg respawnPointMsg;
-	const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
+	const CTpSpawnZone *zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
 	if (zone == NULL)
 	{
 		nlwarning("<RESPAWN_POINT> %s : invalid zone id %u", id.toString().c_str(), respawnPoint);
@@ -447,19 +441,19 @@ void CCharacterRespawnPoints::addRespawnPointToUserDb(TRespawnPoint respawnPoint
 	zone->getCenter(rs.x, rs.y);
 	respawnPointMsg.RespawnPoints.push_back(rs);
 	respawnPointMsg.NeedToReset = false;
-	bms.serial( respawnPointMsg );
-	msgout.serialMemStream( bms );
+	bms.serial(respawnPointMsg);
+	msgout.serialMemStream(bms);
 	CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(id.getDynamicId()), msgout);
 }
 
 //-----------------------------------------------------------------------------
-void CCharacterRespawnPoints::dumpRespawnPoints(NLMISC::CLog & log) const
+void CCharacterRespawnPoints::dumpRespawnPoints(NLMISC::CLog &log) const
 {
 	log.displayNL("Regular respawn points of player %s", _Char.getId().toString().c_str());
 	for (uint i = 0; i < _RegularRespawnPoints.size(); i++)
 	{
-		const TRespawnPoint & respawnPoint = _RegularRespawnPoints[i];
-		const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
+		const TRespawnPoint &respawnPoint = _RegularRespawnPoints[i];
+		const CTpSpawnZone *zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
 		if (zone == NULL)
 		{
 			log.displayNL("    %u : invalid spawn zone", respawnPoint);
@@ -467,28 +461,26 @@ void CCharacterRespawnPoints::dumpRespawnPoints(NLMISC::CLog & log) const
 		}
 
 		log.displayNL("    %s : id=%u, zone type='%s', continent='%s', usable=%s",
-			zone->getName().c_str(),
-			respawnPoint,
-			RESPAWN_POINT::toString(zone->getType()).c_str(),
-			CONTINENT::toString(zone->getContinent()).c_str(),
-			isUsableRegularRespawnPoint(zone->getContinent(), respawnPoint) ? "true" : "false"
-			);
+		    zone->getName().c_str(),
+		    respawnPoint,
+		    RESPAWN_POINT::toString(zone->getType()).c_str(),
+		    CONTINENT::toString(zone->getContinent()).c_str(),
+		    isUsableRegularRespawnPoint(zone->getContinent(), respawnPoint) ? "true" : "false");
 	}
 
 	log.displayNL("Mission respawn points of player %s", _Char.getId().toString().c_str());
 	map<sint32, CMissionRespawnPoints>::const_iterator it;
 	for (it = _MissionRespawnPointsByContinent.begin(); it != _MissionRespawnPointsByContinent.end(); ++it)
 	{
-		const CMissionRespawnPoints & missionRespawnPoints = (*it).second;
+		const CMissionRespawnPoints &missionRespawnPoints = (*it).second;
 
 		log.displayNL("Continent '%s' (hideOthers=%s):",
-			CONTINENT::toString(CONTINENT::TContinent((*it).first)).c_str(),
-			missionRespawnPoints.getHideOthers()?"true":"false"
-			);
+		    CONTINENT::toString(CONTINENT::TContinent((*it).first)).c_str(),
+		    missionRespawnPoints.getHideOthers() ? "true" : "false");
 		for (uint i = 0; i < missionRespawnPoints.size(); i++)
 		{
-			const TRespawnPoint & respawnPoint = missionRespawnPoints[i];
-			const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
+			const TRespawnPoint &respawnPoint = missionRespawnPoints[i];
+			const CTpSpawnZone *zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
 			if (zone == NULL)
 			{
 				log.displayNL("    %u : invalid spawn zone", respawnPoint);
@@ -496,24 +488,22 @@ void CCharacterRespawnPoints::dumpRespawnPoints(NLMISC::CLog & log) const
 			}
 
 			log.displayNL("    %s : id=%u, zone type='%s', continent='%s'",
-				zone->getName().c_str(),
-				respawnPoint,
-				RESPAWN_POINT::toString(zone->getType()).c_str(),
-				CONTINENT::toString(zone->getContinent()).c_str()
-				);
+			    zone->getName().c_str(),
+			    respawnPoint,
+			    RESPAWN_POINT::toString(zone->getType()).c_str(),
+			    CONTINENT::toString(zone->getContinent()).c_str());
 		}
 	}
 
 	log.displayNL("Usable respawn points of player %s in the current continent '%s'",
-		_Char.getId().toString().c_str(),
-		CONTINENT::toString(_Char.getCurrentContinent()).c_str()
-		);
+	    _Char.getId().toString().c_str(),
+	    CONTINENT::toString(_Char.getCurrentContinent()).c_str());
 	vector<TRespawnPoint> usableRespawnPoints;
 	getUsableRespawnPoints(_Char.getCurrentContinent(), usableRespawnPoints);
 	for (uint i = 0; i < usableRespawnPoints.size(); i++)
 	{
-		const TRespawnPoint & respawnPoint = usableRespawnPoints[i];
-		const CTpSpawnZone * zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
+		const TRespawnPoint &respawnPoint = usableRespawnPoints[i];
+		const CTpSpawnZone *zone = CZoneManager::getInstance().getTpSpawnZone(respawnPoint);
 		if (zone == NULL)
 		{
 			log.displayNL("    %u : invalid spawn zone", respawnPoint);
@@ -521,16 +511,15 @@ void CCharacterRespawnPoints::dumpRespawnPoints(NLMISC::CLog & log) const
 		}
 
 		log.displayNL("    %s : id=%u, zone type='%s', continent='%s'",
-			zone->getName().c_str(),
-			respawnPoint,
-			RESPAWN_POINT::toString(zone->getType()).c_str(),
-			CONTINENT::toString(zone->getContinent()).c_str()
-			);
+		    zone->getName().c_str(),
+		    respawnPoint,
+		    RESPAWN_POINT::toString(zone->getType()).c_str(),
+		    CONTINENT::toString(zone->getContinent()).c_str());
 	}
 }
 
 //-----------------------------------------------------------------------------
-//void CCharacterRespawnPoints::legacyLoad(NLMISC::IStream & f)
+// void CCharacterRespawnPoints::legacyLoad(NLMISC::IStream & f)
 //{
 //	if (f.isReading())
 //	{
@@ -552,6 +541,5 @@ void CCharacterRespawnPoints::dumpRespawnPoints(NLMISC::CLog & log) const
 //	{
 //		// ensure we won't try to save in old format anymore
 //		nlassertex(false, ("<RESPAWN_POINT> you should not save in old format anymore!!!") );
-//	}	
+//	}
 //}
-

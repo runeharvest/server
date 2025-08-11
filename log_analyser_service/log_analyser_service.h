@@ -23,7 +23,6 @@
 #include <nel/misc/time_nl.h>
 #include <nel/net/service.h>
 
-
 /**
  * <Class description>
  * \author Benjamin Legros
@@ -33,23 +32,19 @@
 class CLogAnalyserService : public NLNET::IService
 {
 public:
-
 	/// Constructor
 	CLogAnalyserService();
 
-
 	/// Initialization
-	virtual void	init();
+	virtual void init();
 
 	/// Release
-	virtual void	release();
+	virtual void release();
 
 	/// Update
-	virtual bool	update();
-
+	virtual bool update();
 
 public:
-
 	enum TQueryState
 	{
 		QueryAwaiting,
@@ -60,64 +55,67 @@ public:
 	class CQuery
 	{
 	public:
+		CQuery(uint32 id, const std::string &query)
+		    : Id(id)
+		    , Progress(0.0f)
+		    , Query(query)
+		    , State(QueryAwaiting)
+		    , Finished(false)
+		{
+		}
 
-		CQuery(uint32 id, const std::string& query) : Id(id), Progress(0.0f), Query(query), State(QueryAwaiting), Finished(false)	{}
+		uint32 Id;
+		volatile float Progress;
+		TQueryState State;
+		std::string Query;
+		std::vector<std::string> Result;
+		NLMISC::TTime Timeout;
 
-		uint32						Id;
-		volatile float				Progress;
-		TQueryState					State;
-		std::string					Query;
-		std::vector<std::string>	Result;
-		NLMISC::TTime				Timeout;
-
-		NLMISC::CAtomicBool			Finished;
-
+		NLMISC::CAtomicBool Finished;
 	};
 
 	/// Get Service Instance
-	static CLogAnalyserService*	getInstance()
+	static CLogAnalyserService *getInstance()
 	{
-		return (CLogAnalyserService*)IService::getInstance();
+		return (CLogAnalyserService *)IService::getInstance();
 	}
 
 	/// Get Next Query Id
-	uint32			getNextQueryId()
+	uint32 getNextQueryId()
 	{
 		return _NextQueryId++;
 	}
 
 	/// Execute query
-	void			executeQuery(uint32 queryId, const std::string& query);
+	void executeQuery(uint32 queryId, const std::string &query);
 
 	/// Get query result
-	bool			getQueryResult(uint32 queryId, std::string& result, sint page, uint& numpage, const std::string& filter, bool fmode, uint linePerPage);
+	bool getQueryResult(uint32 queryId, std::string &result, sint page, uint &numpage, const std::string &filter, bool fmode, uint linePerPage);
 
 	/// Get Query list
-	void			getQueryList(std::vector<CQuery*>& queries);
+	void getQueryList(std::vector<CQuery *> &queries);
 
 	/// Cancel awaiting query
-	void			cancelQuery(uint32 queryId);
+	void cancelQuery(uint32 queryId);
 
 	/// Get current query
-	CQuery*			getCurrentQuery()				{ return _Current; }
+	CQuery *getCurrentQuery() { return _Current; }
 
 private:
+	NLMISC::CMutex _Mutex;
 
-	NLMISC::CMutex			_Mutex;
+	NLMISC::IThread *_Thread;
 
-	NLMISC::IThread*		_Thread;
+	CQuery *_Current;
 
-	CQuery*					_Current;
+	std::deque<CQuery *> _Requests;
+	std::deque<CQuery *> _Finished;
 
-	std::deque<CQuery*>		_Requests;
-	std::deque<CQuery*>		_Finished;
-
-	uint32					_NextQueryId;
+	uint32 _NextQueryId;
 
 	/// Update Web connection
-	void	updateWebConnection();
+	void updateWebConnection();
 };
-
 
 #endif // NL_LOG_ANALYSER_SERVICE_H
 

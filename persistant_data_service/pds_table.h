@@ -50,8 +50,7 @@ class IDbFileStream;
 class CDatabase;
 class CTableNode;
 
-//#define DEBUG_DATA_ACCESSOR
-
+// #define DEBUG_DATA_ACCESSOR
 
 /**
  * A table able to update values into it
@@ -62,7 +61,6 @@ class CTableNode;
 class CTable : public IRowProcessor, public CPDSLogger
 {
 public:
-
 	/**
 	 * Constructor
 	 */
@@ -76,91 +74,86 @@ public:
 	/**
 	 * Clear table
 	 */
-	void				clear();
+	void clear();
 
 	/**
 	 * Init table
 	 * \return true iff success
 	 */
-	bool				init(CDatabase *database, const CTableNode& table);
+	bool init(CDatabase *database, const CTableNode &table);
 
 	/// Initialized yet?
-	bool				initialised() const			{ return _Init; }
+	bool initialised() const { return _Init; }
 
 	/**
 	 * Post Init, called once all tables have been initialised
 	 */
-	bool				postInit();
+	bool postInit();
 
 	/**
 	 * Build columns
 	 */
-	bool				buildColumns();
-
-
+	bool buildColumns();
 
 	/**
 	 * Get parent Database
 	 */
-	const CDatabase*	getParent() const							{ return _Parent; }
+	const CDatabase *getParent() const { return _Parent; }
 
 	/**
 	 * Get parent Database
 	 */
-	CDatabase*			getParent() 								{ return _Parent; }
+	CDatabase *getParent() { return _Parent; }
 
 	/**
 	 * Get name
 	 */
-	const std::string&	getName() const								{ return _Name; }
+	const std::string &getName() const { return _Name; }
 
 	/**
 	 * Get Id
 	 */
-	TTypeId				getId() const								{ return _Id; }
+	TTypeId getId() const { return _Id; }
 
 	/**
 	 * Get Class Key
 	 */
-	uint32				getKey() const								{ return _Key; }
+	uint32 getKey() const { return _Key; }
 
 	/**
 	 * Get inherited table
 	 */
-	TTypeId				getInheritTable() const						{ return _Inheritance; }
+	TTypeId getInheritTable() const { return _Inheritance; }
 
 	/**
 	 * Get Attributes
 	 */
-	const std::vector<CAttribute*>&	getAttributes() const			{ return _Attributes; }
+	const std::vector<CAttribute *> &getAttributes() const { return _Attributes; }
 
 	/**
 	 * Get Attribute
 	 */
-	const CAttribute*	getAttribute(uint32 attribute) const		{ return attribute < _Attributes.size() ? _Attributes[attribute] : NULL; }
+	const CAttribute *getAttribute(uint32 attribute) const { return attribute < _Attributes.size() ? _Attributes[attribute] : NULL; }
 
 	/**
 	 * Get Attribute
 	 */
-	const CAttribute*	getAttribute(const std::string &name) const;
+	const CAttribute *getAttribute(const std::string &name) const;
 
 	/**
 	 * Get Columns
 	 */
-	const std::vector<CColumn>&		getColumns() const				{ return _Columns; }
+	const std::vector<CColumn> &getColumns() const { return _Columns; }
 
 	/**
 	 * Get Column
 	 */
-	const CColumn*		getColumn(uint32 column) const				{ return column < _Columns.size() && _Columns[column].initialised() ? &_Columns[column] : NULL; }
+	const CColumn *getColumn(uint32 column) const { return column < _Columns.size() && _Columns[column].initialised() ? &_Columns[column] : NULL; }
 
 	/**
 	 * Get Column
 	 */
-	const CColumn*		getColumn(CLocatePath &path, bool verbose = true) const;
-
-
-
+	const CColumn *getColumn(CLocatePath &path, bool verbose = true) const;
 
 	/// \name Row Management
 	// @{
@@ -170,25 +163,25 @@ public:
 	 * \param row is the row to allocate
 	 * Return true if succeded
 	 */
-	bool				allocate(RY_PDS::TRowIndex row, bool acquireRow = false);
+	bool allocate(RY_PDS::TRowIndex row, bool acquireRow = false);
 
 	/**
 	 * Deallocate a row in a table
 	 * \param row is the row to deallocate
 	 * Return true if succeded
 	 */
-	bool				deallocate(RY_PDS::TRowIndex row);
+	bool deallocate(RY_PDS::TRowIndex row);
 
 	/**
 	 * Tells if a row is allocated
 	 * \param row is the row to check
 	 */
-	bool				isAllocated(RY_PDS::TRowIndex row) const;
+	bool isAllocated(RY_PDS::TRowIndex row) const;
 
 	/**
 	 * Is Table Mapped
 	 */
-	bool				isMapped() const		{ return _Mapped; }
+	bool isMapped() const { return _Mapped; }
 
 	/**
 	 * Map a row
@@ -196,67 +189,60 @@ public:
 	 * \param key is the 64 bits row key
 	 * Return true if succeded
 	 */
-	bool				mapRow(const RY_PDS::CObjectIndex &index, uint64 key);
+	bool mapRow(const RY_PDS::CObjectIndex &index, uint64 key);
 
 	/**
 	 * Unmap a row in a table
 	 * \param key is the 64 bits row key
 	 * Return true if succeded
 	 */
-	bool				unmapRow(uint64 key);
+	bool unmapRow(uint64 key);
 
 	/**
 	 * Release a row in table
 	 * \param row is the row to release
 	 * Return true if succeded
 	 */
-	bool				release(RY_PDS::TRowIndex row);
+	bool release(RY_PDS::TRowIndex row);
 
 	/**
 	 * Release all rows in table
 	 */
-	bool				releaseAll();
+	bool releaseAll();
 
 	/**
 	 * Get a mapped row
 	 * \param key is the 64 bits row key
 	 * Return a valid CObjectIndex if success
 	 */
-	RY_PDS::CObjectIndex	getMappedRow(uint64 key) const;
-
+	RY_PDS::CObjectIndex getMappedRow(uint64 key) const;
 
 	/**
 	 * Get the next unallocated row index in table
 	 */
-	RY_PDS::TRowIndex	nextUnallocatedRow() const					{ return _TableBuffer.nextUnallocatedRow(); }
-
+	RY_PDS::TRowIndex nextUnallocatedRow() const { return _TableBuffer.nextUnallocatedRow(); }
 
 	/**
 	 * Get memory load
 	 */
-	uint32				getMemoryLoad() const						{ return _TableBuffer.getMemoryLoad(); }
+	uint32 getMemoryLoad() const { return _TableBuffer.getMemoryLoad(); }
 
 	// @}
-
-
-
 
 	/**
 	 * Set value
 	 */
-	bool				set(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void* dataptr);
+	bool set(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void *dataptr);
 
 	/**
 	 * Set Parent
 	 */
-	bool				setParent(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const RY_PDS::CObjectIndex& parent);
+	bool setParent(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, const RY_PDS::CObjectIndex &parent);
 
 	/**
 	 * Get value
 	 */
-	bool				get(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint& datasize, void* dataptr, TDataType& type);
-
-
+	bool get(RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint &datasize, void *dataptr, TDataType &type);
 
 	/**
 	 * Fetch a row into stream
@@ -264,33 +250,42 @@ public:
 	 * \param row is the row to fetch
 	 * \param data is the stream store data into
 	 */
-	bool				fetch(RY_PDS::TRowIndex row, RY_PDS::CPData &data, bool fetchIndex = true);
-
+	bool fetch(RY_PDS::TRowIndex row, RY_PDS::CPData &data, bool fetchIndex = true);
 
 	/**
 	 * Build the index allocator for this table
 	 */
-	bool				buildIndexAllocator(RY_PDS::CIndexAllocator& alloc);
-
-
-
+	bool buildIndexAllocator(RY_PDS::CIndexAllocator &alloc);
 
 public:
-
 	/**
 	 * A data accessor, that handles embedded access to an object' value
 	 */
 	class CDataAccessor
 	{
 	public:
-
 		/**
 		 * Default constructor, this accessor is invalid
 		 */
 #ifdef DEBUG_DATA_ACCESSOR
-		CDataAccessor() : _IsValid(false), _Table(NULL), _Attribute(NULL), _Column(NULL), _Data(NULL), _IsDebug(false)	{}
+		CDataAccessor()
+		    : _IsValid(false)
+		    , _Table(NULL)
+		    , _Attribute(NULL)
+		    , _Column(NULL)
+		    , _Data(NULL)
+		    , _IsDebug(false)
+		{
+		}
 #else
-		CDataAccessor() : _IsValid(false), _Table(NULL), _Attribute(NULL), _Column(NULL), _Data(NULL)	{}
+		CDataAccessor()
+		    : _IsValid(false)
+		    , _Table(NULL)
+		    , _Attribute(NULL)
+		    , _Column(NULL)
+		    , _Data(NULL)
+		{
+		}
 #endif
 
 		/**
@@ -299,32 +294,32 @@ public:
 		~CDataAccessor();
 
 		/// Is accessor valid?
-		bool						isValid() const						{ return _IsValid; }
+		bool isValid() const { return _IsValid; }
 
 		/**
 		 * Get data as CObjectIndex
 		 * Return false if something went wrong (mainly, CDataAccessor is not valid, or pointed data is not an CObjectIndex)
 		 */
-		bool						getIndex(RY_PDS::CObjectIndex &index) const;
+		bool getIndex(RY_PDS::CObjectIndex &index) const;
 
 		/**
 		 * Set data as CObjectIndex
 		 * Return false if something went wrong (mainly, CDataAccessor is not valid, or pointed data is not an CObjectIndex)
 		 */
-		bool						setIndex(const RY_PDS::CObjectIndex &index);
+		bool setIndex(const RY_PDS::CObjectIndex &index);
 
 		/**
 		 * Get data as a Set
 		 * Return an accessor on a set, which is valid only if not issue occurred
 		 * Thus, you are able to modify the list own your own, add/remove items...
 		 */
-		RY_PDS::CSetMap::CAccessor	getSet();
+		RY_PDS::CSetMap::CAccessor getSet();
 
 		/**
 		 * Get data as a Set
 		 * Return an accessor on a set, which is valid only if not issue occurred
 		 */
-		const RY_PDS::CSetMap::CAccessor	getSet() const;
+		const RY_PDS::CSetMap::CAccessor getSet() const;
 
 		/**
 		 * Get data as simple type value
@@ -333,7 +328,7 @@ public:
 		 * Return false if something went wrong (mainly, CDataAccessor is not valid, or pointed data is not an simple type)
 		 * If datasize doesn't match, data are loaded anyway, but shrinked or truncated, and a warning is issued
 		 */
-		bool						getValue(void* dataptr, uint32 datasize) const;
+		bool getValue(void *dataptr, uint32 datasize) const;
 
 		/**
 		 * Set data as simple type value
@@ -342,111 +337,102 @@ public:
 		 * Return false if something went wrong (mainly, CDataAccessor is not valid, or pointed data is not an simple type)
 		 * If datasize doesn't match, data are stored anyway, but shrinked or truncated, and a warning is issued
 		 */
-		bool						setValue(const void* dataptr, uint32 datasize);
+		bool setValue(const void *dataptr, uint32 datasize);
 
 		/**
 		 * Get as enum/dimension
 		 */
-		bool						getAsIndexType(uint32& value) const;
+		bool getAsIndexType(uint32 &value) const;
 
 		/**
 		 * Set as enum/dimension
 		 */
-		bool						setAsIndexType(uint32 value);
+		bool setAsIndexType(uint32 value);
 
 		/**
 		 * Get Back Ref Key value
 		 */
-		bool						getBackRefKey(uint32& key);
+		bool getBackRefKey(uint32 &key);
 
 		/**
 		 * Fetch column data into stream
 		 */
-		bool						fetch(RY_PDS::CPData &data);
-
+		bool fetch(RY_PDS::CPData &data);
 
 		/**
 		 * Ask Parent Table to release row
 		 */
-		//bool						releaseRow();
+		// bool						releaseRow();
 
 		/**
 		 * Acquire row
 		 */
-		void						acquire();
+		void acquire();
 
 		/**
 		 * Unacquire row
 		 */
-		void						unacquire();
-
+		void unacquire();
 
 		/**
 		 * toString()
 		 */
-		std::string					toString() const		{ return isValid() ? (_Table->getName()+":"+NLMISC::toString(_Accessor.row())+":"+_Column->getName()) : "<invalid>"; }
-
+		std::string toString() const { return isValid() ? (_Table->getName() + ":" + NLMISC::toString(_Accessor.row()) + ":" + _Column->getName()) : "<invalid>"; }
 
 		/**
 		 * Get table
 		 */
-		CTable*						table()					{ return isValid() ? _Table : NULL; }
+		CTable *table() { return isValid() ? _Table : NULL; }
 
 		/**
 		 * Get attribute
 		 */
-		const CAttribute*			attribute() const		{ return isValid() ? _Attribute : NULL; }
+		const CAttribute *attribute() const { return isValid() ? _Attribute : NULL; }
 
 		/**
 		 * Get column
 		 */
-		const CColumn*				column() const			{ return isValid() ? _Column : NULL; }
+		const CColumn *column() const { return isValid() ? _Column : NULL; }
 
 		/**
 		 * Get Row
 		 */
-		RY_PDS::TRowIndex			row() const				{ return isValid() ? _Accessor.row() : RY_PDS::INVALID_ROW_INDEX; }
+		RY_PDS::TRowIndex row() const { return isValid() ? _Accessor.row() : RY_PDS::INVALID_ROW_INDEX; }
 
 		/**
 		 * Perform column integrity check
 		 */
-		bool						check() const;
+		bool check() const;
 
 		/**
 		 * Get value as string
 		 */
-		std::string					valueAsString(bool expandSet = false) const;
+		std::string valueAsString(bool expandSet = false) const;
 
 		/**
 		 * Get Column Index
 		 * Return the Column Index of the column accessed
 		 */
-		RY_PDS::CColumnIndex		getColumnIndex() const
+		RY_PDS::CColumnIndex getColumnIndex() const
 		{
-			return isValid() ?
-				RY_PDS::CColumnIndex((RY_PDS::TTableIndex)_Table->getId(), _Accessor.row(), (RY_PDS::TColumnIndex)_Column->getId()) :
-				RY_PDS::CColumnIndex();
+			return isValid() ? RY_PDS::CColumnIndex((RY_PDS::TTableIndex)_Table->getId(), _Accessor.row(), (RY_PDS::TColumnIndex)_Column->getId()) : RY_PDS::CColumnIndex();
 		}
 
 		/**
 		 * Get Object Index
 		 * Return the Object Index of the whole row accessed
 		 */
-		RY_PDS::CObjectIndex		getObjectIndex() const
+		RY_PDS::CObjectIndex getObjectIndex() const
 		{
-			return isValid() ?
-				RY_PDS::CObjectIndex((RY_PDS::TTableIndex)_Table->getId(), _Accessor.row()) :
-				RY_PDS::CObjectIndex();
+			return isValid() ? RY_PDS::CObjectIndex((RY_PDS::TTableIndex)_Table->getId(), _Accessor.row()) : RY_PDS::CObjectIndex();
 		}
-
 
 		/**
 		 * Dump accessor content and info to xml
 		 */
-		void						dumpToXml(NLMISC::IStream& xml, sint expandDepth = -1);
+		void dumpToXml(NLMISC::IStream &xml, sint expandDepth = -1);
 
 	private:
-
 		/**
 		 * Constructor
 		 * Build a data accessor from a table, a row and an attribute id
@@ -455,9 +441,9 @@ public:
 		 * \param attribute is the attribute in the row
 		 * \param index is the array index if the attribute is an array, set to 0 for other type
 		 */
-		CDataAccessor(CDatabase* root, const RY_PDS::CObjectIndex& object, uint32 attribute, TEnumValue arrayIndex);
+		CDataAccessor(CDatabase *root, const RY_PDS::CObjectIndex &object, uint32 attribute, TEnumValue arrayIndex);
 
-		/** 
+		/**
 		 * Constructor
 		 * Build a data accessor from a table, a row and an column id
 		 * This constructor supports Class and ArrayClass attributes
@@ -465,30 +451,28 @@ public:
 		 * \param row is index to access
 		 * \param column in the row
 		 */
-		CDataAccessor(CDatabase* root, const RY_PDS::CObjectIndex& object, RY_PDS::TColumnIndex column);
+		CDataAccessor(CDatabase *root, const RY_PDS::CObjectIndex &object, RY_PDS::TColumnIndex column);
 
 		/**
 		 * Constructor
 		 * Build a data accessor from a table, a data accessor and a column index
 		 */
-		CDataAccessor(CTable* table, CTableBuffer::CAccessor& data, RY_PDS::TColumnIndex column);
+		CDataAccessor(CTable *table, CTableBuffer::CAccessor &data, RY_PDS::TColumnIndex column);
 
 		/**
 		 * Constructor
 		 * Build a data accessor from another accessor and a column index.
 		 * Used to access another field in a row
 		 */
-		CDataAccessor(const CDataAccessor& accessor, RY_PDS::TColumnIndex column);
-
+		CDataAccessor(const CDataAccessor &accessor, RY_PDS::TColumnIndex column);
 
 #ifdef DEBUG_DATA_ACCESSOR
 		/**
 		 * Constructor
 		 * Build a **debug** data accessor from row data and a column index.
 		 */
-		CDataAccessor(CTable* table, uint8* data, RY_PDS::TColumnIndex column);
+		CDataAccessor(CTable *table, uint8 *data, RY_PDS::TColumnIndex column);
 #endif
-
 
 		/**
 		 * Seek to array index
@@ -496,7 +480,7 @@ public:
 		 * Seek doesn't apply to ArrayClass attributes
 		 * Return true if success, false if not and accessor is invalidated
 		 */
-		bool						seek(TEnumValue index);
+		bool seek(TEnumValue index);
 
 		/**
 		 * Seek to array index
@@ -504,219 +488,201 @@ public:
 		 * Seek doesn't apply to ArrayClass attributes
 		 * Return true if success, false if not and accessor is invalidated
 		 */
-		bool						seek(CDataAccessor& backref);
+		bool seek(CDataAccessor &backref);
 
 		/**
 		 * Check type of an index
 		 */
-		bool						checkType(const RY_PDS::CObjectIndex &object) const;
+		bool checkType(const RY_PDS::CObjectIndex &object) const;
 
 		/**
 		 * Check an accessor as a PDS_Type accessor
 		 */
-		bool						checkAsTypeAccessor() const;
+		bool checkAsTypeAccessor() const;
 
 		/**
 		 * Check an accessor as a PDS_BackRef or PDS_ForwardRef accessor
 		 */
-		bool						checkAsRefAccessor() const;
+		bool checkAsRefAccessor() const;
 
 		/**
 		 * Check an accessor as a PDS_Set accessor
 		 */
-		bool						checkAsSetAccessor() const;
+		bool checkAsSetAccessor() const;
 
 		/**
 		 * Dirty row
 		 * Mark the whole row as modified, and to be stored at next delta backup time
 		 */
-		bool						dirtyRow();
+		bool dirtyRow();
 
 		/**
 		 * Setup Row Accessor
 		 */
-		bool						setupAccessor(RY_PDS::TRowIndex row);
+		bool setupAccessor(RY_PDS::TRowIndex row);
 
 		/**
 		 * Invalidate accessor
 		 */
-		void						invalidate();
+		void invalidate();
 
 		/// Table to look into
-		CTable*						_Table;
+		CTable *_Table;
 
 		/// Attribute
-		const CAttribute*			_Attribute;
+		const CAttribute *_Attribute;
 
 		/// Column
-		const CColumn*				_Column;
+		const CColumn *_Column;
 
 		/// Row data accessor
-		CTableBuffer::CAccessor		_Accessor;
+		CTableBuffer::CAccessor _Accessor;
 
 		/// Pointer to object data (start pointer, in case of array)
-		uint8*						_Data;
+		uint8 *_Data;
 
 		/// Is valid
-		bool						_IsValid;
+		bool _IsValid;
 
 #ifdef DEBUG_DATA_ACCESSOR
 		/// Is debug
-		bool						_IsDebug;
+		bool _IsDebug;
 #endif
 
 		friend class CTable;
 	};
 
-
 protected:
-
-	virtual std::string	getLoggerIdentifier() const		{ return NLMISC::toString("tab:%s", (_Name.empty() ? "<unnamed>" : _Name.c_str())); }
+	virtual std::string getLoggerIdentifier() const { return NLMISC::toString("tab:%s", (_Name.empty() ? "<unnamed>" : _Name.c_str())); }
 
 public:
-
 	/**
 	 * Get accessor on data from a path
 	 */
-	CDataAccessor		getAccessor(CLocatePath &path);
-
-
+	CDataAccessor getAccessor(CLocatePath &path);
 
 	/// Display
-	void				display(NLMISC::CLog *log = NLMISC::InfoLog, bool expanded = false, bool displayHeader = false) const;
+	void display(NLMISC::CLog *log = NLMISC::InfoLog, bool expanded = false, bool displayHeader = false) const;
 
 	/// Display row
-	void				displayRow(RY_PDS::TRowIndex row, NLMISC::CLog *log = NLMISC::InfoLog, bool displayHeader = false);
+	void displayRow(RY_PDS::TRowIndex row, NLMISC::CLog *log = NLMISC::InfoLog, bool displayHeader = false);
 
 	/// Display row
-	void				displayValue(RY_PDS::TRowIndex row, NLMISC::CLog *log = NLMISC::InfoLog);
+	void displayValue(RY_PDS::TRowIndex row, NLMISC::CLog *log = NLMISC::InfoLog);
 
 	/// Dump Delta file content
-	void				dumpDeltaFileContent(const std::string& filename, NLMISC::CLog *log = NLMISC::InfoLog) const;
-
-
+	void dumpDeltaFileContent(const std::string &filename, NLMISC::CLog *log = NLMISC::InfoLog) const;
 
 	/**
 	 * Dump table content and info at row to xml
 	 */
-	void				dumpToXml(RY_PDS::TRowIndex row, NLMISC::IStream& xml, sint expandDepth = -1);
-
-
+	void dumpToXml(RY_PDS::TRowIndex row, NLMISC::IStream &xml, sint expandDepth = -1);
 
 	/// Rebuild forwardrefs from backrefs
-	bool				rebuildForwardRefs();
+	bool rebuildForwardRefs();
 
 	/// Reset forwardrefs
-	bool				resetForwardRefs();
+	bool resetForwardRefs();
 
 	/// Reset table map
-	bool				resetTableMap();
+	bool resetTableMap();
 
 	/// Rebuild table map
-	bool				rebuildTableMap();
+	bool rebuildTableMap();
 
 	/**
 	 * Reset dirty tags
 	 * Reset all rows so no one is marked as being dirty.
 	 * This method fixes broken list issues
 	 */
-	bool				resetDirtyTags();
+	bool resetDirtyTags();
 
 	/**
 	 * Preload reference files
 	 */
-	bool				preloadRefFiles();
-
-
+	bool preloadRefFiles();
 
 	/**
 	 * Notify new Reference
 	 * Internal table reference is reset and table is flushed from its released rows
 	 */
-	bool				notifyNewReference(CRefIndex& newref);
+	bool notifyNewReference(CRefIndex &newref);
 
 	/**
 	 * Apply delta changes from a file
 	 */
-	bool				applyDeltaChanges(const std::string& filename);
+	bool applyDeltaChanges(const std::string &filename);
 
 	/**
 	 * Build the delta file and purge all dirty rows in this table
 	 */
-	bool				buildDelta(const CTimestamp& starttime, const CTimestamp& endtime);
+	bool buildDelta(const CTimestamp &starttime, const CTimestamp &endtime);
 
 	/**
 	 * Flush table from released rows
 	 */
-	bool				flushReleased();
+	bool flushReleased();
 
 	/**
 	 * Build RowMapper
 	 */
-	bool				buildRowMapper();
+	bool buildRowMapper();
 
 	/**
 	 * Process Row
 	 */
-	virtual bool		processRow(RY_PDS::TTableIndex table, CTableBuffer::CAccessor& accessor);
+	virtual bool processRow(RY_PDS::TTableIndex table, CTableBuffer::CAccessor &accessor);
 
 	/**
 	 * Fix broken forward refs
 	 */
-	bool				fixForwardRefs();
+	bool fixForwardRefs();
 
 	/**
 	 * Fix row broken forward refs
 	 * For each forward ref that should not contain null index, allocate a new row in
 	 * the child table, then setup back and forward references
 	 */
-	bool				fixRowForwardRefs(RY_PDS::TRowIndex row);
-
+	bool fixRowForwardRefs(RY_PDS::TRowIndex row);
 
 private:
-
 	/// Initialised yet?
-	bool							_Init;
-
+	bool _Init;
 
 	/// Name of the table
-	std::string						_Name;
+	std::string _Name;
 
 	/// Id of the table
-	TTypeId							_Id;
+	TTypeId _Id;
 
 	/// Inheritance of the table
-	TTypeId							_Inheritance;
+	TTypeId _Inheritance;
 
 	/// Parent database
-	CDatabase*						_Parent;
+	CDatabase *_Parent;
 
 	/// Attributes of the table
-	std::vector<CAttribute*>		_Attributes;
+	std::vector<CAttribute *> _Attributes;
 
 	/// Columns of the table
-	std::vector<CColumn>			_Columns;
-
+	std::vector<CColumn> _Columns;
 
 	/// Key Attribute
-	TTypeId							_Key;
+	TTypeId _Key;
 
 	/// Table buffer
-	CTableBuffer					_TableBuffer;
+	CTableBuffer _TableBuffer;
 
-	/// Size of a row 
-	uint32							_RowSize;
+	/// Size of a row
+	uint32 _RowSize;
 
 	/// Table is mapped
-	bool							_Mapped;
-
+	bool _Mapped;
 
 	/// Empty Row pattern
-	std::vector<uint8>				_EmptyRow;
-
+	std::vector<uint8> _EmptyRow;
 
 private:
-
 	friend class CDataAccessor;
 	friend class CAttribute;
 	friend class CDatabaseAdapter;
@@ -724,20 +690,17 @@ private:
 	/**
 	 * Reset row to initial value
 	 */
-	bool				resetRow(uint8* rowData);
-
-
-	/**
-	 * Get Root Inheritance Table
-	 */
-	CTable*				getRootTable();
+	bool resetRow(uint8 *rowData);
 
 	/**
 	 * Get Root Inheritance Table
 	 */
-	const CTable*		getRootTable() const;
+	CTable *getRootTable();
 
-
+	/**
+	 * Get Root Inheritance Table
+	 */
+	const CTable *getRootTable() const;
 
 	/**
 	 * link a BackRef to a parent
@@ -746,7 +709,7 @@ private:
 	 * \param parent is an index on the parent to link
 	 * \param child is a remember of the child index
 	 */
-	bool				link(CDataAccessor &backref, const RY_PDS::CObjectIndex &parent, const RY_PDS::CObjectIndex &child);
+	bool link(CDataAccessor &backref, const RY_PDS::CObjectIndex &parent, const RY_PDS::CObjectIndex &child);
 
 	/**
 	 * link a ForwardRef to a child
@@ -754,8 +717,7 @@ private:
 	 * \param forwardref is an accessor on the BackRef
 	 * \param child is an index on the child to link
 	 */
-	bool				forwardLink(CDataAccessor &backref, CDataAccessor &forwardref, const RY_PDS::CObjectIndex &child);
-
+	bool forwardLink(CDataAccessor &backref, CDataAccessor &forwardref, const RY_PDS::CObjectIndex &child);
 
 	/**
 	 * Unlink a BackRef
@@ -763,7 +725,7 @@ private:
 	 * \param backref is an accessor on the BackRef
 	 * \param child is a remember of the child index
 	 */
-	bool				unlink(CDataAccessor &backref, const RY_PDS::CObjectIndex &child);
+	bool unlink(CDataAccessor &backref, const RY_PDS::CObjectIndex &child);
 
 	/**
 	 * unlink a ForwardRef to a child
@@ -771,55 +733,49 @@ private:
 	 * \param forwardref is an accessor on the BackRef
 	 * \param child is an index on the child to link
 	 */
-	bool				forwardUnlink(CDataAccessor &backref, CDataAccessor &forwardref, const RY_PDS::CObjectIndex &child);
+	bool forwardUnlink(CDataAccessor &backref, CDataAccessor &forwardref, const RY_PDS::CObjectIndex &child);
 
 	/**
 	 * Clear dirty list
 	 * Reset dirty rows in the table. Only works properly if list is not broken
 	 */
-	bool				clearDirtyList();
-
-
+	bool clearDirtyList();
 
 	struct CBackRefFiller
 	{
-		const CColumn*			Column;
-		const CAttribute*		Referenced;
-		CTable*					ParentTable;
+		const CColumn *Column;
+		const CAttribute *Referenced;
+		CTable *ParentTable;
 	};
 
-	std::vector<CBackRefFiller>	BackRefInfo;
+	std::vector<CBackRefFiller> BackRefInfo;
 
 	struct CAutoForwardRefFiller
 	{
-		const CColumn*			Column;
+		const CColumn *Column;
 	};
 
-	std::vector<CAutoForwardRefFiller>	ForwardRefInfo;
+	std::vector<CAutoForwardRefFiller> ForwardRefInfo;
 
-	std::vector<RY_PDS::TRowIndex>	BrokenForwardRefs;
-
+	std::vector<RY_PDS::TRowIndex> BrokenForwardRefs;
 
 	/**
 	 * Fill up Backward and Forward References information
 	 */
-	bool				fillRefInfo();
+	bool fillRefInfo();
 
 	/**
 	 * Process Back Reference to a set
 	 */
-	bool				processBackRefToSet(CDataAccessor& parent, RY_PDS::CObjectIndex child);
+	bool processBackRefToSet(CDataAccessor &parent, RY_PDS::CObjectIndex child);
 
 	/**
 	 * Process Back Reference to a set
 	 */
-	bool				processBackRefToForwardRef(CDataAccessor& parent, RY_PDS::CObjectIndex child);
+	bool processBackRefToForwardRef(CDataAccessor &parent, RY_PDS::CObjectIndex child);
 };
-
 
 // include inlines
 #include "pds_table_inline.h"
 
-
-#endif //RY_PDS_TABLE_H
-
+#endif // RY_PDS_TABLE_H

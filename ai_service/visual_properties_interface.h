@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #ifndef RYAI_VISUAL_PROPERTIES_INTERFACE_H
 #define RYAI_VISUAL_PROPERTIES_INTERFACE_H
 
@@ -25,12 +22,12 @@
 #include "nel/misc/entity_id.h"
 #include "ai.h"
 */
-//#include "ai_entity_id.h"
+// #include "ai_entity_id.h"
 
 #include <string>
 
 // the class
-class	CVisualPropertiesInterface
+class CVisualPropertiesInterface
 {
 public:
 	// classic init(), update() and release()
@@ -39,10 +36,10 @@ public:
 	static void release();
 
 	// set different visual properties for an entity
-	static	void setName(const TDataSetRow&	dataSetRow, ucstring name);
-	
-//	static void setMode(CAIEntityId id,MBEHAV::EMode mode);
-//	static void setBehaviour(CAIEntityId id,MBEHAV::EBehaviour behaviour);
+	static void setName(const TDataSetRow &dataSetRow, ucstring name);
+
+	//	static void setMode(CAIEntityId id,MBEHAV::EMode mode);
+	//	static void setBehaviour(CAIEntityId id,MBEHAV::EBehaviour behaviour);
 
 	// clear all visual property info for an entity when it despawns
 	/*static void removeEntity(CAIEntityId id);*/

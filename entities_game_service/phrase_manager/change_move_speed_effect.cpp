@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -33,7 +31,7 @@ using namespace NLNET;
 //--------------------------------------------------------------
 //		CChangeMoveSpeedEffect::update()
 //--------------------------------------------------------------
-bool CChangeMoveSpeedEffect::update(CTimerEvent * event, bool applyEffect)
+bool CChangeMoveSpeedEffect::update(CTimerEvent *event, bool applyEffect)
 {
 	if (!_AffectedEntity)
 	{
@@ -48,7 +46,7 @@ bool CChangeMoveSpeedEffect::update(CTimerEvent * event, bool applyEffect)
 	if (applyEffect)
 	{
 		_AffectedEntity->getPhysScores().SpeedVariationModifier += _Value;
-		
+
 		// for players, add the value each tick, and doesn't reset it at the end
 /*		if (_AffectedEntity->getId().getType() == RYZOMID::player)
 		{
@@ -60,7 +58,7 @@ bool CChangeMoveSpeedEffect::update(CTimerEvent * event, bool applyEffect)
 		}
 */	}
 
-	return false;
+return false;
 } // update //
 
 //--------------------------------------------------------------
@@ -71,11 +69,11 @@ void CChangeMoveSpeedEffect::removed()
 	if (!_AffectedEntity) return;
 
 	// snare
-	if ( _Value  < 0)
+	if (_Value < 0)
 	{
-		
+
 		DEBUGLOG("EFFECT: slow move effect (value %d) ends on entity %s", _Value, _AffectedEntity->getId().toString().c_str());
-		
+
 		// restore entity speed
 		_AffectedEntity->getPhysScores().SpeedVariationModifier -= _Value;
 
@@ -90,10 +88,10 @@ void CChangeMoveSpeedEffect::removed()
 		}
 		else
 		{
-			const std::vector<CSEffectPtr>& effects = _AffectedEntity->getSEffects();
-			for (uint i = 0 ; i < effects.size() ; ++i)
+			const std::vector<CSEffectPtr> &effects = _AffectedEntity->getSEffects();
+			for (uint i = 0; i < effects.size(); ++i)
 			{
-				if (effects[i] && effects[i] != this && (effects[i]->getFamily() == EFFECT_FAMILIES::SlowMove || effects[i]->getFamily() == EFFECT_FAMILIES::CombatMvtSlow) )
+				if (effects[i] && effects[i] != this && (effects[i]->getFamily() == EFFECT_FAMILIES::SlowMove || effects[i]->getFamily() == EFFECT_FAMILIES::CombatMvtSlow))
 					return;
 			}
 		}
@@ -106,7 +104,7 @@ void CChangeMoveSpeedEffect::removed()
 	}
 
 	// send end message unless entity is dead
-	if ( !_AffectedEntity->isDead())
+	if (!_AffectedEntity->isDead())
 		sendEffectEndMessages();
 
 } // removed //

@@ -17,15 +17,12 @@
 #ifndef RY_PLACES_BACK_COMPAT_H
 #define RY_PLACES_BACK_COMPAT_H
 
-
-namespace BACK_COMPAT
-{
+namespace BACK_COMPAT {
 
 void initPlacesCompat();
 uint16 oldToNewPlaceId(uint16 oldId);
 
 } // namespace BACK_COMPAT
-
 
 #endif // RY_PLACES_BACK_COMPAT_H
 

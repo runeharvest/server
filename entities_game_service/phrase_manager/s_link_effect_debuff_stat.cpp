@@ -14,49 +14,44 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "s_link_effect_debuff_stat.h"
 #include "s_link_effect_dot.h"
 #include "entity_manager/entity_manager.h"
 #include "entity_structure/statistic.h"
 
-
-
 using namespace std;
 using namespace NLMISC;
 
 extern CRandom RandomGenerator;
 
-
 //--------------------------------------------------------------
-bool CSLinkEffectDebuffStat::update(CTimerEvent * event, bool applyEffect)
+bool CSLinkEffectDebuffStat::update(CTimerEvent *event, bool applyEffect)
 {
-	if ( CSLinkEffectOffensive::update(event, applyEffect) )
+	if (CSLinkEffectOffensive::update(event, applyEffect))
 		return true;
-	
+
 	if (_LinkExists)
 	{
-//		CEntityBase * caster = CEntityBaseManager::getEntityBasePtr( _CreatorRowId );
-//		if ( !caster )
-//		{
-//			nlwarning("<CSLinkEffectDebuffStat update> Invalid target %u",_CreatorRowId.getIndex() );
-//			return true;
-//		}
+		//		CEntityBase * caster = CEntityBaseManager::getEntityBasePtr( _CreatorRowId );
+		//		if ( !caster )
+		//		{
+		//			nlwarning("<CSLinkEffectDebuffStat update> Invalid target %u",_CreatorRowId.getIndex() );
+		//			return true;
+		//		}
 	}
-	
+
 	if (applyEffect && !_Applied)
 	{
-		CEntityBase * target = CEntityBaseManager::getEntityBasePtr( _TargetRowId );
-		if ( !target )
+		CEntityBase *target = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
+		if (!target)
 		{
-			nlwarning("<CSLinkEffectDebuffStat update> Invalid target %u",_TargetRowId.getIndex() );
+			nlwarning("<CSLinkEffectDebuffStat update> Invalid target %u", _TargetRowId.getIndex());
 			_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 			return true;
 		}
 
-		switch( _Type )
+		switch (_Type)
 		{
 		case STAT_TYPES::Skill:
 			///\todo nico
@@ -80,17 +75,16 @@ bool CSLinkEffectDebuffStat::update(CTimerEvent * event, bool applyEffect)
 	return false;
 }
 
-
 //--------------------------------------------------------------
 void CSLinkEffectDebuffStat::removed()
 {
 	// remove effect if effect have been applied
 	if (_Applied)
 	{
-		CEntityBase * target = CEntityBaseManager::getEntityBasePtr( _TargetRowId );
-		if ( target )
+		CEntityBase *target = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
+		if (target)
 		{
-			switch( _Type )
+			switch (_Type)
 			{
 			case STAT_TYPES::Skill:
 				break;
@@ -99,8 +93,8 @@ void CSLinkEffectDebuffStat::removed()
 			case STAT_TYPES::Speed:
 				target->getPhysScores().SpeedVariationModifier -= _Value;
 				break;
-//			default:
-//				nlwarning("invalid stat type %d", _Type);
+				//			default:
+				//				nlwarning("invalid stat type %d", _Type);
 			}
 		}
 	}

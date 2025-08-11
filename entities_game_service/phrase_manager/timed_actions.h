@@ -14,15 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef RY_TIMED_ACTIONS_H
 #define RY_TIMED_ACTIONS_H
-
 
 class CEntityBase;
 class CGameItemPtr;
 class CTimedActionPhrase;
-
 
 class CStaticItem;
 
@@ -46,10 +43,10 @@ class CTimedAction
 
 public:
 	/// \ctor
-	CTimedAction() {}
-	
+	CTimedAction() { }
+
 	/// \dtor
-	virtual ~CTimedAction() {}
+	virtual ~CTimedAction() { }
 
 	/// validate action
 	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor) = 0;
@@ -61,16 +58,15 @@ public:
 	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor) = 0;
 
 	/// stop action before execution of the phrase
-	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor) {}
+	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor) { }
 
 	/// test if action is canceled when actor is being hit, return true if canceled
-	virtual bool testCancelOnHit( sint32 attackSkillValue, CEntityBase * entity, CEntityBase * defender);
+	virtual bool testCancelOnHit(sint32 attackSkillValue, CEntityBase *entity, CEntityBase *defender);
 
 private:
 	/// family
-//	TFamily		_Family;
+	//	TFamily		_Family;
 };
-
 
 /**
  * Timed action specialized class for Teleport
@@ -82,14 +78,14 @@ class CTPTimedAction : public CTimedAction
 {
 public:
 	/// \ctor
-	CTPTimedAction() {}
-	
+	CTPTimedAction() { }
+
 	/// \dtor
-	virtual ~CTPTimedAction() {}
+	virtual ~CTPTimedAction() { }
 
 	/// validate action
 	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor);
-	
+
 	/// apply action
 	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor);
 
@@ -97,13 +93,12 @@ public:
 	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor);
 
 	/// stop action before execution of the phrase
-	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor) { stopAction(phrase,actor); }
+	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor) { stopAction(phrase, actor); }
 
 private:
 	/// get and unlock TP item
 	CGameItemPtr getAndUnlockTP(CEntityBase *actor);
 };
-
 
 /**
  * Timed action specialized class for Disconnection
@@ -115,14 +110,14 @@ class CDisconnectTimedAction : public CTimedAction
 {
 public:
 	/// \ctor
-	CDisconnectTimedAction() {}
-	
+	CDisconnectTimedAction() { }
+
 	/// \dtor
-	virtual ~CDisconnectTimedAction() {}
+	virtual ~CDisconnectTimedAction() { }
 
 	/// validate action
 	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor);
-	
+
 	/// apply action
 	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor);
 
@@ -132,7 +127,6 @@ public:
 	/// stop action before execution of the phrase
 	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor);
 };
-
 
 /**
  * Timed action specialized class for mounting a Mektoub
@@ -144,14 +138,14 @@ class CMountTimedAction : public CTimedAction
 {
 public:
 	/// \ctor
-	CMountTimedAction() {}
-	
+	CMountTimedAction() { }
+
 	/// \dtor
-	virtual ~CMountTimedAction() {}
+	virtual ~CMountTimedAction() { }
 
 	/// validate action
 	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor);
-	
+
 	/// apply action
 	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor);
 
@@ -163,7 +157,7 @@ public:
 
 private:
 	// entity to mount
-	TDataSetRow		_EntityToMount;
+	TDataSetRow _EntityToMount;
 };
 
 /**
@@ -176,14 +170,14 @@ class CUnmountTimedAction : public CTimedAction
 {
 public:
 	/// \ctor
-	CUnmountTimedAction() {}
-	
+	CUnmountTimedAction() { }
+
 	/// \dtor
-	virtual ~CUnmountTimedAction() {}
+	virtual ~CUnmountTimedAction() { }
 
 	/// validate action
 	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor);
-	
+
 	/// apply action
 	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor);
 
@@ -194,9 +188,8 @@ public:
 	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor);
 
 	/// test if action is canceled when actor is being hit, return true if canceled
-	virtual bool testCancelOnHit( sint32 attackSkillValue, CEntityBase * attacker, CEntityBase * defender) { return false; }
+	virtual bool testCancelOnHit(sint32 attackSkillValue, CEntityBase *attacker, CEntityBase *defender) { return false; }
 };
-
 
 /**
  * Timed action specialized class for consumming an item
@@ -209,13 +202,13 @@ class CConsumeItemTimedAction : public CTimedAction
 public:
 	/// \ctor
 	CConsumeItemTimedAction() { _Form = 0; }
-	
+
 	/// \dtor
-	virtual ~CConsumeItemTimedAction() {}
+	virtual ~CConsumeItemTimedAction() { }
 
 	/// validate action
 	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor);
-	
+
 	/// apply action
 	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor);
 
@@ -226,14 +219,12 @@ public:
 	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor);
 
 	/// test if action is canceled when actor is being hit, return true if canceled
-	virtual bool testCancelOnHit( sint32 attackSkillValue, CEntityBase * attacker, CEntityBase * defender);
+	virtual bool testCancelOnHit(sint32 attackSkillValue, CEntityBase *attacker, CEntityBase *defender);
 
 private:
 	const CStaticItem *_Form;
 };
 
-
 #endif // RY_TIMED_ACTIONS_H
-
 
 /* End of timed_actions.h */

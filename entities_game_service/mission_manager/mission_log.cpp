@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "mission_log.h"
 #include "nel/misc/displayer.h"
@@ -24,32 +22,32 @@ using namespace std;
 using namespace NLMISC;
 
 CMissionLog MissionLog;
-//bool VerboseMissions = false;
+// bool VerboseMissions = false;
 
 //-----------------------------------------------
 // CMissionLog init
 //-----------------------------------------------
-void CMissionLog::init(const std::string & logFile)
+void CMissionLog::init(const std::string &logFile)
 {
 	_LogFile = logFile;
-	if ( logFile.empty() )
+	if (logFile.empty())
 		Log = NLMISC::WarningLog;
 	else
 	{
 		Log = new NLMISC::CLog;
-		_Fd.setParam ( logFile, true);
-		Log->addDisplayer (&_Fd);
+		_Fd.setParam(logFile, true);
+		Log->addDisplayer(&_Fd);
 	}
-}// CMissionLog init
+} // CMissionLog init
 
 //-----------------------------------------------
 // CMissionLog release
 //-----------------------------------------------
 void CMissionLog::release()
 {
-	if ( Log != NLMISC::WarningLog )
+	if (Log != NLMISC::WarningLog)
 		delete Log;
-}// CMissionLog release
+} // CMissionLog release
 
 //-----------------------------------------------
 //-----------------------------------------------
@@ -58,8 +56,8 @@ void CMissionLog::display(const char *format, ...)
 	if (Log == NULL) return;
 
 	char *str;
-	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
-	
+	NLMISC_CONVERT_VARGS(str, format, 256 /*NLMISC::MaxCStringSize*/);
+
 	string toDisp = str;
 	toDisp = string(IDisplayer::dateToHumanString()) + string(" ") + toDisp;
 

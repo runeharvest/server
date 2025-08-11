@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef CHARACTER_VERSION_ADAPTER_H
 #define CHARACTER_VERSION_ADAPTER_H
 
@@ -24,7 +23,6 @@
 
 class CCharacter;
 
-
 /**
  * Singleton class used to adapt different version of CCharacter
  * \author David Fleury
@@ -32,33 +30,33 @@ class CCharacter;
  * \date 2003
  */
 class CCharacterVersionAdapter
-{	
+{
 	NL_INSTANCE_COUNTER_DECL(CCharacterVersionAdapter);
-public:
 
+public:
 	/// getInstance
 	static inline CCharacterVersionAdapter *getInstance()
 	{
 		if (_Instance == NULL)
 			_Instance = new CCharacterVersionAdapter();
-		
+
 		return _Instance;
 	}
-	
+
 	/// Destructor
-	virtual ~CCharacterVersionAdapter() {}
+	virtual ~CCharacterVersionAdapter() { }
 
 	/// get current version number
 	uint32 currentVersionNumber() const;
 
 	/// adapt character from given version
-	void adaptCharacterFromVersion( CCharacter &character, uint32 version ) const;
+	void adaptCharacterFromVersion(CCharacter &character, uint32 version) const;
 
 	/// adapt a specific inventory to version6
-	void updateInventoryToVersion6 ( CInventoryBase *inventory, INVENTORIES::TInventory inventoryType, CCharacter * character )const;
+	void updateInventoryToVersion6(CInventoryBase *inventory, INVENTORIES::TInventory inventoryType, CCharacter *character) const;
 
-	void setToolsToMaxHP(CInventoryBase * pInv) const;
-	
+	void setToolsToMaxHP(CInventoryBase *pInv) const;
+
 private:
 	/// adapter methods
 	void adaptToVersion1(CCharacter &character) const;
@@ -86,10 +84,10 @@ private:
 	void adaptToVersion23(CCharacter &character) const;
 	void adaptToVersion24(CCharacter &character) const;
 	void adaptToVersion25(CCharacter &character) const;
+
 private:
 	/// unique instance
-	static CCharacterVersionAdapter*			_Instance;
-	
+	static CCharacterVersionAdapter *_Instance;
 };
 
 #endif // CHARACTER_VERSION_ADAPTER_H

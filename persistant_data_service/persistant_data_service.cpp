@@ -22,10 +22,10 @@
 #include "db_manager.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
 
 using namespace std;
@@ -33,14 +33,12 @@ using namespace NLMISC;
 using namespace NLNET;
 
 //-----------------------------------------------
-//	callback table for input message 
+//	callback table for input message
 //
 //-----------------------------------------------
-TUnifiedCallbackItem CbArray[] =
-{
-	{ "",	NULL },
+TUnifiedCallbackItem CbArray[] = {
+	{ "", NULL },
 };
-
 
 /*
  * Constructor
@@ -49,45 +47,36 @@ CPersistantDataService::CPersistantDataService()
 {
 }
 
-
 //-----------------------------------------------
 //	NLNET_SERVICE_MAIN
 //-----------------------------------------------
-NLNET_SERVICE_MAIN( CPersistantDataService, "PDS", "persistant_data_service", 0, CbArray, "", "" );
-
-
-
-
+NLNET_SERVICE_MAIN(CPersistantDataService, "PDS", "persistant_data_service", 0, CbArray, "", "");
 
 /*
  * Initialization
  */
-void	CPersistantDataService::init()
+void CPersistantDataService::init()
 {
-//	RY_PDS::CPDStringManager	sm;
+	//	RY_PDS::CPDStringManager	sm;
 
-//	sm.addString(CEntityId(12, 0), string(""));
-//	sm.stringExists(string(""), 12);
+	//	sm.addString(CEntityId(12, 0), string(""));
+	//	sm.stringExists(string(""), 12);
 
 	CDbManager::init();
 }
 
-
 /*
  * Release
  */
-void	CPersistantDataService::release()
+void CPersistantDataService::release()
 {
 	CDbManager::release();
 }
 
-
-
-
 /*
  * Update
  */
-bool	CPersistantDataService::update()
+bool CPersistantDataService::update()
 {
 	if (!CDbManager::update())
 		return false;

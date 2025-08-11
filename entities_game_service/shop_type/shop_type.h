@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef RY_SHOP_TYPE_H
 #define RY_SHOP_TYPE_H
 
@@ -29,29 +28,33 @@ const uint32 NumTpType = 2;
 class IShopType
 {
 	NL_INSTANCE_COUNTER_DECL(IShopType);
+
 public:
-	
-	enum TShopType { item = 0, rm, tp };
+	enum TShopType
+	{
+		item = 0,
+		rm,
+		tp
+	};
 
 	// return type of shop
 	virtual TShopType getShopType() = 0;
 
 	// get shop unit
-	virtual IShopUnit * getShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType ) = 0;
-	
+	virtual IShopUnit *getShopUnit(uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType) = 0;
+
 	// create a shop unit, or just return it if already exist
-	virtual IShopUnit * createShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType ) = 0;
+	virtual IShopUnit *createShopUnit(uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType) = 0;
 
 private:
-	//release shop content
+	// release shop content
 	virtual void releaseShopType() = 0;
 };
-
 
 class CItemShopType : public IShopType
 {
 public:
-	CItemShopType();	
+	CItemShopType();
 
 	// destructor
 	~CItemShopType() { releaseShopType(); }
@@ -60,19 +63,18 @@ public:
 	TShopType getShopType() { return _ShopType; }
 
 	// get shop unit
-	IShopUnit * getShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
-	
+	IShopUnit *getShopUnit(uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType);
+
 	// create a shop unit, or just return it if already exist
-	IShopUnit * createShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
-	
+	IShopUnit *createShopUnit(uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType);
+
 private:
-	//release shop content
+	// release shop content
 	void releaseShopType();
 
-	IShopUnit *				_ShopItemBaseContent[ ITEM_ORIGIN::NUM_ITEM_ORIGIN ] [ NumQuality ] [ NumLevel ] [ IShopUnit::NumShopUnitType ];
-	IShopType::TShopType	_ShopType;
+	IShopUnit *_ShopItemBaseContent[ITEM_ORIGIN::NUM_ITEM_ORIGIN][NumQuality][NumLevel][IShopUnit::NumShopUnitType];
+	IShopType::TShopType _ShopType;
 };
-
 
 class CRMShopType : public IShopType
 {
@@ -84,45 +86,44 @@ public:
 
 	// return type of shop
 	TShopType getShopType() { return _ShopType; }
-	
-	// get shop unit
-	IShopUnit * getShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
-	
-	// create a shop unit, or just return it if already exist
-	IShopUnit * createShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
-	
-private:
-	//release shop content
-	void releaseShopType();
-	
-	IShopUnit *				_ShopRMBaseContent[ ECOSYSTEM::NUM_ECOSYSTEM ] [ NumQuality ] [ NumLevel ] [ IShopUnit::NumShopUnitType ];
-	IShopType::TShopType	_ShopType;
-};
 
+	// get shop unit
+	IShopUnit *getShopUnit(uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType);
+
+	// create a shop unit, or just return it if already exist
+	IShopUnit *createShopUnit(uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType);
+
+private:
+	// release shop content
+	void releaseShopType();
+
+	IShopUnit *_ShopRMBaseContent[ECOSYSTEM::NUM_ECOSYSTEM][NumQuality][NumLevel][IShopUnit::NumShopUnitType];
+	IShopType::TShopType _ShopType;
+};
 
 class CTPShopType : public IShopType
 {
 public:
 	CTPShopType();
-	
+
 	// destructor
 	~CTPShopType() { releaseShopType(); }
-	
+
 	// return type of shop
 	TShopType getShopType() { return _ShopType; }
-	
+
 	// get shop unit
-	IShopUnit * getShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
-	
+	IShopUnit *getShopUnit(uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType);
+
 	// create a shop unit, or just return it if already exist
-	IShopUnit * createShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
-	
+	IShopUnit *createShopUnit(uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType);
+
 private:
-	//release shop content
+	// release shop content
 	void releaseShopType();
-	
-	IShopUnit *				_ShopTPBaseContent[ ECOSYSTEM::NUM_ECOSYSTEM ] [ NumTpType ];
-	IShopType::TShopType	_ShopType;
+
+	IShopUnit *_ShopTPBaseContent[ECOSYSTEM::NUM_ECOSYSTEM][NumTpType];
+	IShopType::TShopType _ShopType;
 };
 
 #endif

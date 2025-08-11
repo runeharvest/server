@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -39,11 +37,10 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
 //		CDamageAuraEffect::update()
 //--------------------------------------------------------------
-bool CDamageAuraEffect::update(CTimerEvent * event, bool applyEffect)
+bool CDamageAuraEffect::update(CTimerEvent *event, bool applyEffect)
 {
 	const TGameCycle time = CTickEventHandler::getGameCycle();
 
@@ -59,26 +56,26 @@ bool CDamageAuraEffect::update(CTimerEvent * event, bool applyEffect)
 	// if main entity is being teleported, do not apply effect
 	if (applyEffect && _AffectedEntity->getId().getType() == RYZOMID::player)
 	{
-		CCharacter *player = dynamic_cast<CCharacter*> (&(*_AffectedEntity));
+		CCharacter *player = dynamic_cast<CCharacter *>(&(*_AffectedEntity));
 		if (player && player->teleportInProgress())
 		{
 			applyEffect = false;
 		}
 	}
-	
+
 	if (applyEffect)
 	{
 		// get entities in surrouding area
 		CRangeSelector entitiesSelector;
-		CEntityBase * actor = CEntityBaseManager::getEntityBasePtr(getCreatorRowId());
-		entitiesSelector.buildDisc( actor, _AffectedEntity->getX(), _AffectedEntity->getY(), _AuraRadius, EntityMatrix, true );
-		
+		CEntityBase *actor = CEntityBaseManager::getEntityBasePtr(getCreatorRowId());
+		entitiesSelector.buildDisc(actor, _AffectedEntity->getX(), _AffectedEntity->getY(), _AuraRadius, EntityMatrix, true);
+
 		// create or update effect on entities returned
-		const vector<CEntityBase*> &entities = entitiesSelector.getEntities();
+		const vector<CEntityBase *> &entities = entitiesSelector.getEntities();
 		const uint size = (uint)entities.size();
-		for (uint i = 0; i < size ; ++i)
+		for (uint i = 0; i < size; ++i)
 		{
-			if (entities[i] && (entities[i] != (CEntityBase*)_AffectedEntity) && isEntityValidTarget(entities[i], actor) )
+			if (entities[i] && (entities[i] != (CEntityBase *)_AffectedEntity) && isEntityValidTarget(entities[i], actor))
 			{
 				CEntityBase *entity = entities[i];
 
@@ -87,25 +84,25 @@ bool CDamageAuraEffect::update(CTimerEvent * event, bool applyEffect)
 				// to victim
 				if (entity->getId().getType() == RYZOMID::player)
 				{
-					params[0].setEIdAIAlias( _AffectedEntity->getId(), CAIAliasTranslator::getInstance()->getAIAlias(_AffectedEntity->getId()) );
+					params[0].setEIdAIAlias(_AffectedEntity->getId(), CAIAliasTranslator::getInstance()->getAIAlias(_AffectedEntity->getId()));
 					params[1].Int = _CycleDamage;
-					PHRASE_UTILITIES::sendDynamicSystemMessage( entity->getEntityRowId(), "EFFECT_STENCH_LOSE_HP", params);
+					PHRASE_UTILITIES::sendDynamicSystemMessage(entity->getEntityRowId(), "EFFECT_STENCH_LOSE_HP", params);
 				}
 				// to stinking entity
 				if (_AffectedEntity->getId().getType() == RYZOMID::player)
 				{
-					params[0].setEIdAIAlias( entity->getId(), CAIAliasTranslator::getInstance()->getAIAlias(entity->getId()) );
+					params[0].setEIdAIAlias(entity->getId(), CAIAliasTranslator::getInstance()->getAIAlias(entity->getId()));
 					params[1].Int = _CycleDamage;
-					PHRASE_UTILITIES::sendDynamicSystemMessage( _TargetRowId, "EFFECT_STENCH_LOSE_HP_ACTOR", params);
+					PHRASE_UTILITIES::sendDynamicSystemMessage(_TargetRowId, "EFFECT_STENCH_LOSE_HP_ACTOR", params);
 				}
-				
+
 				// remove HP
-				if (entity->changeCurrentHp( -sint32(_CycleDamage), _TargetRowId))
+				if (entity->changeCurrentHp(-sint32(_CycleDamage), _TargetRowId))
 				{
 					// killed entity, so this effect and all other effects have been cleared send kill message and return true
-					PHRASE_UTILITIES::sendDeathMessages( _TargetRowId, entity->getEntityRowId());
+					PHRASE_UTILITIES::sendDeathMessages(_TargetRowId, entity->getEntityRowId());
 					//_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
-					//return true;
+					// return true;
 				}
 			}
 		}
@@ -113,7 +110,7 @@ bool CDamageAuraEffect::update(CTimerEvent * event, bool applyEffect)
 
 	// set timer next event
 	_UpdateTimer.setRemaining(_CycleLength, event);
-	
+
 	return false;
 } // update //
 
@@ -129,7 +126,7 @@ void CDamageAuraEffect::removed()
 		return;
 
 	DEBUGLOG("COMBAT EFFECT: Damage aura effect ends on entity %s", _AffectedEntity->getId().toString().c_str());
-	
+
 	sendEffectEndMessages();
 } // removed //
 
@@ -149,17 +146,17 @@ bool CDamageAuraEffect::isEntityValidTarget(CEntityBase *entity, CEntityBase *ac
 
 	if (entity->getId().getType() == RYZOMID::player)
 		retValue = _AffectPlayers;
-	else if (_AffectAttackableEntities && entity->getContextualProperty().getValue().attackable() )
+	else if (_AffectAttackableEntities && entity->getContextualProperty().getValue().attackable())
 		retValue = true;
-//	else if ( !_AffectAttackableEntities && !entity->getContextualProperty().getValue().attackable() )
-//		retValue = true;
+	//	else if ( !_AffectAttackableEntities && !entity->getContextualProperty().getValue().attackable() )
+	//		retValue = true;
 	else
 		retValue = false;
 
-	CCreature * creature = CreatureManager.getCreature( entity->getId() );
+	CCreature *creature = CreatureManager.getCreature(entity->getId());
 	if (retValue == false && creature && actor)
 	{
-		if (creature->checkFactionAttackable( actor->getId() ))
+		if (creature->checkFactionAttackable(actor->getId()))
 		{
 			retValue = true;
 		}
@@ -168,13 +165,12 @@ bool CDamageAuraEffect::isEntityValidTarget(CEntityBase *entity, CEntityBase *ac
 	if (retValue)
 	{
 		// check entity isn't invulnerable
-		CSEffect *effect = entity->lookForActiveEffect( EFFECT_FAMILIES::PowerInvulnerability);
+		CSEffect *effect = entity->lookForActiveEffect(EFFECT_FAMILIES::PowerInvulnerability);
 		if (effect != NULL)
 			retValue = false;
-		else if (entity->lookForActiveEffect( EFFECT_FAMILIES::Invincibility) != NULL)
+		else if (entity->lookForActiveEffect(EFFECT_FAMILIES::Invincibility) != NULL)
 			retValue = false;
 	}
 
 	return retValue;
 } // checkTargetValidity //
-

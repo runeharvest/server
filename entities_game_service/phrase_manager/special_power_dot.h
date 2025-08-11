@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef RYZOM_SPECIAL_POWER_DOT_H
 #define RYZOM_SPECIAL_POWER_DOT_H
 
 #include "special_power.h"
-
 
 /**
  * Specialized class for dot-like powers such as berserk
@@ -32,17 +30,17 @@ class CSpecialPowerDoT : public CSpecialPower
 public:
 	/// Constructor
 	CSpecialPowerDoT(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds, float disableTimeInSeconds, POWERS::TPowerType powerType)
-	:CSpecialPower()
+	    : CSpecialPower()
 	{
 		_EffectFamily = EFFECT_FAMILIES::Unknown;
-		_ParamValue = 0;		
+		_ParamValue = 0;
 		_Phrase = phrase;
 		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());
 		_DisablePowerTime = NLMISC::TGameCycle(disableTimeInSeconds / CTickEventHandler::getGameTimeStep());
 
 		_PowerType = powerType;
-		
-		if(TheDataset.isAccessible(actorRowId))
+
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -67,19 +65,19 @@ public:
 
 protected:
 	/// effect duration
-	NLMISC::TGameCycle		_Duration;
+	NLMISC::TGameCycle _Duration;
 
 	/// update rate in ticks
-	NLMISC::TGameCycle		_UpdateFrequency;
+	NLMISC::TGameCycle _UpdateFrequency;
 
 	/// damage per update
-	float					_DamagePerUpdate;
+	float _DamagePerUpdate;
 
 	/// effect param value
-	sint32					_ParamValue;
+	sint32 _ParamValue;
 
 	/// effect family
-	EFFECT_FAMILIES::TEffectFamily	_EffectFamily;
+	EFFECT_FAMILIES::TEffectFamily _EffectFamily;
 };
 
 #endif // RYZOM_SPECIAL_POWER_DOT_H

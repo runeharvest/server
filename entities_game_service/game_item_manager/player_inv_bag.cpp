@@ -21,9 +21,7 @@
 #include "game_share/slot_equipment.h"
 #include "player_manager/character.h"
 
-
-extern NLMISC::CVariable<uint32>	MaxPlayerBulk;
-
+extern NLMISC::CVariable<uint32> MaxPlayerBulk;
 
 /////////////////////////////////////////////////////////////
 // CBagInventory
@@ -49,18 +47,17 @@ void CBagInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags chang
 
 	// itc_hp
 	// Cf. CGameItem::removeHp and CGameItem::addHp
-/*	if (_Form && !ITEMFAMILY::destroyedWhenWorned(_Form->Family) )
-	{
-		const CEntityId itemOwner = getOwnerPlayer();
-		if (itemOwner != CEntityId::Unknown)
-		{
-			SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
-			params[0].SheetId = _SheetId;
-			PHRASE_UTILITIES::sendDynamicSystemMessage( TheDataset.getDataSetRow(itemOwner), ITEM_WORN_STATE::getMessageForState(ITEM_WORN_STATE::Worned), params);
-		}
-	}
-*/
-
+	/*	if (_Form && !ITEMFAMILY::destroyedWhenWorned(_Form->Family) )
+	    {
+	        const CEntityId itemOwner = getOwnerPlayer();
+	        if (itemOwner != CEntityId::Unknown)
+	        {
+	            SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
+	            params[0].SheetId = _SheetId;
+	            PHRASE_UTILITIES::sendDynamicSystemMessage( TheDataset.getDataSetRow(itemOwner), ITEM_WORN_STATE::getMessageForState(ITEM_WORN_STATE::Worned), params);
+	        }
+	    }
+	*/
 }
 
 // ****************************************************************************

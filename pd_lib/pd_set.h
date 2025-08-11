@@ -21,9 +21,7 @@
 #include <set>
 #include <map>
 
-namespace RY_PDS
-{
-
+namespace RY_PDS {
 
 /**
  * <Class description>
@@ -31,18 +29,16 @@ namespace RY_PDS
  * \author Nevrax France
  * \date 2003
  */
-template<typename Key, typename T>
+template <typename Key, typename T>
 class CPDSet
 {
 public:
-
 	/// Constructor
 	CPDSet()
 	{
 	}
 
 public:
-
 	class iterator
 	{
 	public:
@@ -54,13 +50,11 @@ public:
 	};
 
 private:
-
 	/// Container Type
-	typedef std::map<Key, T>		TMap;
+	typedef std::map<Key, T> TMap;
 
 	/// Internal STL Container
-	TMap							_Map;
-
+	TMap _Map;
 };
 
 }; // RY_PDS

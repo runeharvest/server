@@ -25,56 +25,53 @@
 // Variables
 //-----------------------------------------------------------------------------
 
-NLMISC::CVariable<std::string>	ScanJobState("Stats", "ScanJobState", "The state of the current scan job", std::string(""), 0, true);
-
+NLMISC::CVariable<std::string> ScanJobState("Stats", "ScanJobState", "The state of the current scan job", std::string(""), 0, true);
 
 //-----------------------------------------------------------------------------
 // class CFinishedJob
 //-----------------------------------------------------------------------------
 
-class CFinishedJob: public CJobManager::IJob
+class CFinishedJob : public CJobManager::IJob
 {
 public:
-	void start()									{ }
-	bool finished()									{ return true; }
-	std::string getShortStatus()					{ return _ShortStatus; }
-	std::string getStatus()							{ return _Status; }
-	void display(NLMISC::CLog* log=NLMISC::InfoLog) { log->displayNL("%s",_Status.c_str()); }
-	void update()									{}
+	void start() { }
+	bool finished() { return true; }
+	std::string getShortStatus() { return _ShortStatus; }
+	std::string getStatus() { return _Status; }
+	void display(NLMISC::CLog *log = NLMISC::InfoLog) { log->displayNL("%s", _Status.c_str()); }
+	void update() { }
 
-	CFinishedJob(CJobManager::IJob* theFinishedJob)
+	CFinishedJob(CJobManager::IJob *theFinishedJob)
 	{
-		if (theFinishedJob==NULL)
+		if (theFinishedJob == NULL)
 			return;
-		_Status=theFinishedJob->getStatus();
-		_ShortStatus=theFinishedJob->getShortStatus();
+		_Status = theFinishedJob->getStatus();
+		_ShortStatus = theFinishedJob->getShortStatus();
 	}
 
 private:
 	std::string _Status;
 	std::string _ShortStatus;
-
 };
-
 
 //-----------------------------------------------------------------------------
 // methods CJobManager
 //-----------------------------------------------------------------------------
 
-CJobManager* CJobManager::getInstance()
+CJobManager *CJobManager::getInstance()
 {
-	static CJobManager* mgr=NULL;
-	if (mgr==NULL)
+	static CJobManager *mgr = NULL;
+	if (mgr == NULL)
 	{
-		mgr=new CJobManager;
+		mgr = new CJobManager;
 	}
 	return mgr;
 }
 
 CJobManager::CJobManager()
 {
-	_Paused=false;
-	_JobUpdatesPerUpdate=1;
+	_Paused = false;
+	_JobUpdatesPerUpdate = 1;
 }
 
 void CJobManager::serviceUpdate()
@@ -82,36 +79,36 @@ void CJobManager::serviceUpdate()
 	// setup the status debug variable
 	std::string status;
 	if (_UnfinishedJobs.empty())
-		status="idle";
+		status = "idle";
 	else
 	{
-		nlassert(_UnfinishedJobs.front()<_Jobs.size());
-		NLMISC::CSmartPtr<IJob>& theJob= _Jobs[_UnfinishedJobs.front()];
-		status= theJob->getShortStatus();
-		if (_Paused) status+=" *Paused*";
+		nlassert(_UnfinishedJobs.front() < _Jobs.size());
+		NLMISC::CSmartPtr<IJob> &theJob = _Jobs[_UnfinishedJobs.front()];
+		status = theJob->getShortStatus();
+		if (_Paused) status += " *Paused*";
 	}
-	ScanJobState= status;
+	ScanJobState = status;
 
 	if (_Paused)
 		return;
 
-	for (uint32 count=0;count<_JobUpdatesPerUpdate &&!_UnfinishedJobs.empty();++count)
+	for (uint32 count = 0; count < _JobUpdatesPerUpdate && !_UnfinishedJobs.empty(); ++count)
 	{
-		nlassert(_UnfinishedJobs.front()<_Jobs.size());
-		NLMISC::CSmartPtr<IJob>& theJob= _Jobs[_UnfinishedJobs.front()];
+		nlassert(_UnfinishedJobs.front() < _Jobs.size());
+		NLMISC::CSmartPtr<IJob> &theJob = _Jobs[_UnfinishedJobs.front()];
 
 		// start the job running if it hasn't already been started
-		static uint32 lastJob=~0u;
-		if (_UnfinishedJobs.front()!=lastJob)
+		static uint32 lastJob = ~0u;
+		if (_UnfinishedJobs.front() != lastJob)
 		{
 			theJob->start();
-			lastJob=_UnfinishedJobs.front();
+			lastJob = _UnfinishedJobs.front();
 		}
 
 		if (theJob->finished())
 		{
 			// delete the job and replace it with a light weight 'finished job' marker
-			theJob= new CFinishedJob(theJob);
+			theJob = new CFinishedJob(theJob);
 
 			// remove this job from the list of unfinished jobs
 			_UnfinishedJobs.pop_front();
@@ -127,11 +124,10 @@ void CJobManager::serviceUpdate()
 	}
 }
 
-
 uint32 CJobManager::addJob(NLMISC::CSmartPtr<CJobManager::IJob> job)
 {
-	nlassert(job!=NULL);
-	uint32 id= (uint32)_Jobs.size();
+	nlassert(job != NULL);
+	uint32 id = (uint32)_Jobs.size();
 	_UnfinishedJobs.push_back(id);
 	_Jobs.push_back(job);
 	return id;
@@ -140,33 +136,33 @@ uint32 CJobManager::addJob(NLMISC::CSmartPtr<CJobManager::IJob> job)
 void CJobManager::promoteJob(uint32 idx)
 {
 	TUnfinishedJobs::iterator it;
-	for (it=_UnfinishedJobs.begin(); it!=_UnfinishedJobs.end(); ++it)
+	for (it = _UnfinishedJobs.begin(); it != _UnfinishedJobs.end(); ++it)
 	{
-		if (*it==idx)
+		if (*it == idx)
 		{
 			_UnfinishedJobs.erase(it);
 			_UnfinishedJobs.push_front(idx);
 			return;
 		}
 	}
-	nlwarning("Failed to promote job with ID %d as not found in unfinished jobs list",idx);
+	nlwarning("Failed to promote job with ID %d as not found in unfinished jobs list", idx);
 }
 
 void CJobManager::pause()
 {
-	_Paused= true;
+	_Paused = true;
 }
 
 void CJobManager::resume()
 {
-	_Paused= false;
+	_Paused = false;
 }
 
 void CJobManager::setJobUpdatesPerUpdate(uint32 count)
 {
-	_JobUpdatesPerUpdate= count;
-	if (count==0 || count>100)
-		nlwarning("Suspicious value of JobUpdatesPerUpdate: %d",count);
+	_JobUpdatesPerUpdate = count;
+	if (count == 0 || count > 100)
+		nlwarning("Suspicious value of JobUpdatesPerUpdate: %d", count);
 }
 
 uint32 CJobManager::getJobUpdatesPerUpdate()
@@ -178,48 +174,48 @@ std::string CJobManager::getStatus()
 {
 	std::string result;
 
-	if (_Paused) result+="[Paused] ";
-	
+	if (_Paused) result += "[Paused] ";
+
 	if (!_UnfinishedJobs.empty())
 	{
-		uint32 idx=_UnfinishedJobs.front();
-		nlassert(idx<_Jobs.size());
-		result+=_Jobs[idx]->getStatus();
+		uint32 idx = _UnfinishedJobs.front();
+		nlassert(idx < _Jobs.size());
+		result += _Jobs[idx]->getStatus();
 	}
 
-	result+=NLMISC::toString(" [Updates per cycle: %d]",_JobUpdatesPerUpdate);
+	result += NLMISC::toString(" [Updates per cycle: %d]", _JobUpdatesPerUpdate);
 
 	return result;
 }
 
-void CJobManager::listJobs(NLMISC::CLog* log)
+void CJobManager::listJobs(NLMISC::CLog *log)
 {
-	for (uint32 i=0;i< _Jobs.size(); ++i)
+	for (uint32 i = 0; i < _Jobs.size(); ++i)
 	{
 		if (!_Jobs[i]->finished())
-			nlinfo("%4d*: %s",i,_Jobs[i]->getStatus().c_str());
+			nlinfo("%4d*: %s", i, _Jobs[i]->getStatus().c_str());
 	}
-	nlinfo("%d unfinished jobs (%d  in total)",_UnfinishedJobs.size(),_Jobs.size());
+	nlinfo("%d unfinished jobs (%d  in total)", _UnfinishedJobs.size(), _Jobs.size());
 }
 
-void CJobManager::listJobHistory(NLMISC::CLog* log)
+void CJobManager::listJobHistory(NLMISC::CLog *log)
 {
-	for (uint32 i=0;i< _Jobs.size(); ++i)
+	for (uint32 i = 0; i < _Jobs.size(); ++i)
 	{
-		nlinfo("%4d%c: %s",i,_Jobs[i]->finished()? ' ': '*',_Jobs[i]->getStatus().c_str());
+		nlinfo("%4d%c: %s", i, _Jobs[i]->finished() ? ' ' : '*', _Jobs[i]->getStatus().c_str());
 	}
-	nlinfo("%d unfinished jobs (%d  in total)",_UnfinishedJobs.size(),_Jobs.size());
+	nlinfo("%d unfinished jobs (%d  in total)", _UnfinishedJobs.size(), _Jobs.size());
 }
 
-void CJobManager::displayCurrentJob(NLMISC::CLog* log)
+void CJobManager::displayCurrentJob(NLMISC::CLog *log)
 {
 	if (!_UnfinishedJobs.empty())
-		displayJob(_UnfinishedJobs.front(),log);
+		displayJob(_UnfinishedJobs.front(), log);
 }
 
-void CJobManager::displayJob(uint32 jobId,NLMISC::CLog* log)
+void CJobManager::displayJob(uint32 jobId, NLMISC::CLog *log)
 {
-	nlassert(jobId<_Jobs.size());
+	nlassert(jobId < _Jobs.size());
 	_Jobs[jobId]->display(log);
 }
 
@@ -227,4 +223,3 @@ uint32 CJobManager::getNumJobs() const
 {
 	return (uint32)_UnfinishedJobs.size();
 }
-

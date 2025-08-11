@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_COMBAT_ACTION_SLOW_MOVE_H
 #define RY_COMBAT_ACTION_SLOW_MOVE_H
 
 #include "combat_action.h"
-
 
 /**
  * Class managing the creation of slow move effects for combat
@@ -32,17 +29,20 @@ class CCombatActionSlowMove : public CCombatAction
 {
 public:
 	/// Constructor
-	CCombatActionSlowMove(): _Duration(0), _SpeedModifier(0)
+	CCombatActionSlowMove()
+	    : _Duration(0)
+	    , _SpeedModifier(0)
 	{
 	}
 
 	/// Constructor
-	CCombatActionSlowMove(const TDataSetRow & actorRowId, CCombatPhrase *phrase, NLMISC::TGameCycle duration, sint16 speedModifier)
-	: _Duration(duration), _SpeedModifier(speedModifier)
+	CCombatActionSlowMove(const TDataSetRow &actorRowId, CCombatPhrase *phrase, NLMISC::TGameCycle duration, sint16 speedModifier)
+	    : _Duration(duration)
+	    , _SpeedModifier(speedModifier)
 	{
 		_CombatPhrase = phrase;
-		
-		if(TheDataset.isAccessible(actorRowId))
+
+		if (TheDataset.isAccessible(actorRowId))
 			_ActorRowId = actorRowId;
 		else
 		{
@@ -57,15 +57,14 @@ public:
 	virtual void apply(CCombatPhrase *phrase);
 
 	/// apply on entity
-	virtual void applyOnEntity( CEntityBase *entity, float successFactor );
+	virtual void applyOnEntity(CEntityBase *entity, float successFactor);
 
-private:	
+private:
 	/// bleed total duration (in ticks)
-	NLMISC::TGameCycle			_Duration;
+	NLMISC::TGameCycle _Duration;
 	/// speed modifier
-	sint16						_SpeedModifier;
+	sint16 _SpeedModifier;
 };
-
 
 #endif // RY_COMBAT_ACTION_SLOW_MOVE_H
 

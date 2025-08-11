@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -29,7 +27,6 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
 //--------------------------------------------------------------
 //		CCombatStunEffect::isTimeToUpdate()
 //--------------------------------------------------------------
@@ -41,7 +38,7 @@ bool CCombatStunEffect::isTimeToUpdate()
 //--------------------------------------------------------------
 //		CCombatStunEffect::update()
 //--------------------------------------------------------------
-bool CCombatStunEffect::update( uint32 & updateFlag )
+bool CCombatStunEffect::update(uint32 &updateFlag)
 {
 	// always return true as the test is made in isTimeToUpdate
 	return true;
@@ -61,10 +58,10 @@ void CCombatStunEffect::removed()
 	DEBUGLOG("COMBAT EFFECT: stun effect ends on entity %s", _StunnedEntity->getId().toString().c_str());
 
 	// if this is the last STUN effect on target, then wake it
-	const std::vector<CSEffect*>& effects = _StunnedEntity->getSEffects();
-	for (uint i = 0 ; i < effects.size() ; ++i)
+	const std::vector<CSEffect *> &effects = _StunnedEntity->getSEffects();
+	for (uint i = 0; i < effects.size(); ++i)
 	{
-		if (effects[i] && effects[i] != this && (effects[i]->getFamily() == EFFECT_FAMILIES::Stun || effects[i]->getFamily() == EFFECT_FAMILIES::CombatStun) )
+		if (effects[i] && effects[i] != this && (effects[i]->getFamily() == EFFECT_FAMILIES::Stun || effects[i]->getFamily() == EFFECT_FAMILIES::CombatStun))
 		{
 			DEBUGLOG("COMBAT EFFECT : entity is still stunned (has another stun effect)");
 			return;
@@ -80,8 +77,8 @@ void CCombatStunEffect::removed()
 		actorId = TheDataset.getEntityId(_CreatorRowId);
 
 	// send message
-//	PHRASE_UTILITIES::sendSimpleMessage( _TargetRowId, "OPS_EFFECT_STUN_END" );
-//	PHRASE_UTILITIES::sendMessage( _CreatorRowId, "OPS_EFFECT_STUN_END_E", _TargetRowId );
+	//	PHRASE_UTILITIES::sendSimpleMessage( _TargetRowId, "OPS_EFFECT_STUN_END" );
+	//	PHRASE_UTILITIES::sendMessage( _CreatorRowId, "OPS_EFFECT_STUN_END_E", _TargetRowId );
 
 	TVectorParamCheck params;
 
@@ -90,7 +87,7 @@ void CCombatStunEffect::removed()
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_StunnedEntity->getEntityRowId(), "EFFECT_STUN_END_TARGET");
 	}
 
-	if ( actorId.getType() == RYZOMID::player)
+	if (actorId.getType() == RYZOMID::player)
 	{
 		params.resize(1);
 		params[0].Type = STRING_MANAGER::entity;
@@ -100,4 +97,3 @@ void CCombatStunEffect::removed()
 	}
 	// todo spectators and self stun
 } // removed //
-

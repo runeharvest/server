@@ -30,13 +30,13 @@ using namespace NLMISC;
 // Destructor
 CColumn::~CColumn()
 {
-	//PDS_DEBUG("delete()");
+	// PDS_DEBUG("delete()");
 }
 
 /*
  * Initialize column
  */
-bool	CColumn::init(CAttribute* parent, CDatabase *root)
+bool CColumn::init(CAttribute *parent, CDatabase *root)
 {
 	_Parent = parent;
 	_Root = root;
@@ -47,4 +47,3 @@ bool	CColumn::init(CAttribute* parent, CDatabase *root)
 
 	return true;
 }
-

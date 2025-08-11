@@ -28,34 +28,30 @@
 //
 #include "pd_lib.h"
 
-
-
 /**
  * Task Event Listener
  */
 class ITaskEventListener
 {
 public:
-
 	/// Called when RBS task was done successfully
-	virtual void	taskSuccessful(void* arg) = 0;
+	virtual void taskSuccessful(void *arg) = 0;
 
 	/// Called when RBS task has failed
-	virtual void	taskFailed(void* arg) = 0;
+	virtual void taskFailed(void *arg) = 0;
 };
-
-
-
 
 class CLocatePath
 {
 public:
-
 	/// Constructor
-	CLocatePath() : Pos(0)	{}	
+	CLocatePath()
+	    : Pos(0)
+	{
+	}
 
 	/// End of path?
-	bool				end() const
+	bool end() const
 	{
 		return Pos >= FullPath.size();
 	}
@@ -63,52 +59,44 @@ public:
 	struct CLocateAttributeNode
 	{
 		/// The name of the attribute to locate
-		std::string		Name;
+		std::string Name;
 
 		/// Is this node an array?
-		bool			Array;
+		bool Array;
 
 		/// Is this node a set?
-		bool			Set;
+		bool Set;
 
 		/// Key, for array and set
-		std::string		Key;
+		std::string Key;
 	};
 
 	/// Get current node
-	CLocateAttributeNode&	node()
+	CLocateAttributeNode &node()
 	{
 		return FullPath[Pos];
 	}
 
 	/// Step to next
-	bool				next()
+	bool next()
 	{
 		++Pos;
 		return !end();
 	}
 
-	typedef std::vector<CLocateAttributeNode>	TLocatePath;
+	typedef std::vector<CLocateAttributeNode> TLocatePath;
 
 	/// Full path to value
-	TLocatePath			FullPath;
+	TLocatePath FullPath;
 
 	/// Current pos in path
-	uint				Pos;
+	uint Pos;
 };
 
-
-
-
-
-
 /// 'for' loop through xml children
-#define	FOREACH_CHILD(node, parent, type)	for (node=CIXml::getFirstChildNode(parent, #type);\
-												 node!=NULL;\
-												 node=CIXml::getNextChildNode(node, #type))
-
-
-
+#define FOREACH_CHILD(node, parent, type) for (node = CIXml::getFirstChildNode(parent, #type); \
+	                                           node != NULL;                                   \
+	                                           node = CIXml::getNextChildNode(node, #type))
 
 /*
  * Utility functions.
@@ -119,10 +107,10 @@ public:
  * Store node property propName into result
  * Returns true iff the property appears in the node (but won't tell if property was of the matching type)
  */
-template<typename T>
-bool	getProperty(xmlNodePtr node, const char* propName, T &result)
+template <typename T>
+bool getProperty(xmlNodePtr node, const char *propName, T &result)
 {
-	std::string	res;
+	std::string res;
 	if (!NLMISC::CIXml::getPropertyString(res, node, propName))
 	{
 		nlwarning("Couldn't get property '%s' in xml node", propName);
@@ -137,10 +125,10 @@ bool	getProperty(xmlNodePtr node, const char* propName, T &result)
  * Store node property propName into result, and if property not present in node use defaultValue instead
  * Returns true iff the property appears in the node (but won't tell if property was of the matching type)
  */
-template<typename T>
-bool	getProperty(xmlNodePtr node, const char* propName, T &result, const T &defaultValue, bool quiet = true)
+template <typename T>
+bool getProperty(xmlNodePtr node, const char *propName, T &result, const T &defaultValue, bool quiet = true)
 {
-	std::string	res;
+	std::string res;
 	if (!NLMISC::CIXml::getPropertyString(res, node, propName))
 	{
 		if (!quiet)
@@ -152,10 +140,4 @@ bool	getProperty(xmlNodePtr node, const char* propName, T &result, const T &defa
 	return true;
 }
 
-
-
-
-#endif //RY_PDS_COMMON_H
-
-
-
+#endif // RY_PDS_COMMON_H

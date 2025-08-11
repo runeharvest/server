@@ -17,7 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "nel/misc/types_nl.h"
 
 #include "nel/misc/singleton.h"
@@ -25,34 +24,36 @@
 #include "nel/net/message.h"
 #include "cdb_synchronised.h"
 
-
 class CDBStringUpdater : public NLMISC::CSingleton<CDBStringUpdater>
 {
 
-	typedef uint32				TIOSStringId;
-	typedef NLMISC::TStringId	TLocalStringId;
+	typedef uint32 TIOSStringId;
+	typedef NLMISC::TStringId TLocalStringId;
 
 	// Identifier for one string mapped into one data container
 	struct TBDStringLeaf
 	{
-		CCDBSynchronised		*ClientDB;
-		ICDBStructNode			*Node;
+		CCDBSynchronised *ClientDB;
+		ICDBStructNode *Node;
 
 		TBDStringLeaf()
-			:	ClientDB(NULL),
-				Node(NULL)
-		{}
+		    : ClientDB(NULL)
+		    , Node(NULL)
+		{
+		}
 
 		TBDStringLeaf(CCDBSynchronised *clientDB, ICDBStructNode *node)
-			: ClientDB(clientDB), Node(node)
-		{}
+		    : ClientDB(clientDB)
+		    , Node(node)
+		{
+		}
 
-		bool operator ==(const TBDStringLeaf &other) const
+		bool operator==(const TBDStringLeaf &other) const
 		{
 			return ClientDB == other.ClientDB && Node == other.Node;
 		}
 
-		bool operator <(const TBDStringLeaf &other) const
+		bool operator<(const TBDStringLeaf &other) const
 		{
 			if (ClientDB != other.ClientDB)
 				return ClientDB < other.ClientDB;
@@ -65,10 +66,14 @@ class CDBStringUpdater : public NLMISC::CSingleton<CDBStringUpdater>
 	// hasher for the identifier
 	struct THashDBStringLeaf
 	{
-		enum { bucket_size = 4, min_buckets = 8 };
+		enum
+		{
+			bucket_size = 4,
+			min_buckets = 8
+		};
 		size_t operator()(const TBDStringLeaf &stringLeaf) const
 		{
-			return ((size_t)stringLeaf.ClientDB>>4) ^ ((size_t)stringLeaf.Node>>4);
+			return ((size_t)stringLeaf.ClientDB >> 4) ^ ((size_t)stringLeaf.Node >> 4);
 		}
 		bool operator()(const TBDStringLeaf &left, const TBDStringLeaf &right) const
 		{
@@ -79,31 +84,28 @@ class CDBStringUpdater : public NLMISC::CSingleton<CDBStringUpdater>
 	// info for each string leaf
 	struct TStringLeafInfo
 	{
-		TLocalStringId	LocalStringId;
-		bool			ForceSending;
+		TLocalStringId LocalStringId;
+		bool ForceSending;
 	};
 
 	typedef CHashMap<TBDStringLeaf, TStringLeafInfo, THashDBStringLeaf> TStringLeafs;
 
 	// All the string leaf with non empty string
-	TStringLeafs			_StringLeafs;
+	TStringLeafs _StringLeafs;
 
-
-	typedef std::map<TLocalStringId, TIOSStringId>	TMappedIOSStrings;
+	typedef std::map<TLocalStringId, TIOSStringId> TMappedIOSStrings;
 
 	// The local table of already mapped IOS id
-	TMappedIOSStrings		_MappedIOSStrings;
+	TMappedIOSStrings _MappedIOSStrings;
 
-	bool		_IOSIsUp;
-
-
+	bool _IOSIsUp;
 
 private:
-	void	storeAStringInIOS(const ucstring &str);
+	void storeAStringInIOS(const ucstring &str);
 
-	void	storeStringResult(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+	void storeStringResult(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+
 public:
-
 	CDBStringUpdater();
 
 	void onIOSUp();
@@ -115,8 +117,5 @@ public:
 	ucstring getUcstringLeaf(CCDBSynchronised *clientDB, ICDBStructNode *node) const;
 	const std::string &getStringLeaf(CCDBSynchronised *clientDB, ICDBStructNode *node) const;
 
-	static void	cbStoreStringResult(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+	static void cbStoreStringResult(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 };
-
-
-

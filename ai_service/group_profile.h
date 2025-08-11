@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #ifndef GROUP_PROFILE_H
 #define GROUP_PROFILE_H
 
@@ -29,29 +26,29 @@
 //----------------------------------------------------------------------------
 
 class CGrpProfileDynCamping
-: public CSlaveProfile
+    : public CSlaveProfile
 {
 public:
-	CGrpProfileDynCamping(CProfileOwner* owner, CNpcZone const* const zone);
-			
+	CGrpProfileDynCamping(CProfileOwner *owner, CNpcZone const *const zone);
+
 	/// @name CAIBaseProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_CAMPING; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_CAMPING; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
-	
+
 	/// @name CSlaveSpawnProfile implementation
 	//@{
-	void addBot(CBot* bot) { }
-	void removeBot(CBot* bot) { }
+	void addBot(CBot *bot) { }
+	void removeBot(CBot *bot) { }
 	//@}
-	
+
 	bool timeOut() const;
-	CNpcZone const* currentZone() const;
-	
+	CNpcZone const *currentZone() const;
+
 private:
 	NLMISC::CSmartPtr<CNpcZone const> _CurrentZone;
 
@@ -59,23 +56,20 @@ private:
 	CAITimer _EndOfCamping;
 };
 
-inline
-CGrpProfileDynCamping::CGrpProfileDynCamping(CProfileOwner* owner, CNpcZone const* const zone)
-: CSlaveProfile(owner)
-, _CurrentZone(zone)
+inline CGrpProfileDynCamping::CGrpProfileDynCamping(CProfileOwner *owner, CNpcZone const *const zone)
+    : CSlaveProfile(owner)
+    , _CurrentZone(zone)
 {
 }
 
-inline
-bool CGrpProfileDynCamping::timeOut() const
+inline bool CGrpProfileDynCamping::timeOut() const
 {
 	return _EndOfCamping.test();
 }
 
-inline
-CNpcZone const* CGrpProfileDynCamping::currentZone() const
+inline CNpcZone const *CGrpProfileDynCamping::currentZone() const
 {
-	return	_CurrentZone;
+	return _CurrentZone;
 }
 
 //----------------------------------------------------------------------------
@@ -83,39 +77,37 @@ CNpcZone const* CGrpProfileDynCamping::currentZone() const
 //----------------------------------------------------------------------------
 
 class CGrpProfileDynWaitInZone
-: public CGrpProfileNormal
+    : public CGrpProfileNormal
 {
 public:
-	CGrpProfileDynWaitInZone(CProfileOwner* owner, CNpcZone const* const npcZone);
-	
+	CGrpProfileDynWaitInZone(CProfileOwner *owner, CNpcZone const *const npcZone);
+
 	/// @name CAIBaseProfile implementation
 	//@{
 	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
 	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ZONE_WAIT; }
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::ZONE_WAIT; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
-	
-	CNpcZone const* currentZone() const;
-	
+
+	CNpcZone const *currentZone() const;
+
 private:
-	NLMISC::CSmartPtr<const	CNpcZone> _CurrentZone;
+	NLMISC::CSmartPtr<const CNpcZone> _CurrentZone;
 	/// where to wait.
 	RYAI_MAP_CRUNCH::CWorldPosition WaitPos;
 	/// Date of beginning of wait
 	uint32 StartOfWait;
 };
 
-inline
-CGrpProfileDynWaitInZone::CGrpProfileDynWaitInZone(CProfileOwner* owner, CNpcZone const* const npcZone) 
-: CGrpProfileNormal(owner)
-, _CurrentZone(npcZone)
+inline CGrpProfileDynWaitInZone::CGrpProfileDynWaitInZone(CProfileOwner *owner, CNpcZone const *const npcZone)
+    : CGrpProfileNormal(owner)
+    , _CurrentZone(npcZone)
 {
 }
 
-inline
-CNpcZone const* CGrpProfileDynWaitInZone::currentZone() const
+inline CNpcZone const *CGrpProfileDynWaitInZone::currentZone() const
 {
 	return _CurrentZone;
 }
@@ -125,104 +117,99 @@ CNpcZone const* CGrpProfileDynWaitInZone::currentZone() const
 //---------------------------------------------------------------------------------
 
 class CGrpProfileDynFollowPath
-: public CMoveProfile
+    : public CMoveProfile
 {
 	static int _InstanceCounter;
+
 public:
-	CGrpProfileDynFollowPath(CProfileOwner* owner);
-	CGrpProfileDynFollowPath(CProfileOwner* owner, CNpcZone const* const start, CNpcZone const* const end, AITYPES::CPropertySet const& zoneFilter);
+	CGrpProfileDynFollowPath(CProfileOwner *owner);
+	CGrpProfileDynFollowPath(CProfileOwner *owner, CNpcZone const *const start, CNpcZone const *const end, AITYPES::CPropertySet const &zoneFilter);
 	virtual ~CGrpProfileDynFollowPath();
-	
+
 	/// @name CAIBaseProfile implementation
 	//@{
-	virtual	void beginProfile();
+	virtual void beginProfile();
 	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::MOVE_DYN_FOLLOW_PATH; }
+	virtual void endProfile();
+	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_DYN_FOLLOW_PATH; }
 	virtual std::string getOneLineInfoString() const;
 	//@}
-	
+
 	/// @name CSlaveSpawnProfile implementation
 	//@{
-	void addBot(CBot* bot);
-	void removeBot(CBot* bot);
+	void addBot(CBot *bot);
+	void removeBot(CBot *bot);
 	//@}
-	
+
 	/// @name CMoveSpawnProfile implementation
 	//@{
-	virtual	CPathCont* getPathCont(CBot const* bot);
+	virtual CPathCont *getPathCont(CBot const *bot);
 	//@}
-	
+
 	/// Overload for IDynFollowPath interface
-	void setPath(CNpcZone const* const start, CNpcZone const* const end, AITYPES::CPropertySet const& zoneFilter);
+	void setPath(CNpcZone const *const start, CNpcZone const *const end, AITYPES::CPropertySet const &zoneFilter);
 	void calcPath();
-	
+
 	bool destinationReach() const;
-	
-	CNpcZone const* currentZone() const;
-	
+
+	CNpcZone const *currentZone() const;
+
 private:
-	NLMISC::CSmartPtr<CNpcZone const>	_StartZone;	///< smartPtr to inc refcount (cheat)
-	NLMISC::CSmartPtr<CNpcZone const>	_EndZone;	///< smartPtr to inc refcount (cheat)
-	
-	NLMISC::CstCDbgPtr<CNpcZone>	_CurrentZone;
-	NLMISC::CstCDbgPtr<CRoad>		_CurrentRoad;
-	AITYPES::CPropertySet			_ZoneFilter;
-	
+	NLMISC::CSmartPtr<CNpcZone const> _StartZone; ///< smartPtr to inc refcount (cheat)
+	NLMISC::CSmartPtr<CNpcZone const> _EndZone; ///< smartPtr to inc refcount (cheat)
+
+	NLMISC::CstCDbgPtr<CNpcZone> _CurrentZone;
+	NLMISC::CstCDbgPtr<CRoad> _CurrentRoad;
+	AITYPES::CPropertySet _ZoneFilter;
+
 	/// CSmartPtr to have a counter on each road (bad way, but no time to spend rewriting kernel classes).
-	std::vector<NLMISC::CSmartPtr<CRoad> >	_Path;
-	uint32		_PathCursor;
-	
-	bool		_hasChanged;	//	to avoid to remake calculation every calls.
-	
-	CProfilePtr	_FollowRoute;
+	std::vector<NLMISC::CSmartPtr<CRoad>> _Path;
+	uint32 _PathCursor;
+
+	bool _hasChanged; //	to avoid to remake calculation every calls.
+
+	CProfilePtr _FollowRoute;
 };
 
-inline
-CGrpProfileDynFollowPath::CGrpProfileDynFollowPath(CProfileOwner* owner)
-: CMoveProfile(owner)
+inline CGrpProfileDynFollowPath::CGrpProfileDynFollowPath(CProfileOwner *owner)
+    : CMoveProfile(owner)
 {
 	++_InstanceCounter;
 	nldebug("CGrpProfileDynFollowPath: %u instances", _InstanceCounter);
 	_hasChanged = false;
 }
 
-inline
-CGrpProfileDynFollowPath::CGrpProfileDynFollowPath(CProfileOwner* owner, CNpcZone const* const start, CNpcZone const* const end, AITYPES::CPropertySet const& zoneFilter)
-: CMoveProfile(owner)
+inline CGrpProfileDynFollowPath::CGrpProfileDynFollowPath(CProfileOwner *owner, CNpcZone const *const start, CNpcZone const *const end, AITYPES::CPropertySet const &zoneFilter)
+    : CMoveProfile(owner)
 {
 	++_InstanceCounter;
-	
+
 	_hasChanged = false;
 	setPath(start, end, zoneFilter);
 }
 
-inline
-CGrpProfileDynFollowPath::~CGrpProfileDynFollowPath()
+inline CGrpProfileDynFollowPath::~CGrpProfileDynFollowPath()
 {
 	--_InstanceCounter;
 }
 
-inline
-CNpcZone const* CGrpProfileDynFollowPath::currentZone() const
+inline CNpcZone const *CGrpProfileDynFollowPath::currentZone() const
 {
 	return _CurrentZone;
 }
 
-inline
-CPathCont* CGrpProfileDynFollowPath::getPathCont(CBot const* bot)
+inline CPathCont *CGrpProfileDynFollowPath::getPathCont(CBot const *bot)
 {
 	nlassert(_FollowRoute.getAIProfile() != NULL);
-	return	NLMISC::safe_cast<CMoveProfile*>(_FollowRoute.getAIProfile())->getPathCont(bot);
+	return NLMISC::safe_cast<CMoveProfile *>(_FollowRoute.getAIProfile())->getPathCont(bot);
 }
 
-inline
-void CGrpProfileDynFollowPath::addBot(CBot* bot)
+inline void CGrpProfileDynFollowPath::addBot(CBot *bot)
 {
-	if( _FollowRoute.getAIProfile() == NULL)
+	if (_FollowRoute.getAIProfile() == NULL)
 		return;
-	
-	CMoveProfile*moveProfile=NLMISC::type_cast<CMoveProfile*>(_FollowRoute.getAIProfile());
+
+	CMoveProfile *moveProfile = NLMISC::type_cast<CMoveProfile *>(_FollowRoute.getAIProfile());
 #if !FINAL_VERSION
 	nlassert(moveProfile);
 #endif
@@ -230,13 +217,12 @@ void CGrpProfileDynFollowPath::addBot(CBot* bot)
 		moveProfile->addBot(bot);
 }
 
-inline
-void CGrpProfileDynFollowPath::removeBot(CBot* bot)
+inline void CGrpProfileDynFollowPath::removeBot(CBot *bot)
 {
-	if( _FollowRoute.getAIProfile() == NULL)
+	if (_FollowRoute.getAIProfile() == NULL)
 		return;
-	
-	CMoveProfile*moveProfile=NLMISC::type_cast<CMoveProfile*>(_FollowRoute.getAIProfile());
+
+	CMoveProfile *moveProfile = NLMISC::type_cast<CMoveProfile *>(_FollowRoute.getAIProfile());
 #if !FINAL_VERSION
 	nlassert(moveProfile);
 #endif

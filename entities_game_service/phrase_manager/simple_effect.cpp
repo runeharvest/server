@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -38,7 +36,7 @@ using namespace NLNET;
 //--------------------------------------------------------------
 //		CSimpleEffect::update()
 //--------------------------------------------------------------
-bool CSimpleEffect::update(CTimerEvent * event, bool applyEffect)
+bool CSimpleEffect::update(CTimerEvent *event, bool applyEffect)
 {
 	if (applyEffect)
 	{
@@ -51,7 +49,7 @@ bool CSimpleEffect::update(CTimerEvent * event, bool applyEffect)
 			return false;
 
 		// manage some special things according to effect family
-		switch(_Family) 
+		switch (_Family)
 		{
 		case EFFECT_FAMILIES::CombatDefenseModifier:
 			playerChar->incParryModifier(_Value);
@@ -91,26 +89,25 @@ void CSimpleEffect::removed()
 	if (playerChar)
 	{
 		// manage some special things according to effect family
-		switch(_Family) 
+		switch (_Family)
 		{
 		case EFFECT_FAMILIES::CombatDefenseModifier:
-			playerChar->incParryModifier( -_Value);
+			playerChar->incParryModifier(-_Value);
 		case EFFECT_FAMILIES::CombatDebuffDodge:
-			playerChar->incDodgeModifier( -_Value);
+			playerChar->incDodgeModifier(-_Value);
 			break;
-			
+
 		case EFFECT_FAMILIES::CombatDebuffCombatSkills:
 		case EFFECT_FAMILIES::DebuffSkillMelee:
-			playerChar->incParryModifier( -_Value);
+			playerChar->incParryModifier(-_Value);
 			break;
-			
+
 		default:;
 		}
 	}
 
 	sendEffectEndMessages();
 } // removed //
-
 
 CEffectTFactory<CSimpleEffect> *CSlowMagicEffectFactory = new CEffectTFactory<CSimpleEffect>(EFFECT_FAMILIES::SlowMagic);
 CEffectTFactory<CSimpleEffect> *CSlowMeleeEffectFactory = new CEffectTFactory<CSimpleEffect>(EFFECT_FAMILIES::SlowMelee);
@@ -140,5 +137,3 @@ CEffectTFactory<CSimpleEffect> *CInvulnerabilityEffectFactory = new CEffectTFact
 
 CEffectTFactory<CSimpleEffect> *CReflectDamageEffectFactory = new CEffectTFactory<CSimpleEffect>(EFFECT_FAMILIES::ReflectDamage);
 CEffectTFactory<CSimpleEffect> *CReverseDamageEffectFactory = new CEffectTFactory<CSimpleEffect>(EFFECT_FAMILIES::ReverseDamage);
-
-

@@ -14,22 +14,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//Nel georges
+// Nel georges
 #include "nel/georges/u_form.h"
 #include "game_share/sp_type.h"
 
-
-namespace GUILD_OPTIONS
+namespace GUILD_OPTIONS {
+enum TType
 {
-	enum TType
-	{
-		MainBuilding,
-		RmFight,
-		RmMagic,
-		RmHarvest,
-		RmCraft,
-		Unknown,
-	};
+	MainBuilding,
+	RmFight,
+	RmMagic,
+	RmHarvest,
+	RmCraft,
+	Unknown,
+};
 }
 
 /**
@@ -41,11 +39,9 @@ namespace GUILD_OPTIONS
 class CStaticGuildOption
 {
 public:
-	
-
-	EGSPD::CSPType::TSPType getSpType()const
+	EGSPD::CSPType::TSPType getSpType() const
 	{
-		switch(Type)
+		switch (Type)
 		{
 		case GUILD_OPTIONS::RmFight:
 			return EGSPD::CSPType::Fight;
@@ -61,20 +57,17 @@ public:
 	}
 
 	/// Read georges sheet
-	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+	void readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 
 	/// Serial
 	void serial(NLMISC::IStream &f);
 
 	/// Return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 1; }
+	inline static uint getVersion() { return 1; }
 
 	/// Removed
-	void removed() {}
+	void removed() { }
 
 	uint32 Price;
 	GUILD_OPTIONS::TType Type;
-
 };
-
-

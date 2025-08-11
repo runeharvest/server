@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -31,9 +28,8 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CCombatActionSlowMove::apply(CCombatPhrase *phrase)
 {
@@ -48,9 +44,9 @@ void CCombatActionSlowMove::apply(CCombatPhrase *phrase)
 	if (_ApplyOnTargets)
 	{
 		const std::vector<CCombatPhrase::TTargetInfos> &targets = phrase->getTargets();
-		for (uint i = 0; i < targets.size() ; ++i)
+		for (uint i = 0; i < targets.size(); ++i)
 		{
-			if ( phrase->getTargetDodgeFactor(i) == 0.0f )
+			if (phrase->getTargetDodgeFactor(i) == 0.0f)
 			{
 				if (targets[i].Target != NULL)
 				{
@@ -71,23 +67,22 @@ void CCombatActionSlowMove::apply(CCombatPhrase *phrase)
 	}
 } // apply //
 
-
 //--------------------------------------------------------------
-//					applyOnEntity()  
+//					applyOnEntity()
 //--------------------------------------------------------------
-void CCombatActionSlowMove::applyOnEntity( CEntityBase *entity, float successFactor )
+void CCombatActionSlowMove::applyOnEntity(CEntityBase *entity, float successFactor)
 {
 	H_AUTO(CCombatActionSlowMove_applyOnEntity);
 
 	if (!entity || !_CombatPhrase) return;
-	
+
 	// if entity is already dead, return
 	if (entity->isDead())
 		return;
-	
-	TGameCycle endDate = TGameCycle(_Duration*successFactor) + CTickEventHandler::getGameCycle();
 
-	CChangeMoveSpeedEffect *effect = new CChangeMoveSpeedEffect( _ActorRowId, entity->getEntityRowId(), EFFECT_FAMILIES::CombatMvtSlow, _SpeedModifier, endDate, entity);
+	TGameCycle endDate = TGameCycle(_Duration * successFactor) + CTickEventHandler::getGameCycle();
+
+	CChangeMoveSpeedEffect *effect = new CChangeMoveSpeedEffect(_ActorRowId, entity->getEntityRowId(), EFFECT_FAMILIES::CombatMvtSlow, _SpeedModifier, endDate, entity);
 	if (!effect)
 	{
 		nlwarning("COMBAT : <CCombatActionSlowMove::apply> Failed to allocate new CCombatSlowMoveEffect object !");
@@ -96,4 +91,3 @@ void CCombatActionSlowMove::applyOnEntity( CEntityBase *entity, float successFac
 
 	entity->addSabrinaEffect(effect);
 } // applyOnEntity //
-

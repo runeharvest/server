@@ -14,27 +14,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_PROTECTION_TYPE_BACK_COMPAT_H
 #define RY_PROTECTION_TYPE_BACK_COMPAT_H
 
 #include "nel/misc/types_nl.h"
 
-namespace BACK_COMPAT
-{
-namespace OLD_PROTECTION_TYPE
-{
+namespace BACK_COMPAT {
+namespace OLD_PROTECTION_TYPE {
 
 enum TOldProtectionType
 {
 	Cold = 0,
 	Acid,
 	Rot,
-	Fire,			// Fyros speciality
-	Shockwave,		// Tryker speciality
-	Poison,			// Matis speciality
-	Electricity,	// Zorai speciality
+	Fire, // Fyros speciality
+	Shockwave, // Tryker speciality
+	Poison, // Matis speciality
+	Electricity, // Zorai speciality
 	Madness,
 	Slow,
 	Snare,
@@ -43,18 +39,16 @@ enum TOldProtectionType
 	Root,
 	Blind,
 	Fear,
-	
+
 	None,
-	
+
 	NB_OLD_PROTECTION_TYPE = None
 };
 
-TOldProtectionType fromString(const std::string & str);
-const std::string & toString(TOldProtectionType oldType);
+TOldProtectionType fromString(const std::string &str);
+const std::string &toString(TOldProtectionType oldType);
 
 } // namespace OLD_PROTECTION_TYPE
 } // namespace BACK_COMPAT
 
-
 #endif // RY_PROTECTION_TYPE_BACK_COMPAT_H
-

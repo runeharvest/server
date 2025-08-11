@@ -25,15 +25,17 @@
  * \author Nevrax France
  * \date 2004
  */
-class CGuildOfficerModule: public  CGuildMemberModule
+class CGuildOfficerModule : public CGuildMemberModule
 {
 	NL_INSTANCE_COUNTER_DECL(CGuildOfficerModule);
-public:
 
-	CGuildOfficerModule( CGuildCharProxy & proxy, CGuildMember* guildMember)
-		:CGuildMemberModule(proxy,guildMember){}	
-	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade grade)const;
-	virtual bool canInvite()const;
+public:
+	CGuildOfficerModule(CGuildCharProxy &proxy, CGuildMember *guildMember)
+	    : CGuildMemberModule(proxy, guildMember)
+	{
+	}
+	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade grade) const;
+	virtual bool canInvite() const;
 
 	// Function to check if the member can pick a mission.
 	// By default only Officers and above can pick a guild mission.
@@ -44,7 +46,6 @@ public:
 	}
 };
 ;
-
 
 #endif // RY_GUILD_OFFICER_MODULE_H
 

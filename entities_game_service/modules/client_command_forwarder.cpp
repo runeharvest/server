@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 
 #include "nel/net/service.h"
@@ -27,24 +24,19 @@
 
 #include "client_command_forwarder.h"
 
-
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 using namespace CMDEXE;
 
-
-
-class CClientCommandForwader : public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav <CModuleBase> > >,
-	public IClientCommandForwader
+class CClientCommandForwader : public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase>>>,
+                               public IClientCommandForwader
 {
-	typedef map<std::string, TModuleProxyPtr>	TCommandExecutors;
+	typedef map<std::string, TModuleProxyPtr> TCommandExecutors;
 
-	TCommandExecutors	_CommandExecutors;
+	TCommandExecutors _CommandExecutors;
 
 public:
-
 	void onModuleUp(IModuleProxy *module)
 	{
 		if (module->getModuleClassName() == "CommandExecutor")
@@ -76,7 +68,6 @@ public:
 				}
 			}
 		}
-
 	}
 
 	bool onProcessModuleMessage(IModuleProxy *sender, const CMessage &message)
@@ -86,11 +77,9 @@ public:
 		return false;
 	}
 
-
 	///////////////////////////////////////////////////////////////////////////////
 	///////// IClientCommandForwader implementation  //////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-
 
 	void sendCommand(const std::string &service, const std::string &commandName, const NLMISC::CEntityId &senderEId, bool haveTarget, const NLMISC::CEntityId &targetEId, const std::string &arg)
 	{
@@ -103,8 +92,6 @@ public:
 
 		cep.sendCommand(this, commandName, senderEId, haveTarget, targetEId, arg);
 	}
-
 };
 
 NLNET_REGISTER_MODULE_FACTORY(CClientCommandForwader, "ClientCommandForwader");
-

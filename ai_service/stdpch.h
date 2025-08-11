@@ -20,8 +20,6 @@
 #ifndef STDPCH_H
 #define STDPCH_H
 
-
-
 //----------------------------------------------------------------
 // external files
 //----------------------------------------------------------------
@@ -31,7 +29,6 @@
 
 #include "nel/misc/types_nl.h"
 
-
 //----------------------------------------------------------------
 // std libs
 
@@ -39,7 +36,6 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <math.h>
-
 
 //----------------------------------------------------------------
 // stl
@@ -50,13 +46,12 @@
 #include <map>
 #include <set>
 #include <algorithm>
-//#include <sstream>
+// #include <sstream>
 #include <exception>
 #include <utility>
 #include <deque>
 #include <limits>
 #include <iterator>
-
 
 //----------------------------------------------------------------
 // nel
@@ -84,59 +79,64 @@
 #include "nel/ligo/primitive.h"
 #include "nel/ligo/primitive_configuration.h"
 
-
 //----------------------------------------------------------------
 // nel net
 #include "nel/net/service.h"
 //----------------------------------------------------------------
 // service basics
 
-#define	FOREACH(__itvar,__conttype,__contvar)	\
-for (__conttype::iterator __itvar(__contvar.begin()),__itvar##end(__contvar.end()); __itvar!=__itvar##end; ++__itvar)
+#define FOREACH(__itvar, __conttype, __contvar) \
+	for (__conttype::iterator __itvar(__contvar.begin()), __itvar##end(__contvar.end()); __itvar != __itvar##end; ++__itvar)
 
-#define	FOREACH_NOINC(__itvar,__conttype,__contvar)	\
-for (__conttype::iterator __itvar(__contvar.begin()),__itvar##end(__contvar.end()); __itvar!=__itvar##end;)
+#define FOREACH_NOINC(__itvar, __conttype, __contvar) \
+	for (__conttype::iterator __itvar(__contvar.begin()), __itvar##end(__contvar.end()); __itvar != __itvar##end;)
 
-#define	FOREACHC(__itvar,__conttype,__contvar)	\
-for (__conttype::const_iterator __itvar(__contvar.begin()),__itvar##end(__contvar.end()); __itvar!=__itvar##end; ++__itvar)
+#define FOREACHC(__itvar, __conttype, __contvar) \
+	for (__conttype::const_iterator __itvar(__contvar.begin()), __itvar##end(__contvar.end()); __itvar != __itvar##end; ++__itvar)
 
-#define	FOREACHC_NOINC(__itvar,__conttype,__contvar)	\
-for (__conttype::const_iterator __itvar(__contvar.begin()),__itvar##end(__contvar.end()); __itvar!=__itvar##end; )
+#define FOREACHC_NOINC(__itvar, __conttype, __contvar) \
+	for (__conttype::const_iterator __itvar(__contvar.begin()), __itvar##end(__contvar.end()); __itvar != __itvar##end;)
 
-
-class	CStringWriter
-		:public	NLMISC::CRefCount
+class CStringWriter
+    : public NLMISC::CRefCount
 {
 public:
 	CStringWriter()
-	{}
+	{
+	}
 	virtual ~CStringWriter()
-	{}
-	virtual	void	append(const std::string	&str) = 0;
+	{
+	}
+	virtual void append(const std::string &str) = 0;
 };
 
-class	CTrashStringWriter
-:public	CStringWriter
+class CTrashStringWriter
+    : public CStringWriter
 {
 public:
-	CTrashStringWriter(NLMISC::CLog *log=NLMISC::InfoLog)
-	{}
+	CTrashStringWriter(NLMISC::CLog *log = NLMISC::InfoLog)
+	{
+	}
 	virtual ~CTrashStringWriter()
-	{}
-	void	append(const std::string	&str)
-	{}
+	{
+	}
+	void append(const std::string &str)
+	{
+	}
 };
 
-class	CLogStringWriter
-	:public	CStringWriter
+class CLogStringWriter
+    : public CStringWriter
 {
 public:
-	CLogStringWriter(NLMISC::CLog *log=NLMISC::InfoLog)
-		:_Log(log)
-	{}
+	CLogStringWriter(NLMISC::CLog *log = NLMISC::InfoLog)
+	    : _Log(log)
+	{
+	}
 	virtual ~CLogStringWriter()
-	{}
-	void	append(const std::string	&str)
+	{
+	}
+	void append(const std::string &str)
 	{
 #if !FINAL_VERSION
 		nlassert(_Log);
@@ -147,28 +147,28 @@ public:
 	NLMISC::CLog *_Log;
 };
 
-
-class	CArrayStringWriter
-	:public	CStringWriter
+class CArrayStringWriter
+    : public CStringWriter
 {
 public:
-	CArrayStringWriter(std::vector<std::string>	&stringVector)
-		:_StringVector(stringVector)
-	{}
+	CArrayStringWriter(std::vector<std::string> &stringVector)
+	    : _StringVector(stringVector)
+	{
+	}
 	virtual ~CArrayStringWriter()
-	{}
-	void	append(const std::string	&str)
+	{
+	}
+	void append(const std::string &str)
 	{
 		_StringVector.push_back(str);
 	}
-	std::vector<std::string>	&_StringVector;
+	std::vector<std::string> &_StringVector;
 };
 
-
 namespace MULTI_LINE_FORMATER {
-	void pushTitle(std::vector<std::string>& container, std::string const& text);
-	void pushEntry(std::vector<std::string>& container, std::string const& text);
-	void pushFooter(std::vector<std::string>& container);
+void pushTitle(std::vector<std::string> &container, std::string const &text);
+void pushEntry(std::vector<std::string> &container, std::string const &text);
+void pushFooter(std::vector<std::string> &container);
 }
 
 //----------------------------------------------------------------
@@ -183,7 +183,6 @@ namespace MULTI_LINE_FORMATER {
 //----------------------------------------------------------------
 // ai share
 
-
 #include "ai_share/ai_share.h"
 #include "ai_share/ai_types.h"
 #include "ai_share/ai_alias_description_node.h"
@@ -194,10 +193,10 @@ namespace MULTI_LINE_FORMATER {
 #include "ai_share/world_map.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
 
 #endif /*STDPCH_H*/

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_PROPERTY_HISTORY_H
 #define NL_PROPERTY_HISTORY_H
 
@@ -30,8 +28,8 @@
 
 #include "fe_types.h"
 
-const uint	MaxTranslationProperties = 1024;
-const uint	DefaultMaxDeltaSend = 100;
+const uint MaxTranslationProperties = 1024;
+const uint DefaultMaxDeltaSend = 100;
 
 struct CPropertyTranslation;
 
@@ -50,19 +48,19 @@ public:
 	public:
 		CPropertyEntry() { reset(); }
 
-		CLFECOMMON::CAction::TValue	LastSent;
-//		uint32						Packet;
-		bool						HasValue;
+		CLFECOMMON::CAction::TValue LastSent;
+		//		uint32						Packet;
+		bool HasValue;
 
-		template<typename T>
-		void	getValue(T& v) const		{ v = *((T*)(&LastSent)); }
+		template <typename T>
+		void getValue(T &v) const { v = *((T *)(&LastSent)); }
 
-		template<typename T>
-		void	setValue(T& v)				{ *((T*)(&LastSent)) = v; }
+		template <typename T>
+		void setValue(T &v) { *((T *)(&LastSent)) = v; }
 
-		void	reset()
+		void reset()
 		{
-//			Packet = 0xffffffff;
+			//			Packet = 0xffffffff;
 			HasValue = false;
 			LastSent = 0;
 		}
@@ -72,21 +70,25 @@ public:
 	class CEntityEntry
 	{
 	public:
-		CEntityEntry() : Used(false), AssociationBitsSent(0) {}
-
-		CPropertyEntry	Properties[CLFECOMMON::MAX_PROPERTIES_PER_ENTITY];
-		uint32			Mileage;
-		bool			Used;
-		uint8			AssociationBitsSent;
-
-		void	clearEntityEntry()
+		CEntityEntry()
+		    : Used(false)
+		    , AssociationBitsSent(0)
 		{
-			uint	i;
-			for (i=0; i<CLFECOMMON::MAX_PROPERTIES_PER_ENTITY; ++i)
+		}
+
+		CPropertyEntry Properties[CLFECOMMON::MAX_PROPERTIES_PER_ENTITY];
+		uint32 Mileage;
+		bool Used;
+		uint8 AssociationBitsSent;
+
+		void clearEntityEntry()
+		{
+			uint i;
+			for (i = 0; i < CLFECOMMON::MAX_PROPERTIES_PER_ENTITY; ++i)
 				Properties[i].reset();
 		}
 
-		void	resetEntityEntry()
+		void resetEntityEntry()
 		{
 			Used = false;
 			Mileage = 0;
@@ -95,14 +97,14 @@ public:
 			clearEntityEntry();
 		}
 
-		void	getLastSentPosition(CLFECOMMON::CAction::TValue &posx, CLFECOMMON::CAction::TValue &posy, CLFECOMMON::CAction::TValue &posz) const
+		void getLastSentPosition(CLFECOMMON::CAction::TValue &posx, CLFECOMMON::CAction::TValue &posy, CLFECOMMON::CAction::TValue &posz) const
 		{
 			posx = Properties[CLFECOMMON::PROPERTY_POSX].LastSent;
 			posy = Properties[CLFECOMMON::PROPERTY_POSY].LastSent;
 			posz = Properties[CLFECOMMON::PROPERTY_POSZ].LastSent;
 		}
 
-		void			setLastSentPosition(CLFECOMMON::CAction::TValue posx, CLFECOMMON::CAction::TValue posy, CLFECOMMON::CAction::TValue posz)
+		void setLastSentPosition(CLFECOMMON::CAction::TValue posx, CLFECOMMON::CAction::TValue posy, CLFECOMMON::CAction::TValue posz)
 		{
 			Properties[CLFECOMMON::PROPERTY_POSX].LastSent = posx;
 			Properties[CLFECOMMON::PROPERTY_POSY].LastSent = posy;
@@ -111,15 +113,13 @@ public:
 	};
 
 private:
-
-
-	typedef CEntityEntry TCLEntityTable [MAX_SEEN_ENTITIES_PER_CLIENT];
+	typedef CEntityEntry TCLEntityTable[MAX_SEEN_ENTITIES_PER_CLIENT];
 	struct TTimestampedPos
 	{
-		NLMISC::TGameCycle		Timestamp;
-		CLFECOMMON::TCoord		X, Y;
+		NLMISC::TGameCycle Timestamp;
+		CLFECOMMON::TCoord X, Y;
 	};
-	typedef std::deque< TTimestampedPos > TPositionsByTimestamp;
+	typedef std::deque<TTimestampedPos> TPositionsByTimestamp;
 
 	/**
 	 * A client entry, containing history for each entity the client sees
@@ -127,14 +127,15 @@ private:
 	class CClientEntry
 	{
 	public:
-		TCLEntityTable								Entities;
+		TCLEntityTable Entities;
+
 	private:
-		TPositionsByTimestamp						_TargetPositionsByTimestamp;
-	public:
-		bool										EntryUsed;
+		TPositionsByTimestamp _TargetPositionsByTimestamp;
 
 	public:
+		bool EntryUsed;
 
+	public:
 		/// Constructor
 		CClientEntry()
 		{
@@ -142,10 +143,10 @@ private:
 		}
 
 		/// Reset the client entry
-		void	reset()
+		void reset()
 		{
-			uint	i;
-			for (i=0; i<MAX_SEEN_ENTITIES_PER_CLIENT; ++i)
+			uint i;
+			for (i = 0; i < MAX_SEEN_ENTITIES_PER_CLIENT; ++i)
 			{
 				Entities[i].resetEntityEntry();
 				Entities[i].AssociationBitsSent = 0;
@@ -155,11 +156,11 @@ private:
 		}
 
 		/// Add a target position
-		void	storeTargetPosition( const CLFECOMMON::TCoord& x, const CLFECOMMON::TCoord& y, const NLMISC::TGameCycle& timestamp )
+		void storeTargetPosition(const CLFECOMMON::TCoord &x, const CLFECOMMON::TCoord &y, const NLMISC::TGameCycle &timestamp)
 		{
 			// Remove old positions (keep at least one)
-			while ( (_TargetPositionsByTimestamp.size() > 1)
-				 && (_TargetPositionsByTimestamp.front().Timestamp < timestamp - 80) ) // 8 seconds (except the latest sent pos)
+			while ((_TargetPositionsByTimestamp.size() > 1)
+			    && (_TargetPositionsByTimestamp.front().Timestamp < timestamp - 80)) // 8 seconds (except the latest sent pos)
 			{
 				_TargetPositionsByTimestamp.pop_front();
 			}
@@ -169,17 +170,17 @@ private:
 			tp.Timestamp = timestamp;
 			tp.X = x;
 			tp.Y = y;
-			_TargetPositionsByTimestamp.push_back( tp );
+			_TargetPositionsByTimestamp.push_back(tp);
 		}
 
 		/// Retrieve a sent target position by timestamp
-		void	getTargetPosition( const NLMISC::TGameCycle& timestamp, CLFECOMMON::TCoord& x, CLFECOMMON::TCoord& y ) const
+		void getTargetPosition(const NLMISC::TGameCycle &timestamp, CLFECOMMON::TCoord &x, CLFECOMMON::TCoord &y) const
 		{
 			// Browse the queue from the back downto the first timestamp <= than the searched one
 			TPositionsByTimestamp::const_reverse_iterator irevp;
-			for ( irevp=_TargetPositionsByTimestamp.rbegin(); irevp!=_TargetPositionsByTimestamp.rend(); ++irevp )
+			for (irevp = _TargetPositionsByTimestamp.rbegin(); irevp != _TargetPositionsByTimestamp.rend(); ++irevp)
 			{
-				if ( (*irevp).Timestamp <= timestamp )
+				if ((*irevp).Timestamp <= timestamp)
 				{
 					x = (*irevp).X;
 					y = (*irevp).Y;
@@ -194,87 +195,89 @@ private:
 	};
 
 	/// The client entries
-	std::vector<CClientEntry>			_ClientEntries;
+	std::vector<CClientEntry> _ClientEntries;
 
 	//
-	//sint8								_PropertiesTranslation[MaxTranslationProperties];
+	// sint8								_PropertiesTranslation[MaxTranslationProperties];
 
 	//
-	uint32								_PositionPropertyId;
+	uint32 _PositionPropertyId;
 
 	//
-	uint16								_MaxDeltaSend;
+	uint16 _MaxDeltaSend;
 
 public:
-
 	/// Constructor
 	CPropertyHistory();
 
 	/// Reinitialises the history
-	void		clear();
-	void		init(uint maxClient) { setMaximumClient(maxClient); clear(); }
-	void		setMaximumClient(uint maxClient);
+	void clear();
+	void init(uint maxClient)
+	{
+		setMaximumClient(maxClient);
+		clear();
+	}
+	void setMaximumClient(uint maxClient);
 
 	/// @name Client management
 	// @{
 
 	/// Adds a client
-	void		addClient(TClientId clientId);
+	void addClient(TClientId clientId);
 	/// Removes a client
-	void		removeClient(TClientId clientId);
+	void removeClient(TClientId clientId);
 	/// Resets a client (after a lag)
-	void		resetClient(TClientId clientId);
+	void resetClient(TClientId clientId);
 	/// Checks if a clientId is valid
-	bool		isValidClient(TClientId clientId);
+	bool isValidClient(TClientId clientId);
 
 	// @}
-
 
 	/// @name Client management
 	// @{
 
 	/// Adds an entity to a client
-	bool		addEntityToClient(CLFECOMMON::TCLEntityId entityId, TClientId clientId);
+	bool addEntityToClient(CLFECOMMON::TCLEntityId entityId, TClientId clientId);
 	/// Removes an entity of a client
-	void		removeEntityOfClient(CLFECOMMON::TCLEntityId entityId, TClientId clientId);
+	void removeEntityOfClient(CLFECOMMON::TCLEntityId entityId, TClientId clientId);
 
 	// @}
 
 	/// Set the new association changebits sent
-	void		updateAssociationChangeBits(TClientId clientId, CLFECOMMON::TCLEntityId slot, uint8 newAssociationChangeBits)
+	void updateAssociationChangeBits(TClientId clientId, CLFECOMMON::TCLEntityId slot, uint8 newAssociationChangeBits)
 	{
-		CEntityEntry		&entity = _ClientEntries[clientId].Entities[slot];
+		CEntityEntry &entity = _ClientEntries[clientId].Entities[slot];
 		entity.AssociationBitsSent = newAssociationChangeBits;
 	}
 
 	/// Updates a property using client, packet number and action
-	void		updateProperty(TClientId clientId, uint32 packet, CLFECOMMON::CAction &action)
+	void updateProperty(TClientId clientId, uint32 packet, CLFECOMMON::CAction &action)
 	{
-		//nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
+		// nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
 
-		CEntityEntry		&entity = _ClientEntries[clientId].Entities[action.Slot];
+		CEntityEntry &entity = _ClientEntries[clientId].Entities[action.Slot];
 		// search if entity exists already
-		//nlassert(entity.Used);
+		// nlassert(entity.Used);
 
-		CPropertyEntry		&entry = entity.Properties[action.PropertyCode];
+		CPropertyEntry &entry = entity.Properties[action.PropertyCode];
 
 		entry.LastSent = action.getValue();
 		entry.HasValue = true;
 
 		/*if ( action.PropIndex == 3 )
-			nlinfo( "Storing orientation for %hu %hu", clientId, (uint16)action.CLEntityId );*/
+		    nlinfo( "Storing orientation for %hu %hu", clientId, (uint16)action.CLEntityId );*/
 	}
 
 	/// Updates a property using client, packet number and action
-	void		updatePosition(TClientId clientId, uint32 packet, CLFECOMMON::CActionPosition &action, uint32 mileage, bool storeByTimestamp, NLMISC::TGameCycle timestamp)
+	void updatePosition(TClientId clientId, uint32 packet, CLFECOMMON::CActionPosition &action, uint32 mileage, bool storeByTimestamp, NLMISC::TGameCycle timestamp)
 	{
-		//nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
+		// nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
 
-		CEntityEntry		&entity = _ClientEntries[clientId].Entities[action.Slot];
+		CEntityEntry &entity = _ClientEntries[clientId].Entities[action.Slot];
 		// search if entity exists already
-		//nlassert(entity.Used);
+		// nlassert(entity.Used);
 
-		if ( action.IsRelative )
+		if (action.IsRelative)
 		{
 			entity.Properties[0].HasValue = false; // not storing the relative pos (useless for distance calculation)
 		}
@@ -286,46 +289,46 @@ public:
 		entity.Mileage = mileage;
 
 		// Store target pos by timestamp if required
-		if ( storeByTimestamp )
+		if (storeByTimestamp)
 		{
-			_ClientEntries[clientId].storeTargetPosition( timestamp, action.Position[0], action.Position[1] );
+			_ClientEntries[clientId].storeTargetPosition(timestamp, action.Position[0], action.Position[1]);
 		}
 	}
 
 	//
-	void		ackProperty(TClientId clientId, CLFECOMMON::TCLEntityId entityId, uint32 packet, CLFECOMMON::TPropIndex propId);
-	void		negAckProperty(TClientId clientId, CLFECOMMON::TCLEntityId entityId, uint32 packet, CLFECOMMON::TPropIndex propId);
-	void		ackProperties(TClientId clientId, CLFECOMMON::TCLEntityId entityId, uint32 packet, const std::vector<CLFECOMMON::TPropIndex> &ids);
+	void ackProperty(TClientId clientId, CLFECOMMON::TCLEntityId entityId, uint32 packet, CLFECOMMON::TPropIndex propId);
+	void negAckProperty(TClientId clientId, CLFECOMMON::TCLEntityId entityId, uint32 packet, CLFECOMMON::TPropIndex propId);
+	void ackProperties(TClientId clientId, CLFECOMMON::TCLEntityId entityId, uint32 packet, const std::vector<CLFECOMMON::TPropIndex> &ids);
 
 	//
 	/*bool		isContinuousProperty(CLFECOMMON::TPropIndex property) const
-	{ 
-		// Deprecated //return (property >= CLFECOMMON::FIRST_CONTINUOUS_PROPERTY && property <= CLFECOMMON::LAST_CONTINUOUS_PROPERTY);
+	{
+	    // Deprecated //return (property >= CLFECOMMON::FIRST_CONTINUOUS_PROPERTY && property <= CLFECOMMON::LAST_CONTINUOUS_PROPERTY);
 	}*/
 
 	//
-	const CEntityEntry		&getEntityEntry(TClientId clientId, CLFECOMMON::TCLEntityId entityId) const
+	const CEntityEntry &getEntityEntry(TClientId clientId, CLFECOMMON::TCLEntityId entityId) const
 	{
 		return _ClientEntries[clientId].Entities[entityId];
 	}
 
 	//
-	const CPropertyEntry	&getPropertyEntry(TClientId clientId, CLFECOMMON::TCLEntityId entityId, CLFECOMMON::TPropIndex property, bool &hasValue) const
+	const CPropertyEntry &getPropertyEntry(TClientId clientId, CLFECOMMON::TCLEntityId entityId, CLFECOMMON::TPropIndex property, bool &hasValue) const
 	{
-		//nlassert(isContinuousProperty(property));
-		//nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
-		const CEntityEntry		&entity = _ClientEntries[clientId].Entities[entityId];
-		//nlassertex(entity.Used, ("client=%d, entity=%d property=%d", clientId, entityId, property));
-		const CPropertyEntry	&entry = entity.Properties[property];
+		// nlassert(isContinuousProperty(property));
+		// nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
+		const CEntityEntry &entity = _ClientEntries[clientId].Entities[entityId];
+		// nlassertex(entity.Used, ("client=%d, entity=%d property=%d", clientId, entityId, property));
+		const CPropertyEntry &entry = entity.Properties[property];
 		hasValue = entry.HasValue;
 		return entry;
 	}
 
 	//
-	bool					getPosition(TClientId clientId, CLFECOMMON::TCLEntityId entityId, CLFECOMMON::CAction::TValue &posx, CLFECOMMON::CAction::TValue &posy, CLFECOMMON::CAction::TValue &posz) const
+	bool getPosition(TClientId clientId, CLFECOMMON::TCLEntityId entityId, CLFECOMMON::CAction::TValue &posx, CLFECOMMON::CAction::TValue &posy, CLFECOMMON::CAction::TValue &posz) const
 	{
-		//nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
-		const CEntityEntry		&entity = _ClientEntries[clientId].Entities[entityId];
+		// nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
+		const CEntityEntry &entity = _ClientEntries[clientId].Entities[entityId];
 		posx = entity.Properties[CLFECOMMON::PROPERTY_POSX].LastSent;
 		posy = entity.Properties[CLFECOMMON::PROPERTY_POSY].LastSent;
 		posz = entity.Properties[CLFECOMMON::PROPERTY_POSZ].LastSent;
@@ -333,34 +336,34 @@ public:
 	}
 
 	/// Get the cumulated delta stored in history
-	uint32					getMileage(TClientId clientId, CLFECOMMON::TCLEntityId entityId) const
+	uint32 getMileage(TClientId clientId, CLFECOMMON::TCLEntityId entityId) const
 	{
-		//nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
-		const CEntityEntry		&entity = _ClientEntries[clientId].Entities[entityId];
+		// nlassert(clientId < _ClientEntries.size() && _ClientEntries[clientId].EntryUsed);
+		const CEntityEntry &entity = _ClientEntries[clientId].Entities[entityId];
 		return entity.Mileage;
 	}
 
 	/// Get the position known by the client of its target at the specified tick
-	void					getTargetPosAtTick( TClientId clientId, NLMISC::TGameCycle tick, CLFECOMMON::TCoord& x, CLFECOMMON::TCoord& y ) const
+	void getTargetPosAtTick(TClientId clientId, NLMISC::TGameCycle tick, CLFECOMMON::TCoord &x, CLFECOMMON::TCoord &y) const
 	{
-		//nlassert(clientId < _ClientEntries.size());
-		_ClientEntries[clientId].getTargetPosition( tick, x, y );
+		// nlassert(clientId < _ClientEntries.size());
+		_ClientEntries[clientId].getTargetPosition(tick, x, y);
 	}
 
 	/// Set HasValue to false to force a sending
-	bool					resetValue( TClientId clientId, CLFECOMMON::TCLEntityId entityId, CLFECOMMON::TPropIndex property, uint8 currentAssociationBits )
+	bool resetValue(TClientId clientId, CLFECOMMON::TCLEntityId entityId, CLFECOMMON::TPropIndex property, uint8 currentAssociationBits)
 	{
-		CEntityEntry		&entity = _ClientEntries[clientId].Entities[entityId];
-		if ( entity.AssociationBitsSent == currentAssociationBits )
+		CEntityEntry &entity = _ClientEntries[clientId].Entities[entityId];
+		if (entity.AssociationBitsSent == currentAssociationBits)
 		{
-			//nlassertex(entity.Used, ("client=%d, entity=%d property=%d", clientId, entityId, property));
+			// nlassertex(entity.Used, ("client=%d, entity=%d property=%d", clientId, entityId, property));
 			if (property == CLFECOMMON::PROPERTY_POSITION)
 			{
 				entity.Mileage = 0;
 			}
 			else if (property != CLFECOMMON::PROPERTY_DISASSOCIATION)
 			{
-				CPropertyEntry	&entry = entity.Properties[property];
+				CPropertyEntry &entry = entity.Properties[property];
 				entry.HasValue = false;
 			}
 			return true;

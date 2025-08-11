@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_PVP_CHALLENGE_H
 #define RY_PVP_CHALLENGE_H
 
@@ -39,57 +37,56 @@ public:
 	struct CMember
 	{
 		/// row id of the user
-		TDataSetRow				Row;
+		TDataSetRow Row;
 		/// previous coords of the player
-		COfflineEntityState	OldCoords;
-		std::vector<sint32>					OldCaracs;
+		COfflineEntityState OldCoords;
+		std::vector<sint32> OldCaracs;
 	};
 	/// a team of the challenge
 	struct CTeamEntry
 	{
 		/// id of the corresponding ingame team ( CTeam::InvalidTeamId if there are none, e.g. : alone player )
-		uint16					TeamId;
+		uint16 TeamId;
 		/// members of the team that are actually in the challenge
-		std::vector<CMember>	Members;
+		std::vector<CMember> Members;
 	};
-	
-	CPVPChallenge(CCharacter *user1, CCharacter * user2);
+
+	CPVPChallenge(CCharacter *user1, CCharacter *user2);
 	/// get a member of the challenge
-	const CMember * getMember( const TDataSetRow & userRow, uint16 &teamIdx, uint16 &memberIdx )const;
+	const CMember *getMember(const TDataSetRow &userRow, uint16 &teamIdx, uint16 &memberIdx) const;
 
 	PVP_MODE::TPVPMode getPVPMode() const { return PVP_MODE::PvpChallenge; }
 
 	/// return pvp relation between the two players
-	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
-	
+	PVP_RELATION::TPVPRelation getPVPRelation(CCharacter *user, CEntityBase *target) const;
+
 private:
-	bool leavePVP( CCharacter * user, IPVP::TEndType type );
+	bool leavePVP(CCharacter *user, IPVP::TEndType type);
 
 	/// Return true for players in the challenge, from a different team, false for anyone else (including non-players) ('attackable' will be used instead)
-	bool canUserHurtTarget(CCharacter * user, CEntityBase * target) const;
+	bool canUserHurtTarget(CCharacter *user, CEntityBase *target) const;
 
 	/// Return true for players in the challenge, from the same team, false for anyone else (including non-players)
-	bool canUserHelpTarget(CCharacter * user, CEntityBase * target) const;
+	bool canUserHelpTarget(CCharacter *user, CEntityBase *target) const;
 
 	/// Return true for ennemy players and for non-players (if offensive)
-	bool canApplyAreaEffect(CCharacter * caster, CEntityBase * areaTarget, bool offensive, bool ignoreMainTarget) const;
+	bool canApplyAreaEffect(CCharacter *caster, CEntityBase *areaTarget, bool offensive, bool ignoreMainTarget) const;
 
 	virtual bool doCancelRespawn() const { return true; }
 
 	/// add a user team
 	void addUserTeam(CCharacter *user);
 	/// backup a member propeties
-	inline void addUserToTeam( CTeamEntry & entry, CCharacter *user );
+	inline void addUserToTeam(CTeamEntry &entry, CCharacter *user);
 	/// send a message to the specified team members
-	inline void sendChallengeMessage(uint16 teamIdx, const std::string & msg, const TVectorParamCheck & params = TVectorParamCheck() )const;
+	inline void sendChallengeMessage(uint16 teamIdx, const std::string &msg, const TVectorParamCheck &params = TVectorParamCheck()) const;
 	/// put back the former user caracs
-	inline void restoreScores(CCharacter * user, const CMember& member );
-	
+	inline void restoreScores(CCharacter *user, const CMember &member);
+
 	/// teams in challenge
 	std::vector<CTeamEntry> _Teams;
 	/// cellid of the challenge island
-	sint32					_CellId;
+	sint32 _CellId;
 };
 
 #endif // RY_PVP_CHALLENGE_H
-

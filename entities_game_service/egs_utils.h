@@ -25,15 +25,15 @@
 
 /// assert and cast that must be used to test the PD generated class
 #ifdef RY_EGS_PD_DEBUG
-	#define EGS_PD_AST nlassert
-	#define EGS_PD_CAST dynamic_cast
+#define EGS_PD_AST nlassert
+#define EGS_PD_CAST dynamic_cast
 #else
-	#define EGS_PD_AST ((void)0)
-	#define EGS_PD_CAST static_cast
+#define EGS_PD_AST ((void)0)
+#define EGS_PD_CAST static_cast
 #endif
 
 /// if USE_PDS is defined, we use the Persistant Data service, otherwise, EGS takes full care of persistance
-//#define USE_PDS
+// #define USE_PDS
 
 #endif // egs_utils
 

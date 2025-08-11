@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
-
 #include "stdpch.h"
 #include "magic_action_ai_mass_dispel.h"
 #include "phrase_manager/magic_phrase.h"
@@ -31,28 +29,28 @@ using namespace std;
 //--------------------------------------------------------------
 //					initFromAiAction
 //--------------------------------------------------------------
-bool CMagicAiActionMassDispel::initFromAiAction( const CStaticAiAction *aiAction, CMagicPhrase *phrase )
+bool CMagicAiActionMassDispel::initFromAiAction(const CStaticAiAction *aiAction, CMagicPhrase *phrase)
 {
 #ifdef NL_DEBUG
 	nlassert(phrase);
 	nlassert(aiAction);
 #endif
-	
-	if (aiAction->getType() != AI_ACTION::EffectSpell )
+
+	if (aiAction->getType() != AI_ACTION::EffectSpell)
 		return false;
-	
+
 	// read parameters
 	const CEffectSpellParams &data = aiAction->getData().EffectSpell;
-		
+
 	return true;
 } // initFromAiAction //
 
 //--------------------------------------------------------------
 //					launch
 //--------------------------------------------------------------
-void CMagicAiActionMassDispel::launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-									   const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-									   const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
+void CMagicAiActionMassDispel::launch(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport)
 {
 	H_AUTO(CMagicAiActionEffect_launch);
 
@@ -61,7 +59,7 @@ void CMagicAiActionMassDispel::launch( CMagicPhrase * phrase, sint deltaLevel, s
 
 	const vector<CSpellTarget> &targets = phrase->getTargets();
 	const uint nbTargets = (uint)targets.size();
-	for (uint i = 0 ; i < nbTargets ; ++i)
+	for (uint i = 0; i < nbTargets; ++i)
 	{
 		if (!TheDataset.isAccessible(targets[i].getId()))
 			continue;
@@ -76,25 +74,25 @@ void CMagicAiActionMassDispel::launch( CMagicPhrase * phrase, sint deltaLevel, s
 		affectedTargets.set(i);
 
 		CTargetInfos targetInfos;
-		targetInfos.RowId		= target->getEntityRowId();
-		targetInfos.MainTarget	= (i == 0);
+		targetInfos.RowId = target->getEntityRowId();
+		targetInfos.MainTarget = (i == 0);
 
 		_ApplyTargets.push_back(targetInfos);
 	}
 } // launch //
 
 //--------------------------------------------------------------
-//					apply  
+//					apply
 //--------------------------------------------------------------
-void CMagicAiActionMassDispel::apply( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-									  const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-									  const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport,
-									  sint32 vamp, float vampRatio, bool reportXp )
+void CMagicAiActionMassDispel::apply(CMagicPhrase *phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour &behav,
+    const std::vector<float> &powerFactors, NLMISC::CBitSet &affectedTargets, const NLMISC::CBitSet &invulnerabilityOffensive,
+    const NLMISC::CBitSet &invulnerabilityAll, bool isMad, NLMISC::CBitSet &resists, const TReportAction &actionReport,
+    sint32 vamp, float vampRatio, bool reportXp)
 {
 	H_AUTO(CMagicAiActionMassDispel_apply);
 
 	const uint nbTargets = (uint)_ApplyTargets.size();
-	for (uint i = 0 ; i < nbTargets ; ++i)
+	for (uint i = 0; i < nbTargets; ++i)
 	{
 		if (!TheDataset.isAccessible(_ApplyTargets[i].RowId))
 			continue;
@@ -110,6 +108,5 @@ void CMagicAiActionMassDispel::apply( CMagicPhrase * phrase, sint deltaLevel, si
 		target->removeAllSpells();
 	}
 } // apply //
-
 
 CMagicAiSpecializedActionTFactory<CMagicAiActionMassDispel> *CMagicActionAiMassDispelFactoryInstance = new CMagicAiSpecializedActionTFactory<CMagicAiActionMassDispel>(AI_ACTION::MassDispel);

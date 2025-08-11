@@ -31,51 +31,43 @@
 class CRefBuilderTask : public IRefTask
 {
 public:
-
 	/// Constructor
 	CRefBuilderTask();
 
 	/// Destructor
 	~CRefBuilderTask();
 
-
 	/// Setup Task
-	void		setup(const std::string& rootRefPath,
-					  const std::string& previousReferencePath,
-					  const std::string& nextReferencePath,
-					  const std::string& hoursUpdatePath,
-					  const std::string& minutesUpdatePath,
-					  const std::string& secondsUpdatePath,
-					  const std::string& logUpdatePath,
-					  const std::string& mintimestamp,
-					  const std::string& maxtimestamp,
-					  const std::string& keeptimestamp);
-
-
+	void setup(const std::string &rootRefPath,
+	    const std::string &previousReferencePath,
+	    const std::string &nextReferencePath,
+	    const std::string &hoursUpdatePath,
+	    const std::string &minutesUpdatePath,
+	    const std::string &secondsUpdatePath,
+	    const std::string &logUpdatePath,
+	    const std::string &mintimestamp,
+	    const std::string &maxtimestamp,
+	    const std::string &keeptimestamp);
 
 	/// Run task
-	virtual bool	execute();
-
+	virtual bool execute();
 
 private:
-
-	std::string		_RootRefPath;
-	std::string		_PreviousReferencePath;
-	std::string		_NextReferencePath;
-	std::string		_HoursUpdatePath;
-	std::string		_MinutesUpdatePath;
-	std::string		_SecondsUpdatePath;
-	std::string		_LogUpdatePath;
-	std::string		_Mintimestamp;
-	std::string		_Maxtimestamp;
-	std::string		_KeepTimestamp;
+	std::string _RootRefPath;
+	std::string _PreviousReferencePath;
+	std::string _NextReferencePath;
+	std::string _HoursUpdatePath;
+	std::string _MinutesUpdatePath;
+	std::string _SecondsUpdatePath;
+	std::string _LogUpdatePath;
+	std::string _Mintimestamp;
+	std::string _Maxtimestamp;
+	std::string _KeepTimestamp;
 
 public:
-
 	/// Compute next timestamp
-	static std::string	getNextTimestamp(const std::string& timestamp);
+	static std::string getNextTimestamp(const std::string &timestamp);
 };
-
 
 #endif // NL_REF_BUILDER_TASK_H
 

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #include "phrase_manager/phrase_manager_callbacks.h"
@@ -26,162 +24,151 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
-
 //--------------------------------------------------------------
-//					CEGSExecuteMsg::callback()  
+//					CEGSExecuteMsg::callback()
 //--------------------------------------------------------------
-void CEGSExecuteMsgImp::callback (const std::string &serviceName, NLNET::TServiceId sid)
+void CEGSExecuteMsgImp::callback(const std::string &serviceName, NLNET::TServiceId sid)
 {
 	H_AUTO(CEGSExecuteMsgImpCallback);
-	if ( ! Mirror.mirrorIsReady() )
+	if (!Mirror.mirrorIsReady())
 	{
-		nlwarning("<CEGSExecuteMsg::callback> Received from %s service but mirror not yet ready", serviceName.c_str() );
+		nlwarning("<CEGSExecuteMsg::callback> Received from %s service but mirror not yet ready", serviceName.c_str());
 		return;
 	}
 
-	CPhraseManager::getInstance().executePhrase( ActorRowId, TargetRowId, BrickIds, Cyclic );
+	CPhraseManager::getInstance().executePhrase(ActorRowId, TargetRowId, BrickIds, Cyclic);
 } // CEGSExecuteMsg::callback  //
 
-
 //--------------------------------------------------------------
-//					cbRegisterService()  
+//					cbRegisterService()
 //--------------------------------------------------------------
-void cbRegisterService( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbRegisterService(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
-	CPhraseManager::getInstance().registerService( serviceId );
+	CPhraseManager::getInstance().registerService(serviceId);
 } // cbRegisterService //
 
-
 //--------------------------------------------------------------
-//					cbUnregisterService()  
+//					cbUnregisterService()
 //--------------------------------------------------------------
-void cbUnregisterService( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbUnregisterService(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
-	CPhraseManager::getInstance().unregisterService( serviceId );
+	CPhraseManager::getInstance().unregisterService(serviceId);
 } // cbUnregisterService //
 
-
 //--------------------------------------------------------------
-//					cbRegisterServiceAI()  
+//					cbRegisterServiceAI()
 //--------------------------------------------------------------
-void cbRegisterServiceAI( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbRegisterServiceAI(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
-	CPhraseManager::getInstance().registerServiceForAI( serviceId );
+	CPhraseManager::getInstance().registerServiceForAI(serviceId);
 } // cbRegisterServiceAI //
 
-
 //--------------------------------------------------------------
-//					cbUnregisterServiceAI()  
+//					cbUnregisterServiceAI()
 //--------------------------------------------------------------
-void cbUnregisterServiceAI( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbUnregisterServiceAI(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
-	CPhraseManager::getInstance().unregisterServiceForAI( serviceId );
+	CPhraseManager::getInstance().unregisterServiceForAI(serviceId);
 } // cbUnregisterServiceAI //
 
-
 //--------------------------------------------------------------
-//					cbDisengageNotification()  
+//					cbDisengageNotification()
 //--------------------------------------------------------------
-void cbDisengageNotification( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbDisengageNotification(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	H_AUTO(cbDisengageNotification);
-	
-	if ( ! Mirror.mirrorIsReady() )
+
+	if (!Mirror.mirrorIsReady())
 	{
-		nlwarning("<cbDisengageNotification> Received from %s service but mirror not yet ready", serviceName.c_str() );
+		nlwarning("<cbDisengageNotification> Received from %s service but mirror not yet ready", serviceName.c_str());
 		return;
 	}
-	
-	if (NLMISC::nlstricmp(serviceName.c_str(),"AIS")==0)
+
+	if (NLMISC::nlstricmp(serviceName.c_str(), "AIS") == 0)
 	{
 		TDataSetRow entityRowId;
-		msgin.serial( entityRowId );
-		
+		msgin.serial(entityRowId);
+
 		INFOLOG("<cbDisengageNotification> received disengage notification for entity %s", TheDataset.getEntityId(entityRowId).toString().c_str());
-		
-		CPhraseManager::getInstance().disengage( entityRowId, true );
+
+		CPhraseManager::getInstance().disengage(entityRowId, true);
 	}
 	else
 	{
 		CEntityId entityId;
-		msgin.serial( entityId );
-		
+		msgin.serial(entityId);
+
 		INFOLOG("<cbDisengageNotification> received disengage notification for entity %s", entityId.toString().c_str());
-		
-		CPhraseManager::getInstance().disengage( TheDataset.getDataSetRow(entityId), true );
+
+		CPhraseManager::getInstance().disengage(TheDataset.getDataSetRow(entityId), true);
 	}
-	
+
 } // cbDisengageNotification //
 
-
 //--------------------------------------------------------------
-//					cbDisengage()  
+//					cbDisengage()
 //--------------------------------------------------------------
-void cbDisengage( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
+void cbDisengage(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	H_AUTO(cbDisengage);
-	
-	if ( ! Mirror.mirrorIsReady() )
+
+	if (!Mirror.mirrorIsReady())
 	{
-		nlwarning("<cbDisengage> Received from %s service but mirror not yet ready", serviceName.c_str() );
+		nlwarning("<cbDisengage> Received from %s service but mirror not yet ready", serviceName.c_str());
 		return;
 	}
 
 	if (serviceName == "AIS")
 	{
 		TDataSetRow entityRowId;
-		msgin.serial( entityRowId );
-		
-		DEBUGLOG("<cbDisengage> AIS Disengage entity %s", TheDataset.getEntityId(entityRowId).toString().c_str() );
-		
-		CPhraseManager::getInstance().disengage( entityRowId, true /*chatMsg*/, true /*disengageCreature*/);
+		msgin.serial(entityRowId);
+
+		DEBUGLOG("<cbDisengage> AIS Disengage entity %s", TheDataset.getEntityId(entityRowId).toString().c_str());
+
+		CPhraseManager::getInstance().disengage(entityRowId, true /*chatMsg*/, true /*disengageCreature*/);
 	}
 	else
 	{
 		CEntityId entityId;
-		msgin.serial( entityId );
+		msgin.serial(entityId);
 
-		DEBUGLOG("<cbDisengage> Service %s Disengage entity %s", serviceName.c_str(), entityId.toString().c_str() );
+		DEBUGLOG("<cbDisengage> Service %s Disengage entity %s", serviceName.c_str(), entityId.toString().c_str());
 
-		CPhraseManager::getInstance().disengage( TheDataset.getDataSetRow(entityId), true );
+		CPhraseManager::getInstance().disengage(TheDataset.getDataSetRow(entityId), true);
 	}
-	
+
 } // cbDisengage //
 
-
 //--------------------------------------------------------------
-//				CBSAIEventReportMsg::callback()  
+//				CBSAIEventReportMsg::callback()
 //--------------------------------------------------------------
-void CBSAIDeathReport::callback(const string &, NLNET::TServiceId )
+void CBSAIDeathReport::callback(const string &, NLNET::TServiceId)
 {
 	// Nothing to do.
 }
 
 //--------------------------------------------------------------
-//				CBSAIEventReportMsg::callback()  
+//				CBSAIEventReportMsg::callback()
 //--------------------------------------------------------------
-void CBSAIEventReportMsg::callback(const string &, NLNET::TServiceId )
+void CBSAIEventReportMsg::callback(const string &, NLNET::TServiceId)
 {
 	// empty , unused
 } // CBSAIEventReportMsg::callback //
 
-
 //--------------------------------------------------------------
-//				CEGSExecutePhraseMsg::callback()  
+//				CEGSExecutePhraseMsg::callback()
 //--------------------------------------------------------------
 void CEGSExecutePhraseMsg::callback(const string &serviceName, NLNET::TServiceId sid)
 {
 	H_AUTO(CEGSExecutePhraseMsg_callback);
-	CPhraseManager::getInstance().executePhrase( ActorRowId, TargetRowId, PhraseId, false );
+	CPhraseManager::getInstance().executePhrase(ActorRowId, TargetRowId, PhraseId, false);
 } // CEGSExecutePhraseMsg::callback //
 
-
 //--------------------------------------------------------------
-//				CEGSExecuteAiActionMsgImp::callback()  
+//				CEGSExecuteAiActionMsgImp::callback()
 //--------------------------------------------------------------
 void CEGSExecuteAiActionMsgImp::callback(const string &serviceName, NLNET::TServiceId sid)
-{	
+{
 	H_AUTO(CEGSExecuteAiActionMsgImp_callback);
 	CPhraseManager::getInstance().executeAiAction(ActorRowId, TargetRowId, ActionId, DamageCoef, DamageSpeedCoef);
 } // CEGSExecuteAiActionMsgImp::callback //

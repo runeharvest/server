@@ -26,14 +26,11 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace CNM;
 
-class CCharNameMapper : 
-	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
-	public CCharNameMapperSkel
+class CCharNameMapper : public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase>>>,
+                        public CCharNameMapperSkel
 {
 
-
 public:
-
 	CCharNameMapper()
 	{
 		CCharNameMapperSkel::init(this);
@@ -42,13 +39,13 @@ public:
 	////////////////////////////////////////////////////////////////
 	// Virtual overrides from char name mapper
 	////////////////////////////////////////////////////////////////
-	virtual void mapCharNames(NLNET::IModuleProxy *sender, const std::vector < TCharNameInfo > &charNameInfos)
+	virtual void mapCharNames(NLNET::IModuleProxy *sender, const std::vector<TCharNameInfo> &charNameInfos)
 	{
 		// we receive a list of character name, map them in the IOS string table
 
 		vector<TCharMappedInfo> result(charNameInfos.size());
 
-		for (uint i=0; i<charNameInfos.size(); ++i)
+		for (uint i = 0; i < charNameInfos.size(); ++i)
 		{
 			const TCharNameInfo &cni = charNameInfos[i];
 			uint32 stringId = SM->storeString(cni.getCharName());
@@ -61,9 +58,6 @@ public:
 		CCharNameMapperClientProxy cnmc(sender);
 		cnmc.charNamesMapped(this, result);
 	}
-
-
 };
-
 
 NLNET_REGISTER_MODULE_FACTORY(CCharNameMapper, "CharNameMapper");

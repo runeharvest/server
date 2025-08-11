@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -34,30 +32,29 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
 //		CNoLinkDOTEffect::update()
 //--------------------------------------------------------------
-bool CNoLinkDOTEffect::update(CTimerEvent * event, bool applyEffect)
+bool CNoLinkDOTEffect::update(CTimerEvent *event, bool applyEffect)
 {
 	// if needed check if caster is dead
 	if (_EndsAtCasterDeath)
 	{
 		const CEntityBase *caster = CEntityBaseManager::getEntityBasePtr(_CreatorRowId);
-		if ( !caster || caster->isDead())
+		if (!caster || caster->isDead())
 		{
 			_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 			return true;
 		}
 	}
 
-	CEntityBase	*targetEntity = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
+	CEntityBase *targetEntity = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
 	if (targetEntity == NULL)
 	{
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
 	}
-	
+
 	if (applyEffect)
 	{
 		sint32 maxDamage = sint32(_CycleDamage);
@@ -72,24 +69,24 @@ bool CNoLinkDOTEffect::update(CTimerEvent * event, bool applyEffect)
 		sint32 realDamage;
 
 		bool kill = false;
-		switch(_AffectedScore)
-		{ 
+		switch (_AffectedScore)
+		{
 		case SCORES::hit_points:
-			realDamage = targetEntity->applyDamageOnArmor( _DamageType, maxDamage );
-			kill = targetEntity->changeCurrentHp( -realDamage, _CreatorRowId);
+			realDamage = targetEntity->applyDamageOnArmor(_DamageType, maxDamage);
+			kill = targetEntity->changeCurrentHp(-realDamage, _CreatorRowId);
 			break;
 		default:
-			realDamage = targetEntity->applyDamageOnArmor( _DamageType, maxDamage );
+			realDamage = targetEntity->applyDamageOnArmor(_DamageType, maxDamage);
 			targetEntity->changeScore(_AffectedScore, -realDamage);
 			return true;
 		}
 
 		if (targetEntity != NULL && _CreatorRowId.isValid() && TheDataset.isDataSetRowStillValid(_CreatorRowId))
-			PHRASE_UTILITIES::sendScoreModifierSpellMessage( TheDataset.getEntityId(_CreatorRowId), targetEntity->getId(), -realDamage, -maxDamage, SCORES::hit_points , ACTNATURE::OFFENSIVE_MAGIC);
+			PHRASE_UTILITIES::sendScoreModifierSpellMessage(TheDataset.getEntityId(_CreatorRowId), targetEntity->getId(), -realDamage, -maxDamage, SCORES::hit_points, ACTNATURE::OFFENSIVE_MAGIC);
 
 		if (kill)
 		{
-			PHRASE_UTILITIES::sendDeathMessages(_CreatorRowId,_TargetRowId);
+			PHRASE_UTILITIES::sendDeathMessages(_CreatorRowId, _TargetRowId);
 			_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 			return true;
 		}
@@ -97,7 +94,7 @@ bool CNoLinkDOTEffect::update(CTimerEvent * event, bool applyEffect)
 
 	// set timer next event
 	_UpdateTimer.setRemaining(_CycleLength, event);
-	
+
 	return false;
 } // update //
 
@@ -106,7 +103,7 @@ bool CNoLinkDOTEffect::update(CTimerEvent * event, bool applyEffect)
 //--------------------------------------------------------------
 void CNoLinkDOTEffect::removed()
 {
-	CEntityBase	*targetEntity = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
+	CEntityBase *targetEntity = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
 	if (targetEntity == NULL)
 	{
 		return;
@@ -117,23 +114,23 @@ void CNoLinkDOTEffect::removed()
 		return;
 
 	DEBUGLOG("EFFECT: DoT effect ends on entity %s", targetEntity->getId().toString().c_str());
-	
-	// send messages to target
-/*	if (_TargetEntity->getId().getType() == RYZOMID::player)
-		PHRASE_UTILITIES::sendDynamicSystemMessage( _TargetRowId, "EFFECT_BLEED_ENDED");
 
-	// try to inform actor
-	if ( _CreatorRowId != _TargetRowId && _CreatorRowId.isValid() && TheDataset.isDataSetRowStillValid(_CreatorRowId))
-	{
-		CCharacter *actor = PlayerManager.getChar(_CreatorRowId);
-		if (actor != NULL)
-		{
-			TVectorParamCheck params;
-			params.resize(1);
-			params[0].Type = STRING_MANAGER::entity;
-			params[0].EId = _TargetEntity->getId();
-			PHRASE_UTILITIES::sendDynamicSystemMessage( actor->getEntityRowId(), "EFFECT_BLEED_ENDED_ACTOR", params);
-		}
-	}
-*/
+	// send messages to target
+	/*	if (_TargetEntity->getId().getType() == RYZOMID::player)
+	        PHRASE_UTILITIES::sendDynamicSystemMessage( _TargetRowId, "EFFECT_BLEED_ENDED");
+
+	    // try to inform actor
+	    if ( _CreatorRowId != _TargetRowId && _CreatorRowId.isValid() && TheDataset.isDataSetRowStillValid(_CreatorRowId))
+	    {
+	        CCharacter *actor = PlayerManager.getChar(_CreatorRowId);
+	        if (actor != NULL)
+	        {
+	            TVectorParamCheck params;
+	            params.resize(1);
+	            params[0].Type = STRING_MANAGER::entity;
+	            params[0].EId = _TargetEntity->getId();
+	            PHRASE_UTILITIES::sendDynamicSystemMessage( actor->getEntityRowId(), "EFFECT_BLEED_ENDED_ACTOR", params);
+	        }
+	    }
+	*/
 } // removed //

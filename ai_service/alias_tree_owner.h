@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef _ALIAS_TREE_OWNER_
 #define _ALIAS_TREE_OWNER_
 
@@ -33,13 +31,13 @@ class CAliasTreeOwner;
 class IAliasCont
 {
 public:
-	virtual uint32				size() const = 0;
-	virtual	void				removeChildByAlias	(uint32 alias) = 0;
-	virtual	void				removeChildByIndex	(uint32 index) = 0;
-	virtual	CAliasTreeOwner*	getAliasChildByAlias(uint32 alias) const = 0;
-	virtual	CAliasTreeOwner*	addAliasChild		(CAliasTreeOwner* child) = 0;
-	virtual	CAliasTreeOwner*	addAliasChild		(CAliasTreeOwner* child, uint32 index) = 0;		
-	
+	virtual uint32 size() const = 0;
+	virtual void removeChildByAlias(uint32 alias) = 0;
+	virtual void removeChildByIndex(uint32 index) = 0;
+	virtual CAliasTreeOwner *getAliasChildByAlias(uint32 alias) const = 0;
+	virtual CAliasTreeOwner *addAliasChild(CAliasTreeOwner *child) = 0;
+	virtual CAliasTreeOwner *addAliasChild(CAliasTreeOwner *child, uint32 index) = 0;
+
 	virtual ~IAliasCont() { }
 };
 
@@ -52,73 +50,75 @@ class CAliasTreeOwner;
 class CAliasTreeOwnerLocator
 {
 public:
-	static CAliasTreeOwnerLocator* getInstance();
+	static CAliasTreeOwnerLocator *getInstance();
+
 private:
-	CAliasTreeOwnerLocator() {}
-	static CAliasTreeOwnerLocator* _Instance;
-	
+	CAliasTreeOwnerLocator() { }
+	static CAliasTreeOwnerLocator *_Instance;
+
 public:
-	CAliasTreeOwner* getEntity(uint32 const alias) const;
-	CAliasTreeOwner* getEntity(std::string const& name) const;
-	void addEntity(uint32 const alias, std::string const& name, CAliasTreeOwner* entity);
-	void delEntity(uint32 const alias, std::string const& name, CAliasTreeOwner* entity);
+	CAliasTreeOwner *getEntity(uint32 const alias) const;
+	CAliasTreeOwner *getEntity(std::string const &name) const;
+	void addEntity(uint32 const alias, std::string const &name, CAliasTreeOwner *entity);
+	void delEntity(uint32 const alias, std::string const &name, CAliasTreeOwner *entity);
+
 private:
-	std::map<uint32, CAliasTreeOwner*> _EntitiesByAlias;
-	std::map<std::string, CAliasTreeOwner*> _EntitiesByName;
+	std::map<uint32, CAliasTreeOwner *> _EntitiesByAlias;
+	std::map<std::string, CAliasTreeOwner *> _EntitiesByName;
 };
 
 class CAliasTreeOwner
-: public NLMISC::CDbgRefCount<CAliasTreeOwner>
+    : public NLMISC::CDbgRefCount<CAliasTreeOwner>
 {
 public:
 	class CAliasDiff
 	{
 	public:
 		CAliasDiff(uint32 alias);
-		virtual	~CAliasDiff() { }
-		bool operator ()(CAliasTreeOwner const* other) const;
+		virtual ~CAliasDiff() { }
+		bool operator()(CAliasTreeOwner const *other) const;
 		uint32 _Alias;
 	};
-	
+
 public:
-	explicit CAliasTreeOwner(CAIAliasDescriptionNode* aliasTree);
-	explicit CAliasTreeOwner(uint32	alias, std::string const& name);
+	explicit CAliasTreeOwner(CAIAliasDescriptionNode *aliasTree);
+	explicit CAliasTreeOwner(uint32 alias, std::string const &name);
 	virtual ~CAliasTreeOwner();
-	
+
 	/// @name Virtual interface
 	//@{
 	// obtain the container associated with this type.
-	virtual IAliasCont* getAliasCont(AITYPES::TAIType type);
+	virtual IAliasCont *getAliasCont(AITYPES::TAIType type);
 	// create a child with the specified alias node.
-	virtual CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
+	virtual CAliasTreeOwner *createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree);
 	// done to allow postprocess dependencies updates.
-	virtual void updateDependencies(CAIAliasDescriptionNode const& aliasTree, CAliasTreeOwner* aliasTreeOwner);
+	virtual void updateDependencies(CAIAliasDescriptionNode const &aliasTree, CAliasTreeOwner *aliasTreeOwner);
 	//@}
-	
-	CAIAliasDescriptionNode* getAliasNode() const;
-	
+
+	CAIAliasDescriptionNode *getAliasNode() const;
+
 	uint32 getAlias() const;
 	std::string getAliasString() const;
-	
-	std::string const& getName() const;
-	
-	void setName(std::string const& name);
-	
+
+	std::string const &getName() const;
+
+	void setName(std::string const &name);
+
 	std::string getAliasFullName() const;
-	
-	void updateAliasTree(CAIAliasDescriptionNode const& newTree);
-	bool getCont(CAliasTreeOwner*& childOwner, IAliasCont*& cont, AITYPES::TAIType _type);
+
+	void updateAliasTree(CAIAliasDescriptionNode const &newTree);
+	bool getCont(CAliasTreeOwner *&childOwner, IAliasCont *&cont, AITYPES::TAIType _type);
 
 	void pushCurrentOwnerList() { _CurrentOwnerList.push_back(this); }
 	void popCurrentOwnerList() { _CurrentOwnerList.pop_back(); }
-	
+
 private:
-	uint32		_Alias;
-	std::string	_Name;
-	
+	uint32 _Alias;
+	std::string _Name;
+
 	NLMISC::CSmartPtr<CAIAliasDescriptionNode> _AliasTree;
-	
-	static std::vector<NLMISC::CDbgPtr<CAliasTreeOwner> > _CurrentOwnerList;
+
+	static std::vector<NLMISC::CDbgPtr<CAliasTreeOwner>> _CurrentOwnerList;
 };
 
 /****************************************************************************/
@@ -129,23 +129,20 @@ private:
 // CAliasTreeOwner                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
-inline
-CAliasTreeOwner::CAliasDiff::CAliasDiff(uint32 alias)
-: _Alias(alias)
+inline CAliasTreeOwner::CAliasDiff::CAliasDiff(uint32 alias)
+    : _Alias(alias)
 {
 }
 
-inline
-bool CAliasTreeOwner::CAliasDiff::operator()(CAliasTreeOwner const* other) const
+inline bool CAliasTreeOwner::CAliasDiff::operator()(CAliasTreeOwner const *other) const
 {
-	return other->getAlias()!=_Alias;
+	return other->getAlias() != _Alias;
 }
 
-inline
-CAliasTreeOwner::CAliasTreeOwner(CAIAliasDescriptionNode* aliasTree)
-: _Alias(0)
-, _Name(std::string())
-, _AliasTree(aliasTree)
+inline CAliasTreeOwner::CAliasTreeOwner(CAIAliasDescriptionNode *aliasTree)
+    : _Alias(0)
+    , _Name(std::string())
+    , _AliasTree(aliasTree)
 {
 	if (aliasTree)
 	{
@@ -153,60 +150,53 @@ CAliasTreeOwner::CAliasTreeOwner(CAIAliasDescriptionNode* aliasTree)
 	}
 	else
 	{
-		//DEBUG_STOP;
+		// DEBUG_STOP;
 	}
 }
 
-inline
-CAliasTreeOwner::CAliasTreeOwner(uint32	alias, std::string const& name)
-: _Alias(alias)
-, _Name(name)
-, _AliasTree(NULL)
+inline CAliasTreeOwner::CAliasTreeOwner(uint32 alias, std::string const &name)
+    : _Alias(alias)
+    , _Name(name)
+    , _AliasTree(NULL)
 {
 	CAliasTreeOwnerLocator::getInstance()->addEntity(_Alias, _Name, this);
 }
 
-inline
-CAliasTreeOwner::~CAliasTreeOwner()
+inline CAliasTreeOwner::~CAliasTreeOwner()
 {
 	CAliasTreeOwnerLocator::getInstance()->delEntity(getAlias(), getName(), this);
 }
 
-inline
-CAIAliasDescriptionNode* CAliasTreeOwner::getAliasNode() const
+inline CAIAliasDescriptionNode *CAliasTreeOwner::getAliasNode() const
 {
 	return _AliasTree;
 }
 
-inline
-uint32 CAliasTreeOwner::getAlias() const
+inline uint32 CAliasTreeOwner::getAlias() const
 {
 	if (_AliasTree)
 		return _AliasTree->getAlias();
-	
+
 	return _Alias;
 }
 
-inline
-std::string CAliasTreeOwner::getAliasString() const
+inline std::string CAliasTreeOwner::getAliasString() const
 {
 	if (_AliasTree)
 		return LigoConfig.aliasToString(_AliasTree->getAlias());
-	
+
 	return LigoConfig.aliasToString(_Alias);
 }
 
-inline
-std::string const& CAliasTreeOwner::getName() const
+inline std::string const &CAliasTreeOwner::getName() const
 {
 	if (_AliasTree)
 		return _AliasTree->getName();
-	
+
 	return _Name;
 }
 
-inline
-void CAliasTreeOwner::setName(std::string const& name)
+inline void CAliasTreeOwner::setName(std::string const &name)
 {
 	// should be able to change the alias tree node name?
 	if (_AliasTree)
@@ -220,29 +210,25 @@ void CAliasTreeOwner::setName(std::string const& name)
 	CAliasTreeOwnerLocator::getInstance()->addEntity(_Alias, _Name, this);
 }
 
-inline
-std::string CAliasTreeOwner::getAliasFullName() const
+inline std::string CAliasTreeOwner::getAliasFullName() const
 {
 	if (_AliasTree)
 		return _AliasTree->fullName();
-	
+
 	return getName(); // to upgrade...
 }
 
-inline
-IAliasCont* CAliasTreeOwner::getAliasCont(AITYPES::TAIType type)
+inline IAliasCont *CAliasTreeOwner::getAliasCont(AITYPES::TAIType type)
 {
 	return NULL;
 }
 
-inline
-CAliasTreeOwner* CAliasTreeOwner::createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree)
+inline CAliasTreeOwner *CAliasTreeOwner::createChild(IAliasCont *cont, CAIAliasDescriptionNode *aliasTree)
 {
 	return NULL;
 }
 
-inline
-void CAliasTreeOwner::updateDependencies(CAIAliasDescriptionNode const& aliasTree, CAliasTreeOwner* aliasTreeOwner)
+inline void CAliasTreeOwner::updateDependencies(CAIAliasDescriptionNode const &aliasTree, CAliasTreeOwner *aliasTreeOwner)
 {
 }
 

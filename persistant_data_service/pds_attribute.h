@@ -44,22 +44,21 @@ class CAttributeNode;
 class CAttribute : public CPDSLogger
 {
 public:
-
 	/// Constructor
-	CAttribute() : 
-		_MetaType(PDS_UnknownMetaType),
-		_DataType(PDS_UnknownDataType),
-		_TypeId(INVALID_TYPE_ID),
-		_ReferencedAttribute(0),
-		_AllowNull(false),
-		_Key(INVALID_TYPE_ID),
-		_IndexId(0),
-		_Id(0),
-		_Offset(0),
-		_Columns(0),
-		_Init(false),
-		_Root(NULL),
-		_Parent(NULL)
+	CAttribute()
+	    : _MetaType(PDS_UnknownMetaType)
+	    , _DataType(PDS_UnknownDataType)
+	    , _TypeId(INVALID_TYPE_ID)
+	    , _ReferencedAttribute(0)
+	    , _AllowNull(false)
+	    , _Key(INVALID_TYPE_ID)
+	    , _IndexId(0)
+	    , _Id(0)
+	    , _Offset(0)
+	    , _Columns(0)
+	    , _Init(false)
+	    , _Root(NULL)
+	    , _Parent(NULL)
 	{
 	}
 
@@ -69,116 +68,114 @@ public:
 	/**
 	 * Initialize attribute using a full xml node
 	 */
-	bool				init(CDatabase *root, CTable* parent, const CAttributeNode& attribute);
+	bool init(CDatabase *root, CTable *parent, const CAttributeNode &attribute);
 
 	/// Initialized yet?
-	bool				initialised() const			{ return _Init; }
+	bool initialised() const { return _Init; }
 
 	/**
 	 * Build columns for this attribute
 	 */
-	bool				buildColumns();
+	bool buildColumns();
 
 	/**
 	 * Compute back reference key
 	 */
-	bool				computeBackRefKey();
-
+	bool computeBackRefKey();
 
 	/**
 	 * Set column offset and size
 	 */
-	void				setAttributeColumns(uint32 offset, uint32 size)		{ _Offset = offset; _Columns = size; }
-
+	void setAttributeColumns(uint32 offset, uint32 size)
+	{
+		_Offset = offset;
+		_Columns = size;
+	}
 
 	/// Get meta type of column
-	TMetaType			getMetaType() const			{ return _MetaType; }
+	TMetaType getMetaType() const { return _MetaType; }
 
 	/// Get data type of column
-	TDataType			getDataType() const			{ return _DataType; }
+	TDataType getDataType() const { return _DataType; }
 
 	/// Get type/class id
-	TTypeId				getTypeId() const			{ return _TypeId; }
+	TTypeId getTypeId() const { return _TypeId; }
 
 	/// Get referenced attribute in backward/forward reference
-	uint32				getReferencedAttribute() const	{ return _ReferencedAttribute; }
+	uint32 getReferencedAttribute() const { return _ReferencedAttribute; }
 
 	/// Get associated key
-	uint32				getBackRefKey() const		{ return _Key; }
+	uint32 getBackRefKey() const { return _Key; }
 
 	/// Is ArrayRef has null pointers allowed?
-	bool				allowNull() const			{ return _AllowNull; }
+	bool allowNull() const { return _AllowNull; }
 
 	/// Get index type
-	uint32				getIndexId() const			{ return _IndexId; }
+	uint32 getIndexId() const { return _IndexId; }
 
 	/// Get Row order
-	uint32				getId() const				{ return _Id; }
+	uint32 getId() const { return _Id; }
 
 	/// Get column offset in table
-	uint32				getOffset() const			{ return _Offset; }
+	uint32 getOffset() const { return _Offset; }
 
 	/// Get column number
-	uint32				getColumns() const			{ return _Columns; }
+	uint32 getColumns() const { return _Columns; }
 
 	/// Get column name
-	const std::string&	getName() const				{ return _Name; }
+	const std::string &getName() const { return _Name; }
 
 	/// Get parent table
-	const CTable*		getParent() const			{ return _Parent; }
+	const CTable *getParent() const { return _Parent; }
 
 	/// Get Root
-	const CDatabase*	getRoot() const				{ return _Root; }
+	const CDatabase *getRoot() const { return _Root; }
 
 protected:
-
-	virtual std::string	getLoggerIdentifier() const	{ return NLMISC::toString("attr:%s", (_Name.empty() ? "<unnamed>" : _Name.c_str())); }
-
+	virtual std::string getLoggerIdentifier() const { return NLMISC::toString("attr:%s", (_Name.empty() ? "<unnamed>" : _Name.c_str())); }
 
 private:
-
 	/// Initialised yet?
-	bool								_Init;
+	bool _Init;
 
 	/// Root Database
-	CDatabase*							_Root;
+	CDatabase *_Root;
 
 	/// Parent table
-	CTable*								_Parent;
+	CTable *_Parent;
 
 	/// Name of the attribute
-	std::string							_Name;
+	std::string _Name;
 
 	/// Id of the attribute in class
-	uint32								_Id;
-
+	uint32 _Id;
 
 	/// Metatype of the attribute
-	TMetaType							_MetaType;
+	TMetaType _MetaType;
 
 	/// Data type of the attribute, unused when meta type is an array, a set or a simple class
-	TDataType							_DataType;
+	TDataType _DataType;
 
 	/// Type descriptor of the attribute (type or class)
-	TTypeId								_TypeId;
+	TTypeId _TypeId;
 
 	/// Back/Forward referenced attribute in the parent class
-	uint32								_ReferencedAttribute;
+	uint32 _ReferencedAttribute;
 
 	/// Allow null reference, only ArrayRef
-	bool								_AllowNull;
+	bool _AllowNull;
 
-	/// Key associated to a backreference, 
-	uint32								_Key;
+	/// Key associated to a backreference,
+	uint32 _Key;
 
 	/// Index type for array
-	TTypeId								_IndexId;
+	TTypeId _IndexId;
 
 	/// Start column of the attribute
-	uint32								_Offset;
+	uint32 _Offset;
 
 	/// Number of columns in the attribute
-	uint32								_Columns;
+	uint32 _Columns;
 };
 
 #endif // NL_PDS_ATTRIBUTE_H

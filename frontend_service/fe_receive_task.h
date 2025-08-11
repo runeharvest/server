@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_FE_RECEIVE_TASK_H
 #define NL_FE_RECEIVE_TASK_H
 
@@ -28,12 +26,11 @@
 #include "nel/misc/buf_fifo.h"
 #include "nel/misc/mutex.h"
 
-//#define MEASURE_RECEIVE_TASK
+// #define MEASURE_RECEIVE_TASK
 
 #include "nel/net/udp_sock.h"
 
 #include <vector>
-
 
 const uint32 MsgHeaderSize = 1;
 
@@ -45,55 +42,56 @@ class CQuicUserContext;
 struct TReceivedMessage
 {
 	/// Type of incoming events (see also NLNET::CBufNetBase::TEventType)
-	enum TEventType { User = 'U', RemoveClient = 'D' };
+	enum TEventType
+	{
+		User = 'U',
+		RemoveClient = 'D'
+	};
 
 	/// Constructor
 	TReceivedMessage();
 
 	/// Resize data
-	void				resizeData( uint32 datasize )	{ _Data.resize( MsgHeaderSize + datasize ); }
+	void resizeData(uint32 datasize) { _Data.resize(MsgHeaderSize + datasize); }
 
 	/// Return a vector containing the address info
-	void				addressToVector();
+	void addressToVector();
 
 	/// Set address with address info from specified vector
-	void				vectorToAddress();
+	void vectorToAddress();
 
 	/// Set "disconnection" message for the current AddrFrom
-	void				setTypeEvent( TEventType t )	{ *_Data.begin() = (uint8)t; }
+	void setTypeEvent(TEventType t) { *_Data.begin() = (uint8)t; }
 
 	/// Return the event type
-	TEventType			eventType() const				{ return (TEventType)(*_Data.begin()); }
+	TEventType eventType() const { return (TEventType)(*_Data.begin()); }
 
 	/// Return a pointer to user data for writing
-	uint8				*userDataW()					{ return &*_Data.begin() + MsgHeaderSize; }
+	uint8 *userDataW() { return &*_Data.begin() + MsgHeaderSize; }
 
 	/// Return a pointer to user data for reading
-	const uint8			*userDataR() const				{ return &*_Data.begin() + MsgHeaderSize; }
+	const uint8 *userDataR() const { return &*_Data.begin() + MsgHeaderSize; }
 
 	/// Return the size of user data
-	uint32				userSize()						{ return (uint32)_Data.size() - MsgHeaderSize; }
+	uint32 userSize() { return (uint32)_Data.size() - MsgHeaderSize; }
 
 	/// Return the data vector (event type header byte + user data)
-	std::vector<uint8>&	data()							{ return _Data; }
+	std::vector<uint8> &data() { return _Data; }
 
 private:
-
 	/// One byte for event type (header), followed by user data
-	std::vector<uint8>	_Data;
+	std::vector<uint8> _Data;
 
 public:
-	
 	/// Address of sender as CInetAddress
-	NLNET::CInetAddress	AddrFrom;
+	NLNET::CInetAddress AddrFrom;
 
 	/// Placeholder vector for address info
-	std::vector<uint8>	VAddrFrom;
+	std::vector<uint8> VAddrFrom;
 
 	/// QUIC user context, no need to refcount since it's already held in the FIFO readout
 	CQuicUserContext *QuicUser;
 };
-
 
 /**
  * Front-end receive task
@@ -104,52 +102,52 @@ public:
 class CFEReceiveTask : public NLMISC::IRunnable
 {
 public:
-
 	/// Constructor
-	CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptablePort, uint32 msgsize );
+	CFEReceiveTask(uint16 firstAcceptablePort, uint16 lastAcceptablePort, uint32 msgsize);
 
 	/// Destructor
 	~CFEReceiveTask();
 
 	/// Run
-	virtual void	run();
+	virtual void run();
 
 	/// Set new write queue (thread-safe because mutexed)
 	NLMISC::CBufFIFO *swapWriteQueue(NLMISC::CBufFIFO *writeQueue);
 
 	/// Require exit (thread-safe because atomic assignment)
-	void			requireExit() { _ExitRequired = true; }
+	void requireExit() { _ExitRequired = true; }
 
 	/// Return the number of rejected datagrams since the last call (thread-safe because atomic assignment)
-	uint			nbNewRejectedDatagrams()	{ uint nb=_NbRejectedDatagrams; _NbRejectedDatagrams=0; return nb; }
+	uint nbNewRejectedDatagrams()
+	{
+		uint nb = _NbRejectedDatagrams;
+		_NbRejectedDatagrams = 0;
+		return nb;
+	}
 
 private:
-
 	/// Datagram length
-	uint										_DatagramLength;
+	uint _DatagramLength;
 
 	/// Received message
-	TReceivedMessage							_ReceivedMessage;
+	TReceivedMessage _ReceivedMessage;
 
 	/// Write queue access
-	NLMISC::CSynchronized<NLMISC::CBufFIFO*>	_WriteQueue;
+	NLMISC::CSynchronized<NLMISC::CBufFIFO *> _WriteQueue;
 
 	/// Number of datagrams not copied because too big
-	volatile uint								_NbRejectedDatagrams;
+	volatile uint _NbRejectedDatagrams;
 
 	/// Exit required
-	volatile bool								_ExitRequired;
+	volatile bool _ExitRequired;
 
 public:
-	
 	/// External datagram socket
-	NLNET::CUdpSock								*DataSock;
+	NLNET::CUdpSock *DataSock;
 
 	/// The date of the last UPD packet recevied
-	static volatile	uint32						LastUDPPacketReceived;
-
+	static volatile uint32 LastUDPPacketReceived;
 };
-
 
 #endif // NL_FE_RECEIVE_TASK_H
 

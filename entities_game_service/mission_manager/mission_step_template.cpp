@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "mission_step_template.h"
 #include "mission_log.h"
@@ -34,10 +32,9 @@ using namespace NLMISC;
 
 NL_INSTANCE_COUNTER_IMPL(IMissionStepTemplate);
 
-std::vector< std::pair< std::string, IMissionStepTemplateFactory* > > * IMissionStepTemplateFactory::Entries;
+std::vector<std::pair<std::string, IMissionStepTemplateFactory *>> *IMissionStepTemplateFactory::Entries;
 
-
-void logMissionStep(uint32 line, const TDataSetRow & userRow, uint32 subStepIndex, const string &prefix, const string &stepNameAndParams)
+void logMissionStep(uint32 line, const TDataSetRow &userRow, uint32 subStepIndex, const string &prefix, const string &stepNameAndParams)
 {
 	if (!VerboseMissions) return;
 	string sTmp;
@@ -50,69 +47,65 @@ void logMissionStep(uint32 line, const TDataSetRow & userRow, uint32 subStepInde
 	MISLOG("%s", sTmp.c_str());
 }
 
-
-
-IMissionStepTemplate * IMissionStepTemplate::getCopy()
+IMissionStepTemplate *IMissionStepTemplate::getCopy()
 {
-	IMissionStepTemplate * step = getNewPtr();
-	for ( uint i = 0; i < _Actions.size(); i++ )
+	IMissionStepTemplate *step = getNewPtr();
+	for (uint i = 0; i < _Actions.size(); i++)
 	{
 		step->_Actions[i] = _Actions[i]->getCopy();
 	}
 	return step;
-}// IMissionStepTemplate::getCopy
+} // IMissionStepTemplate::getCopy
 
 IMissionStepTemplate::~IMissionStepTemplate()
 {
-	for ( uint i = 0; i < _Actions.size(); i++ )
+	for (uint i = 0; i < _Actions.size(); i++)
 	{
 		delete _Actions[i];
 	}
-}// IMissionStepTemplate::~IMissionStepTemplate
+} // IMissionStepTemplate::~IMissionStepTemplate
 
-void IMissionStepTemplate::overrideTexts( const std::string & phraseId, const TVectorParamCheck & params , bool addDefaultParams)
+void IMissionStepTemplate::overrideTexts(const std::string &phraseId, const TVectorParamCheck &params, bool addDefaultParams)
 {
 	_OverridenText = phraseId;
 	_AdditionalParams = params;
 	_AddDefaultParams = addDefaultParams;
-}//IMissionStepTemplate::OverrideTexts
+} // IMissionStepTemplate::OverrideTexts
 
-void IMissionStepTemplate::setRoleplayText( const std::string & phraseId, const TVectorParamCheck & params)
+void IMissionStepTemplate::setRoleplayText(const std::string &phraseId, const TVectorParamCheck &params)
 {
 	_RoleplayText = phraseId;
 	_AdditionalParams = params;
 }
 
-bool IMissionStepTemplate::solveTextsParams( CMissionSpecificParsingData & missionData,CMissionTemplate * templ  )
+bool IMissionStepTemplate::solveTextsParams(CMissionSpecificParsingData &missionData, CMissionTemplate *templ)
 {
 	bool ret = true;
-	for ( uint i = 0; i < _Actions.size(); i++ )
+	for (uint i = 0; i < _Actions.size(); i++)
 	{
-		if ( !_Actions[i]->solveTextsParams(missionData) )
+		if (!_Actions[i]->solveTextsParams(missionData))
 			ret = false;
 	}
-	if ( !CMissionParser::solveTextsParams( _SourceLine, _AdditionalParams,missionData ) )
+	if (!CMissionParser::solveTextsParams(_SourceLine, _AdditionalParams, missionData))
 		ret = false;
 	return ret;
-}// IMissionStepTemplate::solveTextsParams
+} // IMissionStepTemplate::solveTextsParams
 
-
-
-uint32 IMissionStepTemplate::sendRpStepText(CCharacter * user,const std::vector<uint32>& stepStates,const NLMISC::CEntityId & giver)
+uint32 IMissionStepTemplate::sendRpStepText(CCharacter *user, const std::vector<uint32> &stepStates, const NLMISC::CEntityId &giver)
 {
 	TVectorParamCheck params;
 	string buffer;
 	uint nbSteps = 0;
-	const std::string* textPtr = NULL;
+	const std::string *textPtr = NULL;
 
-	if ( !_RoleplayText.empty() )
+	if (!_RoleplayText.empty())
 	{
 		// build the param list
-		getTextParams(nbSteps,(const std::string *&)textPtr,params,stepStates);
+		getTextParams(nbSteps, (const std::string *&)textPtr, params, stepStates);
 
 		params.reserve(params.size() + _AdditionalParams.size());
 		params.insert(params.end(), _AdditionalParams.begin(), _AdditionalParams.end());
-		if ( textPtr && !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
+		if (textPtr && !textPtr->empty() && (*textPtr)[textPtr->size() - 1] == '_')
 		{
 			buffer = _RoleplayText + "_";
 			textPtr = &buffer;
@@ -121,42 +114,41 @@ uint32 IMissionStepTemplate::sendRpStepText(CCharacter * user,const std::vector<
 			textPtr = &_RoleplayText;
 	}
 
-	if( !textPtr )
+	if (!textPtr)
 		return 0;
 
 	// solve dynamic names
-	CMissionParser::solveEntitiesNames(params,user->getEntityRowId(),giver);
+	CMissionParser::solveEntitiesNames(params, user->getEntityRowId(), giver);
 
 	// if the text was generated, compute its suffix
-	if ( !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
+	if (!textPtr->empty() && (*textPtr)[textPtr->size() - 1] == '_')
 	{
-		std::string text = NLMISC::toString( "%s%u", textPtr->c_str(),nbSteps );
-		return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),text,params);
+		std::string text = NLMISC::toString("%s%u", textPtr->c_str(), nbSteps);
+		return STRING_MANAGER::sendStringToClient(user->getEntityRowId(), text, params);
 	}
 	else
-		return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),*textPtr,params);
+		return STRING_MANAGER::sendStringToClient(user->getEntityRowId(), *textPtr, params);
 
-}// IMissionStepTemplate::sendRpStepText
+} // IMissionStepTemplate::sendRpStepText
 
-
-uint32 IMissionStepTemplate::sendStepText(CCharacter * user,const std::vector<uint32>& stepStates,const NLMISC::CEntityId & giver)
+uint32 IMissionStepTemplate::sendStepText(CCharacter *user, const std::vector<uint32> &stepStates, const NLMISC::CEntityId &giver)
 {
 	TVectorParamCheck params;
 	string buffer;
 	uint nbSteps = 0;
-	const std::string* textPtr = NULL;
+	const std::string *textPtr = NULL;
 
 	// build the param list
-	getTextParams(nbSteps,(const std::string *&)textPtr,params,stepStates);
-	
+	getTextParams(nbSteps, (const std::string *&)textPtr, params, stepStates);
+
 	// If the text is overriden, add the overide parameters
-	if ( !_OverridenText.empty() )
+	if (!_OverridenText.empty())
 	{
-		if ( _AddDefaultParams )
+		if (_AddDefaultParams)
 		{
 			params.reserve(params.size() + _AdditionalParams.size());
 			params.insert(params.end(), _AdditionalParams.begin(), _AdditionalParams.end());
-			if ( textPtr && !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
+			if (textPtr && !textPtr->empty() && (*textPtr)[textPtr->size() - 1] == '_')
 			{
 				buffer = _OverridenText + "_";
 				textPtr = &buffer;
@@ -169,71 +161,69 @@ uint32 IMissionStepTemplate::sendStepText(CCharacter * user,const std::vector<ui
 			params = _AdditionalParams;
 			textPtr = &_OverridenText;
 		}
-		
 	}
 
-	if( !textPtr )
+	if (!textPtr)
 		return 0;
 
 	// solve dynamic names
-	CMissionParser::solveEntitiesNames(params,user->getEntityRowId(),giver);
+	CMissionParser::solveEntitiesNames(params, user->getEntityRowId(), giver);
 
 	// if the text was generated, compute its suffix
-	if ( !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
+	if (!textPtr->empty() && (*textPtr)[textPtr->size() - 1] == '_')
 	{
-//		if( !isAny() )
+		//		if( !isAny() )
 		{
-			std::string text = NLMISC::toString( "%s%u", textPtr->c_str(),nbSteps );
-			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),text,params);
+			std::string text = NLMISC::toString("%s%u", textPtr->c_str(), nbSteps);
+			return STRING_MANAGER::sendStringToClient(user->getEntityRowId(), text, params);
 		}
-//		else
-//		{
-//			std::string text = NLMISC::toString( "%s%u", textPtr->c_str(),nbSteps );
-//			SM_STATIC_PARAMS_1(paramsAnyOr, STRING_MANAGER::dyn_string_id);
-//			paramsAnyOr[0].StringId = STRING_MANAGER::sendStringToClient( user->getEntityRowId(),text,params);
-//			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),"MISSION_GOAL_STEP_ANY_OR",paramsAnyOr);
-//		}
+		//		else
+		//		{
+		//			std::string text = NLMISC::toString( "%s%u", textPtr->c_str(),nbSteps );
+		//			SM_STATIC_PARAMS_1(paramsAnyOr, STRING_MANAGER::dyn_string_id);
+		//			paramsAnyOr[0].StringId = STRING_MANAGER::sendStringToClient( user->getEntityRowId(),text,params);
+		//			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),"MISSION_GOAL_STEP_ANY_OR",paramsAnyOr);
+		//		}
 	}
 	else
 	{
-//		if( !isAny() )
+		//		if( !isAny() )
 		{
-			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),*textPtr,params);
+			return STRING_MANAGER::sendStringToClient(user->getEntityRowId(), *textPtr, params);
 		}
-//		else
-//		{
-//			SM_STATIC_PARAMS_1(paramsAnyOr, STRING_MANAGER::dyn_string_id);
-//			paramsAnyOr[0].StringId = STRING_MANAGER::sendStringToClient( user->getEntityRowId(),*textPtr,params);
-//			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),"MISSION_GOAL_STEP_ANY_OR",paramsAnyOr);
-//		}
+		//		else
+		//		{
+		//			SM_STATIC_PARAMS_1(paramsAnyOr, STRING_MANAGER::dyn_string_id);
+		//			paramsAnyOr[0].StringId = STRING_MANAGER::sendStringToClient( user->getEntityRowId(),*textPtr,params);
+		//			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),"MISSION_GOAL_STEP_ANY_OR",paramsAnyOr);
+		//		}
 	}
-}// IMissionStepTemplate::sendStepText
+} // IMissionStepTemplate::sendStepText
 
-void IMissionStepTemplate::addAction(IMissionAction * action)
+void IMissionStepTemplate::addAction(IMissionAction *action)
 {
-	_Actions.push_back( action );
-}// IMissionAction solveTextsParams
+	_Actions.push_back(action);
+} // IMissionAction solveTextsParams
 
-bool IMissionStepTemplate::checkPlayerGift( CMission* instance, CCharacter * user )
+bool IMissionStepTemplate::checkPlayerGift(CMission *instance, CCharacter *user)
 {
 	nlwarning("<checkPlayerGift> Not implemented in this class");
 	return false;
-}// IMissionStepTemplate::checkPlayerGift
+} // IMissionStepTemplate::checkPlayerGift
 
-
-IMissionStepTemplate* IMissionStepTemplateFactory::buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+IMissionStepTemplate *IMissionStepTemplateFactory::buildStep(uint32 line, const std::vector<std::string> &script, CMissionGlobalParsingData &globalData, CMissionSpecificParsingData &missionData)
 {
-	for ( uint i = 0; i < Entries->size(); i++ )
+	for (uint i = 0; i < Entries->size(); i++)
 	{
-		if ( script[0] == (*Entries)[i].first )
+		if (script[0] == (*Entries)[i].first)
 		{
-			IMissionStepTemplate * ret = (*Entries)[i].second->instanciate();
-			if ( !ret )
+			IMissionStepTemplate *ret = (*Entries)[i].second->instanciate();
+			if (!ret)
 			{
 				nlerror("BUG IN STEP FACTORY : BAD INIT CODE");
 				return NULL;
 			}
-			if ( !ret->buildStep(line, script, globalData, missionData) )
+			if (!ret->buildStep(line, script, globalData, missionData))
 			{
 				MISLOGERROR("cant build step");
 				delete ret;
@@ -243,12 +233,10 @@ IMissionStepTemplate* IMissionStepTemplateFactory::buildStep( uint32 line, const
 		}
 	}
 	return NULL;
-}// IMissionStepTemplateFactory buildStep
-	
+} // IMissionStepTemplateFactory buildStep
 
 void IMissionStepTemplateFactory::init()
 {
-	if ( ! Entries )
-		Entries = new std::vector< std::pair< std::string, IMissionStepTemplateFactory* > >;
-}// IMissionStepTemplate init
-
+	if (!Entries)
+		Entries = new std::vector<std::pair<std::string, IMissionStepTemplateFactory *>>;
+} // IMissionStepTemplate init

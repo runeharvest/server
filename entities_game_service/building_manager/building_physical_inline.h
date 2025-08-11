@@ -19,53 +19,55 @@
 /*****************************************************************************/
 
 //----------------------------------------------------------------------------
-inline IBuildingPhysical::IBuildingPhysical(CBuildingTemplate* templ, TAIAlias alias)
-:_Template(templ),_Alias(alias),_StateCounter(0)
+inline IBuildingPhysical::IBuildingPhysical(CBuildingTemplate *templ, TAIAlias alias)
+    : _Template(templ)
+    , _Alias(alias)
+    , _StateCounter(0)
 {
 }
 
 //----------------------------------------------------------------------------
-inline const CBuildingTemplate * IBuildingPhysical::getTemplate() const
+inline const CBuildingTemplate *IBuildingPhysical::getTemplate() const
 {
 	return _Template;
 }
 
 //----------------------------------------------------------------------------
-inline const std::string & IBuildingPhysical::getName() const
+inline const std::string &IBuildingPhysical::getName() const
 {
-	return _Name; 
+	return _Name;
 }
 
 //----------------------------------------------------------------------------
-inline uint16 IBuildingPhysical::getStateCounter()const
+inline uint16 IBuildingPhysical::getStateCounter() const
 {
 	return _StateCounter;
 }
 
 //----------------------------------------------------------------------------
-inline TAIAlias IBuildingPhysical::getAlias()const
+inline TAIAlias IBuildingPhysical::getAlias() const
 {
 	return _Alias;
 }
 
 //----------------------------------------------------------------------------
-inline const CTPDestination* IBuildingPhysical::getExit( uint8 idx )const
+inline const CTPDestination *IBuildingPhysical::getExit(uint8 idx) const
 {
-	if ( idx >= _Exits.size() ) return NULL;
+	if (idx >= _Exits.size()) return NULL;
 	return _Exits[idx];
 }
 
 //----------------------------------------------------------------------------
-inline uint16 IBuildingPhysical::getDefaultExitSpawn()const
+inline uint16 IBuildingPhysical::getDefaultExitSpawn() const
 {
 	return _DefaultExitSpawn;
 }
 
 //----------------------------------------------------------------------------
-inline bool IBuildingPhysical::removeUser(const TDataSetRow & row)
+inline bool IBuildingPhysical::removeUser(const TDataSetRow &row)
 {
-	std::vector<TDataSetRow>::iterator it = std::find( _UsersInside.begin(), _UsersInside.end(), row );
-	if ( it != _UsersInside.end() )
+	std::vector<TDataSetRow>::iterator it = std::find(_UsersInside.begin(), _UsersInside.end(), row);
+	if (it != _UsersInside.end())
 	{
 		(*it) = _UsersInside.back();
 		_UsersInside.pop_back();
@@ -75,181 +77,172 @@ inline bool IBuildingPhysical::removeUser(const TDataSetRow & row)
 }
 
 //----------------------------------------------------------------------------
-inline sint32 IBuildingPhysical::getRoomCell( uint16 roomIdx, uint16 ownerIdx )
+inline sint32 IBuildingPhysical::getRoomCell(uint16 roomIdx, uint16 ownerIdx)
 {
 	/// simply get the cell matching the parameters
-	if ( roomIdx >= _Rooms.size() )
+	if (roomIdx >= _Rooms.size())
 	{
-		nlwarning("<BUILDING>Invalid room %u count is %u",roomIdx,_Rooms.size() );
+		nlwarning("<BUILDING>Invalid room %u count is %u", roomIdx, _Rooms.size());
 		return false;
 	}
-	if ( ownerIdx >= _Rooms[roomIdx].Cells.size() )
+	if (ownerIdx >= _Rooms[roomIdx].Cells.size())
 	{
-		nlwarning("<BUILDING>Invalid owner idx %u count is %u",ownerIdx,_Rooms[roomIdx].Cells.size());
+		nlwarning("<BUILDING>Invalid owner idx %u count is %u", ownerIdx, _Rooms[roomIdx].Cells.size());
 		return false;
 	}
 
-	return  _Rooms[roomIdx].Cells[ownerIdx];
+	return _Rooms[roomIdx].Cells[ownerIdx];
 }
-
 
 /*****************************************************************************/
 //						CBuildingPhysicalCommon implementation
 /*****************************************************************************/
 
 //----------------------------------------------------------------------------
-CBuildingPhysicalCommon::CBuildingPhysicalCommon(CBuildingTemplate* templ, TAIAlias alias)
-:IBuildingPhysical(templ,alias)
+CBuildingPhysicalCommon::CBuildingPhysicalCommon(CBuildingTemplate *templ, TAIAlias alias)
+    : IBuildingPhysical(templ, alias)
 {
 }
 
 //----------------------------------------------------------------------------
-inline void CBuildingPhysicalCommon::resetRoomCell( uint16 roomIdx )
+inline void CBuildingPhysicalCommon::resetRoomCell(uint16 roomIdx)
 {
-	BOMB_IF( (roomIdx >= _Rooms.size()),
-		NLMISC::toString("<BUILDING> in building '%s' roomIdx %hu asked, count is %u", _Name.c_str(), roomIdx, _Rooms.size()),
-		return
-		);
+	BOMB_IF((roomIdx >= _Rooms.size()),
+	    NLMISC::toString("<BUILDING> in building '%s' roomIdx %hu asked, count is %u", _Name.c_str(), roomIdx, _Rooms.size()),
+	    return);
 
-	BOMB_IF( (_Rooms[roomIdx].Cells.size() < 1), "<BUILDING> trying to reset a cell out of bound", return );
+	BOMB_IF((_Rooms[roomIdx].Cells.size() < 1), "<BUILDING> trying to reset a cell out of bound", return);
 	_Rooms[roomIdx].Cells[0] = 0;
 }
 
 /*****************************************************************************/
 //						CBuildingPhysicalGuild implementation
 /*****************************************************************************/
-inline CBuildingPhysicalGuild::CBuildingPhysicalGuild(CBuildingTemplate* templ,TAIAlias alias)
-:IBuildingPhysical(templ,alias)
+inline CBuildingPhysicalGuild::CBuildingPhysicalGuild(CBuildingTemplate *templ, TAIAlias alias)
+    : IBuildingPhysical(templ, alias)
 {
 }
 
 //----------------------------------------------------------------------------
-void CBuildingPhysicalGuild::addGuild( uint32 guildId )
+void CBuildingPhysicalGuild::addGuild(uint32 guildId)
 {
-	if ( std::find(_Guilds.begin(), _Guilds.end(), guildId) != _Guilds.end() )
+	if (std::find(_Guilds.begin(), _Guilds.end(), guildId) != _Guilds.end())
 	{
 		return;
 	}
 
 	_StateCounter++;
-	_Guilds.push_back( guildId );
+	_Guilds.push_back(guildId);
 	// add an instance cell to each room for this guild
 	const uint size = (uint)_Rooms.size();
-	for ( uint i = 0; i < size; i++ )
+	for (uint i = 0; i < size; i++)
 	{
-		_Rooms[i].Cells.push_back( 0 );
+		_Rooms[i].Cells.push_back(0);
 	}
 }
 
 //----------------------------------------------------------------------------
-void CBuildingPhysicalGuild::resetRoomCell( uint16 roomIdx,uint32 guild )
+void CBuildingPhysicalGuild::resetRoomCell(uint16 roomIdx, uint32 guild)
 {
-	BOMB_IF( (roomIdx >= _Rooms.size()),
-		NLMISC::toString("<BUILDING> in building '%s' roomIdx %hu asked, count is %u", _Name.c_str(), roomIdx, _Rooms.size()),
-		return
-		);
+	BOMB_IF((roomIdx >= _Rooms.size()),
+	    NLMISC::toString("<BUILDING> in building '%s' roomIdx %hu asked, count is %u", _Name.c_str(), roomIdx, _Rooms.size()),
+	    return);
 
-	for ( uint i = 0; i < _Guilds.size(); i++ )
+	for (uint i = 0; i < _Guilds.size(); i++)
 	{
-		if ( _Guilds[i] == guild )
+		if (_Guilds[i] == guild)
 		{
-			BOMB_IF( (i >= _Rooms[roomIdx].Cells.size()), "<BUILDING> trying to reset a cell out of bound", return );
+			BOMB_IF((i >= _Rooms[roomIdx].Cells.size()), "<BUILDING> trying to reset a cell out of bound", return);
 			_Rooms[roomIdx].Cells[i] = 0;
 			return;
 		}
 	}
-	nlwarning("<BUILDING> in building '%s' guild %u asked and not found",_Name.c_str(), guild );
+	nlwarning("<BUILDING> in building '%s' guild %u asked and not found", _Name.c_str(), guild);
 }
 
 //----------------------------------------------------------------------------
 EGSPD::TGuildId CBuildingPhysicalGuild::getOwnerGuildId(uint idx)
 {
-	if ( idx < _Guilds.size() )
+	if (idx < _Guilds.size())
 		return _Guilds[idx];
 	return 0;
 }
-
-
 
 /*****************************************************************************/
 //					CBuildingPhysicalPlayer implementation
 /*****************************************************************************/
 
 //----------------------------------------------------------------------------
-inline CBuildingPhysicalPlayer::CBuildingPhysicalPlayer(CBuildingTemplate* templ, TAIAlias alias)
-:IBuildingPhysical(templ,alias)
+inline CBuildingPhysicalPlayer::CBuildingPhysicalPlayer(CBuildingTemplate *templ, TAIAlias alias)
+    : IBuildingPhysical(templ, alias)
 {
 }
 
 //----------------------------------------------------------------------------
-inline void CBuildingPhysicalPlayer::addPlayer( const NLMISC::CEntityId & userId )
+inline void CBuildingPhysicalPlayer::addPlayer(const NLMISC::CEntityId &userId)
 {
-	if ( std::find(_Players.begin(), _Players.end(), userId) != _Players.end() )
+	if (std::find(_Players.begin(), _Players.end(), userId) != _Players.end())
 	{
-		//nlwarning("<BUILDING> trying to add player %s which is already present in the building", userId.toString().c_str());
+		// nlwarning("<BUILDING> trying to add player %s which is already present in the building", userId.toString().c_str());
 		return;
 	}
 
 	_StateCounter++;
-	_Players.push_back( userId );
+	_Players.push_back(userId);
 	// add an instance cell to each room for this player
 	const uint size = (uint)_Rooms.size();
-	for ( uint i = 0; i < size; i++ )
+	for (uint i = 0; i < size; i++)
 	{
-		_Rooms[i].Cells.push_back( 0 );
+		_Rooms[i].Cells.push_back(0);
 	}
 }
 
 //----------------------------------------------------------------------------
-inline uint16 CBuildingPhysicalPlayer::getOwnerIdx( const NLMISC::CEntityId & userId )
+inline uint16 CBuildingPhysicalPlayer::getOwnerIdx(const NLMISC::CEntityId &userId)
 {
-	for ( uint16 i = 0; i < _Players.size(); i++ )
+	for (uint16 i = 0; i < _Players.size(); i++)
 	{
-		if ( _Players[i] == userId )
+		if (_Players[i] == userId)
 		{
 			return i;
 		}
 	}
-	
+
 	_StateCounter++;
-	_Players.push_back( userId );
+	_Players.push_back(userId);
 	// add an instance cell to each room for this player
 	const uint size = (uint)_Rooms.size();
-	for ( uint i = 0; i < size; i++ )
+	for (uint i = 0; i < size; i++)
 	{
-		_Rooms[i].Cells.push_back( 0 );
+		_Rooms[i].Cells.push_back(0);
 	}
 
 	return (uint16)(_Players.size() - 1);
 }
 
-
 //----------------------------------------------------------------------------
-inline void CBuildingPhysicalPlayer::resetRoomCell( uint16 roomIdx,const NLMISC::CEntityId & userId )
+inline void CBuildingPhysicalPlayer::resetRoomCell(uint16 roomIdx, const NLMISC::CEntityId &userId)
 {
-	BOMB_IF( (roomIdx >= _Rooms.size()),
-		NLMISC::toString("<BUILDING> in building '%s' roomIdx %hu asked, count is %u", _Name.c_str(), roomIdx, _Rooms.size()),
-		return
-		);
+	BOMB_IF((roomIdx >= _Rooms.size()),
+	    NLMISC::toString("<BUILDING> in building '%s' roomIdx %hu asked, count is %u", _Name.c_str(), roomIdx, _Rooms.size()),
+	    return);
 
-	for ( uint i = 0; i < _Players.size(); i++ )
+	for (uint i = 0; i < _Players.size(); i++)
 	{
-		if ( _Players[i] == userId )
+		if (_Players[i] == userId)
 		{
-			BOMB_IF( (i >= _Rooms[roomIdx].Cells.size()), "<BUILDING> trying to reset a cell out of bound", return );
+			BOMB_IF((i >= _Rooms[roomIdx].Cells.size()), "<BUILDING> trying to reset a cell out of bound", return);
 			_Rooms[roomIdx].Cells[i] = 0;
 			return;
 		}
 	}
-	nlwarning("<BUILDING> in building '%s' player %s asked and not found",_Name.c_str(), userId.toString().c_str() );
+	nlwarning("<BUILDING> in building '%s' player %s asked and not found", _Name.c_str(), userId.toString().c_str());
 }
 
-
 //----------------------------------------------------------------------------
-inline const NLMISC::CEntityId & CBuildingPhysicalPlayer::getPlayer(uint idx)
+inline const NLMISC::CEntityId &CBuildingPhysicalPlayer::getPlayer(uint idx)
 {
-	if ( idx < _Players.size() )
+	if (idx < _Players.size())
 		return _Players[idx];
 	return NLMISC::CEntityId::Unknown;
 }
-

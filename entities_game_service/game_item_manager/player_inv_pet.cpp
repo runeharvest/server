@@ -21,8 +21,6 @@
 #include "game_share/slot_equipment.h"
 #include "player_manager/character.h"
 
-
-
 /////////////////////////////////////////////////////////////
 // CMektoubInventory
 /////////////////////////////////////////////////////////////
@@ -36,14 +34,12 @@ CPetInventory::CPetInventory()
 	_PetIndex = ~0;
 }
 
-
 void CPetInventory::initPetInventory(uint32 petIndex, uint32 petMaxWeight, uint32 petMaxBulk)
 {
 	_PetMaxWeight = petMaxWeight;
 	_PetMaxBulk = petMaxBulk;
 	_PetIndex = petIndex;
 }
-
 
 uint32 CPetInventory::getMaxWeight() const
 {
@@ -60,17 +56,16 @@ uint32 CPetInventory::getMaxSlot() const
 	return INVENTORIES::NbPackerSlots;
 }
 
-//void CPetInventory::onItemChanged(uint32 slot)
+// void CPetInventory::onItemChanged(uint32 slot)
 //{
 //	// update mek inventory
 //	nlassert(false);
-//}
+// }
 //
-//void CPetInventory::onInventoryChanged()
+// void CPetInventory::onInventoryChanged()
 //{
 //	nlassert(false);
-//}
-
+// }
 
 //-----------------------------------------------
 //	onItemChanged
@@ -83,13 +78,6 @@ void CPetInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags chang
 
 } // onItemChanged
 
-
-
-
 void CPetInvView::onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags)
 {
-	
 }
-
-
-

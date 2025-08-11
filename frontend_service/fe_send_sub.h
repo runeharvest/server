@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_FE_SEND_SUB_H
 #define NL_FE_SEND_SUB_H
 
@@ -29,10 +27,8 @@
 
 class CPrioSub;
 
-
-const uint	SYNCSendLatency = 100;		// number of ms between sends of SYNC system message
-const uint	PROBESendLatency = 300;		// number of ms between sends of PROBE system message
-
+const uint SYNCSendLatency = 100; // number of ms between sends of SYNC system message
+const uint PROBESendLatency = 300; // number of ms between sends of PROBE system message
 
 /**
  * Front-end Send Subsystem
@@ -43,7 +39,6 @@ const uint	PROBESendLatency = 300;		// number of ms between sends of PROBE syste
 class CFeSendSub
 {
 public:
-
 	/*
 	 * Buffer and address
 	 */
@@ -53,20 +48,25 @@ public:
 		typedef bool TSBState;
 
 		/// Destination address
-		NLNET::CInetAddress		DestAddress;
-		CQuicUserContextPtr		QuicUser;
+		NLNET::CInetAddress DestAddress;
+		CQuicUserContextPtr QuicUser;
 
 		/// Used (connected) or not
 		NLMISC::CAtomicEnum<TSBState> SBState;
 
 		/// Output buffer
-		TOutBox					OutBox;
+		TOutBox OutBox;
 
 		/// Default constructor
-		CSendBuffer() : SBState(false), OutBox(false, 512), QuicUser(nullptr) {} // prealloc 512 bytes to avoid bitmemstream reallocation
+		CSendBuffer()
+		    : SBState(false)
+		    , OutBox(false, 512)
+		    , QuicUser(nullptr)
+		{
+		} // prealloc 512 bytes to avoid bitmemstream reallocation
 
 		/// Set the new address. state should be SBReady or SBNotReady only.
-		void	setAddress( const NLNET::CInetAddress *addr, CQuicUserContext *quicUser, TSBState state )
+		void setAddress(const NLNET::CInetAddress *addr, CQuicUserContext *quicUser, TSBState state)
 		{
 			// Copy the address (just a link would not work)
 			DestAddress = *addr;
@@ -75,13 +75,13 @@ public:
 		}
 
 		/// Enable or disable the current address
-		void	enableSendBuffer( TSBState state )
+		void enableSendBuffer(TSBState state)
 		{
 			SBState = state;
 		}
 
 		/// Send the current outbox
-		void	sendOutBox( NLNET::CUdpSock *datasock );
+		void sendOutBox(NLNET::CUdpSock *datasock);
 	};
 
 	/// Vector for send buffers indexed by TClientId
@@ -91,64 +91,67 @@ public:
 	typedef std::set<TClientId> TBuffersToEnable;
 
 	/// Constructor
-	CFeSendSub() :
-		_DataSock( NULL ),
-		_ClientIdCont(),
-//		_UIActions(),
-		_History( NULL ),
-		_PrioSub( NULL ),
-		_TotalBitBandwidth(0xFFFFFFFF),
-		_ClientBitBandwidth(150*8),
-		//_OutputBits(0),
-		_SendCounter(0),
-		_NbActions(0),
-		_NbImpulseActions(0)
-		{}
+	CFeSendSub()
+	    : _DataSock(NULL)
+	    , _ClientIdCont()
+	    ,
+	    //		_UIActions(),
+	    _History(NULL)
+	    , _PrioSub(NULL)
+	    , _TotalBitBandwidth(0xFFFFFFFF)
+	    , _ClientBitBandwidth(150 * 8)
+	    ,
+	    //_OutputBits(0),
+	    _SendCounter(0)
+	    , _NbActions(0)
+	    , _NbImpulseActions(0)
+	{
+	}
 
 	/// Init
-	void	init( NLNET::CUdpSock *datasock, THostMap *clientmap, CHistory *history, CPrioSub *priosub );
+	void init(NLNET::CUdpSock *datasock, THostMap *clientmap, CHistory *history, CPrioSub *priosub);
 
 	/// Update
-	void	update();
+	void update();
 
 	/// Set client bandwidth per cycle in bytes
-	void	setClientBandwidth( uint32 bytes );
+	void setClientBandwidth(uint32 bytes);
 
 	/// Set total bandwidth per cycle in bytes (limited to 512 MB) (currently not used!)
-	void	setTotalBandwidth( uint32 bytes )
+	void setTotalBandwidth(uint32 bytes)
 	{
-		if ( bytes < 536870912 ) // 512 MB
-			_TotalBitBandwidth = bytes*8;
+		if (bytes < 536870912) // 512 MB
+			_TotalBitBandwidth = bytes * 8;
 		else
 			_TotalBitBandwidth = 0xFFFFFFFF; // prevent from overflow
 	}
 
 	uint32 clientBandwidth() const { return _ClientBitBandwidth; }
-	
+
 	uint32 totalBandwidth() const { return _TotalBitBandwidth; }
 
-	TClientIdCont&			clientIdCont() { return _ClientIdCont; }
+	TClientIdCont &clientIdCont() { return _ClientIdCont; }
 
-	volatile uint32			&sendCounter() { return _SendCounter; }
+	volatile uint32 &sendCounter() { return _SendCounter; }
 
 	/// Set the address for send buffer, to match a connected client
-	void					setSendBufferAddress( TClientId id, const NLNET::CInetAddress *addr, CQuicUserContext *quicUser )
+	void setSendBufferAddress(TClientId id, const NLNET::CInetAddress *addr, CQuicUserContext *quicUser)
 	{
 		// We set the address for both, but we can't enable the buffer yet
-		((*_CurrentFillingBuffers)[id]).setAddress( addr, quicUser, false /*true*/ );
-		((*_CurrentFlushingBuffers)[id]).setAddress( addr, quicUser, false );
+		((*_CurrentFillingBuffers)[id]).setAddress(addr, quicUser, false /*true*/);
+		((*_CurrentFlushingBuffers)[id]).setAddress(addr, quicUser, false);
 		//_BuffersToEnable.insert( id ); // OBSOLETE: now it is enabled/disabled in CFeSendSub::fillPrioritizedActions
 	}
 
 	/// Unset a send buffer, when a client disconnects
-	void					disableSendBuffer( TClientId id )
+	void disableSendBuffer(TClientId id)
 	{
 		// We can disable both, because no problem if the flushing thread sees the state of a buffer change to unused
 		// ((*_CurrentFillingBuffers)[id]).enableSendBuffer( false );
 		// ((*_CurrentFlushingBuffers)[id]).enableSendBuffer( false );
 		NLNET::CInetAddress nullAddr(false);
-		((*_CurrentFillingBuffers)[id]).setAddress( &nullAddr, NULL, false );
-		((*_CurrentFlushingBuffers)[id]).setAddress( &nullAddr, NULL, false );
+		((*_CurrentFillingBuffers)[id]).setAddress(&nullAddr, NULL, false);
+		((*_CurrentFlushingBuffers)[id]).setAddress(&nullAddr, NULL, false);
 
 		// But we must remove the id for _BuffersToEnable in the case when there was
 		// a connection and then a disconnection for the same client in the same cycle
@@ -157,92 +160,89 @@ public:
 	}
 
 	/// Enable a send buffer, the first time when the buffer is ready to be flushed out
-	void					enableSendBuffer( TClientId id )
+	void enableSendBuffer(TClientId id)
 	{
 		// In the filling one, we enabled the buffer as soon as the client connected
-		((*_CurrentFlushingBuffers)[id]).enableSendBuffer( true );
+		((*_CurrentFlushingBuffers)[id]).enableSendBuffer(true);
 	}
 
 	/// Access the outbox (for filling)
-	TOutBox&				outBox( TClientId id )
+	TOutBox &outBox(TClientId id)
 	{
 		return (*_CurrentFillingBuffers)[id].OutBox;
-	}		
+	}
 
 	/// Call before a send cycle (even if there is no client)
-	void					prepareSendCycle()
+	void prepareSendCycle()
 	{
 		_NbActions = 0;
 		_NbImpulseActions = 0;
 	}
 
 	/// Setup headers for outgoing messages of current cycle (only if there are clients)
-	void					prepareHeadersAndFillImpulses();
+	void prepareHeadersAndFillImpulses();
 
 	/// Fill prioritized actions into outgoing messages (only if there are clients)
-	void					fillPrioritizedActions();
+	void fillPrioritizedActions();
 
 	/// Swap send buffers
-	void					swapSendBuffers();
+	void swapSendBuffers();
 
 	/// Send outgoing messages
-	void					flushMessages();
+	void flushMessages();
 
 private:
-
 	/// Socket access
-	NLNET::CUdpSock			*_DataSock;
+	NLNET::CUdpSock *_DataSock;
 
 	/** Client id container (insert()/erase() are done by the receive subsystem who manages the clients).
 	 * For a vector, there are as many elements as possibles clients, non-attributed elements are set to NULL.
 	 */
-	TClientIdCont			_ClientIdCont;
+	TClientIdCont _ClientIdCont;
 
 	/// Urgent-important actions
-//	CUrgentImportantActions	_UIActions;
+	//	CUrgentImportantActions	_UIActions;
 
 	// Client map access
-	THostMap				*_ClientMap;
+	THostMap *_ClientMap;
 
 	/// Packet History access
-	CHistory				*_History;
+	CHistory *_History;
 
 	// Priority access
-	CPrioSub				*_PrioSub;
+	CPrioSub *_PrioSub;
 
 	/** Max total bandwidth (bytes per update)
 	 * Warning: uint32 for bits => limitation is 512 KB ((2^32-1)/8))
 	 * see setTotalBitBandwidth
 	 */
-	uint32					_TotalBitBandwidth;
+	uint32 _TotalBitBandwidth;
 
 	/// Max bandwidth per client (bytes per update)
-	uint32					_ClientBitBandwidth;
+	uint32 _ClientBitBandwidth;
 
 	/// Number of bits stored for the current cyle
-	//uint32					_OutputBits;
+	// uint32					_OutputBits;
 
 	/// Number of messages effectively sent (flushed)
-	volatile uint32			_SendCounter;
+	volatile uint32 _SendCounter;
 
 	/// Number of actions stored for the current cycle (important + prioritized)
-	uint32					_NbActions;
+	uint32 _NbActions;
 
 	/// Number of important actions stored for the current cycle
-	uint32					_NbImpulseActions;
+	uint32 _NbImpulseActions;
 
-	TSendBuffers			_SendBuffers1, _SendBuffers2;
-	TSendBuffers			*_CurrentFillingBuffers, *_CurrentFlushingBuffers;
+	TSendBuffers _SendBuffers1, _SendBuffers2;
+	TSendBuffers *_CurrentFillingBuffers, *_CurrentFlushingBuffers;
 
 	/// MD5 hash keys of msg.xml and database.xml
-	NLMISC::CHashKeyMD5		_MsgXmlMD5;
-	NLMISC::CHashKeyMD5		_DatabaseXmlMD5;
+	NLMISC::CHashKeyMD5 _MsgXmlMD5;
+	NLMISC::CHashKeyMD5 _DatabaseXmlMD5;
 
-	//TBuffersToEnable		_BuffersToEnable; // OBSOLETE
+	// TBuffersToEnable		_BuffersToEnable; // OBSOLETE
 };
-
 
 #endif // NL_FE_SEND_SUB_H
 
 /* End of fe_send_sub.h */
-

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef BS_MP_H
 #define BS_MP_H
 
@@ -31,56 +29,57 @@ class CRawMaterial
 {
 public:
 	/// Constructor
-	CRawMaterial() : MinQuality(0), MaxQuality(0)
-	{}
-
-	/// copy Constructor
-	CRawMaterial( const CRawMaterial &m)
+	CRawMaterial()
+	    : MinQuality(0)
+	    , MaxQuality(0)
 	{
-		Name				= m.Name;
-		AssociatedItemName	= m.AssociatedItemName;
-		MinQuality			= m.MinQuality;
-		MaxQuality			= m.MaxQuality;
 	}
 
+	/// copy Constructor
+	CRawMaterial(const CRawMaterial &m)
+	{
+		Name = m.Name;
+		AssociatedItemName = m.AssociatedItemName;
+		MinQuality = m.MinQuality;
+		MaxQuality = m.MaxQuality;
+	}
 
 	/// copy Constructor
-	CRawMaterial( const CStaticRawMaterial &m)
+	CRawMaterial(const CStaticRawMaterial &m)
 	{
-		Name				= m.Name;
-		AssociatedItemName	= m.AssociatedItemName;
-		MinQuality			= m.MinQuality;
-		MaxQuality			= m.MaxQuality;
+		Name = m.Name;
+		AssociatedItemName = m.AssociatedItemName;
+		MinQuality = m.MinQuality;
+		MaxQuality = m.MaxQuality;
 	}
-	
 
 	/// Destructor
 	~CRawMaterial()
-	{}
+	{
+	}
 
 	/// serial
 	void serial(NLMISC::IStream &f)
 	{
-		f.serial( Name );
-		f.serial( AssociatedItemName );
-		f.serial( MinQuality );
-		f.serial( MaxQuality );
+		f.serial(Name);
+		f.serial(AssociatedItemName);
+		f.serial(MinQuality);
+		f.serial(MaxQuality);
 	}
 
 public:
 	/// name of the mp
-	std::string		Name;
+	std::string Name;
 
 	/// associated item name
-	std::string		AssociatedItemName;
+	std::string AssociatedItemName;
 
 	/// min quality
-	uint8			MinQuality;
+	uint8 MinQuality;
 
 	/// max quality
-	uint8			MaxQuality;
+	uint8 MaxQuality;
 };
-
 
 #endif // BS_MP_H
 

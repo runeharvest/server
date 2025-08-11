@@ -17,21 +17,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 
 #include "fe_receive_task.h"
 #include "fe_types.h"
 
 #ifdef NL_OS_WINDOWS
-#	include <winsock2.h>
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#include <winsock2.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 // Windows includes for `sockaddr_in6` and `WSAStringToAddressW`
-#	include <ws2ipdef.h>
+#include <ws2ipdef.h>
 #elif defined NL_OS_UNIX
 
 #include <unistd.h>
@@ -44,10 +42,8 @@
 
 #endif
 
-
 using namespace NLMISC;
 using namespace NLNET;
-
 
 volatile uint32 CFEReceiveTask::LastUDPPacketReceived = 0;
 
@@ -56,82 +52,80 @@ volatile uint32 CFEReceiveTask::LastUDPPacketReceived = 0;
  */
 
 /// Constructor
-TReceivedMessage::TReceivedMessage() : QuicUser(nullptr)
+TReceivedMessage::TReceivedMessage()
+    : QuicUser(nullptr)
 {
 	VAddrFrom.resize(sizeof(sockaddr_in6));
 }
 
 /// Return a vector containing the address info
-void	TReceivedMessage::addressToVector()
+void TReceivedMessage::addressToVector()
 {
 	AddrFrom.toSockAddrInet6((sockaddr_in6 *)(&*VAddrFrom.begin()));
 }
 
 /// Set address with address info from specified vector
-void	TReceivedMessage::vectorToAddress()
+void TReceivedMessage::vectorToAddress()
 {
 	AddrFrom.fromSockAddrInet6((sockaddr_in6 *)&*VAddrFrom.begin());
 }
 
-
 /*
  * Constructor (note: called from the main thread)
  */
-CFEReceiveTask::CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptablePort, uint32 msgsize ) :
-	_ReceivedMessage(),
-	_WriteQueue( "WriteQueue" ), // value unspecified
-	_DatagramLength( msgsize ),
-	_ExitRequired( false ),
-	_NbRejectedDatagrams( 0 )
+CFEReceiveTask::CFEReceiveTask(uint16 firstAcceptablePort, uint16 lastAcceptablePort, uint32 msgsize)
+    : _ReceivedMessage()
+    , _WriteQueue("WriteQueue")
+    , // value unspecified
+    _DatagramLength(msgsize)
+    , _ExitRequired(false)
+    , _NbRejectedDatagrams(0)
 {
 	// Socket
-	DataSock = new CUdpSock( false );
-	nlassert( DataSock );
+	DataSock = new CUdpSock(false);
+	nlassert(DataSock);
 
 	// Test of multihomed host: bind the first address
-/*	vector<CInetAddress> addrlist;
-	addrlist = CInetAddress::localAddresses();
-	vector<CInetAddress>::iterator ivi;
-	nlinfo( "Listing local interfaces:" );
-	for ( ivi=addrlist.begin(); ivi!=addrlist.end(); ++ivi )
-	{
-		nlinfo( "%s", (*ivi).asIPString().c_str() );
-	}
-	addrlist[0].setPort( port );
-	DataSock->bind( addrlist[0] );
-*/
+	/*	vector<CInetAddress> addrlist;
+	    addrlist = CInetAddress::localAddresses();
+	    vector<CInetAddress>::iterator ivi;
+	    nlinfo( "Listing local interfaces:" );
+	    for ( ivi=addrlist.begin(); ivi!=addrlist.end(); ++ivi )
+	    {
+	        nlinfo( "%s", (*ivi).asIPString().c_str() );
+	    }
+	    addrlist[0].setPort( port );
+	    DataSock->bind( addrlist[0] );
+	*/
 
 	// Bind on all network interfaces (TODO: find a simple way to bind only on the external interface; note: change releaase code for Linux in fe_receive_sub.cpp as well)
 	uint16 actualPort;
-	for ( actualPort=firstAcceptablePort; actualPort<=lastAcceptablePort; ++actualPort )
+	for (actualPort = firstAcceptablePort; actualPort <= lastAcceptablePort; ++actualPort)
 	{
 		try
 		{
-			DataSock->bind( actualPort );
+			DataSock->bind(actualPort);
 			break;
 		}
 		catch (const ESocket &e)
 		{
-			nlinfo( "Port %u not available: %s", actualPort, e.what() );
+			nlinfo("Port %u not available: %s", actualPort, e.what());
 		}
 	}
-	if ( actualPort > lastAcceptablePort )
-		nlerror( "Could not find an available port between %hu and %hu", firstAcceptablePort, lastAcceptablePort );
-	nlinfo( "Binding all network interfaces on port %hu (%hu asked)", actualPort, firstAcceptablePort );
+	if (actualPort > lastAcceptablePort)
+		nlerror("Could not find an available port between %hu and %hu", firstAcceptablePort, lastAcceptablePort);
+	nlinfo("Binding all network interfaces on port %hu (%hu asked)", actualPort, firstAcceptablePort);
 }
-
-
 
 /*
  * Destructor
  */
 CFEReceiveTask::~CFEReceiveTask()
 {
-	nlassert( DataSock != NULL );
+	nlassert(DataSock != NULL);
 	delete DataSock;
 	DataSock = NULL;
 }
-
 
 /*
  * Run
@@ -139,7 +133,7 @@ CFEReceiveTask::~CFEReceiveTask()
 void CFEReceiveTask::run()
 {
 	uint maxrecvlength = _DatagramLength;
-	while ( ! _ExitRequired )
+	while (!_ExitRequired)
 	{
 #ifndef SIMUL_CLIENTS
 
@@ -149,9 +143,9 @@ void CFEReceiveTask::run()
 		static TTime lastdisplay = CTime::getLocalTime();
 		TTime tn = CTime::getLocalTime();
 		uint32 diff = (uint32)(tn - lastdisplay);
-		if ( diff > 2000 )
+		if (diff > 2000)
 		{
-			nlinfo("Reads by second: %.1f => LoopTime = %.2f ms LoopCount = %u Diff = %u ms",(float)loopcount * 1000.0f / (float)diff, (float)diff / loopcount, loopcount, diff);
+			nlinfo("Reads by second: %.1f => LoopTime = %.2f ms LoopCount = %u Diff = %u ms", (float)loopcount * 1000.0f / (float)diff, (float)diff / loopcount, loopcount, diff);
 			loopcount = 0;
 			lastdisplay = tn;
 		}
@@ -161,46 +155,45 @@ void CFEReceiveTask::run()
 		{
 			// Receive into _ReceivedMessage
 			_DatagramLength = maxrecvlength;
-			_ReceivedMessage.resizeData( _DatagramLength );
-			_ReceivedMessage.setTypeEvent( TReceivedMessage::User );
-			DataSock->receivedFrom( _ReceivedMessage.userDataW(), _DatagramLength, _ReceivedMessage.AddrFrom );
+			_ReceivedMessage.resizeData(_DatagramLength);
+			_ReceivedMessage.setTypeEvent(TReceivedMessage::User);
+			DataSock->receivedFrom(_ReceivedMessage.userDataW(), _DatagramLength, _ReceivedMessage.AddrFrom);
 		}
-		catch (const ESocket&)
+		catch (const ESocket &)
 		{
 			// Remove the client corresponding to the address
-			_ReceivedMessage.setTypeEvent( TReceivedMessage::RemoveClient );
+			_ReceivedMessage.setTypeEvent(TReceivedMessage::RemoveClient);
 			_DatagramLength = 0;
 		}
-		
+
 		// update the last datagram receive date
 		LastUDPPacketReceived = CTime::getSecondsSince1970();
 
 		// Check the size. Consider a big size as a hacked message
-//		if ( _DatagramLength < 512 )
+		//		if ( _DatagramLength < 512 )
 		{
 			// Push into the write queue
 			_ReceivedMessage.addressToVector();
-			_ReceivedMessage.resizeData( _DatagramLength ); // _DatagramLength was modified by receivedFrom()
+			_ReceivedMessage.resizeData(_DatagramLength); // _DatagramLength was modified by receivedFrom()
 			{
-				CSynchronized<CBufFIFO*>::CAccessor wq( &_WriteQueue );
-				wq.value()->push( _ReceivedMessage.data() );
-				wq.value()->push( _ReceivedMessage.VAddrFrom );
+				CSynchronized<CBufFIFO *>::CAccessor wq(&_WriteQueue);
+				wq.value()->push(_ReceivedMessage.data());
+				wq.value()->push(_ReceivedMessage.VAddrFrom);
 			}
 		}
-//		else
-//		{
-//			// Reject message
-//			++_NbRejectedDatagrams;
-//		}
+		//		else
+		//		{
+		//			// Reject message
+		//			++_NbRejectedDatagrams;
+		//		}
 
 #else
-		nlSleep( 1000 );
+		nlSleep(1000);
 #endif
 	}
 
-	nlinfo( "Exiting from front-end receive task" );
+	nlinfo("Exiting from front-end receive task");
 }
-
 
 /*
  * Set new write queue

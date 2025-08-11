@@ -19,19 +19,8 @@
 
 #include "nel/misc/time_nl.h"
 
-// set date of proj 
+// set date of proj
 void projStatsTime(NLMISC::TTime time);
 void projStatsIncrement();
-
-
-
-
-
-
-
-
-
-
-
 
 #endif

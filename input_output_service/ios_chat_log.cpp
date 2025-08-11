@@ -14,38 +14,35 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "ios_pd.h"
 
-namespace IOSPD
-{
-	
-void							createTeam(NLMISC::CEntityId team)
+namespace IOSPD {
+
+void createTeam(NLMISC::CEntityId team)
 {
 	PDSLib.log(0);
 	PDSLib.logPush(team);
 }
 
-void							deleteTeam(NLMISC::CEntityId team)
+void deleteTeam(NLMISC::CEntityId team)
 {
 	PDSLib.log(1);
 	PDSLib.logPush(team);
 }
 
-void							playerJoinsTeam(NLMISC::CEntityId player, NLMISC::CEntityId team)
+void playerJoinsTeam(NLMISC::CEntityId player, NLMISC::CEntityId team)
 {
 	PDSLib.log(2);
 	PDSLib.logPush(player);
 	PDSLib.logPush(team);
 }
 
-void							playerLeavesTeam(NLMISC::CEntityId player, NLMISC::CEntityId team)
+void playerLeavesTeam(NLMISC::CEntityId player, NLMISC::CEntityId team)
 {
 	PDSLib.log(3);
 	PDSLib.logPush(player);
 	PDSLib.logPush(team);
 }
 
-	
 } // End of IOSPD

@@ -33,31 +33,27 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-
-
-
-#define CHECK_DB_MGR_INIT(function, returnvalue)	\
-if (!initialised())	\
-{	\
-	nlwarning("CDbManager not initialised, " #function "() forbidden");	\
-	return returnvalue;	\
-}
-
+#define CHECK_DB_MGR_INIT(function, returnvalue)                            \
+	if (!initialised())                                                     \
+	{                                                                       \
+		nlwarning("CDbManager not initialised, " #function "() forbidden"); \
+		return returnvalue;                                                 \
+	}
 
 /*
  * Initialised yet?
  */
-bool	CDbManager::initialised()
+bool CDbManager::initialised()
 {
 	return _Initialised;
 }
 
-CVariable<uint>	DeltaUpdateRate("pds", "DeltaUpdateRate", "Number of seconds between two delta updates", 10, 0, true);
+CVariable<uint> DeltaUpdateRate("pds", "DeltaUpdateRate", "Number of seconds between two delta updates", 10, 0, true);
 
 /*
  * Update manager
  */
-bool	CDbManager::update()
+bool CDbManager::update()
 {
 	H_AUTO(PDS_DbManager_update);
 
@@ -66,25 +62,24 @@ bool	CDbManager::update()
 	// update stamp
 	CTableBuffer::updateCommonStamp();
 
-	TDatabaseMap::iterator	it;
+	TDatabaseMap::iterator it;
 
 	CDatabase::checkUpdateRates();
 
-
 	// check evently if database need to write some delta
-	TTime	tm = CTime::getLocalTime();
+	TTime tm = CTime::getLocalTime();
 	if (tm >= _NextTimeDelta)
 	{
 
-		CTimestamp	starttime = _LastUpdateTime;
-		CTimestamp	endtime;
+		CTimestamp starttime = _LastUpdateTime;
+		CTimestamp endtime;
 		endtime.setToCurrent();
 
-		std::vector<uint32>	ack;
+		std::vector<uint32> ack;
 
-		for (it=_DatabaseMap.begin(); it!=_DatabaseMap.end(); ++it)
+		for (it = _DatabaseMap.begin(); it != _DatabaseMap.end(); ++it)
 		{
-			CDatabase*	database = (*it).second;
+			CDatabase *database = (*it).second;
 
 			// generate deltas
 			if (!database->buildDelta(starttime, endtime))
@@ -98,26 +93,26 @@ bool	CDbManager::update()
 
 			if (!ack.empty() && database->getMappedService().get() != 0xffff)
 			{
-				CMessage	msgack("PD_ACK_UPD");
-				uint32		databaseId = (*it).first;
+				CMessage msgack("PD_ACK_UPD");
+				uint32 databaseId = (*it).first;
 				msgack.serial(databaseId);
 				msgack.serialCont(ack);
 				CUnifiedNetwork::getInstance()->send(database->getMappedService(), msgack);
 			}
 		}
 
-		_NextTimeDelta = tm - (tm%(DeltaUpdateRate*1000)) + (DeltaUpdateRate*1000);
+		_NextTimeDelta = tm - (tm % (DeltaUpdateRate * 1000)) + (DeltaUpdateRate * 1000);
 
 		_LastUpdateTime = endtime;
 	}
 
-	CTimestamp	ts;
+	CTimestamp ts;
 	ts.setToCurrent();
 
 	// check databases require some delta packing/reference generation
-	for (it=_DatabaseMap.begin(); it!=_DatabaseMap.end(); ++it)
+	for (it = _DatabaseMap.begin(); it != _DatabaseMap.end(); ++it)
 	{
-		CDatabase*	database = (*it).second;
+		CDatabase *database = (*it).second;
 		database->sendBuildCommands(ts);
 	}
 
@@ -135,7 +130,7 @@ bool	CDbManager::update()
 /*
  * Release manager
  */
-bool	CDbManager::release()
+bool CDbManager::release()
 {
 	CHECK_DB_MGR_INIT(release, false);
 
@@ -145,44 +140,42 @@ bool	CDbManager::release()
 	return true;
 }
 
-
 // Is manager initialised
-bool						CDbManager::_Initialised = false;
+bool CDbManager::_Initialised = false;
 
 // Map of database
-CDbManager::TDatabaseMap	CDbManager::_DatabaseMap;
+CDbManager::TDatabaseMap CDbManager::_DatabaseMap;
 
 // Map of services
-CDbManager::TServiceMap		CDbManager::_ServiceMap;
+CDbManager::TServiceMap CDbManager::_ServiceMap;
 
 // Next time to build delta
-TTime						CDbManager::_NextTimeDelta;
+TTime CDbManager::_NextTimeDelta;
 
 // Next task
-uint32						CDbManager::_TaskId = 0;
+uint32 CDbManager::_TaskId = 0;
 
 // Messages to send to RBS
-std::deque<NLNET::CMessage*>	CDbManager::_RBSMessages;
+std::deque<NLNET::CMessage *> CDbManager::_RBSMessages;
 
 // Acknowledge to wake
-std::map<uint32, std::pair<ITaskEventListener*, void*> >	CDbManager::_TaskListeners;
+std::map<uint32, std::pair<ITaskEventListener *, void *>> CDbManager::_TaskListeners;
 
 // RBS state
-bool						CDbManager::_RBSUp = false;
+bool CDbManager::_RBSUp = false;
 
 // Last Update timestamp
-CTimestamp					CDbManager::_LastUpdateTime;
-
+CTimestamp CDbManager::_LastUpdateTime;
 
 /*
  * Create a database entry
  */
-CDatabase*	CDbManager::createDatabase(TDatabaseId id, CLog* log)
+CDatabase *CDbManager::createDatabase(TDatabaseId id, CLog *log)
 {
 	CHECK_DB_MGR_INIT(createDatabase, NULL);
 
 	// check db doesn't exist yet
-	CDatabase*	db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 	if (db != NULL)
 	{
 		log->displayNL("Unable to createDatabase() %d, already exists as '%s'", id, db->getName().c_str());
@@ -199,12 +192,12 @@ CDatabase*	CDbManager::createDatabase(TDatabaseId id, CLog* log)
 /*
  * Delete a database entry
  */
-bool	CDbManager::deleteDatabase(TDatabaseId id, CLog* log)
+bool CDbManager::deleteDatabase(TDatabaseId id, CLog *log)
 {
 	CHECK_DB_MGR_INIT(deleteDatabase, false);
 
 	// check db exists
-	TDatabaseMap::iterator	it = _DatabaseMap.find(id);
+	TDatabaseMap::iterator it = _DatabaseMap.find(id);
 	if (it == _DatabaseMap.end())
 	{
 		log->displayNL("Unable to deleteDatabase() %d, not create yet", id);
@@ -212,7 +205,7 @@ bool	CDbManager::deleteDatabase(TDatabaseId id, CLog* log)
 	}
 
 	// get database
-	CDatabase*	db = (*it).second;
+	CDatabase *db = (*it).second;
 
 	// unmap it
 	(*it).second = NULL;
@@ -224,19 +217,16 @@ bool	CDbManager::deleteDatabase(TDatabaseId id, CLog* log)
 	return true;
 }
 
-
-
-
 /*
  * Load a database and adapt to the description if needed
  */
-CDatabase*	CDbManager::loadDatabase(TDatabaseId id, const string& description, CLog* log)
+CDatabase *CDbManager::loadDatabase(TDatabaseId id, const string &description, CLog *log)
 {
 	CHECK_DB_MGR_INIT(loadDatabase, NULL);
 
 	nlinfo("CDbManager::loadDatabase(): load/setup database '%d'", id);
 
-	CDatabase*	db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 
 	// database not loaded yet?
 	if (db == NULL)
@@ -265,8 +255,8 @@ CDatabase*	CDbManager::loadDatabase(TDatabaseId id, const string& description, C
 		}
 	}
 
-	CDatabase*	adapted = db->adapt(description);
-	if (adapted ==  NULL)
+	CDatabase *adapted = db->adapt(description);
+	if (adapted == NULL)
 	{
 		log->displayNL("failed to adapt database '%s' to new description", db->getName().c_str());
 		return NULL;
@@ -284,17 +274,15 @@ CDatabase*	CDbManager::loadDatabase(TDatabaseId id, const string& description, C
 	return adapted;
 }
 
-
-
 /*
  * load a database
  */
-bool	CDbManager::loadDatabase(TDatabaseId id, CLog* log)
+bool CDbManager::loadDatabase(TDatabaseId id, CLog *log)
 {
 	CHECK_DB_MGR_INIT(loadDatabase, false);
 
 	// check db doesn't exist yet
-	CDatabase*	db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 	if (db == NULL)
 	{
 		log->displayNL("Unable to loadDatabase() %d, not created yet", id);
@@ -311,31 +299,27 @@ bool	CDbManager::loadDatabase(TDatabaseId id, CLog* log)
 	return db->loadState();
 }
 
-
-
 /*
  * get a database entry
  */
-CDatabase*	CDbManager::getDatabase(TDatabaseId id)
+CDatabase *CDbManager::getDatabase(TDatabaseId id)
 {
 	CHECK_DB_MGR_INIT(getDatabase, NULL);
 
-	TDatabaseMap::iterator	it = _DatabaseMap.find(id);
+	TDatabaseMap::iterator it = _DatabaseMap.find(id);
 	return (it == _DatabaseMap.end() ? NULL : (*it).second);
 }
-
-
 
 /*
  * Set an item in database, located by its table, row and column.
  * \param datasize is provided for validation check (1, 2, 4 or 8 bytes)
- * \param dataptr points to raw data, which may be 1, 2, 4 or 8 bytes, as indicated by datasize 
+ * \param dataptr points to raw data, which may be 1, 2, 4 or 8 bytes, as indicated by datasize
  */
-bool	CDbManager::set(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void* dataptr)
+bool CDbManager::set(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TColumnIndex column, uint datasize, const void *dataptr)
 {
 	CHECK_DB_MGR_INIT(set, false);
 
-	CDatabase*	db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 	if (db == NULL)
 	{
 		nlwarning("Unable to set() value in %d, not created yet", id);
@@ -351,11 +335,11 @@ bool	CDbManager::set(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowInde
  * \param table is the specified table
  * \param row is the specified row in table
  */
-bool	CDbManager::allocRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row)
+bool CDbManager::allocRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row)
 {
 	CHECK_DB_MGR_INIT(allocRow, false);
 
-	CDatabase*	db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 	if (db == NULL)
 	{
 		nlwarning("Unable to allocRow() '%d' in table '%d' in database '%d', not created yet", row, table, id);
@@ -371,11 +355,11 @@ bool	CDbManager::allocRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRo
  * \param table is the specified table
  * \param row is the specified row in table
  */
-bool	CDbManager::deallocRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row)
+bool CDbManager::deallocRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row)
 {
 	CHECK_DB_MGR_INIT(deallocRow, false);
 
-	CDatabase*	db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 	if (db == NULL)
 	{
 		nlwarning("Unable to deallocRow() '%d' in table '%d' in database '%d', not created yet", row, table, id);
@@ -391,11 +375,11 @@ bool	CDbManager::deallocRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::T
  * \param key is the 64 bits row key
  * Return true if succeded
  */
-bool	CDbManager::mapRow(TDatabaseId id, const RY_PDS::CObjectIndex &index, uint64 key)
+bool CDbManager::mapRow(TDatabaseId id, const RY_PDS::CObjectIndex &index, uint64 key)
 {
 	CHECK_DB_MGR_INIT(mapRow, false);
 
-	CDatabase*	db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 	if (db == NULL)
 	{
 		nlwarning("Unable to mapRow() '%016" NL_I64 "X' to row '%d':'%d' in db '%d' , not created yet", key, index.table(), index.row(), id);
@@ -411,11 +395,11 @@ bool	CDbManager::mapRow(TDatabaseId id, const RY_PDS::CObjectIndex &index, uint6
  * \param key is the 64 bits row key
  * Return true if succeded
  */
-bool	CDbManager::unmapRow(TDatabaseId id, RY_PDS::TTableIndex tableIndex, uint64 key)
+bool CDbManager::unmapRow(TDatabaseId id, RY_PDS::TTableIndex tableIndex, uint64 key)
 {
 	CHECK_DB_MGR_INIT(unmapRow, false);
 
-	CDatabase*	db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 	if (db == NULL)
 	{
 		nlwarning("Unable to unmapRow() '%016" NL_I64 "X' in '%d':'%d' in db '%d' , not created yet", key, tableIndex, id);
@@ -431,11 +415,11 @@ bool	CDbManager::unmapRow(TDatabaseId id, RY_PDS::TTableIndex tableIndex, uint64
  * \param table is the specified table
  * \param row is the specified row in table
  */
-bool	CDbManager::releaseRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row)
+bool CDbManager::releaseRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::TRowIndex row)
 {
 	CHECK_DB_MGR_INIT(releaseRow, false);
 
-	CDatabase*	db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 	if (db == NULL)
 	{
 		nlwarning("Unable to releaseRow() '%d' in table '%d' in database '%d', not created yet", row, table, id);
@@ -448,18 +432,18 @@ bool	CDbManager::releaseRow(TDatabaseId id, RY_PDS::TTableIndex table, RY_PDS::T
 /*
  * Fetch data
  */
-bool	CDbManager::fetch(TDatabaseId id, RY_PDS::TTableIndex tableIndex, uint64 key, RY_PDS::CPData &data)
+bool CDbManager::fetch(TDatabaseId id, RY_PDS::TTableIndex tableIndex, uint64 key, RY_PDS::CPData &data)
 {
 	CHECK_DB_MGR_INIT(fetch, false);
 
-	CDatabase*	db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 	if (db == NULL)
 	{
 		nlwarning("Unable to fetch(), db '%d' not created yet", id);
 		return false;
 	}
 
-	RY_PDS::CObjectIndex	index = db->getMappedRow(tableIndex, key);
+	RY_PDS::CObjectIndex index = db->getMappedRow(tableIndex, key);
 	if (!index.isValid())
 	{
 		// row is not mapped
@@ -469,48 +453,42 @@ bool	CDbManager::fetch(TDatabaseId id, RY_PDS::TTableIndex tableIndex, uint64 ke
 	return db->fetch(index, data);
 }
 
-
-
 /*
  * Add String in Database' string manager
  */
 /*
 bool	CDbManager::addString(TDatabaseId id, const NLMISC::CEntityId& eId, RY_PDS::CPDStringManager::TEntryId pdId, const ucstring& str)
 {
-	CHECK_DB_MGR_INIT(addString, false);
+    CHECK_DB_MGR_INIT(addString, false);
 
-	CDatabase*	db = getDatabase(id);
-	if (db == NULL)
-	{
-		nlwarning("Unable to addString(), db '%d' not created yet", id);
-		return false;
-	}
+    CDatabase*	db = getDatabase(id);
+    if (db == NULL)
+    {
+        nlwarning("Unable to addString(), db '%d' not created yet", id);
+        return false;
+    }
 
-	RY_PDS::CPDStringManager&	sm = db->getStringManager();
+    RY_PDS::CPDStringManager&	sm = db->getStringManager();
 
-	return sm.setString(eId, pdId, str);
+    return sm.setString(eId, pdId, str);
 }
 */
-
-
-
-
 
 /*
  * Delete all database entries
  */
-bool	CDbManager::deleteAllDatabases(CLog* log)
+bool CDbManager::deleteAllDatabases(CLog *log)
 {
 	CHECK_DB_MGR_INIT(getDatabase, false);
 
-	CTimestamp	starttime = _LastUpdateTime;
-	CTimestamp	endtime;
+	CTimestamp starttime = _LastUpdateTime;
+	CTimestamp endtime;
 	endtime.setToCurrent();
 
-	TDatabaseMap::iterator	it;
-	for (it=_DatabaseMap.begin(); it!=_DatabaseMap.end(); ++it)
+	TDatabaseMap::iterator it;
+	for (it = _DatabaseMap.begin(); it != _DatabaseMap.end(); ++it)
 	{
-		CDatabase*	db = (*it).second;
+		CDatabase *db = (*it).second;
 
 		if (db == NULL)
 		{
@@ -535,18 +513,12 @@ bool	CDbManager::deleteAllDatabases(CLog* log)
 	return true;
 }
 
-
-
-
-
-
-
 /*
  * Parse path into TLocatePath
  */
-bool	CDbManager::parsePath(const string &strPath, CLocatePath &lpath)
+bool CDbManager::parsePath(const string &strPath, CLocatePath &lpath)
 {
-	CLocatePath::TLocatePath	&path = lpath.FullPath;
+	CLocatePath::TLocatePath &path = lpath.FullPath;
 
 	lpath.Pos = 0;
 	path.clear();
@@ -559,14 +531,14 @@ bool	CDbManager::parsePath(const string &strPath, CLocatePath &lpath)
 
 	// explode path into nodes formed like 'a_name' or 'an_array[a_key]' or 'a_set<a_key>'
 
-	vector<string>	nodes;
+	vector<string> nodes;
 	explode(strPath, string("."), nodes, false);
 
-	uint	i;
-	for (i=0; i<nodes.size(); ++i)
+	uint i;
+	for (i = 0; i < nodes.size(); ++i)
 	{
-		string								&node = nodes[i];
-		CLocatePath::CLocateAttributeNode	anode;
+		string &node = nodes[i];
+		CLocatePath::CLocateAttributeNode anode;
 
 		if (node.empty())
 			return false;
@@ -589,7 +561,7 @@ bool	CDbManager::parsePath(const string &strPath, CLocatePath &lpath)
 			if (end == string::npos)
 				return false;
 
-			anode.Key = node.substr(pos+1, end-pos-1);
+			anode.Key = node.substr(pos + 1, end - pos - 1);
 		}
 		else
 		{
@@ -602,27 +574,26 @@ bool	CDbManager::parsePath(const string &strPath, CLocatePath &lpath)
 	return true;
 }
 
-
 /*
  * Locate a column using a path
  */
-CTable::CDataAccessor	CDbManager::locate(CLocatePath &path)
+CTable::CDataAccessor CDbManager::locate(CLocatePath &path)
 {
 	CHECK_DB_MGR_INIT(getDatabase, CTable::CDataAccessor());
 
 	if (path.end())
 		return CTable::CDataAccessor();
 
-	TDatabaseId		id;
+	TDatabaseId id;
 	NLMISC::fromString(path.node().Name, id);
 	if (!path.next())
 		return CTable::CDataAccessor();
 
-	CDatabase*		db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 	if (db == NULL)
 		return CTable::CDataAccessor();
 
-	CTable*	table = const_cast<CTable*>(db->getTable(path.node().Name));
+	CTable *table = const_cast<CTable *>(db->getTable(path.node().Name));
 	if (table == NULL)
 		return CTable::CDataAccessor();
 
@@ -631,11 +602,6 @@ CTable::CDataAccessor	CDbManager::locate(CLocatePath &path)
 	return table->getAccessor(path);
 }
 
-
-
-
-
-
 /*
  * Constructor
  */
@@ -643,12 +609,10 @@ CDbManager::CDbManager()
 {
 }
 
-
-
 /*
  * Init manager
  */
-bool	CDbManager::init()
+bool CDbManager::init()
 {
 	nlinfo("CDbManager::init(): initialise database engine");
 
@@ -657,11 +621,11 @@ bool	CDbManager::init()
 
 	initDbManagerMessages();
 
-	uint	i;
-	for (i=0; i<256; ++i)
+	uint i;
+	for (i = 0; i < 256; ++i)
 		_ServiceMap[i] = INVALID_DATABASE_ID;
 
-	string	rootPath = RY_PDS::CPDSLib::getPDSRootDirectory();
+	string rootPath = RY_PDS::CPDSLib::getPDSRootDirectory();
 
 	if (!CFile::isDirectory(rootPath))
 	{
@@ -680,15 +644,15 @@ bool	CDbManager::init()
 
 	_Initialised = true;
 
-	vector<string>	databases;
+	vector<string> databases;
 	NLMISC::CPath::getPathContent(rootPath, false, true, false, databases);
 
-	for (i=0; i<databases.size(); ++i)
+	for (i = 0; i < databases.size(); ++i)
 	{
-		string&	db = databases[i];
+		string &db = databases[i];
 		// init database in directory db
 
-		bool	inited = false;
+		bool inited = false;
 
 		nldebug("CDbManager::init(): found directory '%s' in root database path, try to load database", db.c_str());
 
@@ -696,12 +660,12 @@ bool	CDbManager::init()
 		{
 			if (CDatabaseState::exists(db))
 			{
-				TTime	starttime = CTime::getLocalTime();
+				TTime starttime = CTime::getLocalTime();
 
-				CDatabaseState	state;
+				CDatabaseState state;
 				if (state.load(db) && createDatabase(state.Id) && loadDatabase(state.Id))
 				{
-					TTime	totaltime = CTime::getLocalTime()-starttime;
+					TTime totaltime = CTime::getLocalTime() - starttime;
 					nlinfo("CDbManager::init(): database '%d' initialised in %d ms", state.Id, (uint32)totaltime);
 					inited = true;
 				}
@@ -712,7 +676,7 @@ bool	CDbManager::init()
 				}
 			}
 		}
-		catch (const Exception&)
+		catch (const Exception &)
 		{
 		}
 
@@ -729,12 +693,10 @@ bool	CDbManager::init()
 	return true;
 }
 
-
-
 /*
  * Map Service Id
  */
-bool	CDbManager::mapService(TServiceId serviceId, TDatabaseId databaseId)
+bool CDbManager::mapService(TServiceId serviceId, TDatabaseId databaseId)
 {
 	if (serviceId.get() > 256 || _ServiceMap[serviceId.get()] != INVALID_DATABASE_ID)
 	{
@@ -744,7 +706,7 @@ bool	CDbManager::mapService(TServiceId serviceId, TDatabaseId databaseId)
 
 	_ServiceMap[serviceId.get()] = databaseId;
 
-	CDatabase*	database = getDatabase(databaseId);
+	CDatabase *database = getDatabase(databaseId);
 	if (database != NULL)
 		database->mapToService(serviceId);
 
@@ -754,15 +716,15 @@ bool	CDbManager::mapService(TServiceId serviceId, TDatabaseId databaseId)
 /*
  * Unmap Service Id
  */
-bool	CDbManager::unmapService(NLNET::TServiceId serviceId)
+bool CDbManager::unmapService(NLNET::TServiceId serviceId)
 {
 	if (serviceId.get() > 256 || _ServiceMap[serviceId.get()] == INVALID_DATABASE_ID)
 		return false;
 
-	TDatabaseId	id = _ServiceMap[serviceId.get()];
+	TDatabaseId id = _ServiceMap[serviceId.get()];
 	_ServiceMap[serviceId.get()] = INVALID_DATABASE_ID;
 
-	CDatabase*	db = getDatabase(id);
+	CDatabase *db = getDatabase(id);
 
 	if (db != NULL)
 	{
@@ -773,39 +735,36 @@ bool	CDbManager::unmapService(NLNET::TServiceId serviceId)
 	return true;
 }
 
-
-
 /*
  * Add RBS Task
  */
-NLNET::CMessage&	CDbManager::addTask(const std::string& msg, ITaskEventListener* listener, void* arg)
+NLNET::CMessage &CDbManager::addTask(const std::string &msg, ITaskEventListener *listener, void *arg)
 {
-	NLNET::CMessage*	msgrbs = new NLNET::CMessage(msg);
+	NLNET::CMessage *msgrbs = new NLNET::CMessage(msg);
 	_RBSMessages.push_back(msgrbs);
 
-	uint32	id = nextTaskId();
+	uint32 id = nextTaskId();
 	msgrbs->serial(id);
 
 	// add listener to task listeners
 	if (listener != NULL)
-		_TaskListeners[id] = std::pair<ITaskEventListener*, void*>(listener, arg);
+		_TaskListeners[id] = std::pair<ITaskEventListener *, void *>(listener, arg);
 
 	return *msgrbs;
 }
 
-
 /*
  * Notify RBS task success report
  */
-void	CDbManager::notifyRBSSuccess(uint32 taskId)
+void CDbManager::notifyRBSSuccess(uint32 taskId)
 {
-	std::map<uint32, std::pair<ITaskEventListener*, void*> >::iterator	it = _TaskListeners.find(taskId);
+	std::map<uint32, std::pair<ITaskEventListener *, void *>>::iterator it = _TaskListeners.find(taskId);
 	if (it == _TaskListeners.end())
 		return;
 
 	// call listener success method
-	ITaskEventListener*	listener = (*it).second.first;
-	void*				arg = (*it).second.second;
+	ITaskEventListener *listener = (*it).second.first;
+	void *arg = (*it).second.second;
 
 	listener->taskSuccessful(arg);
 
@@ -816,15 +775,15 @@ void	CDbManager::notifyRBSSuccess(uint32 taskId)
 /*
  * Notify RBS task failure report
  */
-void	CDbManager::notifyRBSFailure(uint32 taskId)
+void CDbManager::notifyRBSFailure(uint32 taskId)
 {
-	std::map<uint32, std::pair<ITaskEventListener*, void*> >::iterator	it = _TaskListeners.find(taskId);
+	std::map<uint32, std::pair<ITaskEventListener *, void *>>::iterator it = _TaskListeners.find(taskId);
 	if (it == _TaskListeners.end())
 		return;
 
 	// call listener failure method
-	ITaskEventListener*	listener = (*it).second.first;
-	void*				arg = (*it).second.second;
+	ITaskEventListener *listener = (*it).second.first;
+	void *arg = (*it).second.second;
 
 	listener->taskFailed(arg);
 
@@ -832,24 +791,9 @@ void	CDbManager::notifyRBSFailure(uint32 taskId)
 	_TaskListeners.erase(it);
 }
 
-
-
-
-
-
-
-
-
-
-
-
 /*
  * Utility commands
  */
-
-
-
-
 
 //
 NLMISC_COMMAND(createDatabase, "create a database using a given id", "<databaseId>")
@@ -911,13 +855,13 @@ NLMISC_COMMAND(displayTable, "display table info", "<databaseId> <tableName>")
 	TDatabaseId databaseId;
 	NLMISC::fromString(args[0], databaseId);
 
-	const std::string&	tableName = args[1];
+	const std::string &tableName = args[1];
 
-	CDatabase*			database = CDbManager::getDatabase(databaseId);
+	CDatabase *database = CDbManager::getDatabase(databaseId);
 	if (database == NULL)
 		return false;
 
-	const CTable*		table = database->getTable(tableName);
+	const CTable *table = database->getTable(tableName);
 	if (table == NULL)
 		return false;
 
@@ -935,13 +879,13 @@ NLMISC_COMMAND(dumpDeltaFileContent, "duump the content of a delta file", "<data
 	TDatabaseId databaseId;
 	NLMISC::fromString(args[0], databaseId);
 
-	const std::string&	tableName = args[1];
+	const std::string &tableName = args[1];
 
-	CDatabase*			database = CDbManager::getDatabase(databaseId);
+	CDatabase *database = CDbManager::getDatabase(databaseId);
 	if (database == NULL)
 		return false;
 
-	const CTable*		table = database->getTable(tableName);
+	const CTable *table = database->getTable(tableName);
 	if (table == NULL)
 		return false;
 
@@ -959,26 +903,26 @@ NLMISC_COMMAND(displayRow, "display row values", "<databaseId> [<tableName> <row
 	TDatabaseId databaseId;
 	NLMISC::fromString(args[0], databaseId);
 
-	CDatabase*			database = CDbManager::getDatabase(databaseId);
+	CDatabase *database = CDbManager::getDatabase(databaseId);
 	if (database == NULL)
 		return false;
 
-	CTable*		table = NULL;
-	RY_PDS::TRowIndex	rowId;
+	CTable *table = NULL;
+	RY_PDS::TRowIndex rowId;
 
 	if (args.size() == 3)
 	{
-		const CTable*	ctable = database->getTable(args[1]);
+		const CTable *ctable = database->getTable(args[1]);
 		if (ctable != NULL)
 		{
-			RY_PDS::TTableIndex	tableIndex = (RY_PDS::TTableIndex)ctable->getId();
+			RY_PDS::TTableIndex tableIndex = (RY_PDS::TTableIndex)ctable->getId();
 			table = database->getNonConstTable(tableIndex);
 			NLMISC::fromString(args[2], rowId);
 		}
 	}
 	else
 	{
-		RY_PDS::CObjectIndex	index;
+		RY_PDS::CObjectIndex index;
 		index.fromString(args[1].c_str());
 
 		table = database->getNonConstTable(index.table());
@@ -1002,15 +946,15 @@ NLMISC_COMMAND(allocRow, "allocate a row in a table of a given database", "<data
 	TDatabaseId databaseId;
 	NLMISC::fromString(args[0], databaseId);
 
-	const std::string&	tableName = args[1];
-	RY_PDS::TRowIndex	rowId;
+	const std::string &tableName = args[1];
+	RY_PDS::TRowIndex rowId;
 	NLMISC::fromString(args[2], rowId);
 
-	CDatabase*			database = CDbManager::getDatabase(databaseId);
+	CDatabase *database = CDbManager::getDatabase(databaseId);
 	if (database == NULL)
 		return false;
 
-	const CTable*		table = database->getTable(tableName);
+	const CTable *table = database->getTable(tableName);
 	if (table == NULL)
 		return false;
 
@@ -1026,23 +970,22 @@ NLMISC_COMMAND(deallocRow, "deallocate a row in a table of a given database", "<
 	TDatabaseId databaseId;
 	NLMISC::fromString(args[0], databaseId);
 
-	const std::string&	tableName = args[1];
-	RY_PDS::TRowIndex	rowId;
+	const std::string &tableName = args[1];
+	RY_PDS::TRowIndex rowId;
 	NLMISC::fromString(args[2], rowId);
 
-	CDatabase*			database = CDbManager::getDatabase(databaseId);
+	CDatabase *database = CDbManager::getDatabase(databaseId);
 
 	if (database == NULL)
 		return false;
 
-	const CTable*		table = database->getTable(tableName);
+	const CTable *table = database->getTable(tableName);
 
 	if (table == NULL)
 		return false;
 
 	return database->deallocate(RY_PDS::CObjectIndex((RY_PDS::TTableIndex)table->getId(), rowId));
 }
-
 
 //
 NLMISC_COMMAND(mapRow, "map a row in a table of a given database with a 64bits key", "<databaseId> <tableName> <rowId> <key64>")
@@ -1053,18 +996,18 @@ NLMISC_COMMAND(mapRow, "map a row in a table of a given database with a 64bits k
 	TDatabaseId databaseId;
 	NLMISC::fromString(args[0], databaseId);
 
-	const std::string&	tableName = args[1];
-	RY_PDS::TRowIndex	rowId;
+	const std::string &tableName = args[1];
+	RY_PDS::TRowIndex rowId;
 	NLMISC::fromString(args[2], rowId);
-	uint64				key;
+	uint64 key;
 	sscanf(args[3].c_str(), "%" NL_I64 "X", &key);
 
-	CDatabase*			database = CDbManager::getDatabase(databaseId);
+	CDatabase *database = CDbManager::getDatabase(databaseId);
 
 	if (database == NULL)
 		return false;
 
-	const CTable*		table = database->getTable(tableName);
+	const CTable *table = database->getTable(tableName);
 
 	if (table == NULL)
 		return false;
@@ -1078,18 +1021,18 @@ NLMISC_COMMAND(unmapRow, "unmap a row in a table of a given database with a 64bi
 	if (args.size() != 3)
 		return false;
 
-	TDatabaseId			databaseId;
+	TDatabaseId databaseId;
 	NLMISC::fromString(args[0], databaseId);
-	const std::string&	tableName = args[1];
-	uint64				key;
+	const std::string &tableName = args[1];
+	uint64 key;
 	sscanf(args[2].c_str(), "%" NL_I64 "X", &key);
 
-	CDatabase*			database = CDbManager::getDatabase(databaseId);
+	CDatabase *database = CDbManager::getDatabase(databaseId);
 
 	if (database == NULL)
 		return false;
 
-	const CTable*		table = database->getTable(tableName);
+	const CTable *table = database->getTable(tableName);
 
 	if (table == NULL)
 		return false;
@@ -1103,26 +1046,26 @@ NLMISC_COMMAND(setValue, "set a value in table", "<databaseId> <tableName> <rowI
 	if (args.size() != 6)
 		return false;
 
-	TDatabaseId				databaseId;
+	TDatabaseId databaseId;
 	NLMISC::fromString(args[0], databaseId);
 
-	const std::string&		tableName = args[1];
+	const std::string &tableName = args[1];
 
-	RY_PDS::TRowIndex		rowId;
+	RY_PDS::TRowIndex rowId;
 	NLMISC::fromString(args[2], rowId);
 
-	RY_PDS::TColumnIndex	colId;
+	RY_PDS::TColumnIndex colId;
 	NLMISC::fromString(args[3], colId);
 
-	const std::string&		type = args[4];
-	const std::string&		value = args[5];
+	const std::string &type = args[4];
+	const std::string &value = args[5];
 
-	CDatabase*				database = CDbManager::getDatabase(databaseId);
+	CDatabase *database = CDbManager::getDatabase(databaseId);
 
 	if (database == NULL)
 		return false;
 
-	const CTable*			table = database->getTable(tableName);
+	const CTable *table = database->getTable(tableName);
 
 	if (table == NULL)
 		return false;
@@ -1130,30 +1073,27 @@ NLMISC_COMMAND(setValue, "set a value in table", "<databaseId> <tableName> <rowI
 	return database->set((RY_PDS::TTableIndex)table->getId(), rowId, colId, type, value);
 }
 
-
-
-
 //
 NLMISC_COMMAND(set, "set a value in table", "<locatepath> [<type>] <value>")
 {
 	if (args.size() != 2 && args.size() != 3)
 		return false;
 
-	CLocatePath			path;
+	CLocatePath path;
 
 	if (!CDbManager::parsePath(args[0], path))
 		return false;
 
-	CTable::CDataAccessor	accessor = CDbManager::locate(path);
+	CTable::CDataAccessor accessor = CDbManager::locate(path);
 
 	if (!accessor.isValid())
 		return false;
 
-	CDatabase*			database = const_cast<CDatabase*>(accessor.table()->getParent());
-	const CTable*		table = accessor.table();
+	CDatabase *database = const_cast<CDatabase *>(accessor.table()->getParent());
+	const CTable *table = accessor.table();
 
-	const std::string	value = (args.size() == 3 ? args[2] : args[1]);
-	const std::string	type = (args.size() == 2 ? getNameFromDataType(accessor.column()->getDataType()) : args[1]);
+	const std::string value = (args.size() == 3 ? args[2] : args[1]);
+	const std::string type = (args.size() == 2 ? getNameFromDataType(accessor.column()->getDataType()) : args[1]);
 
 	return database->set((RY_PDS::TTableIndex)table->getId(), accessor.row(), (RY_PDS::TColumnIndex)accessor.column()->getId(), type, value);
 }
@@ -1164,12 +1104,12 @@ NLMISC_COMMAND(get, "get a value in table", "<locatepath>")
 	if (args.size() != 1)
 		return false;
 
-	CLocatePath			path;
+	CLocatePath path;
 
 	if (!CDbManager::parsePath(args[0], path))
 		return false;
 
-	CTable::CDataAccessor	accessor = CDbManager::locate(path);
+	CTable::CDataAccessor accessor = CDbManager::locate(path);
 
 	log.displayNL("%s = '%s'", args[0].c_str(), accessor.valueAsString(1).c_str());
 
@@ -1177,7 +1117,7 @@ NLMISC_COMMAND(get, "get a value in table", "<locatepath>")
 }
 
 //
-//NLMISC_COMMAND(displayStringManager, "display the content of a string manager", "<databaseId>")
+// NLMISC_COMMAND(displayStringManager, "display the content of a string manager", "<databaseId>")
 //{
 //	if (args.size() != 1)
 //		return false;
@@ -1194,28 +1134,27 @@ NLMISC_COMMAND(get, "get a value in table", "<locatepath>")
 //	return true;
 //}
 
-
 //
 NLMISC_COMMAND(dumpToXml, "dump the content of an object into an xml file", "<databaseId> <objectIndex|entityId|key64> <xmlfilename> [sint expandDepth=-1(infinite depth)]")
 {
 	if (args.size() < 3 || args.size() > 4)
 		return false;
 
-	TDatabaseId				databaseId;
+	TDatabaseId databaseId;
 	NLMISC::fromString(args[0], databaseId);
 
-	CDatabase*				database = CDbManager::getDatabase(databaseId);
+	CDatabase *database = CDbManager::getDatabase(databaseId);
 
 	if (database == NULL)
 		return false;
 
-	RY_PDS::CObjectIndex	index;
+	RY_PDS::CObjectIndex index;
 
 	index.fromString(args[1].c_str(), database);
 	if (!index.isValid())
 	{
-		uint64				key;
-		NLMISC::CEntityId	id;
+		uint64 key;
+		NLMISC::CEntityId id;
 		id.fromString(args[1].c_str());
 
 		if (id == NLMISC::CEntityId::Unknown)
@@ -1231,7 +1170,7 @@ NLMISC_COMMAND(dumpToXml, "dump the content of an object into an xml file", "<da
 			key = id.getRawId();
 		}
 
-		std::set<RY_PDS::CObjectIndex>	indexes;
+		std::set<RY_PDS::CObjectIndex> indexes;
 		if (!database->searchObjectIndex(key, indexes))
 		{
 			log.displayNL("no object matching key %s found", args[1].c_str());
@@ -1241,9 +1180,9 @@ NLMISC_COMMAND(dumpToXml, "dump the content of an object into an xml file", "<da
 		if (indexes.size() > 1)
 		{
 			log.displayNL("%d objects match key '%s', please select the correct ObjectIndex below", indexes.size(), args[1].c_str());
-			
-			std::set<RY_PDS::CObjectIndex>::iterator	it;
-			for (it=indexes.begin(); it!=indexes.end(); ++it)
+
+			std::set<RY_PDS::CObjectIndex>::iterator it;
+			for (it = indexes.begin(); it != indexes.end(); ++it)
 				log.displayNL("%s", it->toString(database).c_str());
 			return true;
 		}
@@ -1251,15 +1190,15 @@ NLMISC_COMMAND(dumpToXml, "dump the content of an object into an xml file", "<da
 		index = *(indexes.begin());
 	}
 
-	COFile	ofile;
+	COFile ofile;
 	if (!ofile.open(args[2]))
 		return false;
 
-	COXml	oxml;
+	COXml oxml;
 	if (!oxml.init(&ofile))
 		return false;
 
-	sint	expandDepth = -1;
+	sint expandDepth = -1;
 	if (args.size() == 4)
 	{
 		NLMISC::fromString(args[3], expandDepth);
@@ -1269,4 +1208,3 @@ NLMISC_COMMAND(dumpToXml, "dump the content of an object into an xml file", "<da
 
 	return true;
 }
-

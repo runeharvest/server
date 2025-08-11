@@ -31,7 +31,6 @@ class COutpost;
 class COutpostBuilding
 {
 public:
-
 	DECLARE_PERSISTENCE_METHODS
 
 	COutpostBuilding(COutpost *parent, TAIAlias alias, const NLMISC::CVector &center, NLMISC::CSheetId defaultSheet);
@@ -71,7 +70,6 @@ public:
 	void setConstructionTime(uint32 nNbSeconds, uint32 nCurrentTime);
 
 private:
-
 	// Never construct a building like this
 	COutpostBuilding() { }
 
@@ -82,15 +80,15 @@ private:
 private:
 	/// @name Primitive data (static)
 	//@{
-	COutpost				*_Parent;
-	
-	TAIAlias				_Alias;
-	
+	COutpost *_Parent;
+
+	TAIAlias _Alias;
+
 	// Position in the world
-	NLMISC::CVector			_Center;
+	NLMISC::CVector _Center;
 
 	// Default sheet of the building
-	NLMISC::CSheetId		_DefaultSheet;
+	NLMISC::CSheetId _DefaultSheet;
 	//@}
 
 	/// @name Sheet data (static)
@@ -98,29 +96,29 @@ private:
 	// Static data of the building
 	const CStaticOutpostBuilding *_StaticData;
 	//@}
-	
+
 	/// @name Persistent data
 	//@{
 	// Date of the last constructed or the beginning of construction
-	uint32					_BuiltDate;
-	
+	uint32 _BuiltDate;
+
 	// Is there a construction in progress ?
-	bool					_Constructing;
-	
+	bool _Constructing;
+
 	// Currently spawned object
-	NLMISC::CSheetId		_CurrentSheet;
-	
+	NLMISC::CSheetId _CurrentSheet;
+
 	/// Used for driller
 	//@{
-	float	_MPLeft;
-	uint32	_MPLastTime;
+	float _MPLeft;
+	uint32 _MPLastTime;
 	//@}
 	//@}
-	
+
 	/// @name Dynamic data
 	//@{
 	/// Used BotObject
-	NLMISC::CRefPtr<CCreature>	_BotObject;
+	NLMISC::CRefPtr<CCreature> _BotObject;
 	//@}
 };
 

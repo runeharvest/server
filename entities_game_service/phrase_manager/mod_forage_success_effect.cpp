@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -32,11 +30,10 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
 //		update
 //--------------------------------------------------------------
-bool CModForageSuccessEffect::update(CTimerEvent * event, bool applyEffect)
+bool CModForageSuccessEffect::update(CTimerEvent *event, bool applyEffect)
 {
 	if (!TheDataset.isAccessible(_TargetRowId))
 	{
@@ -50,9 +47,9 @@ bool CModForageSuccessEffect::update(CTimerEvent * event, bool applyEffect)
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
 	}
-	
-	player->forageSuccessModifier( ECOSYSTEM::stringToEcosystem(_Ecosystem), (sint32)(_Modifier1 + _Modifier2) );
-		
+
+	player->forageSuccessModifier(ECOSYSTEM::stringToEcosystem(_Ecosystem), (sint32)(_Modifier1 + _Modifier2));
+
 	return false;
 } // update //
 
@@ -68,10 +65,9 @@ void CModForageSuccessEffect::removed()
 		nlwarning("Cannot find target entity %s", _TargetRowId.toString().c_str());
 		return;
 	}
-	
-	player->forageSuccessModifier( ECOSYSTEM::stringToEcosystem(_Ecosystem), 0 );
-}
 
+	player->forageSuccessModifier(ECOSYSTEM::stringToEcosystem(_Ecosystem), 0);
+}
 
 //--------------------------------------------------------------
 //		activate
@@ -88,13 +84,13 @@ void CModForageSuccessEffect::activate()
 	ECOSYSTEM::EECosystem eco = ECOSYSTEM::stringToEcosystem(_Ecosystem);
 	EFFECT_FAMILIES::TEffectFamily effectFamily = EFFECT_FAMILIES::Unknown;
 
-	CModForageSuccessEffect *effect = new CModForageSuccessEffect(actor->getEntityRowId(), 
-		getEndDate()+CTickEventHandler::getGameCycle(),
-		_Family,
-		_Ecosystem,
-		_Modifier1,
-		_Modifier2);
-	
+	CModForageSuccessEffect *effect = new CModForageSuccessEffect(actor->getEntityRowId(),
+	    getEndDate() + CTickEventHandler::getGameCycle(),
+	    _Family,
+	    _Ecosystem,
+	    _Modifier1,
+	    _Modifier2);
+
 	if (!effect)
 	{
 		nlwarning("<CModForageSuccessEffect::activate> Failed to allocate new CModForageSuccessEffect");
@@ -103,7 +99,6 @@ void CModForageSuccessEffect::activate()
 	actor->addSabrinaEffect(effect);
 }
 
-
 //-----------------------------------------------------------------------------
 // Persistent data for CModForageSuccessEffect
 //-----------------------------------------------------------------------------
@@ -111,14 +106,13 @@ void CModForageSuccessEffect::activate()
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
 #define PERSISTENT_CLASS CModForageSuccessEffect
 
-#define PERSISTENT_DATA\
-	STRUCT2(STimedEffect,					CSTimedEffect::store(pdr),						CSTimedEffect::apply(pdr))\
-	PROP2(_CreatorEntityId,		CEntityId,	TheDataset.getEntityId(getCreatorRowId()),		_CreatorEntityId = val)\
-	PROP2(_TargetDisableTime,	TGameCycle,	_TargetDisableTime>CTickEventHandler::getGameCycle()?_TargetDisableTime-CTickEventHandler::getGameCycle():0,	_TargetDisableTime=val)\
-	PROP(std::string,_Ecosystem)\
-	PROP(float,_Modifier1)\
-	PROP(float,_Modifier2)\
+#define PERSISTENT_DATA                                                                                                                                                                  \
+	STRUCT2(STimedEffect, CSTimedEffect::store(pdr), CSTimedEffect::apply(pdr))                                                                                                          \
+	PROP2(_CreatorEntityId, CEntityId, TheDataset.getEntityId(getCreatorRowId()), _CreatorEntityId = val)                                                                                \
+	PROP2(_TargetDisableTime, TGameCycle, _TargetDisableTime > CTickEventHandler::getGameCycle() ? _TargetDisableTime - CTickEventHandler::getGameCycle() : 0, _TargetDisableTime = val) \
+	PROP(std::string, _Ecosystem)                                                                                                                                                        \
+	PROP(float, _Modifier1)                                                                                                                                                              \
+	PROP(float, _Modifier2)
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
-

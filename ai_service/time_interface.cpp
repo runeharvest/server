@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "time_interface.h"
 #include "game_share/tick_event_handler.h"
@@ -27,6 +25,6 @@ using namespace NLNET;
 using namespace NLMISC;
 using namespace std;
 
-CTimeDateSeasonManager	CTimeInterface::_TimeDateSeason;
-bool					CTimeInterface::_isDay;
-CRyzomTime				CTimeInterface::_DebugTime;
+CTimeDateSeasonManager CTimeInterface::_TimeDateSeason;
+bool CTimeInterface::_isDay;
+CRyzomTime CTimeInterface::_DebugTime;

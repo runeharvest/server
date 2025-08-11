@@ -14,14 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef PLAYER_INV_XCHG_H
 #define PLAYER_INV_XCHG_H
 
 #include "game_item_manager/game_item.h"
 #include "game_item_manager/player_inventory.h"
 #include "game_share/item_type.h"
-
 
 /**
  * CExchangeView
@@ -46,16 +44,16 @@ public:
 	void clearExchangeView();
 
 	/// set interlocutor view, interlocutorView can be NULL in the case of bot gift
-	void setInterlocutorView(CExchangeView * interlocutorView);
+	void setInterlocutorView(CExchangeView *interlocutorView);
 
 	/// get interlocutor view
-	CExchangeView * getInterlocutorView() { return _InterlocutorView; }
+	CExchangeView *getInterlocutorView() { return _InterlocutorView; }
 
 	/// the following events are ignored
-	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) {}
-	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) {}
-	virtual void onItemStackSizeChanged(uint32 slot, uint32 previousStackSize) {}
-	virtual void forceSlotUpdate(uint32 slot) {}
+	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) { }
+	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) { }
+	virtual void onItemStackSizeChanged(uint32 slot, uint32 previousStackSize) { }
+	virtual void forceSlotUpdate(uint32 slot) { }
 
 	/// put an item in exchange
 	bool putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint32 quantity);
@@ -66,7 +64,7 @@ public:
 
 	/// validate exchange
 	/// \param givenItems : if not NULL, return the given items
-	void validateExchange(std::vector<CGameItemPtr> * givenItems);
+	void validateExchange(std::vector<CGameItemPtr> *givenItems);
 
 	/// if we change this exchange view, call this on the interlocutor exchange view
 	void onInterlocutorSlotChanged(uint32 interlocutorGiveSlot);
@@ -74,13 +72,13 @@ public:
 	/// helper: get the item proposed in the given exchange slot
 	/// \param exchangeSlot : slot in the exchange view
 	/// \param exchangeQuantity : if not NULL, returns the quantity of the item offered in the exchange
-	CGameItemPtr getExchangeItem(uint32 exchangeSlot, uint32 * exchangeQuantity = NULL) const;
+	CGameItemPtr getExchangeItem(uint32 exchangeSlot, uint32 *exchangeQuantity = NULL) const;
 
 	/// return true if there is no item in the exchange view
 	bool isEmpty() const;
 
 	/// return nb ticket exchanged for an ticket type
-	uint32 getPetTicketExchanged(ITEM_TYPE::TItemType itemType) { return * getPetTicketCount(itemType); }
+	uint32 getPetTicketExchanged(ITEM_TYPE::TItemType itemType) { return *getPetTicketCount(itemType); }
 
 private:
 	/// helper: used to update client when an exchange slot changes
@@ -90,7 +88,7 @@ private:
 	bool isPetTicket(ITEM_TYPE::TItemType itemType) const;
 
 	/// return a pointer of _PackerTicketCount or _MountTicketCount depending on the type
-	uint32 * getPetTicketCount(ITEM_TYPE::TItemType itemType);
+	uint32 *getPetTicketCount(ITEM_TYPE::TItemType itemType);
 
 private:
 	struct CExchangeSlot
@@ -114,6 +112,5 @@ private:
 	/// nb of mount tickets in the exchange view
 	uint32 _MountTicketCount;
 };
-
 
 #endif

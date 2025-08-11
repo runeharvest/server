@@ -14,42 +14,39 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef RYZOM_ITEM_WORN_STATE_H
 #define RYZOM_ITEM_WORN_STATE_H
 
-namespace ITEM_WORN_STATE
+namespace ITEM_WORN_STATE {
+enum TItemWornState
 {
-	enum TItemWornState
-	{
-		Unspoiled = 0,
-		WornState1,
-		WornState2,
-		WornState3,
-		WornState4,
-		Worned,		
-	};
+	Unspoiled = 0,
+	WornState1,
+	WornState2,
+	WornState3,
+	WornState4,
+	Worned,
+};
 
+/**
+ * get item worn state corresponding to input string
+ * \param str the input string
+ * \return the TItemWornState associated to this string (nothing if the string cannot be interpreted)
+ */
+TItemWornState fromString(const std::string &str);
 
-	/**
-	 * get item worn state corresponding to input string
-	 * \param str the input string
-	 * \return the TItemWornState associated to this string (nothing if the string cannot be interpreted)
-	 */
-	TItemWornState fromString(const std::string &str);
+/**
+ * get the protection type string corresponding to enum
+ * \param type the TProtectionType value
+ * \return type as a string (or nothing)
+ */
+const std::string &toString(TItemWornState state);
 
-	/**
-	 * get the protection type string corresponding to enum
-	 * \param type the TProtectionType value
-	 * \return type as a string (or nothing)
-	 */
-	const std::string& toString(TItemWornState state);
-
-	/**
-	 * get the chat message to send when an item changes it's state
-	 * \param state the worn state of the item
-	 */
-	const std::string& getMessageForState(TItemWornState state);
+/**
+ * get the chat message to send when an item changes it's state
+ * \param state the worn state of the item
+ */
+const std::string &getMessageForState(TItemWornState state);
 
 }; // ITEM_WORN_STATE
 

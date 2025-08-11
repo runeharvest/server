@@ -28,17 +28,14 @@
 using namespace std;
 using namespace NLMISC;
 
-
-
 NLMISC_COMMAND(testStamp, "", "")
 {
 	if (args.size() != 1)
 		return false;
 
-	CTimestamp	stamp;
+	CTimestamp stamp;
 
 	stamp.fromString(args[0].c_str());
 
 	return true;
 }
-

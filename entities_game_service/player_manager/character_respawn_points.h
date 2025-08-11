@@ -17,7 +17,6 @@
 #ifndef EGS_CHARACTER_RESPAWN_POINTS_H
 #define EGS_CHARACTER_RESPAWN_POINTS_H
 
-
 //-----------------------------------------------------------------------------
 // includes
 //-----------------------------------------------------------------------------
@@ -62,7 +61,7 @@ public:
 	/// also they will be cleared when player will leave the given continent
 	/// NOTE: the given respawn points can (or even should) be located in another continent than 'continent'
 	/// WARNING: all the given respawn points must be located in the same continent
-	void setMissionRespawnPoints(CONTINENT::TContinent continent, const std::vector<TRespawnPoint> & respawnPoints, bool hideOthers);
+	void setMissionRespawnPoints(CONTINENT::TContinent continent, const std::vector<TRespawnPoint> &respawnPoints, bool hideOthers);
 
 	/// set Ring adventure respawn point
 	/// will been seen by player if he exist when player dies, other re-spawn point are not displayed in this case.
@@ -74,12 +73,12 @@ public:
 	void clearRingRespawnpoint();
 
 	/// return true and fill coordinate if r-spawn point is a ring adventure re-spawn point, else return false
-	bool getRingAdventuresRespawnPoint( sint32 &x, sint32 &y ) const;
+	bool getRingAdventuresRespawnPoint(sint32 &x, sint32 &y) const;
 
 	/// get the respawn points that player can use in the given continent
-	void getUsableRespawnPoints(CONTINENT::TContinent continent, std::vector<TRespawnPoint> & respawnPoints) const;
+	void getUsableRespawnPoints(CONTINENT::TContinent continent, std::vector<TRespawnPoint> &respawnPoints) const;
 
-	/// Build a container with 
+	/// Build a container with
 	CONTINENT::TRespawnPointCounters buildRingPoints() const;
 
 	/// clear all respawn points (regular and mission)
@@ -93,11 +92,11 @@ public:
 	void cbContinentChanged(CONTINENT::TContinent previousContinent);
 
 	/// dump all respawn points of the player
-	void dumpRespawnPoints(NLMISC::CLog & log) const;
+	void dumpRespawnPoints(NLMISC::CLog &log) const;
 
 	/// DO NOT USE THIS
 	/// this old serial method is only here to load old save game
-//	void legacyLoad(NLMISC::IStream & f);
+	//	void legacyLoad(NLMISC::IStream & f);
 
 	/// reset user db (resend all respawn points of the current continent to the client)
 	void resetUserDb() const;
@@ -107,16 +106,16 @@ private:
 	class CMissionRespawnPoints : public std::vector<TRespawnPoint>
 	{
 	public:
-		DECLARE_PERSISTENCE_METHODS_WITH_ARG(const CCharacter& c)
+		DECLARE_PERSISTENCE_METHODS_WITH_ARG(const CCharacter &c)
 
 		/// ctor
 		CMissionRespawnPoints()
-		: _HideOthers(true)
+		    : _HideOthers(true)
 		{
 		}
 
-		bool getHideOthers() const			{ return _HideOthers;		}
-		void setHideOthers(bool hideOthers)	{ _HideOthers = hideOthers;	}
+		bool getHideOthers() const { return _HideOthers; }
+		void setHideOthers(bool hideOthers) { _HideOthers = hideOthers; }
 
 	private:
 		/// if true these mission respawn points will hide the other respawn points
@@ -125,7 +124,7 @@ private:
 
 	/// get mission respawn points of the given continent
 	/// \return false if continent has no event respawn point
-	const CMissionRespawnPoints * getMissionRespawnPoints(CONTINENT::TContinent continent) const;
+	const CMissionRespawnPoints *getMissionRespawnPoints(CONTINENT::TContinent continent) const;
 
 	/// return true if player can use the given regular respawn point in the given continent
 	bool isUsableRegularRespawnPoint(CONTINENT::TContinent continent, TRespawnPoint respawnPoint) const;
@@ -144,7 +143,7 @@ private:
 	std::map<sint32, CMissionRespawnPoints> _MissionRespawnPointsByContinent;
 
 	/// Ring adventure re-spawn point
-	CFarPosition	_RingRespawnPoint;
+	CFarPosition _RingRespawnPoint;
 };
 
 #endif // EGS_CHARACTER_RESPAWN_POINTS_H

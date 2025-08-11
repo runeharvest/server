@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #ifndef RYAI_EGS_INTERFACE_H
 #define RYAI_EGS_INTERFACE_H
 
@@ -26,8 +23,7 @@
 #include "nel/misc/entity_id.h"
 #include "nel/misc/sheet_id.h"
 
-//#include "ai_entity_id.h"
-
+// #include "ai_entity_id.h"
 
 // the class
 class CEGSInterface
@@ -39,32 +35,29 @@ public:
 	static void release();
 };
 
-
 class CAddHandledAIGroupImp : public CAddHandledAIGroupMsg
 {
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 };
 
 class CDelHandledAIGroupImp : public CDelHandledAIGroupMsg
 {
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 };
 
 class CCreatureDespawnImp : public CCreatureDespawnMsg
 {
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback(const std::string &name, NLNET::TServiceId id);
 };
 
 class CUserEventMsgImp : public CUserEventMsg
-{	
-	void callback (const std::string &name, NLNET::TServiceId id);
+{
+	void callback(const std::string &name, NLNET::TServiceId id);
 };
 
 class CSetEscortTeamIdImp : public CSetEscortTeamId
 {
-	void callback (const std::string &name, NLNET::TServiceId id);
+	void callback(const std::string &name, NLNET::TServiceId id);
 };
-
-
 
 #endif

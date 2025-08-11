@@ -14,30 +14,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "egs_pd.h"
 
-namespace EGSPD
-{
-	
+namespace EGSPD {
+
 /* -----------------------------------------
-* Static Implementation of CGuildMemberPD
-* ----------------------------------------- */
-TCharacterId					CGuildMemberPD::getId() const
+ * Static Implementation of CGuildMemberPD
+ * ----------------------------------------- */
+TCharacterId CGuildMemberPD::getId() const
 {
 	return _Id;
 }
-CGuildGrade::TGuildGrade		CGuildMemberPD::getGrade() const
+CGuildGrade::TGuildGrade CGuildMemberPD::getGrade() const
 {
 	return _Grade;
 }
-void							CGuildMemberPD::setGrade(CGuildGrade::TGuildGrade __v, bool forceWrite)
+void CGuildMemberPD::setGrade(CGuildGrade::TGuildGrade __v, bool forceWrite)
 {
-	nlassert(__v<CGuildGrade::___TGuildGrade_useSize);
+	nlassert(__v < CGuildGrade::___TGuildGrade_useSize);
 	if (_Grade != __v)
 	{
-		// callback the manager 
+		// callback the manager
 		IGuildManager::getInstance().guildMemberChanged(this);
 	}
 	if ((_Grade != __v) || forceWrite)
@@ -46,11 +44,11 @@ void							CGuildMemberPD::setGrade(CGuildGrade::TGuildGrade __v, bool forceWrit
 	}
 	_Grade = __v;
 }
-uint32							CGuildMemberPD::getEnterTime() const
+uint32 CGuildMemberPD::getEnterTime() const
 {
 	return _EnterTime;
 }
-void							CGuildMemberPD::setEnterTime(uint32 __v, bool forceWrite)
+void CGuildMemberPD::setEnterTime(uint32 __v, bool forceWrite)
 {
 	if ((_EnterTime != __v) || forceWrite)
 	{
@@ -58,53 +56,53 @@ void							CGuildMemberPD::setEnterTime(uint32 __v, bool forceWrite)
 	}
 	_EnterTime = __v;
 }
-CGuildPD*						CGuildMemberPD::getGuild()
+CGuildPD *CGuildMemberPD::getGuild()
 {
 	return _Guild;
 }
-const CGuildPD*					CGuildMemberPD::getGuild() const
+const CGuildPD *CGuildMemberPD::getGuild() const
 {
 	return _Guild;
 }
-void							CGuildMemberPD::clear()
+void CGuildMemberPD::clear()
 {
 	_Grade = (CGuildGrade::TGuildGrade)0;
 	PDSLib.set(3, __BaseRow, (RY_PDS::TColumnIndex)(1), (uint32)(CGuildGrade::TGuildGrade)0);
 	_EnterTime = 0;
 	PDSLib.set(3, __BaseRow, (RY_PDS::TColumnIndex)(2), 0);
 }
-CGuildMemberPD*					CGuildMemberPD::cast(RY_PDS::IPDBaseData* obj)
+CGuildMemberPD *CGuildMemberPD::cast(RY_PDS::IPDBaseData *obj)
 {
-	return (obj->getTable() == 3) ? static_cast<CGuildMemberPD*>(obj) : NULL;
+	return (obj->getTable() == 3) ? static_cast<CGuildMemberPD *>(obj) : NULL;
 }
-const CGuildMemberPD*			CGuildMemberPD::cast(const RY_PDS::IPDBaseData* obj)
+const CGuildMemberPD *CGuildMemberPD::cast(const RY_PDS::IPDBaseData *obj)
 {
-	return (obj->getTable() == 3) ? static_cast<const CGuildMemberPD*>(obj) : NULL;
+	return (obj->getTable() == 3) ? static_cast<const CGuildMemberPD *>(obj) : NULL;
 }
-void							CGuildMemberPD::setFactory(RY_PDS::TPDFactory userFactory)
+void CGuildMemberPD::setFactory(RY_PDS::TPDFactory userFactory)
 {
 	pds_static__setFactory(userFactory);
 }
-CGuildMemberPD*					CGuildMemberPD::create(const TCharacterId &Id)
+CGuildMemberPD *CGuildMemberPD::create(const TCharacterId &Id)
 {
-	CGuildMemberPD	*__o = static_cast<CGuildMemberPD*>(PDSLib.create(3));
+	CGuildMemberPD *__o = static_cast<CGuildMemberPD *>(PDSLib.create(3));
 	__o->pds__init(Id);
 	__o->pds__register();
 	__o->pds__notifyInit();
 	return __o;
 }
-void							CGuildMemberPD::apply(CPersistentDataRecord &__pdr)
+void CGuildMemberPD::apply(CPersistentDataRecord &__pdr)
 {
-	uint16	__Tok_MapKey = __pdr.addString("__Key__");
-	uint16	__Tok_MapVal = __pdr.addString("__Val__");
-	uint16	__Tok_ClassName = __pdr.addString("__Class__");
-	uint16	__TokId = __pdr.addString("Id");
-	uint16	__TokGrade = __pdr.addString("Grade");
-	uint16	__TokEnterTime = __pdr.addString("EnterTime");
+	uint16 __Tok_MapKey = __pdr.addString("__Key__");
+	uint16 __Tok_MapVal = __pdr.addString("__Val__");
+	uint16 __Tok_ClassName = __pdr.addString("__Class__");
+	uint16 __TokId = __pdr.addString("Id");
+	uint16 __TokGrade = __pdr.addString("Grade");
+	uint16 __TokEnterTime = __pdr.addString("EnterTime");
 	_Guild = NULL;
 	while (!__pdr.isEndOfStruct())
 	{
-		if (false) {}
+		if (false) { }
 		else if (__pdr.peekNextToken() == __TokId)
 		{
 			__pdr.pop(__TokId, _Id);
@@ -112,7 +110,7 @@ void							CGuildMemberPD::apply(CPersistentDataRecord &__pdr)
 		else if (__pdr.peekNextToken() == __TokGrade)
 		{
 			{
-				std::string	valuename;
+				std::string valuename;
 				__pdr.pop(__TokGrade, valuename);
 				_Grade = CGuildGrade::fromString(valuename);
 			}
@@ -128,67 +126,67 @@ void							CGuildMemberPD::apply(CPersistentDataRecord &__pdr)
 		}
 	}
 }
-void							CGuildMemberPD::store(CPersistentDataRecord &__pdr) const
+void CGuildMemberPD::store(CPersistentDataRecord &__pdr) const
 {
-	uint16	__Tok_MapKey = __pdr.addString("__Key__");
-	uint16	__Tok_MapVal = __pdr.addString("__Val__");
-	uint16	__Tok_ClassName = __pdr.addString("__Class__");
-	uint16	__TokId = __pdr.addString("Id");
-	uint16	__TokGrade = __pdr.addString("Grade");
-	uint16	__TokEnterTime = __pdr.addString("EnterTime");
+	uint16 __Tok_MapKey = __pdr.addString("__Key__");
+	uint16 __Tok_MapVal = __pdr.addString("__Val__");
+	uint16 __Tok_ClassName = __pdr.addString("__Class__");
+	uint16 __TokId = __pdr.addString("Id");
+	uint16 __TokGrade = __pdr.addString("Grade");
+	uint16 __TokEnterTime = __pdr.addString("EnterTime");
 	__pdr.push(__TokId, _Id);
 	{
-		std::string	valuename = CGuildGrade::toString(_Grade);
+		std::string valuename = CGuildGrade::toString(_Grade);
 		__pdr.push(__TokGrade, valuename);
 	}
 	__pdr.push(__TokEnterTime, _EnterTime);
 }
-void							CGuildMemberPD::init()
+void CGuildMemberPD::init()
 {
 }
-void							CGuildMemberPD::release()
+void CGuildMemberPD::release()
 {
 }
-void							CGuildMemberPD::pds__init(const TCharacterId &Id)
+void CGuildMemberPD::pds__init(const TCharacterId &Id)
 {
 	_Id = Id;
 	_Grade = (CGuildGrade::TGuildGrade)0;
 	_EnterTime = 0;
 	_Guild = NULL;
 }
-void							CGuildMemberPD::pds__destroy()
+void CGuildMemberPD::pds__destroy()
 {
 }
-void							CGuildMemberPD::pds__fetch(RY_PDS::CPData &data)
+void CGuildMemberPD::pds__fetch(RY_PDS::CPData &data)
 {
 	data.serial(_Id);
 	data.serialEnum(_Grade);
 	data.serial(_EnterTime);
 	_Guild = NULL;
 }
-void							CGuildMemberPD::pds__register()
+void CGuildMemberPD::pds__register()
 {
 	__BaseRow = _IndexAllocator.allocate();
 	PDSLib.allocateRow(3, __BaseRow, 0, _Id);
 	pds__registerAttributes();
 }
-void							CGuildMemberPD::pds__registerAttributes()
+void CGuildMemberPD::pds__registerAttributes()
 {
-	if (RY_PDS::PDVerbose)	nldebug("CGuildMemberPD: registerAttributes %u:%u", 3, __BaseRow);
+	if (RY_PDS::PDVerbose) nldebug("CGuildMemberPD: registerAttributes %u:%u", 3, __BaseRow);
 	PDSLib.set(3, __BaseRow, (RY_PDS::TColumnIndex)(0), _Id);
 }
-void							CGuildMemberPD::pds__unregister()
+void CGuildMemberPD::pds__unregister()
 {
 	pds__unregisterAttributes();
 	PDSLib.deallocateRow(3, __BaseRow, _Id);
 	_IndexAllocator.deallocate(__BaseRow);
 }
-void							CGuildMemberPD::pds__unregisterAttributes()
+void CGuildMemberPD::pds__unregisterAttributes()
 {
-	if (RY_PDS::PDVerbose)	nldebug("CGuildMemberPD: unregisterAttributes %u:%u", 3, __BaseRow);
+	if (RY_PDS::PDVerbose) nldebug("CGuildMemberPD: unregisterAttributes %u:%u", 3, __BaseRow);
 	pds__setParent(NULL);
 }
-void							CGuildMemberPD::pds__setParent(CGuildPD* __parent)
+void CGuildMemberPD::pds__setParent(CGuildPD *__parent)
 {
 	if (_Guild != NULL)
 	{
@@ -197,20 +195,20 @@ void							CGuildMemberPD::pds__setParent(CGuildPD* __parent)
 	_Guild = __parent;
 	PDSLib.setParent(3, getRow(), (RY_PDS::TColumnIndex)(3), (__parent != NULL ? RY_PDS::CObjectIndex(4, __parent->getRow()) : RY_PDS::CObjectIndex::null()), _Id);
 }
-void							CGuildMemberPD::pds__setParentUnnotified(CGuildPD* __parent)
+void CGuildMemberPD::pds__setParentUnnotified(CGuildPD *__parent)
 {
 	_Guild = __parent;
 }
-void							CGuildMemberPD::pds__notifyInit()
+void CGuildMemberPD::pds__notifyInit()
 {
 	init();
 }
-void							CGuildMemberPD::pds__notifyRelease()
+void CGuildMemberPD::pds__notifyRelease()
 {
 	release();
 	PDSLib.release(3, __BaseRow);
 }
-void							CGuildMemberPD::pds_static__init()
+void CGuildMemberPD::pds_static__init()
 {
 	PDSLib.setIndexAllocator(3, _IndexAllocator);
 	nlassertex(_FactoryInitialised, ("User Factory for class CGuildMemberPD not set!"));
@@ -218,7 +216,7 @@ void							CGuildMemberPD::pds_static__init()
 	// You must provide a factory for the class CGuildMemberPD as it is marked as derived
 	// Call EGSPD::CGuildMemberPD::setFactory() with a factory before any call to EGSPD::init()!
 }
-void							CGuildMemberPD::pds_static__setFactory(RY_PDS::TPDFactory userFactory)
+void CGuildMemberPD::pds_static__setFactory(RY_PDS::TPDFactory userFactory)
 {
 	if (!_FactoryInitialised)
 	{
@@ -226,15 +224,14 @@ void							CGuildMemberPD::pds_static__setFactory(RY_PDS::TPDFactory userFactory
 		_FactoryInitialised = true;
 	}
 }
-bool							CGuildMemberPD::_FactoryInitialised;
-RY_PDS::CIndexAllocator			CGuildMemberPD::_IndexAllocator;
-void							CGuildMemberPD::pds_static__fetch(RY_PDS::IPDBaseData *object, RY_PDS::CPData &data)
+bool CGuildMemberPD::_FactoryInitialised;
+RY_PDS::CIndexAllocator CGuildMemberPD::_IndexAllocator;
+void CGuildMemberPD::pds_static__fetch(RY_PDS::IPDBaseData *object, RY_PDS::CPData &data)
 {
-	CGuildMemberPD	*__o = static_cast<CGuildMemberPD*>(object);
+	CGuildMemberPD *__o = static_cast<CGuildMemberPD *>(object);
 	__o->pds__fetch(data);
 	__o->pds__notifyInit();
 }
 // End of static implementation of CGuildMemberPD
 
-	
 } // End of EGSPD

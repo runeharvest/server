@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_S_LINK_EFFECT_DOT_H
 #define RY_S_LINK_EFFECT_DOT_H
 
@@ -24,42 +22,45 @@
 class CSLinkEffectDot : public CSLinkEffectOffensive
 {
 public:
-	inline CSLinkEffectDot( 
-		const TDataSetRow & creatorRowId,
-		const TDataSetRow & targetRowId,
-		sint32 cost,
-		SCORES::TScores energyCost,
-		SKILLS::ESkills skill,
-		uint32 maxDistance,
-		DMGTYPE::EDamageType dmgType,
-		uint8 power,
-		TReportAction& report,
-		sint32 dmgHp,sint32 dmgSap,sint32 dmgSta,sint32 vampirise, float vampiriseRatio )
-		:CSLinkEffectOffensive ( creatorRowId,targetRowId,EFFECT_FAMILIES::Dot,cost,energyCost, skill, maxDistance, 0,power, report ),
-		_DmgType( dmgType ),
-		_DmgHp( dmgHp), _DmgSap( dmgSap), _DmgSta(dmgSta),_Vampirise(vampirise),_VampiriseRatio(vampiriseRatio),
-		_FirstUpdate(true)
+	inline CSLinkEffectDot(
+	    const TDataSetRow &creatorRowId,
+	    const TDataSetRow &targetRowId,
+	    sint32 cost,
+	    SCORES::TScores energyCost,
+	    SKILLS::ESkills skill,
+	    uint32 maxDistance,
+	    DMGTYPE::EDamageType dmgType,
+	    uint8 power,
+	    TReportAction &report,
+	    sint32 dmgHp, sint32 dmgSap, sint32 dmgSta, sint32 vampirise, float vampiriseRatio)
+	    : CSLinkEffectOffensive(creatorRowId, targetRowId, EFFECT_FAMILIES::Dot, cost, energyCost, skill, maxDistance, 0, power, report)
+	    , _DmgType(dmgType)
+	    , _DmgHp(dmgHp)
+	    , _DmgSap(dmgSap)
+	    , _DmgSta(dmgSta)
+	    , _Vampirise(vampirise)
+	    , _VampiriseRatio(vampiriseRatio)
+	    , _FirstUpdate(true)
 	{
 		_MagicFxType = MAGICFX::toMagicFx(dmgType, true);
 	}
 
-	DMGTYPE::EDamageType getDamageType(){ return _DmgType; }
+	DMGTYPE::EDamageType getDamageType() { return _DmgType; }
 
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent *event, bool applyEffect);
 
 protected:
-	DMGTYPE::EDamageType	_DmgType;
-	sint32	_DmgHp;
-	sint32	_DmgSap;
-	sint32	_DmgSta;
-	sint32	_Vampirise;
-	float	_VampiriseRatio;
-	bool	_FirstUpdate;
+	DMGTYPE::EDamageType _DmgType;
+	sint32 _DmgHp;
+	sint32 _DmgSap;
+	sint32 _DmgSta;
+	sint32 _Vampirise;
+	float _VampiriseRatio;
+	bool _FirstUpdate;
 };
-
 
 #endif // RY_S_LINK_EFFECT_DOT_H
 

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -32,11 +30,10 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //--------------------------------------------------------------
 //		CRegenAuraEffect::update()
 //--------------------------------------------------------------
-bool CRegenAuraEffect::update(CTimerEvent * event, bool applyEffect)
+bool CRegenAuraEffect::update(CTimerEvent *event, bool applyEffect)
 {
 	if (!TheDataset.isAccessible(_TargetRowId))
 	{
@@ -47,16 +44,16 @@ bool CRegenAuraEffect::update(CTimerEvent * event, bool applyEffect)
 #ifdef NL_DEBUG
 	nlassert(_AffectedScore != SCORES::unknown);
 #endif
-	
+
 	CCharacter *player = PlayerManager.getChar(_TargetRowId);
 	if (!player)
 	{
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
 	}
-		
+
 	player->getScores()._PhysicalScores[_AffectedScore].RegenerateModifier += _RegenModifier;
-	
+
 	// now only one update is needed, but the end methos must reset the modifier !
 	// must update this every ticks NO !!!!
 	//_UpdateTimer.setRemaining(1, event);
@@ -76,13 +73,12 @@ void CRegenAuraEffect::removed()
 		nlwarning("Cannot find target entity %s", _TargetRowId.toString().c_str());
 		return;
 	}
-	
+
 	player->getScores()._PhysicalScores[_AffectedScore].RegenerateModifier -= _RegenModifier;
 
 	// call base class method for aura removal management
 	CAuraBaseEffect::removed();
 }
-
 
 CAuraEffectTFactory<CRegenAuraEffect> *CLifeAuraEffectFactoryInstance = new CAuraEffectTFactory<CRegenAuraEffect>(POWERS::LifeAura);
 CAuraEffectTFactory<CRegenAuraEffect> *CStaminaAuraEffectFactoryInstance = new CAuraEffectTFactory<CRegenAuraEffect>(POWERS::StaminaAura);

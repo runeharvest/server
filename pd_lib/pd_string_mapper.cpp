@@ -22,8 +22,7 @@
 /*
  * Unknown String
  */
-std::string		CPDStringMapper::_UnknownString = "Unknown";
-
+std::string CPDStringMapper::_UnknownString = "Unknown";
 
 /*
  * Constructor
@@ -32,19 +31,19 @@ CPDStringMapper::CPDStringMapper()
 {
 }
 
-
 /*
  * Set Mapping
  */
-void	CPDStringMapper::setMapping(const std::string& str, uint32 id)
+void CPDStringMapper::setMapping(const std::string &str, uint32 id)
 {
-	std::string				lowMapStr = NLMISC::toLowerAscii(str);
-	TStringMap::iterator	its;
+	std::string lowMapStr = NLMISC::toLowerAscii(str);
+	TStringMap::iterator its;
 
-	TIdMap::iterator		iti = _IdMap.find(id);
+	TIdMap::iterator iti = _IdMap.find(id);
 	if (iti != _IdMap.end())
 	{
-		its = (*iti).second;;
+		its = (*iti).second;
+		;
 		if ((*its).first != lowMapStr || (*its).second != id)
 		{
 			nlwarning("CPDStringMapper::setMapping(): failed to map '%s' to '%d', id is already mapped to a different string", str.c_str(), id);
@@ -74,11 +73,11 @@ void	CPDStringMapper::setMapping(const std::string& str, uint32 id)
 /*
  * Serial Mapper
  */
-void	CPDStringMapper::serial(NLMISC::IStream& f)
+void CPDStringMapper::serial(NLMISC::IStream &f)
 {
 	f.serialCheck(NELID("PDSM"));
 
-	uint	version = f.serialVersion(0);
+	uint version = f.serialVersion(0);
 
 	f.serialCont(_StringMap);
 
@@ -91,15 +90,15 @@ void	CPDStringMapper::serial(NLMISC::IStream& f)
 /*
  * Rebuild Id Mapping
  */
-void	CPDStringMapper::buildIdMap()
+void CPDStringMapper::buildIdMap()
 {
 	_IdMap.clear();
 
-	TStringMap::iterator	it;
-	for (it=_StringMap.begin(); it!=_StringMap.end(); ++it)
+	TStringMap::iterator it;
+	for (it = _StringMap.begin(); it != _StringMap.end(); ++it)
 	{
-		const std::string&	str = (*it).first;
-		uint32				id = (*it).second;
+		const std::string &str = (*it).first;
+		uint32 id = (*it).second;
 
 		_IdMap[id] = it;
 	}

@@ -35,7 +35,6 @@
 class CPDStringMapper
 {
 public:
-
 	/// Unknown String Id
 	enum
 	{
@@ -45,76 +44,68 @@ public:
 	/// Constructor
 	CPDStringMapper();
 
-
 	/// Get String from Id
-	const std::string&	getString(uint32 id) const;
+	const std::string &getString(uint32 id) const;
 
 	/// Get Id from String
-	uint32				getId(const std::string& str) const;
+	uint32 getId(const std::string &str) const;
 
 	/// Set Mapping
-	void				setMapping(const std::string& str, uint32 id);
-
+	void setMapping(const std::string &str, uint32 id);
 
 	/// Serial Mapper
-	void				serial(NLMISC::IStream& f);
+	void serial(NLMISC::IStream &f);
 
 	/// Rebuild Id Mapping
-	void				buildIdMap();
-
+	void buildIdMap();
 
 private:
-
 	/// Mapping of string to id
-	typedef std::map<std::string, uint32>			TStringMap;
+	typedef std::map<std::string, uint32> TStringMap;
 
 	/// Mapping of id to string
-	typedef std::map<uint32, TStringMap::iterator>	TIdMap;
+	typedef std::map<uint32, TStringMap::iterator> TIdMap;
 
 	/// String Mapping
-	TStringMap										_StringMap;
+	TStringMap _StringMap;
 
 	/// Id Mapping
-	TIdMap											_IdMap;
+	TIdMap _IdMap;
 
 	/// Unknown String
-	static std::string								_UnknownString;
-
+	static std::string _UnknownString;
 };
-
 
 /*
  * -- Inlines
  */
 
-
 /*
  * Get String from Id
  */
-inline const std::string&	CPDStringMapper::getString(uint32 id) const
+inline const std::string &CPDStringMapper::getString(uint32 id) const
 {
-	TIdMap::const_iterator	it = _IdMap.find(id);
+	TIdMap::const_iterator it = _IdMap.find(id);
 
 	if (it == _IdMap.end())
 	{
 		return _UnknownString;
 	}
 
-	TStringMap::iterator	its = (*it).second;
+	TStringMap::iterator its = (*it).second;
 	return (*its).first;
 }
 
 /*
  * Get Id from String
  */
-inline uint32				CPDStringMapper::getId(const std::string& str) const
+inline uint32 CPDStringMapper::getId(const std::string &str) const
 {
-	std::string					lowMapStr = NLMISC::toLowerAscii(str);
-	TStringMap::const_iterator	it = _StringMap.find(lowMapStr);
+	std::string lowMapStr = NLMISC::toLowerAscii(str);
+	TStringMap::const_iterator it = _StringMap.find(lowMapStr);
 
 	return (it == _StringMap.end()) ? UnknownString : (*it).second;
 }
-
 
 #endif // NL_PD_STRING_MAPPER_H
 

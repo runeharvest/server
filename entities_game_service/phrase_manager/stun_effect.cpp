@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -33,10 +31,10 @@ using namespace NLNET;
 //--------------------------------------------------------------
 //		CStunEffect::update()
 //--------------------------------------------------------------
-bool CStunEffect::update(CTimerEvent * event, bool applyEffect)
+bool CStunEffect::update(CTimerEvent *event, bool applyEffect)
 {
 	CEntityBase *stunnedEntity = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
-	if (!stunnedEntity) 
+	if (!stunnedEntity)
 	{
 		nlwarning("EFFECT: failed to find stunned entity %s", _TargetRowId.toString().c_str());
 		return true;
@@ -54,16 +52,16 @@ bool CStunEffect::update(CTimerEvent * event, bool applyEffect)
 void CStunEffect::removed()
 {
 	CEntityBase *stunnedEntity = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
-	if (!stunnedEntity) 
+	if (!stunnedEntity)
 		return;
 
 	DEBUGLOG("EFFECT: stun effect ends on entity %s", stunnedEntity->getId().toString().c_str());
 
 	// if this is the last STUN effect on target, then wake it
-	const std::vector<CSEffectPtr>& effects = stunnedEntity->getSEffects();
-	for (uint i = 0 ; i < effects.size() ; ++i)
+	const std::vector<CSEffectPtr> &effects = stunnedEntity->getSEffects();
+	for (uint i = 0; i < effects.size(); ++i)
 	{
-		if (effects[i] && effects[i] != this && (effects[i]->getFamily() == EFFECT_FAMILIES::Stun || effects[i]->getFamily() == EFFECT_FAMILIES::CombatStun) )
+		if (effects[i] && effects[i] != this && (effects[i]->getFamily() == EFFECT_FAMILIES::Stun || effects[i]->getFamily() == EFFECT_FAMILIES::CombatStun))
 		{
 			DEBUGLOG("EFFECT : entity is still stunned (has another stun effect)");
 			return;
@@ -77,7 +75,6 @@ void CStunEffect::removed()
 	sendEffectEndMessages();
 
 } // removed //
-
 
 CEffectTFactory<CStunEffect> *CCombatStunEffectFactory = new CEffectTFactory<CStunEffect>(EFFECT_FAMILIES::CombatStun);
 CEffectTFactory<CStunEffect> *CStunEffectFactory = new CEffectTFactory<CStunEffect>(EFFECT_FAMILIES::Stun);

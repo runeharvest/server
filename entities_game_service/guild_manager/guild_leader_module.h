@@ -25,20 +25,21 @@
  * \author Nevrax France
  * \date 2004
  */
-class CGuildLeaderModule : public  CGuildHighOfficerModule
+class CGuildLeaderModule : public CGuildHighOfficerModule
 {
 	NL_INSTANCE_COUNTER_DECL(CGuildLeaderModule);
-public:
-	
-	CGuildLeaderModule( CGuildCharProxy & proxy, CGuildMember* guildMember)
-		:CGuildHighOfficerModule(proxy,guildMember){}	
-	
-	virtual void setLeader( uint16 index,uint8 session);
-	virtual void quitGuild();
-	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade)const;
-	virtual bool canInvite()const;
-};
 
+public:
+	CGuildLeaderModule(CGuildCharProxy &proxy, CGuildMember *guildMember)
+	    : CGuildHighOfficerModule(proxy, guildMember)
+	{
+	}
+
+	virtual void setLeader(uint16 index, uint8 session);
+	virtual void quitGuild();
+	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade) const;
+	virtual bool canInvite() const;
+};
 
 #endif // RY_GUILD_LEADER_MODULE_H
 

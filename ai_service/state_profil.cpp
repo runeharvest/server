@@ -14,19 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 #include "state_profil.h"
 #include "ai_bot_npc.h"
 #include "ai_grp_npc.h"
 
-
-std::string	CAIStateProfile::getIndexString	()	const
+std::string CAIStateProfile::getIndexString() const
 {
-	return	getOwner()->getIndexString()+NLMISC::toString(":%u", getChildIndex());
+	return getOwner()->getIndexString() + NLMISC::toString(":%u", getChildIndex());
 }
-
 
 void CAIStateProfile::grpKeywordFilterAdd(const std::string &keyword)
 {
@@ -37,23 +33,20 @@ void CAIStateProfile::grpKeywordFilterAdd(const std::string &keyword)
 		nlwarning("There are some keyword error in '%s'", getAliasNode()->fullName().c_str());
 	}
 
-	_grpKeywordFilter+=filter;
+	_grpKeywordFilter += filter;
 }
-
 
 bool CAIStateProfile::testCompatibility(const CGroupNpc &grp) const
 {
-	const std::string &groupName	=	grp.getName();	
+	const std::string &groupName = grp.getName();
 	bool grpOK = _namedGrps.empty() && _grpKeywordFilter.isEmpty();
 
 	// as long as group not flagged OK - test the list of named groups to see if we match
-	for (uint i=0;!grpOK && i<_namedGrps.size();++i)
-		grpOK = (groupName==_namedGrps[i]);
+	for (uint i = 0; !grpOK && i < _namedGrps.size(); ++i)
+		grpOK = (groupName == _namedGrps[i]);
 
-	// if all else fails try the keyword test 
-	return	(	grpOK
-			||	(	!_grpKeywordFilter.isEmpty()
-				&& _grpKeywordFilter.test(grp.getKeywords())
-				)
-			);
+	// if all else fails try the keyword test
+	return (grpOK
+	    || (!_grpKeywordFilter.isEmpty()
+	        && _grpKeywordFilter.test(grp.getKeywords())));
 }

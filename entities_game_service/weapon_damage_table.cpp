@@ -14,10 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 /////////////
-// INCLUDE 
+// INCLUDE
 /////////////
 #include "stdpch.h"
 //
@@ -33,40 +31,38 @@
 using namespace std;
 using namespace NLMISC;
 
-
 /////////////
-// GLOBALS 
+// GLOBALS
 /////////////
-
 
 //--------------------------------------------------------------
-//				init()  
+//				init()
 //--------------------------------------------------------------
 void CWeaponDamageTable::init()
 {
-//	nlinfo("Weapon damage table config :\nMinDamage = %.2f\t\tDamageStep = %.2f\t\tExponentialPower = %.2f\t\tSmoothingFactor = %.2f", MinDamage, DamageStep, ExponentialPower, SmoothingFactor);
-	for (uint reference = 0 ; reference <= MaxRefenceSkillValue ; ++reference )
+	//	nlinfo("Weapon damage table config :\nMinDamage = %.2f\t\tDamageStep = %.2f\t\tExponentialPower = %.2f\t\tSmoothingFactor = %.2f", MinDamage, DamageStep, ExponentialPower, SmoothingFactor);
+	for (uint reference = 0; reference <= MaxRefenceSkillValue; ++reference)
 	{
-		if (reference  == 50)
+		if (reference == 50)
 		{
-//			nlinfo("\n\nNew table, recommended skill value = %u\n", reference);
-//			nlinfo("Skill\t\tDamage");
+			//			nlinfo("\n\nNew table, recommended skill value = %u\n", reference);
+			//			nlinfo("Skill\t\tDamage");
 		}
 
-		const float dmgLimit = MinDamage + DamageStep*reference;
+		const float dmgLimit = MinDamage + DamageStep * reference;
 
-		for (uint skill = 0 ; skill <= MaxSkillValue ; ++skill )
+		for (uint skill = 0; skill <= MaxSkillValue; ++skill)
 		{
 			// compute ref damage value, linear progression
-			const float ref = MinDamage + DamageStep*skill;			
-			
+			const float ref = MinDamage + DamageStep * skill;
+
 			/// % of reference reached by skill (max 100%)
-			const float pos = (skill>=reference) ? 1.0f : float(skill)/reference;
+			const float pos = (skill >= reference) ? 1.0f : float(skill) / reference;
 
 			float value;
 			if (pos < 1.0f)
 			{
-				value = (float) ((MinDamage + (dmgLimit-MinDamage)*pow(pos, ExponentialPower) + ref) / 2.0f);
+				value = (float)((MinDamage + (dmgLimit - MinDamage) * pow(pos, ExponentialPower) + ref) / 2.0f);
 			}
 			else
 			{
@@ -76,20 +72,18 @@ void CWeaponDamageTable::init()
 				}
 				else
 				{
-					value = _DamageTable[reference][skill-1] + (_DamageTable[reference][skill-1] - _DamageTable[reference][skill-2]) * SmoothingFactor;
-				}				
+					value = _DamageTable[reference][skill - 1] + (_DamageTable[reference][skill - 1] - _DamageTable[reference][skill - 2]) * SmoothingFactor;
+				}
 			}
 
 			_DamageTable[reference][skill] = value;
 
-			if (reference  == 50)
-			{				
-//				nlinfo("%u\t\t%.2f", skill, value);
+			if (reference == 50)
+			{
+				//				nlinfo("%u\t\t%.2f", skill, value);
 			}
 		}
 	}
-//	nlinfo("\n\n");
-	
+	//	nlinfo("\n\n");
+
 } // init //
-
-

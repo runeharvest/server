@@ -35,17 +35,17 @@ class CFEServerRoute : public CGatewayRoute
 {
 public:
 	/// ClientId of the client
-	TClientId		ClientId;
+	TClientId ClientId;
 	/// FS channel communication number
-	uint8			Channel;
+	uint8 Channel;
 	/// Message numbering for client reordering
-	mutable uint8	SerialNumber;
+	mutable uint8 SerialNumber;
 
 	CFEServerRoute(IGatewayTransport *transport, TClientId clientId, uint8 channel)
-		: CGatewayRoute(transport),
-			ClientId(clientId), 
-			Channel(channel),
-			SerialNumber(0)
+	    : CGatewayRoute(transport)
+	    , ClientId(clientId)
+	    , Channel(channel)
+	    , SerialNumber(0)
 	{
 		// warn the client that the transport is open
 		CMessage msg;
@@ -63,47 +63,45 @@ public:
 		sendRawMessage("MODULE_GATEWAY:FECLOSE", msg);
 	}
 
-
 	void sendMessage(const CMessage &message) const
 	{
 		sendRawMessage("MODULE_GATEWAY:GATEWAY_MSG", message);
 	}
+
 private:
 	// send a message for the
 	void sendRawMessage(const char *transportMessageName, const CMessage &message) const
 	{
 		// put the message in a bit mem stream for transmission
 		CBitMemStream bms;
-		GenericXmlMsgHeaderMngr.pushNameToStream( transportMessageName, bms );
+		GenericXmlMsgHeaderMngr.pushNameToStream(transportMessageName, bms);
 		// serial the message number for reordering on client side
 		bms.serial(SerialNumber);
 		++SerialNumber;
 		// put the message in the stream
-		bms.serialBufferWithSize(const_cast<uint8*>(message.buffer()), message.length());
+		bms.serialBufferWithSize(const_cast<uint8 *>(message.buffer()), message.length());
 
 		// wrap the bit mem in a transport message (for inpulsion sender), that's a bit nut !?!
 		// TODO : write a better module message sender, avoiding useless data copy
 		CMessage wrapper("IMPULTION_ID");
-		wrapper.serialMemStream( bms );
+		wrapper.serialMemStream(bms);
 
 		// Send message to the client
 		wrapper.invert();
-		sendImpulsion( ClientId, wrapper, Channel, toString( "from FE to ClientId %u", ClientId ).c_str(), false );
+		sendImpulsion(ClientId, wrapper, Channel, toString("from FE to ClientId %u", ClientId).c_str(), false);
 	}
 };
-
-
-
 
 #define FE_SERVER_CLASS_NAME "FEServer"
 /** Transport for module gateway through front end service, server part. */
 class CGatewayFEServerTransport : public IGatewayTransport
 {
 	friend class CFEServerRoute;
+
 public:
 	/// The table that keep track of all routes (from the user id)
-	typedef std::map<TClientId, CFEServerRoute*>	TRouteMap;
-	TRouteMap	_Routes;
+	typedef std::map<TClientId, CFEServerRoute *> TRouteMap;
+	TRouteMap _Routes;
 
 	// store the unique active transport (only one transport of this type can be activated at a time)
 	static CGatewayFEServerTransport *&OpenTransport()
@@ -114,8 +112,8 @@ public:
 	}
 
 	/// Constructor
-	CGatewayFEServerTransport(const IGatewayTransport::TCtorParam &param) 
-		: IGatewayTransport(param)
+	CGatewayFEServerTransport(const IGatewayTransport::TCtorParam &param)
+	    : IGatewayTransport(param)
 	{
 	}
 
@@ -160,8 +158,8 @@ public:
 				uint32 userId = first->first;
 				CFEServerRoute *route = first->second;
 				log.displayNL("    + route to user %u, %u entries in the proxy translation table :",
-					userId,
-					route->ForeignToLocalIdx.getAToBMap().size());
+				    userId,
+				    route->ForeignToLocalIdx.getAToBMap().size());
 
 				{
 					CGatewayRoute::TForeignToLocalIdx::TAToBMap::const_iterator first(route->ForeignToLocalIdx.getAToBMap().begin()), last(route->ForeignToLocalIdx.getAToBMap().end());
@@ -170,9 +168,9 @@ public:
 						IModuleProxy *modProx = mm.getModuleProxy(first->second);
 
 						log.displayNL("      - Proxy '%s' : local proxy id %u => foreign module id %u",
-							modProx != NULL ? modProx->getModuleName().c_str() : "ERROR, invalid module",
-							first->second,
-							first->first);
+						    modProx != NULL ? modProx->getModuleName().c_str() : "ERROR, invalid module",
+						    first->second,
+						    first->first);
 					}
 				}
 			}
@@ -188,7 +186,7 @@ public:
 	bool onCommand(const TParsedCommandLine &command)
 	{
 		if (command.SubParams.size() < 1)
-			throw  EInvalidCommand();
+			throw EInvalidCommand();
 
 		const std::string &commandName = command.SubParams[0]->ParamName;
 		if (commandName == "open")
@@ -228,14 +226,13 @@ public:
 
 			CMessage message("IMPULTION_ID");
 			CBitMemStream bms;
-			GenericXmlMsgHeaderMngr.pushNameToStream( "MODULE_GATEWAY:FEOPEN", bms );
-			message.serialMemStream( bms );
+			GenericXmlMsgHeaderMngr.pushNameToStream("MODULE_GATEWAY:FEOPEN", bms);
+			message.serialMemStream(bms);
 
 			message.invert();
- 
-			sendImpulsion( ch->clientId(), message, 1, toString( "from FE to ClientId %u", ch->clientId()).c_str(), false );
-		}
 
+			sendImpulsion(ch->clientId(), message, 1, toString("from FE to ClientId %u", ch->clientId()).c_str(), false);
+		}
 	}
 
 	/// Close the server, this will close the listing socket and any active connection
@@ -261,13 +258,12 @@ public:
 		OpenTransport() = NULL;
 	}
 
-
 	/***************************************************/
 	/** Event management                              **/
 	/***************************************************/
 
 	// handle the connection of a new client on the server
-	void onConnection ( TClientId clientId)
+	void onConnection(TClientId clientId)
 	{
 		if (_Routes.find(clientId) != _Routes.end())
 		{
@@ -276,7 +272,7 @@ public:
 		}
 
 		// Create a new route for this connection
-		CFEServerRoute* route = new CFEServerRoute(this, clientId, 1);
+		CFEServerRoute *route = new CFEServerRoute(this, clientId, 1);
 
 		// store the route information
 		_Routes.insert(make_pair(clientId, route));
@@ -286,7 +282,7 @@ public:
 	}
 
 	// handle the deconnection of a new client on the server
-	void onDisconnection ( TClientId clientId)
+	void onDisconnection(TClientId clientId)
 	{
 		TRouteMap::iterator it(_Routes.find(clientId));
 		if (it == _Routes.end())
@@ -315,8 +311,8 @@ public:
 		}
 
 		// Build a CMessage from the bit mem stream
-//		string msgName;
-//		bms.serial(msgName);
+		//		string msgName;
+		//		bms.serial(msgName);
 
 		// create an input stream for dispatching
 		CMessage msg("", true);
@@ -345,7 +341,7 @@ public:
 		onConnection(clientHost->clientId());
 	}
 	// Id impulsion gateway open callback handler
-	void impulsionIdGatewayOpen( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId )
+	void impulsionIdGatewayOpen(CEntityId &sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId)
 	{
 		// retrieve uid
 		CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
@@ -376,7 +372,7 @@ public:
 	}
 
 	// Id impulsion gateway message callback handler
-	void impulsionIdGatewayMessage( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId )
+	void impulsionIdGatewayMessage(CEntityId &sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId)
 	{
 		// retrieve uid
 		CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
@@ -406,7 +402,7 @@ public:
 		onDisconnection(clientHost->clientId());
 	}
 	// Id impulsion gateway close callback handler
-	void impulsionIdGatewayClose( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId )
+	void impulsionIdGatewayClose(CEntityId &sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId)
 	{
 		// retrieve uid
 		CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
@@ -429,7 +425,6 @@ public:
 		else
 			return it->second;
 	}
-
 };
 
 /***************************************************/
@@ -437,7 +432,7 @@ public:
 /***************************************************/
 
 // Forwarder to the real method
-void cbGwTrDisconnection ( TClientId clientId )
+void cbGwTrDisconnection(TClientId clientId)
 {
 	if (CGatewayFEServerTransport::OpenTransport() != NULL)
 		CGatewayFEServerTransport::OpenTransport()->onDisconnection(clientId);
@@ -451,7 +446,7 @@ void cbImpulsionUidGatewayOpen(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::T
 }
 
 // Id impulsion gateway open callback handler
-void cbImpulsionIdGatewayOpen( CEntityId& sender, CBitMemStream &bms, TGameCycle gameCycle, uint16 serviceId )
+void cbImpulsionIdGatewayOpen(CEntityId &sender, CBitMemStream &bms, TGameCycle gameCycle, uint16 serviceId)
 {
 	if (CGatewayFEServerTransport::OpenTransport() != NULL)
 		CGatewayFEServerTransport::OpenTransport()->impulsionIdGatewayOpen(sender, bms, gameCycle, serviceId);
@@ -465,7 +460,7 @@ void cbImpulsionUidGatewayMessage(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC
 }
 
 // Id impulsion gateway message callback handler
-void cbImpulsionIdGatewayMessage( CEntityId& sender, CBitMemStream &bms, TGameCycle gameCycle, uint16 serviceId )
+void cbImpulsionIdGatewayMessage(CEntityId &sender, CBitMemStream &bms, TGameCycle gameCycle, uint16 serviceId)
 {
 	if (CGatewayFEServerTransport::OpenTransport() != NULL)
 		CGatewayFEServerTransport::OpenTransport()->impulsionIdGatewayMessage(sender, bms, gameCycle, serviceId);
@@ -479,16 +474,14 @@ void cbImpulsionUidGatewayClose(uint32 uid, NLMISC::CBitMemStream &bms, NLMISC::
 }
 
 // Id impulsion gateway open callback handler
-void cbImpulsionIdGatewayClose( CEntityId& sender, CBitMemStream &bms, TGameCycle gameCycle, uint16 serviceId )
+void cbImpulsionIdGatewayClose(CEntityId &sender, CBitMemStream &bms, TGameCycle gameCycle, uint16 serviceId)
 {
 	if (CGatewayFEServerTransport::OpenTransport() != NULL)
 		CGatewayFEServerTransport::OpenTransport()->impulsionIdGatewayClose(sender, bms, gameCycle, serviceId);
 }
 
-
 // register this class in the transport factory
 NLMISC_REGISTER_OBJECT(IGatewayTransport, CGatewayFEServerTransport, std::string, string(FE_SERVER_CLASS_NAME));
-
 
 ////////////////////////////////////////////////////////
 // Security plug-in for the gateway
@@ -499,10 +492,10 @@ NLMISC_REGISTER_OBJECT(IGatewayTransport, CGatewayFEServerTransport, std::string
 class CFESecurity : public CGatewaySecurity
 {
 public:
-	static CFESecurity		*Instance;
+	static CFESecurity *Instance;
 
 	CFESecurity(const TCtorParam params)
-		: CGatewaySecurity (params)
+	    : CGatewaySecurity(params)
 	{
 		nlassert(Instance == NULL);
 		Instance = this;
@@ -530,7 +523,7 @@ public:
 			TClientInfo *ci = new TClientInfo(TSecurityData::TCtorParam(rmst_client_info));
 
 			// store client information in a security bloc
-			if( ch == NULL)
+			if (ch == NULL)
 			{
 				ci->UserPriv = "";
 				ci->ExtendedPriv = "";
@@ -566,14 +559,13 @@ public:
 		}
 	}
 
-
 	void onDelete()
 	{
 		// remove any client security info
-		vector<IModuleProxy*> proxies;
+		vector<IModuleProxy *> proxies;
 		_Gateway->getModuleProxyList(proxies);
 
-		for (uint i=0; i<proxies.size(); ++i)
+		for (uint i = 0; i < proxies.size(); ++i)
 		{
 			IModuleProxy *proxy = proxies[i];
 			if (proxy->getGatewayRoute() != NULL)
@@ -584,14 +576,13 @@ public:
 					// remove security data for client
 					removeSecurityData(proxy, rmst_client_info);
 				}
-			}	
+			}
 		}
 	}
 
-
 	void entityIdChanged(CClientHost *clienthost)
 	{
-		vector<IModuleProxy*>	proxies;
+		vector<IModuleProxy *> proxies;
 		_Gateway->getModuleProxyList(proxies);
 
 		if (CGatewayFEServerTransport::OpenTransport() == NULL)
@@ -602,9 +593,9 @@ public:
 		if (route == NULL)
 			return;
 
-		for (uint i=0; i<proxies.size(); ++i)
+		for (uint i = 0; i < proxies.size(); ++i)
 		{
-			CModuleProxy *proxy = static_cast<CModuleProxy*>(proxies[i]);
+			CModuleProxy *proxy = static_cast<CModuleProxy *>(proxies[i]);
 
 			if (proxy->getGatewayRoute() == route)
 			{
@@ -626,8 +617,7 @@ public:
 
 NLMISC_REGISTER_OBJECT(CGatewaySecurity, CFESecurity, std::string, string(FE_SECURITY_CLASS_NAME));
 
-CFESecurity		*CFESecurity::Instance = NULL;
-
+CFESecurity *CFESecurity::Instance = NULL;
 
 void cbEntityIdChanged(CClientHost *clienthost)
 {

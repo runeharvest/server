@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_CMS_CLIENT_H
 #define RY_CMS_CLIENT_H
 
@@ -26,7 +24,6 @@
 class CMonitorClient : public NLMISC::CRefCount
 {
 protected:
-
 	// The socket id
 	NLNET::TSockId _Sock;
 
@@ -34,11 +31,10 @@ protected:
 	NLMISC::CVector _WindowTopLeft, _WindowBottomRight;
 
 public:
-
 	class CEntityEntry
 	{
 	public:
-		CEntityEntry ()
+		CEntityEntry()
 		{
 			Flags = 0;
 		}
@@ -60,17 +56,16 @@ public:
 	~CMonitorClient();
 
 	/// Update
-	void update ();
-
+	void update();
 
 	/// Add an entity
-	void	add(const TDataSetRow &entity);
+	void add(const TDataSetRow &entity);
 
 	/// Remove an entity
-	void	remove(const TDataSetRow &entity);
+	void remove(const TDataSetRow &entity);
 
 	/// Reset vision
-	void	resetVision();
+	void resetVision();
 
 	//
 	void setWindow(float xmin, float ymin, float xmax, float ymax);
@@ -86,38 +81,38 @@ public:
 	}
 
 	// returns the TSockID
-	NLNET::TSockId getSock() const {return _Sock;}
+	NLNET::TSockId getSock() const { return _Sock; }
 
 	// Entities
-	std::vector<CEntityEntry>	Entites;
+	std::vector<CEntityEntry> Entites;
 
 	// In vision
-	std::vector<uint32>			InVision;
+	std::vector<uint32> InVision;
 
 	// Start point for entity update
-	uint						StartOffset;
+	uint StartOffset;
 
 	// Pending entities to be added
-	std::vector<uint32>			PendingAdd;
+	std::vector<uint32> PendingAdd;
 
 	// Pending entities to be removed
-	std::vector<uint32>			PendingRemove;
+	std::vector<uint32> PendingRemove;
 
 	// The data for the ADD message
 	class CAddData
 	{
 	public:
 		uint32 Id;
-		TYPE_NAME_STRING_ID	StringId;
-		NLMISC::CEntityId	EntityId;
-		NLMISC::CSheetId	SheetId;
+		TYPE_NAME_STRING_ID StringId;
+		NLMISC::CEntityId EntityId;
+		NLMISC::CSheetId SheetId;
 	};
 
 	// ADD message queue
-	std::vector<CAddData>		Add;
+	std::vector<CAddData> Add;
 
 	// RMV message queue
-	std::vector<uint32>			Rmv;
+	std::vector<uint32> Rmv;
 
 	// The data for the POS message
 	class CPosData
@@ -127,7 +122,7 @@ public:
 		float X, Y, Tetha;
 	};
 	// POS message queue
-	std::vector<CPosData>		Pos;
+	std::vector<CPosData> Pos;
 
 	// The data for the MISC_PROP message
 	class CMiscPropData
@@ -136,36 +131,32 @@ public:
 		uint32 Id;
 		sint32 CurrentHP;
 		sint32 MaxHP;
-		uint8  Mode;
-		uint8  Behaviour;
+		uint8 Mode;
+		uint8 Behaviour;
 	};
 
 	// MISC_PROP message queue
 	std::vector<CMiscPropData> MiscProp;
 
-
 	// STR message queue
-	std::vector<TYPE_NAME_STRING_ID>	Str;
+	std::vector<TYPE_NAME_STRING_ID> Str;
 
 	// Allowed Upload for this client (in bytes per second)
-	uint32						AllowedUploadBandwidth;
+	uint32 AllowedUploadBandwidth;
 
-	float						AddWeight;
-	float						RemoveWeight;
-	float						PosWeight;
-	float						StrWeight;
-	float						MiscPropWeight;
+	float AddWeight;
+	float RemoveWeight;
+	float PosWeight;
+	float StrWeight;
+	float MiscPropWeight;
 	//
-	bool						Authentificated;
-	bool						BadLogin; // The client has given a bad login
-	                                      // As long as this flag is set, no login should be accepted
-	                                      // for that client. The flag will be cleared in the main loop
-	                                      // when enough time has ellapsed
+	bool Authentificated;
+	bool BadLogin; // The client has given a bad login
+	               // As long as this flag is set, no login should be accepted
+	               // for that client. The flag will be cleared in the main loop
+	               // when enough time has ellapsed
 };
 
-
-extern std::vector<NLMISC::CSmartPtr<CMonitorClient> > Clients;
-
-
+extern std::vector<NLMISC::CSmartPtr<CMonitorClient>> Clients;
 
 #endif // RY_CMS_CLIENT_H

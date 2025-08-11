@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_MISSION_STEP_AI_H
 #define RY_MISSION_STEP_AI_H
 
@@ -23,54 +21,52 @@
 
 /***************************************************************************************************
 Steps linked with AI concepts/events
-	- escort		: escort a bot 
-	- wait_message	: wait for a specific AI event
+    - escort		: escort a bot
+    - wait_message	: wait for a specific AI event
 ***************************************************************************************************/
 
 class CMissionStepEscort : public IMissionStepTemplate
 {
 
-	std::vector<TAIAlias>	Aliases;
-	bool					SaveAll;
-		
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData );
+	std::vector<TAIAlias> Aliases;
+	bool SaveAll;
 
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow );
+	virtual bool buildStep(uint32 line, const std::vector<std::string> &script, CMissionGlobalParsingData &globalData, CMissionSpecificParsingData &missionData);
 
-	void getInitState( std::vector<uint32>& ret );
+	uint processEvent(const TDataSetRow &userRow, const CMissionEvent &event, uint subStepIndex, const TDataSetRow &giverRow);
 
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates);
+	void getInitState(std::vector<uint32> &ret);
 
-	virtual void onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList);
+	virtual void getTextParams(uint &nbSubSteps, const std::string *&textPtr, TVectorParamCheck &retParams, const std::vector<uint32> &subStepStates);
 
-	virtual void getEscortGroups( std::vector< TAIAlias > & groups );
-	
-	virtual bool checkEscortFailure( bool groupWiped );
+	virtual void onActivation(CMission *inst, uint32 stepIndex, std::list<CMissionEvent *> &eventList);
+
+	virtual void getEscortGroups(std::vector<TAIAlias> &groups);
+
+	virtual bool checkEscortFailure(bool groupWiped);
 
 	bool checkTextConsistency();
 
 	MISSION_STEP_GETNEWPTR(CMissionStepEscort)
-	
 };
-
 
 class CMissionStepAIMsg : public IMissionStepTemplate
 {
 	std::string _Msg;
 
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData );
+	virtual bool buildStep(uint32 line, const std::vector<std::string> &script, CMissionGlobalParsingData &globalData, CMissionSpecificParsingData &missionData);
 
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow );
+	uint processEvent(const TDataSetRow &userRow, const CMissionEvent &event, uint subStepIndex, const TDataSetRow &giverRow);
 
-	void getInitState( std::vector<uint32>& ret );
+	void getInitState(std::vector<uint32> &ret);
 
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
-	{}
+	virtual void getTextParams(uint &nbSubSteps, const std::string *&textPtr, TVectorParamCheck &retParams, const std::vector<uint32> &subStepStates)
+	{
+	}
 
 	bool checkTextConsistency();
 
 	MISSION_STEP_GETNEWPTR(CMissionStepAIMsg)
 };
-
 
 #endif

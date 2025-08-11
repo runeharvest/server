@@ -40,10 +40,10 @@
 #include "log_storage.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
+#ifndef NL_COMP_MINGW
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif // NL_OS_WINDOWS
 
 using namespace std;
@@ -52,33 +52,30 @@ using namespace NLNET;
 using namespace INVENTORIES;
 using namespace LGS;
 
-
 CVariable<string> LQLState("lgs", "LQLState", "The current Query state", "");
 CVariable<uint32> LastFinishedQuery("lgs", "LastFinishedQuery", "The number of the last finished request", 0);
 CVariable<string> LogQueryResultFile("lgs", "LogQueryResultFile", "The file used to output the query result", "log_query_result.txt");
 
 uint32 randu32(CRandom &rand, uint32 mod)
 {
-	uint32 ret = (((uint32)rand.rand(0xffff))<<16)+rand.rand(0xffff);
+	uint32 ret = (((uint32)rand.rand(0xffff)) << 16) + rand.rand(0xffff);
 
 	return ret % mod;
 }
 
 sint32 rands32(CRandom &rand, sint32 mod)
 {
-	sint32 ret = (((sint32)rand.rand(0xffff))<<16)+rand.rand(0xffff);
+	sint32 ret = (((sint32)rand.rand(0xffff)) << 16) + rand.rand(0xffff);
 
 	return ret % mod;
 }
-
 
 uint64 randu64(CRandom &rand, uint64 mod)
 {
-	uint64 ret = (((uint64)randu32(rand, 0xffffffff))<<32)+randu32(rand, 0xffffffff);
+	uint64 ret = (((uint64)randu32(rand, 0xffffffff)) << 32) + randu32(rand, 0xffffffff);
 
 	return ret % mod;
 }
-
 
 /** An safe inter-thread communication channel.
  *  Allow safe transmission of object of type T
@@ -89,10 +86,10 @@ template <class T>
 class CThreadChannel
 {
 	/// the object ready to be transfered to the receiver thread
-	list<T>		_Datas;
+	list<T> _Datas;
 
 	/// The mutex that protect the object.
-	NLMISC::CMutex	_Mutex;
+	NLMISC::CMutex _Mutex;
 
 	/// Wait until a data is available or channel empty,
 	/// NB : The is Aquired on exit to be sure that the wait will lock the
@@ -112,13 +109,12 @@ class CThreadChannel
 			nlSleep(100);
 
 			_Mutex.enter();
-		} while(_Datas.empty() != empty);
+		} while (_Datas.empty() != empty);
 
 		// exit with mutex acquired
 	}
 
 public:
-
 	/// Write data to the channel
 	void write(const T &t)
 	{
@@ -152,7 +148,6 @@ public:
 			wait(false);
 
 			// NB : the mutex is entered by the wait method
-
 		}
 
 		T t = _Datas.front();
@@ -181,7 +176,6 @@ public:
 			wait(false);
 
 			// NB : the mutex is entered by the wait method
-
 		}
 
 		const T &t = _Datas.front();
@@ -231,55 +225,51 @@ public:
 
 		return true;
 	}
-
 };
-
-
 
 // the logger module
 class CLoggerServiceMod
-	:	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
-		public LGS::CLoggerServiceSkel
+    : public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase>>>,
+      public LGS::CLoggerServiceSkel
 {
 
-	typedef map<TModuleProxyPtr, TShardId>	TLogClients;
+	typedef map<TModuleProxyPtr, TShardId> TLogClients;
 	// A list of logger client
-	TLogClients		_Clients;
+	TLogClients _Clients;
 
 	// The log definitions
-	TLogDefinitions				_LogDefs;
+	TLogDefinitions _LogDefs;
 
-	typedef map<std::string, size_t>	TLogDefLindex;
+	typedef map<std::string, size_t> TLogDefLindex;
 	// the log def index
-	TLogDefLindex				_LogDefIndex;
+	TLogDefLindex _LogDefIndex;
 
 	/// the log serial number
-	uint32						_LogId;
+	uint32 _LogId;
 
 	/// storage for the log entries
-	TLogInfos					_LogInfos;
+	TLogInfos _LogInfos;
 	/// 'manual' count of log entry (because list<>.size() id not constant time)
-	size_t						_LogInfosSize;
+	size_t _LogInfosSize;
 
 	/// A mutex to protect the access to the log info when the query thread read
 	/// the log in memory
-	CMutex						_LogMutex;
+	CMutex _LogMutex;
 
 	/// date of last 'minute' log output
-	uint32						_LastMinuteOutput;
+	uint32 _LastMinuteOutput;
 	/// date of last 'hourly' consolidation
-	uint32						_LastHourlyProcess;
+	uint32 _LastHourlyProcess;
 
 	/// Line counter of current request being written to backup service
-	uint32						_WriteLineCounter;
+	uint32 _WriteLineCounter;
 	/// Query number, used to number each query sent to the worker thread.
-	uint32						_LastQueryNumber;
-
+	uint32 _LastQueryNumber;
 
 	enum
 	{
 		MinuteDelay = 60,
-		HourlyDelay = 60*60,
+		HourlyDelay = 60 * 60,
 	};
 
 	enum TQueryCommand
@@ -293,19 +283,18 @@ class CLoggerServiceMod
 	};
 	struct TThreadCommand
 	{
-		TQueryCommand	QueryCommand;
-		uint32			QueryNumber;
-		string			QueryString;
+		TQueryCommand QueryCommand;
+		uint32 QueryNumber;
+		string QueryString;
 	};
 
 	struct TQueryInterupPred
 	{
-		bool operator () (const TThreadCommand &command) const
+		bool operator()(const TThreadCommand &command) const
 		{
 			return command.QueryCommand == qc_interupt;
 		}
 	};
-
 
 	friend struct TQueryInterupPred;
 
@@ -326,29 +315,29 @@ class CLoggerServiceMod
 	struct TThreadStatus
 	{
 		NLMISC::CAtomicEnum<TQueryStatus> ThreadStatus;
-		string			StatusString;
+		string StatusString;
 
-		TThreadStatus(TQueryStatus	threadStatus, const string &statusString)
-			:	ThreadStatus(threadStatus),
-				StatusString(statusString)
-		{}
+		TThreadStatus(TQueryStatus threadStatus, const string &statusString)
+		    : ThreadStatus(threadStatus)
+		    , StatusString(statusString)
+		{
+		}
 	};
 
 	struct TThreadResult
 	{
-		uint32				QueryNumber;
-		string				OutputFilename;
-		std::list<string>	*Lines;
+		uint32 QueryNumber;
+		string OutputFilename;
+		std::list<string> *Lines;
 	};
 
 	/// A thread channel used by the service to control the query thread
-	CThreadChannel<TThreadCommand>	_QueryCommands;
+	CThreadChannel<TThreadCommand> _QueryCommands;
 	/// A thread channel used by the query thread to report status string
-	CThreadChannel<TThreadStatus>	_QueryStatus;
+	CThreadChannel<TThreadStatus> _QueryStatus;
 	/// A thread channel used by the query thread to report query result to be
 	/// stored on disk by the main thread using the backup service interface.
-	CThreadChannel<TThreadResult>	_QueryResult;
-
+	CThreadChannel<TThreadResult> _QueryResult;
 
 	/// the thread used to execute the query
 	class CQueryThread : public NLMISC::IRunnable
@@ -357,11 +346,11 @@ class CLoggerServiceMod
 		CLoggerServiceMod *_LoggerService;
 
 		CQueryThread(CLoggerServiceMod *loggerService)
-			:	_LoggerService(loggerService)
+		    : _LoggerService(loggerService)
 		{
 		}
 
-		virtual void getName (std::string &result) const
+		virtual void getName(std::string &result) const
 		{
 			result = "QueryThread";
 		}
@@ -387,19 +376,17 @@ class CLoggerServiceMod
 
 	friend class CLoggerServiceMod::CQueryThread;
 	/// the query thread
-	IThread				*_QueryThread;
-
-
+	IThread *_QueryThread;
 
 public:
 	CLoggerServiceMod()
-		:	_LogInfosSize(0),
-			_LogId(0),
-			_LastMinuteOutput(0),
-			_LastHourlyProcess(0),
-			_LastQueryNumber(0),
-			_WriteLineCounter(0),
-			_QueryThread(NULL)
+	    : _LogInfosSize(0)
+	    , _LogId(0)
+	    , _LastMinuteOutput(0)
+	    , _LastHourlyProcess(0)
+	    , _LastQueryNumber(0)
+	    , _WriteLineCounter(0)
+	    , _QueryThread(NULL)
 	{
 		CLoggerServiceSkel::init(this);
 	}
@@ -450,7 +437,7 @@ public:
 	{
 		uint32 now = CTime::getSecondsSince1970();
 
-		if (now > _LastHourlyProcess+HourlyDelay)
+		if (now > _LastHourlyProcess + HourlyDelay)
 		{
 			// do the hourly process
 
@@ -462,7 +449,7 @@ public:
 			_LastHourlyProcess = now;
 			_LastMinuteOutput = now;
 		}
-		if (now > _LastMinuteOutput+MinuteDelay)
+		if (now > _LastMinuteOutput + MinuteDelay)
 		{
 			// do the minute output
 
@@ -509,16 +496,16 @@ public:
 
 			uint32 nbLog = (uint32)threadResult.Lines->size();
 
-			if( _WriteLineCounter != nbLog)
+			if (_WriteLineCounter != nbLog)
 			{
 				bool firstBlock = _WriteLineCounter == 0;
 
-				CBackupMsgSaveFile saveFile(BsiGlobal.getRemotePath()+"/"+threadResult.OutputFilename,
-											firstBlock ? CBackupMsgSaveFile::SaveFile : CBackupMsgSaveFile::AppendFile ,
-											BsiGlobal);
+				CBackupMsgSaveFile saveFile(BsiGlobal.getRemotePath() + "/" + threadResult.OutputFilename,
+				    firstBlock ? CBackupMsgSaveFile::SaveFile : CBackupMsgSaveFile::AppendFile,
+				    BsiGlobal);
 				saveFile.FileName = threadResult.OutputFilename;
 
-				const char *newLine="\n";
+				const char *newLine = "\n";
 
 				list<string>::const_iterator first(threadResult.Lines->begin()), last(threadResult.Lines->end());
 				for (uint32 localCounter = 0; first != last; ++first, ++localCounter)
@@ -529,20 +516,19 @@ public:
 						continue;
 					}
 
-					saveFile.DataMsg.serialBuffer((uint8*)&(*first->begin()), (uint)first->size());
-					saveFile.DataMsg.serialBuffer((uint8*)newLine, 1);
+					saveFile.DataMsg.serialBuffer((uint8 *)&(*first->begin()), (uint)first->size());
+					saveFile.DataMsg.serialBuffer((uint8 *)newLine, 1);
 
 					++_WriteLineCounter;
 
-					if (saveFile.DataMsg.length() > CBufNetBase::DefaultMaxSentBlockSize/2)
+					if (saveFile.DataMsg.length() > CBufNetBase::DefaultMaxSentBlockSize / 2)
 					{
 						// segment the output soo that it never exceed the maximum message size allowed
 						break;
 					}
 				}
 
-				LQLState = toString("Writing result logs %u/%u...", _WriteLineCounter+1, nbLog);
-
+				LQLState = toString("Writing result logs %u/%u...", _WriteLineCounter + 1, nbLog);
 
 				// send the file to the backup service
 				if (firstBlock)
@@ -580,7 +566,7 @@ public:
 		vector<string> files;
 		CPath::getPathContent(logRoot, false, false, true, files, NULL, true);
 
-		for (uint i=0; i<files.size(); ++i)
+		for (uint i = 0; i < files.size(); ++i)
 		{
 			if (files[i].find("minutely") != string::npos)
 			{
@@ -592,7 +578,6 @@ public:
 		_LogInfos.clear();
 	}
 
-
 	/// Rebuild the last 'hourly' from residual minutely files found on disk
 	void consolidatePreviousFiles()
 	{
@@ -602,9 +587,9 @@ public:
 		vector<string> files;
 		CPath::getPathContent(logRoot, false, false, true, files, NULL, true);
 
-		for (uint i=0; i<files.size(); ++i)
+		for (uint i = 0; i < files.size(); ++i)
 		{
-			if (files[i].find("minutely") != string::npos && files[i].find(".binlog") == files[i].size()-7)
+			if (files[i].find("minutely") != string::npos && files[i].find(".binlog") == files[i].size() - 7)
 			{
 				ls.loadLogs(files[i]);
 			}
@@ -614,7 +599,7 @@ public:
 		ls.saveLogfile("hourly_");
 
 		// delete minute files (even those .tmp file left by failed copy)
-		for (uint i=0; i<files.size(); ++i)
+		for (uint i = 0; i < files.size(); ++i)
 		{
 			if (files[i].find("minutely") != string::npos)
 			{
@@ -623,16 +608,14 @@ public:
 		}
 	}
 
-
 	///////////////////////////////////////////////////////////////////////////
 	/////    CLoggetServiceSkel implementation    /////////////////////////////
 	///////////////////////////////////////////////////////////////////////////
 
-
 	// A logger client register itself wy providing it's definition of
 	// the log content. It is mandatory that ALL client share
 	// Exactly the same definition of log.
-	virtual void registerClient(NLNET::IModuleProxy *sender, uint32 shardId, const std::vector < TLogDefinition > &logDef)
+	virtual void registerClient(NLNET::IModuleProxy *sender, uint32 shardId, const std::vector<TLogDefinition> &logDef)
 	{
 		CAutoMutex<CMutex> lock(_LogMutex);
 		// check that the client use the correct log format
@@ -643,13 +626,12 @@ public:
 			_LogInfos.clear();
 			_LogInfosSize = 0;
 
-
 			// this is the first client, or no other client connected, it define the format
 			_LogDefs = logDef;
 
 			// init the index
 			_LogDefIndex.clear();
-			for (uint i=0; i<_LogDefs.size(); ++i)
+			for (uint i = 0; i < _LogDefs.size(); ++i)
 			{
 				_LogDefIndex.insert(make_pair(_LogDefs[i].getLogName(), i));
 			}
@@ -661,8 +643,8 @@ public:
 
 				// this client use a different format, reject him
 				nlwarning("Client %s from shard %u connect with a different log format!",
-					sender->getModuleName().c_str(),
-					shardId);
+				    sender->getModuleName().c_str(),
+				    shardId);
 
 				// make the information visible to admins
 				IService::getInstance()->addStatusTag("INVALID_CLIENT");
@@ -676,7 +658,7 @@ public:
 	}
 
 	// A client send a log
-	virtual void reportLog(NLNET::IModuleProxy *sender, const std::vector < TLogInfo > &logInfos)
+	virtual void reportLog(NLNET::IModuleProxy *sender, const std::vector<TLogInfo> &logInfos)
 	{
 		CAutoMutex<CMutex> lock(_LogMutex);
 		// 1st check that the client is allowed
@@ -689,7 +671,7 @@ public:
 		}
 
 		// for each log received
-		for (uint l=0; l<logInfos.size(); ++l)
+		for (uint l = 0; l < logInfos.size(); ++l)
 		{
 			const TLogInfo &logInfo = logInfos[l];
 			// 2nd find the log desc
@@ -697,8 +679,8 @@ public:
 			if (logDefIt == _LogDefIndex.end())
 			{
 				nlwarning("Service '%s' send unknown log named '%s'",
-					sender ? sender->getModuleName().c_str() : "NULL",
-					logInfo.getLogName().c_str());
+				    sender ? sender->getModuleName().c_str() : "NULL",
+				    logInfo.getLogName().c_str());
 				return;
 			}
 
@@ -709,55 +691,54 @@ public:
 			if (logInfo.getParams().size() != ld.getParams().size())
 			{
 				nlwarning("Service '%s' send log '%s' with %u param instead of %u",
-					sender ? sender->getModuleName().c_str() : "NULL",
-					logInfo.getLogName().c_str(),
-					logInfo.getParams().size(),
-					ld.getParams().size());
+				    sender ? sender->getModuleName().c_str() : "NULL",
+				    logInfo.getLogName().c_str(),
+				    logInfo.getParams().size(),
+				    ld.getParams().size());
 				return;
 			}
 			if (logInfo.getListParams().size() != ld.getListParams().size())
 			{
 				nlwarning("Service '%s' send log '%s' with %u listParam instead of %u",
-					sender ? sender->getModuleName().c_str() : "NULL",
-					logInfo.getLogName().c_str(),
-					logInfo.getListParams().size(),
-					ld.getListParams().size());
+				    sender ? sender->getModuleName().c_str() : "NULL",
+				    logInfo.getLogName().c_str(),
+				    logInfo.getListParams().size(),
+				    ld.getListParams().size());
 				return;
 			}
-			for (uint i=0; i<ld.getParams().size(); ++i)
+			for (uint i = 0; i < ld.getParams().size(); ++i)
 			{
 				if (ld.getParams()[i].getType() != logInfo.getParams()[i].getType())
 				{
 					nlwarning("Service '%s' send log '%s' with %uth param (%s) of type %s instead of %s",
-						sender ? sender->getModuleName().c_str() : "NULL",
-						logInfo.getLogName().c_str(),
-						i+1,
-						ld.getParams()[i].getName().c_str(),
-						logInfo.getParams()[i].getType().toString().c_str(),
-						ld.getParams()[i].getType().toString().c_str());
+					    sender ? sender->getModuleName().c_str() : "NULL",
+					    logInfo.getLogName().c_str(),
+					    i + 1,
+					    ld.getParams()[i].getName().c_str(),
+					    logInfo.getParams()[i].getType().toString().c_str(),
+					    ld.getParams()[i].getType().toString().c_str());
 					return;
 				}
 			}
-			for (uint i=0; i<ld.getListParams().size(); ++i)
+			for (uint i = 0; i < ld.getListParams().size(); ++i)
 			{
 				const LGS::TListParamValues &values = logInfo.getListParams()[i];
-				std::list < LGS::TParamValue >::const_iterator first(values.getParams().begin()), last(values.getParams().end());
-				for (uint j=0; first != last; ++first, ++j)
+				std::list<LGS::TParamValue>::const_iterator first(values.getParams().begin()), last(values.getParams().end());
+				for (uint j = 0; first != last; ++first, ++j)
 				{
 					if (ld.getListParams()[i].getType() != first->getType())
 					{
 						nlwarning("Service '%s' send log '%s' with %uth listParam (%s) of type %s instead of %s",
-							sender ? sender->getModuleName().c_str() : "NULL",
-							logInfo.getLogName().c_str(),
-							i+1,
-							ld.getParams()[i].getName().c_str(),
-							first->getType().toString().c_str(),
-							ld.getParams()[i].getType().toString().c_str());
+						    sender ? sender->getModuleName().c_str() : "NULL",
+						    logInfo.getLogName().c_str(),
+						    i + 1,
+						    ld.getParams()[i].getName().c_str(),
+						    first->getType().toString().c_str(),
+						    ld.getParams()[i].getType().toString().c_str());
 						return;
 					}
 				}
 			}
-
 
 			// 4st store the log
 			_LogInfos.push_back(TLogEntry());
@@ -770,7 +751,7 @@ public:
 
 	void queryLogs(const std::string queryString, const CLogStorage &ls, list<string> &result, uint32 &totalLogParsed, uint32 &totalLogSelected, uint32 &totalLogOutput)
 	{
-		uint32 now= CTime::getSecondsSince1970();
+		uint32 now = CTime::getSecondsSince1970();
 		CQueryParser qp(ls._LogDefs);
 		CQueryParser::TParserResult pr = qp.parseQuery(queryString, false);
 
@@ -817,7 +798,7 @@ public:
 				id = *first;
 				stackSize = dle.ContextStack;
 				lowerStackSize = dle.ContextStack;
-				while (stackSize > 0 && id < ls._DiskLogEntries.size()-1)
+				while (stackSize > 0 && id < ls._DiskLogEntries.size() - 1)
 				{
 					++id;
 					if (ls._DiskLogEntries[id].LogDate == 0)
@@ -859,22 +840,21 @@ public:
 
 				string shardName = CShardNames::getInstance().getShardName(dle.ShardId);
 				if (shardName.empty())
-					logLine << "ShardId="<<dle.ShardId<<":";
+					logLine << "ShardId=" << dle.ShardId << ":";
 				else
-					logLine << "ShardId="<<shardName<<":";
+					logLine << "ShardId=" << shardName << ":";
 
-				for (uint i=0; i<dle.ContextStack; ++i)
+				for (uint i = 0; i < dle.ContextStack; ++i)
 					logLine << "	";
 
-
 				if (dle.LogDate == 0)
-					logLine << "OpenContext "<<logDef.getLogName()<<":"<<logDef.getLogText()<<":";
+					logLine << "OpenContext " << logDef.getLogName() << ":" << logDef.getLogText() << ":";
 				else if (dle.LogDate == ~0)
-					logLine << "CloseContext "<<logDef.getLogName()<<":";
+					logLine << "CloseContext " << logDef.getLogName() << ":";
 				else
-					logLine << formatDate(dle.LogDate)<< "("<<CTime::getHumanRelativeTime(now-dle.LogDate)<<"):"<<logDef.getLogName()<<":"<<logDef.getLogText()<<":";
+					logLine << formatDate(dle.LogDate) << "(" << CTime::getHumanRelativeTime(now - dle.LogDate) << "):" << logDef.getLogName() << ":" << logDef.getLogText() << ":";
 
-				for (uint j=0; j<dle.ParamIndex.size(); ++j)
+				for (uint j = 0; j < dle.ParamIndex.size(); ++j)
 				{
 					const LGS::TParamDesc &paramDesc = logDef.getParams()[j];
 					CLogStorage::TLogParamId lpi;
@@ -882,26 +862,26 @@ public:
 					lpi.ParamType = paramDesc.getType();
 					nlassert(ls._ParamTables.find(lpi) != ls._ParamTables.end());
 					if (lpi.ParamType == LGS::TSupportedParamType::spt_string)
-						logLine << " "<<paramDesc.getName()<<"=\""<<ls._ParamTables.find(lpi)->second[dle.ParamIndex[j]].toString()<<"\"";
+						logLine << " " << paramDesc.getName() << "=\"" << ls._ParamTables.find(lpi)->second[dle.ParamIndex[j]].toString() << "\"";
 					else
-						logLine << " "<<paramDesc.getName()<<"="<<ls._ParamTables.find(lpi)->second[dle.ParamIndex[j]].toString();
+						logLine << " " << paramDesc.getName() << "=" << ls._ParamTables.find(lpi)->second[dle.ParamIndex[j]].toString();
 				}
-				for (uint j=0; j<dle.ListParamIndex.size(); ++j)
+				for (uint j = 0; j < dle.ListParamIndex.size(); ++j)
 				{
 					const LGS::TParamDesc &paramDesc = logDef.getListParams()[j];
 					CLogStorage::TLogParamId lpi;
 					lpi.ParamName = paramDesc.getName();
 					lpi.ParamType = paramDesc.getType();
 					nlassert(ls._ParamTables.find(lpi) != ls._ParamTables.end());
-					logLine << " "<<paramDesc.getName()<<"=";
+					logLine << " " << paramDesc.getName() << "=";
 
-					for (uint k=0; k<dle.ListParamIndex[j].size(); ++k)
+					for (uint k = 0; k < dle.ListParamIndex[j].size(); ++k)
 					{
 						if (lpi.ParamType == LGS::TSupportedParamType::spt_string)
-							logLine << "\""<<ls._ParamTables.find(lpi)->second[dle.ListParamIndex[j][k]].toString()<<"\"";
+							logLine << "\"" << ls._ParamTables.find(lpi)->second[dle.ListParamIndex[j][k]].toString() << "\"";
 						else
 							logLine << ls._ParamTables.find(lpi)->second[dle.ListParamIndex[j][k]].toString();
-						if (k < dle.ListParamIndex[j].size()-1)
+						if (k < dle.ListParamIndex[j].size() - 1)
 							logLine << ", ";
 					}
 				}
@@ -920,8 +900,9 @@ public:
 		_QueryStatus.write(TThreadStatus(qs_lql_state, toString("Starting executing query %u", queryNumber)));
 
 		// prepare the output file
-		string outputFile = queryOptions.OutputPrefix+LogQueryResultFile.get();
-		FILE *fp = nlfopen(outputFile, "wt");;
+		string outputFile = queryOptions.OutputPrefix + LogQueryResultFile.get();
+		FILE *fp = nlfopen(outputFile, "wt");
+		;
 		if (fp == NULL)
 		{
 			_QueryStatus.write(TThreadStatus(qs_push_state, "ErrorWritingQueryResult"));
@@ -933,11 +914,11 @@ public:
 		list<string> result;
 		try
 		{
-			uint32 totalLogParsed =0;
-			uint32 totalLogSelected =0;
-			uint32 totalLogOutput =0;
-			uint32 totalFileSelected =0;
-			uint32 totalFileFound =0;
+			uint32 totalLogParsed = 0;
+			uint32 totalLogSelected = 0;
+			uint32 totalLogOutput = 0;
+			uint32 totalFileSelected = 0;
+			uint32 totalFileFound = 0;
 
 			// write the query at the start of the result set
 			result.push_back(query);
@@ -959,38 +940,38 @@ public:
 			{
 				_QueryStatus.write(TThreadStatus(qs_log, toString("No LogDate specified, request will be limited to the last 24 hours files")));
 				// no time range defined, force a 24 hours time line
-//				query = "LogDate > yesterday and ("+query+")";
+				//				query = "LogDate > yesterday and ("+query+")";
 
 				result.push_back(string("WARNING : last 24 hours only : no time predicate found, result is automaticaly limited to last day"));
 				result.push_back(string("================================================================================"));
 
 				// set start date to yesterday
-				timeLine[0].StartDate = CTime::getSecondsSince1970()-60*60*24;
+				timeLine[0].StartDate = CTime::getSecondsSince1970() - 60 * 60 * 24;
 			}
 
 			_QueryStatus.write(TThreadStatus(qs_push_state, "Querying"));
 			/// dump the time line
-			for (uint i=0; i<timeLine.size(); ++i)
+			for (uint i = 0; i < timeLine.size(); ++i)
 			{
 				nlinfo("TimeLine item %2u : [%s - %s)", i, formatDate(timeLine[i].StartDate).c_str(), formatDate(timeLine[i].EndDate).c_str());
 			}
 
 			time_t now = CTime::getSecondsSince1970();
 
-			vector<string>	files;
+			vector<string> files;
 			CPath::getPathContent(CLogStorage::getLogRoot(), false, false, true, files, NULL, true);
 
 			// first loop to select the file to read according to the date
-//			set<uint32>	selectedFileIndex;
+			//			set<uint32>	selectedFileIndex;
 			/// This is the ordered by date file selection
 			map<uint32, uint32> selectedFile;
 
 			uint32 previousDate = 0;
 
-			for (uint i=0; i<files.size(); ++i)
+			for (uint i = 0; i < files.size(); ++i)
 			{
-				if (files[i].substr(files[i].size()-7) == ".binlog"
-					&& files[i].find("hourly_") != string::npos)
+				if (files[i].substr(files[i].size() - 7) == ".binlog"
+				    && files[i].find("hourly_") != string::npos)
 				{
 					// extract the date from the file name
 					string fileName = CFile::getFilenameWithoutExtension(files[i]);
@@ -998,13 +979,12 @@ public:
 					struct tm fileDate;
 					memset(&fileDate, 0, sizeof(fileDate));
 					int nbField = sscanf(fileName.c_str(), "hourly_%u-%u-%u_%u-%u-%u",
-						&fileDate.tm_year,
-						&fileDate.tm_mon,
-						&fileDate.tm_mday,
-						&fileDate.tm_hour,
-						&fileDate.tm_min,
-						&fileDate.tm_sec
-						);
+					    &fileDate.tm_year,
+					    &fileDate.tm_mon,
+					    &fileDate.tm_mday,
+					    &fileDate.tm_hour,
+					    &fileDate.tm_min,
+					    &fileDate.tm_sec);
 
 					if (nbField != 6)
 					{
@@ -1019,23 +999,22 @@ public:
 					// adjust month
 					fileDate.tm_mon -= 1;
 					// let the CRunt time compute the daylight saving offset
-					fileDate.tm_isdst  = -1;
+					fileDate.tm_isdst = -1;
 
 					uint32 date = (uint32)mktime(&fileDate);
 
 					// check that the date is within a selected time slice
-					for (uint j=0; j<timeLine.size(); ++j)
+					for (uint j = 0; j < timeLine.size(); ++j)
 					{
-						if (!(	(date < timeLine[j].StartDate && previousDate < timeLine[j].StartDate)
-							|| (date > timeLine[j].EndDate && previousDate > timeLine[j].EndDate))
-							)
+						if (!((date < timeLine[j].StartDate && previousDate < timeLine[j].StartDate)
+						        || (date > timeLine[j].EndDate && previousDate > timeLine[j].EndDate)))
 						{
 							nlinfo("File %s from (%s to %s] is accepted in the range [%s - %s)",
-								fileName.c_str(),
-								formatDate(previousDate).c_str(),
-								formatDate(date).c_str(),
-								formatDate(timeLine[j].StartDate).c_str(),
-								formatDate(timeLine[j].EndDate).c_str());
+							    fileName.c_str(),
+							    formatDate(previousDate).c_str(),
+							    formatDate(date).c_str(),
+							    formatDate(timeLine[j].StartDate).c_str(),
+							    formatDate(timeLine[j].EndDate).c_str());
 
 							selectedFile.insert(make_pair(date, i));
 							break;
@@ -1043,12 +1022,11 @@ public:
 						else
 						{
 							nlinfo("File %s from (%s to %s] is REJECTED from the range [%s - %s)",
-								fileName.c_str(),
-								formatDate(previousDate).c_str(),
-								formatDate(date).c_str(),
-								formatDate(timeLine[j].StartDate).c_str(),
-								formatDate(timeLine[j].EndDate).c_str());
-
+							    fileName.c_str(),
+							    formatDate(previousDate).c_str(),
+							    formatDate(date).c_str(),
+							    formatDate(timeLine[j].StartDate).c_str(),
+							    formatDate(timeLine[j].EndDate).c_str());
 						}
 					}
 
@@ -1059,25 +1037,23 @@ public:
 			totalFileSelected = (uint32)selectedFile.size();
 			// now, do the real job, query inside each selected file in ascending date order
 			map<uint32, uint32>::iterator first(selectedFile.begin()), last(selectedFile.end());
-			for (uint counter=0; first != last; ++first, ++counter)
+			for (uint counter = 0; first != last; ++first, ++counter)
 			{
-				_QueryStatus.write(TThreadStatus(qs_lql_state, toString("Reading log file %u/%u", counter+1, selectedFile.size())));
+				_QueryStatus.write(TThreadStatus(qs_lql_state, toString("Reading log file %u/%u", counter + 1, selectedFile.size())));
 
 				CLogStorage ls(_LogDefs);
 				ls.loadLogs(files[first->second]);
 
 				// check the timeline limits
 				if (!ls._DiskLogEntries.empty()
-					&&
-						(ls._DiskLogEntries.begin()->LogDate >  timeLine.rbegin()->EndDate
-						|| ls._DiskLogEntries.rbegin()->LogDate <  timeLine.begin()->StartDate)
-						)
+				    && (ls._DiskLogEntries.begin()->LogDate > timeLine.rbegin()->EndDate
+				        || ls._DiskLogEntries.rbegin()->LogDate < timeLine.begin()->StartDate))
 				{
 					// no log can match inside this file
 					continue;
 				}
 
-				_QueryStatus.write(TThreadStatus(qs_lql_state, toString("Processing log file %u/%u", counter+1, selectedFile.size())));
+				_QueryStatus.write(TThreadStatus(qs_lql_state, toString("Processing log file %u/%u", counter + 1, selectedFile.size())));
 				queryLogs(query, ls, result, totalLogParsed, totalLogSelected, totalLogOutput);
 
 				// check the command channel for interrupt request
@@ -1119,12 +1095,10 @@ public:
 			_QueryStatus.write(TThreadStatus(qs_pop_state, "Querying"));
 			_QueryStatus.write(TThreadStatus(qs_push_state, "WritingResult"));
 
-
 			result.push_back("===============================================================================");
 			result.push_back("Query stats :");
 			result.push_back(toString("%u log files found, %u log file read", totalFileFound, totalFileSelected));
 			result.push_back(toString("%u log parsed, %u log selected, %u log written to output", totalLogParsed, totalLogSelected, totalLogOutput));
-
 
 			/// output the result
 			{
@@ -1137,55 +1111,48 @@ public:
 				// write the result in the channel and block until the main thread
 				// has read it.
 				_QueryResult.syncWrite(threadResult);
-
 			}
 
-			_QueryStatus.write(TThreadStatus(qs_log, toString("Selected %u logs in %u seconds, %u seconds to output result", totalLogSelected, afterSelect-now, CTime::getSecondsSince1970()-afterSelect)));
+			_QueryStatus.write(TThreadStatus(qs_log, toString("Selected %u logs in %u seconds, %u seconds to output result", totalLogSelected, afterSelect - now, CTime::getSecondsSince1970() - afterSelect)));
 
 			_QueryStatus.write(TThreadStatus(qs_lql_state, toString("Finished query %u", queryNumber)));
-
 		}
 		catch (const CQueryParser::EInvalidQuery &iq)
 		{
-			uint index= (uint)(iq.It - query.begin());
-			_QueryStatus.write(TThreadStatus(qs_log, toString("Error will parsing query near char %u : %s", index+1, iq.ErrorStr)));
+			uint index = (uint)(iq.It - query.begin());
+			_QueryStatus.write(TThreadStatus(qs_log, toString("Error will parsing query near char %u : %s", index + 1, iq.ErrorStr)));
 			_QueryStatus.write(TThreadStatus(qs_log, query));
 			CSString err;
-			for (uint i=0; i<index; ++i)
+			for (uint i = 0; i < index; ++i)
 				err << " ";
 			err << "^";
 			_QueryStatus.write(TThreadStatus(qs_log, err));
-
 		}
 
-endQuery:
+	endQuery:
 		_QueryStatus.write(TThreadStatus(qs_pop_state, "Querying"));
 		_QueryStatus.write(TThreadStatus(qs_pop_state, "WritingResult"));
-
 	}
-
-
 
 	/*************************************************************************/
 	/* Commands handler														 */
 	/*************************************************************************/
 	NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CLoggerServiceMod, CModuleBase)
-		NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, dump, "Dump the module internal state", "");
-		NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, displayLog, "Display the last log entries", "[duration(s)=10]");
-		NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, fillTestLog, "Fill the logger with some test log. Logger must be just started with no clients", "");
-		NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, queryLogs, "Test the query parser", "<a full query>");
-		NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, interruptQuery, "Stop the current running query", "");
-		NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, saveLogs, "Save the logs", "");
-		NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, loadLogs, "Load a log file", "<filename>");
-		NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, displayLogFormat, "Display the format of log", "");
-		NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, generateManyLogs, "Generate a big number of random logs", "<nbLogsToGenerate> <nbOutputFile>");
+	NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, dump, "Dump the module internal state", "");
+	NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, displayLog, "Display the last log entries", "[duration(s)=10]");
+	NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, fillTestLog, "Fill the logger with some test log. Logger must be just started with no clients", "");
+	NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, queryLogs, "Test the query parser", "<a full query>");
+	NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, interruptQuery, "Stop the current running query", "");
+	NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, saveLogs, "Save the logs", "");
+	NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, loadLogs, "Load a log file", "<filename>");
+	NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, displayLogFormat, "Display the format of log", "");
+	NLMISC_COMMAND_HANDLER_ADD(CLoggerServiceMod, generateManyLogs, "Generate a big number of random logs", "<nbLogsToGenerate> <nbOutputFile>");
 	NLMISC_COMMAND_HANDLER_TABLE_END
 
 	NLMISC_CLASS_COMMAND_DECL(generateManyLogs)
 	{
 		CRandom rand;
 		rand.srand(CTime::getSecondsSince1970());
-
 
 		if (args.size() != 2)
 			return false;
@@ -1210,37 +1177,36 @@ endQuery:
 
 		/// Build the table of 'random' value
 		vector<CEntityId> entityIds;
-		for (uint i=0; i<25000; ++i)
+		for (uint i = 0; i < 25000; ++i)
 		{
 			entityIds.push_back(CEntityId(0, randu64(rand, UINT64_CONSTANT(0xffffffffffffffff)), 0, 0));
 		}
 		vector<INVENTORIES::TItemId> itemIds;
-		for (uint i=0; i<60000; ++i)
+		for (uint i = 0; i < 60000; ++i)
 		{
 			itemIds.push_back(INVENTORIES::TItemId(randu64(rand, UINT64_CONSTANT(0xffffffffffffffff))));
 		}
 
-		std::vector <CSheetId> allSheets;
+		std::vector<CSheetId> allSheets;
 		CSheetId::buildIdVector(allSheets);
 
 		vector<CSheetId> sheetIds;
-		for (uint i=0; i<3000; ++i)
+		for (uint i = 0; i < 3000; ++i)
 		{
 			sheetIds.push_back(allSheets[randu32(rand, (uint32)allSheets.size())]);
 		}
 
-
-		for (uint i=0; i<nbFiles; ++i)
+		for (uint i = 0; i < nbFiles; ++i)
 		{
-			vector<uint32>	contextStack;
-			log.displayNL("Generating log file %u/%u", i+1, nbFiles);
-			for (uint j=0; j<nbLogsPerFile; ++j)
+			vector<uint32> contextStack;
+			log.displayNL("Generating log file %u/%u", i + 1, nbFiles);
+			for (uint j = 0; j < nbLogsPerFile; ++j)
 			{
-				if (j%1000 == 0)
-					log.displayNL("Generating log entry %u/%u", j+1, nbLogsPerFile);
+				if (j % 1000 == 0)
+					log.displayNL("Generating log entry %u/%u", j + 1, nbLogsPerFile);
 
 				if (!contextStack.empty()
-					&& randu32(rand, 5) < contextStack.size())
+				    && randu32(rand, 5) < contextStack.size())
 				{
 					LGS::TLogDefinition &ld = _LogDefs[contextStack.back()];
 					// unstack a level of context
@@ -1276,12 +1242,13 @@ endQuery:
 						// this is a normal log, build a random list of parameter
 						TLogEntry le;
 						le.LogInfo.setLogName(ld.getLogName());
-						le.LogInfo.setTimeStamp(CTime::getSecondsSince1970());;
+						le.LogInfo.setTimeStamp(CTime::getSecondsSince1970());
+						;
 						le.ShardId = 666;
 						le.LogId = _LogId++;
 
 						le.LogInfo.getParams().reserve(ld.getParams().size());
-						for (uint k=0; k<ld.getParams().size(); ++k)
+						for (uint k = 0; k < ld.getParams().size(); ++k)
 						{
 							LGS::TParamDesc &pd = ld.getParams()[k];
 
@@ -1297,16 +1264,15 @@ endQuery:
 								le.LogInfo.getParams().push_back(TParamValue(rands32(rand, 0xffffffff)));
 								break;
 							case LGS::TSupportedParamType::spt_float:
-								le.LogInfo.getParams().push_back(TParamValue(rand.frand()*1000.0f));
+								le.LogInfo.getParams().push_back(TParamValue(rand.frand() * 1000.0f));
 								break;
-							case LGS::TSupportedParamType::spt_string:
-								{
-									char buffer[2];
-									buffer[1] =0;
-									buffer[0] = 32+(char)rand.rand(96);
-									le.LogInfo.getParams().push_back(TParamValue(string(buffer)));
-								}
-								break;
+							case LGS::TSupportedParamType::spt_string: {
+								char buffer[2];
+								buffer[1] = 0;
+								buffer[0] = 32 + (char)rand.rand(96);
+								le.LogInfo.getParams().push_back(TParamValue(string(buffer)));
+							}
+							break;
 							case LGS::TSupportedParamType::spt_entityId:
 								le.LogInfo.getParams().push_back(TParamValue(entityIds[randu32(rand, (uint32)entityIds.size())]));
 								break;
@@ -1320,14 +1286,14 @@ endQuery:
 						}
 
 						le.LogInfo.getListParams().resize(ld.getListParams().size());
-						for (uint k=0; k<ld.getListParams().size(); ++k)
+						for (uint k = 0; k < ld.getListParams().size(); ++k)
 						{
 							LGS::TParamDesc &pd = ld.getListParams()[k];
 							uint32 listSize = randu32(rand, 20);
 
 							TListParamValues &lpv = le.LogInfo.getListParams()[k];
 
-							for (uint l=0; l<listSize; ++l)
+							for (uint l = 0; l < listSize; ++l)
 							{
 								switch (pd.getType().getValue())
 								{
@@ -1341,16 +1307,15 @@ endQuery:
 									lpv.getParams().push_back(TParamValue(rands32(rand, 0xffffffff)));
 									break;
 								case LGS::TSupportedParamType::spt_float:
-									lpv.getParams().push_back(TParamValue(rand.frand()*1000.0f));
+									lpv.getParams().push_back(TParamValue(rand.frand() * 1000.0f));
 									break;
-								case LGS::TSupportedParamType::spt_string:
-									{
-										char buffer[2];
-										buffer[1] =0;
-										buffer[0] = 32+(char)rand.rand(96);
-										lpv.getParams().push_back(TParamValue(string(buffer)));
-									}
-									break;
+								case LGS::TSupportedParamType::spt_string: {
+									char buffer[2];
+									buffer[1] = 0;
+									buffer[0] = 32 + (char)rand.rand(96);
+									lpv.getParams().push_back(TParamValue(string(buffer)));
+								}
+								break;
 								case LGS::TSupportedParamType::spt_entityId:
 									lpv.getParams().push_back(TParamValue(entityIds[randu32(rand, (uint32)entityIds.size())]));
 									break;
@@ -1367,7 +1332,6 @@ endQuery:
 						_LogInfos.push_back(le);
 					}
 				}
-
 			}
 
 			// empty the context stack
@@ -1385,7 +1349,7 @@ endQuery:
 				contextStack.pop_back();
 			}
 
-			log.displayNL("Writing log file %u/%u", i+1, nbFiles);
+			log.displayNL("Writing log file %u/%u", i + 1, nbFiles);
 			doHourlyProcess();
 
 			// wait at least one second before continuing
@@ -1394,7 +1358,6 @@ endQuery:
 
 		return true;
 	}
-
 
 	NLMISC_CLASS_COMMAND_DECL(interruptQuery)
 	{
@@ -1412,21 +1375,21 @@ endQuery:
 		set<string> allParamNames;
 		log.displayNL("Definition of %5u logs :", _LogDefs.size());
 		log.displayNL("--------------------------", _LogDefs.size());
-		for (uint i=0; i<_LogDefs.size(); ++i)
+		for (uint i = 0; i < _LogDefs.size(); ++i)
 		{
 			const TLogDefinition &ld = _LogDefs[i];
 
 			log.displayNL("LogName=%s, Text=%s, %u parameters, %u list parameters",
-				ld.getLogName().c_str(),
-				ld.getLogText().c_str(),
-				ld.getParams().size(),
-				ld.getListParams().size());
+			    ld.getLogName().c_str(),
+			    ld.getLogText().c_str(),
+			    ld.getParams().size(),
+			    ld.getListParams().size());
 
 			if (!ld.getParams().empty())
 			{
-				for (uint j=0; j<ld.getParams().size(); ++j)
+				for (uint j = 0; j < ld.getParams().size(); ++j)
 				{
-					const TParamDesc&pd = ld.getParams()[j];
+					const TParamDesc &pd = ld.getParams()[j];
 					log.display("  ParamName=%s, Type=%s", pd.getName().c_str(), pd.getType().toString().c_str());
 
 					allParamNames.insert(pd.getName());
@@ -1436,9 +1399,9 @@ endQuery:
 			if (!ld.getListParams().empty())
 			{
 				log.displayNL("  List params :");
-				for (uint j=0; j<ld.getListParams().size(); ++j)
+				for (uint j = 0; j < ld.getListParams().size(); ++j)
 				{
-					const TParamDesc&pd = ld.getListParams()[j];
+					const TParamDesc &pd = ld.getListParams()[j];
 					log.display("  ParamName=%s, Type=%s", pd.getName().c_str(), pd.getType().toString().c_str());
 
 					allParamNames.insert(pd.getName());
@@ -1464,7 +1427,6 @@ endQuery:
 		if (!line.empty())
 			log.displayNL("%s", line.c_str());
 
-
 		return true;
 	}
 
@@ -1486,7 +1448,7 @@ endQuery:
 		CAutoMutex<CMutex> lock(_LogMutex);
 		CLogStorage ls(_LogDefs);
 		ls.saveHourly(_LogInfos);
-//		ls.storeLogs(0, 0x7fffffff, _LogInfos);
+		//		ls.storeLogs(0, 0x7fffffff, _LogInfos);
 
 		ls.dumpLogs(log);
 
@@ -1505,7 +1467,7 @@ endQuery:
 				return true;
 			}
 
-			for (uint i=0; i<var->size(); ++i)
+			for (uint i = 0; i < var->size(); ++i)
 			{
 				log.displayNL("%s", var->asString(i).c_str());
 			}
@@ -1534,7 +1496,6 @@ endQuery:
 		log.displayNL("Dumping logger service :");
 		log.displayNL("-----------------------------");
 
-
 		log.displayNL("There is %u connected and accepted clients :", _Clients.size());
 		TLogClients::iterator first(_Clients.begin()), last(_Clients.end());
 		for (; first != last; ++first)
@@ -1542,15 +1503,14 @@ endQuery:
 			IModuleProxy *proxy = first->first;
 			TShardId shardId = first->second;
 			log.displayNL("  Client : '%s' for shard %u",
-				proxy? proxy->getModuleName().c_str() : "NULL",
-				shardId);
+			    proxy ? proxy->getModuleName().c_str() : "NULL",
+			    shardId);
 		}
 
 		log.displayNL("There are %u log entry in memory.", _LogInfosSize);
 
 		return true;
 	}
-
 
 	NLMISC_CLASS_COMMAND_DECL(displayLog)
 	{
@@ -1566,19 +1526,18 @@ endQuery:
 		TLogInfos::reverse_iterator rit = _LogInfos.rbegin();
 		// advance cursor up to the requested time
 		while (rit != _LogInfos.rend()
-			&& (rit->LogInfo.getTimeStamp() == 0
-				|| rit->LogInfo.getTimeStamp() == ~0
-				|| rit->LogInfo.getTimeStamp()+nbSec > now))
+		    && (rit->LogInfo.getTimeStamp() == 0
+		        || rit->LogInfo.getTimeStamp() == ~0
+		        || rit->LogInfo.getTimeStamp() + nbSec > now))
 			++rit;
 
 		// now convert to forward iterator
 		TLogInfos::iterator it = rit.base();
 
-
 		while (it != _LogInfos.end()
-			&& (it->LogInfo.getTimeStamp() == 0
-				|| it->LogInfo.getTimeStamp() == ~0
-				|| it->LogInfo.getTimeStamp()+nbSec > now))
+		    && (it->LogInfo.getTimeStamp() == 0
+		        || it->LogInfo.getTimeStamp() == ~0
+		        || it->LogInfo.getTimeStamp() + nbSec > now))
 		{
 			const TLogInfo &li = it->LogInfo;
 
@@ -1594,14 +1553,14 @@ endQuery:
 			}
 			else if (li.getTimeStamp() == ~0)
 			{
-				tabs.erase(tabs.size()-1);
+				tabs.erase(tabs.size() - 1);
 				log.displayNL("%sClosing log context %s", tabs.c_str(), ld.getLogName().c_str());
 			}
 			else
 			{
-				log.display("%s%s(%ds ago), LOG : %s", tabs.c_str(), formatDate(li.getTimeStamp()).c_str(), now-li.getTimeStamp(), ld.getLogText().c_str());
+				log.display("%s%s(%ds ago), LOG : %s", tabs.c_str(), formatDate(li.getTimeStamp()).c_str(), now - li.getTimeStamp(), ld.getLogText().c_str());
 
-				for (uint i=0; i<ld.getParams().size(); ++i)
+				for (uint i = 0; i < ld.getParams().size(); ++i)
 				{
 					log.display(", %s = '%s'", ld.getParams()[i].getName().c_str(), li.getParams()[i].toString().c_str());
 				}
@@ -1617,7 +1576,7 @@ endQuery:
 
 	NLMISC_CLASS_COMMAND_DECL(fillTestLog)
 	{
-		vector<TLogDefinition>	logDefs;
+		vector<TLogDefinition> logDefs;
 
 		logDefs.resize(4);
 		// define log 1
@@ -1693,80 +1652,80 @@ endQuery:
 		}
 
 		// register the client
-		registerClient( NULL, 101, logDefs);
+		registerClient(NULL, 101, logDefs);
 
 		// now, send some logs
 		{
 			TLogInfo li;
 			li.setLogName("L1");
-			li.setTimeStamp(CTime::getSecondsSince1970()-20);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 20);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x1234)));
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x5678)));
 			li.getParams().push_back(TParamValue(string("Ho mon bateau")));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 		{
 			TLogInfo li;
 			li.setLogName("L1");
-			li.setTimeStamp(CTime::getSecondsSince1970()-15);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 15);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x1111)));
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x2222)));
 			li.getParams().push_back(TParamValue(string("Titanic")));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 		{
 			TLogInfo li;
 			li.setLogName("L2");
-			li.setTimeStamp(CTime::getSecondsSince1970()-10);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 10);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x1111)));
 			li.getParams().push_back(TParamValue(TItemId(UINT64_CONSTANT(123456789012345678))));
 			li.getParams().push_back(TParamValue(CSheetId(1)));
 			li.getParams().push_back(TParamValue(uint32(10)));
 			li.getParams().push_back(TParamValue(uint32(1)));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 		{
 			TLogInfo li;
 			li.setLogName("L2");
-			li.setTimeStamp(CTime::getSecondsSince1970()-5);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 5);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x2222)));
 			li.getParams().push_back(TParamValue(TItemId()));
 			li.getParams().push_back(TParamValue(CSheetId(2)));
 			li.getParams().push_back(TParamValue(uint32(100)));
 			li.getParams().push_back(TParamValue(uint32(10)));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 
 		// send log with variable params
 		{
 			TLogInfo li;
 			li.setLogName("L3");
-			li.setTimeStamp(CTime::getSecondsSince1970()-4);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 4);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x3333)));
 			li.getParams().push_back(TParamValue(string("Hello, this is a cool chat entry!")));
 			li.getListParams().resize(1);
-			for (uint i=0; i<10; ++i)
-				li.getListParams()[0].getParams().push_back(TParamValue(CEntityId(0, 0x4444+i)));
+			for (uint i = 0; i < 10; ++i)
+				li.getListParams()[0].getParams().push_back(TParamValue(CEntityId(0, 0x4444 + i)));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 		{
 			TLogInfo li;
 			li.setLogName("L4");
-			li.setTimeStamp(CTime::getSecondsSince1970()-4);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 4);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x4444)));
 			li.getParams().push_back(TParamValue(string("Hello, this is another also cool chat entry!")));
 			li.getListParams().resize(2);
-			for (uint i=0; i<10; ++i)
-				li.getListParams()[0].getParams().push_back(TParamValue(CEntityId(0, 0x5555+i)));
-			for (uint i=0; i<5; ++i)
+			for (uint i = 0; i < 10; ++i)
+				li.getListParams()[0].getParams().push_back(TParamValue(CEntityId(0, 0x5555 + i)));
+			for (uint i = 0; i < 5; ++i)
 				li.getListParams()[1].getParams().push_back(TParamValue(uint32(i)));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 
 		// send some missformed logs
@@ -1774,28 +1733,28 @@ endQuery:
 			// not enought param
 			TLogInfo li;
 			li.setLogName("L2");
-			li.setTimeStamp(CTime::getSecondsSince1970()-5);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 5);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x2222)));
 			li.getParams().push_back(TParamValue(TItemId(UINT64_CONSTANT(765432109876543210))));
 			li.getParams().push_back(TParamValue(CSheetId(3)));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 		{
 			// not enought list param
 			TLogInfo li;
 			li.setLogName("L3");
-			li.setTimeStamp(CTime::getSecondsSince1970()-4);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 4);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x3333)));
 			li.getParams().push_back(TParamValue(string("Hello, this is a cool chat entry!")));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 		{
 			// too many param
 			TLogInfo li;
 			li.setLogName("L2");
-			li.setTimeStamp(CTime::getSecondsSince1970()-5);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 5);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x2222)));
 			li.getParams().push_back(TParamValue(TItemId(UINT64_CONSTANT(765432109876543210))));
 			li.getParams().push_back(TParamValue(uint32(100)));
@@ -1804,102 +1763,96 @@ endQuery:
 			li.getParams().push_back(TParamValue(uint32(100)));
 			li.getParams().push_back(TParamValue(uint32(10)));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 		{
 			// too many list param
 			TLogInfo li;
 			li.setLogName("L3");
-			li.setTimeStamp(CTime::getSecondsSince1970()-4);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 4);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x3333)));
 			li.getParams().push_back(TParamValue(string("Hello, this is a cool chat entry!")));
 			li.getListParams().resize(2);
-			for (uint i=0; i<10; ++i)
-				li.getListParams()[0].getParams().push_back(TParamValue(CEntityId(0, 0x4444+i)));
+			for (uint i = 0; i < 10; ++i)
+				li.getListParams()[0].getParams().push_back(TParamValue(CEntityId(0, 0x4444 + i)));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 		{
 			// unknow log
 			TLogInfo li;
 			li.setLogName("L500");
-			li.setTimeStamp(CTime::getSecondsSince1970()-5);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 5);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x2222)));
 			li.getParams().push_back(TParamValue(TItemId(UINT64_CONSTANT(765432109876543210))));
 			li.getParams().push_back(TParamValue(CSheetId(5)));
 			li.getParams().push_back(TParamValue(uint32(100)));
 			li.getParams().push_back(TParamValue(uint32(10)));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 		{
 			// invalid param
 			TLogInfo li;
 			li.setLogName("L2");
-			li.setTimeStamp(CTime::getSecondsSince1970()-5);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 5);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x2222)));
 			li.getParams().push_back(TParamValue(TItemId(UINT64_CONSTANT(765432109876543210))));
 			li.getParams().push_back(TParamValue(CSheetId(6)));
 			li.getParams().push_back(TParamValue(CSheetId(7)));
 			li.getParams().push_back(TParamValue(uint32(10)));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 		{
 			// invalid list param
 			TLogInfo li;
 			li.setLogName("L3");
-			li.setTimeStamp(CTime::getSecondsSince1970()-4);
+			li.setTimeStamp(CTime::getSecondsSince1970() - 4);
 			li.getParams().push_back(TParamValue(CEntityId(0, 0x3333)));
 			li.getParams().push_back(TParamValue(string("Hello, this is a cool chat entry!")));
 			li.getListParams().resize(1);
-			for (uint i=0; i<10; ++i)
+			for (uint i = 0; i < 10; ++i)
 				li.getListParams()[0].getParams().push_back(TParamValue(uint32(i)));
 
-			reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+			reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 		}
 
 		if (args.size() == 1 && args[0] == "many")
 		{
 			// fill a very big deal of logs
-			for (uint i=0; i<50000; ++i)
+			for (uint i = 0; i < 50000; ++i)
 			{
 				TLogInfo li;
 				li.setLogName("L2");
-				li.setTimeStamp(CTime::getSecondsSince1970()-50000+i);
+				li.setTimeStamp(CTime::getSecondsSince1970() - 50000 + i);
 				li.getParams().push_back(TParamValue(CEntityId(0, 0x2222)));
 				li.getParams().push_back(TParamValue(TItemId()));
 				li.getParams().push_back(TParamValue(CSheetId(2)));
-				li.getParams().push_back(TParamValue(uint32(100+i)));
+				li.getParams().push_back(TParamValue(uint32(100 + i)));
 				li.getParams().push_back(TParamValue(uint32(10)));
 
-				reportLog(NULL, vector<TLogInfo>(&li, &li+1));
+				reportLog(NULL, vector<TLogInfo>(&li, &li + 1));
 			}
 		}
 
-
 		return true;
 	}
-
 };
 
 NLNET_REGISTER_MODULE_FACTORY(CLoggerServiceMod, "LoggerService");
-
-
-
 
 // the logger service
 class CLoggerService : public IService
 {
 public:
-
 	/**
 	 * Init
 	 */
 	void init()
 	{
 		// init the sheet manager without worying about aving the sheet_id.bin file
-//		CSheetId::initWithoutSheet();
+		//		CSheetId::initWithoutSheet();
 		CSheetId::init(false);
 
 		CSingletonRegistry::getInstance()->init();
@@ -1910,7 +1863,7 @@ public:
 	/**
 	 * Update
 	 */
-	bool update ()
+	bool update()
 	{
 		CSingletonRegistry::getInstance()->tickUpdate();
 
@@ -1920,25 +1873,14 @@ public:
 	void release()
 	{
 		CSingletonRegistry::getInstance()->release();
-
 	}
 
-	virtual std::string					getServiceStatusString() const
+	virtual std::string getServiceStatusString() const
 	{
 		return toString("LQLState=%s LastFinishedQuery=%u", LQLState.c_str(), LastFinishedQuery.get());
 	}
-
 };
-
-
-
-
-
-
-
-
-
 
 /// Logger servive
 //
-NLNET_SERVICE_MAIN (CLoggerService, "LGS", "logger_service", 0, EmptyCallbackArray, "", "");
+NLNET_SERVICE_MAIN(CLoggerService, "LGS", "logger_service", 0, EmptyCallbackArray, "", "");

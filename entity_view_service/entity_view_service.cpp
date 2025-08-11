@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 // misc
 #include "nel/misc/command.h"
 #include "nel/misc/vector_2d.h"
@@ -52,14 +50,13 @@ using namespace NLNET;
 using namespace NL3D;
 using namespace NLPACS;
 
-#define BACKGROUND (CRGBA (64,64,64,0))
-#define GROUND_COLOR (CRGBA (96,96,128,255))
-#define CHAIN_COLOR (CRGBA (160,160,96,255))
-#define DIRECTION_COLOR (CRGBA (255,255,255,255))
-
+#define BACKGROUND (CRGBA(64, 64, 64, 0))
+#define GROUND_COLOR (CRGBA(96, 96, 128, 255))
+#define CHAIN_COLOR (CRGBA(160, 160, 96, 255))
+#define DIRECTION_COLOR (CRGBA(255, 255, 255, 255))
 
 // driver
-UDriver	*pDriver;
+UDriver *pDriver;
 
 // Text context
 UTextContext *textContext;
@@ -68,7 +65,7 @@ UTextContext *textContext;
 UScene *pScene;
 
 // Camera
-UCamera	*pCam;
+UCamera *pCam;
 
 // Mouse listener
 U3dMouseListener *plistener;
@@ -80,24 +77,22 @@ UMaterial *chainMat;
 UMaterial *targetMat;
 
 //
-CEntityViewService		*pEVS;
-
-
-//
-vector< pair<CVector,CEntity*> >	Names;
-vector< deque<CVectorD>* >			Pathes;
+CEntityViewService *pEVS;
 
 //
-const uint	MaxObjects = 400;
+vector<pair<CVector, CEntity *>> Names;
+vector<deque<CVectorD> *> Pathes;
 
 //
-CEntityId		Follow = CEntityId::Unknown;
+const uint MaxObjects = 400;
 
 //
-CVector		MousePos;
-bool		MouseClicked = false;
-CEntityId	SelId = CEntityId::Unknown;
+CEntityId Follow = CEntityId::Unknown;
 
+//
+CVector MousePos;
+bool MouseClicked = false;
+CEntityId SelId = CEntityId::Unknown;
 
 //
 /*
@@ -115,7 +110,6 @@ TPropertyUint8Manager	*CombatStateManager;
 class CCommandLineListener : public IEventListener
 {
 public:
-
 	/// Constructor
 	CCommandLineListener()
 	{
@@ -128,40 +122,40 @@ public:
 	{
 	}
 
-	/** 
-     * Register the listener to the server.
+	/**
+	 * Register the listener to the server.
 	 * \param server is the reference to the server
 	 */
-	void addToServer(CEventServer& server)
+	void addToServer(CEventServer &server)
 	{
 		server.addListener(EventKeyDownId, this);
 	}
 
-	/** 
+	/**
 	 * Unregister the listener to the server.
 	 * \param server is the reference to the server
 	 */
-	void removeFromServer(CEventServer& server)
+	void removeFromServer(CEventServer &server)
 	{
 		server.removeListener(EventKeyDownId, this);
 	}
 
 	//
-	bool	getInputState() { return _InputState; }
+	bool getInputState() { return _InputState; }
 
 	//
-	const string	&getCommandLine() { return _CommandLine; }
+	const string &getCommandLine() { return _CommandLine; }
 
 protected:
 	/*
 	 * Call back of the listener.
 	 * \param event is the event send to the listener
 	 */
-	virtual void operator ()(const CEvent& event)
+	virtual void operator()(const CEvent &event)
 	{
 		if (event == EventKeyDownId)
 		{
-			const CEventKeyDown	&ev = static_cast<const CEventKeyDown&>(event);
+			const CEventKeyDown &ev = static_cast<const CEventKeyDown &>(event);
 
 			LastKey = ev.Key;
 
@@ -176,27 +170,35 @@ protected:
 				{
 				case KeyRETURN:
 					// send command
-					ICommand::execute (_CommandLine, *InfoLog);
+					ICommand::execute(_CommandLine, *InfoLog);
 					_InputState = false;
 					_CommandLine = "";
 					break;
 				case KeyBACK:
 					if (_CommandLine.empty())
 						break;
-					_CommandLine.erase(_CommandLine.end()-1);
+					_CommandLine.erase(_CommandLine.end() - 1);
 					break;
-				case KeySPACE:	_CommandLine += ' '; break;
+				case KeySPACE: _CommandLine += ' '; break;
 				case KeyTAB: ICommand::expand(_CommandLine); break;
-				case KeyNUMPAD0: case KeyNUMPAD1: case KeyNUMPAD2: case KeyNUMPAD3: case KeyNUMPAD4:
-				case KeyNUMPAD5: case KeyNUMPAD6: case KeyNUMPAD7: case KeyNUMPAD8: case KeyNUMPAD9:
-					_CommandLine += ev.Key-KeyNUMPAD0+'0';
+				case KeyNUMPAD0:
+				case KeyNUMPAD1:
+				case KeyNUMPAD2:
+				case KeyNUMPAD3:
+				case KeyNUMPAD4:
+				case KeyNUMPAD5:
+				case KeyNUMPAD6:
+				case KeyNUMPAD7:
+				case KeyNUMPAD8:
+				case KeyNUMPAD9:
+					_CommandLine += ev.Key - KeyNUMPAD0 + '0';
 					break;
-				case KeyMULTIPLY:	_CommandLine += '*'; break;
-				case KeyADD:		_CommandLine += '+'; break;
-				case KeySEPARATOR:	_CommandLine += '-'; break;
-				case KeySUBTRACT:	_CommandLine += '-'; break;
-				case KeyDECIMAL:	_CommandLine += '.'; break;
-				case KeyDIVIDE:		_CommandLine += '/'; break;
+				case KeyMULTIPLY: _CommandLine += '*'; break;
+				case KeyADD: _CommandLine += '+'; break;
+				case KeySEPARATOR: _CommandLine += '-'; break;
+				case KeySUBTRACT: _CommandLine += '-'; break;
+				case KeyDECIMAL: _CommandLine += '.'; break;
+				case KeyDIVIDE: _CommandLine += '/'; break;
 
 				default:
 					if (ev.Key >= '0' && ev.Key <= '9')
@@ -210,17 +212,17 @@ protected:
 	}
 
 private:
-	string	_CommandLine;
-	bool	_InputState;
+	string _CommandLine;
+	bool _InputState;
+
 public:
-	uint	LastKey;
+	uint LastKey;
 };
 
 //
 class CMousePosListener : public IEventListener
 {
 public:
-
 	/// Constructor
 	CMousePosListener()
 	{
@@ -231,22 +233,22 @@ public:
 	{
 	}
 
-	/** 
-     * Register the listener to the server.
+	/**
+	 * Register the listener to the server.
 	 * \param server is the reference to the server
 	 */
-	void addToServer(CEventServer& server)
+	void addToServer(CEventServer &server)
 	{
 		server.addListener(EventMouseMoveId, this);
 		server.addListener(EventMouseDownId, this);
 		server.addListener(EventMouseUpId, this);
 	}
 
-	/** 
+	/**
 	 * Unregister the listener to the server.
 	 * \param server is the reference to the server
 	 */
-	void removeFromServer(CEventServer& server)
+	void removeFromServer(CEventServer &server)
 	{
 		server.removeListener(EventMouseMoveId, this);
 		server.removeListener(EventMouseDownId, this);
@@ -258,23 +260,23 @@ protected:
 	 * Call back of the listener.
 	 * \param event is the event send to the listener
 	 */
-	virtual void operator ()(const CEvent& event)
+	virtual void operator()(const CEvent &event)
 	{
 		if (event == EventMouseMoveId)
 		{
-			const CEventMouseMove	&ev = static_cast<const CEventMouseMove&>(event);
+			const CEventMouseMove &ev = static_cast<const CEventMouseMove &>(event);
 			MousePos = CVector(ev.X, ev.Y, 0.0f);
 		}
 		else if (event == EventMouseDownId)
 		{
-			const CEventMouseDown	&ev = static_cast<const CEventMouseDown&>(event);
+			const CEventMouseDown &ev = static_cast<const CEventMouseDown &>(event);
 			MousePos = CVector(ev.X, ev.Y, 0.0f);
 			if ((ev.Button & rightButton) != 0)
 				MouseClicked = true;
 		}
 		else if (event == EventMouseUpId)
 		{
-			const CEventMouseUp		&ev = static_cast<const CEventMouseUp&>(event);
+			const CEventMouseUp &ev = static_cast<const CEventMouseUp &>(event);
 			MousePos = CVector(ev.X, ev.Y, 0.0f);
 			if ((ev.Button & rightButton) != 0)
 				MouseClicked = false;
@@ -282,46 +284,44 @@ protected:
 	}
 };
 
-
-
 //
-bool	GPMSUp = false;
+bool GPMSUp = false;
 
-void cbGpmsUp( const std::string &serviceName, uint16 serviceId, void *arg )
+void cbGpmsUp(const std::string &serviceName, uint16 serviceId, void *arg)
 {
 	GPMSUp = true;
 }
 
-void cbGpmsDown( const std::string &serviceName, uint16 serviceId, void *arg )
+void cbGpmsDown(const std::string &serviceName, uint16 serviceId, void *arg)
 {
 	GPMSUp = false;
 }
 
-bool	CMSUp = false;
+bool CMSUp = false;
 
-void cbCmsUp( const std::string &serviceName, uint16 serviceId, void *arg )
+void cbCmsUp(const std::string &serviceName, uint16 serviceId, void *arg)
 {
 	CMSUp = true;
 }
 
-void cbCmsDown( const std::string &serviceName, uint16 serviceId, void *arg )
+void cbCmsDown(const std::string &serviceName, uint16 serviceId, void *arg)
 {
 	CMSUp = false;
 }
 //
-CCommandLineListener	CommandLine;
-CMousePosListener		MousePosListener;
+CCommandLineListener CommandLine;
+CMousePosListener MousePosListener;
 
 /*
  * Initialisation
  */
-void	cbMirrorIsReady( CMirror *mirror )
+void cbMirrorIsReady(CMirror *mirror)
 {
 	pEVS->initMirror();
 }
 
 //
-void	CEntity::setup(const TDataSetRow& entityIndex)
+void CEntity::setup(const TDataSetRow &entityIndex)
 {
 	EntityIndex = entityIndex;
 
@@ -334,12 +334,12 @@ void	CEntity::setup(const TDataSetRow& entityIndex)
 }
 
 //
-void	CEntity::setSheet(const CSheetId &sheetId)
+void CEntity::setSheet(const CSheetId &sheetId)
 {
 	SheetId = sheetId;
 	SheetName = sheetId.toString();
 
-	const CSheets::CSheet	*pSheet = CSheets::lookup(SheetId);
+	const CSheets::CSheet *pSheet = CSheets::lookup(SheetId);
 	if (pSheet != NULL)
 	{
 		Radius = pSheet->BoundingRadius;
@@ -348,12 +348,12 @@ void	CEntity::setSheet(const CSheetId &sheetId)
 }
 
 /****************************************************************\
-							init() 
+                            init()
 \****************************************************************/
 // init the service
 void CEntityViewService::init()
-{   
-	setVersion (RYZOM_VERSION);
+{
+	setVersion(RYZOM_VERSION);
 
 	// set update time out
 	setUpdateTimeout(30);
@@ -363,144 +363,143 @@ void CEntityViewService::init()
 	CSheetId::init();
 
 	//
-	CUnifiedNetwork::getInstance()->setServiceUpCallback( "GPMS", cbGpmsUp, 0);
-	CUnifiedNetwork::getInstance()->setServiceDownCallback( "GPMS", cbGpmsDown, 0);
-	CUnifiedNetwork::getInstance()->setServiceUpCallback( "CMS", cbCmsUp, 0);
-	CUnifiedNetwork::getInstance()->setServiceDownCallback( "CMS", cbCmsDown, 0);
+	CUnifiedNetwork::getInstance()->setServiceUpCallback("GPMS", cbGpmsUp, 0);
+	CUnifiedNetwork::getInstance()->setServiceDownCallback("GPMS", cbGpmsDown, 0);
+	CUnifiedNetwork::getInstance()->setServiceUpCallback("CMS", cbCmsUp, 0);
+	CUnifiedNetwork::getInstance()->setServiceDownCallback("CMS", cbCmsDown, 0);
 
 	// Create a driver
-	pDriver=UDriver::createDriver(0);
+	pDriver = UDriver::createDriver(0);
 
 	// Text context
-	pDriver->setDisplay (UDriver::CMode(640, 480, 0));
-	pDriver->setFontManagerMaxMemory (2000000);
-	textContext=pDriver->createTextContext ("R:\\graphics\\fonts\\noto_sans.ttf");
-	textContext->setHotSpot (UTextContext::TopLeft);
-	textContext->setColor (CRGBA (255,255,255));
-	textContext->setFontSize (12);
+	pDriver->setDisplay(UDriver::CMode(640, 480, 0));
+	pDriver->setFontManagerMaxMemory(2000000);
+	textContext = pDriver->createTextContext("R:\\graphics\\fonts\\noto_sans.ttf");
+	textContext->setHotSpot(UTextContext::TopLeft);
+	textContext->setColor(CRGBA(255, 255, 255));
+	textContext->setFontSize(12);
 
 	//
 	CommandLine.addToServer(pDriver->EventServer);
 	MousePosListener.addToServer(pDriver->EventServer);
 
 	// Create a scene
-	pScene=pDriver->createScene();
-
+	pScene = pDriver->createScene();
 
 	// Camera
-	pCam=pScene->getCam();
-	pCam->setTransformMode (UTransformable::DirectMatrix);
-	pCam->setPerspective ((float)Pi/2.f, 1.33f, 0.1f, 1000);
+	pCam = pScene->getCam();
+	pCam->setTransformMode(UTransformable::DirectMatrix);
+	pCam->setPerspective((float)Pi / 2.f, 1.33f, 0.1f, 1000);
 
 	// Mouse listener
-	plistener=pDriver->create3dMouseListener ();
-	plistener->setHotSpot (CVectorD (0,0,0));
-	plistener->setFrustrum (pCam->getFrustum());
-	plistener->setMatrix (pCam->getMatrix());
-	plistener->setMouseMode (U3dMouseListener::firstPerson);
+	plistener = pDriver->create3dMouseListener();
+	plistener->setHotSpot(CVectorD(0, 0, 0));
+	plistener->setFrustrum(pCam->getFrustum());
+	plistener->setMatrix(pCam->getMatrix());
+	plistener->setMouseMode(U3dMouseListener::firstPerson);
 
 	// Add mouse listener to event server
-//	plistener->addToServer(CNELU::EventServer);
+	//	plistener->addToServer(CNELU::EventServer);
 
 	// Material for lines
-	lineMat=pDriver->createMaterial ();
-	lineMat->initUnlit ();
-	lineMat->setColor (GROUND_COLOR);
+	lineMat = pDriver->createMaterial();
+	lineMat->initUnlit();
+	lineMat->setColor(GROUND_COLOR);
 
-	directMat=pDriver->createMaterial ();
-	directMat->initUnlit ();
-	directMat->setColor (DIRECTION_COLOR);
+	directMat = pDriver->createMaterial();
+	directMat->initUnlit();
+	directMat->setColor(DIRECTION_COLOR);
 
-	chainMat=pDriver->createMaterial ();
-	chainMat->initUnlit ();
-	chainMat->setColor (CHAIN_COLOR);
+	chainMat = pDriver->createMaterial();
+	chainMat->initUnlit();
+	chainMat->setColor(CHAIN_COLOR);
 
-	targetMat=pDriver->createMaterial ();
-	targetMat->initUnlit ();
-	targetMat->setColor (CHAIN_COLOR);
+	targetMat = pDriver->createMaterial();
+	targetMat->initUnlit();
+	targetMat->setColor(CHAIN_COLOR);
 
 	// Init the mirror system
 	vector<string> datasetNames;
-	datasetNames.push_back( "fe_temp" );
-	Mirror.init( datasetNames, cbMirrorIsReady );
+	datasetNames.push_back("fe_temp");
+	Mirror.init(datasetNames, cbMirrorIsReady);
 
-	uint	i;
+	uint i;
 
-	for (i=0; i<MaxObjects; ++i)
+	for (i = 0; i < MaxObjects; ++i)
 	{
-		UInstance	*instance = pScene->createInstance ("box_op.shape");
+		UInstance *instance = pScene->createInstance("box_op.shape");
 		_OBoxes.push_back(instance);
 
-		instance->setScale (CVectorD (1.0, 1.0, 1.0));
-		instance->setRotQuat (CQuat (CVectorD (0, 0, 1), (float)0.0));
+		instance->setScale(CVectorD(1.0, 1.0, 1.0));
+		instance->setRotQuat(CQuat(CVectorD(0, 0, 1), (float)0.0));
 		instance->setPos(CVectorD(0.0, 0.0, 0.0));
 		instance->hide();
 	}
 
-	for (i=0; i<MaxObjects; ++i)
+	for (i = 0; i < MaxObjects; ++i)
 	{
-		UInstance	*instance = pScene->createInstance ("box_tr.shape");
+		UInstance *instance = pScene->createInstance("box_tr.shape");
 		_TBoxes.push_back(instance);
 
-		instance->setScale (CVectorD (1.0, 1.0, 1.0));
-		instance->setRotQuat (CQuat (CVectorD (0, 0, 1), (float)0.0));
+		instance->setScale(CVectorD(1.0, 1.0, 1.0));
+		instance->setRotQuat(CQuat(CVectorD(0, 0, 1), (float)0.0));
 		instance->setPos(CVectorD(0.0, 0.0, 0.0));
 		instance->hide();
 	}
 
-	for (i=0; i<MaxObjects; ++i)
+	for (i = 0; i < MaxObjects; ++i)
 	{
-		UInstance	*instance = pScene->createInstance ("cylinder_op.shape");
+		UInstance *instance = pScene->createInstance("cylinder_op.shape");
 		_OCylinders.push_back(instance);
 
-		instance->setScale (CVectorD (1.0, 1.0, 1.0));
-		instance->setRotQuat (CQuat (CVectorD (0, 0, 1), (float)0.0));
+		instance->setScale(CVectorD(1.0, 1.0, 1.0));
+		instance->setRotQuat(CQuat(CVectorD(0, 0, 1), (float)0.0));
 		instance->setPos(CVectorD(0.0, 0.0, 0.0));
 		instance->hide();
 	}
 
-	for (i=0; i<MaxObjects; ++i)
+	for (i = 0; i < MaxObjects; ++i)
 	{
-		UInstance	*instance = pScene->createInstance ("cylinder_tr.shape");
+		UInstance *instance = pScene->createInstance("cylinder_tr.shape");
 		_TCylinders.push_back(instance);
 
-		instance->setScale (CVectorD (1.0, 1.0, 1.0));
-		instance->setRotQuat (CQuat (CVectorD (0, 0, 1), (float)0.0));
+		instance->setScale(CVectorD(1.0, 1.0, 1.0));
+		instance->setRotQuat(CQuat(CVectorD(0, 0, 1), (float)0.0));
 		instance->setPos(CVectorD(0.0, 0.0, 0.0));
 		instance->hide();
 	}
 
-	vector<string>	chainfiles;
+	vector<string> chainfiles;
 	CPath::getPathContent("data_shard/ochains/", true, false, true, chainfiles);
 
 	nlinfo("Loading %d ochain files", chainfiles.size());
 
-	for (i=0; i<chainfiles.size(); ++i)
+	for (i = 0; i < chainfiles.size(); ++i)
 	{
 		// open zone ochain file
-		CIFile	f(CPath::lookup(chainfiles[i]));
+		CIFile f(CPath::lookup(chainfiles[i]));
 
 		// load chains
-		vector<COrderedChain3f>	chains;
+		vector<COrderedChain3f> chains;
 		f.serialCont(chains);
 
 		// convert zonename into x y coordinates
-		string		filename = CFile::getFilename(chainfiles[i]);
-		const char	*zone = filename.c_str();
-		char		ax[16];
+		string filename = CFile::getFilename(chainfiles[i]);
+		const char *zone = filename.c_str();
+		char ax[16];
 
-		sint	x, y;
+		sint x, y;
 		sscanf(zone, "%d_%2s", &y, ax);
 
 		--y;
-		x = (ax[0]-'A')*26+(ax[1]-'A');
+		x = (ax[0] - 'A') * 26 + (ax[1] - 'A');
 
 		// get zone center for translation
-		CVector	center(160.0f*((float)x+0.5f), -160.0f*((float)y+0.5f), 0.0f);
+		CVector center(160.0f * ((float)x + 0.5f), -160.0f * ((float)y + 0.5f), 0.0f);
 
 		// translate all chains
-		uint	j;
-		for (j=0; j<chains.size(); ++j)
+		uint j;
+		for (j = 0; j < chains.size(); ++j)
 			chains[j].translate(center);
 
 		// add chains to common chains
@@ -509,10 +508,10 @@ void CEntityViewService::init()
 
 	nlinfo("Loaded %d chains, inserting into chain grid...", _Chains.size());
 
-	for (i=0; i<_Chains.size(); ++i)
+	for (i = 0; i < _Chains.size(); ++i)
 	{
-		const vector<CVector>	&verts = _Chains[i].getVertices();
-		CAABBox					bbox;
+		const vector<CVector> &verts = _Chains[i].getVertices();
+		CAABBox bbox;
 
 		if (verts.empty())
 			continue;
@@ -520,8 +519,8 @@ void CEntityViewService::init()
 		bbox.setCenter(verts[0]);
 		bbox.setHalfSize(CVector::Null);
 
-		uint	j;
-		for (j=1; j<verts.size(); ++j)
+		uint j;
+		for (j = 1; j < verts.size(); ++j)
 			bbox.extend(verts[j]);
 
 		_ChainGrid.insert(&(_Chains[i]), bbox.getCenter());
@@ -534,9 +533,8 @@ void CEntityViewService::init()
 
 } // init //
 
-
 /*--------------------------------------------------------------*\
-						cbSync()  
+                        cbSync()
 \*--------------------------------------------------------------*/
 void cbSync()
 {
@@ -545,34 +543,33 @@ void cbSync()
 void CEntityViewService::initMirror()
 {
 	// Allow to add a few entities manually (using the command addEntity)
-//	Mirror.declareEntityTypeOwner( RYZOMID::player, 10 );
-//	Mirror.declareEntityTypeOwner( RYZOMID::npc, 10 );
+	//	Mirror.declareEntityTypeOwner( RYZOMID::player, 10 );
+	//	Mirror.declareEntityTypeOwner( RYZOMID::npc, 10 );
 
 	DataSet = &(Mirror.getDataSet("fe_temp"));
-	DataSet->declareProperty( "X", PSOReadOnly | PSONotifyChanges, "X");		// group notification on X
-	DataSet->declareProperty( "Y", PSOReadOnly | PSONotifyChanges, "X");		// group notification on X
-	DataSet->declareProperty( "Z", PSOReadOnly | PSONotifyChanges, "X");		// group notification on X
-	DataSet->declareProperty( "Theta", PSOReadOnly | PSONotifyChanges, "Theta");
-	DataSet->declareProperty( "Sheet", PSOReadOnly | PSONotifyChanges, "Sheet");
-	DataSet->declareProperty( "CombatState", PSOReadOnly);
+	DataSet->declareProperty("X", PSOReadOnly | PSONotifyChanges, "X"); // group notification on X
+	DataSet->declareProperty("Y", PSOReadOnly | PSONotifyChanges, "X"); // group notification on X
+	DataSet->declareProperty("Z", PSOReadOnly | PSONotifyChanges, "X"); // group notification on X
+	DataSet->declareProperty("Theta", PSOReadOnly | PSONotifyChanges, "Theta");
+	DataSet->declareProperty("Sheet", PSOReadOnly | PSONotifyChanges, "Sheet");
+	DataSet->declareProperty("CombatState", PSOReadOnly);
 
-	initRyzomVisualPropertyIndices( *DataSet );
+	initRyzomVisualPropertyIndices(*DataSet);
 }
 
-
 //
-void	CEntityViewService::updateEntities()
+void CEntityViewService::updateEntities()
 {
-	if ( ! Mirror.mirrorIsReady() )
+	if (!Mirror.mirrorIsReady())
 		return;
 
 	// Process entities added to mirror
 	TheDataset.beginAddedEntities();
 	entityIndex = TheDataset.getNextAddedEntity();
-	while ( entityIndex != LAST_CHANGED )
+	while (entityIndex != LAST_CHANGED)
 	{
-		TEntityMap::iterator	it = createEntity(TheDataset.getEntityId(entityIndex));
-		(*it).second.setup( entityIndex );
+		TEntityMap::iterator it = createEntity(TheDataset.getEntityId(entityIndex));
+		(*it).second.setup(entityIndex);
 		entityIndex = TheDataset.getNextAddedEntity();
 	}
 	TheDataset.endAddedEntities();
@@ -580,29 +577,29 @@ void	CEntityViewService::updateEntities()
 	// Process entities removed from mirror
 	TheDataset.beginRemovedEntities();
 	CEntityId *id;
-	TDataSetRow entityIndex = TheDataset.getNextRemovedEntity( &id );
-	while ( entityIndex != LAST_CHANGED )
+	TDataSetRow entityIndex = TheDataset.getNextRemovedEntity(&id);
+	while (entityIndex != LAST_CHANGED)
 	{
-		removeEntity( *id );
-		entityIndex = TheDataset.getNextRemovedEntity( &id );
+		removeEntity(*id);
+		entityIndex = TheDataset.getNextRemovedEntity(&id);
 	}
 	TheDataset.endRemovedEntities();
 
 	// Process properties changed and notified in the mirror
 	TPropertyIndex propIndex;
 	TheDataset.beginChangedValues();
-	TheDataset.getNextChangedValue( entityIndex, propIndex );
-	while ( entityIndex != LAST_CHANGED )
+	TheDataset.getNextChangedValue(entityIndex, propIndex);
+	while (entityIndex != LAST_CHANGED)
 	{
-		const CEntityId& entityId = TheDataset.getEntityId( entityIndex );
-		CEntity	*entity = getEntity(entityId);
+		const CEntityId &entityId = TheDataset.getEntityId(entityIndex);
+		CEntity *entity = getEntity(entityId);
 
 		// TEMP: while we don't handle all by entity indices, we need to test if the entityId has been notified (added)
-		if ( entity != NULL )
+		if (entity != NULL)
 		{
 			if (propIndex == DSPropertyPOSX)
 			{
-				entity->Position = CVectorD(entity->X()*0.001, entity->Y()*0.001, entity->Z()*0.001);
+				entity->Position = CVectorD(entity->X() * 0.001, entity->Y() * 0.001, entity->Z() * 0.001);
 				_EntityGrid.move(entity->Iterator, entity->Position);
 
 				entity->Path.push_back(entity->Position);
@@ -615,23 +612,23 @@ void	CEntityViewService::updateEntities()
 			}
 			else if (propIndex == DSPropertySHEET)
 			{
-				uint32				sheetId;
-				TheDataset.getValue( entityIndex, DSPropertySHEET, sheetId);
+				uint32 sheetId;
+				TheDataset.getValue(entityIndex, DSPropertySHEET, sheetId);
 				entity->setSheet(CSheetId(sheetId));
 			}
 		}
 
-		//nldebug( "Pos changed from mirror E%d", entityIndex  );
-		TheDataset.getNextChangedValue( entityIndex, propIndex );
+		// nldebug( "Pos changed from mirror E%d", entityIndex  );
+		TheDataset.getNextChangedValue(entityIndex, propIndex);
 	}
 	TheDataset.endChangedValues();
 
 	Pathes.clear();
 
-	uint	usedOCylinders = 0;
-	uint	usedTCylinders = 0;
+	uint usedOCylinders = 0;
+	uint usedTCylinders = 0;
 
-	CAABBox	bbox;
+	CAABBox bbox;
 
 	bbox.setCenter(pCam->getMatrix().getPos());
 	bbox.setHalfSize(CVector(32.0f, 32.0f, 10.0f));
@@ -640,29 +637,29 @@ void	CEntityViewService::updateEntities()
 	_EntityGrid.select(bbox);
 
 	//
-	TEntityGrid::CIterator	its;
+	TEntityGrid::CIterator its;
 
-	CMatrix	matrix = pCam->getMatrix();
+	CMatrix matrix = pCam->getMatrix();
 	matrix.invert();
 
-	uint32	w, h;
+	uint32 w, h;
 	pDriver->getWindowSize(w, h);
 
-	float		minDist = 64;
+	float minDist = 64;
 	SelId = CEntityId::Unknown;
-	for (its=_EntityGrid.begin(); its!=_EntityGrid.end(); ++its)
+	for (its = _EntityGrid.begin(); its != _EntityGrid.end(); ++its)
 	{
-		CEntity	&entity = *(*its);
+		CEntity &entity = *(*its);
 
-		CVector	np = matrix.mulPoint(entity.Position);
+		CVector np = matrix.mulPoint(entity.Position);
 
 		if (np.y < 0.0)
 			continue;
 
-		CVector	d = pCam->getFrustum().project(np)-MousePos;
-		float	px = d.x*w, py = d.y*h;
+		CVector d = pCam->getFrustum().project(np) - MousePos;
+		float px = d.x * w, py = d.y * h;
 
-		float	dist = (float)sqrt(px*px+py*py);
+		float dist = (float)sqrt(px * px + py * py);
 		if (dist < minDist)
 		{
 			minDist = dist;
@@ -672,65 +669,65 @@ void	CEntityViewService::updateEntities()
 
 	Names.clear();
 
-	for (its=_EntityGrid.begin(); its!=_EntityGrid.end(); ++its)
+	for (its = _EntityGrid.begin(); its != _EntityGrid.end(); ++its)
 	{
-		CEntity	&entity = *(*its);
+		CEntity &entity = *(*its);
 
-		switch(entity.Id.getType())
+		switch (entity.Id.getType())
 		{
 		case RYZOMID::player:
 		case RYZOMID::npc:
 		case RYZOMID::creature:
 			if (usedOCylinders < _OCylinders.size())
 			{
-				CVector	np = matrix.mulPoint(entity.Position);
+				CVector np = matrix.mulPoint(entity.Position);
 
 				if (np.y < 0.0)
 					break;
 
 				if (entity.Id == SelId)
 				{
-					_TCylinders[usedTCylinders]->setRotQuat(CQuat (CVectorD (0, 0, 1), entity.Orientation));
+					_TCylinders[usedTCylinders]->setRotQuat(CQuat(CVectorD(0, 0, 1), entity.Orientation));
 					_TCylinders[usedTCylinders]->setPos(entity.Position);
-					_TCylinders[usedTCylinders]->setScale(CVectorD (entity.Radius, entity.Radius, entity.Height));
+					_TCylinders[usedTCylinders]->setScale(CVectorD(entity.Radius, entity.Radius, entity.Height));
 					if (_TCylinders[usedTCylinders]->getVisibility() == UTransform::Hide)
 						_TCylinders[usedTCylinders]->show();
 					++usedTCylinders;
 
-					Names.push_back(make_pair<CVector,CEntity*>(pCam->getFrustum().project(np), &entity));
+					Names.push_back(make_pair<CVector, CEntity *>(pCam->getFrustum().project(np), &entity));
 				}
 				else
 				{
-					_OCylinders[usedOCylinders]->setRotQuat(CQuat (CVectorD (0, 0, 1), entity.Orientation));
+					_OCylinders[usedOCylinders]->setRotQuat(CQuat(CVectorD(0, 0, 1), entity.Orientation));
 					_OCylinders[usedOCylinders]->setPos(entity.Position);
-					_OCylinders[usedOCylinders]->setScale(CVectorD (entity.Radius, entity.Radius, entity.Height));
+					_OCylinders[usedOCylinders]->setScale(CVectorD(entity.Radius, entity.Radius, entity.Height));
 					if (_OCylinders[usedOCylinders]->getVisibility() == UTransform::Hide)
 						_OCylinders[usedOCylinders]->show();
 					++usedOCylinders;
 				}
 
-				TEntityMap::iterator	it;
-				if (entity.Target != CEntityId::Unknown && (it= _Entities.find(entity.Target))!=_Entities.end())
+				TEntityMap::iterator it;
+				if (entity.Target != CEntityId::Unknown && (it = _Entities.find(entity.Target)) != _Entities.end())
 				{
-					CLineColor	line;
-					line = CLine(entity.Position+CVector(0.0f, 0.0f, 1.0f), (*it).second.Position+CVector(0.0f, 0.0f, 1.0f));
+					CLineColor line;
+					line = CLine(entity.Position + CVector(0.0f, 0.0f, 1.0f), (*it).second.Position + CVector(0.0f, 0.0f, 1.0f));
 					line.Color0 = CRGBA(255, 128, 128, 255);
-					line.Color1 = CRGBA(160, 160,   0, 128);
+					line.Color1 = CRGBA(160, 160, 0, 128);
 					_Targets.push_back(line);
 				}
 
 				Pathes.push_back(&(entity.Path));
 
-				_Directions.push_back(CLine(entity.Position+CVector(entity.Radius*(float)cos(entity.Orientation), entity.Radius*(float)sin(entity.Orientation), 1.0f),
-											entity.Position+CVector((entity.Radius+1.0f)*(float)cos(entity.Orientation), (entity.Radius+1.0f)*(float)sin(entity.Orientation), 1.0f)));
+				_Directions.push_back(CLine(entity.Position + CVector(entity.Radius * (float)cos(entity.Orientation), entity.Radius * (float)sin(entity.Orientation), 1.0f),
+				    entity.Position + CVector((entity.Radius + 1.0f) * (float)cos(entity.Orientation), (entity.Radius + 1.0f) * (float)sin(entity.Orientation), 1.0f)));
 			}
 			break;
 		case RYZOMID::trigger:
 			if (usedTCylinders < _TCylinders.size())
 			{
-				_TCylinders[usedTCylinders]->setRotQuat(CQuat (CVectorD (0, 0, 1), entity.Orientation));
+				_TCylinders[usedTCylinders]->setRotQuat(CQuat(CVectorD(0, 0, 1), entity.Orientation));
 				_TCylinders[usedTCylinders]->setPos(entity.Position);
-				_TCylinders[usedTCylinders]->setScale(CVectorD (1.0, 1.0, 10.0));
+				_TCylinders[usedTCylinders]->setScale(CVectorD(1.0, 1.0, 10.0));
 				if (_TCylinders[usedTCylinders]->getVisibility() == UTransform::Hide)
 					_TCylinders[usedTCylinders]->show();
 				++usedTCylinders;
@@ -743,61 +740,59 @@ void	CEntityViewService::updateEntities()
 
 	_EntityGrid.clearSelection();
 
-	for (; usedOCylinders<_OCylinders.size(); ++usedOCylinders)
+	for (; usedOCylinders < _OCylinders.size(); ++usedOCylinders)
 		_OCylinders[usedOCylinders]->hide();
 
-	for (; usedTCylinders<_TCylinders.size(); ++usedTCylinders)
+	for (; usedTCylinders < _TCylinders.size(); ++usedTCylinders)
 		_TCylinders[usedTCylinders]->hide();
 }
 
-
 /****************************************************************\
-							update() 
+                            update()
 \****************************************************************/
 // main loop
 bool CEntityViewService::update()
 {
 	// Main loop
-	if (!pDriver->isActive() || pDriver->AsyncListener.isKeyPushed (KeyESCAPE))
+	if (!pDriver->isActive() || pDriver->AsyncListener.isKeyPushed(KeyESCAPE))
 		return false;
 
 	// Get time
-	static TTime	lastTime = CTime::getLocalTime ();
+	static TTime lastTime = CTime::getLocalTime();
 
-	TTime			newTime = CTime::getLocalTime ();
-	double			deltaTime = (double)(uint32)(newTime-lastTime)/1000.0;
-	lastTime=newTime;
+	TTime newTime = CTime::getLocalTime();
+	double deltaTime = (double)(uint32)(newTime - lastTime) / 1000.0;
+	lastTime = newTime;
 
-	static bool		dispChains = true;
-	static bool		dispPath = false;
+	static bool dispChains = true;
+	static bool dispPath = false;
 
 	updateEntities();
 
-	if (pDriver->AsyncListener.isKeyPushed (KeyF1))
+	if (pDriver->AsyncListener.isKeyPushed(KeyF1))
 		dispChains = !dispChains;
 
-	if (pDriver->AsyncListener.isKeyPushed (KeyF2))
+	if (pDriver->AsyncListener.isKeyPushed(KeyF2))
 		dispPath = !dispPath;
 
-
 	// manual engagement
-	static bool			inCommand = false;
+	static bool inCommand = false;
 
-	static bool			selAssail = false;
-	static bool			selTarget = false;
-	static CEntityId	assailId;
-	static CEntityId	targetId;
+	static bool selAssail = false;
+	static bool selTarget = false;
+	static CEntityId assailId;
+	static CEntityId targetId;
 
-	static bool			selD1 = false;
-	static bool			selD2 = false;
-	static CEntityId	d1Id;
-	static CEntityId	d2Id;
+	static bool selD1 = false;
+	static bool selD2 = false;
+	static CEntityId d1Id;
+	static CEntityId d2Id;
 
-	static TTime		displayTime = 0;
-	static TTime		displayDistance = 0;
-	static char			displayString[1024];
+	static TTime displayTime = 0;
+	static TTime displayDistance = 0;
+	static char displayString[1024];
 
-	CMatrix	matrix = pCam->getMatrix();
+	CMatrix matrix = pCam->getMatrix();
 	matrix.invert();
 
 	if (!CommandLine.getInputState())
@@ -807,7 +802,7 @@ bool CEntityViewService::update()
 		{
 			selAssail = true;
 			sprintf(displayString, "Engage: select assailant");
-			displayTime = CTime::getLocalTime()+5000;
+			displayTime = CTime::getLocalTime() + 5000;
 			inCommand = true;
 		}
 
@@ -818,7 +813,7 @@ bool CEntityViewService::update()
 			selAssail = false;
 			selTarget = true;
 			sprintf(displayString, "Engage %s: select target", assailId.toString().c_str());
-			displayTime = CTime::getLocalTime()+5000;
+			displayTime = CTime::getLocalTime() + 5000;
 		}
 
 		if (selTarget && MouseClicked)
@@ -828,12 +823,12 @@ bool CEntityViewService::update()
 			selAssail = false;
 			selTarget = false;
 
-			CMessage	msg("FORCE_ENGAGE");
+			CMessage msg("FORCE_ENGAGE");
 			msg.serial(assailId, targetId);
 			CUnifiedNetwork::getInstance()->send("AIS", msg);
 
 			sprintf(displayString, "Engaged %s with %s", assailId.toString().c_str(), targetId.toString().c_str());
-			displayTime = CTime::getLocalTime()+5000;
+			displayTime = CTime::getLocalTime() + 5000;
 			inCommand = false;
 		}
 
@@ -842,7 +837,7 @@ bool CEntityViewService::update()
 		{
 			selD1 = true;
 			sprintf(displayString, "Distance: select entity");
-			displayTime = CTime::getLocalTime()+5000;
+			displayTime = CTime::getLocalTime() + 5000;
 			inCommand = true;
 		}
 
@@ -853,7 +848,7 @@ bool CEntityViewService::update()
 			selD1 = false;
 			selD2 = true;
 			sprintf(displayString, "Distance %s: select entity", d1Id.toString().c_str());
-			displayTime = CTime::getLocalTime()+5000;
+			displayTime = CTime::getLocalTime() + 5000;
 		}
 
 		if (selD2 && MouseClicked)
@@ -863,31 +858,31 @@ bool CEntityViewService::update()
 			selD1 = false;
 			selD2 = false;
 
-			TEntityMap::iterator	it1, it2;
+			TEntityMap::iterator it1, it2;
 			it1 = _Entities.find(d1Id);
 			it2 = _Entities.find(d2Id);
 			if (it1 == _Entities.end())
 			{
 				sprintf(displayString, "Distance: can't find entity %s", d1Id.toString().c_str());
-				displayTime = CTime::getLocalTime()+2000;
+				displayTime = CTime::getLocalTime() + 2000;
 			}
 			else if (it2 == _Entities.end())
 			{
 				sprintf(displayString, "Distance: can't find entity %s", d2Id.toString().c_str());
-				displayTime = CTime::getLocalTime()+2000;
+				displayTime = CTime::getLocalTime() + 2000;
 			}
 			else
 			{
-				CEntity	&e1 = (*it1).second,
-						&e2 = (*it2).second;
+				CEntity &e1 = (*it1).second,
+				        &e2 = (*it2).second;
 
-				CVectorD	d1 = e1.Position-e2.Position;
-				CVectorD	d2 = d1;
+				CVectorD d1 = e1.Position - e2.Position;
+				CVectorD d2 = d1;
 				d1.z = 0.0;
 
 				sprintf(displayString, "Distance: |%s-%s| = %f (%f using z)", d1Id.toString().c_str(), d2Id.toString().c_str(), d1.norm(), d2.norm());
-				displayTime = CTime::getLocalTime()+8000;
-				displayDistance = CTime::getLocalTime()+8000;
+				displayTime = CTime::getLocalTime() + 8000;
+				displayDistance = CTime::getLocalTime() + 8000;
 			}
 
 			inCommand = false;
@@ -898,50 +893,50 @@ bool CEntityViewService::update()
 	pCam->setMatrix(plistener->getViewMatrix());
 
 	// Clear
-	pDriver->clearBuffers (BACKGROUND);
+	pDriver->clearBuffers(BACKGROUND);
 
 	// Render
-	pScene->render ();
+	pScene->render();
 
 	// Draw some lines
 	{
 		pDriver->setMatrixMode3D(*pCam);
-		float	x, y;
+		float x, y;
 
-		CVector	pos = pCam->getMatrix().getPos();
+		CVector pos = pCam->getMatrix().getPos();
 
-		const float	GridStep = 16.0f;
-		const float	GridWidth = 48.0f;
+		const float GridStep = 16.0f;
+		const float GridWidth = 48.0f;
 
-		pos.x = pos.x-(float)fmod(pos.x, GridStep);
-		pos.y = pos.y-(float)fmod(pos.y, GridStep);
+		pos.x = pos.x - (float)fmod(pos.x, GridStep);
+		pos.y = pos.y - (float)fmod(pos.y, GridStep);
 		pos.z = 0.0f;
 
-		for (x=-GridWidth; x<=+GridWidth; x+=GridStep)
+		for (x = -GridWidth; x <= +GridWidth; x += GridStep)
 		{
-			CLine	line(pos+CVector(x, -GridWidth, 0.0f), pos+CVector(x, +GridWidth, 0.0f));
+			CLine line(pos + CVector(x, -GridWidth, 0.0f), pos + CVector(x, +GridWidth, 0.0f));
 			pDriver->drawLine(line, *lineMat);
 		}
 
-		for (y=-GridWidth; y<=+GridWidth; y+=GridStep)
+		for (y = -GridWidth; y <= +GridWidth; y += GridStep)
 		{
-			CLine	line(pos+CVector(-GridWidth, y, 0.0f), pos+CVector(+GridWidth, y, 0.0f));
+			CLine line(pos + CVector(-GridWidth, y, 0.0f), pos + CVector(+GridWidth, y, 0.0f));
 			pDriver->drawLine(line, *lineMat);
 		}
 	}
 
-	uint	i;
-	for (i=0; i<_Directions.size(); ++i)
+	uint i;
+	for (i = 0; i < _Directions.size(); ++i)
 		pDriver->drawLine(_Directions[i], *directMat);
 
-	for (i=0; i<_Targets.size(); ++i)
+	for (i = 0; i < _Targets.size(); ++i)
 		pDriver->drawLine(_Targets[i], *targetMat);
 
-	CVector	dp1, dp2, dp, ddpos;
-	if (displayDistance>CTime::getLocalTime())
+	CVector dp1, dp2, dp, ddpos;
+	if (displayDistance > CTime::getLocalTime())
 	{
-		TEntityMap::iterator	it1 = _Entities.find(d1Id),
-								it2 = _Entities.find(d2Id);
+		TEntityMap::iterator it1 = _Entities.find(d1Id),
+		                     it2 = _Entities.find(d2Id);
 
 		if (it1 == _Entities.end() || it2 == _Entities.end())
 		{
@@ -951,13 +946,13 @@ bool CEntityViewService::update()
 		{
 			dp1 = (*it1).second.Position;
 			dp2 = (*it2).second.Position;
-			dp = dp1-dp2;
+			dp = dp1 - dp2;
 			dp.z = 0.0f;
 
-			CLine	line(dp1, dp2);
+			CLine line(dp1, dp2);
 			pDriver->drawLine(line, *lineMat);
 
-			ddpos = pCam->getFrustum().project(matrix.mulPoint((dp1+dp2)*0.5f));
+			ddpos = pCam->getFrustum().project(matrix.mulPoint((dp1 + dp2) * 0.5f));
 		}
 	}
 
@@ -966,16 +961,16 @@ bool CEntityViewService::update()
 
 	if (dispPath)
 	{
-		for (i=0; i<Pathes.size(); ++i)
+		for (i = 0; i < Pathes.size(); ++i)
 		{
-			uint			j;
-			CLine			line;
-			deque<CVectorD>	&path = *(Pathes[i]);
+			uint j;
+			CLine line;
+			deque<CVectorD> &path = *(Pathes[i]);
 
-			for (j=0; j<path.size()-1; ++j)
+			for (j = 0; j < path.size() - 1; ++j)
 			{
 				line.V0 = path[j];
-				line.V1 = path[j+1];
+				line.V1 = path[j + 1];
 				pDriver->drawLine(line, *directMat);
 			}
 		}
@@ -983,7 +978,7 @@ bool CEntityViewService::update()
 
 	if (dispChains)
 	{
-		CAABBox	bbox;
+		CAABBox bbox;
 
 		bbox.setCenter(pCam->getMatrix().getPos());
 		bbox.setHalfSize(CVector(128.0f, 128.0f, 10.0f));
@@ -992,56 +987,55 @@ bool CEntityViewService::update()
 		_ChainGrid.select(bbox);
 
 		//
-		TChainGrid::CIterator	itc;
-		for (itc=_ChainGrid.begin(); itc!=_ChainGrid.end(); ++itc)
+		TChainGrid::CIterator itc;
+		for (itc = _ChainGrid.begin(); itc != _ChainGrid.end(); ++itc)
 		{
-			const COrderedChain3f	&chain = *(*itc);
-			const vector<CVector>	&verts = chain.getVertices();
+			const COrderedChain3f &chain = *(*itc);
+			const vector<CVector> &verts = chain.getVertices();
 
-			for (i=0; (sint)i<(sint)(verts.size()-1); ++i)
-				pDriver->drawLine(CLine(verts[i], verts[i+1]), *chainMat);
+			for (i = 0; (sint)i < (sint)(verts.size() - 1); ++i)
+				pDriver->drawLine(CLine(verts[i], verts[i + 1]), *chainMat);
 		}
 	}
 
 	{
 		textContext->setHotSpot(UTextContext::TopLeft);
-		for (i=0; i<Names.size(); ++i)
+		for (i = 0; i < Names.size(); ++i)
 		{
 			textContext->printfAt(Names[i].first.x, Names[i].first.y, "%s", Names[i].second->Id.toString().c_str());
-			textContext->printfAt(Names[i].first.x, Names[i].first.y-0.02f, "(%.2f,%.2f,%.2f) : %.3f", Names[i].second->Position.x, Names[i].second->Position.y, Names[i].second->Position.z, Names[i].second->Orientation);
-			textContext->printfAt(Names[i].first.x, Names[i].first.y-0.04f, "Target: %s", Names[i].second->Target == CEntityId::Unknown ? "<None>" : Names[i].second->Target.toString().c_str());
-			textContext->printfAt(Names[i].first.x, Names[i].first.y-0.06f, "SheetId: %d %s", Names[i].second->SheetId.asInt(), Names[i].second->SheetName.c_str());
-			textContext->printfAt(Names[i].first.x, Names[i].first.y-0.08f, "Radius: %.2f Height: %.2f", Names[i].second->Radius, Names[i].second->Height);
+			textContext->printfAt(Names[i].first.x, Names[i].first.y - 0.02f, "(%.2f,%.2f,%.2f) : %.3f", Names[i].second->Position.x, Names[i].second->Position.y, Names[i].second->Position.z, Names[i].second->Orientation);
+			textContext->printfAt(Names[i].first.x, Names[i].first.y - 0.04f, "Target: %s", Names[i].second->Target == CEntityId::Unknown ? "<None>" : Names[i].second->Target.toString().c_str());
+			textContext->printfAt(Names[i].first.x, Names[i].first.y - 0.06f, "SheetId: %d %s", Names[i].second->SheetId.asInt(), Names[i].second->SheetName.c_str());
+			textContext->printfAt(Names[i].first.x, Names[i].first.y - 0.08f, "Radius: %.2f Height: %.2f", Names[i].second->Radius, Names[i].second->Height);
 
-			static char		*combatStates[] =
-			{
+			static char *combatStates[] = {
 				"NotEngaged",
 				"MovingTowardTarget",
 				"TargetUnreachable",
 				"Engaged",
 				"TargetLost"
 			};
-			textContext->printfAt(Names[i].first.x, Names[i].first.y-0.10f, "CombatState: %s", combatStates[Names[i].second->CombatState]);
+			textContext->printfAt(Names[i].first.x, Names[i].first.y - 0.10f, "CombatState: %s", combatStates[Names[i].second->CombatState]);
 		}
 
-		CVector	posl = plistener->getViewMatrix().getPos();
-		CVector	posc = pCam->getMatrix().getPos();
+		CVector posl = plistener->getViewMatrix().getPos();
+		CVector posc = pCam->getMatrix().getPos();
 
-		textContext->printfAt (0.0f ,1.0f, "pos listener: %.1f,%.1f,%.1f - pos cam: %.1f,%.1f,%.1f", posl.x, posl.y, posl.z, posc.x, posc.y, posc.z);
+		textContext->printfAt(0.0f, 1.0f, "pos listener: %.1f,%.1f,%.1f - pos cam: %.1f,%.1f,%.1f", posl.x, posl.y, posl.z, posc.x, posc.y, posc.z);
 
 		if (CommandLine.getInputState())
-			textContext->printfAt (0.0f ,0.98f,"Command: %s_", CommandLine.getCommandLine().c_str());
+			textContext->printfAt(0.0f, 0.98f, "Command: %s_", CommandLine.getCommandLine().c_str());
 
-		if (displayTime>CTime::getLocalTime())
+		if (displayTime > CTime::getLocalTime())
 			textContext->printfAt(0.0f, 0.96f, "%s", displayString);
 
 		textContext->setHotSpot(UTextContext::MiddleMiddle);
-		if (displayTime>CTime::getLocalTime())
+		if (displayTime > CTime::getLocalTime())
 			textContext->printfAt(ddpos.x, ddpos.y, "%.3f", dp.norm());
 	}
 
 	// Swap
-	pDriver->swapBuffers ();
+	pDriver->swapBuffers();
 
 	// Pump messages
 	pDriver->EventServer.pump(true);
@@ -1049,71 +1043,63 @@ bool CEntityViewService::update()
 	return true;
 } // update //
 
-
-
 /****************************************************************\
-							release() 
+                            release()
 \****************************************************************/
 void CEntityViewService::release()
 {
 	// Mouse listener
-	pDriver->delete3dMouseListener (plistener);
+	pDriver->delete3dMouseListener(plistener);
 
-}// release //
-
-
+} // release //
 
 /****************************************************************\
  ************** callback table for input message ****************
 \****************************************************************/
-void cbSetTarget(CMessage& msgin, const string &serviceName, uint16 serviceId)
+void cbSetTarget(CMessage &msgin, const string &serviceName, uint16 serviceId)
 {
-	CEntityId	ide, idt;
+	CEntityId ide, idt;
 	msgin.serial(ide, idt);
-	((CEntityViewService*)IService::getInstance())->setTarget(ide, idt);
+	((CEntityViewService *)IService::getInstance())->setTarget(ide, idt);
 }
 
-void cbSetPos(CMessage& msgin, const string &serviceName, uint16 serviceId)
+void cbSetPos(CMessage &msgin, const string &serviceName, uint16 serviceId)
 {
-/*
-	CEntityId	id;
-	sint		x, y, z;
-	msgin.serial(id, x, y, z);
+	/*
+	    CEntityId	id;
+	    sint		x, y, z;
+	    msgin.serial(id, x, y, z);
 
-	((CEntityViewService*)IService::getInstance())->setPos(id, x, y, z);
-*/
+	    ((CEntityViewService*)IService::getInstance())->setPos(id, x, y, z);
+	*/
 }
 
-
-TUnifiedCallbackItem CbArray[] = 
-{
+TUnifiedCallbackItem CbArray[] = {
 	{ "TARGET", cbSetTarget },
 	{ "EVSPOS", cbSetPos },
 };
 
-NLNET_SERVICE_MAIN( CEntityViewService, "EVS", "entity_view_service", 0, CbArray, "", "" );
-
-
+NLNET_SERVICE_MAIN(CEntityViewService, "EVS", "entity_view_service", 0, CbArray, "", "");
 
 NLMISC_COMMAND(follow, "follow an entity", "entityId")
 {
 	if (args.size() < 1)
 		return false;
 
-	CEntityId	sid;
+	CEntityId sid;
 
-	uint64		id;
-	uint		type;
-	uint		creatorId;
-	uint		dynamicId;
+	uint64 id;
+	uint type;
+	uint creatorId;
+	uint dynamicId;
 
 	if (sscanf(args[0].c_str(), "(%" NL_I64 "x:%x:%x:%x)", &id, &type, &creatorId, &dynamicId) != 4)
 		return false;
 
-	sid.setShortId( id );
-	sid.setType( type );
-	sid.setCreatorId( creatorId );
-	sid.setDynamicId( dynamicId );
+	sid.setShortId(id);
+	sid.setType(type);
+	sid.setCreatorId(creatorId);
+	sid.setDynamicId(dynamicId);
 
 	Follow = sid;
 
@@ -1125,11 +1111,11 @@ NLMISC_COMMAND(goTo, "goto a position", "x y z")
 	if (args.size() < 3)
 		return false;
 
-	sint32	x = atoi(args[0].c_str());
-	sint32	y = atoi(args[1].c_str());
-	sint32	z = atoi(args[2].c_str());
+	sint32 x = atoi(args[0].c_str());
+	sint32 y = atoi(args[1].c_str());
+	sint32 z = atoi(args[2].c_str());
 
-	CMatrix	mat = pCam->getMatrix();
+	CMatrix mat = pCam->getMatrix();
 	mat.setPos(CVector((float)x, (float)y, (float)z));
 	pCam->setMatrix(mat);
 
@@ -1140,7 +1126,7 @@ NLMISC_COMMAND(goTo, "goto a position", "x y z")
 
 NLMISC_COMMAND(displayEntities, "display entities positions", "")
 {
-	static_cast<CEntityViewService*>(IService::getInstance())->displayEntities();
+	static_cast<CEntityViewService *>(IService::getInstance())->displayEntities();
 
 	return true;
 }

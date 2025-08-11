@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef LOGGER_SERVICE_H
 #define LOGGER_SERVICE_H
 
@@ -30,44 +29,39 @@ typedef uint32 TShardId;
 struct TLogEntry
 {
 	// A unique ID for this logging sessions
-	uint32		LogId;
+	uint32 LogId;
 	// that shard that sent the log
-	TShardId	ShardId;
+	TShardId ShardId;
 	// The log info
-	LGS::TLogInfo	LogInfo;
+	LGS::TLogInfo LogInfo;
 };
 
 /// A list of log entry
-typedef std::list<TLogEntry>		TLogInfos;
-
+typedef std::list<TLogEntry> TLogInfos;
 
 /// A vector of log definitions
-typedef std::vector < LGS::TLogDefinition >	TLogDefinitions;
+typedef std::vector<LGS::TLogDefinition> TLogDefinitions;
 
-class CQueryParser	*createQueryParser(const TLogDefinitions &logDefs);
-
+class CQueryParser *createQueryParser(const TLogDefinitions &logDefs);
 
 inline std::string formatDate(time_t date)
 {
 	date &= 0x7fffffff;
-	struct tm *t=localtime(&date);
+	struct tm *t = localtime(&date);
 
 	char dateStr[1024];
 	strftime(dateStr, 1024, "%Y-%m-%d %H:%M:%S", t);
 
 	return dateStr;
 
-//
-//	return NLMISC::toString("%4u-%02u-%02u %2u:%02u:%02u",
-//		t->tm_year+1900,
-//		t->tm_mon+1,
-//		t->tm_mday,
-//		t->tm_hour,
-//		t->tm_min,
-//		t->tm_sec);
+	//
+	//	return NLMISC::toString("%4u-%02u-%02u %2u:%02u:%02u",
+	//		t->tm_year+1900,
+	//		t->tm_mon+1,
+	//		t->tm_mday,
+	//		t->tm_hour,
+	//		t->tm_min,
+	//		t->tm_sec);
 }
 
-
-
-
-#endif //LOGGER_SERVICE_H
+#endif // LOGGER_SERVICE_H

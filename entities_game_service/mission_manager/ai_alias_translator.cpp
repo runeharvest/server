@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "mission_manager/ai_alias_translator.h"
 #include "nel/net/service.h"
@@ -29,7 +28,7 @@ using namespace NLNET;
 using namespace std;
 using namespace NLLIGO;
 
-CAIAliasTranslator* CAIAliasTranslator::_Instance = NULL;
+CAIAliasTranslator *CAIAliasTranslator::_Instance = NULL;
 const TAIAlias CAIAliasTranslator::Invalid = 0;
 
 //-----------------------------------------------
@@ -39,7 +38,7 @@ void CAIAliasTranslator::init()
 {
 	nlassert(_Instance == NULL);
 	_Instance = new CAIAliasTranslator();
-}// CAIAliasTranslator init
+} // CAIAliasTranslator init
 
 //-----------------------------------------------
 // CAIAliasTranslator ctor
@@ -47,7 +46,7 @@ void CAIAliasTranslator::init()
 CAIAliasTranslator::CAIAliasTranslator()
 {
 	CConfigFile::CVar *varPtr = IService::getInstance()->ConfigFile.getVarPtr("StoreBotNames");
-	if ( varPtr && varPtr->asInt() != 0 )
+	if (varPtr && varPtr->asInt() != 0)
 	{
 		_KeepNames = true;
 	}
@@ -55,9 +54,9 @@ CAIAliasTranslator::CAIAliasTranslator()
 	{
 		_KeepNames = false;
 	}
-	
+
 	// get the loaded primitives
-	const CPrimitivesParser::TPrimitivesList & primsList = CPrimitivesParser::getInstance().getPrimitives();
+	const CPrimitivesParser::TPrimitivesList &primsList = CPrimitivesParser::getInstance().getPrimitives();
 	nlinfo("loading bot names and mission names");
 	CPrimitivesParser::TPrimitivesList::const_iterator first, last;
 	for (first = primsList.begin(), last = primsList.end(); first != last; ++first)
@@ -66,7 +65,7 @@ CAIAliasTranslator::CAIAliasTranslator()
 		buildMissionTree(first->Primitive.RootNode);
 	}
 	nlinfo("bot names and mission names loaded");
-}// CAIAliasTranslator ctor
+} // CAIAliasTranslator ctor
 
 //-----------------------------------------------
 // CAIAliasTranslator release
@@ -75,7 +74,7 @@ void CAIAliasTranslator::release()
 {
 	delete _Instance;
 	_Instance = NULL;
-}// CAIAliasTranslator release
+} // CAIAliasTranslator release
 
 //-----------------------------------------------
 // CAIAliasTranslator destructor
@@ -86,172 +85,175 @@ CAIAliasTranslator::~CAIAliasTranslator()
 	_AIGroupNamesToIds.clear();
 	_HashTableAiId.clear();
 	_HashTableEntityId.clear();
-	
-}// CAIAliasTranslator destructor
+
+} // CAIAliasTranslator destructor
 
 //-----------------------------------------------
 // CAIAliasTranslator buildBotTree
 //-----------------------------------------------
-void CAIAliasTranslator::buildBotTree(const NLLIGO::IPrimitive* prim)
+void CAIAliasTranslator::buildBotTree(const NLLIGO::IPrimitive *prim)
 {
 	// look for bot nodes in the primitives
-	std::string value,name,aiClass;
-	if (prim->getPropertyByName("class",aiClass)  )
+	std::string value, name, aiClass;
+	if (prim->getPropertyByName("class", aiClass))
 	{
-		if ( !nlstricmp(aiClass.c_str(),"npc_bot") ||!nlstricmp(aiClass.c_str(),"group_fauna") ||!nlstricmp(aiClass.c_str(),"npc_group") )
+		if (!nlstricmp(aiClass.c_str(), "npc_bot") || !nlstricmp(aiClass.c_str(), "group_fauna") || !nlstricmp(aiClass.c_str(), "npc_group"))
 		{
 			bool error = false;
-			if ( !prim->getPropertyByName("name",name) )
+			if (!prim->getPropertyByName("name", name))
 			{
 				nlwarning("<CAIAliasTranslator buildBotTree> no name property in an AI node '%s'", buildPrimPath(prim).c_str());
 				error = true;
 			}
 			TAIAlias id;
-			if ( !CPrimitivesParser::getAlias(prim, id))
+			if (!CPrimitivesParser::getAlias(prim, id))
 			{
 				nlwarning("<CAIAliasTranslator buildBotTree> no alias property in an AI node '%s'", buildPrimPath(prim).c_str());
 				error = true;
 			}
 			if (error)
 			{
-				nlwarning("<CAIAliasTranslator buildBotTree> errors : name='%s' alias='%s' in '%s'",name.c_str(),value.c_str(), buildPrimPath(prim).c_str());
+				nlwarning("<CAIAliasTranslator buildBotTree> errors : name='%s' alias='%s' in '%s'", name.c_str(), value.c_str(), buildPrimPath(prim).c_str());
 			}
 
 			NLMISC::strlwr(name);
-			//remove AI name parameters
+			// remove AI name parameters
 			string::size_type trash = name.find('$');
-			if ( trash != string::npos )
+			if (trash != string::npos)
 			{
 				name.resize(trash);
 			}
 			if (!error)
 			{
-				if ( !nlstricmp(aiClass.c_str(),"npc_bot") )
+				if (!nlstricmp(aiClass.c_str(), "npc_bot"))
 				{
-					_BotIdsToNames.insert( make_pair(id,name) );
-					_BotNamesToIds.insert( make_pair(name,id) );
+					_BotIdsToNames.insert(make_pair(id, name));
+					_BotNamesToIds.insert(make_pair(name, id));
 				}
 				else
-					_AIGroupNamesToIds.insert( make_pair(name,id) );
+					_AIGroupNamesToIds.insert(make_pair(name, id));
 			}
 		}
-		if ( !nlstricmp(aiClass.c_str(),"spire") )
+		if (!nlstricmp(aiClass.c_str(), "spire"))
 		{
 			bool error = false;
 			// For spires name of the group is "spire_group_"+name where name is the nams of the spire primitive
-			if ( !prim->getPropertyByName("name", name) )
+			if (!prim->getPropertyByName("name", name))
 			{
 				nlwarning("<CAIAliasTranslator buildBotTree> no region property in an spire node '%s'", buildPrimPath(prim).c_str());
 				error = true;
 			}
 			TAIAlias id;
-			if ( !CPrimitivesParser::getAlias(prim, id))
+			if (!CPrimitivesParser::getAlias(prim, id))
 			{
 				nlwarning("<CAIAliasTranslator buildBotTree> no alias property in an spire node '%s'", buildPrimPath(prim).c_str());
 				error = true;
 			}
 			if (error)
 			{
-				nlwarning("<CAIAliasTranslator buildBotTree> errors : name='%s' alias='%s' in '%s'",name.c_str(),value.c_str(), buildPrimPath(prim).c_str());
+				nlwarning("<CAIAliasTranslator buildBotTree> errors : name='%s' alias='%s' in '%s'", name.c_str(), value.c_str(), buildPrimPath(prim).c_str());
 			}
 
-		//	NLMISC::strlwr(name);
-			//remove AI name parameters
-		//	string::size_type trash = name.find('$');
-		//	if ( trash != string::npos )
-		//	{
-		//		name.resize(trash);
-		//	}
+			//	NLMISC::strlwr(name);
+			// remove AI name parameters
+			//	string::size_type trash = name.find('$');
+			//	if ( trash != string::npos )
+			//	{
+			//		name.resize(trash);
+			//	}
 			if (!error)
 			{
-				_AIGroupNamesToIds.insert( make_pair("spire_group_"+name,id) );
+				_AIGroupNamesToIds.insert(make_pair("spire_group_" + name, id));
 			}
 		}
 	}
-	//this is not a mission node, so lookup recursively in the children
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	// this is not a mission node, so lookup recursively in the children
+	for (uint i = 0; i < prim->getNumChildren(); ++i)
 	{
 		const IPrimitive *child;
-		if ( prim->getChild(child,i) )
+		if (prim->getChild(child, i))
 			buildBotTree(child);
 	}
-}// CAIAliasTranslator buildBotTree
+} // CAIAliasTranslator buildBotTree
 
 //-----------------------------------------------
 // CAIAliasTranslator buildMissionTree
 //-----------------------------------------------
-void CAIAliasTranslator::buildMissionTree(const NLLIGO::IPrimitive* prim)
+void CAIAliasTranslator::buildMissionTree(const NLLIGO::IPrimitive *prim)
 {
 	// look for mission nodes in the primitives
-	std::string value,name;
-	if (prim->getPropertyByName("class",value)  )
+	std::string value, name;
+	if (prim->getPropertyByName("class", value))
 	{
-		if ( !nlstricmp(value.c_str(),"mission") )
+		if (!nlstricmp(value.c_str(), "mission"))
 		{
 			bool error = false;
 			TAIAlias id;
-			if ( !CPrimitivesParser::getAlias(prim, id) )
+			if (!CPrimitivesParser::getAlias(prim, id))
 			{
 				nlwarning("<CAIAliasTranslator buildMissionTree> no alias property in a mission node");
 				error = true;
 			}
-//			TAIAlias id;
-//			NLMISC::fromString(value, id);
-			if ( !prim->getPropertyByName("name",name) )
+			//			TAIAlias id;
+			//			NLMISC::fromString(value, id);
+			if (!prim->getPropertyByName("name", name))
 			{
 				nlwarning("<CAIAliasTranslator buildMissionTree> no name property in a mission node");
 				error = true;
 			}
 			NLMISC::strlwr(name);
-			if ( error )
+			if (error)
 			{
-				nlwarning("<CAIAliasTranslator buildMissionTree> errors : name='%s' alias='%s'",name.c_str(),value.c_str());
+				nlwarning("<CAIAliasTranslator buildMissionTree> errors : name='%s' alias='%s'", name.c_str(), value.c_str());
 			}
-			else if ( _MissionNamesToIds. insert( make_pair(name,id) ).second == false )
+			else if (_MissionNamesToIds.insert(make_pair(name, id)).second == false)
 			{
-				nlwarning("<CAIAliasTranslator buildMissionTree> The name %s is already assigned, we overwrite it",name.c_str());
+				nlwarning("<CAIAliasTranslator buildMissionTree> The name %s is already assigned, we overwrite it", name.c_str());
 			}
-			
 		}
 	}
-	//this is not a mission node, so lookup recursively in the children
-	for (uint i=0;i<prim->getNumChildren();++i)	
+	// this is not a mission node, so lookup recursively in the children
+	for (uint i = 0; i < prim->getNumChildren(); ++i)
 	{
 		const IPrimitive *child;
-		if ( prim->getChild(child,i) )
+		if (prim->getChild(child, i))
 			buildMissionTree(child);
 	}
-}// CAIAliasTranslator buildMissionTree
+} // CAIAliasTranslator buildMissionTree
 
-
-void CAIAliasTranslator::sendAliasToIOS() const		
+void CAIAliasTranslator::sendAliasToIOS() const
 {
 
-	NLNET::CMessage msg("UPDATE_AIALIAS");	
-	enum {Set=0, Add = 1, Delete=2  };
+	NLNET::CMessage msg("UPDATE_AIALIAS");
+	enum
+	{
+		Set = 0,
+		Add = 1,
+		Delete = 2
+	};
 	uint32 subcommand = static_cast<uint32>(Set);
-	msg.serial( subcommand );
-	typedef CHashMap< uint, std::string > TContainer;
+	msg.serial(subcommand);
+	typedef CHashMap<uint, std::string> TContainer;
 	TContainer::const_iterator first(_BotIdsToNames.begin());
-	TContainer::const_iterator last(_BotIdsToNames.end());		
+	TContainer::const_iterator last(_BotIdsToNames.end());
 	uint32 size = static_cast<uint32>(_BotIdsToNames.size());
 	msg.serial(size);
 	for (; first != last; ++first)
 	{
-		uint32 alias ((*first).first);
-		std::string name ((*first).second);
-		msg.serial( alias );
-		msg.serial( name );
+		uint32 alias((*first).first);
+		std::string name((*first).second);
+		msg.serial(alias);
+		msg.serial(name);
 	}
-	sendMessageViaMirror ("IOS", msg);
+	sendMessageViaMirror("IOS", msg);
 }
 
-TAIAlias CAIAliasTranslator::getAIAlias(const NLMISC::CEntityId & entityId) const
+TAIAlias CAIAliasTranslator::getAIAlias(const NLMISC::CEntityId &entityId) const
 {
 
-	typedef CHashMap< NLMISC::CEntityId, TAIAlias,NLMISC::CEntityIdHashMapTraits> TContainer;
-	TContainer::const_iterator it(_HashTableEntityId.find(entityId));	
-	if(  it != _HashTableEntityId.end() )
+	typedef CHashMap<NLMISC::CEntityId, TAIAlias, NLMISC::CEntityIdHashMapTraits> TContainer;
+	TContainer::const_iterator it(_HashTableEntityId.find(entityId));
+	if (it != _HashTableEntityId.end())
 		return (*it).second;
 	return Invalid;
 }

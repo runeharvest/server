@@ -22,35 +22,35 @@
 #include "nel/misc/smart_ptr.h"
 #include "game_share/singleton_registry.h"
 
-class CJobManager: public IServiceSingleton
+class CJobManager : public IServiceSingleton
 {
 public:
-	static CJobManager* getInstance();
+	static CJobManager *getInstance();
 
 public:
-	class IJob: public NLMISC::CRefCount
+	class IJob : public NLMISC::CRefCount
 	{
 	public:
 		// virtual dtor
-		virtual ~IJob() {}
+		virtual ~IJob() { }
 
 		// start a job running (one that isn't in progress)
-		virtual void start()=0;
+		virtual void start() = 0;
 
 		// return true if the job is finished -> the job object can be deleted
-		virtual bool finished()=0;
+		virtual bool finished() = 0;
 
 		// return a status string that can be displayed in an update variable
-		virtual std::string getShortStatus()=0;
+		virtual std::string getShortStatus() = 0;
 
 		// get a detailed status string for display in a job list etc
-		virtual std::string getStatus()=0;
+		virtual std::string getStatus() = 0;
 
 		// display the details of the job... eg the list of files being processed with related info
-		virtual void display(NLMISC::CLog* log=NLMISC::InfoLog)=0;
+		virtual void display(NLMISC::CLog *log = NLMISC::InfoLog) = 0;
 
 		// run the job's update to do a bit of work
-		virtual void update()=0;
+		virtual void update() = 0;
 	};
 
 public:
@@ -77,16 +77,16 @@ public:
 	std::string getStatus();
 
 	// list the status of all jobs that are not finished
-	void listJobs(NLMISC::CLog* log=NLMISC::InfoLog);
+	void listJobs(NLMISC::CLog *log = NLMISC::InfoLog);
 
 	// list the status of all jobs including those that are finished
-	void listJobHistory(NLMISC::CLog* log=NLMISC::InfoLog);
+	void listJobHistory(NLMISC::CLog *log = NLMISC::InfoLog);
 
 	// call the currently active job's 'display' method
-	void displayCurrentJob(NLMISC::CLog* log=NLMISC::InfoLog);
+	void displayCurrentJob(NLMISC::CLog *log = NLMISC::InfoLog);
 
 	// call the given job's 'display' method
-	void displayJob(uint32 jobId,NLMISC::CLog* log=NLMISC::InfoLog);
+	void displayJob(uint32 jobId, NLMISC::CLog *log = NLMISC::InfoLog);
 
 	// returns the number of unfinished jobs in the manager
 	uint32 getNumJobs() const;
@@ -95,7 +95,7 @@ private:
 	CJobManager();
 
 	typedef std::list<uint32> TUnfinishedJobs;
-	typedef std::vector<NLMISC::CSmartPtr<IJob> > TJobs;
+	typedef std::vector<NLMISC::CSmartPtr<IJob>> TJobs;
 
 	bool _Paused;
 	uint32 _JobUpdatesPerUpdate;

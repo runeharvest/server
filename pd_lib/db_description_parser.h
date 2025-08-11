@@ -26,11 +26,9 @@
 
 #include "pds_types.h"
 
-
 class CTypeNode
 {
 public:
-
 	enum
 	{
 		TypeSimple,
@@ -38,18 +36,18 @@ public:
 		TypeDimension
 	};
 
-	std::string										Name;
-	uint											Id;
-	TDataType										DataType;
-	uint32											ByteSize;
-	uint32											Type;
-	uint32											Dimension;
+	std::string Name;
+	uint Id;
+	TDataType DataType;
+	uint32 ByteSize;
+	uint32 Type;
+	uint32 Dimension;
 
-	std::vector<std::pair<std::string, uint32> >	EnumValues;
+	std::vector<std::pair<std::string, uint32>> EnumValues;
 
-	std::string			getEnumName(uint32 value) const
+	std::string getEnumName(uint32 value) const
 	{
-		for (uint i=0; i<EnumValues.size(); ++i)
+		for (uint i = 0; i < EnumValues.size(); ++i)
 			if (EnumValues[i].second == value)
 				return EnumValues[i].first;
 		return "<UNKNOWN>";
@@ -59,44 +57,45 @@ public:
 class CAttributeNode
 {
 public:
-	std::string										Name;
-	uint											Id;
-	uint											ColumnId;
-	uint											Columns;
-	TMetaType										MetaType;
-	uint											TypeId;
-	uint											Index;
-	uint											Reference;
-	bool											AllowNull;
+	std::string Name;
+	uint Id;
+	uint ColumnId;
+	uint Columns;
+	TMetaType MetaType;
+	uint TypeId;
+	uint Index;
+	uint Reference;
+	bool AllowNull;
 };
 
 class CColumnNode
 {
 public:
+	uint Index;
+	std::string Name;
 
-	uint											Index;
-	std::string										Name;
-
-	TDataType										DataType;
-	uint											TypeId;
-	uint											ByteSize;
+	TDataType DataType;
+	uint TypeId;
+	uint ByteSize;
 };
 
 class CTableNode
 {
 public:
+	CTableNode()
+	    : ColumnsBuilt(false)
+	{
+	}
 
-	CTableNode() : ColumnsBuilt(false)				{ }
+	std::string Name;
+	uint Id;
+	sint Key;
+	sint Inherit;
+	sint Mapped;
+	std::vector<CAttributeNode> Attributes;
+	std::vector<CColumnNode> Columns;
 
-	std::string										Name;
-	uint											Id;
-	sint											Key;
-	sint											Inherit;
-	sint											Mapped;
-	std::vector<CAttributeNode>						Attributes;
-	std::vector<CColumnNode>						Columns;
-
-	bool											ColumnsBuilt;
+	bool ColumnsBuilt;
 };
 
 // Added so strings can be logged in logmsg or logcontext
@@ -108,36 +107,31 @@ enum
 class CLogNode
 {
 public:
-
-	uint											Id;
-	bool											Context;
+	uint Id;
+	bool Context;
 
 	class CParameter
 	{
 	public:
-
-		uint32										DataType;
-		uint32										TypeId;
-		uint32										ByteOffset;
-		uint32										ByteSize;
+		uint32 DataType;
+		uint32 TypeId;
+		uint32 ByteOffset;
+		uint32 ByteSize;
 	};
 
-	std::vector<CParameter>							Parameters;
-	std::string										Message;
+	std::vector<CParameter> Parameters;
+	std::string Message;
 };
 
 class CDatabaseNode
 {
 public:
-	std::string										Name;
+	std::string Name;
 
-	std::vector<CTypeNode>							Types;
-	std::vector<CTableNode>							Tables;
-	std::vector<CLogNode>							Logs;
+	std::vector<CTypeNode> Types;
+	std::vector<CTableNode> Tables;
+	std::vector<CLogNode> Logs;
 };
-
-
-
 
 /**
  * Parse an xml input stream and setup a database
@@ -148,108 +142,99 @@ public:
 class CDBDescriptionParser
 {
 public:
-
 	/// Constructor
 	CDBDescriptionParser();
 
 	/**
 	 * Load database description
 	 */
-	bool			loadDescriptionFile(const std::string& filename);
+	bool loadDescriptionFile(const std::string &filename);
 
 	/**
 	 * Load database description
 	 */
-	bool			loadDescription(const uint8* description);
+	bool loadDescription(const uint8 *description);
 
 	/**
 	 * Save database description
 	 */
-//	bool			saveDescription(const std::string& filename);
+	//	bool			saveDescription(const std::string& filename);
 
 	/**
 	 * Get HashKey
 	 */
-	const NLMISC::CHashKey&	getHashKey() const				{ return _HashKey; }
+	const NLMISC::CHashKey &getHashKey() const { return _HashKey; }
 
 	/**
 	 * Get Description
 	 */
-	std::string&	getDescription()				{ return _Description; }
-
+	std::string &getDescription() { return _Description; }
 
 	/**
 	 * Get Database Node
 	 */
-	const CDatabaseNode	&getDatabaseNode() const	{ return _Database; }
-
+	const CDatabaseNode &getDatabaseNode() const { return _Database; }
 
 	/**
 	 * Build Columns
 	 */
-	bool			buildColumns();
-
+	bool buildColumns();
 
 	/**
 	 * Display whole database node info
 	 */
-	void			display(NLMISC::CLog& log) const;
+	void display(NLMISC::CLog &log) const;
 
 	/**
 	 * Display Table node info
 	 */
-	void			displayTable(uint table, NLMISC::CLog& log) const;
-
+	void displayTable(uint table, NLMISC::CLog &log) const;
 
 private:
-
 	/// Database description
-	std::string										_Description;
+	std::string _Description;
 
 	/// Description hashkey
-	NLMISC::CHashKey										_HashKey;
+	NLMISC::CHashKey _HashKey;
 
 	/// Database node
-	CDatabaseNode									_Database;
-
-
+	CDatabaseNode _Database;
 
 	/**
 	 * Load database description
 	 */
-	bool			loadDescription(NLMISC::CIXml& xmlStream);
+	bool loadDescription(NLMISC::CIXml &xmlStream);
 
 	/**
 	 * Load Database description node
 	 */
-	bool			loadDatabase(xmlNodePtr node);
+	bool loadDatabase(xmlNodePtr node);
 
 	/**
 	 * Load Type description node
 	 */
-	bool			loadType(xmlNodePtr node);
+	bool loadType(xmlNodePtr node);
 
 	/**
 	 * Load Table description node
 	 */
-	bool			loadTable(xmlNodePtr node);
+	bool loadTable(xmlNodePtr node);
 
 	/**
 	 * Load attribute description node
 	 */
-	bool			loadAttribute(xmlNodePtr node, CTableNode& table);
+	bool loadAttribute(xmlNodePtr node, CTableNode &table);
 
 	/**
 	 * Load log description node
 	 */
-	bool			loadLog(xmlNodePtr node);
+	bool loadLog(xmlNodePtr node);
 
 	/**
 	 * Build Table Columns
 	 */
-	bool			buildColumns(uint tableIndex);
+	bool buildColumns(uint tableIndex);
 };
-
 
 #endif // NL_DB_DESCRIPTION_PARSER_H
 

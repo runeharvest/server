@@ -14,16 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 
 #include "ios_pd.h"
 
-namespace IOSPD
-{
-	
-RY_PDS::CPDSLib	PDSLib;
-void							init(uint32 overrideDbId)
+namespace IOSPD {
+
+RY_PDS::CPDSLib PDSLib;
+void init(uint32 overrideDbId)
 {
 	// Init CreateTeam log message and parameters
 	PDSLib.initLog(0);
@@ -39,7 +37,7 @@ void							init(uint32 overrideDbId)
 	PDSLib.initLog(3);
 	PDSLib.initLogParam(3, 0, 8);
 	PDSLib.initLogParam(3, 1, 8);
-	std::string	xmlDescription;
+	std::string xmlDescription;
 	xmlDescription += "<?xml version='1.0'?>\n";
 	xmlDescription += "<dbdescription version='0.0'>\n";
 	xmlDescription += "<db name='IOSPD' types='15' classes='0'>\n";
@@ -81,32 +79,31 @@ void							init(uint32 overrideDbId)
 	PDSLib.init(xmlDescription, overrideDbId);
 }
 
-bool							ready()
+bool ready()
 {
 	return PDSLib.PDSReady();
 }
 
-void							update()
+void update()
 {
 	PDSLib.update();
 }
 
-void							logChat(const ucstring& sentence, const NLMISC::CEntityId& from, const std::vector<NLMISC::CEntityId>& to)
+void logChat(const ucstring &sentence, const NLMISC::CEntityId &from, const std::vector<NLMISC::CEntityId> &to)
 {
 	PDSLib.logChat(sentence, from, to);
 }
 
-void							logTell(const ucstring& sentence, const NLMISC::CEntityId& from, const NLMISC::CEntityId& to)
+void logTell(const ucstring &sentence, const NLMISC::CEntityId &from, const NLMISC::CEntityId &to)
 {
-	std::vector<NLMISC::CEntityId>	ids;
+	std::vector<NLMISC::CEntityId> ids;
 	ids.push_back(to);
 	PDSLib.logChat(sentence, from, ids);
 }
 
-void							release()
+void release()
 {
 	PDSLib.release();
 }
 
-	
 } // End of IOSPD

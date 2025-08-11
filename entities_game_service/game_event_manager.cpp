@@ -34,21 +34,17 @@
 #include "egs_variables.h"
 #include "pvp_manager/pvp_zone.h"
 
-
-
 // ----------------------------------------------------------------------------
 
 using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
-
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily
-
 
 // ----------------------------------------------------------------------------
 
-CVariable<std::string> GameEventFile("egs", "GameEventFile", "game event file holding all g.e. stuff", std::string("game_event.txt"), 0, true );
+CVariable<std::string> GameEventFile("egs", "GameEventFile", "game event file holding all g.e. stuff", std::string("game_event.txt"), 0, true);
 
 // ----------------------------------------------------------------------------
 CGameEventManager::CGameEventManager()
@@ -77,7 +73,7 @@ void CGameEventManager::init()
 }
 
 // ----------------------------------------------------------------------------
-void CGameEventManager::resetGameEvent(const string &sEventName, const string &sEventFaction1, const string &sEventFaction2, const string &sEventFaction1ChannelName, const string &sEventFaction2ChannelName, bool factionChanelInZoneOnly )
+void CGameEventManager::resetGameEvent(const string &sEventName, const string &sEventFaction1, const string &sEventFaction2, const string &sEventFaction1ChannelName, const string &sEventFaction2ChannelName, bool factionChanelInZoneOnly)
 {
 	_Name = sEventName;
 	_EventFaction1Name = sEventFaction1;
@@ -87,9 +83,9 @@ void CGameEventManager::resetGameEvent(const string &sEventName, const string &s
 	_EventFaction2ChannelName = sEventFaction2ChannelName;
 
 	_FactionChanelInZoneOnly = factionChanelInZoneOnly;
-	
+
 	// Get the starting date
-	if( !sEventName.empty() )
+	if (!sEventName.empty())
 		_Date = CTickEventHandler::getGameCycle();
 	else
 		_Date = 0; // event stoped
@@ -98,32 +94,32 @@ void CGameEventManager::resetGameEvent(const string &sEventName, const string &s
 	saveGameEventFile();
 
 	// Start a new event channel
-	if( _ChannelEventId != TChanID::Unknown )
+	if (_ChannelEventId != TChanID::Unknown)
 	{
-		DynChatEGS.removeChan( _ChannelEventId );
+		DynChatEGS.removeChan(_ChannelEventId);
 		_ChannelEventId = TChanID::Unknown;
 	}
-	if( _ChannelEventFaction1Id != TChanID::Unknown )
+	if (_ChannelEventFaction1Id != TChanID::Unknown)
 	{
-		DynChatEGS.removeChan( _ChannelEventFaction1Id );
+		DynChatEGS.removeChan(_ChannelEventFaction1Id);
 		_ChannelEventFaction1Id = TChanID::Unknown;
 	}
-	if( _ChannelEventFaction2Id != TChanID::Unknown )
+	if (_ChannelEventFaction2Id != TChanID::Unknown)
 	{
-		DynChatEGS.removeChan( _ChannelEventFaction2Id );
+		DynChatEGS.removeChan(_ChannelEventFaction2Id);
 		_ChannelEventFaction2Id = TChanID::Unknown;
 	}
-	if( _ChannelGMEventFaction1Id != TChanID::Unknown )
+	if (_ChannelGMEventFaction1Id != TChanID::Unknown)
 	{
-		DynChatEGS.removeChan( _ChannelGMEventFaction1Id );
+		DynChatEGS.removeChan(_ChannelGMEventFaction1Id);
 		_ChannelGMEventFaction1Id = TChanID::Unknown;
 	}
-	if( _ChannelGMEventFaction2Id != TChanID::Unknown )
+	if (_ChannelGMEventFaction2Id != TChanID::Unknown)
 	{
-		DynChatEGS.removeChan( _ChannelGMEventFaction2Id );
+		DynChatEGS.removeChan(_ChannelGMEventFaction2Id);
 		_ChannelGMEventFaction2Id = TChanID::Unknown;
 	}
-		
+
 	createEventChannel();
 
 	// For all character online reset their game event part
@@ -131,27 +127,27 @@ void CGameEventManager::resetGameEvent(const string &sEventName, const string &s
 	CPlayerManager::TMapPlayers::const_iterator it = playerMap.begin();
 	while (it != playerMap.end())
 	{
-		CPlayer *p = it->second.Player;		
+		CPlayer *p = it->second.Player;
 		CCharacter *c = p->getActiveCharacter();
 		if (c != NULL)
 		{
 			c->getGameEvent().reset();
-			addCharacterToChannelEvent( c );
+			addCharacterToChannelEvent(c);
 
-			if( !_FactionChanelInZoneOnly )
+			if (!_FactionChanelInZoneOnly)
 			{
 				// find the clan
 				PVP_CLAN::TPVPClan clan1 = PVP_CLAN::fromString(sEventFaction1);
 				PVP_CLAN::TPVPClan clan2 = PVP_CLAN::fromString(sEventFaction2);
-				PVP_CLAN::TPVPClan clan = CPVPVersusZone::getPlayerClan( c, clan1, clan2 );
+				PVP_CLAN::TPVPClan clan = CPVPVersusZone::getPlayerClan(c, clan1, clan2);
 				// add the good chanel
-				if( clan == clan1 )
+				if (clan == clan1)
 				{
-					addCharacterToChannelFactionEvent( c, 1 );
+					addCharacterToChannelFactionEvent(c, 1);
 				}
-				else if( clan == clan2 )
+				else if (clan == clan2)
 				{
-					addCharacterToChannelFactionEvent( c, 2 );
+					addCharacterToChannelFactionEvent(c, 2);
 				}
 			}
 		}
@@ -162,49 +158,49 @@ void CGameEventManager::resetGameEvent(const string &sEventName, const string &s
 // ----------------------------------------------------------------------------
 void CGameEventManager::createEventChannel()
 {
-	if( !_Name.empty() )
+	if (!_Name.empty())
 	{
 		ucstring title;
 		title.fromUtf8(_Name);
-		_ChannelEventId = DynChatEGS.addChan(_Name, title );
+		_ChannelEventId = DynChatEGS.addChan(_Name, title);
 		// set historic size of the newly created channel
-		DynChatEGS.setHistoricSize( _ChannelEventId, EventChannelHistoricSize );
+		DynChatEGS.setHistoricSize(_ChannelEventId, EventChannelHistoricSize);
 	}
 
-	if( !_EventFaction1Name.empty() )
+	if (!_EventFaction1Name.empty())
 	{
 		ucstring title;
 		title.fromUtf8(_EventFaction1Name);
 		_ChannelEventFaction1Id = DynChatEGS.addChan(_EventFaction1Name, title);
-		if( _EventFaction1ChannelName.empty() )
+		if (_EventFaction1ChannelName.empty())
 		{
-			title.fromUtf8(_EventFaction1Name+"_event");
+			title.fromUtf8(_EventFaction1Name + "_event");
 		}
 		else
 		{
-			title.fromUtf8( _EventFaction1ChannelName );
+			title.fromUtf8(_EventFaction1ChannelName);
 		}
-		_ChannelGMEventFaction1Id = DynChatEGS.addChan(_EventFaction1Name+"_GM", title);
+		_ChannelGMEventFaction1Id = DynChatEGS.addChan(_EventFaction1Name + "_GM", title);
 		// set historic size of the newly GM created channel
-		DynChatEGS.setHistoricSize( _ChannelGMEventFaction1Id, EventChannelHistoricSize );
+		DynChatEGS.setHistoricSize(_ChannelGMEventFaction1Id, EventChannelHistoricSize);
 	}
 
-	if( !_EventFaction2Name.empty() )
+	if (!_EventFaction2Name.empty())
 	{
 		ucstring title;
 		title.fromUtf8(_EventFaction2Name);
-		_ChannelEventFaction2Id = DynChatEGS.addChan(_EventFaction2Name, title );
-		if( _EventFaction2ChannelName.empty() )
+		_ChannelEventFaction2Id = DynChatEGS.addChan(_EventFaction2Name, title);
+		if (_EventFaction2ChannelName.empty())
 		{
-			title.fromUtf8(_EventFaction2Name+"_event");
+			title.fromUtf8(_EventFaction2Name + "_event");
 		}
 		else
 		{
-			title.fromUtf8( _EventFaction2ChannelName );
+			title.fromUtf8(_EventFaction2ChannelName);
 		}
-		_ChannelGMEventFaction2Id = DynChatEGS.addChan(_EventFaction2Name+"_GM", title);
+		_ChannelGMEventFaction2Id = DynChatEGS.addChan(_EventFaction2Name + "_GM", title);
 		// set historic size of the newly GM created channel
-		DynChatEGS.setHistoricSize( _ChannelGMEventFaction2Id, EventChannelHistoricSize );
+		DynChatEGS.setHistoricSize(_ChannelGMEventFaction2Id, EventChannelHistoricSize);
 	}
 }
 
@@ -218,20 +214,20 @@ void CGameEventManager::characterLoadedCallback(CCharacter *c)
 }
 
 // ----------------------------------------------------------------------------
-void CGameEventManager::addCharacterToChannelEvent( CCharacter *c )
+void CGameEventManager::addCharacterToChannelEvent(CCharacter *c)
 {
-	if( _ChannelEventId != TChanID::Unknown )
+	if (_ChannelEventId != TChanID::Unknown)
 	{
-		if( c->haveAnyPrivilege() )
+		if (c->haveAnyPrivilege())
 		{
 			DynChatEGS.addSession(_ChannelEventId, c->getEntityRowId(), true);
-			if( _ChannelEventFaction1Id != TChanID::Unknown )
+			if (_ChannelEventFaction1Id != TChanID::Unknown)
 				DynChatEGS.addSession(_ChannelEventFaction1Id, c->getEntityRowId(), true);
-			if( _ChannelEventFaction2Id != TChanID::Unknown )
+			if (_ChannelEventFaction2Id != TChanID::Unknown)
 				DynChatEGS.addSession(_ChannelEventFaction2Id, c->getEntityRowId(), true);
-			if( _ChannelGMEventFaction1Id != TChanID::Unknown )
+			if (_ChannelGMEventFaction1Id != TChanID::Unknown)
 				DynChatEGS.addSession(_ChannelGMEventFaction1Id, c->getEntityRowId(), true);
-			if( _ChannelGMEventFaction2Id != TChanID::Unknown )
+			if (_ChannelGMEventFaction2Id != TChanID::Unknown)
 				DynChatEGS.addSession(_ChannelGMEventFaction2Id, c->getEntityRowId(), true);
 		}
 		else
@@ -242,22 +238,22 @@ void CGameEventManager::addCharacterToChannelEvent( CCharacter *c )
 }
 
 // ----------------------------------------------------------------------------
-void CGameEventManager::addCharacterToChannelFactionEvent( CCharacter *c, uint8 clan )
+void CGameEventManager::addCharacterToChannelFactionEvent(CCharacter *c, uint8 clan)
 {
-	if( c != 0 && c->haveAnyPrivilege() == false )
+	if (c != 0 && c->haveAnyPrivilege() == false)
 	{
-		if( clan == 1 )
+		if (clan == 1)
 		{
-			if( _ChannelGMEventFaction1Id != TChanID::Unknown )
+			if (_ChannelGMEventFaction1Id != TChanID::Unknown)
 				DynChatEGS.addSession(_ChannelGMEventFaction1Id, c->getEntityRowId(), false);
-			if( _ChannelEventFaction1Id != TChanID::Unknown )
+			if (_ChannelEventFaction1Id != TChanID::Unknown)
 				DynChatEGS.addSession(_ChannelEventFaction1Id, c->getEntityRowId(), true);
 		}
 		else
 		{
-			if( _ChannelGMEventFaction2Id != TChanID::Unknown )
+			if (_ChannelGMEventFaction2Id != TChanID::Unknown)
 				DynChatEGS.addSession(_ChannelGMEventFaction2Id, c->getEntityRowId(), false);
-			if( _ChannelEventFaction2Id != TChanID::Unknown )
+			if (_ChannelEventFaction2Id != TChanID::Unknown)
 				DynChatEGS.addSession(_ChannelEventFaction2Id, c->getEntityRowId(), true);
 		}
 		c->channelAdded(true);
@@ -265,22 +261,22 @@ void CGameEventManager::addCharacterToChannelFactionEvent( CCharacter *c, uint8 
 }
 
 // ----------------------------------------------------------------------------
-void CGameEventManager::removeCharacterToChannelFactionEvent( CCharacter *c, uint8 clan )
+void CGameEventManager::removeCharacterToChannelFactionEvent(CCharacter *c, uint8 clan)
 {
-	if( c != 0 )
+	if (c != 0)
 	{
-		if( clan == 1 )
+		if (clan == 1)
 		{
-			if( _ChannelGMEventFaction1Id != TChanID::Unknown )
+			if (_ChannelGMEventFaction1Id != TChanID::Unknown)
 				DynChatEGS.removeSession(_ChannelGMEventFaction1Id, c->getEntityRowId());
-			if( _ChannelEventFaction1Id != TChanID::Unknown )
+			if (_ChannelEventFaction1Id != TChanID::Unknown)
 				DynChatEGS.removeSession(_ChannelEventFaction1Id, c->getEntityRowId());
 		}
 		else
 		{
-			if( _ChannelGMEventFaction1Id != TChanID::Unknown )
+			if (_ChannelGMEventFaction1Id != TChanID::Unknown)
 				DynChatEGS.removeSession(_ChannelGMEventFaction2Id, c->getEntityRowId());
-			if( _ChannelEventFaction2Id != TChanID::Unknown )
+			if (_ChannelEventFaction2Id != TChanID::Unknown)
 				DynChatEGS.removeSession(_ChannelEventFaction2Id, c->getEntityRowId());
 		}
 		c->channelAdded(false);
@@ -294,7 +290,7 @@ bool CGameEventManager::isGameEventMission(TAIAlias missionAlias)
 	uint32 maStaticPart = CPrimitivesParser::getInstance().aliasGetStaticPart(missionAlias);
 
 	// The last 1024 aliases are the GameEvent aliases !!!
-	if ((maStaticPart >= (4096-1024)) && (maStaticPart < 4096) )
+	if ((maStaticPart >= (4096 - 1024)) && (maStaticPart < 4096))
 		return true;
 
 	return false;
@@ -303,12 +299,12 @@ bool CGameEventManager::isGameEventMission(TAIAlias missionAlias)
 // ----------------------------------------------------------------------------
 void CGameEventManager::saveGameEventFile()
 {
-	if( _InitOk )
+	if (_InitOk)
 	{
 		string sFilename = GameEventFile.get();
 		sFilename = CPath::standardizePath(IService::getInstance()->WriteFilesDirectory) + sFilename;
-		
-		static CPersistentDataRecordRyzomStore	pdr;
+
+		static CPersistentDataRecordRyzomStore pdr;
 		pdr.clear();
 		store(pdr);
 		pdr.writeToTxtFile(sFilename);
@@ -321,20 +317,19 @@ void CGameEventManager::saveGameEventFile()
 
 #define PERSISTENT_CLASS CGameEventManager
 
-#define PERSISTENT_PRE_STORE\
-	H_AUTO(CGameEventManagerStore);\
+#define PERSISTENT_PRE_STORE \
+	H_AUTO(CGameEventManagerStore);
 
-#define PERSISTENT_PRE_APPLY\
-	H_AUTO(CGameEventManagerApply);\
+#define PERSISTENT_PRE_APPLY \
+	H_AUTO(CGameEventManagerApply);
 
-#define PERSISTENT_DATA\
-	PROP_GAME_CYCLE_COMP(_Date)\
-	PROP(string, _Name)\
-	PROP(string, _EventFaction1Name)\
-	PROP(string, _EventFaction2Name)\
-	PROP(string, _EventFaction1ChannelName)\
-	PROP(string, _EventFaction2ChannelName)\
+#define PERSISTENT_DATA                     \
+	PROP_GAME_CYCLE_COMP(_Date)             \
+	PROP(string, _Name)                     \
+	PROP(string, _EventFaction1Name)        \
+	PROP(string, _EventFaction2Name)        \
+	PROP(string, _EventFaction1ChannelName) \
+	PROP(string, _EventFaction2ChannelName)
 
-//#pragma message( PERSISTENT_GENERATION_MESSAGE )
+// #pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
-

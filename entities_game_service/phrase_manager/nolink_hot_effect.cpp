@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -37,11 +35,11 @@ extern CPlayerManager PlayerManager;
 //--------------------------------------------------------------
 //		CNoLinkHoTEffect::update()
 //--------------------------------------------------------------
-bool CNoLinkHoTEffect::update(CTimerEvent * event, bool applyEffect)
+bool CNoLinkHoTEffect::update(CTimerEvent *event, bool applyEffect)
 {
 	const TGameCycle time = CTickEventHandler::getGameCycle();
 
-	if(_TargetEntity == NULL)
+	if (_TargetEntity == NULL)
 	{
 		_TargetEntity = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
 		if (!_TargetEntity)
@@ -62,7 +60,7 @@ bool CNoLinkHoTEffect::update(CTimerEvent * event, bool applyEffect)
 			++heal;
 		}
 
-		switch(_AffectedScore)
+		switch (_AffectedScore)
 		{
 		case SCORES::hit_points:
 			_TargetEntity->changeCurrentHp(heal, _CreatorRowId);
@@ -90,23 +88,23 @@ void CNoLinkHoTEffect::removed()
 		return;
 
 	DEBUGLOG("EFFECT: HoT effect ends on entity %s", _TargetEntity->getId().toString().c_str());
-	
-	// send messages to target
-/*	if (_TargetEntity->getId().getType() == RYZOMID::player)
-		PHRASE_UTILITIES::sendDynamicSystemMessage( _TargetRowId, "EFFECT_BLEED_ENDED");
 
-	// try to inform actor
-	if ( _CreatorRowId != _TargetRowId && _CreatorRowId.isValid() && TheDataset.isDataSetRowStillValid(_CreatorRowId))
-	{
-		CCharacter *actor = PlayerManager.getChar(_CreatorRowId);
-		if (actor != NULL)
-		{
-			TVectorParamCheck params;
-			params.resize(1);
-			params[0].Type = STRING_MANAGER::entity;
-			params[0].EId = _TargetEntity->getId();
-			PHRASE_UTILITIES::sendDynamicSystemMessage( actor->getEntityRowId(), "EFFECT_BLEED_ENDED_ACTOR", params);
-		}
-	}
-*/
+	// send messages to target
+	/*	if (_TargetEntity->getId().getType() == RYZOMID::player)
+	        PHRASE_UTILITIES::sendDynamicSystemMessage( _TargetRowId, "EFFECT_BLEED_ENDED");
+
+	    // try to inform actor
+	    if ( _CreatorRowId != _TargetRowId && _CreatorRowId.isValid() && TheDataset.isDataSetRowStillValid(_CreatorRowId))
+	    {
+	        CCharacter *actor = PlayerManager.getChar(_CreatorRowId);
+	        if (actor != NULL)
+	        {
+	            TVectorParamCheck params;
+	            params.resize(1);
+	            params[0].Type = STRING_MANAGER::entity;
+	            params[0].EId = _TargetEntity->getId();
+	            PHRASE_UTILITIES::sendDynamicSystemMessage( actor->getEntityRowId(), "EFFECT_BLEED_ENDED_ACTOR", params);
+	        }
+	    }
+	*/
 } // removed //

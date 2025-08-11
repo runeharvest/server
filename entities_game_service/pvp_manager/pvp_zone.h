@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_PVP_ZONE_H
 #define RY_PVP_ZONE_H
 
@@ -28,29 +26,27 @@
 
 #include "pvp_base.h"
 
-namespace PVP_ZONE_TYPE
+namespace PVP_ZONE_TYPE {
+
+enum TPVPZoneType
 {
+	FreeZone,
+	VersusZone,
+	GuildZone,
+	OutpostZone,
 
-	enum TPVPZoneType
-	{
-		FreeZone,
-		VersusZone,
-		GuildZone,
-		OutpostZone,
+	Unknown,
+	NbPVPZoneTypes = Unknown
+};
 
-		Unknown,
-		NbPVPZoneTypes = Unknown
-	};
-
-	TPVPZoneType fromString(const std::string & str);
-	const std::string & toString(TPVPZoneType type);
+TPVPZoneType fromString(const std::string &str);
+const std::string &toString(TPVPZoneType type);
 
 } // namespace PVP_ZONE_TYPE
 
-namespace NLMISC
-{
+namespace NLMISC {
 
-	class CLog;
+class CLog;
 
 } // namespace NLMISC
 
@@ -68,10 +64,10 @@ class IPVPZone : private NLLIGO::CPrimZone, public IPVP
 {
 public:
 	/// build a PVP zone from a primitive
-	static NLMISC::CSmartPtr<IPVPZone> build(const NLLIGO::CPrimZone * zone);
+	static NLMISC::CSmartPtr<IPVPZone> build(const NLLIGO::CPrimZone *zone);
 
 	/// fill an outpost PVP zone from a primitive
-	static NLMISC::CSmartPtr<IPVPZone> buildOutpostZone(const NLLIGO::CPrimZone * zone, NLMISC::CSmartPtr<IPVPZone> pvpZone);
+	static NLMISC::CSmartPtr<IPVPZone> buildOutpostZone(const NLLIGO::CPrimZone *zone, NLMISC::CSmartPtr<IPVPZone> pvpZone);
 
 	/// returns true if PVP zones overlap, dirty test not working if a zone does not contain a vertex of the other one!
 	static bool overlap(NLMISC::CSmartPtr<IPVPZone> pvpZone1, NLMISC::CSmartPtr<IPVPZone> pvpZone2);
@@ -87,7 +83,7 @@ public:
 	virtual void setActive(bool active);
 
 	/// get name
-	const std::string & getName() const { return _Name; }
+	const std::string &getName() const { return _Name; }
 
 	/// get persistent alias
 	TAIAlias getAlias() const { return _Alias; }
@@ -99,19 +95,19 @@ public:
 	/// get zone type
 	PVP_ZONE_TYPE::TPVPZoneType getPVPZoneType() const { return _PVPZoneType; }
 
-	/** 
+	/**
 	 * Return true if a character killed by 'killer' must use deathPenaltyFactor().
 	 * Precondition: kill not null.
 	 * By default, it's true only when killed by a player character.
 	 */
-	virtual bool hasDeathPenaltyFactorForVictimsOf( CEntityBase *killer ) const;
+	virtual bool hasDeathPenaltyFactorForVictimsOf(CEntityBase *killer) const;
 
 	// return the death penalty factor a character gets when killed by another character in this zone
 	float deathPenaltyFactor() const { return _DeathPenaltyFactor; }
 
 	/// returns true if the PVP zone contains the given position
-	bool contains(const NLMISC::CVector & v, bool excludeSafeZones = true) const;
-	bool contains(CCharacter* user, bool excludeSafeZones = true) const;
+	bool contains(const NLMISC::CVector &v, bool excludeSafeZones = true) const;
+	bool contains(CCharacter *user, bool excludeSafeZones = true) const;
 
 	/**
 	 * add a safe zone if the safe zone is inside the PVP zone and if it was not already added
@@ -120,40 +116,40 @@ public:
 	bool addSafeZone(NLMISC::CSmartPtr<CPVPSafeZone> safeZone);
 
 	/// add a new player in the zone, call this each time a player enters the zone
-	virtual void addPlayer(CCharacter * user) = 0;
+	virtual void addPlayer(CCharacter *user) = 0;
 
 	/// dump the zone
-	virtual void dumpZone(NLMISC::CLog * log, bool dumpUsers = true) const;
+	virtual void dumpZone(NLMISC::CLog *log, bool dumpUsers = true) const;
 
 protected:
 	/// ctor
 	IPVPZone();
 
 	/// is the zone active?
-	bool		_Active;
+	bool _Active;
 
 	/// users inside the zone
 	std::set<TDataSetRow> _Users;
 
 	/// when a character is killed by another character, how much does he death penalty in this zone? (0..1)
-	float		_DeathPenaltyFactor;
+	float _DeathPenaltyFactor;
 
 private:
 	/// name of the zone
-	std::string	_Name;
+	std::string _Name;
 
 	/// persistent alias
-	TAIAlias	_Alias;
+	TAIAlias _Alias;
 
 	/// center coords of the zone
-	sint32		_CenterX;
-	sint32		_CenterY;
+	sint32 _CenterX;
+	sint32 _CenterY;
 
 	/// PVP zone type
-	PVP_ZONE_TYPE::TPVPZoneType	_PVPZoneType;
+	PVP_ZONE_TYPE::TPVPZoneType _PVPZoneType;
 
 	/// safe zones
-	std::vector<NLMISC::CSmartPtr<CPVPSafeZone> > _SafeZones;
+	std::vector<NLMISC::CSmartPtr<CPVPSafeZone>> _SafeZones;
 };
 
 /**
@@ -166,13 +162,13 @@ class CPVPFreeZone : public IPVPZone
 {
 public:
 	PVP_MODE::TPVPMode getPVPMode() const { return PVP_MODE::PvpZoneFree; }
-	void addPlayer(CCharacter * user);
+	void addPlayer(CCharacter *user);
 
 	/// return pvp relation between the two players
-	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
+	PVP_RELATION::TPVPRelation getPVPRelation(CCharacter *user, CEntityBase *target) const;
 
 private:
-	bool leavePVP(CCharacter * user, IPVP::TEndType type);
+	bool leavePVP(CCharacter *user, IPVP::TEndType type);
 
 	/*
 	/// Return true for players in the pvp zone, false for anyone else (including non-players) ('attackable' will be used instead)
@@ -200,36 +196,35 @@ public:
 
 	PVP_MODE::TPVPMode getPVPMode() const { return PVP_MODE::PvpZoneFaction; }
 	void setActive(bool active);
-	void addPlayer(CCharacter * user);
+	void addPlayer(CCharacter *user);
 
 	void giveFactionPoints(bool giveFP);
 	bool giveFactionPoints() const { return _GiveFactionPoints; }
 
-	PVP_CLAN::TPVPClan getClan( uint32 clanNumber ) const { return clanNumber == 1 ? _Clan1 : _Clan2; }
+	PVP_CLAN::TPVPClan getClan(uint32 clanNumber) const { return clanNumber == 1 ? _Clan1 : _Clan2; }
 
 	// return pvp clan of a character
-	PVP_CLAN::TPVPClan getCharacterClan( const NLMISC::CEntityId& character ) const;
+	PVP_CLAN::TPVPClan getCharacterClan(const NLMISC::CEntityId &character) const;
 
-	void dumpZone(NLMISC::CLog * log, bool dumpUsers = true) const;
+	void dumpZone(NLMISC::CLog *log, bool dumpUsers = true) const;
 
-	static PVP_CLAN::TPVPClan getPlayerClan(CCharacter * user, PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan clan2 );
+	static PVP_CLAN::TPVPClan getPlayerClan(CCharacter *user, PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan clan2);
 
 	/// return pvp relation between the two players
-	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
-	
+	PVP_RELATION::TPVPRelation getPVPRelation(CCharacter *user, CEntityBase *target) const;
+
 private:
+	bool isOverridedByARunningEvent(CCharacter *user);
 
-	bool isOverridedByARunningEvent( CCharacter * user );
+	bool setPlayerClan(CCharacter *user /*, PVP_CLAN::TPVPClan clan*/);
 
-	bool setPlayerClan(CCharacter * user/*, PVP_CLAN::TPVPClan clan*/);
-	
-	static PVP_CLAN::TPVPClan determinatePlayerClan( CCharacter *user, PVP_CLAN::TPVPClan clan1, sint32 fame1, PVP_CLAN::TPVPClan clan2, sint32 fame2 );
+	static PVP_CLAN::TPVPClan determinatePlayerClan(CCharacter *user, PVP_CLAN::TPVPClan clan1, sint32 fame1, PVP_CLAN::TPVPClan clan2, sint32 fame2);
 
-	void setPlayerClanInMirror(CCharacter * user, PVP_CLAN::TPVPClan clan) const;
+	void setPlayerClanInMirror(CCharacter *user, PVP_CLAN::TPVPClan clan) const;
 
-	bool leavePVP(CCharacter * user, IPVP::TEndType type);
+	bool leavePVP(CCharacter *user, IPVP::TEndType type);
 
-	void userHurtsTarget(CCharacter * user, CCharacter * target);
+	void userHurtsTarget(CCharacter *user, CCharacter *target);
 
 	/*
 	/// Return false for players according to the rules, and for non-players ('attackable' will be used instead)
@@ -247,10 +242,10 @@ private:
 
 	/// neutral users aggressors
 	typedef std::set<TDataSetRow> TAggressors;
-	std::map<TDataSetRow,TAggressors> _AggressedNeutralUsers;
+	std::map<TDataSetRow, TAggressors> _AggressedNeutralUsers;
 
 	/// users clan
-	std::map<NLMISC::CEntityId,PVP_CLAN::TPVPClan> _UsersClan;
+	std::map<NLMISC::CEntityId, PVP_CLAN::TPVPClan> _UsersClan;
 
 	bool _GiveFactionPoints;
 };
@@ -265,13 +260,13 @@ class CPVPGuildZone : public IPVPZone
 {
 public:
 	PVP_MODE::TPVPMode getPVPMode() const { return PVP_MODE::PvpZoneGuild; }
-	void addPlayer(CCharacter * user);
+	void addPlayer(CCharacter *user);
 
 	/// return pvp relation between the two players
-	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
-	
+	PVP_RELATION::TPVPRelation getPVPRelation(CCharacter *user, CEntityBase *target) const;
+
 private:
-	bool leavePVP(CCharacter * user, IPVP::TEndType type);
+	bool leavePVP(CCharacter *user, IPVP::TEndType type);
 
 	/*
 	/// Return true for players in the pvp zone (everyone for training purpose), false for anyone else (including non-players) ('attackable' will be used instead)
@@ -285,7 +280,6 @@ private:
 	*/
 };
 
-
 /**
  * A PVP outpost zone : guilds fight for the control of an outpost. Defenders are helped by npc squads.
  * \author Olivier Cado
@@ -295,14 +289,12 @@ private:
 class CPVPOutpostZone : public IPVPZone
 {
 public:
-	
-	/** 
+	/**
 	 * Return true if a character killed by 'killer' must use deathPenaltyFactor().
 	 * Precondition: kill not null.
 	 * For outpost zones, it's true whether the killer is a player character or a bot.
 	 */
-	virtual bool hasDeathPenaltyFactorForVictimsOf( CEntityBase *killer ) const;
+	virtual bool hasDeathPenaltyFactorForVictimsOf(CEntityBase *killer) const;
 };
 
 #endif // RY_PVP_ZONE
-

@@ -30,8 +30,8 @@ class CCharacter;
 class CPVPFactionHOF
 {
 	NL_INSTANCE_COUNTER_DECL(CPVPFactionHOF);
-public:
 
+public:
 	enum THOFStat
 	{
 		faction_point,
@@ -57,25 +57,25 @@ public:
 	/// singleton release
 	static void release();
 	/// instance accessor
-	static CPVPFactionHOF* getInstance();
+	static CPVPFactionHOF *getInstance();
 	/// callback called at each tick
 	void tickUpdate();
 	//@}
 
 	// return string of period
-	const std::string& getPeriodStatString( TPeriodStat period ) const;
+	const std::string &getPeriodStatString(TPeriodStat period) const;
 
 	// return string of stat
-	const std::string& getStatString( THOFStat stat ) const;
+	const std::string &getStatString(THOFStat stat) const;
 
 	// write a value in HOF database
-	void writeStatInHOFDatabase( CCharacter * pc, PVP_CLAN::TPVPClan clan, THOFStat stat, sint32 value ) const;
+	void writeStatInHOFDatabase(CCharacter *pc, PVP_CLAN::TPVPClan clan, THOFStat stat, sint32 value) const;
 
 private:
 	// constructor
 	CPVPFactionHOF() { lastDayOfMonthHOFDone = 0; }
 	// destructor
-	~CPVPFactionHOF() {}
+	~CPVPFactionHOF() { }
 
 	// clear Daily Hall of Fame database
 	void clearDailyHOFDatabase();
@@ -93,12 +93,12 @@ private:
 	// create Global Hall of Fame database
 	void createGlobalHOFDatabase();
 	// set player and guild HOF points
-	void setHallOfFame( std::string sdbPvPPath, CCharacter * pc, sint32 value, THOFStat stat ) const;
+	void setHallOfFame(std::string sdbPvPPath, CCharacter *pc, sint32 value, THOFStat stat) const;
 	// set player and guild kill/death HOF points
-	void setHallOfFameKillDeathRatio( std::string sdbPvPPath, CCharacter * pc ) const;
+	void setHallOfFameKillDeathRatio(std::string sdbPvPPath, CCharacter *pc) const;
 
 	// singleton pointer
-	static CPVPFactionHOF * _Instance;
+	static CPVPFactionHOF *_Instance;
 
 	static const std::string _dailyString;
 	static const std::string _weeklyString;
@@ -115,4 +115,4 @@ private:
 	static sint32 lastDayOfMonthHOFDone;
 };
 
-#endif //RY_PVP_HOF_H
+#endif // RY_PVP_HOF_H

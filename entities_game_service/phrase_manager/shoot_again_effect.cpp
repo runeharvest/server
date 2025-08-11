@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -36,30 +34,29 @@ using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
 //----------------------------------------------------------------------------
 
-bool CShootAgainEffect::update(CTimerEvent* event, bool applyEffect)
+bool CShootAgainEffect::update(CTimerEvent *event, bool applyEffect)
 {
-	
+
 	// if needed check if caster is dead
 	const CEntityBase *caster = CEntityBaseManager::getEntityBasePtr(_CreatorRowId);
-	if ( !caster || caster->isDead())
+	if (!caster || caster->isDead())
 	{
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
 	}
-	
-	CEntityBase	*targetEntity = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
+
+	CEntityBase *targetEntity = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
 	if (targetEntity == NULL)
 	{
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
 	}
-	
+
 	// set timer next event
-	_UpdateTimer.setRemaining(/*_CycleLength*/20, event);
-	
+	_UpdateTimer.setRemaining(/*_CycleLength*/ 20, event);
+
 	return false;
 }
 
@@ -67,7 +64,7 @@ bool CShootAgainEffect::update(CTimerEvent* event, bool applyEffect)
 
 void CShootAgainEffect::removed()
 {
-	CEntityBase	*targetEntity = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
+	CEntityBase *targetEntity = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
 	if (targetEntity == NULL)
 	{
 		return;

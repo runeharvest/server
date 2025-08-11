@@ -25,9 +25,7 @@
 
 #include "login_service_itf.h"
 
-class CLoginService : 
-	public NLNET::CEmptyModuleCommBehav<NLNET::NLNET::CModuleBase> > >
-	public CLoginServiceSkel
+class CLoginService : public NLNET::CEmptyModuleCommBehav<NLNET::NLNET::CModuleBase> >> public CLoginServiceSkel
 {
 public:
 	CLoginService()

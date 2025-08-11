@@ -41,41 +41,42 @@
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     TOKEN_IF = 258,
-     TOKEN_ELSE = 259,
-     TOKEN_WHILE = 260,
-     TOKEN_PRINT = 261,
-     TOKEN_LOG = 262,
-     TOKEN_CASE = 263,
-     TOKEN_POINT = 264,
-     TOKEN_SEPARATOR = 265,
-     TOKEN_PV = 266,
-     TOKEN_PP = 267,
-     TOKEN_LP = 268,
-     TOKEN_LA = 269,
-     TOKEN_RP = 270,
-     TOKEN_RA = 271,
-     TOKEN_ASSIGNATOR = 272,
-     TOKEN_SWITCH = 273,
-     TOKEN_RAND = 274,
-     TOKEN_NUMBER = 275,
-     TOKEN_ONCHILDREN = 276,
-     TOKEN_CHAIN = 277,
-     TOKEN_NAME = 278,
-     TOKEN_STRNAME = 279,
-     TOKEN_CTXNAME = 280,
-     TOKEN_LOGIC = 281,
-     TOKEN_INCRDECR = 282,
-     TOKEN_ADD = 283,
-     TOKEN_SUB = 284,
-     TOKEN_COMP = 285,
-     TOKEN_ASSIGN = 286,
-     TOKEN_FACTOR = 287
-   };
+#define YYTOKENTYPE
+/* Put the tokens into the symbol table, so that GDB and other debuggers
+   know about them.  */
+enum yytokentype
+{
+	TOKEN_IF = 258,
+	TOKEN_ELSE = 259,
+	TOKEN_WHILE = 260,
+	TOKEN_PRINT = 261,
+	TOKEN_LOG = 262,
+	TOKEN_CASE = 263,
+	TOKEN_POINT = 264,
+	TOKEN_SEPARATOR = 265,
+	TOKEN_PV = 266,
+	TOKEN_PP = 267,
+	TOKEN_LP = 268,
+	TOKEN_LA = 269,
+	TOKEN_RP = 270,
+	TOKEN_RA = 271,
+	TOKEN_ASSIGNATOR = 272,
+	TOKEN_SWITCH = 273,
+	TOKEN_RAND = 274,
+	TOKEN_NUMBER = 275,
+	TOKEN_ONCHILDREN = 276,
+	TOKEN_CHAIN = 277,
+	TOKEN_NAME = 278,
+	TOKEN_STRNAME = 279,
+	TOKEN_CTXNAME = 280,
+	TOKEN_LOGIC = 281,
+	TOKEN_INCRDECR = 282,
+	TOKEN_ADD = 283,
+	TOKEN_SUB = 284,
+	TOKEN_COMP = 285,
+	TOKEN_ASSIGN = 286,
+	TOKEN_FACTOR = 287
+};
 #endif
 #define TOKEN_IF 258
 #define TOKEN_ELSE 259
@@ -108,28 +109,25 @@
 #define TOKEN_ASSIGN 286
 #define TOKEN_FACTOR 287
 
-
-
-
-#if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
+#if !defined(YYSTYPE) && !defined(YYSTYPE_IS_DECLARED)
 #line 295 "ai_service/script_parser.yacc"
-typedef union YYSTYPE {
-	AICOMP::COpcodeYacc			Opcode;
-	AICOMP::COperatorYacc		Operator;
-	AICOMP::CByteCodeYacc		ByteCode;
-	AICOMP::CByteCodeListYacc	ByteCodeList;
-	AICOMP::CCaseYacc			Case;
-	AICOMP::CSwitchYacc			Switch;
-	struct {} 					Nothing;
+typedef union YYSTYPE
+{
+	AICOMP::COpcodeYacc Opcode;
+	AICOMP::COperatorYacc Operator;
+	AICOMP::CByteCodeYacc ByteCode;
+	AICOMP::CByteCodeListYacc ByteCodeList;
+	AICOMP::CCaseYacc Case;
+	AICOMP::CSwitchYacc Switch;
+	struct
+	{
+	} Nothing;
 } YYSTYPE;
 /* Line 1248 of yacc.c.  */
 #line 110 "ai_service/script_parser_yacc.hpp"
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
-# define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
+#define yystype YYSTYPE /* obsolescent; will be withdrawn */
+#define YYSTYPE_IS_DECLARED 1
+#define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 extern YYSTYPE ailval;
-
-
-

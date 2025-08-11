@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef AVAILABLE_PHRASES_H
 #define AVAILABLE_PHRASES_H
 
@@ -23,7 +21,6 @@
 #include "egs_sheets/egs_static_rolemaster_phrase.h"
 #include "entity_structure/statistic.h"
 #include "game_share/people.h"
-
 
 /**
  * Get the sabrina phrases to make available for a player (who wants to buy phrases from his Rolemaster).
@@ -46,29 +43,27 @@
  * \param bypassBrickRequirements If set to true then do not check brick requirements (allows to learn increase damage 4
  *		  even if increase damage 3 isn't known for exemple)
  */
-void	buildAvailablePhrasesList( const NLMISC::CEntityId& eid,
-								   const std::string& brickFilter,
-								   const std::set<NLMISC::CSheetId>& bricksAlreadyKnown,
-								   const std::set<NLMISC::CSheetId>& phrasesAlreadyKnown,
-								   const std::vector<SSkill>& playerSkills,
-								   std::vector<NLMISC::CSheetId>& result,
-								   uint skillValueLimit=250,
-								   EGSPD::CPeople::TPeople civ= EGSPD::CPeople::Common,
-								   bool bypassBrickRequirements = false,
-								   bool includeNonRolemasterBricks = true
-								   );
+void buildAvailablePhrasesList(const NLMISC::CEntityId &eid,
+    const std::string &brickFilter,
+    const std::set<NLMISC::CSheetId> &bricksAlreadyKnown,
+    const std::set<NLMISC::CSheetId> &phrasesAlreadyKnown,
+    const std::vector<SSkill> &playerSkills,
+    std::vector<NLMISC::CSheetId> &result,
+    uint skillValueLimit = 250,
+    EGSPD::CPeople::TPeople civ = EGSPD::CPeople::Common,
+    bool bypassBrickRequirements = false,
+    bool includeNonRolemasterBricks = true);
 
 /*
  * Return false if the phrase contains bricks that require a skill level that the player doesn't have
  * or if it contains bricks that require a brick that the player doesn't have.
  */
-bool	isPlayerAllowedToGetAllBricksFromPhrase( const NLMISC::CEntityId& eid,
-												 const CStaticRolemasterPhrase& phrase,
-												 const std::vector<SSkill>& playerSkills,
-												 const std::set<NLMISC::CSheetId>& bricksAlreadyKnown,
-												 uint skillValueLimit,
-												 EGSPD::CPeople::TPeople civ,
-												 bool bypassBrickRequirements
-												 );
+bool isPlayerAllowedToGetAllBricksFromPhrase(const NLMISC::CEntityId &eid,
+    const CStaticRolemasterPhrase &phrase,
+    const std::vector<SSkill> &playerSkills,
+    const std::set<NLMISC::CSheetId> &bricksAlreadyKnown,
+    uint skillValueLimit,
+    EGSPD::CPeople::TPeople civ,
+    bool bypassBrickRequirements);
 
 #endif

@@ -14,11 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "egs_static_xp_factor_table.h"
 #include "egs_sheets.h"
-//Nel georges
+// Nel georges
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/load_form.h"
 
@@ -34,11 +33,10 @@ void CStaticXpFactorTable::serial(NLMISC::IStream &f)
 	f.serialCont(_XpFactorTable);
 } // serial //
 
-
 //--------------------------------------------------------------
 // readGeorges
 //--------------------------------------------------------------
-void CStaticXpFactorTable::readGeorges (const CSmartPtr<UForm> &form, const CSheetId &sheetId)
+void CStaticXpFactorTable::readGeorges(const CSmartPtr<UForm> &form, const CSheetId &sheetId)
 {
 	if (!form)
 	{
@@ -46,22 +44,21 @@ void CStaticXpFactorTable::readGeorges (const CSmartPtr<UForm> &form, const CShe
 		return;
 	}
 
-	UFormElm& root = form->getRootNode();		
-	
+	UFormElm &root = form->getRootNode();
+
 	const UFormElm *array = NULL;
-	if (root.getNodeByName (&array, "XpFactor") && array)
-    {
+	if (root.getNodeByName(&array, "XpFactor") && array)
+	{
 		// Get array size
-        uint size;
-		array->getArraySize (size);
-		
-		_XpFactorTable.resize( size );
-		
-        // Get an array value
-        for (uint i=0; i<size; ++i)
-        {
+		uint size;
+		array->getArraySize(size);
+
+		_XpFactorTable.resize(size);
+
+		// Get an array value
+		for (uint i = 0; i < size; ++i)
+		{
 			array->getArrayValue(_XpFactorTable[i], i);
-        }
+		}
 	}
 } // readGeorges //
-

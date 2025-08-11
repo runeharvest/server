@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "phrase_manager/s_link_effect.h"
 #include "entity_manager/entity_manager.h"
@@ -34,14 +33,14 @@
 using namespace std;
 using namespace NLMISC;
 
-extern CRandom				RandomGenerator;
+extern CRandom RandomGenerator;
 
 //-----------------------------------------------
 // CSLinkEffect getNoLinkDurationTime
 //-----------------------------------------------
-TGameCycle CSLinkEffect::getNoLinkDurationTime( EFFECT_FAMILIES::TEffectFamily family)
+TGameCycle CSLinkEffect::getNoLinkDurationTime(EFFECT_FAMILIES::TEffectFamily family)
 {
-	switch(family)
+	switch (family)
 	{
 	case EFFECT_FAMILIES::Fear:
 		return NoLinkTimeFear;
@@ -71,9 +70,9 @@ TGameCycle CSLinkEffect::getNoLinkDurationTime( EFFECT_FAMILIES::TEffectFamily f
 //-----------------------------------------------
 // CSLinkEffect getUpdatePeriod
 //-----------------------------------------------
-TGameCycle CSLinkEffect::getUpdatePeriod( EFFECT_FAMILIES::TEffectFamily family)
+TGameCycle CSLinkEffect::getUpdatePeriod(EFFECT_FAMILIES::TEffectFamily family)
 {
-	switch(family)
+	switch (family)
 	{
 	case EFFECT_FAMILIES::Fear:
 		return UpdatePeriodFear;
@@ -94,51 +93,50 @@ TGameCycle CSLinkEffect::getUpdatePeriod( EFFECT_FAMILIES::TEffectFamily family)
 		return UpdatePeriodMadness;
 	case EFFECT_FAMILIES::Dot:
 		return UpdatePeriodDot;
-		
+
 	default:
 		return DefaultUpdatePeriod;
 	};
 }
 
-
 //-----------------------------------------------
 // CSLinkEffect update
 //-----------------------------------------------
-bool CSLinkEffect::update(CTimerEvent * event, bool)
+bool CSLinkEffect::update(CTimerEvent *event, bool)
 {
-	CEntityBase * target = CEntityBaseManager::getEntityBasePtr( _TargetRowId );
-	if ( !target )
+	CEntityBase *target = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
+	if (!target)
 	{
-		nlwarning("<CSLinkEffect update> Invalid target %u",_TargetRowId.getIndex() );
+		nlwarning("<CSLinkEffect update> Invalid target %u", _TargetRowId.getIndex());
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
 	}
 
 	// -> effect is removed when target receive the invulnerability power
 	// if target is now protected, cancel the effect
-/*	const CSEffect *effect = target->lookForActiveEffect(EFFECT_FAMILIES::PowerInvulnerability);
-	if (effect)
-	{
-		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
-		return true;
-	}
-*/
+	/*	const CSEffect *effect = target->lookForActiveEffect(EFFECT_FAMILIES::PowerInvulnerability);
+	    if (effect)
+	    {
+	        _EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
+	        return true;
+	    }
+	*/
 
 	// if link exists pay price and test distance
 	if (_LinkExists)
 	{
 		bool endEffect = false;
 
-		CEntityBase * caster = CEntityBaseManager::getEntityBasePtr( _CreatorRowId );
-		if ( !caster )
+		CEntityBase *caster = CEntityBaseManager::getEntityBasePtr(_CreatorRowId);
+		if (!caster)
 		{
-			nlwarning("<CSLinkEffectDot update> Invalid caster %u",_CreatorRowId.getIndex() );
+			nlwarning("<CSLinkEffectDot update> Invalid caster %u", _CreatorRowId.getIndex());
 			_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 			return true;
 		}
 
 		// test range
-		if ( ! PHRASE_UTILITIES::testRange(*caster, *target, _MaxDistance) )
+		if (!PHRASE_UTILITIES::testRange(*caster, *target, _MaxDistance))
 		{
 			endEffect = true;
 		}
@@ -147,7 +145,7 @@ bool CSLinkEffect::update(CTimerEvent * event, bool)
 		CCharacter *player = NULL;
 		if (caster->getId().getType() == RYZOMID::player)
 		{
-			CCharacter *player = dynamic_cast<CCharacter *> (caster);
+			CCharacter *player = dynamic_cast<CCharacter *>(caster);
 			if (player)
 			{
 				if (player->isDead())
@@ -162,16 +160,16 @@ bool CSLinkEffect::update(CTimerEvent * event, bool)
 		sint32 price = _CostPerUpdate;
 		if (_Focus.isMagicFocus())
 		{
-			price = sint32( price / (1.0f + _Focus.getPowerFactor(_Skill, _SpellPower) ) );
+			price = sint32(price / (1.0f + _Focus.getPowerFactor(_Skill, _SpellPower)));
 		}
 
 		// pay price
-		SCharacteristicsAndScores & score = caster->getScores()._PhysicalScores[_EnergyCost];
-		if ( score.Current != 0)
+		SCharacteristicsAndScores &score = caster->getScores()._PhysicalScores[_EnergyCost];
+		if (score.Current != 0)
 		{
-			if ( score.Current >  price )
+			if (score.Current > price)
 			{
-				score.Current = score.Current - price;	
+				score.Current = score.Current - price;
 			}
 			else
 				endEffect = true;
@@ -194,12 +192,12 @@ bool CSLinkEffect::update(CTimerEvent * event, bool)
 		if (!endEffect)
 		{
 			//_UpdateTimer.setRemaining( NLMISC::TGameCycle( _UpdatePeriod / CTickEventHandler::getGameTimeStep() ), event );
-			_UpdateTimer.setRemaining( CSLinkEffect::getUpdatePeriod(_Family), event );
+			_UpdateTimer.setRemaining(CSLinkEffect::getUpdatePeriod(_Family), event);
 		}
 		else
 		{
 			// break link
-			caster->removeLink( this, 1.0f );
+			caster->removeLink(this, 1.0f);
 		}
 	}
 	// no more link
@@ -218,30 +216,30 @@ void CSLinkEffect::removed()
 {
 	if (_LinkExists)
 	{
-		CEntityBase * caster = CEntityBaseManager::getEntityBasePtr( _CreatorRowId );
-		if ( !caster )
+		CEntityBase *caster = CEntityBaseManager::getEntityBasePtr(_CreatorRowId);
+		if (!caster)
 		{
-			nlwarning("<CSLinkEffectDot removed> Invalid caster %u",_CreatorRowId.getIndex() );
+			nlwarning("<CSLinkEffectDot removed> Invalid caster %u", _CreatorRowId.getIndex());
 			return;
 		}
-		caster->removeLink( this, 1.0f );
+		caster->removeLink(this, 1.0f);
 	}
-	
+
 	sendEffectEndMessages();
 } // CSLinkEffect::removed //
 
 //-----------------------------------------------
 // CSLinkEffectOffensive updateOffensive
 //-----------------------------------------------
-bool CSLinkEffectOffensive::updateOffensive(CTimerEvent * event, bool sendReportForXP)
+bool CSLinkEffectOffensive::updateOffensive(CTimerEvent *event, bool sendReportForXP)
 {
-	if ( CSLinkEffect::update(event,true) )
+	if (CSLinkEffect::update(event, true))
 		return true;
 
-	CEntityBase * target = CEntityBaseManager::getEntityBasePtr( _TargetRowId );
-	if ( !target )
+	CEntityBase *target = CEntityBaseManager::getEntityBasePtr(_TargetRowId);
+	if (!target)
 	{
-		nlwarning("<CSLinkEffectDot update> Invalid target %u",_TargetRowId.getIndex() );
+		nlwarning("<CSLinkEffectDot update> Invalid target %u", _TargetRowId.getIndex());
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
 	}
@@ -256,7 +254,7 @@ bool CSLinkEffectOffensive::updateOffensive(CTimerEvent * event, bool sendReport
 
 	// test target is still valid for a link (can happen in PVP or duel)
 	string errorCode;
-	if ( !PHRASE_UTILITIES::validateSpellTarget(_CreatorRowId, _TargetRowId, ACTNATURE::OFFENSIVE_MAGIC, errorCode, true ) )
+	if (!PHRASE_UTILITIES::validateSpellTarget(_CreatorRowId, _TargetRowId, ACTNATURE::OFFENSIVE_MAGIC, errorCode, true))
 	{
 		_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 		return true;
@@ -264,21 +262,21 @@ bool CSLinkEffectOffensive::updateOffensive(CTimerEvent * event, bool sendReport
 
 	if (_LinkExists)
 	{
-		CEntityBase * caster = CEntityBaseManager::getEntityBasePtr( _CreatorRowId );
-		if ( !caster )
+		CEntityBase *caster = CEntityBaseManager::getEntityBasePtr(_CreatorRowId);
+		if (!caster)
 		{
-			nlwarning("<CSLinkEffectDot update> Invalid caster %u",_CreatorRowId.getIndex() );
+			nlwarning("<CSLinkEffectDot update> Invalid caster %u", _CreatorRowId.getIndex());
 			_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 			return true;
 		}
-	
+
 		// test resistance
-		if ( !_FirstResist && !EntitiesNoResist)
+		if (!_FirstResist && !EntitiesNoResist)
 		{
 			uint32 resistValue = 0;
 			if (_Family == EFFECT_FAMILIES::Dot)
 			{
-				CSLinkEffectDot *dot = dynamic_cast<CSLinkEffectDot*> (this);
+				CSLinkEffectDot *dot = dynamic_cast<CSLinkEffectDot *>(this);
 				if (dot)
 				{
 					resistValue = target->getMagicResistance(dot->getDamageType());
@@ -290,42 +288,42 @@ bool CSLinkEffectOffensive::updateOffensive(CTimerEvent * event, bool sendReport
 			}
 
 			sint skillValue = 0;
-			if ( caster->getId().getType() == RYZOMID::player )
+			if (caster->getId().getType() == RYZOMID::player)
 			{
-				CCharacter * pC = (CCharacter *) caster;
-				skillValue = pC->getSkillValue( _Skill );
+				CCharacter *pC = (CCharacter *)caster;
+				skillValue = pC->getSkillValue(_Skill);
 			}
 			else
 			{
-				const CStaticCreatures * form = caster->getForm();
-				if ( !form )
+				const CStaticCreatures *form = caster->getForm();
+				if (!form)
 				{
-					nlwarning( "<MAGIC>invalid creature form %s in entity %s", caster->getType().toString().c_str(), caster->getId().toString().c_str() );
+					nlwarning("<MAGIC>invalid creature form %s in entity %s", caster->getType().toString().c_str(), caster->getId().toString().c_str());
 					_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 					return true;
-				}	
+				}
 				skillValue = form->getAttackLevel();
 			}
 
-			const CSEffect* debuff = caster->lookForActiveEffect( EFFECT_FAMILIES::DebuffSkillMagic );
-			if ( debuff )
+			const CSEffect *debuff = caster->lookForActiveEffect(EFFECT_FAMILIES::DebuffSkillMagic);
+			if (debuff)
 				skillValue -= debuff->getParamValue();
-			const CSEffect * outPostBuff = caster->lookForActiveEffect( EFFECT_FAMILIES::OutpostMagic );
-			if ( outPostBuff )
+			const CSEffect *outPostBuff = caster->lookForActiveEffect(EFFECT_FAMILIES::OutpostMagic);
+			if (outPostBuff)
 				skillValue += outPostBuff->getParamValue();
 
 			// cap skill values with brick power
-			if ( (sint32)_Power < skillValue )
+			if ((sint32)_Power < skillValue)
 				skillValue = (sint32)_Power;
-			
-			if ( caster->getId().getType() == RYZOMID::player )
+
+			if (caster->getId().getType() == RYZOMID::player)
 			{
-				CCharacter * pC = dynamic_cast<CCharacter *>( caster );
-				if( pC )
+				CCharacter *pC = dynamic_cast<CCharacter *>(caster);
+				if (pC)
 				{
 					// boost magic skill for low level chars
 					sint sb = (sint)MagicSkillStartValue.get();
-					skillValue = max( sb, skillValue );
+					skillValue = max(sb, skillValue);
 
 					// add magic boost from consumable
 					skillValue += pC->magicSuccessModifier();
@@ -333,7 +331,7 @@ bool CSLinkEffectOffensive::updateOffensive(CTimerEvent * event, bool sendReport
 			}
 
 			// test resistance
-			const uint8 roll = (uint8)RandomGenerator.rand( 99 );
+			const uint8 roll = (uint8)RandomGenerator.rand(99);
 			_ResistFactor = CStaticSuccessTable::getSuccessFactor(SUCCESS_TABLE_TYPE::MagicResistLink, skillValue - resistValue, roll);
 
 			// increase target resistance
@@ -341,7 +339,7 @@ bool CSLinkEffectOffensive::updateOffensive(CTimerEvent * event, bool sendReport
 			{
 				if (_Family == EFFECT_FAMILIES::Dot)
 				{
-					CSLinkEffectDot *dot = dynamic_cast<CSLinkEffectDot*> (this);
+					CSLinkEffectDot *dot = dynamic_cast<CSLinkEffectDot *>(this);
 					if (dot)
 					{
 						target->incResistModifier(dot->getDamageType(), _ResistFactor);
@@ -349,23 +347,23 @@ bool CSLinkEffectOffensive::updateOffensive(CTimerEvent * event, bool sendReport
 				}
 				else
 				{
-					target->incResistModifier(_Family,_ResistFactor);
+					target->incResistModifier(_Family, _ResistFactor);
 				}
 			}
 
-			// delta level for XP gain 
+			// delta level for XP gain
 			// opponent must be a creature or an npc to gain xp
 			_Report.DeltaLvl = skillValue - resistValue;
 			if (target->getId().getType() != RYZOMID::player && caster->getId().getType() == RYZOMID::player)
 			{
-				CCreature *creature = dynamic_cast<CCreature*> (target);
+				CCreature *creature = dynamic_cast<CCreature *>(target);
 				if (!creature)
 				{
 					nlwarning("Entity %s type is creature but dynamic_cast in CCreature * returns NULL ?!", target->getId().toString().c_str());
 					_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
 					return true;
 				}
-				CCharacter * pC = dynamic_cast<CCharacter*> (caster);
+				CCharacter *pC = dynamic_cast<CCharacter *>(caster);
 				if (!pC)
 				{
 					nlwarning("Entity %s type is player but dynamic_cast in CCharacter * returns NULL ?!", caster->getId().toString().c_str());
@@ -373,9 +371,9 @@ bool CSLinkEffectOffensive::updateOffensive(CTimerEvent * event, bool sendReport
 					return true;
 				}
 
-				const CStaticCreatures* form = creature->getForm();
+				const CStaticCreatures *form = creature->getForm();
 				if (form)
-					_Report.DeltaLvl =  pC->getSkillValue(_Skill) - form->getXPLevel();
+					_Report.DeltaLvl = pC->getSkillValue(_Skill) - form->getXPLevel();
 				else
 					sendReportForXP = false;
 			}
@@ -387,42 +385,42 @@ bool CSLinkEffectOffensive::updateOffensive(CTimerEvent * event, bool sendReport
 			_FirstResist = false;
 			_ResistFactor = 1.0f;
 		}
-		
+
 		bool end = true;
 		// resist if factor <= 0
-		if ( _ResistFactor > 0.0f  )
+		if (_ResistFactor > 0.0f)
 		{
 			end = false;
-			if ( _ResistFactor > 1.0f )
+			if (_ResistFactor > 1.0f)
 			{
 				_ResistFactor = 1.0f;
 			}
 
-			// send report for XP			
+			// send report for XP
 			_Report.factor = _ResistFactor;
 
 			if (sendReportForXP)
 			{
-				PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport( _Report );
+				PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport(_Report);
 				PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->reportAction(_Report);
 			}
 		}
 		else
 		{
-			PHRASE_UTILITIES::sendSpellResistMessages( _CreatorRowId, _TargetRowId);
+			PHRASE_UTILITIES::sendSpellResistMessages(_CreatorRowId, _TargetRowId);
 		}
 
 		//////////////////////////////////////////////////////////////////////////
 		// TEMPORARY : SEND AGGRO MESSAGE FOR EVERY UPDATE OF OFFENSIVE LINKS
-		//////////////////////////////////////////////////////////////////////////	
+		//////////////////////////////////////////////////////////////////////////
 		CAiEventReport report;
 		report.Originator = _CreatorRowId;
 		report.Target = _TargetRowId;
-		report.Type = ACTNATURE::OFFENSIVE_MAGIC;		
+		report.Type = ACTNATURE::OFFENSIVE_MAGIC;
 		report.AggroAdd = -0.01f;
 		CPhraseManager::getInstance().addAiEventReport(report);
 		//////////////////////////////////////////////////////////////////////////
-				
+
 		if (end)
 		{
 			_EndTimer.setRemaining(1, new CEndEffectTimerEvent(this));
@@ -436,4 +434,3 @@ bool CSLinkEffectOffensive::updateOffensive(CTimerEvent * event, bool sendReport
 
 	return false;
 } // CSLinkEffectOffensive::updateOffensive //
-

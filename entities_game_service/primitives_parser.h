@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_PRIMITIVES_PARSER_H
 #define RY_PRIMITIVES_PARSER_H
 
@@ -33,26 +31,25 @@
 class CPrimitivesParser : public NLMISC::CSingleton<CPrimitivesParser>
 {
 public:
-
 	struct TLoadedPrimitive
 	{
-		NLLIGO::CPrimitives		Primitive;
-		std::string				FileName;
+		NLLIGO::CPrimitives Primitive;
+		std::string FileName;
 	};
 
-	typedef std::list< TLoadedPrimitive >	TPrimitivesList;
+	typedef std::list<TLoadedPrimitive> TPrimitivesList;
 
 	///\return the primitives
-	inline const TPrimitivesList & getPrimitives(){ return _Primitives; }
+	inline const TPrimitivesList &getPrimitives() { return _Primitives; }
 	///\return the primitives file names
-//	inline const std::vector< std::string > & getPrimitiveFiles(){ return _PrimitiveFiles; }
+	//	inline const std::vector< std::string > & getPrimitiveFiles(){ return _PrimitiveFiles; }
 
 	void init();
 
 	static bool getAlias(const NLLIGO::IPrimitive *prim, uint32 &alias);
 
 	static std::string aliasToString(uint32 alias);
-	static uint32 aliasFromString(const std::string& alias);
+	static uint32 aliasFromString(const std::string &alias);
 
 	static uint32 aliasGetStaticPart(uint32 alias);
 
@@ -60,24 +57,23 @@ public:
 
 private:
 	/// Constructor
-//PrimitivesParser();
+	// PrimitivesParser();
 
 	/**
 	 * load a primitive files in the specified CPrimitives class
 	 * \return true if the parsing was correctly made
 	 */
-	bool loadPrimitive(const char* fileName,NLLIGO::CPrimitives & primitives);
+	bool loadPrimitive(const char *fileName, NLLIGO::CPrimitives &primitives);
 
 	/// parsed primitives
-	TPrimitivesList				_Primitives;
+	TPrimitivesList _Primitives;
 	/// Parsed primitive file names
-//	std::vector<std::string>	_PrimitiveFiles;
+	//	std::vector<std::string>	_PrimitiveFiles;
 
-	static bool					_LigoInit;
+	static bool _LigoInit;
 	/// Ligo config
-	static NLLIGO::CLigoConfig	_LigoConfig;
+	static NLLIGO::CLigoConfig _LigoConfig;
 };
-
 
 #endif // RY_PRIMITIVES_PARSER_H
 

@@ -27,7 +27,7 @@
 #include <time.h>
 
 // load the values using the george sheet
-void CStringManager::TSheetInfo::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
+void CStringManager::TSheetInfo::readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
 {
 	if (form)
 	{
@@ -38,38 +38,39 @@ void CStringManager::TSheetInfo::readGeorges (const NLMISC::CSmartPtr<NLGEORGES:
 		SheetName = SheetName.substr(0, SheetName.find(ext));
 		// remove ending '.'
 		if (!SheetName.empty() && *SheetName.rbegin() == '.')
-			SheetName.resize(SheetName.size()-1);
+			SheetName.resize(SheetName.size() - 1);
 
 		std::string gender;
 
 		if (sheetId.getSheetType() == NLMISC::CSheetId::typeFromFileExtension("creature"))
 		{
-			form->getRootNode ().getValueByName (gender, "Basics.Gender");
+			form->getRootNode().getValueByName(gender, "Basics.Gender");
 			sint genderId;
 			NLMISC::fromString(gender, genderId);
 			Gender = GSGENDER::EGender(genderId);
 
-			form->getRootNode ().getValueByName (Race, "Basics.Race");
+			form->getRootNode().getValueByName(Race, "Basics.Race");
 
-//			form->getRootNode ().getValueByName (DisplayName, "Basics.First Name");
-//			std::string s;
-//			form->getRootNode ().getValueByName (s, "Basics.CharacterName");
-//			if (!DisplayName.empty())
-//				DisplayName+=' ';
-//			DisplayName+=s;
+			//			form->getRootNode ().getValueByName (DisplayName, "Basics.First Name");
+			//			std::string s;
+			//			form->getRootNode ().getValueByName (s, "Basics.CharacterName");
+			//			if (!DisplayName.empty())
+			//				DisplayName+=' ';
+			//			DisplayName+=s;
 
-			form->getRootNode ().getValueByName (Profile, "Basics.Profile");
-			form->getRootNode ().getValueByName (ChatProfile, "Basics.ChatProfile");
+			form->getRootNode().getValueByName(Profile, "Basics.Profile");
+			form->getRootNode().getValueByName(ChatProfile, "Basics.ChatProfile");
 		}
 		else if (sheetId.getSheetType() == NLMISC::CSheetId::typeFromFileExtension("race_stats"))
 		{
-			form->getRootNode ().getValueByName (Race, "Race");
+			form->getRootNode().getValueByName(Race, "Race");
 		}
-/*		else if (sheetId.getType() == NLMISC::CSheetId::typeFromFileExtension("sitem"))
-		{
-			// read any item specific data
-		}
-*/		else
+		/*		else if (sheetId.getType() == NLMISC::CSheetId::typeFromFileExtension("sitem"))
+		        {
+		            // read any item specific data
+		        }
+		*/
+		else
 		{
 			nlwarning("CStringManager::TEntityInfo : Do not know the type of the sheet '%s'.", sheetId.toString().c_str());
 			return;

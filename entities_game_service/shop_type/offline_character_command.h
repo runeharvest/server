@@ -27,7 +27,7 @@
 #include <string>
 #include <map>
 
-extern void finalizeClientReady( uint32 userId, uint32 index );
+extern void finalizeClientReady(uint32 userId, uint32 index);
 
 /**
  * Interface for offline commands
@@ -35,14 +35,14 @@ extern void finalizeClientReady( uint32 userId, uint32 index );
 class IOfflineCommand
 {
 	NL_INSTANCE_COUNTER_DECL(IOfflineCommand);
+
 public:
 	// apply command, offline = true if command are sended during character are offline
 	virtual bool apply(bool offline) = 0;
 
 	// return character id of concerned character
-	virtual const NLMISC::CEntityId& getEntityId() = 0;
+	virtual const NLMISC::CEntityId &getEntityId() = 0;
 };
-
 
 /**
  * Sold item
@@ -51,30 +51,29 @@ public:
 class CSoldItem : public IOfflineCommand
 {
 public:
-	static const std::string	_Token;
- 
+	static const std::string _Token;
+
 	// factory
-	CSoldItem( const std::string& command );
+	CSoldItem(const std::string &command);
 
 	// apply
 	bool apply(bool offline);
 
 	// return character id of concerned character
-	const NLMISC::CEntityId& getEntityId() { return _EntityId; }
+	const NLMISC::CEntityId &getEntityId() { return _EntityId; }
 
 	// make string command
-	static void makeStringCommande( std::string& command, const NLMISC::CEntityId& id, const NLMISC::CSheetId& item, uint32 quantity, uint32 unitPrice, uint32 unitBasePrice, uint32 identifier, const NLMISC::CEntityId& buyer );
+	static void makeStringCommande(std::string &command, const NLMISC::CEntityId &id, const NLMISC::CSheetId &item, uint32 quantity, uint32 unitPrice, uint32 unitBasePrice, uint32 identifier, const NLMISC::CEntityId &buyer);
 
 private:
-	NLMISC::CEntityId	_EntityId;
-	NLMISC::CSheetId	_ItemSheet;
-	uint32				_Quantity;
-	uint32				_Price;
-	uint32				_BasePrice;
-	uint32				_Identifier;
-	NLMISC::CEntityId	_Buyer;
+	NLMISC::CEntityId _EntityId;
+	NLMISC::CSheetId _ItemSheet;
+	uint32 _Quantity;
+	uint32 _Price;
+	uint32 _BasePrice;
+	uint32 _Identifier;
+	NLMISC::CEntityId _Buyer;
 };
-
 
 /**
  * Item reach maximum time in shop store
@@ -83,25 +82,25 @@ private:
 class CMaximumShopStoreTimeReached : public IOfflineCommand
 {
 public:
-	static const std::string	_Token;
-	
+	static const std::string _Token;
+
 	// factory
-	CMaximumShopStoreTimeReached( const std::string& command );
-	
+	CMaximumShopStoreTimeReached(const std::string &command);
+
 	// apply
 	bool apply(bool offline);
-	
+
 	// return character id of concerned character
-	const NLMISC::CEntityId& getEntityId() { return _EntityId; }
-	
+	const NLMISC::CEntityId &getEntityId() { return _EntityId; }
+
 	// make string command
-	static void makeStringCommande( std::string& command, const NLMISC::CEntityId& id, const NLMISC::CSheetId& item, uint32 quantity, uint32 identifier );
+	static void makeStringCommande(std::string &command, const NLMISC::CEntityId &id, const NLMISC::CSheetId &item, uint32 quantity, uint32 identifier);
 
 private:
-	NLMISC::CEntityId	_EntityId;
-	NLMISC::CSheetId	_ItemSheet;
-	uint32				_Quantity;
-	uint32				_Identifier;
+	NLMISC::CEntityId _EntityId;
+	NLMISC::CSheetId _ItemSheet;
+	uint32 _Quantity;
+	uint32 _Identifier;
 };
 
 /**
@@ -110,51 +109,50 @@ private:
 class CAdminOfflineCommand : public IOfflineCommand
 {
 public:
-	static const std::string	_Token;
+	static const std::string _Token;
 
 	// factory
-	CAdminOfflineCommand( const std::string& command );
+	CAdminOfflineCommand(const std::string &command);
 
 	// apply
 	bool apply(bool offline);
 
 	// return character id of concerned character
-	const NLMISC::CEntityId& getEntityId() { return _EntityId; }
-	
-	// make string command
-	static void makeStringCommande( std::string& command, const NLMISC::CEntityId& id, const std::string& adminCommand );
-		
-private:
-	NLMISC::CEntityId	_EntityId;
-	std::string			_AdminCommand;
-};
+	const NLMISC::CEntityId &getEntityId() { return _EntityId; }
 
+	// make string command
+	static void makeStringCommande(std::string &command, const NLMISC::CEntityId &id, const std::string &adminCommand);
+
+private:
+	NLMISC::CEntityId _EntityId;
+	std::string _AdminCommand;
+};
 
 // ***************************************************************************
 /**
- * A command that modify a contact 
+ * A command that modify a contact
  */
 class CModifyContactCommand : public IOfflineCommand
 {
 public:
-	static const std::string	_Token;
- 
+	static const std::string _Token;
+
 	// factory
-	CModifyContactCommand( const std::string& command );
+	CModifyContactCommand(const std::string &command);
 
 	// apply
 	bool apply(bool offline);
 
 	// return character id of concerned character
-	const NLMISC::CEntityId& getEntityId() { return _EntityId; }
+	const NLMISC::CEntityId &getEntityId() { return _EntityId; }
 
 	// make string command
-	static void makeStringCommande( std::string& command, const NLMISC::CEntityId& id, const std::string &contactOperation, const NLMISC::CEntityId& other );
+	static void makeStringCommande(std::string &command, const NLMISC::CEntityId &id, const std::string &contactOperation, const NLMISC::CEntityId &other);
 
 private:
-	NLMISC::CEntityId	_EntityId;
-	NLMISC::CEntityId	_Other;
-	std::string			_Operation;
+	NLMISC::CEntityId _EntityId;
+	NLMISC::CEntityId _Other;
+	std::string _Operation;
 };
 
 // ***************************************************************************
@@ -167,45 +165,46 @@ private:
 class COfflineCharacterCommand
 {
 	NL_INSTANCE_COUNTER_DECL(COfflineCharacterCommand);
+
 public:
 	// get instance
-	static COfflineCharacterCommand * getInstance();
-	
+	static COfflineCharacterCommand *getInstance();
+
 	// factory for IOfflineCommand
-	IOfflineCommand * factory( const std::string& command );
+	IOfflineCommand *factory(const std::string &command);
 
 	// add offline command: try to apply, if fail send command to backup service for apply when character login
-	bool addOfflineCommand( const std::string& command );
+	bool addOfflineCommand(const std::string &command);
 
 	// add offline command: do not try to apply it, just send it to backup service
-	bool addOfflineCommandWithoutApply( const std::string& command );
+	bool addOfflineCommandWithoutApply(const std::string &command);
 
 	// a character goes online
-	void characterOnline( const NLMISC::CEntityId& entity );
+	void characterOnline(const NLMISC::CEntityId &entity);
 
 	// return filename of offline command for a character
-	std::string	getOfflineCommandsFilename(const NLMISC::CEntityId& entity);
-		
+	std::string getOfflineCommandsFilename(const NLMISC::CEntityId &entity);
+
 	// file callback class
 	class COfflineCommandFileCallback : public IBackupFileReceiveCallback
 	{
 	public:
-		NLMISC::CEntityId			Id;
-		COfflineCommandFileCallback(const NLMISC::CEntityId& id);
+		NLMISC::CEntityId Id;
+		COfflineCommandFileCallback(const NLMISC::CEntityId &id);
 
 		// call back for bs file asynchronous read
-		void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream);
+		void callback(const CFileDescription &fileDescription, NLMISC::IStream &dataStream);
 
 		// get line from IStream
-		void getLine( std::string& line, NLMISC::IStream& dataStream );
+		void getLine(std::string &line, NLMISC::IStream &dataStream);
 	};
-	
+
 private:
 	// private constuctor
 	COfflineCharacterCommand();
 
 	// singleton pointer
-	static COfflineCharacterCommand *	_Instance;
+	static COfflineCharacterCommand *_Instance;
 };
 
 #endif // RYZOM_OFFLINE_CHARACTER_COMMAND_H

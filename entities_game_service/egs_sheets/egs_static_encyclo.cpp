@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 #include "egs_sheets/egs_static_encyclo.h"
 
@@ -32,32 +31,32 @@ extern CVariable<bool> EGSLight;
 NL_INSTANCE_COUNTER_IMPL(CStaticEncyclo);
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void CStaticEncycloAlbum::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
+void CStaticEncycloAlbum::readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
 {
 	UFormElm &root = form->getRootNode();
 
 	// Read the album number
-	nlverify (root.getValueByName (AlbumNumber, "AlbumNumber"));
+	nlverify(root.getValueByName(AlbumNumber, "AlbumNumber"));
 
 	// Read the title
-	nlverify (root.getValueByName (Title, "Title"));
+	nlverify(root.getValueByName(Title, "Title"));
 
 	// Read the reward brick
 	string sRewardBrick;
 	RewardBrick = CSheetId::Unknown;
-	nlverify (root.getValueByName (sRewardBrick, "RewardBrick"));
+	nlverify(root.getValueByName(sRewardBrick, "RewardBrick"));
 	if (!sRewardBrick.empty())
 	{
 		RewardBrick = CSheetId(sRewardBrick);
-		if ( RewardBrick == CSheetId::Unknown )
-			nlerror("CStaticEncycloAlbum::RewardBrick sheet '%s' is invalid.", sRewardBrick.c_str() );
+		if (RewardBrick == CSheetId::Unknown)
+			nlerror("CStaticEncycloAlbum::RewardBrick sheet '%s' is invalid.", sRewardBrick.c_str());
 	}
 
 	// Read all the themas
 	const UFormElm *pElt;
 	uint size;
 	root.getNodeByName(&pElt, "Themas");
-	nlverify (pElt->getArraySize (size));
+	nlverify(pElt->getArraySize(size));
 	string sThmFilename;
 	Themas.reserve(size);
 	for (uint32 i = 0; i < size; ++i)
@@ -65,9 +64,9 @@ void CStaticEncycloAlbum::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm>
 		// Get the thema filename
 		if (pElt->getArrayValue(sThmFilename, i))
 		{
-			CSheetId sheet( sThmFilename );
-			if ( sheet == CSheetId::Unknown )
-				nlerror("CStaticEncycloAlbum::Themas %d of sheet '%s' is invalid. ", i, sThmFilename.c_str() );
+			CSheetId sheet(sThmFilename);
+			if (sheet == CSheetId::Unknown)
+				nlerror("CStaticEncycloAlbum::Themas %d of sheet '%s' is invalid. ", i, sThmFilename.c_str());
 			Themas.push_back(sheet);
 		}
 	}
@@ -75,28 +74,28 @@ void CStaticEncycloAlbum::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm>
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void CStaticEncycloThema::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
+void CStaticEncycloThema::readGeorges(const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
 {
 	UFormElm &root = form->getRootNode();
-	
+
 	// Read the thema number
-	nlverify (root.getValueByName (ThemaNumber, "ThemaNumber"));
-	
+	nlverify(root.getValueByName(ThemaNumber, "ThemaNumber"));
+
 	// Read the title
-	nlverify (root.getValueByName (Title, "Title"));
+	nlverify(root.getValueByName(Title, "Title"));
 
 	// Read the reward text
-	nlverify (root.getValueByName (RewardText, "RewardText"));
-	
+	nlverify(root.getValueByName(RewardText, "RewardText"));
+
 	// Read the reward sheet (brick, item, phrase)
 	string sRewardSheet;
 	RewardSheet = CSheetId::Unknown;
-	nlverify (root.getValueByName (sRewardSheet, "RewardSheet"));
+	nlverify(root.getValueByName(sRewardSheet, "RewardSheet"));
 	if (!sRewardSheet.empty())
 	{
 		RewardSheet = CSheetId(sRewardSheet);
-		if ( RewardSheet == CSheetId::Unknown )
-			nlerror("CStaticEncycloThema::RewardSheet sheet '%s' is invalid.", sRewardSheet.c_str() );
+		if (RewardSheet == CSheetId::Unknown)
+			nlerror("CStaticEncycloThema::RewardSheet sheet '%s' is invalid.", sRewardSheet.c_str());
 	}
 
 	// Read all the tasks
@@ -105,16 +104,16 @@ void CStaticEncycloThema::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm>
 	root.getNodeByName(&pElt, "Tasks");
 	if (pElt != NULL) // May be null if no task
 	{
-		nlverify (pElt->getArraySize (size));
+		nlverify(pElt->getArraySize(size));
 		string sTaskSymbolicName;
 		Tasks.reserve(size);
 		for (uint32 i = 0; i < size; ++i)
 			if (pElt->getArrayValue(sTaskSymbolicName, i))
 				Tasks.push_back(sTaskSymbolicName);
 	}
-	
+
 	// Read the rite
-	nlverify (root.getValueByName (Rite, "Rite"));
+	nlverify(root.getValueByName(Rite, "Rite"));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +140,7 @@ void CStaticEncyclo::init()
 	// Album number directly reference an album in the _OrderedAlbums vector
 	if (nMaxAlbumNb == -1)
 		nlerror("CStaticEncyclo::init no album found");
-	_OrderedAlbums.resize(nMaxAlbumNb+1);
+	_OrderedAlbums.resize(nMaxAlbumNb + 1);
 
 	// Setup the accelerator table
 	itAlbumForm = _AlbumsFromSheet.begin();
@@ -169,17 +168,16 @@ void CStaticEncyclo::init()
 
 		for (i = 0; i < rStatAlbum.Themas.size(); ++i)
 		{
-			map<CSheetId, CStaticEncycloThema>::iterator itThmForm = _ThemasFromSheet.find( rStatAlbum.Themas[i] );
-			if( itThmForm == _ThemasFromSheet.end() )
-				nlerror( "CStaticEncyclo::init The static form for sheet %s (%d) is unknown", rStatAlbum.Themas[i].toString().c_str(), rStatAlbum.Themas[i].asInt() );
-			
+			map<CSheetId, CStaticEncycloThema>::iterator itThmForm = _ThemasFromSheet.find(rStatAlbum.Themas[i]);
+			if (itThmForm == _ThemasFromSheet.end())
+				nlerror("CStaticEncyclo::init The static form for sheet %s (%d) is unknown", rStatAlbum.Themas[i].toString().c_str(), rStatAlbum.Themas[i].asInt());
 
 			CStaticEncycloThema *pThm = &(itThmForm->second);
 			if (pThm->ThemaNumber == 0)
 				nlerror("CStaticEncyclo::init no thema number is zero !");
 			rOrdAlbum.ThemaSheets[pThm->ThemaNumber - 1] = pThm;
 		}
-		
+
 		++itAlbumForm;
 	}
 
@@ -190,23 +188,22 @@ void CStaticEncyclo::init()
 			nlwarning("CStaticEncyclo::init Albums number not continuous missing album %d", i);
 		for (uint32 j = 0; j < _OrderedAlbums[i].ThemaSheets.size(); ++j)
 		{
-			//if (_OrderedAlbums[i].ThemaSheets[j] == NULL)
-				//nlwarning("CStaticEncyclo::init Themas number not continuous missing for album %d thema %d", i, j);
-			if ((_OrderedAlbums[i].ThemaSheets[j] != NULL) && 
-				(_OrderedAlbums[i].ThemaSheets[j]->Tasks.size() > 7))
-				nlwarning("CStaticEncyclo::init Tasks number is too big (%d, max is 7) for album %d thema %d",_OrderedAlbums[i].ThemaSheets[j]->Tasks.size(), i, j);
+			// if (_OrderedAlbums[i].ThemaSheets[j] == NULL)
+			// nlwarning("CStaticEncyclo::init Themas number not continuous missing for album %d thema %d", i, j);
+			if ((_OrderedAlbums[i].ThemaSheets[j] != NULL) && (_OrderedAlbums[i].ThemaSheets[j]->Tasks.size() > 7))
+				nlwarning("CStaticEncyclo::init Tasks number is too big (%d, max is 7) for album %d thema %d", _OrderedAlbums[i].ThemaSheets[j]->Tasks.size(), i, j);
 		}
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-const CStaticEncycloAlbum * CStaticEncyclo::getAlbumForm( const NLMISC::CSheetId& sheetId ) const
+const CStaticEncycloAlbum *CStaticEncyclo::getAlbumForm(const NLMISC::CSheetId &sheetId) const
 {
-	map<CSheetId, CStaticEncycloAlbum>::const_iterator itForm = _AlbumsFromSheet.find( sheetId );
-	if( itForm == _AlbumsFromSheet.end() )
+	map<CSheetId, CStaticEncycloAlbum>::const_iterator itForm = _AlbumsFromSheet.find(sheetId);
+	if (itForm == _AlbumsFromSheet.end())
 	{
-		nlwarning( "<CStaticEncyclo::getAlbumForm> The static form for sheet %s (%d) is unknown", sheetId.toString().c_str(), sheetId.asInt() );
+		nlwarning("<CStaticEncyclo::getAlbumForm> The static form for sheet %s (%d) is unknown", sheetId.toString().c_str(), sheetId.asInt());
 		return 0;
 	}
 	return &(*itForm).second;
@@ -214,12 +211,12 @@ const CStaticEncycloAlbum * CStaticEncyclo::getAlbumForm( const NLMISC::CSheetId
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-const CStaticEncycloThema * CStaticEncyclo::getThemaForm( const NLMISC::CSheetId& sheetId ) const
+const CStaticEncycloThema *CStaticEncyclo::getThemaForm(const NLMISC::CSheetId &sheetId) const
 {
-	map<CSheetId, CStaticEncycloThema>::const_iterator itForm = _ThemasFromSheet.find( sheetId );
-	if( itForm == _ThemasFromSheet.end() )
+	map<CSheetId, CStaticEncycloThema>::const_iterator itForm = _ThemasFromSheet.find(sheetId);
+	if (itForm == _ThemasFromSheet.end())
 	{
-		nlwarning( "<CStaticEncyclo::getThemaForm> The static form for sheet %s (%d) is unknown", sheetId.toString().c_str(), sheetId.asInt() );
+		nlwarning("<CStaticEncyclo::getThemaForm> The static form for sheet %s (%d) is unknown", sheetId.toString().c_str(), sheetId.asInt());
 		return 0;
 	}
 	return &(*itForm).second;
@@ -227,14 +224,14 @@ const CStaticEncycloThema * CStaticEncyclo::getThemaForm( const NLMISC::CSheetId
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-uint32 CStaticEncyclo::getNbAlbum () const
+uint32 CStaticEncyclo::getNbAlbum() const
 {
 	return (uint32)_OrderedAlbums.size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-const CStaticEncycloAlbum * CStaticEncyclo::getAlbum ( uint32 nAlbumNb ) const
+const CStaticEncycloAlbum *CStaticEncyclo::getAlbum(uint32 nAlbumNb) const
 {
 	nlassert(nAlbumNb < _OrderedAlbums.size());
 	return _OrderedAlbums[nAlbumNb].AlbumSheet;
@@ -242,7 +239,7 @@ const CStaticEncycloAlbum * CStaticEncyclo::getAlbum ( uint32 nAlbumNb ) const
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-uint32 CStaticEncyclo::getNbThema ( uint32 nAlbumNb ) const
+uint32 CStaticEncyclo::getNbThema(uint32 nAlbumNb) const
 {
 	nlassert(nAlbumNb < _OrderedAlbums.size());
 	return (uint32)_OrderedAlbums[nAlbumNb].ThemaSheets.size();
@@ -250,7 +247,7 @@ uint32 CStaticEncyclo::getNbThema ( uint32 nAlbumNb ) const
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-const CStaticEncycloThema * CStaticEncyclo::getThema ( uint32 nAlbumNb, uint32 nThema ) const
+const CStaticEncycloThema *CStaticEncyclo::getThema(uint32 nAlbumNb, uint32 nThema) const
 {
 	nlassert(nAlbumNb < _OrderedAlbums.size());
 	nlassert(nThema > 0); // Must start at 1 !
@@ -261,9 +258,9 @@ const CStaticEncycloThema * CStaticEncyclo::getThema ( uint32 nAlbumNb, uint32 n
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-bool CStaticEncyclo::isMissionPresent(const string &sMissionSymbolicName,	sint32 &nOutAlb, 
-																			sint32 &nOutThm, 
-																			sint32 &nOutTask) const
+bool CStaticEncyclo::isMissionPresent(const string &sMissionSymbolicName, sint32 &nOutAlb,
+    sint32 &nOutThm,
+    sint32 &nOutTask) const
 {
 	// This search is linear so its slow. May be optimized.
 
@@ -281,7 +278,7 @@ bool CStaticEncyclo::isMissionPresent(const string &sMissionSymbolicName,	sint32
 					if (pThm->Rite == sMissionSymbolicName)
 					{
 						nOutAlb = i;
-						nOutThm = j+1;
+						nOutThm = j + 1;
 						nOutTask = 0;
 						return true;
 					}
@@ -290,8 +287,8 @@ bool CStaticEncyclo::isMissionPresent(const string &sMissionSymbolicName,	sint32
 						if (pThm->Tasks[k] == sMissionSymbolicName)
 						{
 							nOutAlb = i;
-							nOutThm = j+1;
-							nOutTask = k+1;
+							nOutThm = j + 1;
+							nOutTask = k + 1;
 							return true;
 						}
 					}
@@ -304,18 +301,16 @@ bool CStaticEncyclo::isMissionPresent(const string &sMissionSymbolicName,	sint32
 	return false;
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void CStaticEncyclo::getRiteInfos( string& rite, uint32& nAlbum, uint32& nThema, uint32& taskCount ) const
+void CStaticEncyclo::getRiteInfos(string &rite, uint32 &nAlbum, uint32 &nThema, uint32 &taskCount) const
 {
 	// find thema infos
 	CSheetId themaSheet;
 	map<CSheetId, CStaticEncycloThema>::const_iterator itTh;
-	for( itTh = _ThemasFromSheet.begin(); itTh != _ThemasFromSheet.end(); ++itTh )
+	for (itTh = _ThemasFromSheet.begin(); itTh != _ThemasFromSheet.end(); ++itTh)
 	{
-		if( rite == (*itTh).second.Rite )
+		if (rite == (*itTh).second.Rite)
 		{
 			nThema = (*itTh).second.ThemaNumber;
 			taskCount = (uint32)(*itTh).second.Tasks.size();
@@ -323,15 +318,15 @@ void CStaticEncyclo::getRiteInfos( string& rite, uint32& nAlbum, uint32& nThema,
 			break;
 		}
 	}
-	
+
 	// find album infos
 	map<CSheetId, CStaticEncycloAlbum>::const_iterator itAl;
-	for( itAl = _AlbumsFromSheet.begin(); itAl != _AlbumsFromSheet.end(); ++itAl )
+	for (itAl = _AlbumsFromSheet.begin(); itAl != _AlbumsFromSheet.end(); ++itAl)
 	{
 		uint i;
-		for( i=0; i<(*itAl).second.Themas.size(); ++i )
+		for (i = 0; i < (*itAl).second.Themas.size(); ++i)
 		{
-			if( (*itAl).second.Themas[i] == themaSheet )
+			if ((*itAl).second.Themas[i] == themaSheet)
 			{
 				nAlbum = (*itAl).second.AlbumNumber;
 				break;
@@ -339,4 +334,3 @@ void CStaticEncyclo::getRiteInfos( string& rite, uint32& nAlbum, uint32& nThema,
 		}
 	}
 }
-

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef GE_GPMS_H
 #define GE_GPMS_H
 
@@ -44,13 +42,10 @@
 #include "messages.h"
 #include "variables.h"
 
-
 #define MAX_MSG_ELT 400
 
 class CGlobalPositionManagerService;
-extern CGlobalPositionManagerService	*pCGPMS;
-
-
+extern CGlobalPositionManagerService *pCGPMS;
 
 /**
  * CGlobalPositionManagerService
@@ -62,8 +57,7 @@ extern CGlobalPositionManagerService	*pCGPMS;
 class CGlobalPositionManagerService : public NLNET::IService
 {
 public:
-
-	/** 
+	/**
 	 * init the service
 	 */
 	void init(void);
@@ -84,7 +78,7 @@ public:
 	/**
 	 * method called to treat mirror updates on non-ring shards
 	 */
-	static void	processMirrorUpdates();
+	static void processMirrorUpdates();
 
 	/**
 	 * method called to treat mirror updates on ring shards
@@ -107,30 +101,25 @@ public:
 	void _checkRemoveCharacterFromRingAIInstance(sint32 aiInstance);
 
 	// Set of updated AI
-	//std::set< NLMISC::CEntityId > EntityIAUpdated;
+	// std::set< NLMISC::CEntityId > EntityIAUpdated;
 
-	std::vector<NLMISC::CEntityId>	Tracked;
+	std::vector<NLMISC::CEntityId> Tracked;
 
-	NLMISC::CEntityId	EntityTrack0;
-	NLMISC::CEntityId	EntityTrack1;
+	NLMISC::CEntityId EntityTrack0;
+	NLMISC::CEntityId EntityTrack1;
 
-	CMirror				Mirror;
-	CMirroredDataSet	*DataSet;
+	CMirror Mirror;
+	CMirroredDataSet *DataSet;
 
 	NLMISC::CSmartPtr<R2_VISION::CUniverse> RingVisionUniverse;
-	NLMISC::CSmartPtr<CVisionDeltaManager>  RingVisionDeltaManager;
+	NLMISC::CSmartPtr<CVisionDeltaManager> RingVisionDeltaManager;
 	NLMISC::CSmartPtr<CMoveChecker> MoveChecker;
 
-	typedef std::map<uint32,uint32> TCharactersPerAIInstance;
+	typedef std::map<uint32, uint32> TCharactersPerAIInstance;
 	TCharactersPerAIInstance _CharactersPerAIInstance;
 };
-
 
 #define TheMirror (pCGPMS->Mirror)
 #define TheDataset (*(pCGPMS->DataSet))
 
-
-#endif //GE_GPMS_H
-
-
-
+#endif // GE_GPMS_H

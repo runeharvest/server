@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "stdpch.h"
 
 //
@@ -29,38 +28,37 @@ NL_INSTANCE_COUNTER_IMPL(CCharacterDbUpdateTimerEvent);
 NL_INSTANCE_COUNTER_IMPL(CCharacterBarUpdateTimerEvent);
 
 // ***************************************************************************
-CCharacterTickUpdateTimerEvent:: CCharacterTickUpdateTimerEvent(CCharacter *parent)
+CCharacterTickUpdateTimerEvent::CCharacterTickUpdateTimerEvent(CCharacter *parent)
 {
 	_Parent = parent;
 }
 
-void CCharacterTickUpdateTimerEvent::timerCallback(CTimer* owner)
+void CCharacterTickUpdateTimerEvent::timerCallback(CTimer *owner)
 {
 	H_AUTO(CCharacterTickUpdateTimerEvent);
 
-	uint32 timeToNextTick= _Parent->tickUpdate();
-	owner->setRemaining(timeToNextTick,this);
+	uint32 timeToNextTick = _Parent->tickUpdate();
+	owner->setRemaining(timeToNextTick, this);
 }
 
 // ***************************************************************************
-CCharacterDbUpdateTimerEvent:: CCharacterDbUpdateTimerEvent(CCharacter *parent)
+CCharacterDbUpdateTimerEvent::CCharacterDbUpdateTimerEvent(CCharacter *parent)
 {
 	_Parent = parent;
 }
 
-void CCharacterDbUpdateTimerEvent::timerCallback(CTimer* owner)
+void CCharacterDbUpdateTimerEvent::timerCallback(CTimer *owner)
 {
 	H_AUTO(CharacterDbUpdateTimerEvent);
-	
-	_Parent->databaseUpdate();
-	owner->setRemaining(2,this);
-}
 
+	_Parent->databaseUpdate();
+	owner->setRemaining(2, this);
+}
 
 // ***************************************************************************
 CCharacterBarUpdateTimerEvent::CCharacterBarUpdateTimerEvent(CCharacter *parent)
 {
-	_Parent= parent;
+	_Parent = parent;
 }
 
 void CCharacterBarUpdateTimerEvent::timerCallback(CTimer *owner)
@@ -68,6 +66,5 @@ void CCharacterBarUpdateTimerEvent::timerCallback(CTimer *owner)
 	H_AUTO(CCharacterBarUpdateTimerEvent);
 
 	_Parent->barUpdate();
-	owner->setRemaining(2,this);
+	owner->setRemaining(2, this);
 }
-

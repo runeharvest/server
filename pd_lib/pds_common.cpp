@@ -21,4 +21,3 @@ using namespace NLMISC;
 
 // avoid C4786 warning
 void pds_common_foo() {};
-

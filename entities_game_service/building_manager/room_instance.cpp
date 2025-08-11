@@ -38,33 +38,32 @@ NL_INSTANCE_COUNTER_IMPL(CRoomInstanceGuild);
 NL_INSTANCE_COUNTER_IMPL(CRoomInstancePlayer);
 
 //----------------------------------------------------------------------------
-void CRoomInstanceCommon::removeUser( CCharacter* user )
+void CRoomInstanceCommon::removeUser(CCharacter *user)
 {
-	BOMB_IF( !user, "<BUILDING> null character!", return );
+	BOMB_IF(!user, "<BUILDING> null character!", return);
 
-	CBuildingPhysicalCommon * commonBuilding = dynamic_cast<CBuildingPhysicalCommon *>( _Building );
-	BOMB_IF( !commonBuilding, "<BUILDING> building type does not match with room type", return );
+	CBuildingPhysicalCommon *commonBuilding = dynamic_cast<CBuildingPhysicalCommon *>(_Building);
+	BOMB_IF(!commonBuilding, "<BUILDING> building type does not match with room type", return);
 
-	if ( !commonBuilding->removeUser(user->getEntityRowId()) )
+	if (!commonBuilding->removeUser(user->getEntityRowId()))
 	{
 		nlwarning("<BUILDING> trying to remove player %s from building '%s' but he is not in!",
-			user->getId().toString().c_str(), commonBuilding->getName().c_str()
-			);
+		    user->getId().toString().c_str(), commonBuilding->getName().c_str());
 		return;
 	}
 
 	--_RefCount;
-	if ( _RefCount == 0 )
+	if (_RefCount == 0)
 	{
-		commonBuilding->resetRoomCell( _RoomIdx );
+		commonBuilding->resetRoomCell(_RoomIdx);
 		release();
 	}
 }
 
 //----------------------------------------------------------------------------
-void CRoomInstanceCommon::addUser( CCharacter* user, CCharacter* owner )
+void CRoomInstanceCommon::addUser(CCharacter *user, CCharacter *owner)
 {
-	BOMB_IF( !user, "<BUILDING> null character!", return );
+	BOMB_IF(!user, "<BUILDING> null character!", return);
 
 	++_RefCount;
 }
@@ -76,40 +75,39 @@ std::string CRoomInstanceCommon::getRoomDescription() const
 }
 
 //----------------------------------------------------------------------------
-void CRoomInstanceGuild::removeUser( CCharacter* user )
+void CRoomInstanceGuild::removeUser(CCharacter *user)
 {
-	BOMB_IF( !user, "<BUILDING> null character!", return );
+	BOMB_IF(!user, "<BUILDING> null character!", return);
 
 	// close guild inventory window
 	PlayerManager.sendImpulseToClient(user->getId(), "GUILD:CLOSE_INVENTORY");
 
-	CBuildingPhysicalGuild * guildBuilding = dynamic_cast<CBuildingPhysicalGuild *>( _Building );
-	BOMB_IF( !guildBuilding, "<BUILDING> building type does not match with room type", return );
+	CBuildingPhysicalGuild *guildBuilding = dynamic_cast<CBuildingPhysicalGuild *>(_Building);
+	BOMB_IF(!guildBuilding, "<BUILDING> building type does not match with room type", return);
 
-	if ( !guildBuilding->removeUser(user->getEntityRowId()) )
+	if (!guildBuilding->removeUser(user->getEntityRowId()))
 	{
 		nlwarning("<BUILDING> trying to remove player %s from building '%s' but he is not in!",
-			user->getId().toString().c_str(), guildBuilding->getName().c_str()
-			);
+		    user->getId().toString().c_str(), guildBuilding->getName().c_str());
 		return;
 	}
 
 	--_RefCount;
-	if ( _RefCount == 0 )
+	if (_RefCount == 0)
 	{
-		guildBuilding->resetRoomCell( _RoomIdx, _GuildId );
+		guildBuilding->resetRoomCell(_RoomIdx, _GuildId);
 		release();
 	}
 }
 
 //----------------------------------------------------------------------------
-void CRoomInstanceGuild::addUser( CCharacter* user, CCharacter* owner )
+void CRoomInstanceGuild::addUser(CCharacter *user, CCharacter *owner)
 {
-	BOMB_IF( !user, "<BUILDING> null character!", return );
+	BOMB_IF(!user, "<BUILDING> null character!", return);
 
 #ifdef RYZOM_FORGE_ROOM
-	CBuildingPhysicalGuild * guildBuilding = dynamic_cast<CBuildingPhysicalGuild *>( _Building );
-	BOMB_IF( !guildBuilding, "<BUILDING> building type does not match with room type", return );
+	CBuildingPhysicalGuild *guildBuilding = dynamic_cast<CBuildingPhysicalGuild *>(_Building);
+	BOMB_IF(!guildBuilding, "<BUILDING> building type does not match with room type", return);
 #endif
 
 	// open guild inventory window
@@ -122,40 +120,39 @@ void CRoomInstanceGuild::addUser( CCharacter* user, CCharacter* owner )
 std::string CRoomInstanceGuild::getRoomDescription() const
 {
 	string guildName;
-	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
+	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(_GuildId);
 	if (guild)
 		guildName = guild->getName().toUtf8();
 
 	return toString("guild room [index=%hu, owner index=%hu, nb users=%hu, guild name='%s' id=%u]",
-		_RoomIdx, _OwnerIndex, _RefCount, guildName.c_str(), _GuildId);
+	    _RoomIdx, _OwnerIndex, _RefCount, guildName.c_str(), _GuildId);
 }
 
 //----------------------------------------------------------------------------
-void CRoomInstancePlayer::removeUser( CCharacter* user )
+void CRoomInstancePlayer::removeUser(CCharacter *user)
 {
-	BOMB_IF( !user, "<BUILDING> null character!", return );
+	BOMB_IF(!user, "<BUILDING> null character!", return);
 
 	// close room inventory window
 	PlayerManager.sendImpulseToClient(user->getId(), "ITEM:CLOSE_ROOM_INVENTORY");
 
-	CBuildingPhysicalPlayer * playerBuilding = dynamic_cast<CBuildingPhysicalPlayer *>( _Building );
-	BOMB_IF( !playerBuilding, "<BUILDING> building type does not match with room type", return );
+	CBuildingPhysicalPlayer *playerBuilding = dynamic_cast<CBuildingPhysicalPlayer *>(_Building);
+	BOMB_IF(!playerBuilding, "<BUILDING> building type does not match with room type", return);
 
-	if ( !playerBuilding->removeUser(user->getEntityRowId()) )
+	if (!playerBuilding->removeUser(user->getEntityRowId()))
 	{
 		nlwarning("<BUILDING> trying to remove player %s from building '%s' but he is not in!",
-			user->getId().toString().c_str(), playerBuilding->getName().c_str()
-			);
+		    user->getId().toString().c_str(), playerBuilding->getName().c_str());
 		return;
 	}
-	
+
 	--_RefCount;
-	if ( _RefCount == 0 )
+	if (_RefCount == 0)
 	{
 #ifdef RYZOM_FORGE_ROOM
-		playerBuilding->resetRoomCell( _RoomIdx , user->getInRoomOfPlayer());
+		playerBuilding->resetRoomCell(_RoomIdx, user->getInRoomOfPlayer());
 #else
-		playerBuilding->resetRoomCell( _RoomIdx , user->getId() );
+		playerBuilding->resetRoomCell(_RoomIdx, user->getId());
 #endif
 		release();
 	}
@@ -165,13 +162,13 @@ void CRoomInstancePlayer::removeUser( CCharacter* user )
 }
 
 //----------------------------------------------------------------------------
-void CRoomInstancePlayer::addUser( CCharacter* user, CCharacter* owner )
+void CRoomInstancePlayer::addUser(CCharacter *user, CCharacter *owner)
 {
-	BOMB_IF( !user, "<BUILDING> null character!", return );
+	BOMB_IF(!user, "<BUILDING> null character!", return);
 
 #ifdef RYZOM_FORGE_ROOM
-	CBuildingPhysicalPlayer * playerBuilding = dynamic_cast<CBuildingPhysicalPlayer *>( _Building );
-	BOMB_IF( !playerBuilding, "<BUILDING> building type does not match with room type", return );
+	CBuildingPhysicalPlayer *playerBuilding = dynamic_cast<CBuildingPhysicalPlayer *>(_Building);
+	BOMB_IF(!playerBuilding, "<BUILDING> building type does not match with room type", return);
 #endif
 
 	// open room inventory window
@@ -180,7 +177,7 @@ void CRoomInstancePlayer::addUser( CCharacter* user, CCharacter* owner )
 #ifdef RYZOM_FORGE_ROOM
 	if (owner)
 	{
-		owner->removeRoomAccesToPlayer(user->getId(),false);
+		owner->removeRoomAccesToPlayer(user->getId(), false);
 		user->setInRoomOfPlayer(owner->getId());
 	}
 	else
@@ -197,50 +194,50 @@ void CRoomInstancePlayer::addUser( CCharacter* user, CCharacter* owner )
 std::string CRoomInstancePlayer::getRoomDescription() const
 {
 	string charName;
-	CCharacter * c = PlayerManager.getChar( _Player );
+	CCharacter *c = PlayerManager.getChar(_Player);
 	if (c)
 		charName = c->getName().toUtf8();
 
 	return toString("player room [index=%hu, owner index=%hu, nb users=%hu, player name='%s' eid=%s]",
-		_RoomIdx, _OwnerIndex, _RefCount, charName.c_str(), _Player.toString().c_str());
+	    _RoomIdx, _OwnerIndex, _RefCount, charName.c_str(), _Player.toString().c_str());
 }
 
 //----------------------------------------------------------------------------
-bool IRoomInstance::create( IBuildingPhysical * building, uint16 roomIdx,uint16 ownerIdx, sint32 cellId )
+bool IRoomInstance::create(IBuildingPhysical *building, uint16 roomIdx, uint16 ownerIdx, sint32 cellId)
 {
 	nlassert(building);
 	nlassert(building->getTemplate());
-	nlassert(roomIdx < building->getTemplate()->Rooms.size() );
+	nlassert(roomIdx < building->getTemplate()->Rooms.size());
 	_Building = building;
 	_RoomIdx = roomIdx;
 	_OwnerIndex = ownerIdx;
 
 	// spawn the bots
-	const CRoomTemplate & templ = building->getTemplate()->Rooms[roomIdx];
+	const CRoomTemplate &templ = building->getTemplate()->Rooms[roomIdx];
 	const uint size = (uint)templ.Bots.size();
-	_Bots.reserve( size );
-	for ( uint i = 0; i < size; i++ )
+	_Bots.reserve(size);
+	for (uint i = 0; i < size; i++)
 	{
-		const CEntityId & eid = CAIAliasTranslator::getInstance()->getEntityId( templ.Bots[i] );
-		if ( eid == CEntityId::Unknown )
+		const CEntityId &eid = CAIAliasTranslator::getInstance()->getEntityId(templ.Bots[i]);
+		if (eid == CEntityId::Unknown)
 		{
-			nlwarning("<BUILDING> Invalid bot alias %s in building '%s'", CPrimitivesParser::aliasToString(templ.Bots[i]).c_str(), templ.Name.c_str() );
+			nlwarning("<BUILDING> Invalid bot alias %s in building '%s'", CPrimitivesParser::aliasToString(templ.Bots[i]).c_str(), templ.Name.c_str());
 			continue;
 		}
-		CCreature * bot = CreatureManager.getCreature( eid );
-		if ( bot == NULL )
+		CCreature *bot = CreatureManager.getCreature(eid);
+		if (bot == NULL)
 		{
-			nlwarning("<BUILDING> Invalid bot id '%s'%s in destination '%s'", eid.toString().c_str(), CPrimitivesParser::aliasToString(templ.Bots[i]).c_str(), templ.Name.c_str() );
+			nlwarning("<BUILDING> Invalid bot id '%s'%s in destination '%s'", eid.toString().c_str(), CPrimitivesParser::aliasToString(templ.Bots[i]).c_str(), templ.Name.c_str());
 			continue;
 		}
-		
-		//allocate a new creature
+
+		// allocate a new creature
 		static uint64 id64 = 0;
 		NLMISC::CEntityId entityId(RYZOMID::npc, id64++, TServiceId8(NLNET::IService::getInstance()->getServiceId()).get(), NLNET::TServiceId8(NLNET::IService::getInstance()->getServiceId()).get());
-		nlinfo("<BUILDING> spawning bot alias %s, eid %s in building '%s'", CPrimitivesParser::aliasToString(templ.Bots[i]).c_str(), entityId.toString().c_str() ,templ.Name.c_str() );
-		CCreature * bot2 = bot->getCreatureCopy(  entityId, cellId );
-		nlassert( bot2 );
-		_Bots.push_back( bot2->getEntityRowId() );
+		nlinfo("<BUILDING> spawning bot alias %s, eid %s in building '%s'", CPrimitivesParser::aliasToString(templ.Bots[i]).c_str(), entityId.toString().c_str(), templ.Name.c_str());
+		CCreature *bot2 = bot->getCreatureCopy(entityId, cellId);
+		nlassert(bot2);
+		_Bots.push_back(bot2->getEntityRowId());
 	}
 	return true;
 }
@@ -250,36 +247,36 @@ void IRoomInstance::release()
 {
 	for (uint i = 0; i < _Bots.size(); i++)
 	{
-		CEntityId id = getEntityIdFromRow( _Bots[i] );
+		CEntityId id = getEntityIdFromRow(_Bots[i]);
 		CreatureManager.removeCreature(id);
 		Mirror.removeEntity(id);
 	}
 }
 
 //----------------------------------------------------------------------------
-bool CRoomInstanceGuild::create( IBuildingPhysical * building, uint16 roomIdx,uint16 ownerIdx,sint32 cellId )
+bool CRoomInstanceGuild::create(IBuildingPhysical *building, uint16 roomIdx, uint16 ownerIdx, sint32 cellId)
 {
 	nlassert(building);
-	CBuildingPhysicalGuild * guildBuilding = dynamic_cast<CBuildingPhysicalGuild*>(building);
+	CBuildingPhysicalGuild *guildBuilding = dynamic_cast<CBuildingPhysicalGuild *>(building);
 	nlassert(guildBuilding);
-	if ( !IRoomInstance::create(building,roomIdx,ownerIdx,cellId) )
+	if (!IRoomInstance::create(building, roomIdx, ownerIdx, cellId))
 		return false;
-	_GuildId = guildBuilding->getOwnerGuildId( ownerIdx );
-	if( !_GuildId )
+	_GuildId = guildBuilding->getOwnerGuildId(ownerIdx);
+	if (!_GuildId)
 		return false;
 	return true;
 }
 
 //----------------------------------------------------------------------------
-bool CRoomInstancePlayer::create( IBuildingPhysical * building, uint16 roomIdx,uint16 ownerIdx,sint32 cellId )
+bool CRoomInstancePlayer::create(IBuildingPhysical *building, uint16 roomIdx, uint16 ownerIdx, sint32 cellId)
 {
 	nlassert(building);
-	CBuildingPhysicalPlayer * playerBuilding = dynamic_cast<CBuildingPhysicalPlayer*>(building);
+	CBuildingPhysicalPlayer *playerBuilding = dynamic_cast<CBuildingPhysicalPlayer *>(building);
 	nlassert(playerBuilding);
-	if( !IRoomInstance::create(building,roomIdx,ownerIdx,cellId) )
+	if (!IRoomInstance::create(building, roomIdx, ownerIdx, cellId))
 		return false;
-	_Player = playerBuilding->getPlayer( ownerIdx );
-	if( _Player == CEntityId::Unknown )
+	_Player = playerBuilding->getPlayer(ownerIdx);
+	if (_Player == CEntityId::Unknown)
 		return false;
 	return true;
 }

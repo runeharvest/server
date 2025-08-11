@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
 #include "stdpch.h"
 // net
 #include "nel/net/message.h"
@@ -33,39 +30,36 @@
 #include "player_manager/player.h"
 #include "mod_forage_success_effect.h"
 
-
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
 extern CPlayerManager PlayerManager;
 
-
-
 //--------------------------------------------------------------
-//					ctor()  
+//					ctor()
 //--------------------------------------------------------------
-CSpecialPowerModForageSuccess::CSpecialPowerModForageSuccess(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds,  
-							  const std::string& ecosystem, float modifier1, float modifier2 )
+CSpecialPowerModForageSuccess::CSpecialPowerModForageSuccess(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds,
+    const std::string &ecosystem, float modifier1, float modifier2)
 {
-	if(TheDataset.isAccessible(actorRowId))
+	if (TheDataset.isAccessible(actorRowId))
 		_ActorRowId = actorRowId;
 	else
 	{
 		nlwarning("<CSpecialPowerModForageSuccess> invalid data set row passed as actor");
 	}
-	
+
 	_Phrase = phrase;
-	
+
 	_DisablePowerTime = 0;
-	_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());		
-	
+	_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());
+
 	_Ecosystem = ecosystem;
 	_Modifier1 = modifier1;
 	_Modifier2 = modifier2;
 
 	ECOSYSTEM::EECosystem eco = ECOSYSTEM::stringToEcosystem(_Ecosystem);
-	switch( eco )
+	switch (eco)
 	{
 	case ECOSYSTEM::common_ecosystem:
 		_PowerType = POWERS::ModForageSkill;
@@ -87,14 +81,12 @@ CSpecialPowerModForageSuccess::CSpecialPowerModForageSuccess(TDataSetRow actorRo
 		break;
 	default:
 		_PowerType = POWERS::UnknownType;
-		nldebug("<CSpecialPowerModForageSuccess::CSpecialPowerModForageSuccess> The ecosystem %s is not managed by this kind of power",_Ecosystem.c_str());
+		nldebug("<CSpecialPowerModForageSuccess::CSpecialPowerModForageSuccess> The ecosystem %s is not managed by this kind of power", _Ecosystem.c_str());
 	}
 }
 
-
-
 //--------------------------------------------------------------
-//					apply()  
+//					apply()
 //--------------------------------------------------------------
 void CSpecialPowerModForageSuccess::apply()
 {
@@ -116,37 +108,37 @@ void CSpecialPowerModForageSuccess::apply()
 	// create effect and apply it on target
 	EFFECT_FAMILIES::TEffectFamily effectFamily;
 	ECOSYSTEM::EECosystem eco = ECOSYSTEM::stringToEcosystem(_Ecosystem);
-	switch( eco )
+	switch (eco)
 	{
-		case ECOSYSTEM::common_ecosystem:
-			effectFamily = EFFECT_FAMILIES::PowerModForageSkill;
-			break;
-		case ECOSYSTEM::desert:
-			effectFamily = EFFECT_FAMILIES::PowerModDesertForageSkill;
-			break;
-		case ECOSYSTEM::forest:
-			effectFamily = EFFECT_FAMILIES::PowerModForestForageSkill;
-			break;
-		case ECOSYSTEM::lacustre:
-			effectFamily = EFFECT_FAMILIES::PowerModLacustreForageSkill;
-			break;
-		case ECOSYSTEM::jungle:
-			effectFamily = EFFECT_FAMILIES::PowerModJungleForageSkill;
-			break;
-		case ECOSYSTEM::primary_root:
-			effectFamily = EFFECT_FAMILIES::PowerModPrimaryRootForageSkill;
-			break;
-		default:
-			nldebug("<CSpecialPowerModForageSuccess::apply> The ecosystem '%s' is not managed by this special power",_Ecosystem.c_str());
-			return;
+	case ECOSYSTEM::common_ecosystem:
+		effectFamily = EFFECT_FAMILIES::PowerModForageSkill;
+		break;
+	case ECOSYSTEM::desert:
+		effectFamily = EFFECT_FAMILIES::PowerModDesertForageSkill;
+		break;
+	case ECOSYSTEM::forest:
+		effectFamily = EFFECT_FAMILIES::PowerModForestForageSkill;
+		break;
+	case ECOSYSTEM::lacustre:
+		effectFamily = EFFECT_FAMILIES::PowerModLacustreForageSkill;
+		break;
+	case ECOSYSTEM::jungle:
+		effectFamily = EFFECT_FAMILIES::PowerModJungleForageSkill;
+		break;
+	case ECOSYSTEM::primary_root:
+		effectFamily = EFFECT_FAMILIES::PowerModPrimaryRootForageSkill;
+		break;
+	default:
+		nldebug("<CSpecialPowerModForageSuccess::apply> The ecosystem '%s' is not managed by this special power", _Ecosystem.c_str());
+		return;
 	}
 
-	CModForageSuccessEffect *effect = new CModForageSuccessEffect(_ActorRowId, 
-													endDate, 
-													effectFamily,
-													_Ecosystem,
-													_Modifier1,
-													_Modifier2);
+	CModForageSuccessEffect *effect = new CModForageSuccessEffect(_ActorRowId,
+	    endDate,
+	    effectFamily,
+	    _Ecosystem,
+	    _Modifier1,
+	    _Modifier2);
 	if (!effect)
 	{
 		nlwarning("<CSpecialPowerModForageSuccess::apply> Failed to allocate new CModForageSuccessEffect");
@@ -157,7 +149,7 @@ void CSpecialPowerModForageSuccess::apply()
 
 	// send messages
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::power_type);
-//	TVectorParamCheck params;
+	//	TVectorParamCheck params;
 	// for actor
 	if (actor->getId().getType() == RYZOMID::player)
 	{

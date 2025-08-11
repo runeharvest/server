@@ -43,16 +43,16 @@ NL_INSTANCE_COUNTER_IMPL(CCharacterGameEvent);
 //-----------------------------------------------------------------------------
 // vars
 //-----------------------------------------------------------------------------
-CVariable<uint32> PlayerChannelHistoricSize("egs","PlayerChannelHistoricSize", "historic size of a player channel", 50, 0, true );
-CVariable<uint32> GMChannelHistoricSize("egs","GMChannelHistoricSize", "historic size of a gm channel", 100, 0, true );
-
+CVariable<uint32> PlayerChannelHistoricSize("egs", "PlayerChannelHistoricSize", "historic size of a player channel", 50, 0, true);
+CVariable<uint32> GMChannelHistoricSize("egs", "GMChannelHistoricSize", "historic size of a gm channel", 100, 0, true);
 
 //-----------------------------------------------------------------------------
 // methods CCharacterGameEvent
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-CCharacterGameEvent::CCharacterGameEvent(CCharacter &c) : _Char(c)
+CCharacterGameEvent::CCharacterGameEvent(CCharacter &c)
+    : _Char(c)
 {
 	_Date = 0;
 	_RegisterEventFaction = false;
@@ -63,7 +63,7 @@ void CCharacterGameEvent::subscribe()
 {
 	// if we are already in a game event do not reset
 	if (isInGameEvent()) return;
-	
+
 	// Here is the code for the backup of data (last player position for ending correctly for instance)
 
 	_Date = CTickEventHandler::getGameCycle();
@@ -73,19 +73,19 @@ void CCharacterGameEvent::subscribe()
 void CCharacterGameEvent::reset()
 {
 	// if we are not in a game event do not reset
-	if (! isInGameEvent()) return;
+	if (!isInGameEvent()) return;
 
 	// Remove game event mission
-	map<TAIAlias, CMission*>::iterator it = _Char.getMissionsBegin();
+	map<TAIAlias, CMission *>::iterator it = _Char.getMissionsBegin();
 	// remove missions
 	while (it != _Char.getMissionsEnd())
 	{
 		if (CGameEventManager::getInstance().isGameEventMission(it->first))
 		{
 			TAIAlias mission = it->first;
-			map<TAIAlias, CMission*>::iterator itToDel = it;
+			map<TAIAlias, CMission *>::iterator itToDel = it;
 			++it;
-			_Char._Missions->deleteFromMissions( mission );
+			_Char._Missions->deleteFromMissions(mission);
 		}
 		else
 		{
@@ -101,14 +101,14 @@ void CCharacterGameEvent::reset()
 			TAIAlias mission = itH->first;
 			map<TAIAlias, TMissionHistory>::iterator itHToDel = itH;
 			++itH;
-			_Char._MissionHistories.erase( itHToDel );
+			_Char._MissionHistories.erase(itHToDel);
 		}
 		else
 		{
 			++itH;
 		}
 	}
-	
+
 	clearEventFaction();
 
 	_Date = 0;
@@ -126,9 +126,9 @@ void CCharacterGameEvent::tickUpdate()
 }
 
 //-----------------------------------------------------------------------------
-void CCharacterGameEvent::setEventFaction(const std::string & eventFaction)
+void CCharacterGameEvent::setEventFaction(const std::string &eventFaction)
 {
-	if( eventFaction != _EventFaction )
+	if (eventFaction != _EventFaction)
 	{
 		_PreviousEventFaction = _EventFaction;
 		_EventFaction = eventFaction;
@@ -154,68 +154,66 @@ void CCharacterGameEvent::registerEventFaction()
 //-----------------------------------------------------------------------------
 void CCharacterGameEvent::setEventChannelSessions()
 {
-	addEventSession( _EventFaction, true, PlayerChannelHistoricSize );
-	removeEventSession( _PreviousEventFaction );
+	addEventSession(_EventFaction, true, PlayerChannelHistoricSize);
+	removeEventSession(_PreviousEventFaction);
 
-	addEventSession( _EventFaction + "_gm", false, GMChannelHistoricSize );
-	removeEventSession( _PreviousEventFaction + "_gm" );
+	addEventSession(_EventFaction + "_gm", false, GMChannelHistoricSize);
+	removeEventSession(_PreviousEventFaction + "_gm");
 }
 
-
 //-----------------------------------------------------------------------------
-void CCharacterGameEvent::addEventSession( const string& channel, bool writeRight, uint32 historicSize )
+void CCharacterGameEvent::addEventSession(const string &channel, bool writeRight, uint32 historicSize)
 {
-	if( !channel.empty() )
+	if (!channel.empty())
 	{
 		TDataSetRow rowId = _Char.getEntityRowId();
-		
+
 		// add channel in dynchat
-		TChanID chanId = DynChatEGS.addLocalizedChan( channel);
-		
+		TChanID chanId = DynChatEGS.addLocalizedChan(channel);
+
 		// if channel didn't exist
-		if( chanId != DYN_CHAT_INVALID_CHAN )
+		if (chanId != DYN_CHAT_INVALID_CHAN)
 		{
 			// set historic size of the newly created channel
-			DynChatEGS.setHistoricSize( chanId, historicSize );
+			DynChatEGS.setHistoricSize(chanId, historicSize);
 		}
 		else
 		{
 			// get id of existing channel
-			chanId = DynChatEGS.getChanIDFromName( channel );
+			chanId = DynChatEGS.getChanIDFromName(channel);
 		}
 
 		// add a char session in his new channel
-		if( chanId != DYN_CHAT_INVALID_CHAN )
+		if (chanId != DYN_CHAT_INVALID_CHAN)
 		{
-			if( !DynChatEGS.addSession( chanId, rowId, writeRight) )
+			if (!DynChatEGS.addSession(chanId, rowId, writeRight))
 			{
-				nlwarning("<CCharacterGameEvent::addEventSession> Can't add session in channel %s for char %s",channel.c_str(), _Char.getId().toString().c_str());
+				nlwarning("<CCharacterGameEvent::addEventSession> Can't add session in channel %s for char %s", channel.c_str(), _Char.getId().toString().c_str());
 			}
 		}
 	}
 }
 
-
 //-----------------------------------------------------------------------------
-void CCharacterGameEvent::removeEventSession( const string& channel )
+void CCharacterGameEvent::removeEventSession(const string &channel)
 {
-	if( !channel.empty() )
+	if (!channel.empty())
 	{
-		TChanID chanId = DynChatEGS.getChanIDFromName( channel );
-		if( chanId != DYN_CHAT_INVALID_CHAN )
+		TChanID chanId = DynChatEGS.getChanIDFromName(channel);
+		if (chanId != DYN_CHAT_INVALID_CHAN)
 		{
 			TDataSetRow rowId = _Char.getEntityRowId();
 
 			// remove session of char from channel
-			if( !DynChatEGS.removeSession( chanId, rowId ) )
+			if (!DynChatEGS.removeSession(chanId, rowId))
 			{
-				nlwarning("<CCharacterGameEvent::removeEventSession> Can't remove session in channel %s for char %s",channel.c_str(),_Char.getId().toString().c_str());
+				nlwarning("<CCharacterGameEvent::removeEventSession> Can't remove session in channel %s for char %s", channel.c_str(), _Char.getId().toString().c_str());
 			}
-			
+
 			// if channel is empty now, remove it
-			if( DynChatEGS.getSessionCount( chanId ) == 0 )
+			if (DynChatEGS.getSessionCount(chanId) == 0)
 			{
-				if( !DynChatEGS.removeChan( chanId ) )
+				if (!DynChatEGS.removeChan(chanId))
 				{
 					nlwarning("<CCharacterGameEvent::removeEventSession> Can't remove channel %s", chanId.toString().c_str());
 				}
@@ -223,4 +221,3 @@ void CCharacterGameEvent::removeEventSession( const string& channel )
 		}
 	}
 }
-

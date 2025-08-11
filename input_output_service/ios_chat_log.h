@@ -30,28 +30,24 @@
 
 // User #includes
 
-namespace IOSPD
-{
-	
+namespace IOSPD {
+
 //
 // Forward declarations
 //
-
-
 
 //
 // Typedefs & Enums
 //
 
-void							createTeam(NLMISC::CEntityId team);
+void createTeam(NLMISC::CEntityId team);
 
-void							deleteTeam(NLMISC::CEntityId team);
+void deleteTeam(NLMISC::CEntityId team);
 
-void							playerJoinsTeam(NLMISC::CEntityId player, NLMISC::CEntityId team);
+void playerJoinsTeam(NLMISC::CEntityId player, NLMISC::CEntityId team);
 
-void							playerLeavesTeam(NLMISC::CEntityId player, NLMISC::CEntityId team);
+void playerLeavesTeam(NLMISC::CEntityId player, NLMISC::CEntityId team);
 
-	
 } // End of IOSPD
 
 #endif

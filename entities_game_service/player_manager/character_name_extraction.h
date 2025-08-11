@@ -19,7 +19,6 @@
 
 #include "game_share/persistent_data.h"
 
-
 //-----------------------------------------------------------------------------
 // class CEntityBaseNameExtraction
 //-----------------------------------------------------------------------------
@@ -32,17 +31,15 @@ public:
 	std::string Name;
 };
 
-
 //-----------------------------------------------------------------------------
 // class CCharacterNameExtraction
 //-----------------------------------------------------------------------------
 
-struct CCharacterNameExtraction: CEntityBaseNameExtraction
+struct CCharacterNameExtraction : CEntityBaseNameExtraction
 {
 public:
 	DECLARE_PERSISTENCE_APPLY_METHOD
 };
-
 
 //-----------------------------------------------------------------------------
 #endif

@@ -17,11 +17,10 @@
 #include "stdpch.h"
 #include "far_position_stack.h"
 
-
 /*
  * Replace a position in the stack (no bound check) (debug only)
  */
-void CFarPositionStack::substFarPosition( uint index, const CFarPosition& newFarPos )
+void CFarPositionStack::substFarPosition(uint index, const CFarPosition &newFarPos)
 {
 	_Vec[index] = newFarPos;
 }

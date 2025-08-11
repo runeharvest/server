@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef NL_PRIO_SUB_H
 #define NL_PRIO_SUB_H
 
@@ -43,53 +41,52 @@
 class CPrioSub
 {
 public:
-
 	/// Constructor
 	CPrioSub();
 
 	/// Main initialization
-	void					init( CHistory *h, CClientIdLookup *cl )
-							{
-								VisionProvider.init( &VisionArray, h, cl );
-								Prioritizer.init( &VisionArray, &VisionProvider, h );
-							}
+	void init(CHistory *h, CClientIdLookup *cl)
+	{
+		VisionProvider.init(&VisionArray, h, cl);
+		Prioritizer.init(&VisionArray, &VisionProvider, h);
+	}
 
 	/// Perform one cycle (PropDispatcher becomes ready for getNextParcel())
-	void					update()
-							{
-								H_TIME(ProcessVision, processVision(););
-								H_TIME(calculatePriorities, calculatePriorities(););
-							}
+	void update()
+	{
+		H_TIME(ProcessVision, processVision(););
+		H_TIME(calculatePriorities, calculatePriorities(););
+	}
 
 	/// Process Vision Differences
-	void					processVision()
-							{ VisionProvider.processVision(); }
+	void processVision()
+	{
+		VisionProvider.processVision();
+	}
 
 	/// Calculate the priorities corresponding to the selected pairs
-	void					calculatePriorities()
-							{ Prioritizer.calculatePriorities(); }
+	void calculatePriorities()
+	{
+		Prioritizer.calculatePriorities();
+	}
 
 	/// Unit testing (TEMP)
-	void					testVisionProvider();
+	void testVisionProvider();
 
 public:
-
 	/// Entities seen by the clients and the priorities of their properties
-	CVisionArray			VisionArray;
+	CVisionArray VisionArray;
 
 	/// Manager of the vision (who sees who)
-	CVisionProvider			VisionProvider;
+	CVisionProvider VisionProvider;
 
 	/// Priority calculation
-	CDistancePrioritizer	Prioritizer;
+	CDistancePrioritizer Prioritizer;
 
 private:
-
 	/// Counter for adjustHPThreshold
-	//uint32					_AHPTCounter;
-
+	// uint32					_AHPTCounter;
 };
-
 
 #endif // NL_PRIO_SUB_H
 

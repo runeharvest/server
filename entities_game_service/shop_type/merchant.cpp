@@ -34,39 +34,39 @@ CMerchant::~CMerchant()
 }
 
 //-----------------------------------------------------------------------------
-void CMerchant::addShopUnit( const IShopUnit * shop )
+void CMerchant::addShopUnit(const IShopUnit *shop)
 {
-	for( uint i = 0; i < _MerchantTradeList.size(); ++i )
+	for (uint i = 0; i < _MerchantTradeList.size(); ++i)
 	{
-		if( _MerchantTradeList[ i ] == shop )
+		if (_MerchantTradeList[i] == shop)
 			return;
 	}
-	_MerchantTradeList.push_back( shop );
+	_MerchantTradeList.push_back(shop);
 }
 
 //-----------------------------------------------------------------------------
 void CMerchant::clearMerchantTradeList()
 {
 	_MerchantTradeList.clear();
-	_MerchantTradeList.push_back( &_ExpliciteShopContent );
+	_MerchantTradeList.push_back(&_ExpliciteShopContent);
 }
 
 //-----------------------------------------------------------------------------
-void CMerchant::addExpliciteSellingItem( CSmartPtr< IItemTrade>& item )
+void CMerchant::addExpliciteSellingItem(CSmartPtr<IItemTrade> &item)
 {
-	_ExpliciteShopContent.addContent( item );
+	_ExpliciteShopContent.addContent(item);
 }
 
 //-----------------------------------------------------------------------------
-const vector< const IShopUnit * >& CMerchant::getMerchantTradeList()
+const vector<const IShopUnit *> &CMerchant::getMerchantTradeList()
 {
-	if(_Creature)
+	if (_Creature)
 		_Creature->updateMerchantTradeList();
-	return _MerchantTradeList; 
+	return _MerchantTradeList;
 }
 
 //-----------------------------------------------------------------------------
-bool CMerchant::sellPlayerItem() 
-{ 
+bool CMerchant::sellPlayerItem()
+{
 	return _Creature ? _Creature->sellPlayerItem() : false;
 }

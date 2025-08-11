@@ -21,15 +21,14 @@
 #ifndef NL_PDS_TABLE_BUFFER_INLINE_H
 #define NL_PDS_TABLE_BUFFER_INLINE_H
 
-
 /*
  * Copy header info from another accessor
  * Warning, this is only a local copy of header, data won't been updated in parent CTableBuffer
  */
-inline void	CTableBuffer::CAccessor::copyHeader(const CAccessor& access)
+inline void CTableBuffer::CAccessor::copyHeader(const CAccessor &access)
 {
-	const CMappedHeader*	srcHdr = (const CMappedHeader*)(access.fullRow());
-	CMappedHeader*			dstHdr = (CMappedHeader*)fullRow();
+	const CMappedHeader *srcHdr = (const CMappedHeader *)(access.fullRow());
+	CMappedHeader *dstHdr = (CMappedHeader *)fullRow();
 
 	// copy flags
 	dstHdr->clear();
@@ -44,12 +43,10 @@ inline void	CTableBuffer::CAccessor::copyHeader(const CAccessor& access)
 	}
 }
 
-
-
 /*
  * Init Number of Rows per File
  */
-inline bool	CTableBuffer::initRowsPerFile()
+inline bool CTableBuffer::initRowsPerFile()
 {
 	if (_InternalRowSize == 0)
 	{
@@ -57,24 +54,24 @@ inline bool	CTableBuffer::initRowsPerFile()
 		return false;
 	}
 
-	uint32	actualRowSize = _InternalRowSize+CDBReferenceFile::getRowHeaderSize();
-	_RowsPerFile = (_MaxRefFileSize+actualRowSize-1) / actualRowSize;
+	uint32 actualRowSize = _InternalRowSize + CDBReferenceFile::getRowHeaderSize();
+	_RowsPerFile = (_MaxRefFileSize + actualRowSize - 1) / actualRowSize;
 	return true;
 }
 
 /*
  * Check reference file is ready
  */
-inline bool	CTableBuffer::checkRef(uint32 refFile)
+inline bool CTableBuffer::checkRef(uint32 refFile)
 {
 	nlassert(_Init);
 
 	// get reference path
-	std::string		path = NLMISC::CPath::standardizePath(_RefPath);
+	std::string path = NLMISC::CPath::standardizePath(_RefPath);
 
 	// reserve room
 	if (_RefFileMap.size() <= refFile)
-		_RefFileMap.resize(refFile+1, NULL);
+		_RefFileMap.resize(refFile + 1, NULL);
 
 	if (_RefFileMap[refFile] == NULL)
 		_RefFileMap[refFile] = new CDBReferenceFile();
@@ -82,9 +79,9 @@ inline bool	CTableBuffer::checkRef(uint32 refFile)
 	// if file not initialised, do it
 	if (!_RefFileMap[refFile]->initialised())
 	{
-		uint32		base = _RowsPerFile * refFile;
-		uint32		end = base + _RowsPerFile;
-		std::string	file = CDBReferenceFile::getRefFileName(_TableId, refFile);
+		uint32 base = _RowsPerFile * refFile;
+		uint32 end = base + _RowsPerFile;
+		std::string file = CDBReferenceFile::getRefFileName(_TableId, refFile);
 		_RefFileMap[refFile]->setup(file, path, base, end, _InternalRowSize);
 	}
 
@@ -94,9 +91,9 @@ inline bool	CTableBuffer::checkRef(uint32 refFile)
 /*
  * Acquire a row, internal version
  */
-inline bool	CTableBuffer::acquireRow(TRowMap::iterator it)
+inline bool CTableBuffer::acquireRow(TRowMap::iterator it)
 {
-	CHeader*	header =(CHeader*)((*it).second);
+	CHeader *header = (CHeader *)((*it).second);
 
 	if (header->acquire())
 	{
@@ -112,9 +109,9 @@ inline bool	CTableBuffer::acquireRow(TRowMap::iterator it)
 /*
  * Release a row, internal version
  */
-inline bool	CTableBuffer::releaseRow(TRowMap::iterator it, bool forceNotAcquired)
+inline bool CTableBuffer::releaseRow(TRowMap::iterator it, bool forceNotAcquired)
 {
-	CHeader*	header =(CHeader*)((*it).second);
+	CHeader *header = (CHeader *)((*it).second);
 
 	if (header->unacquire() || forceNotAcquired)
 	{
@@ -143,16 +140,15 @@ inline bool	CTableBuffer::releaseRow(TRowMap::iterator it, bool forceNotAcquired
 /*
  * Set Row As Dirty
  */
-inline void	CTableBuffer::CHeader::setDirty()
+inline void CTableBuffer::CHeader::setDirty()
 {
-	uint32	dirtStamp = CTableBuffer::getCommonStamp();
+	uint32 dirtStamp = CTableBuffer::getCommonStamp();
 	setFlags(Dirty);
 	if (dirtStamp > _DirtStamp)
 		_DirtStamp = dirtStamp;
 	else if (dirtStamp < _DirtStamp)
 		nlwarning("CTableBuffer::CHeader::setDirty(): try to dirty row with an older timestamp (new=%d, previous=%d)", dirtStamp, _DirtStamp);
 }
-
 
 #endif // NL_PDS_TABLE_BUFFER_INLINE_H
 
