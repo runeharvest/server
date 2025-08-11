@@ -28,7 +28,6 @@
           "-DWITH_NELNS=ON",
           "-DWITH_NELNS_LOGIN_SYSTEM=ON",
           "-DWITH_NELNS_SERVER=ON",
-          "-DWITH_QT5=ON",
           "-DWITH_LIBGSF=ON",
           "-DWITH_MONGODB=OFF",
           "-DWITH_PCH=OFF"
