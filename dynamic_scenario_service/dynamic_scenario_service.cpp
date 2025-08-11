@@ -47,12 +47,7 @@ using namespace NLMISC;
 using namespace R2;
 
 
-// force admin module to link in
-extern void admin_modules_forceLink();
-void foo()
-{
-	admin_modules_forceLink();
-}
+
 
 namespace R2
 {

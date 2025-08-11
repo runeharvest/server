@@ -34,12 +34,7 @@ using namespace NLMISC;
 using namespace NLNET;
 
 
-// force admin module to link in
-extern void admin_modules_forceLink();
-void foo()
-{
-    admin_modules_forceLink();
-}
+
 
 
 CBufServer*	WebServer = NULL;
@@ -50,7 +45,7 @@ CVariable<uint>	LinePerPage("pd", "LinePerPage", "number of lines per page in re
 
 
 //-----------------------------------------------
-//	callback table for input message 
+//	callback table for input message
 //
 //-----------------------------------------------
 TUnifiedCallbackItem CbArray[] =
@@ -126,7 +121,7 @@ public:
 	std::vector<std::string>*	Result;
 
 	CStrDisplayer(std::vector<std::string>* result) : IDisplayer(), Result(result)	{}
-	
+
 protected:
 
 	virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message)

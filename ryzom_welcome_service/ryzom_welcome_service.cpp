@@ -49,13 +49,6 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace WS;
 
-extern void admin_modules_forceLink();
-
-void foo()
-{
-	admin_modules_forceLink();
-}
-
 
 CVariable<sint> PlayerLimit(
 	"ws","PlayerLimit", "Rough max number of players accepted on this shard (-1 for Unlimited)",

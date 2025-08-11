@@ -74,12 +74,7 @@ using namespace NLNET;
 using namespace NLMISC;
 using namespace CLFECOMMON;
 
-// force admin module to link in
-extern void admin_modules_forceLink();
-void foo()
-{
-	admin_modules_forceLink();
-}
+
 
 //#define FE_MULTITHREADED
 
@@ -212,7 +207,7 @@ void fillPrioritizedActionsToSend()
 void swapSendBuffers()
 {
 	H_AUTO(WaitAndSwapSendBuffers);
-	
+
     // Wait for the end of flushMessagesToSend()
 	CAtomicLockFast::enter(FlushInProgress);
 
@@ -377,7 +372,7 @@ void cbMapIdToUid( CMessage& msgin, const string& serviceName, NLNET::TServiceId
 	CEntityId id;
 	msgin.serial( uid );
 	msgin.serial( id );
-	
+
 	// Search the Uid in client hosts
 	CFrontEndService *fe = CFrontEndService::instance();
 	CClientHost *clienthost = fe->receiveSub()->findClientHostByUid( uid );
@@ -392,7 +387,7 @@ void cbMapIdToUid( CMessage& msgin, const string& serviceName, NLNET::TServiceId
 		clienthost->setEId( id );
 		// update security for client module
 		cbEntityIdChanged(clienthost);
-		
+
 		if ( fe->receiveSub()->EntityToClient.findEntityId( id ) )
 		{
 			nlwarning( "The CEntityId %s is already owned by another client!", id.toString().c_str() );
@@ -410,7 +405,7 @@ void cbMapIdToUid( CMessage& msgin, const string& serviceName, NLNET::TServiceId
 		{
 			clienthost->PropDispatcher.setPriority( 0, (TPropIndex)p, fe->PrioSub.VisionArray.prioLoc( clienthost->clientId(), 0, (TPropIndex)p ), (TPriority)HIGHEST_PRIORITY );
 		}*/
-	
+
 	}
 	else
 	{
@@ -653,7 +648,7 @@ void cbDisconnectAllClients( CMessage& msgin, const string &serviceName, NLNET::
 /*
  * Return the name of an entity (if previously retrieved or "" if no name)
  */
-std::string				getEntityName( const TDataSetRow& entityIndex ) 
+std::string				getEntityName( const TDataSetRow& entityIndex )
 {
 	TEntityNamesMap::const_iterator itn = CFrontEndService::instance()->EntityNames.find( entityIndex.getIndex() );
 	if ( itn != CFrontEndService::instance()->EntityNames.end() )
@@ -907,15 +902,15 @@ void cbDisconnectClient (TUid userId, const std::string &reqServiceName)
 			// Ask the client to disconnect
 			CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
 			GETCLIENTA(it)->ImpulseEncoder.add(act, 0);
-			nlinfo( "%s asked to remove player %hu (uid %u)", 
-				reqServiceName.c_str(), 
-				GETCLIENTA(it)->clientId(), 
+			nlinfo( "%s asked to remove player %hu (uid %u)",
+				reqServiceName.c_str(),
+				GETCLIENTA(it)->clientId(),
 				userId );
 
 			// Prepare removal of client on the front-end
 			CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(it)->clientId() ); // prevent to insert it twice
 			CFrontEndService::instance()->receiveSub()->addToRemoveList( GETCLIENTA(it)->clientId() );
-			
+
 			return;
 		}
 	}
@@ -994,7 +989,7 @@ void cbServiceUp( const string& serviceName, NLNET::TServiceId serviceId, void *
 		CMessage			msgPlr("NBPLAYERS2");
 		uint32				nbClients = (uint32)CFrontEndService::instance()->receiveSub()->clientMap().size();
 		uint32				nbPendingClients = CLoginServer::getNbPendingUsers();
-		
+
 		msgPlr.serial(nbClients);
 		msgPlr.serial(nbPendingClients);
 
@@ -1039,10 +1034,10 @@ void cbServiceDown( const string& serviceName, NLNET::TServiceId serviceId, void
 			{
 				// Cannot use cbDisconnect() because we need the client to be removed at once, otherwise
 				// the property receiver could raise an assert in assignIndexToId(clientsid)
-				//CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(ihm)->clientId() ); 
+				//CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(ihm)->clientId() );
 				//CFrontEndService::instance()->receiveSub()->removeClientById( GETCLIENTA(ihm)->clientId() );
 			}*/
-			
+
 			CFrontEndService::instance()->ShardDown = true;
 			nlinfo( "Entering SERVER_DOWN mode" );
 
@@ -1225,7 +1220,7 @@ void CFrontEndService::init()
 
 		// Init the login system
 		nlinfo( "Initializing login subsystem..." );
-		CLoginServer::init( "", cbDisconnectClient ); 
+		CLoginServer::init( "", cbDisconnectClient );
 
 //		// Init front end listening port
 		CInetHost listenHost = CLoginServer::getListenHost();
@@ -1252,7 +1247,7 @@ void CFrontEndService::init()
 		if ( plafp )
 		{
 			if ( plafp->asInt() >= frontendPort )
-				lastAcceptableFrontendPort = plafp->asInt(); 
+				lastAcceptableFrontendPort = plafp->asInt();
 			else
 				nlwarning( "Invalid LastAcceptableFSUDPPort: %u (port from ListenAddress: %hu); using %hu", plafp->asInt(), frontendPort, lastAcceptableFrontendPort );
 		}
@@ -1632,7 +1627,7 @@ void CFrontEndService::updateClientsStates()
 				nlinfo( "Client %u %s seems dead (no incoming data for %u ms)", GETCLIENTA(iclient)->clientId(), GETCLIENTA(iclient)->address().asString().c_str(), _ClientTimeOut );
 				icremove = iclient;
 				++iclient;
-				_ReceiveSub.removeFromRemoveList( GETCLIENTA(icremove)->clientId() ); 
+				_ReceiveSub.removeFromRemoveList( GETCLIENTA(icremove)->clientId() );
 				_ReceiveSub.removeClientById( GETCLIENTA(icremove)->clientId() );
 			}
 			else
@@ -1678,13 +1673,13 @@ void CFrontEndService::sendServerProblemStateToClients( uint connectionState )
 		TOutBox& outbox = _SendSub.outBox( client->clientId() );
 		outbox.resetBufPos();
 		client->setupSystemHeader( outbox, systemMsgCode );
-		
+
 		//outbox.displayStream(toString("STALLED:displayOutbox for %u:", client->clientId()).c_str());
 		//++numClients;
 	}
 	swapSendBuffers(); // waits for the end of the previous background flushing
 	flushMessagesToSend(); // flushes (blocking operation in the main thread)
-	
+
 	//nldebug( "Sent %s to %u clients", SystemMessagesNames[systemMsgCode], numClients );
 }
 
@@ -1710,7 +1705,7 @@ void CFrontEndService::setClientsToSynchronizeState()
 
 void CFrontEndService::newCookieCallback(const NLNET::CLoginCookie &cookie)
 {
-	// update the last UPD packet date 
+	// update the last UPD packet date
 	if (CFEReceiveTask::LastUDPPacketReceived == 0)
 	{
 		// set the date to 'now'. If no UPD traffic is detected after
@@ -1774,10 +1769,10 @@ NLMISC_COMMAND( monitorClient, "Set the client id to monitor", "<clientid>" )
 NLMISC_COMMAND( disconnectClient, "Disconnect a client", "<clientid>" )
 {
 	if (args.size() != 1) return false;
-	
+
 	TClientId clientid;
 	NLMISC::fromString(args[0], clientid);
-	
+
 	CClientHost *clienthost;
 	if ( (clientid <= MaxNbClients) && ((clienthost = CFrontEndService::instance()->sendSub()->clientIdCont()[clientid]) != NULL) )
 	{

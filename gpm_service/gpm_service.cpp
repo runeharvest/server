@@ -59,12 +59,7 @@
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 
-// force admin module to link in
-extern void admin_modules_forceLink();
-void foo()
-{
-	admin_modules_forceLink();
-}
+
 
 
 using namespace std;

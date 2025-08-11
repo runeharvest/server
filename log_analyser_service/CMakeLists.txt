@@ -5,7 +5,6 @@ ADD_EXECUTABLE(ryzom_log_analyser_service WIN32 ${SRC})
 INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_log_analyser_service
-						ryzom_adminmodules
 						ryzom_gameshare
 						ryzom_pd
 						nelmisc

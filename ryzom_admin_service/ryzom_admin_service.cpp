@@ -35,15 +35,10 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-// force admin module to link in
-extern void admin_modules_forceLink();
-void foo()
-{
-	admin_modules_forceLink();
-}
+
 
 //-----------------------------------------------------------------------------
-// class CServiceClass 
+// class CServiceClass
 //-----------------------------------------------------------------------------
 
 class CServiceClass : public NLNET::IService
@@ -97,7 +92,7 @@ static const char* getShortServiceName(const IService* theService)
 	{
 		s= theService->getLongArg("shortadminname");
 	}
-	
+
 	return s.c_str();
 }
 

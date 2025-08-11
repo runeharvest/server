@@ -91,12 +91,6 @@ CInetAddress getHostAddress( TServiceId  sid );
 // Asks a service to stop and tell every one
 void doUnregisterService (TServiceId sid);
 
-extern void admin_modules_forceLink();
-void foo()
-{
-	admin_modules_forceLink();
-}
-
 /**
  * Manager for services instances
  * (Moved from the TICKS to the NS)
@@ -108,7 +102,7 @@ void foo()
 class CServiceInstanceManager
 {
 public:
-	
+
 	/// Constructor
 	CServiceInstanceManager();
 
@@ -286,7 +280,7 @@ void getDstAddresses(vector<CInetAddress> &dstAddr, const CServiceEntry &dstEntr
 	// If all the IP addresses in the destination exist in the source, and there's more than just loopbacks, it's the same host
 	// Then, just send the first loopback address if there is one
 	// Otherwise, send all the destination addresses
-	
+
 	// Check
 	bool foundMissing = false;
 	bool foundNonLoopback = false;
@@ -314,7 +308,7 @@ void getDstAddresses(vector<CInetAddress> &dstAddr, const CServiceEntry &dstEntr
 				return;
 			}
 		}
-		
+
 		// Didn't find a loopback, so just send all addresses
 		dstAddr = dstEntry.Addr;
 	}
@@ -322,7 +316,7 @@ void getDstAddresses(vector<CInetAddress> &dstAddr, const CServiceEntry &dstEntr
 	// It's not the same host
 	// Filter out all loopback addresses
 	// Filter out all LAN addresses with unreachable networks
-	
+
 	// Get all the subnets at the source
 	std::set<CIPv6Address> subnets;
 	for (const CInetAddress &addr : srcEntry.Addr)
@@ -384,7 +378,7 @@ list<CServiceEntry>::iterator effectivelyRemove (list<CServiceEntry>::iterator &
 list<CServiceEntry>::iterator doRemove (list<CServiceEntry>::iterator it)
 {
 	nldebug ("Unregister the service %s-%hu '%s'", (*it).Name.c_str(), it->SId.get(), (*it).Addr[0].asString().c_str());
-	
+
 	// tell to everybody that this service is unregistered
 
 	CMessage msgout ("UNB");
@@ -442,7 +436,7 @@ list<CServiceEntry>::iterator doRemove (list<CServiceEntry>::iterator it)
 	}
 
 	nlinfo ("Before removing the service %s-%hu, we wait the ACK of '%s'", (*it).Name.c_str(), (*it).SId.get(), res.c_str());
-	
+
 	if ((*it).WaitingUnregistrationServices.empty())
 	{
 		return effectivelyRemove (it);
@@ -596,7 +590,7 @@ bool doRegister (const string &name, const vector<CInetAddress> &addr, TServiceI
 		CServiceEntry dstEntry = CServiceEntry(from, addr, name, sid);
 		if (ok)
 		{
-			// Check if the instance is allowed to start, according to the restriction in the config file			
+			// Check if the instance is allowed to start, according to the restriction in the config file
 			if ( SIMInstance->queryStartService( name, sid, addr, reason ) )
 			{
 				// add him in the registered list
@@ -685,7 +679,7 @@ bool doRegister (const string &name, const vector<CInetAddress> &addr, TServiceI
 			{
 				msgout.serial( reason );
 			}
-			
+
 			netbase.send (msgout, from);
 			netbase.flush (from);
 		}
@@ -1056,7 +1050,7 @@ public:
 
 		// add the callback in case of disconnection
 		CNetManager::setConnectionCallback ("NS", cbConnect, NULL);
-		
+
 		// add the callback in case of disconnection
 		CNetManager::setDisconnectionCallback ("NS", cbDisconnect, NULL);
 */
@@ -1136,7 +1130,7 @@ static const char* getShortServiceName(const IService* theService)
 	{
 		s= theService->getLongArg("shortnsname");
 	}
-	
+
 	return s.c_str();
 }
 //

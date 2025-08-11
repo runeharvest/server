@@ -38,12 +38,10 @@ using namespace NLMISC;
 using namespace NLNET;
 
 // force admin module and command executor to link in
-extern void admin_modules_forceLink();
 extern void commandExecutor_forcelink();
 
 void foo()
 {
-	admin_modules_forceLink();
 	commandExecutor_forcelink();
 }
 
@@ -55,8 +53,8 @@ extern void forceChatUnifierLink();
 
 
 
-NLNET::TUnifiedCallbackItem cbArraySU[] = 
-{ 
+NLNET::TUnifiedCallbackItem cbArraySU[] =
+{
 	{"", NULL}
 };
 

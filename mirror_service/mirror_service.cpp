@@ -38,12 +38,7 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace std;
 
-// force admin module to link in
-extern void admin_modules_forceLink();
-void foo()
-{
-	admin_modules_forceLink();
-}
+
 
 
 const string MirrorServiceVersion = string("1.10-")+string(ListRowSizeString); // ADDED: Unidirectional Mode (don't wait for delta)
@@ -74,7 +69,7 @@ void cbServiceUp( const string& serviceName, NLNET::TServiceId serviceId, void *
 		{
 			//nlwarning( "Error: Another mirror service on the same computer is detected!" ); // commented out because now the seconds instance is not granted to start
 		}
-		else 
+		else
 		{
 			MSInstance->addRemoteMS( serviceId );
 		}
@@ -215,7 +210,7 @@ void	CMirrorService::init()
 	for ( ism=sDataSetSheets.begin(); ism!=sDataSetSheets.end(); ++ism )
 	{
 		//nlinfo( "\tDataset: %s", (*ism).second.DataSetName.c_str() );
-			
+
 		// Create a CDataSetMS and insert into _SDataSets
 		CDataSetMS newDataSet;
 		pair<TSDataSetsMS::iterator,bool> res = _SDataSets.insert( make_pair( (*ism).first, newDataSet ) );
@@ -546,7 +541,7 @@ void	CMirrorService::applyPendingRescans()
  */
 void	CMirrorService::deleteTracker( CChangeTrackerMS& tracker, std::vector<CChangeTrackerMS>& vect )
 {
-	nldebug( "TRACKER: Removing 1 tracker for service %s (%s)", 
+	nldebug( "TRACKER: Removing 1 tracker for service %s (%s)",
 		servStr(tracker.destServiceId()).c_str(),
 		tracker.isAllocated() ? toString("smid %d", tracker.smid()).c_str() : "notallocd" );
 
@@ -603,7 +598,7 @@ void	CMirrorService::removeTrackers( NLNET::TServiceId serviceId )
 				break; // no entity tracker
 
 			//nlinfo( "FOUND ENTITY TRACKER" );
-			
+
 			// Tell every other local service to remove the tracker
 			for ( isl=dataset._EntityTrackers[eti].begin(); isl!=dataset._EntityTrackers[eti].end(); ++isl )
 			{
@@ -704,7 +699,7 @@ void	CMirrorService::buildAndSendAllDeltas()
 	for ( ids=_SDataSets.begin(); ids!=_SDataSets.end(); ++ids )
 	{
 		CDataSetMS& dataset = GET_SDATASET(ids);
-		
+
 		// Prevent useless filling and sending
 		if ( dataset._NbLocalWriterProps != 0 ) // TODO: change criterion: one service could spawn entities without writing any properties
 		{
@@ -1113,10 +1108,10 @@ void	CMirrorService::processReceivedDelta( CMessage& msgin, TServiceId serviceId
 						CMessage msg( ms );
 						string msgName;
 						getNameOfMessageOrTransportClass( msg, msgName );
-						nlwarning( "MSG: Can't locate client service %s for message from MS-%hu (%s from %s)", 
-							servStr(destId).c_str(), 
-							serviceId.get(), 
-							msgName.c_str(), 
+						nlwarning( "MSG: Can't locate client service %s for message from MS-%hu (%s from %s)",
+							servStr(destId).c_str(),
+							serviceId.get(),
+							msgName.c_str(),
 							servStr(senderId).c_str() );
 					}
 				}
@@ -1440,7 +1435,7 @@ void	CMirrorService::allocateProperty( CMessage& msgin, NLNET::TServiceId servic
 						// List of values
 						segmentSize = (ds->maxNbRows() * (sizeof(TGameCycle)+sizeof(TServiceId8)+sizeof(TSharedListRow)))
 									+ sizeof(TSharedListRow) + (NB_SHAREDLIST_CELLS * (sizeof(TSharedListRow)+dataTypeSize));
-					}	
+					}
 					else
 					{
 						// Single values
@@ -1532,7 +1527,7 @@ void	CMirrorService::allocateProperty( CMessage& msgin, NLNET::TServiceId servic
 		else
 		{
 			nlinfo( "SHDMEM: Returning a segment already allocated for property %s (smid %d)", propName.c_str(), propinfo.SMId );
-			
+
 			if ( propinfo.PropertyIndex != INVALID_PROPERTY_INDEX )
 			{
 				dataTypeSize = propinfo.DataSet->_PropertyContainer.PropertyValueArrays[propinfo.PropertyIndex].DataTypeSize;
@@ -1654,7 +1649,7 @@ void	CMirrorService::destroyPropertySegments()
 				}
 			}
 		}
-	}	
+	}
 }
 
 
@@ -2021,7 +2016,7 @@ void			CMirrorService::setNewTagOfRemoteMS( const CMTRTag& tag, TServiceId msId 
 					break; // no entity tracker
 
 				//nlinfo( "FOUND ENTITY TRACKER" );
-				
+
 				// Tell every other local service having tag incompatibility to remove the tracker
 				for ( isl=dataset._EntityTrackers[eti].begin(); isl!=dataset._EntityTrackers[eti].end(); ++isl )
 				{
@@ -2095,7 +2090,7 @@ void	CMirrorService::processDataSetEntitiesSubscription( const std::string& data
 
 		nlinfo( "ROWMGT: MS %hu subscribes to dataset %s", msId.get(), dataSetName.c_str() );
 		allocateEntityTrackers( NDataSets[dataSetName], msId, clientServiceId, false, newTagOfRemoteMS );
-	}		
+	}
 	catch (const EMirror&)
 	{
 		nlwarning( "MIRROR: Invalid dataset while receiving subscription" );
@@ -2191,7 +2186,7 @@ void	CMirrorService::allocateEntityTrackers( CDataSetMS& dataset, NLNET::TServic
 				smidAdd = _SMIdPool.getNewId();
 			if ( ! pEntityTrackerRemoving )
 				smidRemove = _SMIdPool.getNewId();
-			if ((!pEntityTrackerAdding && (smidAdd == InvalidSMId)) 
+			if ((!pEntityTrackerAdding && (smidAdd == InvalidSMId))
 				|| (!pEntityTrackerRemoving && (smidRemove == InvalidSMId)))
 			{
 				nlwarning( "ROWMGT: No more free shared memory ids (entity tracker)" );
@@ -2329,7 +2324,7 @@ void	CMirrorService::allocateEntityTrackers( CDataSetMS& dataset, NLNET::TServic
 					// (because it will be able to do it only after receiving SC_EI).
 					// THUS the corresponding FWD_ACKATE must not call popATEAcknowledgesExpected().
 					// This info will be transmitted in the FWD_ACKATE. However, when receiving FWD_ACKATE,
-					// we will have to ensure that the tracker is open, 
+					// we will have to ensure that the tracker is open,
 					// Instead of doing this:
 					//if ( (! self) && (! entityTrackersAdding[i].isLocal()) )
 					//{
@@ -2431,7 +2426,7 @@ void	CMirrorService::broadcastSubscribeProperty( CMessage& msgin, const std::str
 		CUnifiedNetwork::getInstance()->send( "MS", msgout, false );
 		nlinfo( "PROPMGT: Sent SPROP (subscribe property) %s to all MS", propName.c_str() );
 	}
-	
+
 	// Add in local subscribers list
 	processPropSubscriptionByName( propName, serviceId, true, (options & PSOReadOnly)!=0, (options & PSONotifyChanges)!=0, notifyGroupByPropName, (options & PSOWriteOnly)!=0 );
 }
@@ -2660,7 +2655,7 @@ void	CMirrorService::processPropSubscription( CDataSetMS& dataset, TPropertyInde
 			}
 		}
 	}
-	
+
 	if ( local && (allocate || (!readOnly)) )
 	{
 		CMessage msgout2( "ATP" );
@@ -2857,7 +2852,7 @@ void	CMirrorService::receiveAcknowledgeAddEntityTrackerMS( NLNET::CMessage& msgi
 						 (! addingEntityTracker->isAllowedToSendToRemoteMS()) &&
 						 (addingEntityTracker->nbATEAcksExpectedBeforeUnblocking() == 0) )
 					{
-						nlinfo( "ROWMGT: Unblocking tracker to MS-%hu for new writer client service %s", 
+						nlinfo( "ROWMGT: Unblocking tracker to MS-%hu for new writer client service %s",
 							addingEntityTracker->destServiceId().get(),
 							CUnifiedNetwork::getInstance()->getServiceUnifiedName( serviceIdFrom ).c_str() );
 						addingEntityTracker->allowSendingToRemoteMS( true );
@@ -3129,7 +3124,7 @@ void	CMirrorService::receiveSyncFromRemoteMS( CMessage& msgin, TServiceId srcRem
 	string remoteMSVersion;
 	msgin.serial( remoteMSVersion );
 	if ( MirrorServiceVersion != remoteMSVersion )
-		nlerror( "MS version mismatch! This MS: %s; Remote MS-%hu: %s", MirrorServiceVersion.c_str(), srcRemoteMSId.get(), remoteMSVersion.c_str() ); 
+		nlerror( "MS version mismatch! This MS: %s; Remote MS-%hu: %s", MirrorServiceVersion.c_str(), srcRemoteMSId.get(), remoteMSVersion.c_str() );
 
 	// MS Tag
 	CMTRTag tag;
@@ -3216,9 +3211,9 @@ void	CMirrorService::releaseEntitiesInRanges( CDataSetMS& dataset, const std::ve
 					++nbChanges;
 				}
 			}
-			nlinfo( "ROWMGT: Removed %u entities of owner %s (range [%u..%u])", 
-				nbChanges, 
-				servStr((*ier).OwnerServiceId).c_str(), 
+			nlinfo( "ROWMGT: Removed %u entities of owner %s (range [%u..%u])",
+				nbChanges,
+				servStr((*ier).OwnerServiceId).c_str(),
 				(*ier).First, (*ier).Last );
 		}
 	}
@@ -3334,8 +3329,8 @@ void	CMirrorService::receiveSyncMirrorInformation( CMessage& msgin, TServiceId s
 						propInfo.DataSet->incNbLocalWriterProps();
 						nldebug( "%s_NbLocalWriterProps up to %u", propInfo.DataSet->name().c_str(), propInfo.DataSet->_NbLocalWriterProps );
 					}
-					
-					
+
+
 				}
 			}
 			else
@@ -3354,7 +3349,7 @@ void	CMirrorService::receiveSyncMirrorInformation( CMessage& msgin, TServiceId s
 		msgoutM.serial( tagOfNewClientService );
 		msgoutM.serial( const_cast<string&>(MirrorServiceVersion) );
 		CUnifiedNetwork::getInstance()->send( "MS", msgoutM, false );
-		
+
 		nlinfo( "Resync from client service %s succeeded", servStr(serviceId).c_str() );
 
 	}
@@ -3527,11 +3522,11 @@ void	CMirrorService::displayRemoteMSList( NLMISC::CLog& log )
 				clientServices += servStr(TServiceId8(i)) + string(" ");
 		}
 		TDeltaToMSList& deltaToMSList = _RemoteMSList.getDeltaToMSList( *isl );
-		log.displayNL( "MS %hu: %u delta buffers; client services: %s, MTR %s tag: %d", 
-			isl->get(), 
-			deltaToMSList.size(), 
-			clientServices.c_str(), 
-			hasTagOfServiceChanged( *isl ) ? "changed" : "steady", 
+		log.displayNL( "MS %hu: %u delta buffers; client services: %s, MTR %s tag: %d",
+			isl->get(),
+			deltaToMSList.size(),
+			clientServices.c_str(),
+			hasTagOfServiceChanged( *isl ) ? "changed" : "steady",
 			getTagOfService( *isl ).rawTag() );
 		TDeltaToMSList::const_iterator idml;
 		for ( idml=deltaToMSList.begin(); idml!=deltaToMSList.end(); ++idml )
@@ -3688,7 +3683,7 @@ void cbForwardACKATP( NLNET::CMessage& msgin, const std::string &serviceName, TS
 		nlinfo( "ROWMGT: Decoded ACKATP from %s", servStr(serviceId).c_str() );
 	}
 	else
-	{		
+	{
 		CMessage msgout( "ACKATP" );
 		msgout.serialBuffer( const_cast<uint8*>(msgin.buffer() + msgin.getPos()), msgin.length() - msgin.getPos() );
 		CUnifiedNetwork::getInstance()->send( destServiceId, msgout );
@@ -3735,7 +3730,7 @@ void cbAddRemoveRemoteClientService( NLNET::CMessage& msgin, const std::string &
 		catch (const EStreamOverflow&)
 		{}
 		if ( MirrorServiceVersion != remoteMSVersion )
-			nlerror( "MS version mismatch! This MS: %s; Remote MS-%hu: %s", MirrorServiceVersion.c_str(), serviceId.get(), remoteMSVersion.c_str() ); 
+			nlerror( "MS version mismatch! This MS: %s; Remote MS-%hu: %s", MirrorServiceVersion.c_str(), serviceId.get(), remoteMSVersion.c_str() );
 	}
 	MSInstance->addRemoveRemoteClientService( (TServiceId)clientServiceId, (TServiceId)serviceId, addOrRemove, tagOfNewClientService );
 }

@@ -5,7 +5,6 @@ ADD_EXECUTABLE(ryzom_admin_service WIN32 ${SRC})
 INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_admin_service
-						ryzom_adminmodules
 						nelmisc
 						nelnet)
 

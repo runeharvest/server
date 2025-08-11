@@ -7,7 +7,7 @@ ADD_EXECUTABLE(ryzom_dynamic_scenario_service WIN32 ${SRC})
 INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_dynamic_scenario_service
-						ryzom_adminmodules
+						#ryzom_adminmodules
 						ryzom_gameshare
 						ryzom_servershare
 						ryzom_aishare

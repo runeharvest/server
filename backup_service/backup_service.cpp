@@ -39,12 +39,7 @@
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 
-// force admin module to link in
-extern void admin_modules_forceLink();
-void foo()
-{
-	admin_modules_forceLink();
-}
+
 
 //-------------------------------------------------------------------------------------------------
 // struct CBackupMsgSaveFile
@@ -635,7 +630,7 @@ bool CBackupService::update()
 		IService::getInstance()->removeStatusTag("ReadWrite");
 		IService::getInstance()->addStatusTag("WriteOnly");
 	}
-	
+
 	return true;
 }
 
@@ -691,8 +686,8 @@ TUnifiedCallbackItem CbArray[]=
 TCallbackItem cbSyncArray[] =
 {
 	{ "GET_READ_MODE",		cbReadMode	},		// TODO : implement me !
-	{ "load_file",			cbSyncLoadFile	},	
-	{ "GET_FILE_CLASS",		cbSyncGetFileClass	},	
+	{ "load_file",			cbSyncLoadFile	},
+	{ "GET_FILE_CLASS",		cbSyncGetFileClass	},
 };
 
 //-----------------------------------------------------------------------------
@@ -710,7 +705,7 @@ void CBackupService::init()
 	CUnifiedNetwork::getInstance()->setServiceUpCallback( string("BS"), cbConnection, 0);
 	CUnifiedNetwork::getInstance()->setServiceDownCallback( string("BS"), cbDisconnection, 0);
 
-	// Init the sheet Id 
+	// Init the sheet Id
 	CSheetId::init(false);
 
 	if (!MasterBSHost.get().empty())
@@ -856,11 +851,11 @@ void	CDirectoryRateStat::display(NLMISC::CLog& log)
 		(*first).second.updateTime(limit);
 		uint64	rdrate = (*first).second.ReadBytes/60;
 		uint64	wrrate = (*first).second.WrittenBytes/60;
-		log.displayNL(format.c_str(), 
-			(*first).first.c_str(), 
-			NLMISC::toString((*first).second.ReadFiles).c_str(), 
-			(NLMISC::bytesToHumanReadable(uint32(rdrate))+"/s").c_str(), 
-			NLMISC::toString((*first).second.WrittenFiles).c_str(), 
+		log.displayNL(format.c_str(),
+			(*first).first.c_str(),
+			NLMISC::toString((*first).second.ReadFiles).c_str(),
+			(NLMISC::bytesToHumanReadable(uint32(rdrate))+"/s").c_str(),
+			NLMISC::toString((*first).second.WrittenFiles).c_str(),
 			(NLMISC::bytesToHumanReadable(uint32(wrrate))+"/s").c_str());
 	}
 }

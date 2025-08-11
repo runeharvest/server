@@ -144,12 +144,7 @@ using namespace NLMISC;
 using namespace NLNET;
 using namespace NLGEORGES;
 
-// force admin module to link in
-extern void admin_modules_forceLink();
-void foo()
-{
-	admin_modules_forceLink();
-}
+
 
 extern void cbClientReady(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 extern CVariable<bool> EGSLight;
@@ -3222,7 +3217,7 @@ NLMISC_COMMAND(simulateClientReady,"Simulate clientReady for a character","clien
 
 
 // predicate for following command
-struct TIsNotACharFile 
+struct TIsNotACharFile
 #ifndef NL_CPP17
 	: std::unary_function<string, bool>
 #endif

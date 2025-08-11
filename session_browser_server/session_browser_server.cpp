@@ -43,13 +43,6 @@ using namespace R2;
 CVariable<string>	MaxRingPoints("sbs", "MaxRingPoints", "A string that contains the maximum ring points in each ecosystem (e.g A3:D8:F5:J9:L2:R4)", "A1:D9:F9:J9:L9:R9", 0, true);
 
 #ifndef UNIT_TEST_ENV
-// force admin module and command executor to link in
-extern void admin_modules_forceLink();
-
-void foo()
-{
-	admin_modules_forceLink();
-}
 #else
 void session_browser_force_link()
 {
@@ -75,7 +68,7 @@ void session_browser_force_link()
 
 
 // The session browser module
-class CSessionBrowserServerMod 
+class CSessionBrowserServerMod
 	:	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
 		public CSessionBrowserServerWebItf,
 		public CRingSessionManagerWebClientItf
@@ -99,7 +92,7 @@ class CSessionBrowserServerMod
 	typedef CTwinMap<TSockId, TUserId>	TClientAuths;
 	/// client auth info
 	TClientAuths	_ClientAuths;
-	
+
 	// Proxy to ServerEditionModule
 	NLNET::TModuleProxyPtr	_ServerEditionProxy;
 
@@ -139,14 +132,14 @@ public:
 			nlwarning("RSM : missing ring db connection information");
 			return false;
 		}
-		
+
 		// connect to the database
 		if (!_RingDB.connect(*initRingDb))
 		{
 			nlwarning("Failed to connect to database using %s", initRingDb->toString().c_str());
 			return false;
 		}
-		
+
 		CShardNames::getInstance().init(IService::getInstance()->ConfigFile);
 
 		return ret;
@@ -181,7 +174,7 @@ public:
 
 		}
 	}
-	 
+
 	void onModuleUp(NLNET::IModuleProxy *moduleProxy)
 	{
 		std::string moduleName = moduleProxy->getModuleClassName();
@@ -230,7 +223,7 @@ public:
 	virtual void on_setSessionStartParams(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const std::string& initialIslandLocation, const std::string & initialEntryPoint, const std::string& initialSeason)
 	{
 		CHECK_AUTH_WITH_CHARID(from, charId);
-		CRingSessionManagerWebClientItf::setSessionStartParams(charId, sessionId, initialIslandLocation, initialEntryPoint, initialSeason);			
+		CRingSessionManagerWebClientItf::setSessionStartParams(charId, sessionId, initialIslandLocation, initialEntryPoint, initialSeason);
 	}
 
 
@@ -584,11 +577,11 @@ public:
 	//                6 : session not found
 	//                7 : scenario not found
 	//                8 : internal error
-	virtual void on_setPlayerRating(NLNET::TSockId from, uint32 charId, TSessionId sessionId, 
-		uint32 rateFun, 
-		uint32 rateDifficulty, 
-		uint32 rateAccessibility, 
-		uint32 rateOriginality, 
+	virtual void on_setPlayerRating(NLNET::TSockId from, uint32 charId, TSessionId sessionId,
+		uint32 rateFun,
+		uint32 rateDifficulty,
+		uint32 rateAccessibility,
+		uint32 rateOriginality,
 		uint32 rateDirection)
 	{
 		CHECK_AUTH_WITH_CHARID(from, charId);
@@ -681,7 +674,7 @@ public:
 			return;
 		}
 		if (connStatus != "cs_online")
-		{	
+		{
 			nlinfo("Client from '%s' submited auth cookie '%s' for user %u, but user is not online",
 				from->getTcpSock()->remoteAddr().asString().c_str(),
 				cookie.toString().c_str(),
@@ -704,12 +697,12 @@ public:
 		}
 		_ClientAuths.add(from, userId);
 	}
-	
+
 	// Ask for the list of session that are available
 	// for the requesting character.
 	virtual void on_getSessionList(NLNET::TSockId from, uint32 charId)
 	{
-		nldebug("on_getSessionList : getting sessions for char %u (new version)", charId); 
+		nldebug("on_getSessionList : getting sessions for char %u (new version)", charId);
 		CHECK_AUTH_WITH_CHARID(from, charId);
 
 		// check for unit test
@@ -729,7 +722,7 @@ public:
 			query << "SELECT session_id, kicked";
 			query << " FROM session_participant WHERE char_id = "<< charId;
 			BOMB_IF(!_RingDB.query(query), "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
-			CUniquePtr<CStoreResult> result(_RingDB.storeResult());	
+			CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 			uint32 row = result->getNumRows();
 			uint32 index = 0;
 
@@ -737,7 +730,7 @@ public:
 			{
 				uint32 session_id;
 				uint32 kicked;
-				
+
 				result->fetchRow();
 				result->getField(0, session_id);
 				result->getField(1, kicked);
@@ -788,7 +781,7 @@ public:
 		STOP_IF(shardIndex == 0xffffffff, "Invalid shard name");
 
 		// issue the request in the session table (only Animation Sessions)
-		//                     0                    1					2          
+		//                     0                    1					2
 		query = "SELECT home_mainland_session_id, guild_id, sessions.session_id,";
 		//			3				4         5						6					7
 		query << " sessions.title, sessions.owner, start_date, sessions.description, sessions.orientation,";
@@ -802,7 +795,7 @@ public:
 		query << " LEFT JOIN session_log ON sessions.session_id = session_log.id";
 		query << " LEFT JOIN player_rating ON session_log.scenario_id = player_rating.scenario_id";
 		query << " LEFT JOIN scenario ON session_log.scenario_id = scenario.id";
-		
+
 		query << " WHERE session_type = 'st_anim'";
 
 		query << " AND state = 'ss_open'";
@@ -905,15 +898,15 @@ public:
 			sd.setScenarioRRPTotal(rrpTotal);
 			result2->getField(22, allowFreeTrial);
 			sd.setAllowFreeTrial(allowFreeTrial);
-			
+
 
 			uint32 startDate;
 			result2->getDateField(5, startDate);
 			sd.setLaunchDate(startDate);
-			
+
 			sd.setRequesterCharInvited(allowedSessions.find(sessionNum) != allowedSessions.end() || accessType == TAccessType::at_public || autoInvite);
 			sd.setRequesterCharKicked(kickedSessions.find(sessionNum) != kickedSessions.end());
-			
+
 			// Calculate number of connected players
 			// TODO : do this a bit faster
 			query =  "SELECT COUNT(*) FROM ring_users";
@@ -1141,9 +1134,9 @@ public:
 		if (result->getNumRows() == 0)
 		{
 			sessionAverageScores(from, false, 0,0,0,0,0, 0);
-			return;	
+			return;
 		}
-		
+
 		result->fetchRow();
 
 		uint32 ratesNb;
@@ -1162,7 +1155,7 @@ public:
 		result->getField(4, rateOri);
 		result->getField(5, rateDir);
 		result->getField(6, rrpScored);
-		
+
 		// send the result back to the client
 		sessionAverageScores(from, true, rateFun, rateDiff, rateAcc, rateOri, rateDir, rrpScored);
 	}
@@ -1182,11 +1175,11 @@ public:
 
 		BOMB_IF(!_RingDB.query(query), "getScenarioAverageScores : failed request in database", scenarioAverageScores(from, false, 0,0,0,0,0,0); return);
 		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
-		
+
 		if (result->getNumRows() == 0)
 		{
 			scenarioAverageScores(from, false, 0,0,0,0,0, 0);
-			return;	
+			return;
 		}
 
 		result->fetchRow();
@@ -1207,7 +1200,7 @@ public:
 		result->getField(4, rateOri);
 		result->getField(5, rateDir);
 		result->getField(6, rrpTotal);
-		
+
 		// send the result back to the client
 		scenarioAverageScores(from, true, rateFun, rateDiff, rateAcc, rateOri, rateDir, rrpTotal);
 	}
@@ -1259,11 +1252,11 @@ public:
 
 	// Send the Footer message of a multi-part message that will be forwarded to DSS via sbs
 	void on_forwardToDss(NLNET::TSockId from, uint32 charId, const NLNET::CMessage& msg)
-	{		
+	{
 		CHECK_AUTH_WITH_CHARID(from, charId);
-		BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);	
+		BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
 
-		NLNET::CMessage message(msg);		
+		NLNET::CMessage message(msg);
 		/*
 		if (!message.isReading())
 		{
@@ -1271,8 +1264,8 @@ public:
 		}
 		*/
 		_ServerEditionProxy->sendModuleMessage(this, message);
-		
-		
+
+
 	}
 
 
@@ -1284,7 +1277,7 @@ public:
 	virtual void on_CRingSessionManagerWebClient_Disconnection(NLNET::TSockId from)
 	{
 		// we have lost conn with the SU, we need to disconnect all
-		// connected clients, discard all pending request, and 
+		// connected clients, discard all pending request, and
 		// wait for reconnection to the SU
 
 		// disconnect all clients
@@ -1334,7 +1327,7 @@ public:
 	}
 
 	//
-	virtual void on_sessionInfoResult(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const RSMGR::TRaceFilter &raceFilter, const RSMGR::TReligionFilter &religionFilter, 
+	virtual void on_sessionInfoResult(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const RSMGR::TRaceFilter &raceFilter, const RSMGR::TReligionFilter &religionFilter,
 		const RSMGR::TGuildFilter &guildFilter, const RSMGR::TShardFilter &shardFilter, const RSMGR::TLevelFilter &levelFilter, bool subscriptionClosed, bool autoInvite, const std::string &language, const TSessionOrientation &orientation, const std::string &description)
 	{
 		// forward to the appropriate client
@@ -1345,7 +1338,7 @@ public:
 			return;
 		}
 
-		sessionInfoResult(*psock, charId, sessionId, raceFilter, religionFilter, guildFilter, 
+		sessionInfoResult(*psock, charId, sessionId, raceFilter, religionFilter, guildFilter,
 			shardFilter, levelFilter, subscriptionClosed, autoInvite, language, orientation, description);
 	}
 
@@ -1425,8 +1418,8 @@ NLNET_REGISTER_MODULE_FACTORY(CSessionBrowserServerMod, "SessionBrowserServerMod
 
 
 
-NLNET::TUnifiedCallbackItem cbArraySU[] = 
-{ 
+NLNET::TUnifiedCallbackItem cbArraySU[] =
+{
 	{"", NULL}
 };
 
@@ -1443,7 +1436,7 @@ void CSessionBrowserServer::init()
 bool CSessionBrowserServer::update()
 {
 	CSingletonRegistry::getInstance()->serviceUpdate();
-	
+
 	return true;
 }
 

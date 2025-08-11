@@ -92,7 +92,7 @@ ADD_EXECUTABLE(ryzom_entities_game_service WIN32
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_entities_game_service
-						ryzom_adminmodules
+						#ryzom_adminmodules
 						ryzom_gameshare
 						ryzom_servershare
 						ryzom_aishare

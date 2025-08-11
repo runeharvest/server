@@ -22,7 +22,6 @@
 #include "nel/misc/string_view.h"
 #include "nel/misc/variable.h"
 
-#include "config.h"
 #include "quic_selfsign.h"
 
 #include <condition_variable>

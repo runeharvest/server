@@ -20,7 +20,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/net/service.h"
 #include "game_share/dyn_chat.h"
-#include "../server_share/r2_session_backup_module.h"
+#include "server_share/r2_session_backup_module.h"
 
 namespace NLNET
 {
@@ -45,7 +45,7 @@ public:
 	// Initialisation of service
 	void init ();
 
-	// Update net processing 
+	// Update net processing
 	bool update ();
 
 	// Update service processing
@@ -58,19 +58,19 @@ public:
 	static R2::CDynamicScenarioService & instance()  { return (CDynamicScenarioService&)*IService::getInstance(); }
 
 	R2::CDynamicMapService & getDynamicMapService() const { return *_Dms; }
-	
+
 	void forwardToStringManagerModule (NLNET::CMessage &msgin);
-	
+
 
 	void forwardIncarnChat(TChanID id,TDataSetRow senderId,ucstring sentence);
 
 	void setR2Sbm(NLNET::IModule* module) { _R2Sbm = module; }
-	
+
 	NLNET::IModule* getR2Sbm() const { return _R2Sbm; }
-	
+
 	bool getBsUp() const { return _BsUp; }
 	void setBsUp(bool up){ _BsUp = up; }
-	
+
 
 
 private:
@@ -81,9 +81,9 @@ private:
 	R2::CDynamicMapService* _Dms; // Null if _Mode == RESbm
 	NLNET::IModule* _R2Sbm;
 	bool _BsUp;
-	//	
+	//
 
-};	
+};
 } //namespace R2
 
 #endif //R2_DYNAMIC_SCENARIO_SERVICE_H

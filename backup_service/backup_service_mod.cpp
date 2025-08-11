@@ -18,7 +18,7 @@
 #include "nel/net/module.h"
 #include "nel/net/module_builder_parts.h"
 
-#include "../server_share/backup_service_itf.h"
+#include "server_share/backup_service_itf.h"
 
 #include "backup_service.h"
 
@@ -32,7 +32,7 @@ namespace BS
 {
 
 
-	class CBackupServiceMod: 
+	class CBackupServiceMod:
 		public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
 		public CBackupServiceSkel
 	{
@@ -101,7 +101,7 @@ namespace BS
 		/////////////////////////////////////////////////////////////
 		//// commands
 		/////////////////////////////////////////////////////////////
-	
+
 		NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CBackupServiceMod, CModuleBase)
 			NLMISC_COMMAND_HANDLER_ADD(CBackupServiceMod, dump, "dump the module internal state", "no param");
 //			NLMISC_COMMAND_HANDLER_ADD(CMailForumNotifierFwd, simMailNotify, "Simulate a mail notification", "<charId>");
@@ -114,8 +114,8 @@ namespace BS
 
 			return true;
 		}
-	}; 
-	
+	};
+
 	NLNET_REGISTER_MODULE_FACTORY(CBackupServiceMod, "BackupServiceMod");
 
 

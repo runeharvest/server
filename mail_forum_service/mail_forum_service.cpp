@@ -39,12 +39,7 @@ using namespace NLMISC;
 using namespace std;
 
 
-// force admin module to link in
-extern void admin_modules_forceLink();
-void foo()
-{
-	admin_modules_forceLink();
-}
+
 
 
 CVariable<std::string>	WebRootDirectory("web", "WebRootDirectory", "Set Web directory access", "www/", 0, true);
@@ -62,7 +57,7 @@ class CMailForumService : public NLNET::IService
 {
 public:
 
-	/** 
+	/**
 	 * init the service
 	 */
 	void init()
@@ -82,7 +77,7 @@ public:
 
 		return true;
 	}
-	
+
 	/**
 	 * release
 	 */

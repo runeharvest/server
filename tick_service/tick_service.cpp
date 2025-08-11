@@ -44,12 +44,7 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-// force admin module to link in
-extern void admin_modules_forceLink();
-void foo()
-{
-	admin_modules_forceLink();
-}
+
 
 
 CTickService * TS = NULL;
@@ -97,12 +92,12 @@ static void cbRegister(CMessage& msgin, const string &serviceName, NLNET::TServi
 	msgin.serial( tocking );
 	msgin.serial( threshold );
 	TS->registerClient( serviceId, tocking, threshold );
-		
+
 	CMessage msgout( "REGISTERED" );
 	TGameTime gameTime = TS->getGameTime();
 	TGameTime gameTimeStep = TS->getGameTimeStep();
 	TGameCycle gameCycle = TS->getGameCycle();
-	
+
 	msgout.serial( gameTime );
 	msgout.serial( gameTimeStep );
 	msgout.serial( gameCycle );
@@ -176,7 +171,7 @@ static void cbResumeTick(CMessage& msgin, const string &serviceName, NLNET::TSer
 
 
 //-----------------------------------------------
-//	callback table for input message 
+//	callback table for input message
 //
 //-----------------------------------------------
 TUnifiedCallbackItem CbArray[] =
@@ -240,7 +235,7 @@ void	CTickService::resumeTick()
 //
 //-----------------------------------------------
 void CTickService::registerClient( NLNET::TServiceId serviceId, bool tocking, uint16 threshold )
-{ 
+{
 	if( serviceId.get() < _ClientInfos.size() )
 	{
 		if( _ClientInfos[serviceId.get()].Registered == true )
@@ -248,8 +243,8 @@ void CTickService::registerClient( NLNET::TServiceId serviceId, bool tocking, ui
 			nlerror("<CTickService::registerClient> The service %d is alredy registered",serviceId.get());
 		}
 
-		_ClientInfos[serviceId.get()].Registered = true; 
-		_ClientInfos[serviceId.get()].Tocking = tocking; 
+		_ClientInfos[serviceId.get()].Registered = true;
+		_ClientInfos[serviceId.get()].Tocking = tocking;
 		_ClientInfos[serviceId.get()].Threshold = threshold;
 		_QuickLog.displayNL( "%u: +%hu", getGameCycle(), serviceId.get() );
 	}
@@ -295,7 +290,7 @@ void CTickService::addTock( NLNET::TServiceId serviceId )
 			{
 				nlwarning("<CTickService::addTock> Receiving a tock, but there was no tock missing !");
 			}
-		}	
+		}
 		else
 		{
 			nlwarning("(TICKS)<CTickService::addTock> Tock received from service %d which is not registered",serviceId.get());
@@ -327,7 +322,7 @@ void CTickService::checkTockReceived()
 	{
 		// if this client is supposed to send a tock
 		if( _ClientInfos[i].Registered )
-		{			
+		{
 			// if tock was not received yet
 			if( _ClientInfos[i].TockReceived == false )
 			{
@@ -376,7 +371,7 @@ void CTickService::checkTockReceived()
 			_LastTickTimeStep = _TickTimeStep;
 			FirstTime = false;
 		}
-	
+
 		// setup the default value for the time step to use
 		NLMISC::TLocalTime effectiveTimeStep= _TickTimeStep;
 
@@ -421,7 +416,7 @@ void CTickService::checkTockReceived()
 			_TickSendTime = oldTime + dt;
 		}
 
-		//nlinfo( " %" NL_I64 "u  %" NL_I64 "u", (TTime)((_TickSendTime-oldTime)*1000), (TTime)((d2-oldTime)*1000) );		
+		//nlinfo( " %" NL_I64 "u  %" NL_I64 "u", (TTime)((_TickSendTime-oldTime)*1000), (TTime)((d2-oldTime)*1000) );
 
 		// broadcast the tick
 		broadcastTick();
@@ -439,7 +434,7 @@ void CTickService::checkTockReceived()
 //
 //-----------------------------------------------
 void CTickService::broadcastTick()
-{	
+{
 	if ( Pause == true ) return;
 
 	MainTimeMeasures.beginNewCycle();
@@ -469,7 +464,7 @@ void CTickService::broadcastTick()
 				time_t t; time( &t );
 				_QuickLog.displayNL( "%s: %u: [->%u] TICK", IDisplayer::dateToHumanString(t), getGameCycle(), i );
 			}
-			
+
 			CUnifiedNetwork::getInstance()->send(NLNET::TServiceId(i),msgout);
 			TSockId host;
 			CCallbackNetBase *cnb;
@@ -546,7 +541,7 @@ uint16 CTickService::getClientCount()
 	for( i=0; i<_ClientInfos.size(); i++ )
 	{
 		if( _ClientInfos[i].Registered )
-		{	
+		{
 			clientCount++;
 		}
 	}
@@ -558,7 +553,7 @@ uint16 CTickService::getClientCount()
 
 
 //-----------------------------------------------
-//	displayGameTime() 
+//	displayGameTime()
 //
 //-----------------------------------------------
 void CTickService::displayGameTime() const
@@ -591,8 +586,8 @@ void CTickService::init()
 	CurrentMode = TickRunning;
 
 	CSingletonRegistry::getInstance()->init();
-	
-	// keep pointer on class	
+
+	// keep pointer on class
 	TS = this;
 
 	_StepCount = 1;
@@ -632,7 +627,7 @@ void CTickService::init()
 		// tick service time step between two ticks
 		_TickTimeStep = 0.1f;
 	}
-	
+
 	try
 	{
 		_GameTimeStep = ConfigFile.getVar("GameTimeStep").asFloat();
@@ -695,7 +690,7 @@ bool CTickService::update()
 		{
 			// if this client is supposed to send a tock
 			if( _ClientInfos[i].Registered )
-			{	
+			{
 				// if tock was not received yet
 				if( _ClientInfos[i].TockReceived == false )
 				{
@@ -878,11 +873,11 @@ void CTickServiceGameCycleTimeMeasure::displayStats( NLMISC::CLog *log )
 {
 	log->displayNL( "Shard timings at GC %u:", CTickEventHandler::getGameCycle() );
 	log->displayRawNL( "___AVG__" );
-	displayStat( log, MHTSum );	
+	displayStat( log, MHTSum );
 	log->displayRawNL( "___MAX___" );
-	displayStat( log, MHTMax );	
+	displayStat( log, MHTMax );
 	log->displayRawNL( "___MIN___" );
-	displayStat( log, MHTMin );	
+	displayStat( log, MHTMin );
 }
 
 
@@ -958,7 +953,7 @@ NLMISC_VARIABLE(NLNET::TServiceId, SlowestService, "SId of the slowest service")
 NLMISC_VARIABLE(double, SlowestTock, "Time in millisecond to receive the slowest tock");
 
 NLMISC_VARIABLE(string, WaitingForServices, "Services that haven't tocked yet");
-	
+
 NLMISC_DYNVARIABLE(TGameTime, GameTime, "Current game time in second")
 {
 	if (get) *pointer = TS->getGameTime();
@@ -1220,7 +1215,7 @@ NLMISC_COMMAND( loadFileBS, "load a file from BS", "<file to be loaded>")
 class CFileClassReceiveCb: public IBackupFileClassReceiveCallback
 {
 public:
-	
+
 	virtual void callback(const CFileDescriptionContainer& list)
 	{
 		nlinfo("received fileclass");
@@ -1229,7 +1224,7 @@ public:
 			nlinfo("file: %s", list[i].FileName.c_str());
 		nlinfo("end of class");
 	}
-	
+
 };
 
 NLMISC_COMMAND( loadFileClassBS, "load a fileclass from BS", "<directory> <classes to be loaded>")
@@ -1250,7 +1245,7 @@ NLMISC_COMMAND( loadFileClassBS, "load a fileclass from BS", "<directory> <class
 	classes.push_back(bclass);
 
 	Bsi.requestFileClass(directory, classes, new CFileClassReceiveCb());
-	
+
 	return true;
 }
 

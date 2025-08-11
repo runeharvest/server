@@ -57,15 +57,6 @@ CVariable<string> LQLState("lgs", "LQLState", "The current Query state", "");
 CVariable<uint32> LastFinishedQuery("lgs", "LastFinishedQuery", "The number of the last finished request", 0);
 CVariable<string> LogQueryResultFile("lgs", "LogQueryResultFile", "The file used to output the query result", "log_query_result.txt");
 
-
-extern void admin_modules_forceLink();
-void foo()
-{
-	admin_modules_forceLink();
-}
-
-
-
 uint32 randu32(CRandom &rand, uint32 mod)
 {
 	uint32 ret = (((uint32)rand.rand(0xffff))<<16)+rand.rand(0xffff);
@@ -90,7 +81,7 @@ uint64 randu64(CRandom &rand, uint64 mod)
 
 
 /** An safe inter-thread communication channel.
- *  Allow safe transmission of object of type T 
+ *  Allow safe transmission of object of type T
  *	from one thread to another (need 2 channel
  *	for a bi-di operation).
  */
@@ -103,7 +94,7 @@ class CThreadChannel
 	/// The mutex that protect the object.
 	NLMISC::CMutex	_Mutex;
 
-	/// Wait until a data is available or channel empty, 
+	/// Wait until a data is available or channel empty,
 	/// NB : The is Aquired on exit to be sure that the wait will lock the
 	/// available data.
 	/// NB : the mutex MUST be aquired before calling wait
@@ -114,7 +105,7 @@ class CThreadChannel
 		// efficiency.
 
 		/// Loop until there is some data to read or no more date
-		do 
+		do
 		{
 			_Mutex.leave();
 			// begin by a sleep
@@ -200,7 +191,7 @@ public:
 		return t;
 	}
 
-	/// Try to read a data. 
+	/// Try to read a data.
 	/// Return true if a data have been read, false otherwise
 	bool read(T &result)
 	{
@@ -246,7 +237,7 @@ public:
 
 
 // the logger module
-class CLoggerServiceMod 
+class CLoggerServiceMod
 	:	public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
 		public LGS::CLoggerServiceSkel
 {
@@ -354,7 +345,7 @@ class CLoggerServiceMod
 	CThreadChannel<TThreadCommand>	_QueryCommands;
 	/// A thread channel used by the query thread to report status string
 	CThreadChannel<TThreadStatus>	_QueryStatus;
-	/// A thread channel used by the query thread to report query result to be 
+	/// A thread channel used by the query thread to report query result to be
 	/// stored on disk by the main thread using the backup service interface.
 	CThreadChannel<TThreadResult>	_QueryResult;
 
@@ -441,7 +432,7 @@ public:
 
 		return true;
 	}
-	
+
 	void onModuleDown(IModuleProxy *moduleProxy)
 	{
 		// check if this is one of our client
@@ -466,7 +457,7 @@ public:
 			_LogMutex.enter();
 			doHourlyProcess();
 			_LogMutex.leave();
-			
+
 			// update working time
 			_LastHourlyProcess = now;
 			_LastMinuteOutput = now;
@@ -522,7 +513,7 @@ public:
 			{
 				bool firstBlock = _WriteLineCounter == 0;
 
-				CBackupMsgSaveFile saveFile(BsiGlobal.getRemotePath()+"/"+threadResult.OutputFilename, 
+				CBackupMsgSaveFile saveFile(BsiGlobal.getRemotePath()+"/"+threadResult.OutputFilename,
 											firstBlock ? CBackupMsgSaveFile::SaveFile : CBackupMsgSaveFile::AppendFile ,
 											BsiGlobal);
 				saveFile.FileName = threadResult.OutputFilename;
@@ -588,7 +579,7 @@ public:
 		std::string logRoot = ls.getLogRoot();
 		vector<string> files;
 		CPath::getPathContent(logRoot, false, false, true, files, NULL, true);
-		
+
 		for (uint i=0; i<files.size(); ++i)
 		{
 			if (files[i].find("minutely") != string::npos)
@@ -610,7 +601,7 @@ public:
 		std::string logRoot = ls.getLogRoot();
 		vector<string> files;
 		CPath::getPathContent(logRoot, false, false, true, files, NULL, true);
-		
+
 		for (uint i=0; i<files.size(); ++i)
 		{
 			if (files[i].find("minutely") != string::npos && files[i].find(".binlog") == files[i].size()-7)
@@ -638,7 +629,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 
 
-	// A logger client register itself wy providing it's definition of 
+	// A logger client register itself wy providing it's definition of
 	// the log content. It is mandatory that ALL client share
 	// Exactly the same definition of log.
 	virtual void registerClient(NLNET::IModuleProxy *sender, uint32 shardId, const std::vector < TLogDefinition > &logDef)
@@ -697,7 +688,7 @@ public:
 			return;
 		}
 
-		// for each log received 
+		// for each log received
 		for (uint l=0; l<logInfos.size(); ++l)
 		{
 			const TLogInfo &logInfo = logInfos[l];
@@ -705,20 +696,20 @@ public:
 			TLogDefLindex::iterator logDefIt = _LogDefIndex.find(logInfo.getLogName());
 			if (logDefIt == _LogDefIndex.end())
 			{
-				nlwarning("Service '%s' send unknown log named '%s'", 
-					sender ? sender->getModuleName().c_str() : "NULL", 
+				nlwarning("Service '%s' send unknown log named '%s'",
+					sender ? sender->getModuleName().c_str() : "NULL",
 					logInfo.getLogName().c_str());
 				return;
 			}
-			
+
 			// 3rd validate the parameter list
 			nlassert(logDefIt->second < _LogDefs.size());
 			const TLogDefinition &ld = _LogDefs[logDefIt->second];
-			
+
 			if (logInfo.getParams().size() != ld.getParams().size())
 			{
-				nlwarning("Service '%s' send log '%s' with %u param instead of %u", 
-					sender ? sender->getModuleName().c_str() : "NULL", 
+				nlwarning("Service '%s' send log '%s' with %u param instead of %u",
+					sender ? sender->getModuleName().c_str() : "NULL",
 					logInfo.getLogName().c_str(),
 					logInfo.getParams().size(),
 					ld.getParams().size());
@@ -726,8 +717,8 @@ public:
 			}
 			if (logInfo.getListParams().size() != ld.getListParams().size())
 			{
-				nlwarning("Service '%s' send log '%s' with %u listParam instead of %u", 
-					sender ? sender->getModuleName().c_str() : "NULL", 
+				nlwarning("Service '%s' send log '%s' with %u listParam instead of %u",
+					sender ? sender->getModuleName().c_str() : "NULL",
 					logInfo.getLogName().c_str(),
 					logInfo.getListParams().size(),
 					ld.getListParams().size());
@@ -737,8 +728,8 @@ public:
 			{
 				if (ld.getParams()[i].getType() != logInfo.getParams()[i].getType())
 				{
-					nlwarning("Service '%s' send log '%s' with %uth param (%s) of type %s instead of %s", 
-						sender ? sender->getModuleName().c_str() : "NULL", 
+					nlwarning("Service '%s' send log '%s' with %uth param (%s) of type %s instead of %s",
+						sender ? sender->getModuleName().c_str() : "NULL",
 						logInfo.getLogName().c_str(),
 						i+1,
 						ld.getParams()[i].getName().c_str(),
@@ -755,8 +746,8 @@ public:
 				{
 					if (ld.getListParams()[i].getType() != first->getType())
 					{
-						nlwarning("Service '%s' send log '%s' with %uth listParam (%s) of type %s instead of %s", 
-							sender ? sender->getModuleName().c_str() : "NULL", 
+						nlwarning("Service '%s' send log '%s' with %uth listParam (%s) of type %s instead of %s",
+							sender ? sender->getModuleName().c_str() : "NULL",
 							logInfo.getLogName().c_str(),
 							i+1,
 							ld.getParams()[i].getName().c_str(),
@@ -766,8 +757,8 @@ public:
 					}
 				}
 			}
-			
-			
+
+
 			// 4st store the log
 			_LogInfos.push_back(TLogEntry());
 			++_LogInfosSize;
@@ -989,7 +980,7 @@ public:
 			vector<string>	files;
 			CPath::getPathContent(CLogStorage::getLogRoot(), false, false, true, files, NULL, true);
 
-			// first loop to select the file to read according to the date 
+			// first loop to select the file to read according to the date
 //			set<uint32>	selectedFileIndex;
 			/// This is the ordered by date file selection
 			map<uint32, uint32> selectedFile;
@@ -998,7 +989,7 @@ public:
 
 			for (uint i=0; i<files.size(); ++i)
 			{
-				if (files[i].substr(files[i].size()-7) == ".binlog" 
+				if (files[i].substr(files[i].size()-7) == ".binlog"
 					&& files[i].find("hourly_") != string::npos)
 				{
 					// extract the date from the file name
@@ -1006,7 +997,7 @@ public:
 
 					struct tm fileDate;
 					memset(&fileDate, 0, sizeof(fileDate));
-					int nbField = sscanf(fileName.c_str(), "hourly_%u-%u-%u_%u-%u-%u", 
+					int nbField = sscanf(fileName.c_str(), "hourly_%u-%u-%u_%u-%u-%u",
 						&fileDate.tm_year,
 						&fileDate.tm_mon,
 						&fileDate.tm_mday,
@@ -1076,8 +1067,8 @@ public:
 				ls.loadLogs(files[first->second]);
 
 				// check the timeline limits
-				if (!ls._DiskLogEntries.empty() 
-					&& 
+				if (!ls._DiskLogEntries.empty()
+					&&
 						(ls._DiskLogEntries.begin()->LogDate >  timeLine.rbegin()->EndDate
 						|| ls._DiskLogEntries.rbegin()->LogDate <  timeLine.begin()->StartDate)
 						)
@@ -1104,7 +1095,7 @@ public:
 				{
 					CAutoMutex<CMutex> lock(_LogMutex);
 					_QueryStatus.write(TThreadStatus(qs_lql_state, toString("Processing %u logs still in memory...", _LogInfosSize)));
-					
+
 					TLogInfos::const_iterator first(_LogInfos.begin()), last(_LogInfos.end());
 					for (; first != last; ++first)
 					{
@@ -1124,7 +1115,7 @@ public:
 			}
 
 			uint32 afterSelect = CTime::getSecondsSince1970();
-	
+
 			_QueryStatus.write(TThreadStatus(qs_pop_state, "Querying"));
 			_QueryStatus.write(TThreadStatus(qs_push_state, "WritingResult"));
 
@@ -1204,7 +1195,7 @@ endQuery:
 			log.displayNL("Can't generate log because no log definition found");
 			return true;
 		}
-		
+
 		uint32 nbLogs, nbFiles;
 		NLMISC::fromString(args[0], nbLogs);
 		NLMISC::fromString(args[1], nbFiles);
@@ -1425,9 +1416,9 @@ endQuery:
 		{
 			const TLogDefinition &ld = _LogDefs[i];
 
-			log.displayNL("LogName=%s, Text=%s, %u parameters, %u list parameters", 
-				ld.getLogName().c_str(), 
-				ld.getLogText().c_str(), 
+			log.displayNL("LogName=%s, Text=%s, %u parameters, %u list parameters",
+				ld.getLogName().c_str(),
+				ld.getLogText().c_str(),
 				ld.getParams().size(),
 				ld.getListParams().size());
 
@@ -1501,7 +1492,7 @@ endQuery:
 
 		return true;
 	}
-		
+
 	NLMISC_CLASS_COMMAND_DECL(queryLogs)
 	{
 		if (args.size() == 1 && args[0] == "help")
@@ -1550,8 +1541,8 @@ endQuery:
 		{
 			IModuleProxy *proxy = first->first;
 			TShardId shardId = first->second;
-			log.displayNL("  Client : '%s' for shard %u", 
-				proxy? proxy->getModuleName().c_str() : "NULL", 
+			log.displayNL("  Client : '%s' for shard %u",
+				proxy? proxy->getModuleName().c_str() : "NULL",
 				shardId);
 		}
 
@@ -1560,7 +1551,7 @@ endQuery:
 		return true;
 	}
 
-	
+
 	NLMISC_CLASS_COMMAND_DECL(displayLog)
 	{
 		CAutoMutex<CMutex> lock(_LogMutex);
@@ -1574,9 +1565,9 @@ endQuery:
 
 		TLogInfos::reverse_iterator rit = _LogInfos.rbegin();
 		// advance cursor up to the requested time
-		while (rit != _LogInfos.rend() 
-			&& (rit->LogInfo.getTimeStamp() == 0 
-				|| rit->LogInfo.getTimeStamp() == ~0 
+		while (rit != _LogInfos.rend()
+			&& (rit->LogInfo.getTimeStamp() == 0
+				|| rit->LogInfo.getTimeStamp() == ~0
 				|| rit->LogInfo.getTimeStamp()+nbSec > now))
 			++rit;
 
@@ -1584,9 +1575,9 @@ endQuery:
 		TLogInfos::iterator it = rit.base();
 
 
-		while (it != _LogInfos.end() 
-			&& (it->LogInfo.getTimeStamp() == 0 
-				|| it->LogInfo.getTimeStamp() == ~0 
+		while (it != _LogInfos.end()
+			&& (it->LogInfo.getTimeStamp() == 0
+				|| it->LogInfo.getTimeStamp() == ~0
 				|| it->LogInfo.getTimeStamp()+nbSec > now))
 		{
 			const TLogInfo &li = it->LogInfo;
@@ -1625,7 +1616,7 @@ endQuery:
 	}
 
 	NLMISC_CLASS_COMMAND_DECL(fillTestLog)
-	{	
+	{
 		vector<TLogDefinition>	logDefs;
 
 		logDefs.resize(4);
@@ -1644,7 +1635,7 @@ endQuery:
 			ld.getParams()[2].setName("BoatName");
 			ld.getParams()[2].setType(TSupportedParamType::spt_string);
 		}
-		// define log 
+		// define log
 		{
 			TLogDefinition &ld = logDefs[1];
 
@@ -1663,7 +1654,7 @@ endQuery:
 			ld.getParams()[4].setName("Quantity");
 			ld.getParams()[4].setType(TSupportedParamType::spt_uint32);
 		}
-		// define log 
+		// define log
 		{
 			TLogDefinition &ld = logDefs[2];
 
@@ -1680,7 +1671,7 @@ endQuery:
 			ld.getListParams()[0].setType(TSupportedParamType::spt_entityId);
 			ld.getListParams()[0].setList(true);
 		}
-		// define log 
+		// define log
 		{
 			TLogDefinition &ld = logDefs[3];
 
@@ -1700,7 +1691,7 @@ endQuery:
 			ld.getListParams()[1].setType(TSupportedParamType::spt_uint32);
 			ld.getListParams()[1].setList(true);
 		}
-		
+
 		// register the client
 		registerClient( NULL, 101, logDefs);
 

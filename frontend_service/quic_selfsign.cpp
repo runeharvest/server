@@ -23,7 +23,6 @@
 // CAPI implementation for generating the self-signed certificate.
 
 #include "stdpch.h"
-#include "config.h"
 
 #include "quic_selfsign.h"
 
