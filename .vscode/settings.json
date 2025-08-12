@@ -1,9 +1,11 @@
 {
+    "window.title": "${dirty} ${activeEditorShort}${separator}server [${remoteName}]${separator}${profileName}${separator}${appName}",
     "files.associations": {
         "*.log": "ini",
         "condition_variable": "cpp",
         "vector": "cpp"
     },
+
     "search.exclude": {
         "**/node_modules": true,
         "**/bower_components": true,
